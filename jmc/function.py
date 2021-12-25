@@ -16,12 +16,12 @@ class Function:
         self.context = [Command(command, load_json) for command in context.split(
             '; ') if command]  # Remove empty string command
         load_json.functions_name.add(name)
-        self.__str = f""" Function created:
+        self.__str = f"""
         Name: {self.name}
         Parameters: {self.params}
         Contexts (Commands): {[str(command) for command in self.context]}
         """
-        logger.debug(self.__str)
+        logger.debug(f"Function created:{self.__str}")
 
     def __str__(self) -> str:
         return self.__str
