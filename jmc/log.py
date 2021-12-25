@@ -4,7 +4,7 @@ FORMATTER = logging.Formatter(
     '%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
-def Logger(name: str, level: int, file_path: str = "", is_stream: bool = True) -> logging.Logger:
+def Logger(name: str, level: int, file_path: str = "test.log", is_stream: bool = True) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)
     if file_path:
