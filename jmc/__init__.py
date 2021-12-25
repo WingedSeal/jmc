@@ -4,3 +4,4 @@ from .load_json import LoadJson
 
 from . import utils
 from . import function
+from . import command

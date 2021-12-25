@@ -14,10 +14,13 @@ def main():
     load_json = jmc.LoadJson()
     jmcfunctions, jmc_string = jmc.function.capture_function(
         jmc_string, load_json)
-    logger.debug(f"""Leftover jmc_string (first 100 char):
-    {jmc_string[:100]}
+    logger.debug(f"""Leftover jmc_string:
+    {jmc_string}
     . . .""")
-
+    main_func = [jmc.command.Command(command, load_json) for command in jmc_string.split(
+        '; ') if command]
+    logger.debug(
+        f"Main Function (Commands): {[str(command) for command in main_func]}")
     logger.info(load_json)
 
 

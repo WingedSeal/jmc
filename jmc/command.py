@@ -19,5 +19,4 @@ class Command:
         Text: {self.text}""")
 
     def __str__(self) -> str:
-        logger.debug("TESTTTTTT")
         return self.text
