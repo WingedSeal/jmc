@@ -4,7 +4,7 @@ from typing import List
 from . import Logger, PackGlobal
 import logging
 
-logger = Logger(__name__, logging.DEBUG)
+logger = Logger(__name__, logging.INFO)
 
 
 class Module:
@@ -14,4 +14,6 @@ class Module:
         self.path = pack_global.pack_path / path
         logger.info(
             f'importing from "{pack_global.target_path/Path(path)}" to {self.path}')
-        pass
+
+    def __str__(self) -> str:
+        return f"<Module path='{self.path.resolve()}'>"

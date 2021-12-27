@@ -4,7 +4,7 @@ from . import Logger, PackGlobal
 from .module import Module
 import logging
 
-logger = Logger(__name__, logging.DEBUG)
+logger = Logger(__name__, logging.INFO)
 
 
 def handle_imports(string: str, pack_global: PackGlobal) -> str:
@@ -14,9 +14,4 @@ def handle_imports(string: str, pack_global: PackGlobal) -> str:
     for import_match in imports_match:
         pack_global.imports.append(
             Module(import_match.groups()[0], pack_global))
-    return string
-    # TODO: FINISH handle_imports
-
-    #
-    # elif (custom_command := re.match(r'@import [\'\"](.*)[\'\"]', text)) is not None:
-    #     pass
+    return re.sub(r'@import [\'\"](.*?)[\'\"]; ', '', string)

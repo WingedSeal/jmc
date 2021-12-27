@@ -15,4 +15,8 @@ def Logger(name: str, level: int, file_path: str = "test.log", is_stream: bool =
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(FORMATTER)
         logger.addHandler(stream_handler)
+
+    # Override level
+    logger.setLevel(logging.DEBUG)
+
     return logger

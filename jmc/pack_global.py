@@ -1,4 +1,3 @@
-from __future__ import annotations
 from pathlib import Path
 from . import Logger
 import logging
@@ -21,6 +20,10 @@ class PackGlobal:
 
     def __str__(self) -> str:
         return f"""PackGlobal
+        Target Path (.jmc): {self.target_path.resolve()}
+        Datapack Directory (Exported): {self.pack_path.resolve()}
         Scoreboards: {self.scoreboards}
         Integers: {self.ints}
-        Functions: {self.functions_name}"""
+        Functions: {self.functions_name}
+        Imports: {[str(imported) for imported in self.imports]}
+        """

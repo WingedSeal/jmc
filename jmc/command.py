@@ -2,7 +2,7 @@ import re
 from . import Logger, PackGlobal
 import logging
 
-logger = Logger(__name__, logging.DEBUG)
+logger = Logger(__name__, logging.INFO)
 
 
 class Command:
