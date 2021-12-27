@@ -1,0 +1,4 @@
+autopep8==1.6.0
+pycodestyle==2.8.0
+regex==2021.11.10
+toml==0.10.2

@@ -13,7 +13,7 @@ class PackGlobal:
     def __init__(self, target_file: Path) -> None:
         self.target_path = target_file.parent
         self.pack_path = target_file.parent/Path('compiled')
-        self.scoreboards: Set[str] = {"INT"}
+        self.scoreboards: Set[str] = {'__int__', '__variable__'}
         self.ints: Set[int] = set()
         self.functions_name: Set[str] = set()
         self.imports: List[Module] = []

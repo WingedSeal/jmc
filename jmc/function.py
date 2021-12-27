@@ -1,11 +1,11 @@
 import logging
 from typing import List, Tuple
-import re
+import regex as re
 
 from . import Logger, PackGlobal
 from .command import Command
 
-FUNCTION_REGEX = r'function (\w+)\(([\w, ]*)\) \{ ([^}{(]+|\{(?:[^}{(]+|\{[^}{}]*\})*\})*\}'
+FUNCTION_REGEX = r'function (\w+)\(([\w, ]*)\) { ((?:[^}{}]+|(?R))*+)}'
 logger = Logger(__name__, logging.INFO)
 
 

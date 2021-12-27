@@ -6,6 +6,8 @@ logger = Logger(__name__, logging.INFO)
 
 
 class Command:
+    """Datapack function command"""
+
     def __init__(self, text: str, pack_global: PackGlobal) -> None:
         self.text = text
         logger.debug(f"""Command created: 

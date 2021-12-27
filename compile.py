@@ -14,6 +14,7 @@ def main():
     pack_global = jmc.PackGlobal(target_file)
     logger.info("Handling imports")
     jmc_string = jmc.imports.handle_imports(jmc_string, pack_global)
+    logger.info("Handling custom syntax")
     jmc_string = jmc.utils.custom_syntax(jmc_string, pack_global)
     logger.info("Captering funtions")
     jmcfunctions, jmc_string = jmc.function.capture_function(
