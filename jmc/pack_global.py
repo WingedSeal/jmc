@@ -19,11 +19,12 @@ class PackGlobal:
         self.imports: List[Module] = []
 
     def __str__(self) -> str:
+        nl = '\n'
         return f"""PackGlobal
         Target Path (.jmc): {self.target_path.resolve()}
         Datapack Directory (Exported): {self.pack_path.resolve()}
         Scoreboards: {self.scoreboards}
         Integers: {self.ints}
         Functions: {self.functions_name}
-        Imports: {[str(imported) for imported in self.imports]}
+        Imports: {nl.join([str(imported) for imported in self.imports])}
         """
