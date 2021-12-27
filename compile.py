@@ -11,17 +11,20 @@ def main():
     target_file = Path(sys.argv[1])
     with target_file.open() as file:
         jmc_string = jmc.utils.clean_whitespace(file.read())
-    load_json = jmc.LoadJson()
+    pack_global = jmc.PackGlobal(target_file)
+    logger.info("Handling imports")
+    jmc_string = jmc.imports.handle_imports(jmc_string, pack_global)
+    logger.info("Captering funtions")
     jmcfunctions, jmc_string = jmc.function.capture_function(
-        jmc_string, load_json)
+        jmc_string, pack_global)
     logger.debug(f"""Leftover jmc_string:
     {jmc_string}
     . . .""")
-    main_func = [jmc.command.Command(command, load_json) for command in jmc_string.split(
+    main_func = [jmc.command.Command(command, pack_global) for command in jmc_string.split(
         '; ') if command]
     logger.debug(
         f"Main Function (Commands): {[str(command) for command in main_func]}")
-    logger.info(load_json)
+    logger.info(pack_global)
 
 
 if __name__ == '__main__':

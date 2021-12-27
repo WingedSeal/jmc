@@ -1,0 +1,17 @@
+from pathlib import Path
+import re
+from typing import List
+from . import Logger, PackGlobal
+import logging
+
+logger = Logger(__name__, logging.DEBUG)
+
+
+class Module:
+    """Module from @import command"""
+
+    def __init__(self, path: str, pack_global: PackGlobal) -> None:
+        self.path = pack_global.pack_path / path
+        logger.info(
+            f'importing from "{pack_global.target_path/Path(path)}" to {self.path}')
+        pass
