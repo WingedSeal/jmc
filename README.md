@@ -3,7 +3,7 @@
 # (JMC)
 
 A compiler for compiling .jmc file (custom language) to minecraft datapack.
-The language is _inspired_ from JavaScript.
+The language is _inspired_ from JavaScript. It's not exactly like JavaScript
 
 ## Why use JMC
 
@@ -33,11 +33,19 @@ _There's no released version at the moment_
 ## Usage
 
 Create \<name\>.jmc file and compile it!
-[Documentation](docs.md) (Soon TM)
+[Documentation](docs/index.md) (Soon TM)
 
 ## Contributing
 
 **My Discord:** WingedSeal#0795
+
+## Features
+
+- Function declaration (Arrow function does not work)
+- Function parameters
+- Custom variable assignment, incrementation sysntax
+- Importing other .jmc files
+- Multiline command
 
 ## License
 
