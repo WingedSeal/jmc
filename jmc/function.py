@@ -5,7 +5,7 @@ import re
 from . import Logger, PackGlobal
 from .command import Command
 
-FUNCTION_REGEX = r'function (\w+)\(([\w, ]+)\) \{ ([^)(]+|\{(?:[^)(]+|\{[^)(]*\})*\})*\}'
+FUNCTION_REGEX = r'function (\w+)\(([\w, ]*)\) \{ ([^}{(]+|\{(?:[^}{(]+|\{[^}{}]*\})*\})*\}'
 logger = Logger(__name__, logging.INFO)
 
 
