@@ -22,8 +22,9 @@ def main():
     . . .""")
     main_func = [jmc.command.Command(command, pack_global) for command in jmc_string.split(
         '; ') if command]
+    nl = '\n'
     logger.debug(
-        f"Main Function (Commands): {[str(command) for command in main_func]}")
+        f"Main Function (Commands): {nl.join([str(command) for command in main_func])}")
     logger.info(pack_global)
 
 

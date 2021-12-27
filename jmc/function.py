@@ -12,14 +12,17 @@ logger = Logger(__name__, logging.INFO)
 class Function:
     def __init__(self, name: str, params: str, context: str, pack_global: PackGlobal) -> None:
         self.name = name
-        self.params = params.replace(' ', '').split(',')
+        self.params = [param for param in params.replace(
+            ' ', '').split(',') if param]  # Remove empty string param
         self.context = [Command(command, pack_global) for command in context.split(
             '; ') if command]  # Remove empty string command
         pack_global.functions_name.add(name)
+        nl = '\n'
         self.__str = f"""
         Name: {self.name}
         Parameters: {self.params}
-        Contexts (Commands): {[str(command) for command in self.context]}
+        Contexts (Commands): 
+        {nl.join([str(command) for command in self.context])}
         """
         logger.debug(f"Function created:{self.__str}")
 
