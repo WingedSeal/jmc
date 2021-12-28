@@ -61,7 +61,7 @@ function <namespace>:deathmessage
 
 **deathmessage.mcfunction**
 
-```
+```elixir
 tellraw @a [{"text":"Someone died again!", "color": "gold"}]
 tellraw @a {"score":{"name":"$deathCount","objective":"__variable__"}, "color":"red", "bold":"true"}
 ```
