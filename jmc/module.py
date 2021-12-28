@@ -14,7 +14,7 @@ class Module:
         self.name = Path(path).stem
         self.path = pack_global.pack_path / path
         logger.info(
-            f'importing from "{pack_global.target_path/Path(path)}" to {self.path}')
+            f'importing from "{pack_global.target_path/Path(path)}" to "{self.path}"')
 
     def __str__(self) -> str:
         return f"{self.name} Module({self.path.resolve()})"

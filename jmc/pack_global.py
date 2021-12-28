@@ -17,6 +17,7 @@ class PackGlobal:
         self.ints: Set[int] = set()
         self.functions_name: Set[str] = set()
         self.imports: List[Module] = []
+        self.namespace: str = 'TEST'
 
     def __str__(self) -> str:
         nl = '\n'

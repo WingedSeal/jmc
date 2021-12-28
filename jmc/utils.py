@@ -1,5 +1,6 @@
 import logging
-import regex as re
+import re
+import regex
 
 from . import Logger, PackGlobal
 
@@ -12,8 +13,16 @@ def clean_whitespace(string: str) -> str:
     return re.sub(r"\s+", " ", string + ' ')
 
 
+def clean_comments(string: str) -> str:
+    """Delete everything that starts with # or // until the end of the line"""
+    logger.info("Cleaning comments")
+    return re.sub(r"#.*|\/\/.*", "", string)
+
+
 def custom_syntax(string: str, pack_global: PackGlobal) -> str:
     """Replace jmc syntax with mcfunction and return it"""
+    logger.info("Handling custom syntax")
+
     def capture_var_assign(match: re.Match) -> str:
         """$<VARIABLE> = <INT>"""
         groups = match.groups()
@@ -59,10 +68,19 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
     def capture_to_string(match: re.Match) -> str:
         """$<VARIABLE> += $<VARIABLE>, and others"""
         groups = match.groups()
-        rv = f'{{"score":{{"name":"{groups[0]}","objective":"variable"}}{"," if groups[1] != "" else ""}{groups[1]}}}'
+        if groups[1] != "":
+            styles = groups[1].replace(' ', '').split(',')
+            for i, style in enumerate(styles):
+                style = style.split('=')
+                styles[i] = f'"{style[0]}":"{style[1]}"'
+            styles = ', '.join(['']+styles)
+        else:
+            styles = ''
+        styles: str
+        rv = f'{{"score":{{"name":"{groups[0]}","objective":"variable"}}{styles}}}'
         logger.debug(f"Custom Syntax: {rv}")
         return rv
-    string = re.sub(r'(\$\w+)\.toString\(((?:[^)(]+|(?R))*+)\)',
-                    capture_to_string, string)
+    string = regex.sub(r'(\$\w+)\.toString\(((?:[^)(]+|(?R))*+)\)',
+                       capture_to_string, string)
 
     return string

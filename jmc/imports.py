@@ -9,6 +9,7 @@ logger = Logger(__name__, logging.INFO)
 
 def handle_imports(string: str, pack_global: PackGlobal) -> str:
     """Create modules from "@import '<PATH>';" commands and remove the command from the string before returning"""
+    logger.info("Handling imports")
     imports_match: List[re.Match] = re.finditer(
         r'@import [\'\"](.*?)[\'\"]; ', string)
     for import_match in imports_match:
