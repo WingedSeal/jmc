@@ -5,16 +5,18 @@ from pathlib import Path
 FORMATTER = logging.Formatter(
     '%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
+__now = datetime.now()
+FILE_PATH = Path(
+    f'logs/{__now.strftime("%Y-%b")}/{__now.day}{__now.strftime("-%m-%Y")}.log')
 
-def Logger(name: str, level: int, file_path: str = None, is_stream: bool = True, is_log_file: bool = True) -> logging.Logger:
+
+def Logger(name: str, level: int = logging.DEBUG, file_path: str = None, is_stream: bool = True, is_log_file: bool = True) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
     if is_log_file:
         if file_path is None:
-            now = datetime.now()
-            file_path = Path(
-                f'logs/{now.strftime("%Y-%b")}/{now.day}{now.strftime("-%m-%Y")}.log')
+            file_path = FILE_PATH
         else:
             file_path = Path(file_path)
         file_path: Path
@@ -26,8 +28,5 @@ def Logger(name: str, level: int, file_path: str = None, is_stream: bool = True,
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(FORMATTER)
         logger.addHandler(stream_handler)
-
-    # Override level
-    logger.setLevel(logging.DEBUG)
 
     return logger

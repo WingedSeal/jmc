@@ -4,7 +4,7 @@ from . import Logger, PackGlobal
 from .module import Module
 import logging
 
-logger = Logger(__name__, logging.INFO)
+logger = Logger(__name__)
 
 
 def handle_imports(string: str, pack_global: PackGlobal) -> str:

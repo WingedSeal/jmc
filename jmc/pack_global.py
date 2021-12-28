@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from .module import Module
 
 
-logger = Logger(__name__, logging.INFO)
+logger = Logger(__name__)
 
 
 class PackGlobal:

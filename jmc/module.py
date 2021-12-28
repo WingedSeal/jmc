@@ -4,7 +4,7 @@ from typing import List
 from . import Logger, PackGlobal
 import logging
 
-logger = Logger(__name__, logging.INFO)
+logger = Logger(__name__)
 
 
 class Module:
@@ -12,7 +12,7 @@ class Module:
 
     def __init__(self, path: str, pack_global: PackGlobal) -> None:
         self.name = Path(path).stem
-        self.path = pack_global.pack_path / path
+        self.path = pack_global.pack_path / f'{self.name}.mcfunction'
         logger.info(
             f'importing from "{pack_global.target_path/Path(path)}" to "{self.path}"')
 

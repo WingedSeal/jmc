@@ -4,7 +4,7 @@ import regex
 
 from . import Logger, PackGlobal
 
-logger = Logger(__name__, logging.INFO)
+logger = Logger(__name__)
 
 
 def clean_whitespace(string: str) -> str:
@@ -27,7 +27,7 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
         """$<VARIABLE> = <INT>"""
         groups = match.groups()
         rv = f'scoreboard players set {groups[0]} __variable__ {int(groups[1])}'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = re.sub(r'(\$\w+) = ([-+]?[0-9]+)', capture_var_assign, string)
 
@@ -36,7 +36,7 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
         groups = match.groups()
         pack_global.ints.add(int(groups[2]))
         rv = f'scoreboard players operation {groups[0]} __variable__ {groups[1]}= {groups[2]} __int__'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = re.sub(r'(\$\w+) ([+\-\*/%])= ([-+]?[0-9]+)',
                     capture_var_increment, string)
@@ -45,14 +45,14 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
         """$<VARIABLE> = $<VARIABLE>"""
         groups = match.groups()
         rv = f'scoreboard players operation {groups[0]} __variable__ = {groups[1]}'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = re.sub(r'(\$\w+) = (\$\w+)', capture_var_equal, string)
 
     def capture_var_equal(match: re.Match) -> str:
         groups = match.groups()
         rv = f'scoreboard players operation {groups[0]} __variable__ = {groups[1]}'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = re.sub(r'(\$\w+) = (\$\w+)', capture_var_equal, string)
 
@@ -60,7 +60,7 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
         """$<VARIABLE> += $<VARIABLE>, and others"""
         groups = match.groups()
         rv = f'scoreboard players operation {groups[0]} __variable__ {groups[1]}= {groups[2]} __variable__'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = re.sub(r'(\$\w+) ([+\-\*/%])= (\$\w+)',
                     capture_var_increment_var, string)
@@ -78,9 +78,18 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
             styles = ''
         styles: str
         rv = f'{{"score":{{"name":"{groups[0]}","objective":"variable"}}{styles}}}'
-        logger.debug(f"Custom Syntax: {rv}")
+        logger.debug(f"Custom Syntax:\nfrom: {match.group()}\nto: {rv}")
         return rv
     string = regex.sub(r'(\$\w+)\.toString\(((?:[^)(]+|(?R))*+)\)',
                        capture_to_string, string)
 
     return string
+
+
+def replace_function_call(command_text: str, pack_global: PackGlobal) -> str:
+    """Replace `<functionName>()` with `function <namespace>:<functionName>` in command"""
+    def mcfunction(match: re.Match) -> str:
+        return f'function {pack_global.namespace}:{match.groups()[0].replace(".", "/")}'
+    command_text = re.sub(
+        r'([\w\.]+)\(\)', mcfunction, command_text)
+    return command_text

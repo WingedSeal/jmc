@@ -3,11 +3,12 @@ from typing import List, Tuple
 
 from . import Logger, PackGlobal
 from .command import Command
+from .utils import replace_function_call
 import re
 import regex
 
-FUNCTION_REGEX = r'function ([\w\._]+)\(([\w, ]*)\) { ((?:[^}{}]+|(?R))*+)}'
-logger = Logger(__name__, logging.INFO)
+FUNCTION_REGEX = r'function ([\w\._]+)\(([\w, ]*)\) ({(?:[^}{]+|(?3))*+})'
+logger = Logger(__name__)
 
 
 class Function:
@@ -27,8 +28,7 @@ class Function:
         self.__str = f"""
     Name: {self.name}
     Parameters: {self.params}
-    Contexts (Commands): 
-    {nl.join([str(command) for command in self.context])}
+    Contexts (Commands):\n{nl.join([str(command) for command in self.context])}
         """
         logger.debug(f"Function created:{self.__str}")
 
@@ -39,21 +39,18 @@ class Function:
 def capture_function(string: str, pack_global: PackGlobal) -> Tuple[List[Function], str]:
     """Take string of jmc and return a tuple which include list of Function object and left-over jmc string"""
     logger.info("Capturing Functions")
-    logger.debug('\n\n\n\n'+string+'\n\n\n\n')
     jmcfunctions_match: List[re.Match] = regex.finditer(
-        FUNCTION_REGEX, string)
+        FUNCTION_REGEX, string, overlapped=False)
     jmcfunctions: List[Function] = []
+
+    def get_context(match: re.Match):
+        return match.groups()[0]
     for jmcfunction in jmcfunctions_match:
-        logger.debug(f"Function found: {jmcfunction.groups()[0]}")
-        jmcfunctions.append(Function(*jmcfunction.groups(), pack_global))
+        groups: Tuple[str] = jmcfunction.groups()
+        name = groups[0]
+        params = groups[1]
+        # Skip the first spacebar
+        context = re.sub(r'{ (.*)}', get_context, groups[2])
+        jmcfunctions.append(Function(name, params, context, pack_global))
     return jmcfunctions, regex.sub(FUNCTION_REGEX, '', string).lstrip()
     # TODO: Please fix this, it fails to capture stuff and for some reason the string was cut off before this
-
-
-def replace_function_call(string: str, pack_global: PackGlobal) -> str:
-    """Replace `<functionName>()` with `function <namespace>:<functionName>`"""
-    def mcfunction(match: re.Match) -> str:
-        return f'function {pack_global.namespace}:{match.groups()[0].replace(".", "/")}'
-    string = re.sub(
-        r'([\w\.]+)\(\)', mcfunction, string)
-    return string
