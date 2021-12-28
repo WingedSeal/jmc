@@ -22,11 +22,46 @@ function kill() {
 }
 
 function __tick__() {
-    # Anything here will be called every tick
+    // Anything here will be called every tick
+    execute
+        as entity @a[tag=my_tag]
+        run kill();
 }
 
 # Hastag comments still works
 // Anything here will be called on load
 $deathCount = 0; // You can also put comment here
-execute as entity @a[tag=my_tag] run kill();
+```
+
+Will be compiled to:
+
+**load.mcfunction**
+
+```elixir
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard players set 1 __int__ 1
+
+scoreboard players set $deathCount __variable__ 0
+```
+
+**tick.mcfunction**
+
+```elixir
+execute as entity @a[tag=my_tag] run function <namespace>:kill
+```
+
+**kill.mcfunction**
+
+```elixir
+scoreboard players operation $deathCount __variable__ += 1 __int__
+kill @s
+function <namespace>:deathmessage
+```
+
+**deathmessage.mcfunction**
+
+```
+tellraw @a [{"text":"Someone died again!", "color": "gold"}]
+tellraw @a {"score":{"name":"$deathCount","objective":"__variable__"}, "color":"red", "bold":"true"}
 ```
