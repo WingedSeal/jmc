@@ -89,7 +89,7 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
 def replace_function_call(command_text: str, pack_global: PackGlobal) -> str:
     """Replace `<functionName>()` with `function <namespace>:<functionName>` in command"""
     def mcfunction(match: re.Match) -> str:
-        return f'function {pack_global.namespace}:{match.groups()[0].replace(".", "/")}'
+        return f'function {pack_global.namespace}:{match.groups()[0].replace(".", "/").lower()}'
     command_text = re.sub(
         r'([\w\.]+)\(\)', mcfunction, command_text)
     return command_text

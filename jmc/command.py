@@ -10,7 +10,7 @@ class Command:
     """Datapack function command"""
 
     def __init__(self, text: str, pack_global: PackGlobal) -> None:
-        self.text = text  # replace_function_call(text, pack_global)
+        self.text = replace_function_call(text, pack_global)
         logger.debug(f"""Command created: 
         Text: {self.text}""")
 
