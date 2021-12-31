@@ -6,3 +6,4 @@ from . import utils
 from . import function
 from . import command
 from . import imports
+from . import _class
