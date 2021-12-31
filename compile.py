@@ -20,12 +20,9 @@ def main():
     jmc_string = jmc.utils.custom_syntax(jmc_string, pack_global)
     jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
-    jmc_load = [jmc.command.Command(command, pack_global) for command in jmc_string.split(
-        '; ') if command]
+    pack_global.functions.append(jmc.function.Function(
+        '__load__', '', jmc_string, pack_global))
 
-    nl = '\n'
-    logger.debug(
-        f"jmc_load.mcfunction (Commands): {nl.join([str(command) for command in jmc_load])}")
     logger.info(pack_global)
 
 
