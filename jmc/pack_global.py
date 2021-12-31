@@ -4,6 +4,7 @@ import logging
 from typing import List, Set, TYPE_CHECKING
 if TYPE_CHECKING:
     from .module import Module
+    from .function import Function
 
 
 logger = Logger(__name__)
@@ -15,7 +16,7 @@ class PackGlobal:
         self.pack_path = target_file.parent/Path('compiled')
         self.scoreboards: Set[str] = {'__int__', '__variable__'}
         self.ints: Set[int] = set()
-        self.functions_name: Set[str] = set()
+        self.functions: List[Function] = []
         self.imports: List[Module] = []
         self.namespace: str = 'TEST'
 
@@ -26,6 +27,6 @@ class PackGlobal:
         Datapack Directory (Exported): {self.pack_path.resolve()}
         Scoreboards: {self.scoreboards}
         Integers: {self.ints}
-        Functions: {self.functions_name}
+        Functions: {nl.join([str(_function) for _function in self.functions])}
         Imports: {nl.join([str(imported) for imported in self.imports])}
         """

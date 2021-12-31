@@ -18,7 +18,7 @@ def main():
     jmc_string = jmc.utils.clean_whitespace(jmc_string)
     jmc_string = jmc.imports.handle_imports(jmc_string, pack_global)
     jmc_string = jmc.utils.custom_syntax(jmc_string, pack_global)
-    jmcfunctions, jmc_string = jmc.function.capture_function(
+    jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
     jmc_load = [jmc.command.Command(command, pack_global) for command in jmc_string.split(
         '; ') if command]

@@ -23,7 +23,6 @@ class Function:
             in context.split('; ')
             if command
         ]  # Remove empty string command
-        pack_global.functions_name.add(name)
         nl = '\n'
         self.__str = f"""
     Name: {self.name}
@@ -36,12 +35,11 @@ class Function:
         return self.__str
 
 
-def capture_function(string: str, pack_global: PackGlobal) -> Tuple[List[Function], str]:
-    """Take string of jmc and return a tuple which include list of Function object and left-over jmc string"""
+def capture_function(string: str, pack_global: PackGlobal) -> str:
+    """Take string of jmc and return leftover jmc_string, and add functions to pack_global"""
     logger.info("Capturing Functions")
     jmcfunctions_match: List[re.Match] = regex.finditer(
         FUNCTION_REGEX, string, overlapped=False)
-    jmcfunctions: List[Function] = []
 
     def get_context(match: re.Match):
         return match.groups()[0]
@@ -51,6 +49,6 @@ def capture_function(string: str, pack_global: PackGlobal) -> Tuple[List[Functio
         params = groups[1]
         # Skip the first spacebar
         context = re.sub(r'{ (.*)}', get_context, groups[2])
-        jmcfunctions.append(Function(name, params, context, pack_global))
-    return jmcfunctions, regex.sub(FUNCTION_REGEX, '', string).lstrip()
-    # TODO: Please fix this, it fails to capture stuff and for some reason the string was cut off before this
+        pack_global.functions.append(
+            Function(name, params, context, pack_global))
+    return regex.sub(FUNCTION_REGEX, '', string).lstrip()
