@@ -7,7 +7,7 @@ from .utils import replace_function_call
 import re
 import regex
 
-FUNCTION_REGEX = r'function ([\w\._]+)\(([\w, ]*)\) ({(?:[^}{]+|(?3))*+})'
+FUNCTION_REGEX = r'function ([\w\._]+)\(([\w, ]*)\) ({(?:(?:(["\'])(?:(?=(\\?))\5.)*?\4|[^}{])+|(?3))*+})'
 logger = Logger(__name__)
 
 
