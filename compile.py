@@ -21,7 +21,6 @@ def main():
     jmc_string = jmc._class.replace_class(jmc_string)
     jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
-    logger.critical(f"--TEST--\n\n{jmc_string}\n")
     pack_global.functions.append(jmc.function.Function(
         '__load__', '', jmc_string, pack_global))
 
