@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from . import Logger, PackGlobal
 from .command import Command
-from .utils import replace_function_call
+from .utils import replace_function_call, clean_whitespace
 import re
 import regex
 
@@ -51,4 +51,4 @@ def capture_function(string: str, pack_global: PackGlobal) -> str:
         context = re.sub(r'{ (.*)}', get_context, groups[2])
         pack_global.functions.append(
             Function(name, params, context, pack_global))
-    return regex.sub(FUNCTION_REGEX, '', string).lstrip()
+    return clean_whitespace(regex.sub(FUNCTION_REGEX, '', string))
