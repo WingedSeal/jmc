@@ -1,6 +1,5 @@
 from pathlib import Path
 import json
-from re import T
 
 from . import Logger
 import logging
@@ -8,7 +7,6 @@ from typing import List, Set, TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from .module import Module
     from .function import Function
-    from .command import Command
 
 
 logger = Logger(__name__)
