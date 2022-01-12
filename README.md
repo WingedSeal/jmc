@@ -18,7 +18,7 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 
 _There's no released version at the moment_
 
-1. [Download jmc.exe]() from gitgub
+1. [Download jmc.exe]() from github
 1. Create a directory for your datapack
 1. Put **jmc.exe** file in that directory
 1. Create your jmc file with .jmc extension
