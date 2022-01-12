@@ -2,8 +2,9 @@
 from .log import Logger
 from .pack_global import PackGlobal
 
-from . import utils
-from . import function
-from . import command
-from . import imports
 from . import _class
+from . import command
+from . import function
+from . import imports
+from . import module
+from . import utils
