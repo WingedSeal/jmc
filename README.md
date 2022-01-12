@@ -46,6 +46,7 @@ Create \<name\>.jmc file and compile it!
 - Custom variable assignment, incrementation sysntax 
 - Importing other .jmc files
 - Multiline command
+- Build-in functions for basic datapack feature
 
 ## License
 
