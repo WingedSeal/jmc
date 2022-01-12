@@ -47,6 +47,7 @@ Create \<name\>.jmc file and compile it!
 - Importing other .jmc files
 - Multiline command
 - Build-in functions for basic datapack feature
+- Grouping things in a directory using "class" declaration (Note that it's not an actual class)
 
 ## License
 
