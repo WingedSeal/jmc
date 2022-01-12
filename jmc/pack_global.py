@@ -84,7 +84,8 @@ class PackGlobal:
                 json.dump(dictionary, file, indent=2)
 
         for function in self.functions.values():
-            path = function_path/f'{function.name.replace(".","/")}.mcfunction'
+            path = function_path / \
+                f'{function.name.replace(".","/").lower()}.mcfunction'
             path.parent.mkdir(exist_ok=True, parents=True)
             with path.open(mode='w+') as file:
                 file.write(
