@@ -12,7 +12,7 @@ JavaScript-like Minecraft functions
 ```JavaScript
 function deathMessage() {
     tellraw @a [{"text":"Someone died again!", "color": "gold"}];
-    tellraw @a $deathCount.toString(color=red, bold=true);
+    tellraw @a $deathCount.toString(color="red", bold=true);
 }
 
 function kill() {
