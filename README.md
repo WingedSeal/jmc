@@ -42,8 +42,8 @@ Create \<name\>.jmc file and compile it!
 ## Features
 
 - Function declaration (Arrow function does not work)
-- Function parameters
-- Custom variable assignment, incrementation sysntax
+- ~~Function parameters~~ (Discontinued) 
+- Custom variable assignment, incrementation sysntax 
 - Importing other .jmc files
 - Multiline command
 
