@@ -22,7 +22,7 @@ def main():
     jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
     pack_global.functions['__load__'] = jmc.function.Function(
-        '__load__', '', jmc_string, pack_global)
+        '__load__', jmc_string, pack_global)
 
     logger.info(pack_global)
     pack_global.compile()

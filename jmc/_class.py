@@ -27,7 +27,7 @@ def replace_class(string: str) -> str:
         def replace_function(match: re.Match) -> str:
             """Replace function_name with class_name.function_name"""
             groups = match.groups()
-            return f'function {class_name}.{groups[0]}({groups[1]}) {groups[2]}'
+            return f'function {class_name}.{groups[0]}() {groups[1]}'
         string = regex.sub(FUNCTION_REGEX, replace_function, string)
 
         # def replace_variable(match: re.Match) -> str:

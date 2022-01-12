@@ -7,15 +7,13 @@ from .utils import replace_function_call, clean_whitespace
 import re
 import regex
 
-FUNCTION_REGEX = r'function ([\w\._]+)\(([\w, ]*)\) ({(?:(?:(["\'])(?:(?=(\\?))\5.)*?\4|[^}{])+|(?3))*+})'
+FUNCTION_REGEX = r'function ([\w\._]+)\(\) ({(?:(?:(["\'])(?:(?=(\\?))\4.)*?\3|[^}{])+|(?2))*+})'
 logger = Logger(__name__)
 
 
 class Function:
-    def __init__(self, name: str, params: str, context: str, pack_global: PackGlobal) -> None:
+    def __init__(self, name: str, context: str, pack_global: PackGlobal) -> None:
         self.name = name
-        self.params = [param for param in params.replace(
-            ' ', '').split(',') if param]  # Remove empty string param
         context = replace_function_call(context, pack_global)
         self.context = [
             Command(command, pack_global)
@@ -26,7 +24,6 @@ class Function:
         nl = '\n'
         self.__str = f"""
     Name: {self.name}
-    Parameters: {self.params}
     Contexts (Commands):\n{nl.join([str(command) for command in self.context])}
         """
         logger.debug(f"Function created:{self.__str}")
@@ -46,9 +43,8 @@ def capture_function(string: str, pack_global: PackGlobal) -> str:
     for jmcfunction in jmcfunctions_match:
         groups: Tuple[str] = jmcfunction.groups()
         name = groups[0]
-        params = groups[1]
         # Skip the first spacebar
-        context = re.sub(r'{ (.*)}', get_context, groups[2])
+        context = re.sub(r'{ (.*)}', get_context, groups[1])
         pack_global.functions[name] = Function(
-            name, params, context, pack_global)
+            name, context, pack_global)
     return clean_whitespace(regex.sub(FUNCTION_REGEX, '', string))
