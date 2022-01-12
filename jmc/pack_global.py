@@ -45,7 +45,7 @@ class PackGlobal:
                       "description": self.description
                       }
             }, file, indent=2)
-        minecraft_function_path = self.pack_path/'data'/'minecraft'/'tags'/'funtions'
+        minecraft_function_path = self.pack_path/'data'/'minecraft'/'tags'/'functions'
         namespace_path = self.pack_path/'data'/self.namespace
         function_path = namespace_path/'functions'
 
