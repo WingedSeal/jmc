@@ -24,7 +24,7 @@ function kill() {
 function __tick__() {
     // Anything here will be called every tick
     execute
-        as entity @a[tag=my_tag]
+        as @a[tag=my_tag]
         run kill();
 }
 
@@ -48,7 +48,7 @@ scoreboard players set $deathCount __variable__ 0
 **\_\_tick\_\_.mcfunction**
 
 ```elixir
-execute as entity @a[tag=my_tag] run function <namespace>:kill
+execute as @a[tag=my_tag] run function <namespace>:kill
 ```
 
 **kill.mcfunction**
