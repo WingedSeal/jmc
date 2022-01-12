@@ -49,6 +49,6 @@ def capture_function(string: str, pack_global: PackGlobal) -> str:
         params = groups[1]
         # Skip the first spacebar
         context = re.sub(r'{ (.*)}', get_context, groups[2])
-        pack_global.functions.append(
-            Function(name, params, context, pack_global))
+        pack_global.functions[name] = Function(
+            name, params, context, pack_global)
     return clean_whitespace(regex.sub(FUNCTION_REGEX, '', string))

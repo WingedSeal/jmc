@@ -21,10 +21,11 @@ def main():
     jmc_string = jmc._class.replace_class(jmc_string)
     jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
-    pack_global.functions.append(jmc.function.Function(
-        '__load__', '', jmc_string, pack_global))
+    pack_global.functions['__load__'] = jmc.function.Function(
+        '__load__', '', jmc_string, pack_global)
 
     logger.info(pack_global)
+    pack_global.compile()
 
 
 if __name__ == '__main__':
