@@ -15,12 +15,12 @@ logger = Logger(__name__)
 class PackGlobal:
     def __init__(self, target_file: Path) -> None:
         self.target_path = target_file.parent
-        self.pack_path = target_file.parent/Path('compiled')
+        self.pack_path = target_file.parent/Path('datapacks')
         self.scoreboards: Set[str] = {'__int__', '__variable__'}
         self.ints: Set[int] = set()
         self.functions: Dict[str, Function] = dict()
         self.imports: List[Module] = []
-        self.namespace: str = 'TEST'
+        self.namespace: str = 'test_dp'
         self.pack_format: int = 7
         self.description: str = 'DESC'
 
@@ -66,6 +66,26 @@ class PackGlobal:
                 dictionary: dict = json.loads(string)
             dictionary["replace"] = False
             dictionary["values"].append(f"{self.namespace}:__load__")
-            json.dump(dictionary, file)
+            json.dump(dictionary, file, indent=2)
         with (function_path/'__load__.mcfunction').open(mode='w+') as file:
             file.write(__load__)
+        del self.functions["__load__"]
+
+        # Handle __tick__
+        if '__tick__' in self.functions:
+            with (minecraft_function_path/'tick.json').open(mode='w+') as file:
+                string = file.read()
+                if string == "":
+                    dictionary = {"values": []}
+                else:
+                    dictionary: dict = json.loads(string)
+                dictionary["replace"] = False
+                dictionary["values"].append(f"{self.namespace}:__tick__")
+                json.dump(dictionary, file, indent=2)
+
+        for function in self.functions.values():
+            path = function_path/f'{function.name.replace(".","/")}.mcfunction'
+            path.parent.mkdir(exist_ok=True, parents=True)
+            with path.open(mode='w+') as file:
+                file.write(
+                    "\n".join([command.text for command in function.context]))

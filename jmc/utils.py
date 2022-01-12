@@ -72,7 +72,7 @@ def custom_syntax(string: str, pack_global: PackGlobal) -> str:
             styles = groups[1].replace(' ', '').split(',')
             for i, style in enumerate(styles):
                 style = style.split('=')
-                styles[i] = f'"{style[0]}":"{style[1]}"'
+                styles[i] = f'"{style[0]}":{style[1]}'
             styles = ', '.join(['']+styles)
         else:
             styles = ''
