@@ -35,7 +35,7 @@ $deathCount = 0; // You can also put comment here
 
 Will be compiled to:
 
-**jmc_load.mcfunction**
+**__load__.mcfunction**
 
 ```elixir
 scoreboard objectives add __variable__ dummy
@@ -45,7 +45,7 @@ scoreboard players set 1 __int__ 1
 scoreboard players set $deathCount __variable__ 0
 ```
 
-**jmc_tick.mcfunction**
+**__tick__.mcfunction**
 
 ```elixir
 execute as entity @a[tag=my_tag] run function <namespace>:kill
