@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import defaultdict
 import json
 
 from . import Logger
@@ -19,20 +20,25 @@ class PackGlobal:
         self.scoreboards: Set[str] = {'__int__', '__variable__'}
         self.ints: Set[int] = set()
         self.functions: Dict[str, Function] = dict()
+        self.private_functions_count: Dict[str: int] = defaultdict(lambda: -1)
         self.imports: List[Module] = []
         self.namespace: str = 'test_dp'
         self.pack_format: int = 7
         self.description: str = 'DESC'
 
+    def get_pfc(self, string: str) -> int:
+        self.private_functions_count[string] += 1
+        return self.private_functions_count[string]
+
     def __str__(self) -> str:
         nl = '\n'
         return f"""PackGlobal
+        Imports: {nl.join([str(imported) for imported in self.imports])}
         Target Path (.jmc): {self.target_path.resolve()}
         Datapack Directory (Exported): {self.pack_path.resolve()}
         Scoreboards: {self.scoreboards}
         Integers: {self.ints}
         Functions: {nl.join([str(_function) for _function in self.functions.values()])}
-        Imports: {nl.join([str(imported) for imported in self.imports])}
         """
 
     def compile(self) -> None:

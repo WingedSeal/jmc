@@ -15,7 +15,7 @@ logger = Logger(__name__)
 
 class Function:
     def __init__(self, name: str, context: str, pack_global: PackGlobal) -> None:
-        self.name = name
+        self.name = str(name)
         context = replace_function_call(context, pack_global)
         self.context = [
             Command(command.strip(), pack_global)
@@ -31,6 +31,9 @@ class Function:
         logger.debug(f"Function created:{self.__str}")
 
     def __str__(self) -> str:
+        return self.__str
+
+    def __repr__(self) -> str:
         return self.__str
 
 
