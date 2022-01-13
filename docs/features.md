@@ -6,7 +6,7 @@ Syntax:
 ```javascript
 @import '[<directory>/]<file_name>';
 ```
-Will copy the context inside [<directory>/]<file_name>.jmc to main jmc.
+Will copy the context inside `[<directory>/]<file_name>.jmc` to main jmc.
 Example:
 ```javascript
 @import 'lib/math';
