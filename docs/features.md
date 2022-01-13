@@ -73,13 +73,14 @@ scoreboard players set $<variable> __variable__ <integer>
 
 - [x] **3. Variable Operations**
     - operations:
+        - "=" Assign: Set target's score to source's score *(for variable)*
         - "+=" Addition: Add source's score to target's score
         - "-=" Subtraction: Subtract source's score from target's score
         - "*=" Multiplication: Set target's score to the product of the target's and source's scores
         - "/=" (Integer) Division: Divide target's score by source' scores, and the result will be rounded down to an integer.
         - "%=" Modulus: Divide target's score by source's score, and use the positive remainder to set the target score
 ```javascript
-$<variable: target> <operations> ($<variable: source>|<integer>);
+$<target: variable> <operations> ($<source: variable>|<integer>);
 ```
 Output: 
 ```elixir
