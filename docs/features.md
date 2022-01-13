@@ -73,6 +73,7 @@ scoreboard players set $<variable> __variable__ <integer>
 
 - [x] **3. Variable Operations**
     - operations:
+        - "=" Assign: Set target's score to source's score *(for variable)*
         - "+=" Addition: Add source's score to target's score
         - "-=" Subtraction: Subtract source's score from target's score
         - "*=" Multiplication: Set target's score to the product of the target's and source's scores
