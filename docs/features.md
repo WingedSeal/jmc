@@ -1,19 +1,19 @@
 # Import
-- [x]
+
 Literally move context of another jmc file to the **top** of the main file.
 Warning: Importing **doesn't** add extra namespace
 Syntax:
 ```javascript
 @import '[<directory>/]<file_name>';
 ```
-Will copy the context inside [<directory>/]<file_name>.jmc to main jmc.
+Will copy the context inside `[<directory>/]<file_name>.jmc` to main jmc.
 Example:
 ```javascript
 @import 'lib/math';
 ```
 
 # Multiline Command
-- [x]
+
 You are allowed to split a single command into multiple line, with a cost of adding semicolons (`;`) at the end of every command (required).
 
 Example:
@@ -30,7 +30,7 @@ execute
 ```
 
 # Comment 
-- [x]
+   
 Syntax:
 - `#`
 - `//`
@@ -45,13 +45,12 @@ function tellraw_message() {
 ```
 
 # Load/Tick
-- [x]
+    
 - Any commands outside a function will be automatically put into `__load__.mcfunction`
 - Generate `load.json` with a value of `__load__.mcfunction`
 - Generate `tick.json` with a value of `__tick__.mcfunction`
 
 # Custom Syntax
-
 
 ## Variable
 - [ ] **1. Variable Declaration** (Not done)
