@@ -145,10 +145,9 @@ class BracketRegex:
     Throw away unused groups of match_bracket with method 'compile'
     """
     match_bracket_count = 0
-    remove_list = []
 
     def __init__(self) -> None:
-        pass
+        self.remove_list = []
 
     def compile(self, strings: Tuple[str]) -> Tuple[str]:
         """Process tuple from groups()
@@ -163,6 +162,8 @@ class BracketRegex:
             Tuple[str]: Delete all unused string in tuple
         """
         strings = list(strings)
+        logger.debug(f'BracketRegex - strings - {strings}')
+        logger.debug(f'BracketRegex - indexes - {self.remove_list}')
         for index in sorted(self.remove_list, reverse=True):
             del strings[index-1]
         return tuple(strings)
