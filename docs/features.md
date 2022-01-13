@@ -53,7 +53,8 @@ function tellraw_message() {
 # Custom Syntax
 
 ## Variable
-- [ ] **1. Variable Declaration** (Not done)
+- [x] **1. Variable Declaration**
+    - Initialize a variable (Set to 0, if doesn't exist)
 ```javascript
 $<variable>;
 ```
