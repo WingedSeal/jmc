@@ -103,6 +103,7 @@ function [<directory>.]<file_name>() {
 }
 ```
 Output:
+
 `[<directory>/]<file_name>.mcfunction`
 ```javascript
 <command>;
@@ -118,6 +119,7 @@ function utils.chat.spamChat() {
 }
 ```
 Output:
+
 `utils/chat/spamchat.mcfunction`
 ```javascript
 tellraw @a "SPAM 1"
@@ -163,6 +165,7 @@ class [<directory>.]<folder_name> {
 }
 ```
 Output:
+
 `__load__.mcfunction`
 ```javascript
 <command>;
@@ -251,6 +254,7 @@ function do_i_have_tag() {
 execute as @a[team=my_team] run do_i_have_tag();
 ```
 Output:
+
 `__load__.mcfunction`
 ```elixir
 execute as @a[team=my_team] run function namespace:do_i_have_tag
