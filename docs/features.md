@@ -154,26 +154,26 @@ execute as @a run function namespace:utils/chat/spamchat
 ```javascript
 class [<directory>.]<folder_name> {
     function [<directory>/]<file_name>() {
-        <command>
-        <command>
+        <command>;
+        <command>;
         ...
     }
-    <command>
-    <command>
+    <command>;
+    <command>;
     ....
 }
 ```
 Output:
 `__load__.mcfunction`
 ```javascript
-<command>
-<command>
+<command>;
+<command>;
 ...
 ```
 `[<directory>/]<folder_name>/[<directory>/]<file_name>.mcfunction`
 ```javascript
-<command>
-<command>
+<command>;
+<command>;
 ....
 ```
 *For now, I don't recommend using "class".*
@@ -181,6 +181,99 @@ Output:
 ## Flow controlling (Not done)
 
 - [ ] **1. If, Else**
+    - Automatically generate anonymous function(s) with integer name.
+    - Allow JavaScript's if/else syntax
+    - Even if the first condition is met, the rest will still need to check a scoreboard
+    - If there's only `if` and no `else`, compiler will turn it into a vanilla `execute if` command.
+
+```javascript
+if (<condition>) { 
+    <command>;
+    <command>;
+    ...
+} else if (<condition>) {
+    <command>;
+    <command>;
+    ...
+} else if (<condition>) {
+    <command>;
+    <command>;
+    ...
+} else {
+    <command>;
+    <command>;
+    ...
+}
+```
+Output:
+```elixir
+scoreboard players set __tmp__ __variable__ 0
+execute if <condition> run function namespace:__private__/if_else/0
+execute if score __tmp__ __variable__ matches 0 if <condition> run function namespace:__private__/if_else/1
+execute if score __tmp__ __variable__ matches 0 if <condition> run function namespace:__private__/if_else/2
+execute if score __tmp__ __variable__ matches 0 run function namespace:__private__/if_else/3
+```
+`__private__/if_else/0.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+<command>;
+<command>;
+...
+```
+`__private__/if_else/1.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+<command>;
+<command>;
+...
+```
+`__private__/if_else/2.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+<command>;
+<command>;
+...
+```
+`__private__/if_else/3.mcfunction`
+```elixir
+<command>;
+<command>;
+...
+```
+Example:
+```javascript
+function do_i_have_tag() {
+    if (entity @s[tag=my_tag]) { 
+        say I have tag!;
+    } else {
+        say I don't have tag!;
+    }
+}
+execute as @a[team=my_team] run do_i_have_tag();
+```
+Output:
+`__load__.mcfunction`
+```elixir
+execute as @a[team=my_team] run function namespace:do_i_have_tag
+```
+`do_i_have_tag.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 0
+execute if entity @s[tag=my_tag] run function namespace:__private__/if_else/11
+execute if score __tmp__ __variable__ matches 0 run function namespace:__private__/if_else/12
+```
+`__private__/if_else/11.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+say I have tag!
+```
+`__private__/if_else/12.mcfunction`
+```elixir
+say I don't have tag!
+```
+
+
+
 - [ ] **2. While loop**
 - [ ] **3. For loop**
 
@@ -191,7 +284,7 @@ Output:
 ```javascript
 $<variable>.toString([<key>=(<value>|"<value>")])
 ```
-Output
+Output:
 ```json
 {"score":{"name":"$<variable>","objective":"__variable__"},"key":(<value>|"<value>")}
 ```
@@ -199,13 +292,13 @@ Example:
 ```javascript
 $deathCount.toString(color="red", bold=true)
 ```
-Output
+Output:
 ```json
 {"score":{"name":"$deathCount","objective":"__variable__"},"color":"red","bold":true}
 ```
 
 ---
-**BLOW THIS IS UNDER CONSTRUCTION**
+# BLOW THIS IS UNDER CONSTRUCTION*
 - [ ] **2. Timer** (Not done)
     - addTimer(name, runMode, function)
         - None
@@ -213,6 +306,7 @@ Output
         - runTick
     - setTimer(name, tick, target)
     - isTimerOver(name, target) # Must be after `execute if`
+
 NOTE
 ```
 addTimer(
