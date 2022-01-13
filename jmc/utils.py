@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Tuple
 import regex
 
 from . import Logger, PackGlobal
@@ -137,3 +138,64 @@ def replace_function_call(command_text: str, pack_global: PackGlobal) -> str:
     command_text = re.sub(
         r'([\w\.]+)\(\)', mcfunction, command_text)
     return command_text
+
+
+class BracketRegex:
+    """Store groups data and process it for later use 
+    Throw away unused groups of match_bracket with method 'compile'
+    """
+    match_bracket_count = 0
+    remove_list = []
+
+    def __init__(self) -> None:
+        pass
+
+    def compile(self, strings: Tuple[str]) -> Tuple[str]:
+        """Process tuple from groups()
+        Example:
+        ```
+        groups = bracket_regex.compile(regex.search(pattern, string).groups())
+        ```
+        Args:
+            strings (Tuple[str]): re.Match.groups()
+
+        Returns:
+            Tuple[str]: Delete all unused string in tuple
+        """
+        strings = list(strings)
+        for index in sorted(self.remove_list, reverse=True):
+            del strings[index-1]
+        return tuple(strings)
+
+    def add_remove_list(self, start_group: int):
+        self.remove_list += [start_group+1, start_group+2, start_group+3]
+
+
+def match_bracket(bracket: str, start_group: int, bracket_regex: BracketRegex) -> str:
+    """Generate regex for matching bracket, need to be used with BracketRegex
+    Example:
+    ```
+    '(group1)' + match_bracket('{}', 2, bracket_regex) + '(group3)' + match_bracket('()', 4, bracket_regex)
+    ```
+
+    Args:
+        bracket (str): A string with length of 2, containing openning and closing of that bracket type. For example `{}`
+        start_group (int): A group(start at 1) which match_bracket should be. (Assuming 1 match_bracket use up 1 group)
+        bracket_regex (BracketRegex): Store stuff for compiling groups()
+
+    Returns:
+        str: Regex pattern for matching brackets
+    """
+    start_group += bracket_regex.match_bracket_count * 3
+    bracket_regex.match_bracket_count += 1
+    bracket_regex.add_remove_list(start_group)
+
+    # pattern = f'(\\{bracket[0]}((?:(?:(["\'])(?:(?=(\\\\?))\\'
+    # pattern += str(start_group + 3)
+    # pattern += '.)*?\\'
+    # pattern += str(start_group + 2)
+    # pattern += f'|[^{bracket[1]}{bracket[0]}])+|(?'
+    # pattern += str(start_group)
+    # pattern += f'))*+)\\{bracket[1]})'
+
+    return f'(\\{bracket[0]}((?:(?:(["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'

@@ -131,4 +131,5 @@ dmypy.json
 # Custom
 tests/
 logs/
+test.py
 .vscode
