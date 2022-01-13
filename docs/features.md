@@ -204,7 +204,7 @@ Output
 ```
 
 ---
-**BLOW THIS IS UNDER CONSTRUCTION**
+**BELOW THIS IS UNDER CONSTRUCTION**
 - [ ] **2. Timer** (Not done)
     - addTimer(name, runMode, function)
         - None
