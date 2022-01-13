@@ -171,13 +171,12 @@ class BracketRegex:
         """Generate regex for matching bracket, need to be used with BracketRegex
         Example:
         ```
-        '(group1)' + match_bracket('{}', 2, bracket_regex) + '(group3)' + match_bracket('()', 4, bracket_regex)
+        pattern = '(group1)' + bracket_regex.match_bracket('()', 2) + '(group3)' + bracket_regex.match_bracket('{}', 4)
         ```
 
         Args:
             bracket (str): A string with length of 2, containing openning and closing of that bracket type. For example `{}`
             start_group (int): A group(start at 1) which match_bracket should be. (Assuming 1 match_bracket use up 1 group)
-            bracket_regex (BracketRegex): Store stuff for compiling groups()
 
         Returns:
             str: Regex pattern for matching brackets
