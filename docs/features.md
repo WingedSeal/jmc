@@ -80,7 +80,7 @@ scoreboard players set $<variable> __variable__ <integer>
         - "/=" (Integer) Division: Divide target's score by source' scores, and the result will be rounded down to an integer.
         - "%=" Modulus: Divide target's score by source's score, and use the positive remainder to set the target score
 ```javascript
-$<variable: target> <operations> ($<variable: source>|<integer>);
+$<target: variable> <operations> ($<source: variable>|<integer>);
 ```
 Output: 
 ```elixir
