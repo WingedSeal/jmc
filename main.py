@@ -5,7 +5,6 @@ import traceback
 from compile import compile
 from os import system
 
-
 FILE_NAME = 'jmc.config'
 
 
@@ -30,6 +29,8 @@ def main():
             return
 
         try:
+            if config['debug_mode']:
+                pass
             compile(config)
             print(
                 f"\nSuccessfully compiled {config['target_file']} to {config['output']}")

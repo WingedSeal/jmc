@@ -13,7 +13,7 @@ import logging
 logger = Logger(__name__)
 
 bracket_regex = BracketRegex()
-IFELSE_REGEX = f"if ?{bracket_regex.match_bracket('()', 1)} {bracket_regex.match_bracket('{}', 2)}((?: else if ?{bracket_regex.match_bracket('()', 4)} {bracket_regex.match_bracket('{}', 5)})*)(?: else {bracket_regex.match_bracket('{}', 6)})?"
+IFELSE_REGEX = f"if ?{bracket_regex.match_bracket('()', 1)} ?{bracket_regex.match_bracket('{}', 2)}((?: else if ?{bracket_regex.match_bracket('()', 4)} ?{bracket_regex.match_bracket('{}', 5)})*)(?: else ?{bracket_regex.match_bracket('{}', 6)})?"
 
 
 class IfElse:
@@ -67,7 +67,7 @@ class IfElse:
 def capture_if_else(string: str, pack_global: PackGlobal) -> str:
     """Take string of jmc and return leftover jmc_string, and add ifelse to pack_global"""
     logger.info("Capturing If Else")
-    for jmcfunction in regex.finditer(IFELSE_REGEX, string, overlapped=False):
+    for jmcfunction in regex.finditer(IFELSE_REGEX, string):
         jmcfunction: re.Match
         if_else = IfElse(bracket_regex.compile(
             jmcfunction.groups()), pack_global)

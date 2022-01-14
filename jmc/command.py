@@ -58,26 +58,26 @@ class Command:
             groups = match.groups()
             return f'scoreboard players set {groups[0]} __variable__ {int(groups[1])}'
         self.string = re.sub(
-            f'{Re.var} = {Re.integer}', equal_int, self.string)
+            f'{Re.var} ?= ?{Re.integer}', equal_int, self.string)
 
         def operator_int(match: re.Match) -> str:
             groups = match.groups()
             pack_global.ints.add(int(groups[2]))
             return f'scoreboard players operation {groups[0]} __variable__ {groups[1]} {groups[2]} __int__'
-        self.string = re.sub(f'{Re.var} {Re.operator_noequal} {Re.integer}',
+        self.string = re.sub(f'{Re.var} ?{Re.operator_noequal} ?{Re.integer}',
                              operator_int, self.string)
 
         def operator_var(match: re.Match) -> str:
             groups = match.groups()
             pack_global.ints.add(int(groups[2]))
             return f'scoreboard players operation {groups[0]} __variable__ {groups[1]} {groups[2]} __variable__'
-        self.string = re.sub(f'{Re.var} {Re.operator_equal} {Re.var}',
+        self.string = re.sub(f'{Re.var} ?{Re.operator_equal} ?{Re.var}',
                              operator_var, self.string)
 
         def var_declare(match: re.Match) -> str:
             groups = match.groups()
             return f'scoreboard players add {groups[0]} __variable__ 0'
-        self.string = re.sub(f'int {Re.var}', var_declare, self.string)
+        self.string = re.sub(f'int ?{Re.var}', var_declare, self.string)
 
     def __str__(self) -> str:
         return self.string

@@ -2,3 +2,7 @@
 
 \* Fix custom condition <var>==<var> not working
 \* Fix increment syntax
+\* Fix debug_mode
+\* Fix custom operation syntax having significant whitespace
+
++ Add while loop feature

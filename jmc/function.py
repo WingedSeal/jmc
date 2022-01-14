@@ -39,7 +39,7 @@ class Function:
 def capture_function(string: str, pack_global: PackGlobal) -> str:
     """Take string of jmc and return leftover jmc_string, and add functions to pack_global"""
     logger.info("Capturing Functions")
-    for jmcfunction in regex.finditer(FUNCTION_REGEX, string, overlapped=False):
+    for jmcfunction in regex.finditer(FUNCTION_REGEX, string):
         jmcfunction: re.Match
         groups: Tuple[str] = bracket_regex.compile(jmcfunction.groups())
         name = groups[0]
