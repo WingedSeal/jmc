@@ -377,12 +377,12 @@ Output:
         `__tick__.mcfunction` if runMode is `runTick`
         ```elixir
         scoreboard players remove <entity>[scores={timr.<name>=1..}] 1
-        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        execute as <entity>[scores={timr.<name>=0}] <execute_arguments> run function namespace:__private__/timer/0
         ```
         `__tick__.mcfunction` if runMode is `runOnce`
         ```elixir
         scoreboard players remove <entity>[scores={timr.<name>=0..}] 1
-        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        execute as <entity>[scores={timr.<name>=0}] <execute_arguments> run function namespace:__private__/timer/0
         ```
         `__tick__.mcfunction` if runMode is `None`
         ```elixir
@@ -457,7 +457,7 @@ scoreboard objectives add timr.cooldown dummy
 `__tick__.mcfunction`
 ```elixir
 scoreboard players remove @a[team=A,scores={timr.cooldown=0..}] 1
-execute as <entity>[scores={timr.cooldown=..}] <execute_arguments> run function namespace:__private__/timer/0
+execute as @a[team=A,scores={timr.cooldown=0}] <execute_arguments> run function namespace:__private__/timer/0
 ```
 `__private__/timer/0.mcfunction`
 ```elixir
