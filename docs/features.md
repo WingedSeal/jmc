@@ -300,6 +300,26 @@ say I don't have tag!
 
 
 - [ ] **3. While loop**
+    - You can accidentally cause infinite recursion in while loop. Be extremly aware of that
+```javascript
+while (<condition>) {
+    <command>;
+    <command>;
+    ...
+} 
+```
+Output:
+`__load__.mcfunction`
+```elixir
+execute if <condition> run function namespace:__private__/while_loop/0
+```
+`__private__/while_loop/0.mcfunction`
+```elixir
+<command>;
+<command>;
+...
+execute if <condition> run function namespace:__private__/while_loop/0
+```
 - [ ] **4. For loop**
 
 ## Built-in functions
