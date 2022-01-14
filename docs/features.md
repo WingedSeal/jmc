@@ -56,7 +56,7 @@ function tellraw_message() {
 - [x] **1. Variable Declaration**
     - Initialize a variable (Set to 0, if doesn't exist)
 ```javascript
-$<variable>;
+int $<variable>;
 ```
 Output: 
 ```elixir

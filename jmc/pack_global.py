@@ -62,7 +62,7 @@ class PackGlobal:
         # Handle __load__
         __load__ = "\n".join(
             [f'scoreboard objectives add {obj} dummy' for obj in self.scoreboards] +
-            [command.text for command in self.functions["__load__"].context]
+            [command.string for command in self.functions["__load__"].context]
         )
         with (minecraft_function_path/'load.json').open(mode='w+') as file:
             string = file.read()
@@ -95,4 +95,4 @@ class PackGlobal:
             path.parent.mkdir(exist_ok=True, parents=True)
             with path.open(mode='w+') as file:
                 file.write(
-                    "\n".join([command.text for command in function.context]))
+                    "\n".join([command.string for command in function.context]))

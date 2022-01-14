@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from . import Logger, PackGlobal
 from .command import Command
-from .utils import replace_function_call, clean_whitespace, BracketRegex
+from .utils import clean_whitespace, BracketRegex
 import re
 import regex
 
@@ -16,7 +16,6 @@ logger = Logger(__name__)
 class Function:
     def __init__(self, name: str, context: str, pack_global: PackGlobal) -> None:
         self.name = str(name)
-        context = replace_function_call(context, pack_global)
         self.context = [
             Command(command.strip(), pack_global)
             for command
