@@ -62,6 +62,8 @@ class PackGlobal:
         # Handle __load__
         __load__ = "\n".join(
             [f'scoreboard objectives add {obj} dummy' for obj in self.scoreboards] +
+            [f'scoreboard players set {integer} __int__ {integer}' for integer in self.ints] +
+            [''] +
             [command.string for command in self.functions["__load__"].context]
         )
         with (minecraft_function_path/'load.json').open(mode='w+') as file:
