@@ -299,7 +299,7 @@ say I don't have tag!
 
 
 
-- [ ] **3. While loop**
+- [x] **3. While loop**
     - You can accidentally cause infinite recursion in while loop. Be extremly aware of that
 ```javascript
 while (<condition>) {
