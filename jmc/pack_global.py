@@ -14,17 +14,17 @@ logger = Logger(__name__)
 
 
 class PackGlobal:
-    def __init__(self, target_file: Path) -> None:
-        self.target_path = target_file.parent
-        self.pack_path = target_file.parent/Path('datapacks')
+    def __init__(self, config: dict) -> None:
+        self.target_path = config['target_file']
+        self.pack_path = config['output']
         self.scoreboards: Set[str] = {'__int__', '__variable__'}
         self.ints: Set[int] = set()
         self.functions: Dict[str, Function] = dict()
         self.private_functions_count: Dict[str: int] = defaultdict(lambda: -1)
         self.imports: List[Module] = []
-        self.namespace: str = 'test_dp'
-        self.pack_format: int = 7
-        self.description: str = 'DESC'
+        self.namespace: str = config['namespace']
+        self.pack_format: int = config['pack_format']
+        self.description: str = config['description']
 
     def get_pfc(self, string: str) -> int:
         self.private_functions_count[string] += 1

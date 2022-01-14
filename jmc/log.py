@@ -1,18 +1,28 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from sys import argv
 
 FORMATTER = logging.Formatter(
     '%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 __now = datetime.now()
+__debug_mode = False
 FILE_PATH = Path(
-    f'logs/{__now.strftime("%Y-%b")}/{__now.day}{__now.strftime("-%m-%Y")}.log')
+    f'{argv[0]}/logs/{__now.strftime("%Y-%b")}/{__now.day}{__now.strftime("-%m-%Y")}.log')
 
 
-def Logger(name: str, level: int = logging.DEBUG, file_path: str = None, is_stream: bool = True, is_log_file: bool = True) -> logging.Logger:
+def debug():
+    __debug_mode = True
+
+
+def Logger(name: str, level: int = logging.INFO, file_path: str = None, is_stream: bool = True, is_log_file: bool = False) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)
+
+    if __debug_mode:
+        level = logging.DEBUG
+        is_log_file = True
 
     if is_log_file:
         if file_path is None:

@@ -133,3 +133,4 @@ tests/
 logs/
 test.py
 .vscode
+jmc.config

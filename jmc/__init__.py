@@ -1,5 +1,5 @@
 # To prevent circular import, Logger, LoadJson needs to be imported first.
-from .log import Logger
+from .log import Logger, debug
 from .pack_global import PackGlobal
 
 from . import _class
