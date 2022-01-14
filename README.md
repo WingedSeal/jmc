@@ -35,7 +35,7 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 [Documentation](docs/index.md) (Soon TM)
 
 ## Contributing
-
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 **My Discord:** WingedSeal#0795
 
 ## Features
