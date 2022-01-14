@@ -1,7 +1,9 @@
 # Documentation
 
 Welcome! This is the official documentation for JMC.
-JavaScript-like Minecraft functions
+JavaScript-like Minecraft functions.
+
+Make sure to read the warning before coding!
 
 - [Warnings](warnings.md)
 - [Syntax](syntax.md)
@@ -40,7 +42,7 @@ function __tick__() {
 int $deathCount; // You can also put comment here
 ```
 
-Will be compiled to:
+**Will be compiled to:**
 
 `__private__/if_else/0.mcfunction`
 ```elixir
