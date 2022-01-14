@@ -29,7 +29,7 @@ class IfElse:
             return
 
         self.__output = [
-            'scoreboard players set __tmp__ __variable__ 0',
+            'scoreboard players set __tmp__ __variable__ 0;',
             f'execute if {groups[0]} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};',
         ]
         pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
@@ -61,7 +61,7 @@ class IfElse:
 
     @property
     def output(self) -> str:
-        return "\n".join(self.__output)
+        return " ".join(self.__output)
 
 
 def capture_if_else(string: str, pack_global: PackGlobal) -> str:
@@ -72,5 +72,6 @@ def capture_if_else(string: str, pack_global: PackGlobal) -> str:
         if_else = IfElse(bracket_regex.compile(
             jmcfunction.groups()), pack_global)
         logger.debug(f'IfElse.output\n{if_else.output}\n')
-        string = regex.sub(IFELSE_REGEX, if_else.output, string)
+        string = regex.sub(IFELSE_REGEX, f' {if_else.output} ', string)
+    logger.debug(f"--TEST-- {string}")
     return string

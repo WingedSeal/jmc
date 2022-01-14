@@ -182,7 +182,7 @@ Output:
 ```
 *For now, I don't recommend using "class".*
 
-## Flow controlling (Not done)
+## Flow controlling
 
 - [ ] **1. If, Else**
     - Automatically generate anonymous function(s) with integer name.
