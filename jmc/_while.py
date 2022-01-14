@@ -35,6 +35,7 @@ def capture_while_loop(string: str, pack_global: PackGlobal) -> str:
         jmcfunction: re.Match
         _while = While(bracket_regex.compile(
             jmcfunction.groups()), pack_global)
-        logger.debug(f'While.output\n{_while.output}\n')
-        string = regex.sub(WHILE_REGEX, f' {_while.output} ', string)
+        logger.debug(f'While.output\n{_while.output}')
+        string = regex.sub(WHILE_REGEX, f' {_while.output} ', string, count=1)
+        logger.debug(f'--TEST-- {string}')
     return string

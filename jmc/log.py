@@ -15,6 +15,9 @@ __now = datetime.now()
 FILE_PATH = Path(
     argv[0]).parent/f'logs/{__now.strftime("%Y-%b")}/{__now.day}{__now.strftime("-%m-%Y")}.log'
 
+if FILE_PATH.exists():
+    FILE_PATH.unlink()
+
 
 def Logger(name: str, level: int = logging.INFO, file_path: str = None, is_stream: bool = True, is_log_file: bool = False) -> logging.Logger:
     if debug_mode:
@@ -31,7 +34,7 @@ def Logger(name: str, level: int = logging.INFO, file_path: str = None, is_strea
             file_path = Path(file_path)
         file_path: Path
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(file_path.resolve(), mode='w+')
+        file_handler = logging.FileHandler(file_path.resolve())
         file_handler.setFormatter(FORMATTER)
         logger.addHandler(file_handler)
     if is_stream:

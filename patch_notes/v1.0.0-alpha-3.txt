@@ -1,0 +1,5 @@
+**Changelog:**
+
+\* Fix while loop calling the wrong function
+\* Fix incomplete logging
+\* Fix jmc trying to import jmc.config before generating it

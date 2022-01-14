@@ -2,7 +2,6 @@ from pathlib import Path
 from sys import argv
 import json
 import traceback
-from compile import compile
 from os import system
 
 FILE_NAME = 'jmc.config'
@@ -31,11 +30,13 @@ def main():
         try:
             if config['debug_mode']:
                 pass
+            from compile import compile
             compile(config)
             print(
                 f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
             system("pause")
         except FileNotFoundError as e:
+            traceback.print_exc()
             print(f'\nFile Missing')
             print(e)
             system("pause")

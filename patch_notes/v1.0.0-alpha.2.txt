@@ -1,8 +1,8 @@
 **Changelog:**
 
-\* Fix custom condition <var>==<var> not working
+\* Fix custom condition \<var>==\<var> not working
 \* Fix increment syntax
-\* Fix debug_mode
+\* Fix debug_mode not working
 \* Fix custom operation syntax having significant whitespace
 
-+ Add while loop feature
+\+ Add while loop feature
