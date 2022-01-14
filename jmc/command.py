@@ -2,17 +2,9 @@ import re
 import regex
 from . import Logger, PackGlobal
 import logging
-from .utils import BracketRegex
+from .utils import BracketRegex, Re
 
 logger = Logger(__name__)
-
-
-class Re:
-    integer = r'([-+]?[0-9]+)'
-    var = r'(\$\w+)'
-    operator_noequal = r'([+\-*\/%]=)'
-    operator_equal = r'([+\-*\/%]?=)'
-    function_call = r'([\w\.]+)\(\)'
 
 
 class Command:
@@ -50,6 +42,18 @@ class Command:
         self.string = re.sub(Re.function_call, call, self.string)
 
     def custom_syntax(self, pack_global: PackGlobal) -> None:
+        def increment(match: re.Match) -> str:
+            groups = match.groups()
+            return f'{groups[0]}+=1'
+        self.string = re.sub(
+            f'{Re.var}++', increment, self.string)
+
+        def decrement(match: re.Match) -> str:
+            groups = match.groups()
+            return f'{groups[0]}-=1'
+        self.string = re.sub(
+            f'{Re.var}--', decrement, self.string)
+
         def equal_int(match: re.Match) -> str:
             groups = match.groups()
             return f'scoreboard players set {groups[0]} __variable__ {int(groups[1])}'

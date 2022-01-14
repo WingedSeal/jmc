@@ -20,6 +20,77 @@ def clean_comments(string: str) -> str:
     return re.sub(r"#.*|\/\/.*", "", string)
 
 
+def condition(string: str) -> str:
+    """Turn variable conditions into `if score`"""
+    def equal_int(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ matches {groups[1]}'
+    string, success = re.subn(
+        f'^{Re.var} ?(?:==|=) ?{Re.integer}$', equal_int, string)
+    if success:
+        return string
+
+    def equal_range(match: re.Match) -> str:
+        groups = match.groups()
+        start = groups[1] if groups[1] is not None else ''
+        end = groups[2] if groups[2] is not None else ''
+        return f'score {groups[0]} __variable__ matches {start}..{end}'
+    string, success = re.subn(
+        f'^{Re.var} ?(?:==|=) ?{Re.match_range}$', equal_range, string)
+    if success:
+        return string
+
+    def more_than_int(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ matches {int(groups[1])+1}..'
+    string, success = re.subn(
+        f'^{Re.var} ?> ?{Re.integer}$', more_than_int, string)
+    if success:
+        return string
+
+    def less_than_int(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ matches ..{int(groups[1])-1}'
+    string, success = re.subn(
+        f'^{Re.var} ?< ?{Re.integer}$', less_than_int, string)
+    if success:
+        return string
+
+    def more_than_eq_int(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ matches {groups[1]}..'
+    string, success = re.subn(
+        f'^{Re.var} ?>= ?{Re.integer}$', more_than_eq_int, string)
+    if success:
+        return string
+
+    def less_than_eq_int(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ matches ..{groups[1]}'
+    string, success = re.subn(
+        f'^{Re.var} ?<= ?{Re.integer}$', less_than_eq_int, string)
+    if success:
+        return string
+
+    def operation_var(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ {groups[1]} {groups[2]} __variable__'
+    string, success = re.subn(
+        f'^{Re.var} ?(<|<=|=|>=|>) ?{Re.var}$', operation_var, string)
+    if success:
+        return string
+
+    def equal_var(match: re.Match) -> str:
+        groups = match.groups()
+        return f'score {groups[0]} __variable__ = {groups[1]} __variable__'
+    string, success = re.subn(
+        f'^{Re.var} ?== ?{Re.var})$', equal_var, string)
+    if success:
+        return string
+
+    return string
+
+
 class BracketRegex:
     """Store groups data and process it for later use 
     Throw away unused groups of match_bracket with method 'compile'
@@ -66,3 +137,13 @@ class BracketRegex:
         self.match_bracket_count += 1
         self.remove_list += [start_group, start_group+2, start_group+3]
         return f'(\\{bracket[0]}((?:(?:(["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
+
+
+class Re:
+    integer = r'([-+]?[0-9]+)'
+    match_range = r'([-+]?[0-9]+)?..([-+]?[0-9]+)?'
+    var = r'(\$\w+)'
+    operator_noequal = r'([+\-*\/%]=)'
+    operator_equal = r'([+\-*\/%]?=)'
+    function_call = r'([\w\.]+)\(\)'
+    condition_operator = r'(<|<=|=|>=|>)'

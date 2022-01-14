@@ -3,7 +3,7 @@
 from typing import Tuple
 
 from jmc.function import Function
-from .utils import BracketRegex
+from .utils import BracketRegex, condition
 from .pack_global import PackGlobal
 import regex
 import re
@@ -21,7 +21,7 @@ class IfElse:
         logger.info('IfElse created')
         if groups[-1] is None and groups[2] == '':  # No `else`, No `else if`
             self.__output = [
-                f'execute if {groups[0]} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};']
+                f'execute if {condition(groups[0])} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};']
             pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
                 f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
                 groups[1],
@@ -30,7 +30,7 @@ class IfElse:
 
         self.__output = [
             'scoreboard players set __tmp__ __variable__ 0;',
-            f'execute if {groups[0]} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};',
+            f'execute if {condition(groups[0])} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};',
         ]
         pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
             f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
@@ -45,7 +45,7 @@ class IfElse:
                 else_if_groups = bracket_regex.compile(
                     regex.match(pattern, else_if).groups())
                 self.__output.append(
-                    f'execute if score __tmp__ __variable__ matches 0 if {else_if_groups[0]} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};')
+                    f'execute if score __tmp__ __variable__ matches 0 if {condition(else_if_groups[0])} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};')
                 pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
                     f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
                     f'scoreboard players set __tmp__ __variable__ 1; {else_if_groups[1]}',
