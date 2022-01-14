@@ -73,5 +73,4 @@ def capture_if_else(string: str, pack_global: PackGlobal) -> str:
             jmcfunction.groups()), pack_global)
         logger.debug(f'IfElse.output\n{if_else.output}\n')
         string = regex.sub(IFELSE_REGEX, f' {if_else.output} ', string)
-    logger.debug(f"--TEST-- {string}")
     return string
