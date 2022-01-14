@@ -325,7 +325,7 @@ execute if <condition> run function namespace:__private__/while_loop/0
 ## Built-in functions
 
 - [x] **1. toString**
-    - turns variable into json for display (tellraw, title, etc.)
+    - Turn variable into json for display (tellraw, title, etc.)
 ```javascript
 $<variable>.toString([<key>=(<value>|"<value>")])
 ```
@@ -342,38 +342,144 @@ Output:
 {"score":{"name":"$deathCount","objective":"__variable__"},"color":"red","bold":true}
 ```
 
----
-# BLOW THIS IS UNDER CONSTRUCTION*
 - [ ] **2. Timer** (Not done)
-    - addTimer(name, runMode, function)
-        - None
-        - runOnce
-        - runTick
-    - setTimer(name, tick, target)
-    - isTimerOver(name, target) # Must be after `execute if`
+    - Automatically make a scoreboard timer for you. (If you need global timer, `/schedule` is a better option)
+    - `Timer.addTimer(name, runMode, function, entity = @a)`
+        - Only call this outside a function
+        - Create new timer
+        - name:
+            - Name of the timer. It exists so that you can access the timer
+            - Be less than or equal to 11 characters long
+            - Word charactors or underscores `_` only
 
-NOTE
-```
-addTimer(
-    name = "test",
-    runMode = None
-)
+        - runMode:
+            - `None` Doesn't do anything after timer is over
+            - `runOnce` Run exactly once after timer is over
+            - `runTick`  Run every tick after timer is over
+        - function:
+            - `<execute_arguments>` is optional, it's for `as`, `if`, `at` etc.
+            - function is automatically run as the entity that its timer is over
+            ```javascript
+            <execute_arguments> {
+                <command>;
+                <command>;
+                ...
+            }
+            ```
+        - entity:
+            - An optional target selector for timer, defaults at `@a`
+            - Can add extra keys and arguments
 
+        `__load__.mcfunction`
+        ```elixir
+        scoreboard objectives add timr.<name> dummy
+        ```
+        `__tick__.mcfunction` if runMode is `runTick`
+        ```elixir
+        scoreboard players remove <entity>[scores={timr.<name>=1..}] 1
+        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        ```
+        `__tick__.mcfunction` if runMode is `runOnce`
+        ```elixir
+        scoreboard players remove <entity>[scores={timr.<name>=0..}] 1
+        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        ```
+        `__tick__.mcfunction` if runMode is `None`
+        ```elixir
+        scoreboard players remove <entity>[scores={timr.<name>=1..}] 1
+        ```
+        `__private__/timer/0.mcfunction` if runMode is `runTick` or `runOnce`
+        ```elixir
+        <command>;
+        <command>;
+        ...
+        ```
 
-addTimer(
-    name = "cooldown",
-    runMode = runOnce,
-    function = {
-        say "Cooldown Over"
+    - `Timer.setTimer(name, tick, target)`
+        - Set entity's timer
+        - name:
+            - Name of the timer when you did `Timer.addTimer`
+        - tick:
+            - Amount of tick before timer is over.
+        - target:
+            - Target selector that you want to set its timer
+
+        Output:
+        ```elixir
+        scoreboard players set <target> timr.<name> <tick>
+        ```
+
+    - `Timer.isOver(name, target)`
+        - A condition, must be used after `execute if` or anything that compiles down to `execute if`
+        Output:
+        ```elixir
+        score <target> timr.<name> matches ..0
+        ```
+    - `Timer.overSelector(name)`
+        Output:
+        ```
+        scores={timr.<name>=..0}
+        ```
+
+    - `Timer.toSecond(name, $variable ,target)`
+        - Store timer left into a variable
+        Output:
+        ```elixir
+        scoreboard players operation __tmp__ __variable__ = <target> timr.<name>
+        scoreboard players operation __tmp__ /= 20 __int__
+        scoreboard players operation $variable __variable__ = __tmp__ __variable__
+        ```
+
+Example:
+```javascript
+function useAbility() {
+    if (Timer.isOver(cooldown, @s)) {
+        ability();
+        tellraw @s "You used your ability";
+        Timer.setTimer(cooldown, 100, @s);
+    } else {
+        Timer.toSecond(cooldown, $timer.cooldown, @s);
+        tellraw @s [$timer.cooldown.toString(color="red"), "text":" seconds left"];
     }
-)
+}
 
-setTimer(
-    name = "cooldown"
-    tick = 200,
-    target = @s
-)
+Timer.addTimer(cooldown, runOnce, @a[team=A] {
+    tellraw @s "Your ability is ready!";
+})
+```
 
-tick:
-execute as @a if isTimeOver(name="cooldown", taret=@s) say "EVERYTICK SINCE OVER"
+Output:
+`__load__.mcfunction`
+```elixir
+scoreboard objectives add timr.cooldown dummy
+```
+`__tick__.mcfunction`
+```elixir
+scoreboard players remove @a[team=A,scores={timr.cooldown=0..}] 1
+execute as <entity>[scores={timr.cooldown=..}] <execute_arguments> run function namespace:__private__/timer/0
+```
+`__private__/timer/0.mcfunction`
+```elixir
+tellraw @s "Your ability is ready!";
+```
+`useability.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 0
+execute if score @s timr.cooldown matches ..0 run function mydatapack:__private__/if_else/0
+execute if score __tmp__ __variable__ matches 0 run function mydatapack:__private__/if_else/1
+```
+`__private__/if_else/0.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+function mydatapack:ability
+tellraw @s "You used your ability"
+scoreboard players set @s timr.cooldown 100
+```
+`__private__/if_else/1.mcfunction`
+```elixir
+scoreboard players set __tmp__ __variable__ 1
+scoreboard players operation __tmp__ __variable__ = @s timr.cooldown
+scoreboard players operation __tmp__ /= 20 __int__
+scoreboard players operation $timer.cooldown __variable__ = __tmp__ __variable__
+tellraw @s [{"score":{"name":"$timer.cooldown","objective":"__variable__"},"color":"red"},"text":"seconds left"]
 ```

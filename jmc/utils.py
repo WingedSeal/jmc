@@ -84,7 +84,7 @@ def condition(string: str) -> str:
         groups = match.groups()
         return f'score {groups[0]} __variable__ = {groups[1]} __variable__'
     string, success = re.subn(
-        f'^{Re.var} ?== ?{Re.var})$', equal_var, string)
+        f'^{Re.var} ?== ?{Re.var}$', equal_var, string)
     if success:
         return string
 

@@ -46,7 +46,7 @@ class Command:
             groups = match.groups()
             return f'{groups[0]}+=1'
         self.string = re.sub(
-            f'{Re.var}++', increment, self.string)
+            f'{Re.var}\+\+', increment, self.string)
 
         def decrement(match: re.Match) -> str:
             groups = match.groups()

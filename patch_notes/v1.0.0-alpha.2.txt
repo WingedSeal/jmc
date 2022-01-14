@@ -1,0 +1,4 @@
+**Changelog:**
+
+\* Fix custom condition <var>==<var> not working
+\* Fix increment syntax
