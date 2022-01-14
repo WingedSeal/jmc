@@ -91,6 +91,10 @@ scoreboard players operations <target> __variable__ <operations> <source> __vari
 scoreboard players operations <target> __variable__ <operations> <integer> __int__
 ```
 
+- [x] **4. Incrementation/Decrementation**
+    - `$<variable>++` is `$<variable> += 1`
+    - `$<variable>--` is `$<variable> -= 1`
+
 ## Function
 
 - [x] **1. Function Definition**
@@ -184,7 +188,23 @@ Output:
 
 ## Flow controlling
 
-- [x] **1. If, Else**
+- [x] **1. Condition**
+    - Use for other flow controls
+    - Can replace any `<condition>`
+    - `==` and `=` do exactly the same thing
+```javascript
+$<variable> (>=|<=|=|==|>|<) <integer>
+$<variable> (>=|<=|=|==|>|<) <variable> 
+$<variable> (==|=) [<integer>]..[<integer>]
+```
+Example: 
+```javascript
+if ($deathCount>5) {
+    say "Too many death!"
+}
+```
+
+- [x] **2. If, Else**
     - Automatically generate anonymous function(s) with integer name.
     - Allow JavaScript's if/else syntax
     - Even if the first condition is met, the rest will still need to check a scoreboard
@@ -279,8 +299,8 @@ say I don't have tag!
 
 
 
-- [ ] **2. While loop**
-- [ ] **3. For loop**
+- [ ] **3. While loop**
+- [ ] **4. For loop**
 
 ## Built-in functions
 
