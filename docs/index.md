@@ -59,7 +59,6 @@ tellraw @a "A lot of people died."
 ```elixir
 scoreboard players set __tmp__ __variable__ 1
 tellraw @a "Too many people died."
-
 ```
 `__load__.mcfunction`
 ```elixir
