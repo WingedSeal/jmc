@@ -184,7 +184,7 @@ Output:
 
 ## Flow controlling
 
-- [ ] **1. If, Else**
+- [x] **1. If, Else**
     - Automatically generate anonymous function(s) with integer name.
     - Allow JavaScript's if/else syntax
     - Even if the first condition is met, the rest will still need to check a scoreboard
