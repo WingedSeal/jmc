@@ -445,7 +445,7 @@ function useAbility() {
 
 Timer.addTimer(cooldown, runOnce, @a[team=A] {
     tellraw @s "Your ability is ready!";
-})
+}, @a[tag=A])
 ```
 
 Output:
@@ -456,8 +456,8 @@ scoreboard objectives add timr.cooldown dummy
 ```
 `__tick__.mcfunction`
 ```elixir
-scoreboard players remove @a[team=A,scores={timr.cooldown=0..}] 1
-execute as @a[team=A,scores={timr.cooldown=0}] <execute_arguments> run function namespace:__private__/timer/0
+scoreboard players remove @a[tag=A,scores={timr.cooldown=0..}] 1
+execute as @a[team=A,scores={timr.cooldown=0}] run function namespace:__private__/timer/0
 ```
 `__private__/timer/0.mcfunction`
 ```elixir
