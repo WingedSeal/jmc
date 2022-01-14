@@ -449,6 +449,7 @@ Timer.addTimer(cooldown, runOnce, @a[team=A] {
 ```
 
 Output:
+
 `__load__.mcfunction`
 ```elixir
 scoreboard objectives add timr.cooldown dummy
