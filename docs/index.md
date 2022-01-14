@@ -11,10 +11,10 @@ JavaScript-like Minecraft functions
 
 ```javascript
 function deathMessage() {
-    if (score $deathCount __variable__ matches ..5) {
+    if ($deathCount<=5) {
         tellraw @a [{"text":"Someone died again!", "color": "gold"}];
         tellraw @a $deathCount.toString(color="red", bold=true);
-    } else if (score $deathCount __variable__ matches 5..15) {
+    } else if (score $deathCount __variable__==5..15) {
         tellraw @a "A lot of people died.";
     } else {
         tellraw @a "Too many people died.";
