@@ -377,12 +377,12 @@ Output:
         `__tick__.mcfunction` if runMode is `runTick`
         ```elixir
         scoreboard players remove <entity>[scores={timr.<name>=1..}] 1
-        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        execute as <entity>[scores={timr.<name>=0}] <execute_arguments> run function namespace:__private__/timer/0
         ```
         `__tick__.mcfunction` if runMode is `runOnce`
         ```elixir
         scoreboard players remove <entity>[scores={timr.<name>=0..}] 1
-        execute as <entity>[scores={timr.<name>=..}] <execute_arguments> run function namespace:__private__/timer/0
+        execute as <entity>[scores={timr.<name>=0}] <execute_arguments> run function namespace:__private__/timer/0
         ```
         `__tick__.mcfunction` if runMode is `None`
         ```elixir
@@ -445,7 +445,7 @@ function useAbility() {
 
 Timer.addTimer(cooldown, runOnce, @a[team=A] {
     tellraw @s "Your ability is ready!";
-})
+}, @a[tag=A])
 ```
 
 Output:
@@ -456,23 +456,23 @@ scoreboard objectives add timr.cooldown dummy
 ```
 `__tick__.mcfunction`
 ```elixir
-scoreboard players remove @a[team=A,scores={timr.cooldown=0..}] 1
-execute as <entity>[scores={timr.cooldown=..}] <execute_arguments> run function namespace:__private__/timer/0
+scoreboard players remove @a[tag=A,scores={timr.cooldown=0..}] 1
+execute as @a[team=A,scores={timr.cooldown=0}] run function namespace:__private__/timer/0
 ```
 `__private__/timer/0.mcfunction`
 ```elixir
-tellraw @s "Your ability is ready!";
+tellraw @s "Your ability is ready!"
 ```
 `useability.mcfunction`
 ```elixir
 scoreboard players set __tmp__ __variable__ 0
-execute if score @s timr.cooldown matches ..0 run function mydatapack:__private__/if_else/0
-execute if score __tmp__ __variable__ matches 0 run function mydatapack:__private__/if_else/1
+execute if score @s timr.cooldown matches ..0 run function namespace:__private__/if_else/0
+execute if score __tmp__ __variable__ matches 0 run function namespace:__private__/if_else/1
 ```
 `__private__/if_else/0.mcfunction`
 ```elixir
 scoreboard players set __tmp__ __variable__ 1
-function mydatapack:ability
+function namespace:ability
 tellraw @s "You used your ability"
 scoreboard players set @s timr.cooldown 100
 ```
