@@ -17,22 +17,21 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 ### Executable Version
 
 1. [Download JMC-compiler.exe](https://github.com/WingedSeal/jmc/releases/download/v1.0.0-alpha.1/JMC-Compiler.exe) from github
-1. Put **JMC-Compiler.exe** in any directory (Preferable, your datapack directory)
+1. Put **JMC-Compiler.exe** in any directory (Preferably, your datapack directory)
+
+### Python Version
+
+1. Download ZIP or Clone repository / Download [Source code](https://github.com/WingedSeal/jmc/archive/refs/tags/v1.0.0-alpha.1.zip)
+1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`)
+1. Install libraries from requirements.txt using `pip install -r requirements.txt`
+1. Run `main.py`, This will behave exactly like Executable Version (**JMC-Compiler.exe**)
+
+## Usage
 1. Run **JMC-Compiler.exe** and it'll automatically generate **jmc.config** in the same directory it's in
 1. Edit configurations in **jmc.config** 
 1. Write your jmc file(s)
 1. Run **JMC-Compiler.exe** again
 
-### Python Version
-
-1. Download ZIP or Clone repository
-1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`)
-1. Install libraries from requirements.txt using `pip install -r requirements.txt`
-1. Run `main.py` (This will behave exactly like Executable Version)
-
-## Usage
-
-Run **JMC-Compiler.exe** file 
 [Documentation](docs/index.md) (Soon TM)
 
 ## Contributing
