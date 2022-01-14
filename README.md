@@ -16,7 +16,7 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 
 ### Executable Version
 
-1. [Download JMC-compiler.exe](https://github.com/WingedSeal/jmc/releases/download/v1.0.0-alpha/JMC-Compiler.exe) from github
+1. [Download JMC-compiler.exe](https://github.com/WingedSeal/jmc/releases/download/v1.0.0-alpha.1/JMC-Compiler.exe) from github
 1. Put **JMC-Compiler.exe** in any directory (Preferable, your datapack directory)
 1. Run **JMC-Compiler.exe** and it'll automatically generate **jmc.config** in the same directory it's in
 1. Edit configurations in **jmc.config** 
