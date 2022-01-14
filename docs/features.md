@@ -461,7 +461,7 @@ execute as @a[team=A,scores={timr.cooldown=0}] run function namespace:__private_
 ```
 `__private__/timer/0.mcfunction`
 ```elixir
-tellraw @s "Your ability is ready!";
+tellraw @s "Your ability is ready!"
 ```
 `useability.mcfunction`
 ```elixir
