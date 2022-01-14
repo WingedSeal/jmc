@@ -466,13 +466,13 @@ tellraw @s "Your ability is ready!";
 `useability.mcfunction`
 ```elixir
 scoreboard players set __tmp__ __variable__ 0
-execute if score @s timr.cooldown matches ..0 run function mydatapack:__private__/if_else/0
-execute if score __tmp__ __variable__ matches 0 run function mydatapack:__private__/if_else/1
+execute if score @s timr.cooldown matches ..0 run function namespace:__private__/if_else/0
+execute if score __tmp__ __variable__ matches 0 run function namespace:__private__/if_else/1
 ```
 `__private__/if_else/0.mcfunction`
 ```elixir
 scoreboard players set __tmp__ __variable__ 1
-function mydatapack:ability
+function namespace:ability
 tellraw @s "You used your ability"
 scoreboard players set @s timr.cooldown 100
 ```
