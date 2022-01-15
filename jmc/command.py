@@ -11,12 +11,13 @@ class Command:
     """Datapack function command"""
 
     def __init__(self, text: str, pack_global: PackGlobal) -> None:
+        logger.debug(f"Command - Input: {text}")
+
         self.string = text.strip()
         self.function_call(pack_global)
         self.built_in_functions()
         self.custom_syntax(pack_global)
 
-        logger.debug(f"Command - Input: {text}")
         logger.debug(f"Command created:\nText: {self.string}")
 
     def built_in_functions(self) -> None:
