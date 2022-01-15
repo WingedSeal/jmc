@@ -1,9 +1,13 @@
+from __future__ import annotations
 import logging
 from typing import List, Tuple
 
 from . import Logger, PackGlobal
 from .command import Command
 from .utils import clean_whitespace, BracketRegex
+from .if_else import capture_if_else
+from ._while import capture_while_loop
+from ._for import capture_for_loop
 import re
 import regex
 
@@ -16,6 +20,8 @@ logger = Logger(__name__)
 class Function:
     def __init__(self, name: str, context: str, pack_global: PackGlobal) -> None:
         self.name = str(name)
+        context = capture_if_else(capture_while_loop(
+            capture_for_loop(context, pack_global), pack_global), pack_global)
         self.context = [
             Command(command.strip(), pack_global)
             for command

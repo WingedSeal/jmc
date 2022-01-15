@@ -2,7 +2,6 @@
 
 from typing import Tuple
 
-from jmc.function import Function
 from .utils import BracketRegex, condition, Re
 from .pack_global import PackGlobal
 import regex
@@ -18,6 +17,7 @@ FOR_REGEX = f"for ?{bracket_regex.match_bracket('()', 1)} ?{bracket_regex.match_
 
 class For:
     def __init__(self, groups: Tuple[str], pack_global: PackGlobal) -> None:
+        from .function import Function
         logger.info('For created')
         arguments = [argument.strip() for argument in groups[0].split(';')]
         arguments[0] = regex.match(

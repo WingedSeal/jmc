@@ -2,7 +2,6 @@
 
 from typing import Tuple
 
-from jmc.function import Function
 from .utils import BracketRegex, condition
 from .pack_global import PackGlobal
 import regex
@@ -18,6 +17,7 @@ IFELSE_REGEX = f"if ?{bracket_regex.match_bracket('()', 1)} ?{bracket_regex.matc
 
 class IfElse:
     def __init__(self, groups: Tuple[str], pack_global: PackGlobal) -> None:
+        from .function import Function
         logger.info('IfElse created')
         if groups[-1] is None and groups[2] == '':  # No `else`, No `else if`
             self.__output = [
@@ -34,7 +34,7 @@ class IfElse:
         ]
         pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
             f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
-            f'scoreboard players set __tmp__ __variable__ 1; {groups[1]}',
+            f'{groups[1]} scoreboard players set __tmp__ __variable__ 1;',
             pack_global)
 
         if groups[2] != '':  # There's `else if`
@@ -48,7 +48,7 @@ class IfElse:
                     f'execute if score __tmp__ __variable__ matches 0 if {condition(else_if_groups[0])} run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};')
                 pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
                     f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
-                    f'scoreboard players set __tmp__ __variable__ 1; {else_if_groups[1]}',
+                    f'{else_if_groups[1]} scoreboard players set __tmp__ __variable__ 1;',
                     pack_global)
 
         if groups[-1] is not None:  # There's `else`
@@ -56,7 +56,7 @@ class IfElse:
                 f'execute if score __tmp__ __variable__ matches 0 run function {pack_global.namespace}:__private__/if_else/{pack_global.get_pfc("if_else")};')
             pack_global.functions[f'__private__.if_else.{pack_global.private_functions_count["if_else"]}'] = Function(
                 f'__private__.if_else.{pack_global.private_functions_count["if_else"]}',
-                f'scoreboard players set __tmp__ __variable__ 1; {groups[-1]}',
+                f'{groups[-1]} scoreboard players set __tmp__ __variable__ 1;',
                 pack_global)
 
     @property

@@ -2,7 +2,6 @@
 
 from typing import Tuple
 
-from jmc.function import Function
 from .utils import BracketRegex, condition
 from .pack_global import PackGlobal
 import regex
@@ -18,6 +17,7 @@ WHILE_REGEX = f"while ?{bracket_regex.match_bracket('()', 1)} ?{bracket_regex.ma
 
 class While:
     def __init__(self, groups: Tuple[str], pack_global: PackGlobal) -> None:
+        from .function import Function
         logger.info('While created')
 
         _condition = condition(groups[0])

@@ -43,3 +43,7 @@ def Logger(name: str, level: int = logging.INFO, file_path: str = None, is_strea
         logger.addHandler(stream_handler)
 
     return logger
+
+
+logger = Logger(__name__)
+logger.debug('VERSION: v1.0.0-beta.1')
