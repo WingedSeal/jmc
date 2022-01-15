@@ -30,11 +30,18 @@ If you prefer to have main.py elsewhere without moving the entire folder.
 Create a `.py` file at the desired folder then inser the following code
 ```python
 import sys
-sys.path.append('PATH-TO-main.py-HERE')  # noqa
+sys.path.append('PATH_TO_FOLDER_HERE')  # noqa
 import main  # type: ignore
 main.main()
 ```
-And replace `PATH-TO-main.py-HERE` with pure window path to `main.py` you downloaded.
+And replace `PATH_TO_FOLDER_HERE` with pure window path to `main.py`'s parent directly you downloaded.
+For example, if my `main.py`'s path is `D:/Users/User/Documents/GitHub/JMC`
+```python
+import sys
+sys.path.append('D:/Users/User/Documents/GitHub/JMC')  # noqa
+import main  # type: ignore
+main.main()
+```
 
 ## Usage
 1. Run **JMC-Compiler.exe** and it'll automatically generate **jmc.config** in the same directory it's in
