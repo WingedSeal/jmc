@@ -32,7 +32,7 @@ class For:
         ]
         pack_global.functions[f'__private__.for_loop.{pack_global.private_functions_count["for_loop"]}'] = Function(
             f'__private__.for_loop.{pack_global.private_functions_count["for_loop"]}',
-            f'{groups[1]} execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{pack_global.private_functions_count["for_loop"]}; {arguments[2]};',
+            f'{groups[1]} execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{pack_global.private_functions_count["for_loop"]}; {arguments[2].replace(f"${arguments[0][0]}", f"$__private__.{arguments[0][0]}")};',
             pack_global)
 
     @property
