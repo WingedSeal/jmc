@@ -22,7 +22,7 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 ### Python Version
 
 1. Download ZIP or Clone repository / Download [Source code](https://github.com/WingedSeal/jmc/archive/refs/tags/v1.0.0-beta.1.zip)
-1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`)
+1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`) (If you would like to have all libraries in global, you can skip this step)
 1. Install libraries from requirements.txt using `pip install -r requirements.txt`
 1. Run `main.py`, This will behave exactly like Executable Version (**JMC-Compiler.exe**)
 
