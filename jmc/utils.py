@@ -142,7 +142,8 @@ class BracketRegex:
 class Re:
     integer = r'([-+]?[0-9]+)'
     match_range = r'([-+]?[0-9]+)?..([-+]?[0-9]+)?'
-    var = r'(\$\w+)'
+    var = r'(\$[a-zA-Z._]+)'
+    var_nosigncap = r'\$([a-zA-Z._]+)'
     operator_noequal = r'([+\-*\/%]=)'
     operator_equal = r'([+\-*\/%]?=)'
     function_call = r'([\w\.]+)\(\)'

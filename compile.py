@@ -15,7 +15,6 @@ def compile(config: dict) -> None:
 
     # clean_comments() MUST come before clean_whitespace
     jmc_string = jmc.utils.clean_comments(jmc_string)
-    jmc_string = jmc.utils.clean_comments(jmc_string)
     jmc_string = jmc.imports.handle_imports(jmc_string, pack_global)
     jmc_string = jmc.utils.clean_whitespace(jmc_string)
     jmc_string = jmc._class.replace_class(jmc_string)

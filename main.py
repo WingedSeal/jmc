@@ -3,6 +3,7 @@ from sys import argv
 import json
 import traceback
 from os import system
+from compile import compile
 
 FILE_NAME = 'jmc.config'
 
@@ -28,13 +29,17 @@ def main():
             return
 
         try:
-            if config['debug_mode']:
-                pass
-            from compile import compile
-            compile(config)
-            print(
-                f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
-            system("pause")
+            if config['keep_compiling']:
+                while True:
+                    compile(config)
+                    print(
+                        f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
+                    system("pause")
+            else:
+                compile(config)
+                print(
+                    f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
+                system("pause")
         except FileNotFoundError as e:
             traceback.print_exc()
             print(f'\nFile Missing')
@@ -54,6 +59,7 @@ def main():
             'pack_format': 7,
             'target_file': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
             'output': Path(argv[0]).parent.resolve().as_posix(),
+            'keep_compiling': False,
             'debug_mode': False
         }
         with config_file.open('w') as file:

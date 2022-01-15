@@ -77,7 +77,7 @@ class Command:
         def var_declare(match: re.Match) -> str:
             groups = match.groups()
             return f'scoreboard players add {groups[0]} __variable__ 0'
-        self.string = re.sub(f'int ?{Re.var}', var_declare, self.string)
+        self.string = re.sub(f'let ?{Re.var}', var_declare, self.string)
 
     def __str__(self) -> str:
         return self.string
