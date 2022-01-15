@@ -4,6 +4,7 @@ from .pack_global import PackGlobal
 
 from . import _class
 from . import _while
+from . import _for
 from . import command
 from . import function
 from . import if_else

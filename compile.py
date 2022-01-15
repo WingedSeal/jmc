@@ -20,6 +20,7 @@ def compile(config: dict) -> None:
     jmc_string = jmc._class.replace_class(jmc_string)
     jmc_string = jmc.if_else.capture_if_else(jmc_string, pack_global)
     jmc_string = jmc._while.capture_while_loop(jmc_string, pack_global)
+    jmc_string = jmc._for.capture_for_loop(jmc_string, pack_global)
     jmc_string = jmc.function.capture_function(
         jmc_string, pack_global)
     pack_global.functions['__load__'] = jmc.function.Function(

@@ -21,8 +21,9 @@ class For:
         logger.info('For created')
         arguments = [argument.strip() for argument in groups[0].split(';')]
         arguments[0] = regex.match(
-            f'let {Re.var_nosigncap} ?= ?{Re.integer}').groups()
-        arguments[1] = condition(arguments[1])
+            f'let {Re.var_nosigncap} ?= ?{Re.integer}', arguments[0]).groups()
+        arguments[1] = condition(arguments[1].replace(
+            f'${arguments[0][0]}', f'$__private__.{arguments[0][0]}'))
         context = groups[1].replace(
             f'${arguments[0][0]}', f'$__private__.{arguments[0][0]}')
         self.__output = [

@@ -3,7 +3,6 @@ from sys import argv
 import json
 import traceback
 from os import system
-from compile import compile
 
 FILE_NAME = 'jmc.config'
 
@@ -29,6 +28,7 @@ def main():
             return
 
         try:
+            from compile import compile
             if config['keep_compiling']:
                 while True:
                     compile(config)
