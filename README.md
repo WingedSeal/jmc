@@ -28,8 +28,6 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 
 If you prefer to have main.py elsewhere without moving the entire folder.
 Create a `.py` file at the desired directly then insert the following code (The file name **cannot** be `main.py`)
-
-`run.py`
 ```python
 import sys
 sys.path.append('PATH_TO_FOLDER_HERE')  # noqa
@@ -38,6 +36,8 @@ main.main()
 ```
 And replace `PATH_TO_FOLDER_HERE` with pure window path to `main.py`'s parent directory you downloaded.
 For example, if my `main.py`'s path is `D:/Users/User/Documents/GitHub/JMC`
+
+`run.py`
 ```python
 import sys
 sys.path.append('D:/Users/User/Documents/GitHub/JMC')  # noqa
