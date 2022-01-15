@@ -26,6 +26,16 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 1. Install libraries from requirements.txt using `pip install -r requirements.txt`
 1. Run `main.py`, This will behave exactly like Executable Version (**JMC-Compiler.exe**)
 
+If you prefer to have main.py elsewhere without moving the entire folder.
+Create a `.py` file at the desired folder then inser the following code
+```python
+import sys
+sys.path.append('PATH-TO-main.py-HERE')  # noqa
+import main  # type: ignore
+main.main()
+```
+And replace `PATH-TO-main.py-HERE` with pure window path to `main.py` you downloaded.
+
 ## Usage
 1. Run **JMC-Compiler.exe** and it'll automatically generate **jmc.config** in the same directory it's in
 1. Edit configurations in **jmc.config** 
