@@ -34,7 +34,7 @@ sys.path.append('PATH_TO_FOLDER_HERE')  # noqa
 import main  # type: ignore
 main.main()
 ```
-And replace `PATH_TO_FOLDER_HERE` with pure window path to `main.py`'s parent directly you downloaded.
+And replace `PATH_TO_FOLDER_HERE` with pure window path to `main.py`'s parent directory you downloaded.
 For example, if my `main.py`'s path is `D:/Users/User/Documents/GitHub/JMC`
 ```python
 import sys
