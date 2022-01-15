@@ -20,8 +20,9 @@ logger = Logger(__name__)
 class Function:
     def __init__(self, name: str, context: str, pack_global: PackGlobal) -> None:
         self.name = str(name)
-        context = capture_if_else(capture_while_loop(
-            capture_for_loop(context, pack_global), pack_global), pack_global)
+        context = capture_if_else(context, pack_global)
+        context = capture_while_loop(context, pack_global)
+        context = capture_for_loop(context, pack_global)
         self.context = [
             Command(command.strip(), pack_global)
             for command
