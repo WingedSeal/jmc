@@ -27,7 +27,7 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 1. Run `main.py`, This will behave exactly like Executable Version (**JMC-Compiler.exe**)
 
 If you prefer to have main.py elsewhere without moving the entire folder.
-Create a `.py` file at the desired folder then inser the following code
+Create a `.py` file at the desired folder then inser the following code (The file name **cannot** be `main.py`)
 ```python
 import sys
 sys.path.append('PATH_TO_FOLDER_HERE')  # noqa
