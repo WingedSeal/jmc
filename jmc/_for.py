@@ -26,14 +26,14 @@ class For:
             f'${arguments[0][0]}', f'$__private__.{arguments[0][0]}'))
         context = groups[1].replace(
             f'${arguments[0][0]}', f'$__private__.{arguments[0][0]}')
+        counter = pack_global.get_pfc("for_loop")
         self.__output = [
             f'scoreboard players set $__private__.{arguments[0][0]} __variable__ {arguments[0][1]};',
-            f'execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{pack_global.get_pfc("for_loop")};'
+            f'execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{counter};'
         ]
-        for_loop_count = pack_global.private_functions_count["for_loop"]
-        pack_global.functions[f'__private__.for_loop.{for_loop_count}'] = Function(
-            f'__private__.for_loop.{for_loop_count}',
-            f'{context} {arguments[2].replace(f"${arguments[0][0]}", f"$__private__.{arguments[0][0]}")}; execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{pack_global.private_functions_count["for_loop"]};',
+        pack_global.functions[f'__private__.for_loop.{counter}'] = Function(
+            f'__private__.for_loop.{counter}',
+            f'{context} {arguments[2].replace(f"${arguments[0][0]}", f"$__private__.{arguments[0][0]}")}; execute if {arguments[1]} run function {pack_global.namespace}:__private__/for_loop/{counter};',
             pack_global)
 
     @property

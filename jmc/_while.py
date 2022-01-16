@@ -21,10 +21,11 @@ class While:
         logger.info('While created')
 
         _condition = condition(groups[0])
-        self.output = f'execute if {_condition} run function {pack_global.namespace}:__private__/while_loop/{pack_global.get_pfc("while_loop")};'
-        pack_global.functions[f'__private__.while_loop.{pack_global.private_functions_count["while_loop"]}'] = Function(
-            f'__private__.while_loop.{pack_global.private_functions_count["while_loop"]}',
-            f'{groups[1]} execute if {_condition} run function {pack_global.namespace}:__private__/while_loop/{pack_global.private_functions_count["while_loop"]};',
+        counter = pack_global.get_pfc("while_loop")
+        self.output = f'execute if {_condition} run function {pack_global.namespace}:__private__/while_loop/{counter};'
+        pack_global.functions[f'__private__.while_loop.{counter}'] = Function(
+            f'__private__.while_loop.{counter}',
+            f'{groups[1]} execute if {_condition} run function {pack_global.namespace}:__private__/while_loop/{counter};',
             pack_global)
 
 
