@@ -22,12 +22,12 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 ### Python Version
 
 1. Download ZIP or Clone repository / Download [Source code](https://github.com/WingedSeal/jmc/archive/refs/tags/v1.0.0-beta.1.zip)
-1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`)
+1. Create a virtual environment for python (For example, `python -m venv venv`) and activate (For example, `venv\Scripts\activate`) (If you would like to have all libraries in global, you can skip this step)
 1. Install libraries from requirements.txt using `pip install -r requirements.txt`
 1. Run `main.py`, This will behave exactly like Executable Version (**JMC-Compiler.exe**)
 
 If you prefer to have main.py elsewhere without moving the entire folder.
-Create a `.py` file at the desired folder then inser the following code (The file name **cannot** be `main.py`)
+Create a `.py` file at the desired directly then insert the following code (The file name **cannot** be `main.py`)
 ```python
 import sys
 sys.path.append('PATH_TO_FOLDER_HERE')  # noqa
@@ -36,6 +36,8 @@ main.main()
 ```
 And replace `PATH_TO_FOLDER_HERE` with pure window path to `main.py`'s parent directory you downloaded.
 For example, if my `main.py`'s path is `D:/Users/User/Documents/GitHub/JMC`
+
+`run.py`
 ```python
 import sys
 sys.path.append('D:/Users/User/Documents/GitHub/JMC')  # noqa
