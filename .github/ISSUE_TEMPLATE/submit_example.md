@@ -11,7 +11,7 @@ assignees: ''
 By: [how would you like me to credit you]
 Link: [link to your github, planetminecraft, discord, etc. (can only choose one)
 
-[description]
+[detailed description]
 
 **Example:**
 ```javascript
