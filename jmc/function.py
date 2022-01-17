@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from . import Logger, PackGlobal
 from .command import Command
-from .utils import clean_whitespace, BracketRegex
+from .utils import BracketRegex, parse_split
 from .if_else import capture_if_else
 from ._while import capture_while_loop
 from ._for import capture_for_loop
@@ -26,7 +26,7 @@ class Function:
         self.context = [
             Command(command.strip(), pack_global)
             for command
-            in context.split(';')
+            in parse_split(context, ';')
             if command  # Remove empty string command
         ]
         nl = '\n'
