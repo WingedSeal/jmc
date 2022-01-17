@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Tuple
+from typing import List, Tuple
 import regex
 
 from . import Logger, PackGlobal
@@ -136,7 +136,28 @@ class BracketRegex:
         start_group += self.match_bracket_count * 3
         self.match_bracket_count += 1
         self.remove_list += [start_group, start_group+2, start_group+3]
-        return f'(\\{bracket[0]}((?:(?:(["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
+        return f'(\\{bracket[0]}((?:(?:(\\\\?["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
+
+
+def parse_split_comma(string: str) -> List[str]:
+    bracket_regex = BracketRegex()
+    qoute_regex = r"(\\?[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
+    parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|(,)'
+    result = []
+    i = 0
+    for match in regex.finditer(parse_regex, string):
+        match: re.Match
+        comma = bracket_regex.compile(match.groups())[5]
+        if comma is not None:
+            position = match.start()
+            content = string[i:position]
+            if content != '':
+                result.append(content.strip())
+            i = position+1
+    content = string[i:]
+    if content != '':
+        result.append(content.strip())
+    return result
 
 
 class Re:
