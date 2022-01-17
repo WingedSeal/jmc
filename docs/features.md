@@ -58,7 +58,7 @@ function tellraw_message() {
 - Initialize a variable (Set to 0, if doesn't exist)
 
 ```javascript
-let $<variable>;
+int $<variable>;
 ```
 
 Output: 
