@@ -55,7 +55,7 @@ def main():
     else:
         config = {
             'namespace': 'namespace',
-            'description': 'Compile by JMC by WingedSeal',
+            'description': 'Compiled by JMC(Made by WingedSeal)',
             'pack_format': 7,
             'target_file': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
             'output': Path(argv[0]).parent.resolve().as_posix(),
@@ -65,6 +65,7 @@ def main():
         with config_file.open('w') as file:
             json.dump(config, file, indent=2)
         print(f"Generated {FILE_NAME}")
+        print(f"For documentation, https://wingedseal.github.io/docs.jmc/")
         print(f"Edit the configuration and run again.")
         system("pause")
 

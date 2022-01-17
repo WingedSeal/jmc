@@ -139,16 +139,16 @@ class BracketRegex:
         return f'(\\{bracket[0]}((?:(?:(\\\\?["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
 
 
-def parse_split_comma(string: str) -> List[str]:
+def parse_split(string: str, split_item: str = ',') -> List[str]:
     bracket_regex = BracketRegex()
     qoute_regex = r"(\\?[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
-    parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|(,)'
+    parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|({split_item})'
     result = []
     i = 0
     for match in regex.finditer(parse_regex, string):
         match: re.Match
-        comma = bracket_regex.compile(match.groups())[5]
-        if comma is not None:
+        item = bracket_regex.compile(match.groups())[5]
+        if item is not None:
             position = match.start()
             content = string[i:position]
             if content != '':

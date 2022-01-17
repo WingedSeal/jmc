@@ -2,7 +2,7 @@ import re
 import regex
 from . import Logger, PackGlobal
 import logging
-from .utils import BracketRegex, Re
+from .utils import BracketRegex, Re, parse_split
 
 logger = Logger(__name__)
 
@@ -26,10 +26,10 @@ class Command:
         def to_string(match: re.Match) -> str:
             groups = bracket_regex.compile(match.groups())
             var = groups[0]
-            arguments = groups[1].replace(' ', '').split(',')
+            arguments = parse_split(groups[1])
             raw_json = ""
             for argument in arguments:
-                key, value = argument.split('=')
+                key, value = parse_split(argument, '=')
                 raw_json += f',"{key}":{value}'
             return f'{{"score":{{"name":"{var}","objective":"__variable__"}}{raw_json}}}'
 
