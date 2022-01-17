@@ -17,7 +17,7 @@ def clean_whitespace(string: str) -> str:
 def clean_comments(string: str) -> str:
     """Delete everything that starts with # or // until the end of the line"""
     logger.info("Cleaning comments")
-    return re.sub(r"#.*|\/\/.*", "", string)
+    return re.sub(r"((# ).*)|((\/\/).*)", "", string)
 
 
 def condition(string: str) -> str:
