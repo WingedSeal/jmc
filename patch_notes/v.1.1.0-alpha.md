@@ -1,4 +1,4 @@
-# Changelog v1.1.0
+# Changelog v1.1.0-alpha
 
 ### Add
 - Add logic gate processing for condition (`!`, `&&`, `||`, `()`)
