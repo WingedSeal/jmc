@@ -14,9 +14,9 @@ logger = Logger(__name__)
 class Command:
     def __init__(self, command: str, datapack: "DataPack") -> None:
         self.datapack = datapack
-        self.command = command
         logger.debug(f"Command - Input: {command}")
-
+        self.command = " ".join(split(command, ' '))
+        logger.debug(f"Command - Delete whitespaces: {command}")
         self.function_call()
         self.built_in_functions()
         self.custom_syntax()
