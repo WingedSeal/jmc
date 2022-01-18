@@ -202,9 +202,17 @@ class DataPack:
                 json.dump(dictionary, file, indent=2)
 
         for name, function in self.functions.items():
-            path = function_path / \
-                f'{name.replace(".","/").lower()}.mcfunction'
+            path = function_path/f'{name.replace(".","/").lower()}.mcfunction'
             path.parent.mkdir(exist_ok=True, parents=True)
             with path.open(mode='w+') as file:
                 file.write("\n".join([str(command)
                            for command in function.commands]))
+
+        for func_type, functions in self.private_functions.items():
+            for func_name, func in functions.items():
+                path = function_path / \
+                    f'__private__/{func_type}/{func_name.replace(".","/").lower()}.mcfunction'
+                path.parent.mkdir(exist_ok=True, parents=True)
+                with path.open(mode='w+') as file:
+                    file.write("\n".join([str(command)
+                                          for command in func.commands]))
