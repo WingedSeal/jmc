@@ -5,7 +5,7 @@
 - Allowed nesting `class` and `function` (You still can't define function inside function)
 
 ### Changed
-- `@import` now import at the line it's called instead of the top of the fine
+- `@import` now import at the line it's called instead of the top of the file
 - `@import` will only works in the highest level (Outside function, class, etc.)
 - Change configuration file name to `jmc_config.json`
 
