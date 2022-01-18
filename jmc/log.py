@@ -36,4 +36,4 @@ def Logger(name: str) -> logging.Logger:
 
 
 logger = Logger(__name__)
-logger.info('Version: v1.0.3')
+logger.info('Version: v1.1.0-alpha')
