@@ -1,19 +1,22 @@
-from pathlib import Path
-from sys import argv
-import json
-import traceback
 from os import system
+import traceback
+import json
+from sys import argv
+from pathlib import Path
+from config import set_configs
 
-FILE_NAME = 'jmc.config'
+
+FILE_NAME = 'jmc_config.json'
 
 
 def main():
     config_file = Path(argv[0]).parent/FILE_NAME
     if config_file.exists():
-
         try:
             with config_file.open('r') as file:
                 config = json.load(file)
+                set_configs(config)
+
         except json.JSONDecodeError:
             print(
                 f"JSONDecodeError, Your {FILE_NAME} might have invalid or malformed JSON.")
@@ -28,17 +31,22 @@ def main():
             return
 
         try:
-            from compile import compile
+            from jmc import DataPack
+
+            def compile() -> None:
+                datapack = DataPack()
+                datapack.init()
+                datapack.compile()
             if config['keep_compiling']:
                 while True:
-                    compile(config)
+                    compile()
                     print(
-                        f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
+                        f"\nSuccessfully compiled {config['target']} to {config['output']}")
                     system("pause")
             else:
-                compile(config)
+                compile()
                 print(
-                    f"\nSuccessfully compiled {config['target_file']} to {config['output']}")
+                    f"\nSuccessfully compiled {config['target']} to {config['output']}")
                 system("pause")
         except FileNotFoundError as e:
             traceback.print_exc()
@@ -57,7 +65,7 @@ def main():
             'namespace': 'namespace',
             'description': 'Compiled by JMC(Made by WingedSeal)',
             'pack_format': 7,
-            'target_file': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
+            'target': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
             'output': Path(argv[0]).parent.resolve().as_posix(),
             'keep_compiling': False,
             'debug_mode': False

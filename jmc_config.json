@@ -1,0 +1,9 @@
+{
+  "namespace": "namespace",
+  "description": "Compiled by JMC(Made by WingedSeal)",
+  "pack_format": 7,
+  "target": "D:/Users/User/Documents/GitHub/JMC/main.jmc",
+  "output": "D:/Users/User/Documents/GitHub/JMC",
+  "keep_compiling": false,
+  "debug_mode": false
+}

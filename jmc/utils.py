@@ -1,147 +1,34 @@
-import logging
-import re
-from typing import List, Tuple
 import regex
+import re
+from typing import Tuple, List
 
-from . import Logger, PackGlobal
+from . import Logger
 
 logger = Logger(__name__)
 
 
-def clean_whitespace(string: str) -> str:
-    """Replace whitespaces with space and return it"""
-    logger.info("Cleaning whitespace")
-    return re.sub(r"\s+", " ", string + ' ')
-
-
-def clean_comments(string: str) -> str:
-    """Delete everything that starts with # or // until the end of the line"""
-    logger.info("Cleaning comments")
-    return re.sub(r"((# ).*)|((\/\/).*)", "", string)
-
-
-def condition(string: str) -> str:
-    """Turn variable conditions into `if score`"""
-    def equal_int(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ matches {groups[1]}'
-    string, success = re.subn(
-        f'^{Re.var} ?(?:==|=) ?{Re.integer}$', equal_int, string)
-    if success:
-        return string
-
-    def equal_range(match: re.Match) -> str:
-        groups = match.groups()
-        start = groups[1] if groups[1] is not None else ''
-        end = groups[2] if groups[2] is not None else ''
-        return f'score {groups[0]} __variable__ matches {start}..{end}'
-    string, success = re.subn(
-        f'^{Re.var} ?(?:==|=) ?{Re.match_range}$', equal_range, string)
-    if success:
-        return string
-
-    def more_than_int(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ matches {int(groups[1])+1}..'
-    string, success = re.subn(
-        f'^{Re.var} ?> ?{Re.integer}$', more_than_int, string)
-    if success:
-        return string
-
-    def less_than_int(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ matches ..{int(groups[1])-1}'
-    string, success = re.subn(
-        f'^{Re.var} ?< ?{Re.integer}$', less_than_int, string)
-    if success:
-        return string
-
-    def more_than_eq_int(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ matches {groups[1]}..'
-    string, success = re.subn(
-        f'^{Re.var} ?>= ?{Re.integer}$', more_than_eq_int, string)
-    if success:
-        return string
-
-    def less_than_eq_int(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ matches ..{groups[1]}'
-    string, success = re.subn(
-        f'^{Re.var} ?<= ?{Re.integer}$', less_than_eq_int, string)
-    if success:
-        return string
-
-    def operation_var(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ {groups[1]} {groups[2]} __variable__'
-    string, success = re.subn(
-        f'^{Re.var} ?(<|<=|=|>=|>) ?{Re.var}$', operation_var, string)
-    if success:
-        return string
-
-    def equal_var(match: re.Match) -> str:
-        groups = match.groups()
-        return f'score {groups[0]} __variable__ = {groups[1]} __variable__'
-    string, success = re.subn(
-        f'^{Re.var} ?== ?{Re.var}$', equal_var, string)
-    if success:
-        return string
-
-    return string
-
-
 class BracketRegex:
-    """Store groups data and process it for later use 
-    Throw away unused groups of match_bracket with method 'compile'
-    """
     match_bracket_count = 0
 
     def __init__(self) -> None:
         self.remove_list = []
 
     def compile(self, strings: Tuple[str]) -> Tuple[str]:
-        """Process tuple from groups()
-        Example:
-        ```
-        groups = bracket_regex.compile(regex.search(pattern, string).groups())
-        ```
-        Args:
-            strings (Tuple[str]): re.Match.groups()
-
-        Returns:
-            Tuple[str]: Delete all unused string in tuple
-        """
         strings = list(strings)
-        logger.debug(f'BracketRegex - strings - {strings}')
-        logger.debug(f'BracketRegex - indexes - {self.remove_list}')
         for index in sorted(self.remove_list, reverse=True):
             del strings[index-1]
         return tuple(strings)
 
     def match_bracket(self, bracket: str, start_group: int) -> str:
-        """Generate regex for matching bracket, need to be used with BracketRegex
-        Example:
-        ```
-        pattern = '(group1)' + bracket_regex.match_bracket('()', 2) + '(group3)' + bracket_regex.match_bracket('{}', 4)
-        ```
-
-        Args:
-            bracket (str): A string with length of 2, containing openning and closing of that bracket type. For example `{}`
-            start_group (int): A group(start at 1) which match_bracket should be. (Assuming 1 match_bracket use up 1 group)
-
-        Returns:
-            str: Regex pattern for matching brackets
-        """
         start_group += self.match_bracket_count * 3
         self.match_bracket_count += 1
         self.remove_list += [start_group, start_group+2, start_group+3]
-        return f'(\\{bracket[0]}((?:(?:(\\\\?["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
+        return f'(\\{bracket[0]}((?:(?:(\\\\*["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
 
 
-def parse_split(string: str, split_item: str = ',') -> List[str]:
+def split(string: str, split_item: str = ',') -> List[str]:
     bracket_regex = BracketRegex()
-    qoute_regex = r"(\\?[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
+    qoute_regex = r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
     parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|({split_item})'
     result = []
     i = 0
@@ -153,11 +40,28 @@ def parse_split(string: str, split_item: str = ',') -> List[str]:
             content = string[i:position]
             if content != '':
                 result.append(content.strip())
-            i = position+1
+            i = match.end()
     content = string[i:]
     if content != '':
         result.append(content.strip())
     return result
+
+
+def syntax_swap(string: str, swap_1: str, swap_2: str) -> str:
+    """Swap swap_1 with swap_2 in string"""
+    bracket_regex = BracketRegex()
+    qoute_regex = r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
+    parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|({swap_1}|{swap_2})'
+
+    def swap(match: re.Match):
+        match: re.Match
+        item = bracket_regex.compile(match.groups())[5]
+        if item == swap_1:
+            return swap_2
+        elif item == swap_2:
+            return swap_1
+
+    return regex.sub(parse_regex, swap, string)
 
 
 class Re:
@@ -167,5 +71,7 @@ class Re:
     var_nosigncap = r'\$([a-zA-Z0-9._]+)'
     operator_noequal = r'([+\-*\/%]=)'
     operator_equal = r'([+\-*\/%]?=)'
-    function_call = r'([\w\.]+)\(\)'
+    function_call = r'(run |^)([\w\.]+)\(\)'
     condition_operator = r'(<|<=|=|>=|>)'
+    start_cmd = r'(run |^)'
+    start_var = r'((?:run |^)\$[a-zA-Z0-9._]+)'

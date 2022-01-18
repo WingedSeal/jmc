@@ -1,49 +1,39 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 from sys import argv
-import json
 
-config_file = Path(argv[0]).parent/'jmc.config'
-with config_file.open('r') as file:
-    debug_mode = json.load(file)['debug_mode']
+from .config import configs
 
 FORMATTER = logging.Formatter(
     '%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
-__now = datetime.now()
-FILE_PATH = Path(
-    argv[0]).parent/f'logs/{__now.strftime("%Y-%b")}/{__now.day}{__now.strftime("-%m-%Y")}.log'
+FILE_PATH = Path(argv[0]).parent/'jmc.log'
 
-if FILE_PATH.exists():
+DEBUG_MODE = configs["debug_mode"]
+
+if DEBUG_MODE and FILE_PATH.exists():
     FILE_PATH.unlink()
 
 
-def Logger(name: str, level: int = logging.INFO, file_path: str = None, is_stream: bool = True, is_log_file: bool = False) -> logging.Logger:
-    if debug_mode:
-        level = logging.DEBUG
-        is_log_file = True
-
+def Logger(name: str) -> logging.Logger:
+    """```python
+    logger = Logger(__name__)
+    ```"""
     logger = logging.getLogger(name)
-    logger.setLevel(level)
+    logger.setLevel(logging.DEBUG if DEBUG_MODE else logging.INFO)
 
-    if is_log_file:
-        if file_path is None:
-            file_path = FILE_PATH
-        else:
-            file_path = Path(file_path)
-        file_path: Path
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(file_path.resolve())
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(FORMATTER)
+    logger.addHandler(stream_handler)
+
+    if DEBUG_MODE:
+        FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(FILE_PATH.resolve())
         file_handler.setFormatter(FORMATTER)
         logger.addHandler(file_handler)
-    if is_stream:
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(FORMATTER)
-        logger.addHandler(stream_handler)
 
     return logger
 
 
 logger = Logger(__name__)
-logger.debug('VERSION: v1.0.0-beta.1')
+logger.info('Version: v1.0.3')

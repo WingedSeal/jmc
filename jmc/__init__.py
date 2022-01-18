@@ -1,13 +1,3 @@
-# To prevent circular import, Logger, LoadJson needs to be imported first.
 from .log import Logger
-from .pack_global import PackGlobal
-
-from . import _class
-from . import _while
-from . import _for
-from . import command
-from . import function
-from . import if_else
-from . import imports
-from . import module
+from .datapack import DataPack
 from . import utils
