@@ -1,0 +1,106 @@
+<Root>
+
+    GridLayout:
+        size: root.size
+        padding: 0.03*root.width, 0.03*root.height
+        spacing: 0.01*root.height
+        cols: 1
+        Label:
+            text: "JMC Compiler"
+            size: 1, 0.3
+        GridLayout:
+            spacing: 0, 0.01*root.height
+            cols: 3
+            Label:
+                size_hint:  0.2, 0.1
+                text: "Target .jmc file:"
+            Label:
+                id: target
+                align: "left"
+                text: root.configs['target']
+                size_hint:  0.6, 0.1
+            TargetButton:
+                size_hint:  0.2, 0.1
+                text: "Choose file"
+                on_press:
+                    root.configs['target'] = path if (
+                    path:=self.get_target_path()) != "" else root.configs['target']
+
+                    target.text = root.configs['target']
+            Label:
+                size_hint:  0.2, 0.1
+                text: "Output folder:"
+            Label:
+                id: output
+                align: "left"
+                text: root.configs['output']
+                size_hint:  0.6, 0.1
+            OutputButton:
+                size_hint:  0.2, 0.1
+                text: "Choose folder"
+                on_press:
+                    root.configs['output'] = path if (
+                    path:=self.get_output_path()) != "" else root.configs['output']
+
+                    output.text = root.configs['output']
+        GridLayout:
+            cols: 2
+            Label:
+                size_hint:  0.3, 0.1
+                text: "Namespace"
+            TextInput:
+                size_hint:  0.7, 0.1
+                multiline: False
+                on_text: root.configs['namespace'] = self.text
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+                padding_x: 10
+                text: root.configs['namespace']
+
+            Label:
+                size_hint:  0.3, 0.1
+                text: "Description"
+            TextInput:
+                size_hint:  0.7, 0.1
+                multiline: False
+                on_text: root.configs['description'] = self.text
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+                padding_x: 10
+                text: root.configs['description']
+
+        GridLayout:
+            cols: 3
+            Label:
+                size_hint:  0.2, 0.1
+                text: "Pack format"
+            Label:
+                id: pack_format
+                size_hint:  0.2, 0.1
+                text: str(root.configs['pack_format'])
+            Slider:
+                min: 1
+                max: 9
+                step: 1
+                size_hint:  0.6, 0.1
+                orientation: 'horizontal'
+                on_parent: self.value = root.configs['pack_format']
+                on_touch_move:
+                    root.configs['pack_format'] = self.value
+                    pack_format.text = str(root.configs['pack_format'])
+
+        GridLayout:
+            cols: 2
+            Label:
+                size_hint:  0.3, 0.1
+                text: "Debug Mode"
+            ToggleButton:
+                size_hint:  0.2, 0.1
+                state: "down" if root.configs['debug_mode'] else "normal"
+                text: "On" if root.configs['debug_mode'] else "Off"
+                on_state:
+                    root.configs['debug_mode'] = self.state == "down"
+                    self.text = "On" if self.state == "down" else "Off"
+
+        Button:
+            size: 1, 0.2
+            text: "Compile"
+            on_press: root.compile()

@@ -1,82 +1,146 @@
-from os import system
+import tkinter as tk
 import traceback
 import json
-from sys import argv
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.core.window import Window
+from kivy.uix.widget import Widget
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from tkinter import filedialog
+from kivy.base import Builder
+from typing import Tuple
 from pathlib import Path
+from kivy.app import App
+from sys import argv
+
 from config import set_configs
 
 
-FILE_NAME = 'jmc_config.json'
+Builder.load_file('main.kv')
+CONFIG_FILE_NAME = 'jmc_config.json'
+CONFIG_FILE = Path(argv[0]).parent/CONFIG_FILE_NAME
+DEFAULT_CONFIG = {
+    'namespace': 'default_namespace',
+    'description': 'Compiled by JMC(Made by WingedSeal)',
+    'pack_format': 7,
+    'target': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
+    'output': Path(argv[0]).parent.resolve().as_posix(),
+    'debug_mode': False
+}
+
+
+class TargetButton(Button):
+    @staticmethod
+    def get_target_path():
+        root = tk.Tk()
+        root.withdraw()
+        return(filedialog.askopenfilename(filetypes=[("JMC", "*.jmc")]))
+
+
+class OutputButton(Button):
+    @staticmethod
+    def get_output_path():
+        root = tk.Tk()
+        root.withdraw()
+        return(filedialog.askdirectory())
+
+
+class Root(Widget):
+    def __init__(self, configs, **kwargs) -> None:
+        self.configs = configs
+        super().__init__(**kwargs)
+
+    def popup(self, title: str, text: str) -> None:
+        label = Label(text=text)
+        label.texture_update()
+        grid = GridLayout(cols=1, size_hint=(0.9, None),
+                          height=label.texture_size[1]+40)
+        grid.add_widget(label)
+        scrollview = ScrollView()
+        scrollview.add_widget(grid)
+        end = Label(text='', size=(0, 0), size_hint=(0, 0))
+        grid.add_widget(end)
+        popup = Popup(title=title,
+                      content=scrollview,
+                      size_hint=(1, 0.8))
+        scrollview.scroll_to(end)
+        popup.open()
+
+    def compile(self) -> None:
+        try:
+            set_configs(self.configs)
+            from jmc import DataPack
+            datapack = DataPack()
+            datapack.init()
+            datapack.compile()
+            self.popup(
+                "Success", f"\nSuccessfully compiled {self.configs['target']} to {self.configs['output']}")
+        except FileNotFoundError as error:
+            if self.configs['debug_mode']:
+                self.popup(
+                    f"Fail (Debug Mode)", f"{traceback.format_exc()}\nFileNotFoundError"
+                )
+            else:
+                self.popup(
+                    "Fail", f"File Missing\n{error}"
+                )
+        except BaseException as error:
+            self.popup(
+                f"Fail", f"{traceback.format_exc()}\nUnknown Error"
+            )
+
+
+class JMC(App):
+    def __init__(self, configs, start_popup: Tuple[str, str] = None, **kwargs):
+        self.configs = configs
+        self.start_popup = start_popup
+        super().__init__(**kwargs)
+
+    def build(self):
+        Window.bind(on_request_close=self.on_request_close)
+        self.root = Root(self.configs)
+        return self.root
+
+    def on_start(self, **kwargs):
+        if self.start_popup is not None:
+            self.root.popup(
+                text=self.start_popup[1], title=self.start_popup[0])
+
+    def on_request_close(self, *args, **kwargs):
+        with CONFIG_FILE.open('w+') as file:
+            json.dump(self.root.configs, file, indent=2)
 
 
 def main():
-    config_file = Path(argv[0]).parent/FILE_NAME
-    if config_file.exists():
+    popup_text = None
+    if CONFIG_FILE.exists():
         try:
-            with config_file.open('r') as file:
-                config = json.load(file)
-                set_configs(config)
+            with CONFIG_FILE.open('r') as file:
+                configs = DEFAULT_CONFIG | json.load(file)
 
         except json.JSONDecodeError:
-            print(
-                f"JSONDecodeError, Your {FILE_NAME} might have invalid or malformed JSON.")
-            print("To reset the config, simply delete the file and run again.")
-            system("pause")
-            return
-
-        except BaseException as e:
-            traceback.print_exc()
-            print(f'\nEncounter unknown error when *parsing* {FILE_NAME}')
-            system("pause")
-            return
-
-        try:
-            from jmc import DataPack
-
-            def compile() -> None:
-                datapack = DataPack()
-                datapack.init()
-                datapack.compile()
-            if config['keep_compiling']:
-                while True:
-                    compile()
-                    print(
-                        f"\nSuccessfully compiled {config['target']} to {config['output']}")
-                    system("pause")
-            else:
-                compile()
-                print(
-                    f"\nSuccessfully compiled {config['target']} to {config['output']}")
-                system("pause")
-        except FileNotFoundError as e:
-            traceback.print_exc()
-            print(f'\nFile Missing')
-            print(e)
-            system("pause")
-            return
+            popup_text = (
+                f"JSONDecodeError", f"Your {CONFIG_FILE_NAME} might have malformed JSON. \nAutomatically resetting the configs...")
+            configs = DEFAULT_CONFIG
         except BaseException:
-            traceback.print_exc()
-            print(f'\nEncounter unknown error when *compiling*')
-            system("pause")
-            return
-
+            popup_text = (
+                f"Unknown Error", f"{traceback.format_exc()}\nResorting to default configurations."
+            )
+            configs = DEFAULT_CONFIG
     else:
-        config = {
-            'namespace': 'namespace',
-            'description': 'Compiled by JMC(Made by WingedSeal)',
-            'pack_format': 7,
-            'target': (Path(argv[0]).parent/'main.jmc').resolve().as_posix(),
-            'output': Path(argv[0]).parent.resolve().as_posix(),
-            'keep_compiling': False,
-            'debug_mode': False
-        }
-        with config_file.open('w') as file:
-            json.dump(config, file, indent=2)
-        print(f"Generated {FILE_NAME}")
-        print(f"For documentation, https://wingedseal.github.io/docs.jmc/")
-        print(f"Edit the configuration and run again.")
-        system("pause")
+        popup_text = (f"Configuration File Not Found",
+                      f"{CONFIG_FILE_NAME} is not found.\nGenerating default configurations...\nFor documentation, https://wingedseal.github.io/docs.jmc/")
+        configs = DEFAULT_CONFIG
+    set_configs(configs)
+    JMC(configs, popup_text).run()
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except BaseException as Exception:
+        with (Path(argv[0]).parent/'jmc_error.log').open('w+') as file:
+            file.write(
+                f"Exception occured before GUI is able to open.\n\n{traceback.format_exc()}")
