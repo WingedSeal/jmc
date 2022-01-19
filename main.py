@@ -12,6 +12,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from tkinter import filedialog
 from kivy.base import Builder
+from kivy.clock import Clock
 from typing import Tuple
 from pathlib import Path
 from kivy.app import App
@@ -68,6 +69,7 @@ class Root(Widget):
                       size_hint=(1, 0.8))
         scrollview.scroll_to(end)
         popup.open()
+        Clock.schedule_once(popup.dismiss, 3)
 
     def compile(self) -> None:
         try:
