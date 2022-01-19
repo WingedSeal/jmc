@@ -98,6 +98,9 @@ class Root(Widget):
 
 
 class JMC(App):
+    title = "JMC Compiler"
+    icon = (Path(__file__).parent/'WingedSeal.ico')
+
     def __init__(self, configs, start_popup: Tuple[str, str] = None, **kwargs):
         self.configs = configs
         self.start_popup = start_popup
