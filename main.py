@@ -1,3 +1,5 @@
+import os
+os.environ["KIVY_NO_CONSOLELOG"] = "1"  # noqa
 import tkinter as tk
 import traceback
 import json
@@ -17,8 +19,7 @@ from sys import argv
 
 from config import set_configs
 
-
-Builder.load_file('main.kv')
+Builder.load_file((Path(__file__).parent/'main.kv').as_posix())
 CONFIG_FILE_NAME = 'jmc_config.json'
 CONFIG_FILE = Path(argv[0]).parent/CONFIG_FILE_NAME
 DEFAULT_CONFIG = {
