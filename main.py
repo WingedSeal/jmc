@@ -77,7 +77,7 @@ class Root(Widget):
             datapack.init()
             datapack.compile()
             self.popup(
-                "Success", f"\nSuccessfully compiled {self.configs['target']} to {self.configs['output']}")
+                "Success", f"\nSuccessfully compiled\n{self.configs['target']}\nto\n{self.configs['output']}")
         except FileNotFoundError as error:
             if self.configs['debug_mode']:
                 self.popup(
