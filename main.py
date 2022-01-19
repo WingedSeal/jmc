@@ -1,5 +1,6 @@
 import os
 os.environ["KIVY_NO_CONSOLELOG"] = "1"  # noqa
+os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'  # noqa
 import tkinter as tk
 import traceback
 import json
