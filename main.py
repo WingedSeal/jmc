@@ -1,5 +1,5 @@
 import os
-os.environ["KIVY_NO_CONSOLELOG"] = "1"  # noqa
+# os.environ["KIVY_NO_CONSOLELOG"] = "1"  # noqa
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'  # noqa
 import tkinter as tk
 import traceback
@@ -99,7 +99,7 @@ class Root(Widget):
 
 class JMC(App):
     title = "JMC Compiler"
-    icon = (Path(__file__).parent/'WingedSeal.ico')
+    icon = (Path(__file__).parent/'WingedSeal.ico').as_posix()
 
     def __init__(self, configs, start_popup: Tuple[str, str] = None, **kwargs):
         self.configs = configs
