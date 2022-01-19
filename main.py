@@ -143,7 +143,6 @@ def main():
         configs = DEFAULT_CONFIG
     set_configs(configs)
     JMC(configs, popup_text).run()
-    exit()
 
 
 if __name__ == '__main__':
@@ -153,3 +152,4 @@ if __name__ == '__main__':
         with (Path(argv[0]).parent/'jmc_error.log').open('w+') as file:
             file.write(
                 f"Exception occured before GUI is able to open.\n\n{traceback.format_exc()}")
+    exit()
