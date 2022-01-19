@@ -15,7 +15,15 @@ class Command:
     def __init__(self, command: str, datapack: "DataPack") -> None:
         self.datapack = datapack
         logger.debug(f"Command - Input: {command}")
-        self.command = " ".join(split(command, ' '))
+        if command.startswith('say'):
+            self.command = command
+
+        else:
+            say_command = split(command, 'say')
+            self.command = " ".join(split(say_command[0], ' '))
+            if len(say_command) > 1:
+                self.command += f' say {say_command[1]}'
+
         logger.debug(f"Command - Delete whitespaces: {command}")
         self.function_call()
         self.built_in_functions()
@@ -76,7 +84,6 @@ class Command:
 
         def operator_var(match: re.Match) -> str:
             groups = match.groups()
-            self.datapack.ints.add(int(groups[2]))
             return f'scoreboard players operation {groups[0]} __variable__ {groups[1]} {groups[2]} __variable__'
         self.command = re.sub(f'{Re.start_var}\s*{Re.operator_equal}\s*{Re.var}',
                               operator_var, self.command)
