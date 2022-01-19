@@ -17,7 +17,7 @@ from kivy.clock import Clock
 from typing import Tuple
 from pathlib import Path
 from kivy.app import App
-from sys import argv
+from sys import argv, exit
 
 from config import set_configs
 
@@ -55,7 +55,7 @@ class Root(Widget):
         self.configs = configs
         super().__init__(**kwargs)
 
-    def popup(self, title: str, text: str) -> None:
+    def popup(self, title: str, text: str, close: bool = False) -> None:
         label = Label(text=text)
         label.texture_update()
         grid = GridLayout(cols=1, size_hint=(0.9, None),
@@ -70,7 +70,8 @@ class Root(Widget):
                       size_hint=(1, 0.8))
         scrollview.scroll_to(end)
         popup.open()
-        Clock.schedule_once(popup.dismiss, 3)
+        if close:
+            Clock.schedule_once(popup.dismiss, 3)
 
     def compile(self) -> None:
         try:
@@ -80,7 +81,7 @@ class Root(Widget):
             datapack.init()
             datapack.compile()
             self.popup(
-                "Success", f"\nSuccessfully compiled\n{self.configs['target']}\nto\n{self.configs['output']}")
+                "Success", f"\nSuccessfully compiled\n{self.configs['target']}\nto\n{self.configs['output']}", close=True)
         except FileNotFoundError as error:
             if self.configs['debug_mode']:
                 self.popup(
@@ -139,6 +140,7 @@ def main():
         configs = DEFAULT_CONFIG
     set_configs(configs)
     JMC(configs, popup_text).run()
+    exit()
 
 
 if __name__ == '__main__':
