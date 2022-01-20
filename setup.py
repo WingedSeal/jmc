@@ -11,7 +11,6 @@ usage_msg = "Usage: python setup.py (-nogui) <directory>"
 
 def main():
     nogui = False
-    print(sys.argv)
     if len(sys.argv) == 1:
         print(usage_msg)
         return
