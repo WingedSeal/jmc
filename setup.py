@@ -25,9 +25,9 @@ def main():
     run_path = " ".join(sys.argv[1:])
     if not venv_path.exists():
         try:
-            subprocess.call(['python', '-m', 'pip', 'install', 'virtualenv'])
+            subprocess.call(['pip', 'install', 'virtualenv'])
         except FileNotFoundError:
-            subprocess.call(['python3', '-m', 'pip', 'install', 'virtualenv'])
+            subprocess.call(['pip3', 'install', 'virtualenv'])
         subprocess.call(['virtualenv', venv_path])
         if activate_window.exists():
             exec(activate_window.open().read(), dict(__file__=activate_window))
@@ -35,7 +35,10 @@ def main():
         else:
             exec(activate_linux.open().read(), dict(__file__=activate_linux))
             activate = activate_linux
-        subprocess.call(['pip', 'install', '-r', requirements])
+        try:
+            subprocess.call(['pip', 'install', '-r', requirements])
+        except:
+            subprocess.call(['pip3', 'install', '-r', requirements])
     else:
         if activate_window.exists():
             activate = activate_window
