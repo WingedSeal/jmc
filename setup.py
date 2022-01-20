@@ -24,7 +24,10 @@ def main():
 
     run_path = " ".join(sys.argv[1:])
     if not venv_path.exists():
-        subprocess.call(['python', '-m', 'pip', 'install', 'virtualenv'])
+        try:
+            subprocess.call(['python', '-m', 'pip', 'install', 'virtualenv'])
+        except FileNotFoundError:
+            subprocess.call(['python3', '-m', 'pip', 'install', 'virtualenv'])
         subprocess.call(['virtualenv', venv_path])
         if activate_window.exists():
             exec(activate_window.open().read(), dict(__file__=activate_window))
