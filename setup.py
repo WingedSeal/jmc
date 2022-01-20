@@ -37,7 +37,7 @@ def main():
             activate = activate_linux
         try:
             subprocess.call(['pip', 'install', '-r', requirements])
-        except:
+        except FileNotFoundError:
             subprocess.call(['pip3', 'install', '-r', requirements])
     else:
         if activate_window.exists():
