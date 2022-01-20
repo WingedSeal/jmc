@@ -34,6 +34,7 @@ def main():
             activate = activate_window
         else:
             exec(activate_linux.open().read(), dict(__file__=activate_linux))
+            nogui = False
             activate = activate_linux
         try:
             subprocess.call(['pip', 'install', '-r', requirements])
