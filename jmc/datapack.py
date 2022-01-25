@@ -61,7 +61,7 @@ class DataPack:
                 content = file.read()
             return content
         
-        string = regex.sub(r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1|(@import ([\'\"])(.*?)\4)", regex_import, string)
+        string = regex.sub(r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1|(@import ([\'\"])(.*?)\4;)", regex_import, string)
 
         if import_success:
             string = self.handle_import_coment(string)
