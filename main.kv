@@ -25,7 +25,7 @@
                 on_press:
                     root.configs['target'] = path if (
                     path:=self.get_target_path()) != "" else root.configs['target']
-
+                    root.set_configs(root.configs)
                     target.text = root.configs['target']
             Label:
                 size_hint:  0.2, 0.1
@@ -41,7 +41,7 @@
                 on_press:
                     root.configs['output'] = path if (
                     path:=self.get_output_path()) != "" else root.configs['output']
-
+                    root.set_configs(root.configs)
                     output.text = root.configs['output']
         GridLayout:
             cols: 2
@@ -51,7 +51,9 @@
             TextInput:
                 size_hint:  0.7, 0.1
                 multiline: False
-                on_text: root.configs['namespace'] = self.text
+                on_text: 
+                    root.configs['namespace'] = self.text
+                    root.set_configs(root.configs)
                 padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
                 padding_x: 10
                 text: root.configs['namespace']
@@ -62,7 +64,9 @@
             TextInput:
                 size_hint:  0.7, 0.1
                 multiline: False
-                on_text: root.configs['description'] = self.text
+                on_text: 
+                    root.configs['description'] = self.text
+                    root.set_configs(root.configs)
                 padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
                 padding_x: 10
                 text: root.configs['description']
@@ -85,6 +89,7 @@
                 on_parent: self.value = root.configs['pack_format']
                 on_touch_move:
                     root.configs['pack_format'] = self.value
+                    root.set_configs(root.configs)
                     pack_format.text = str(root.configs['pack_format'])
 
         GridLayout:
@@ -98,6 +103,7 @@
                 text: "On" if root.configs['debug_mode'] else "Off"
                 on_state:
                     root.configs['debug_mode'] = self.state == "down"
+                    root.set_configs(root.configs)
                     self.text = "On" if self.state == "down" else "Off"
 
         Button:

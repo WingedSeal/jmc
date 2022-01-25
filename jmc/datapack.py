@@ -1,4 +1,5 @@
 from collections import defaultdict
+from shutil import rmtree
 from pathlib import Path
 import regex
 import json
@@ -31,45 +32,49 @@ class DataPack:
         self.__private_function_count: dict[str, int] = defaultdict(int)
         self.news: dict[str, dict[str, dict]] = defaultdict(dict)
 
+    def handle_import_coment(self, string: str) -> str:
+        import_success = False
+
+        logger.info("Deleting comments")
+        def regex_comment(match: re.Match):
+            groups = match.groups()
+            if groups[2] is None:
+                return match.group(0)
+            return ""
+        string = regex.sub(r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1|(# .*|\/\/.*)", regex_comment, string)
+        logger.info("Replacing Newlines")
+        string = re.sub(r"\n", " ", string)
+
+        logger.info("Replacing imports")
+        def regex_import(match: re.Match) -> str:
+            groups = match.groups()
+            if groups[2] is None:
+                return match.group(0)
+
+            nonlocal import_success 
+            import_success = True
+            path: str = match.groups()[4]
+            if not path.endswith(".jmc"):
+                path += '.jmc'
+            logger.info(f'Import found - {path}')
+            with (self.jmc_path.parent/path).open('r') as file:
+                content = file.read()
+            return content
+        
+        string = regex.sub(r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1|(@import ([\'\"])(.*?)\4)", regex_import, string)
+
+        if import_success:
+            string = self.handle_import_coment(string)
+
+        return string
+
+
     def init(self) -> None:
         logger.info("Reading files")
         with self.jmc_path.open('r') as jmc_file:
             string = jmc_file.read()
 
-        logger.info("Deleting comments")
-        string = re.sub(r"# .*|\/\/.*", "", string)
-
-        logger.info("Deleting Newlines")
-        string = re.sub(r"\n", " ", string)
-
-        lines = split(string, ';')
-
-        def import_found(match: re.Match):
-            path: str = match.groups()[0]
-            if not path.endswith(".jmc"):
-                path += '.jmc'
-            logger.info(f'Import found - {path}')
-
-            with (self.jmc_path.parent/path).open('r') as file:
-                content = file.read()
-
-            return content
-
-        for i, line in enumerate(lines):
-            if line == '':
-                continue
-            content, success = regex.subn(
-                r"^@import [\'\"](.*?)[\'\"]", import_found, line, count=1)
-            if success:
-                lines[i] = content
-
-        string = ";".join(lines)
-
-        logger.info("Deleting comments")
-        string = re.sub(r"# .*|\/\/.*", "", string)
-
-        logger.info("Replacing Newlines")
-        string = re.sub(r"\n", " ", string)
+        string = self.handle_import_coment(string)
 
         lines = split(string, ';')
 
@@ -146,7 +151,13 @@ class DataPack:
         Private Functions{private_functions_string}
         """
 
+    def clean_up(self) -> None:
+        namespace_path = self.datapack_path/'data'/self.namespace
+        if namespace_path.exists():
+            rmtree(namespace_path.as_posix())
+
     def compile(self) -> None:
+        self.clean_up()
         logger.info("Compiling, Exporting to files")
         self.datapack_path.mkdir(exist_ok=True)
         with (self.datapack_path/'pack.mcmeta').open(mode='w+') as file:

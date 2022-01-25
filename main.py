@@ -52,6 +52,7 @@ class OutputButton(Button):
 
 class Root(Widget):
     def __init__(self, configs, **kwargs) -> None:
+        self.set_configs = set_configs
         self.configs = configs
         super().__init__(**kwargs)
 
