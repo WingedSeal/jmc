@@ -1,6 +1,6 @@
 import regex
 import re
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from ..utils import BracketRegex
 from .. import Logger
@@ -15,7 +15,7 @@ bracket_regex = BracketRegex()
 FUNCTION_REGEX = r'^function\s*([\w\._]+)\(\)\s*' + bracket_regex.match_bracket('{}', 2)  # noqa
 
 
-def process_function(self: "DataPack", line: str, prefix: str = ''):
+def capture_function(self: "DataPack", line: str, prefix: str = ''):
     logger.debug("Searching for Function")
     line = line.strip()
     logger.debug(line)
@@ -27,20 +27,20 @@ def process_function(self: "DataPack", line: str, prefix: str = ''):
         self.functions[f'{prefix}{func_name}'.lower().replace(
             '.', '/')] = Function(commands)
         return ""
-    line, success = regex.subn(FUNCTION_REGEX, function_found, line)
+    line, success = regex.subn(FUNCTION_REGEX, function_found, line, count=1)
 
     if success:
         logger.debug(f"Recursing process_function()")
-        line = self.process_function(line, prefix)
+        line = self.capture_function(line, prefix)
     else:
         logger.debug("No Function found")
 
-    line = self.process_class(line, prefix)
+    line = self.capture_class(line, prefix)
     return line
 
 
 class Function:
-    def __init__(self, commands: List["Command"]) -> None:
+    def __init__(self, commands: list["Command"]) -> None:
         self.commands = commands
         pass
 

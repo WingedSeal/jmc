@@ -1,6 +1,6 @@
 import regex
 import re
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from ..utils import BracketRegex, split, Re
 from .condition import Condition
@@ -16,7 +16,7 @@ bracket_regex = BracketRegex()
 FOR_REGEX = f"for\s*{bracket_regex.match_bracket('()', 1)}\s*{bracket_regex.match_bracket('{}', 2)}"
 
 
-def process_for(self: "DataPack", line: str) -> Tuple[str, bool]:
+def capture_for(self: "DataPack", line: str) -> tuple[str, bool]:
     line = line.strip()
 
     def for_found(match: re.Match):
@@ -28,7 +28,7 @@ def process_for(self: "DataPack", line: str) -> Tuple[str, bool]:
     return line, success
 
 
-def handle_for(datapack: "DataPack", groups: Tuple[str]) -> str:
+def handle_for(datapack: "DataPack", groups: tuple[str]) -> str:
     statements = split(groups[0], ';')
     print(statements[0])
     statements[0] = regex.match(

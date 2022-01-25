@@ -1,11 +1,10 @@
-from typing import Dict, List, Set, TYPE_CHECKING
 from collections import defaultdict
 from pathlib import Path
 import regex
 import json
 import re
 
-from .flow_control.function_ import Function, process_function
+from .flow_control import Function
 from .command import Command
 from .config import configs
 from .utils import split
@@ -16,11 +15,7 @@ logger = Logger(__name__)
 
 
 class DataPack:
-    from .flow_control.function_ import process_function
-    from .flow_control.class_ import process_class
-    from .flow_control.if_else import process_if_else
-    from .flow_control.for_ import process_for
-    from .flow_control.while_ import process_while
+    from .flow_control import capture_new, capture_function, capture_if_else, capture_class, capture_for, capture_while
 
     def __init__(self) -> None:
         self.namespace: str = configs['namespace']
@@ -29,12 +24,12 @@ class DataPack:
         self.jmc_path = Path(configs['target'])
         self.datapack_path = Path(configs['output'])
 
-        self.scoreboards: Set[str] = {'__int__', '__variable__'}
-        self.ints: Set[int] = set()
-        self.functions: Dict[str, Function] = dict()
-        self.private_functions: Dict[str,
-                                     Dict[str, Function]] = defaultdict(dict)
-        self.__private_function_count: Dict[str, int] = defaultdict(int)
+        self.scoreboards: set[str] = {'__int__', '__variable__'}
+        self.ints: set[int] = set()
+        self.functions: dict[str, Function] = dict()
+        self.private_functions: dict[str,dict[str, Function]] = defaultdict(dict) #noqa
+        self.__private_function_count: dict[str, int] = defaultdict(int)
+        self.news: dict[str, dict[str, dict]] = defaultdict(dict)
 
     def init(self) -> None:
         logger.info("Reading files")
@@ -81,8 +76,9 @@ class DataPack:
         load_content = ''
 
         for line in lines:
-            line = self.process_class(line)
-            line = self.process_function(line)
+            line = self.capture_class(line)
+            line = self.capture_new(line)
+            line = self.capture_function(line)
             load_content += f'{line};'
 
         commands = self.process_function_content(load_content)
@@ -90,7 +86,7 @@ class DataPack:
 
         logger.info(repr(self))
 
-    def process_function_content(self, content: str) -> List[Command]:
+    def process_function_content(self, content: str) -> list[Command]:
         logger.debug(f"Proccessing Function's content\n{content.strip()}")
         lines = split(content, ';')
         commands = []
@@ -100,30 +96,30 @@ class DataPack:
                 commands += command
         return commands
 
-    def process_flow_control(self, line: str):
+    def capture_flow_control(self, line: str):
         logger.debug("Proccessing Flow Controls")
         if line == '':
             return ''
         logger.debug(line)
 
-        line, success = self.process_if_else(line)
+        line, success = self.capture_if_else(line)
         if success:
-            return self.process_flow_control(line)
+            return self.capture_flow_control(line)
 
-        line, success = self.process_for(line)
+        line, success = self.capture_for(line)
         if success:
-            return self.process_flow_control(line)
+            return self.capture_flow_control(line)
 
-        line, success = self.process_while(line)
+        line, success = self.capture_while(line)
         if success:
-            return self.process_flow_control(line)
+            return self.capture_flow_control(line)
 
         return line
 
     def process_line(self, line: str) -> Command:
         logger.debug(f"Proccessing Line\n{line.strip()}")
         commands = []
-        line = self.process_flow_control(line)
+        line = self.capture_flow_control(line)
         lines = split(line, ';')
         for line in lines:
             if line != '':
@@ -160,8 +156,7 @@ class DataPack:
                       "description": self.description
                       }
             }, file, indent=2)
-        minecraft_function_path = self.datapack_path / \
-            'data'/'minecraft'/'tags'/'functions'
+        minecraft_function_path = self.datapack_path/'data'/'minecraft'/'tags'/'functions' # noqa
         namespace_path = self.datapack_path/'data'/self.namespace
         function_path = namespace_path/'functions'
 
@@ -201,18 +196,27 @@ class DataPack:
                 dictionary["values"].append(f"{self.namespace}:__tick__")
                 json.dump(dictionary, file, indent=2)
 
+        # Create functions
         for name, function in self.functions.items():
-            path = function_path/f'{name.replace(".","/").lower()}.mcfunction'
+            path = function_path/f'{name}.mcfunction'
             path.parent.mkdir(exist_ok=True, parents=True)
             with path.open(mode='w+') as file:
                 file.write("\n".join([str(command)
                            for command in function.commands]))
 
+        # Create private functions
         for func_type, functions in self.private_functions.items():
             for func_name, func in functions.items():
-                path = function_path / \
-                    f'__private__/{func_type}/{func_name.replace(".","/").lower()}.mcfunction'
+                path = function_path/'__private__'/func_type/f'{func_name}.mcfunction' #noqa
                 path.parent.mkdir(exist_ok=True, parents=True)
                 with path.open(mode='w+') as file:
                     file.write("\n".join([str(command)
                                           for command in func.commands]))
+
+        # Create news
+        for new_type, contents in self.news.items():
+            for new_name, content in contents.items():
+                path = namespace_path/new_type/f'{new_name}.json'
+                path.parent.mkdir(exist_ok=True, parents=True)
+                with path.open(mode='w+') as file:
+                    json.dump(content, file, indent=2)

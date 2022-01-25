@@ -1,1 +1,1 @@
-from config import configs
+from config import configs, JMCSyntaxError 

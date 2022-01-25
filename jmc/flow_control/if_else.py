@@ -1,6 +1,6 @@
 import regex
 import re
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from ..utils import BracketRegex, split
 from .condition import Condition
@@ -16,7 +16,7 @@ bracket_regex = BracketRegex()
 IFELSE_REGEX = f"if\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}((?:\\s*else\\s+if\\s*{bracket_regex.match_bracket('()', 4)}\\s*{bracket_regex.match_bracket('{}', 5)})*)(?:\\s*else\\s*{bracket_regex.match_bracket('{}', 6)})?"
 
 
-def process_if_else(self: "DataPack", line: str) -> Tuple[str, bool]:
+def capture_if_else(self: "DataPack", line: str) -> tuple[str, bool]:
 
     line = line.strip()
 
@@ -29,7 +29,7 @@ def process_if_else(self: "DataPack", line: str) -> Tuple[str, bool]:
     return line, success
 
 
-def handle_if_else(datapack: "DataPack", groups: Tuple[str]) -> str:
+def handle_if_else(datapack: "DataPack", groups: tuple[str]) -> str:
     logger.debug("Handling If/Else")
     condition = Condition(groups[0])
     if groups[-1] is None and groups[2] == '':  # No `else`, No `else if`

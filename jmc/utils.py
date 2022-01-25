@@ -1,6 +1,5 @@
 import regex
 import re
-from typing import Tuple, List
 
 from . import Logger
 
@@ -13,11 +12,11 @@ class BracketRegex:
     def __init__(self) -> None:
         self.remove_list = []
 
-    def compile(self, strings: Tuple[str]) -> Tuple[str]:
+    def compile(self, strings: tuple[str]) -> list[str]:
         strings = list(strings)
         for index in sorted(self.remove_list, reverse=True):
             del strings[index-1]
-        return tuple(strings)
+        return strings
 
     def match_bracket(self, bracket: str, start_group: int) -> str:
         start_group += self.match_bracket_count * 3
@@ -26,7 +25,7 @@ class BracketRegex:
         return f'(\\{bracket[0]}((?:(?:(\\\\*["\'])(?:(?=(\\\\?))\\{start_group+3}.)*?\\{start_group+2}|[^{bracket[1]}{bracket[0]}])+|(?{start_group}))*+)\\{bracket[1]})'
 
 
-def split(string: str, split_item: str = ',') -> List[str]:
+def split(string: str, split_item: str = ',') -> list[str]:
     bracket_regex = BracketRegex()
     qoute_regex = r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
     parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|({split_item})'

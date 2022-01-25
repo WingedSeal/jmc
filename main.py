@@ -19,7 +19,7 @@ from pathlib import Path
 from kivy.app import App
 from sys import argv, exit
 
-from config import set_configs
+from config import set_configs, JMCSyntaxError
 
 Builder.load_file((Path(__file__).parent/'main.kv').as_posix())
 CONFIG_FILE_NAME = 'jmc_config.json'
@@ -91,6 +91,11 @@ class Root(Widget):
                 self.popup(
                     "Fail", f"File Missing\n{error}"
                 )
+        except JMCSyntaxError as error:
+            self.popup(
+                f"Fail (JMCSyntaxError)", error.text
+            )
+        
         except BaseException as error:
             self.popup(
                 f"Fail", f"{traceback.format_exc()}\nUnknown Error"

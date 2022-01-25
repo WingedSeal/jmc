@@ -1,6 +1,6 @@
 import regex
 import re
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from ..utils import BracketRegex
 from .condition import Condition
@@ -16,7 +16,7 @@ bracket_regex = BracketRegex()
 WHILE_REGEX = f"while\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}"
 
 
-def process_while(self: "DataPack", line: str) -> Tuple[str, bool]:
+def capture_while(self: "DataPack", line: str) -> tuple[str, bool]:
     line = line.strip()
 
     def while_found(match: re.Match):
@@ -29,7 +29,7 @@ def process_while(self: "DataPack", line: str) -> Tuple[str, bool]:
     return line, success
 
 
-def handle_while(datapack: "DataPack", groups: Tuple[str]) -> str:
+def handle_while(datapack: "DataPack", groups: tuple[str]) -> str:
     logger.debug("Handling While Loop")
     condition = Condition(groups[0])
     count = datapack.get_pfc("while_loop")

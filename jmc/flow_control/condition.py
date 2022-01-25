@@ -1,6 +1,5 @@
 import regex
 import re
-from typing import TYPE_CHECKING, List
 
 from ..utils import split, BracketRegex, Re, syntax_swap
 from ..log import Logger
@@ -11,9 +10,9 @@ PARENTHESIS_REGEX = f"^{BracketRegex().match_bracket('()', 1)}$"
 
 
 class Condition:
-    def __init__(self, string: str, precommands: List[str] = None) -> None:
+    def __init__(self, string: str, precommands: list[str] = None) -> None:
         if precommands is None:
-            self._precommands: List[str] = []
+            self._precommands: list[str] = []
         else:
             self._precommands = precommands
 
