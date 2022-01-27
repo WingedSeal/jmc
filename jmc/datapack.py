@@ -32,6 +32,10 @@ class DataPack:
         self.__private_function_count: dict[str, int] = defaultdict(int)
         self.news: dict[str, dict[str, dict]] = defaultdict(dict)
 
+        self.loads: list[str] = []
+        self.ticks: list[str] = []
+        self.booleans: dict[str, bool] = defaultdict(bool) 
+
     def handle_import_coment(self, string: str) -> str:
         import_success = False
 
@@ -179,6 +183,7 @@ class DataPack:
         __load__ = "\n".join(
             [f'scoreboard objectives add {obj} dummy' for obj in self.scoreboards] +
             [f'scoreboard players set {integer} __int__ {integer}' for integer in self.ints] +
+            self.loads +
             [''] +
             [str(command) for command in self.functions["__load__"].commands]
         )
@@ -196,16 +201,24 @@ class DataPack:
         del self.functions["__load__"]
 
         # Handle __tick__
-        if '__tick__' in self.functions:
-            with (minecraft_function_path/'tick.json').open(mode='w+') as file:
-                string = file.read()
-                if string == "":
-                    dictionary = {"values": []}
-                else:
-                    dictionary: dict = json.loads(string)
-                dictionary["replace"] = False
-                dictionary["values"].append(f"{self.namespace}:__tick__")
-                json.dump(dictionary, file, indent=2)
+        
+        __tick__ = "\n".join(
+            (self.ticks + [''] if self.ticks else []) +
+            ([str(command) for command in self.functions["__tick__"].commands] if "__tick__" in self.functions else [])
+        )
+        with (minecraft_function_path/'tick.json').open(mode='w+') as file:
+            string = file.read()
+            if string == "":
+                dictionary = {"values": []}
+            else:
+                dictionary: dict = json.loads(string)
+            dictionary["replace"] = False
+            dictionary["values"].append(f"{self.namespace}:__tick__")
+            json.dump(dictionary, file, indent=2)
+        with (function_path/'__tick__.mcfunction').open(mode='w+') as file:
+            file.write(__tick__)
+        if "__tick__" in self.functions:
+            del self.functions["__tick__"]
 
         # Create functions
         for name, function in self.functions.items():
