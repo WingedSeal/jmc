@@ -15,7 +15,7 @@ logger = Logger(__name__)
 bracket_regex = BracketRegex()
 NEW_REGEX = r'^new\s*([\w\._]+)\s*'+ bracket_regex.match_bracket('()', 2) + r'\s*' + bracket_regex.match_bracket('{}', 3)  # noqa
 
-def capture_new(self: "DataPack", line: str, prefix: str = ''):
+def capture_new(self: "DataPack", line: str, prefix: str):
     logger.debug("Searching for New")
     line = line.strip()
     logger.debug(line)
@@ -34,8 +34,8 @@ def capture_new(self: "DataPack", line: str, prefix: str = ''):
     line, success = regex.subn(NEW_REGEX, new_found, line, count=1)
 
     if success:
-        logger.debug(f"Recursing capture_new()")
-        line = self.capture_new(line, prefix)
+        logger.debug(f"Recursing capture()")
+        line = self.capture(line, prefix)
     else:
         logger.debug("No Function found")
 

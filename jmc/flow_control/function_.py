@@ -15,7 +15,7 @@ bracket_regex = BracketRegex()
 FUNCTION_REGEX = r'^function\s*([\w\._]+)\(\)\s*' + bracket_regex.match_bracket('{}', 2)  # noqa
 
 
-def capture_function(self: "DataPack", line: str, prefix: str = ''):
+def capture_function(self: "DataPack", line: str, prefix: str):
     logger.debug("Searching for Function")
     line = line.strip()
     logger.debug(line)
@@ -30,12 +30,11 @@ def capture_function(self: "DataPack", line: str, prefix: str = ''):
     line, success = regex.subn(FUNCTION_REGEX, function_found, line, count=1)
 
     if success:
-        logger.debug(f"Recursing process_function()")
-        line = self.capture_function(line, prefix)
+        logger.debug(f"Recursing capture()")
+        line = self.capture(line, prefix)
     else:
         logger.debug("No Function found")
 
-    line = self.capture_class(line, prefix)
     return line
 
 

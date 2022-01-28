@@ -15,7 +15,7 @@ bracket_regex = BracketRegex()
 class_REGEX = r'^class\s*([\w\._]+)\s*' + bracket_regex.match_bracket('{}', 2)  # noqa
 
 
-def capture_class(self: "DataPack", line: str, prefix=''):
+def capture_class(self: "DataPack", line: str, prefix: str):
     logger.debug(f"Searching for class (prefix = {prefix})")
 
     line = line.strip()
@@ -30,11 +30,11 @@ def capture_class(self: "DataPack", line: str, prefix=''):
         remaining_line = self.capture_new(
             class_content, prefix=f'{prefix}{class_name}.')
         return remaining_line
-    line, success = regex.subn(class_REGEX, class_found, line)
+    line, success = regex.subn(class_REGEX, class_found, line, count=1)
 
     if success:
-        logger.debug(f"Recursing process_class()")
-        line = self.capture_class(line, prefix)
+        logger.debug(f"Recursing capture()")
+        line = self.capture(line, prefix)
 
     else:
         logger.debug(f"No Class found")

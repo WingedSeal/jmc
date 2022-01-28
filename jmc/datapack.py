@@ -73,6 +73,12 @@ class DataPack:
         return string
 
 
+    def capture(self, line: str, prefix = '') -> str:
+        line = self.capture_class(line, prefix)
+        line = self.capture_new(line, prefix)
+        line = self.capture_function(line, prefix)
+        return line
+
     def init(self) -> None:
         logger.info("Reading files")
         with self.jmc_path.open('r') as jmc_file:
@@ -85,9 +91,7 @@ class DataPack:
         load_content = ''
 
         for line in lines:
-            line = self.capture_class(line)
-            line = self.capture_new(line)
-            line = self.capture_function(line)
+            line = self.capture(line)
             load_content += f'{line};'
 
         commands = self.process_function_content(load_content)
