@@ -60,7 +60,7 @@ class Re:
     var_nosigncap = r'\$([a-zA-Z0-9._]+)'
     operator_noequal = r'([+\-*\/%]=)'
     operator_equal = r'([+\-*\/%]?=)'
-    function_call = r'(run |^)([\w\.]+)\(\)'
+    function_call = r'(run |schedule |^)([\w\.]+)\(\)'
     condition_operator = r'(<|<=|=|>=|>)'
     start_cmd = r'(run |^)'
     start_var = r'((?:run |^)\$[a-zA-Z0-9._]+)'
