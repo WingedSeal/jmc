@@ -42,7 +42,6 @@ class Condition:
 
         not_condition = re.match(r'!\s*(.+)', string)
         if not_condition is not None:
-            print(not_condition.groups())
             not_condition = not_condition.groups()[0]
             new_condition = Condition(not_condition)
             self._precommands += new_condition._precommands

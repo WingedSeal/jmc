@@ -30,7 +30,6 @@ def capture_for(self: "DataPack", line: str) -> tuple[str, bool]:
 
 def handle_for(datapack: "DataPack", groups: tuple[str]) -> str:
     statements = split(groups[0], ';')
-    print(statements[0])
     statements[0] = regex.match(
         f'let\s*{Re.var_nosigncap}\s*=\s*{Re.integer}', statements[0]).groups()
 

@@ -47,10 +47,14 @@ def split(string: str, split_item: str = ',') -> list[str]:
 
 
 def syntax_swap(string: str, swap_1: str, swap_2: str) -> str:
-    string = string.replace(swap_1, '\U0000E005')
-    string = string.replace(swap_2, swap_1)
-
-    return string.replace('\U0000E005', swap_2)
+    arguments = split(string, r'\s+')
+    for i, argument in enumerate(arguments):
+        if argument == swap_1:
+            arguments[i] = swap_2
+        elif argument == swap_2:
+            arguments[i] = swap_1
+    
+    return ' '+' '.join(arguments)
 
 
 class Re:
