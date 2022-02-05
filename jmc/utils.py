@@ -47,25 +47,15 @@ def split(string: str, split_item: str = ',') -> list[str]:
 
 
 def syntax_swap(string: str, swap_1: str, swap_2: str) -> str:
-    """Swap swap_1 with swap_2 in string"""
-    bracket_regex = BracketRegex()
-    qoute_regex = r"(\\*[\"'])((?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\1"
-    parse_regex = f'{qoute_regex}|{bracket_regex.match_bracket("{}", 3)}|{bracket_regex.match_bracket("()", 4)}|{bracket_regex.match_bracket("[]", 5)}|({swap_1}|{swap_2})'
+    string = string.replace(swap_1, '\U0000E005')
+    string = string.replace(swap_2, swap_1)
 
-    def swap(match: re.Match):
-        match: re.Match
-        item = bracket_regex.compile(match.groups())[5]
-        if item == swap_1:
-            return swap_2
-        elif item == swap_2:
-            return swap_1
-
-    return regex.sub(parse_regex, swap, string)
+    return string.replace('\U0000E005', swap_2)
 
 
 class Re:
     integer = r'([-+]?[0-9]+)'
-    match_range = r'([-+]?[0-9]+)?..([-+]?[0-9]+)?'
+    match_range = r'([-+]?[0-9]+)?\.\.([-+]?[0-9]+)?'
     var = r'(\$[a-zA-Z0-9._]+)'
     var_nosigncap = r'\$([a-zA-Z0-9._]+)'
     operator_noequal = r'([+\-*\/%]=)'
