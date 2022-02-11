@@ -1,3 +1,4 @@
+from tokenize import group
 import regex
 import re
 from typing import TYPE_CHECKING
@@ -140,6 +141,15 @@ class Command:
             return f'{groups[0]}scoreboard players add {groups[1]} __variable__ 0'
         self.command = re.sub(
             f'{Re.start_cmd}let\s*{Re.var}', var_declare, self.command)
+
+        def anonymous_function(match: re.Match, bracket_regex: BracketRegex) -> str:
+            content = bracket_regex.compile(match.groups())[0]
+            count = self.datapack.get_pfc("anonymous_function")
+            self.datapack.private_functions["anonymous_function"][count] = Function(self.datapack.process_function_content(content))
+            return f'run function {self.datapack.namespace}:__private__/anonymous_function/{count}'
+        
+        bracket_regex = BracketRegex()
+        self.command = regex.sub(f'run {bracket_regex.match_bracket("{}", 1)}', lambda match: anonymous_function(match, bracket_regex), self.command)
 
     def __str__(self) -> str:
         return self.command

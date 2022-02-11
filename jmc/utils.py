@@ -68,3 +68,5 @@ class Re:
     condition_operator = r'(<|<=|=|>=|>)'
     start_cmd = r'(run |^)'
     start_var = r'((?:run |^)\$[a-zA-Z0-9._]+)'
+
+        
