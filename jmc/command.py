@@ -83,6 +83,7 @@ class Command:
         self.command = regex.sub(
             f'RightClick.setup{bracket_regex.match_bracket("()", 1)}', lambda match: rightclick_setup(match, bracket_regex), self.command)
 
+
     def function_call(self) -> str:
         def call(match: re.Match) -> str:
             groups = match.groups()
@@ -92,13 +93,13 @@ class Command:
     def custom_syntax(self) -> None:
         def increment(match: re.Match) -> str:
             groups = match.groups()
-            return f'{groups[0]}+=1'
+            return f'scoreboard players add {groups[0]} __variable__ 1'
         self.command = re.sub(
             f'{Re.start_var}\+\+', increment, self.command)
 
         def decrement(match: re.Match) -> str:
             groups = match.groups()
-            return f'{groups[0]}-=1'
+            return f'scoreboard players remove {groups[0]} __variable__ 1'
         self.command = re.sub(
             f'{Re.start_var}--', decrement, self.command)
 
@@ -108,11 +109,24 @@ class Command:
         self.command = re.sub(
             f'{Re.start_var}\s*=\s*{Re.integer}', equal_int, self.command)
 
+        def add_int(match: re.Match) -> str:
+            groups = match.groups()
+            return f'scoreboard players add {groups[0]} __variable__ {groups[1]}'
+        print(f'{Re.start_var}\s*+=\s*{Re.integer}')
+        self.command = re.sub(f'{Re.start_var}\s*\+=\s*{Re.integer}',
+                              add_int, self.command)
+        
+        def remove_int(match: re.Match) -> str:
+            groups = match.groups()
+            return f'scoreboard players remove {groups[0]} __variable__ {groups[1]}'
+        self.command = re.sub(f'{Re.start_var}\s*\-=\s*{Re.integer}',
+                              remove_int, self.command)
+
         def operator_int(match: re.Match) -> str:
             groups = match.groups()
             self.datapack.ints.add(int(groups[2]))
             return f'scoreboard players operation {groups[0]} __variable__ {groups[1]} {groups[2]} __int__'
-        self.command = re.sub(f'{Re.start_var}\s*{Re.operator_noequal}\s*{Re.integer}',
+        self.command = re.sub(f'{Re.start_var}\s*{Re.operator_int}\s*{Re.integer}',
                               operator_int, self.command)
 
         def operator_var(match: re.Match) -> str:

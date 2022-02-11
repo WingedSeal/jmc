@@ -62,7 +62,7 @@ class Re:
     match_range = r'([-+]?[0-9]+)?\.\.([-+]?[0-9]+)?'
     var = r'(\$[a-zA-Z0-9._]+)'
     var_nosigncap = r'\$([a-zA-Z0-9._]+)'
-    operator_noequal = r'([+\-*\/%]=)'
+    operator_int = r'([*\/%]=)'
     operator_equal = r'([+\-*\/%]?=)'
     function_call = r'(run |schedule |^)([\w\.]+)\(\)'
     condition_operator = r'(<|<=|=|>=|>)'
