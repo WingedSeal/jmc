@@ -1,10 +1,10 @@
-from tokenize import group
 import regex
 import re
 from typing import TYPE_CHECKING
 
 from .utils import BracketRegex, Re, split
 from .flow_control.function_ import Function
+from .flow_control.condition import Condition
 from . import Logger
 
 if TYPE_CHECKING:
@@ -33,6 +33,7 @@ class Command:
 
         logger.debug(f"Command - Delete whitespaces: {command}")
         self.function_call()
+        self.do_while_loop()
         self.built_in_functions()
         self.custom_syntax()
 
@@ -91,6 +92,20 @@ class Command:
             return f'{groups[0]}function {self.datapack.namespace}:{groups[1].replace(".", "/").lower()}'
         self.command = re.sub(Re.function_call, call, self.command)
 
+    def do_while_loop(self) -> str:
+        def loop(match: re.Match, bracket_regex: BracketRegex) -> str:
+            groups = bracket_regex.compile(match.groups())
+            condition = Condition(groups[1])
+            count = self.datapack.get_pfc("do_while_loop")
+            self.datapack.private_functions["do_while_loop"][count] = Function(self.datapack.process_function_content(
+                f"{groups[0]} {condition.pre_commands}execute{condition} run function {self.datapack.namespace}:__private__/do_while_loop/{count};"
+            ))
+            return f'function {self.datapack.namespace}:__private__/do_while_loop/{count}'
+        
+        bracket_regex = BracketRegex()
+        do_while_regex = f"do\\s*{bracket_regex.match_bracket('{}', 1)}\\s*while\\s*{bracket_regex.match_bracket('()', 2)}"
+        self.command = regex.sub(do_while_regex, lambda match: loop(match, bracket_regex), self.command)
+
     def custom_syntax(self) -> None:
         def increment(match: re.Match) -> str:
             groups = match.groups()
@@ -113,7 +128,6 @@ class Command:
         def add_int(match: re.Match) -> str:
             groups = match.groups()
             return f'scoreboard players add {groups[0]} __variable__ {groups[1]}'
-        print(f'{Re.start_var}\s*+=\s*{Re.integer}')
         self.command = re.sub(f'{Re.start_var}\s*\+=\s*{Re.integer}',
                               add_int, self.command)
         
