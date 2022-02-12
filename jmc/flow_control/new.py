@@ -7,6 +7,7 @@ from ..config import JMCSyntaxError
 from ..utils import BracketRegex
 from .. import Logger
 
+
 if TYPE_CHECKING:
     from ..datapack import DataPack
 

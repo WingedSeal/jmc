@@ -26,7 +26,7 @@ def built_in_functions(self: "Command") -> None:
             raw_json += f',"{key}":{value}'
         return f'{{"score":{{"name":"{var}","objective":"__variable__"}}{raw_json}}}'
     self.command = regex.sub(
-        f'{Re.var}.toString{bracket_regex.match_bracket("()", 2)}', lambda match: to_string(match, bracket_regex), self.command)
+        f'{Re.var}\\.toString{bracket_regex.match_bracket("()", 2)}', lambda match: to_string(match, bracket_regex), self.command)
     
 
     bracket_regex = BracketRegex()
@@ -54,7 +54,46 @@ def built_in_functions(self: "Command") -> None:
         )
         return ""
     self.command = regex.sub(
-        f'RightClick.setup{bracket_regex.match_bracket("()", 1)}', lambda match: rightclick_setup(match, bracket_regex), self.command)
+        f'RightClick\\.setup{bracket_regex.match_bracket("()", 1)}', lambda match: rightclick_setup(match, bracket_regex), self.command)
+
+
+    bracket_regex = BracketRegex()
+    def player_first_join(match: re.Match, bracket_regex: BracketRegex) -> str:
+        content = bracket_regex.compile(match.groups())[0]
+        count = self.datapack.get_pfc("player_first_join")
+        self.datapack.news["advancements"][f"__private__/player_first_join/{count}"] = {
+            "criteria": {
+                "requirement": {
+                "trigger": "minecraft:tick"
+                }
+            },
+            "rewards": {
+                "function": f"{self.datapack.namespace}:__private__/player_first_join/{count}"
+            }
+        }
+        self.datapack.private_functions["player_first_join"][count] = Function(self.datapack.process_function_content(content))
+        return ""
+        
+    self.command = regex.sub(
+        f'Player\\.firstJoin\\(\\(\\)=>{bracket_regex.match_bracket("{}", 1)}\\)', lambda match: player_first_join(match, bracket_regex), self.command
+    )
+        
+    bracket_regex = BracketRegex()
+    def player_rejoin(match: re.Match, bracket_regex: BracketRegex) -> str:
+        content = bracket_regex.compile(match.groups())[0]
+        if not self.datapack.booleans["player_rejoin"]:
+            self.datapack.booleans["player_rejoin"] = True
+            self.datapack.loads.append('scoreboard objectives add __rejoin__ minecraft.custom:minecraft.leave_game')
+            self.datapack.ticks.append(f'execute as @a[scores={{__rejoin__=1..}}] at @s run function {self.datapack.namespace}:__private__/player_rejoin/main')
+            self.datapack.private_functions["player_rejoin"]["main"] = Function(self.datapack.process_function_content("scoreboard players reset @s __rejoin__;"))
+        count = self.datapack.get_pfc("player_rejoin")
+        self.datapack.private_functions["player_rejoin"][count] = Function(self.datapack.process_function_content(content))
+        self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
+        return ""
+
+    self.command = regex.sub(
+        f'Player\\.rejoin\\(\\(\\)=>{bracket_regex.match_bracket("{}", 1)}\\)', lambda match: player_rejoin(match, bracket_regex), self.command
+    )
 
     def math_sqrt(match: re.Match) -> str:
         groups = match.groups()
@@ -83,4 +122,4 @@ def built_in_functions(self: "Command") -> None:
 function {self.datapack.namespace}:__private__/math/sqrt
 scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable__"""
     self.command = regex.sub(
-        f'{Re.var}\\s*=\\s*Math.sqrt\\({Re.var}\\)', math_sqrt, self.command)
+        f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', math_sqrt, self.command)
