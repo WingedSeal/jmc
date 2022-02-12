@@ -42,7 +42,7 @@ def handle_for(datapack: "DataPack", groups: tuple[str]) -> str:
 
     count = datapack.get_pfc("for_loop")
 
-    datapack.private_functions["while_loop"][count] = Function(datapack.process_function_content(
-        f"{content} {statement}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};"))
+    datapack.private_functions["for_loop"][count] = Function(datapack.process_function_content(
+        f"{content}; {statement}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};"))
 
     return f'scoreboard players set $__private__.{statements[0][0]} __variable__ {statements[0][1]}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};'
