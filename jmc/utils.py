@@ -1,4 +1,6 @@
+import operator as op
 import regex
+import ast
 import re
 
 from . import Logger
@@ -69,4 +71,20 @@ class Re:
     start_cmd = r'(run |^)'
     start_var = r'((?:run |^)\$[a-zA-Z0-9._]+)'
 
-        
+# supported operators
+OPERATORS = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+             ast.Div: op.truediv, ast.Pow: op.pow,
+             ast.USub: op.neg}
+
+def eval_expr(expr) -> str:
+    return str(__eval(ast.parse(expr, mode='eval').body))
+
+def __eval(node):
+    if isinstance(node, ast.Num): # <number>
+        return node.n
+    elif isinstance(node, ast.BinOp): # <left> <operator> <right>
+        return OPERATORS[type(node.op)](__eval(node.left), __eval(node.right))
+    elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
+        return OPERATORS[type(node.op)](__eval(node.operand))
+    else:
+        raise TypeError(node)

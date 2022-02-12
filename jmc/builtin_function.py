@@ -2,8 +2,9 @@ import regex
 import re
 from typing import TYPE_CHECKING
 
-from .utils import BracketRegex, Re, split
+from .utils import BracketRegex, Re, split, eval_expr
 from .flow_control.function_ import Function
+from ast import literal_eval
 from . import Logger
 
 if TYPE_CHECKING:
@@ -43,7 +44,7 @@ def built_in_functions(self: "Command") -> None:
         funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
         for func in funcs:
             bracket_regex = BracketRegex()
-            match: re.Match = regex.match(r'(\d+)\s*:\s*\(\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
+            match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
             id_, content = bracket_regex.compile(match.groups())
             count = self.datapack.get_pfc("rc_detection")
             self.datapack.private_functions["rc_detection"][count] = Function(self.datapack.process_function_content(content))
@@ -75,7 +76,7 @@ def built_in_functions(self: "Command") -> None:
         return ""
         
     self.command = regex.sub(
-        f'Player\\.firstJoin\\(\\(\\)=>{bracket_regex.match_bracket("{}", 1)}\\)', lambda match: player_first_join(match, bracket_regex), self.command
+        r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', lambda match: player_first_join(match, bracket_regex), self.command
     )
         
     bracket_regex = BracketRegex()
@@ -92,7 +93,7 @@ def built_in_functions(self: "Command") -> None:
         return ""
 
     self.command = regex.sub(
-        f'Player\\.rejoin\\(\\(\\)=>{bracket_regex.match_bracket("{}", 1)}\\)', lambda match: player_rejoin(match, bracket_regex), self.command
+        r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', lambda match: player_rejoin(match, bracket_regex), self.command
     )
 
     def math_sqrt(match: re.Match) -> str:
@@ -123,3 +124,26 @@ function {self.datapack.namespace}:__private__/math/sqrt
 scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable__"""
     self.command = regex.sub(
         f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', math_sqrt, self.command)
+
+
+    bracket_regex = BracketRegex()
+    def hard_code_repeat(match: re.Match, bracket_regex: BracketRegex) -> str:
+        index_str, func, start, stop, step = split(bracket_regex.compile(match.groups())[0])
+        func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+        commands: list[Command] = []
+        calc_bracket_regex = BracketRegex()
+        calc_regex = f'Hardcode.calc{calc_bracket_regex.match_bracket("()",1)}'
+
+        def hard_code_calc(match: re.Match) -> str:
+            formula = calc_bracket_regex.compile(match.groups())[0]
+            print(formula)
+            return eval_expr(formula)
+
+        for i in range(*[int(arg.split('=')[1]) for arg in (start, stop, step)]):
+            content = func_content.replace(str(literal_eval(index_str)), str(i))
+            content = regex.sub(calc_regex, hard_code_calc, content)
+            commands.extend(self.datapack.process_function_content(content))
+        return "\n".join([command.command for command in commands])
+        
+    self.command = regex.sub(
+        f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}', lambda match: hard_code_repeat(match, bracket_regex), self.command)
