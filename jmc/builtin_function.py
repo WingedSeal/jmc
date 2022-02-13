@@ -158,3 +158,36 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
         
     self.command = regex.sub(
         f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}', lambda match: hard_code_repeat(match, bracket_regex), self.command)
+
+    bracket_regex = BracketRegex()
+    def trigger_setup(match: re.Match, bracket_regex: BracketRegex) -> str:
+        objective, func_json = split(bracket_regex.compile(match.groups())[0])
+        if not self.datapack.booleans["trigger"]:
+            self.datapack.booleans["trigger"] = True
+            self.datapack.private_functions["trigger"]["main"] = Function([])
+            self.datapack.ticks.append(f'function {self.datapack.namespace}:__private__/trigger/main')
+
+        self.datapack.loads.append(f'scoreboard objectives add {objective} trigger')
+        commands = f"scoreboard players enable @a {objective};"
+
+        funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
+        for func in funcs:
+            bracket_regex = BracketRegex()
+            match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
+            id_, content = bracket_regex.compile(match.groups())
+            
+            __commands = self.datapack.process_function_content(content)
+            if len(__commands) == 1:
+                commands += f" execute as @a[scores={{{objective}={id_}}}] at @s run {__commands[0].command};"
+            else:
+                count = self.datapack.get_pfc("trigger")
+                self.datapack.private_functions["trigger"][count] = Function(__commands)
+                commands += f" execute as @a[scores={{{objective}={id_}}}] at @s run function {self.datapack.namespace}:__private__/trigger/{count};"
+
+        self.datapack.private_functions["trigger"]["main"].commands.extend(
+            self.datapack.process_function_content(commands)
+        )
+        return ""
+
+    self.command = regex.sub(
+        f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}', lambda match: trigger_setup(match, bracket_regex), self.command)
