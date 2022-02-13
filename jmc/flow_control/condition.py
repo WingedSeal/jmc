@@ -19,6 +19,7 @@ class Condition:
         string = string.strip()
         if regex.match(PARENTHESIS_REGEX, string) is not None:
             string = string[1:-1]
+        string = re.sub(r'Timer\.isOver\((.+?)\)', r'!score @s \1 matches 1..', string)
         self.condition = string
 
         or_conditions = split(self.condition, r'\|\|')

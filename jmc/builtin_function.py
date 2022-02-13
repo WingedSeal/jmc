@@ -2,6 +2,8 @@ import regex
 import re
 from typing import TYPE_CHECKING
 
+from jmc import command
+
 from .utils import BracketRegex, Re, split, eval_expr
 from .flow_control.function_ import Function
 from ast import literal_eval
@@ -211,3 +213,63 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     self.command = regex.sub(f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}',
         lambda match: trigger_setup(match, bracket_regex), self.command)
+
+
+    bracket_regex = BracketRegex()
+    def timer_add(match: re.Match, bracket_regex: BracketRegex) -> str:
+        args = split(bracket_regex.compile(match.groups())[0])
+        objective = args[0]
+        run_mode = args[1]
+        if run_mode == "none":
+            target_selector = args[2]
+        else:
+            func = args[2]
+            target_selector = args[3]
+        self.datapack.scoreboards.add(objective)
+        if not self.datapack.booleans["timer_add"]:
+            self.datapack.booleans["timer_add"] = True
+            self.datapack.private_functions["timer_add"]["main"] = Function([])
+            self.datapack.ticks.append(f'function {self.datapack.namespace}:__private__/timer_add/main')
+        
+        self.datapack.private_functions["timer_add"]["main"].commands.extend(
+            self.datapack.process_function_content(f"execute as {target_selector} if score @s {objective} matches 1.. run scoreboard players remove @s {objective} 1;")
+            )
+            
+        if run_mode == "runOnce":
+            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+            count = self.datapack.get_pfc("timer_add")
+            self.datapack.private_functions["timer_add"][count] = Function(
+                self.datapack.process_function_content(f"scoreboard players reset @s {objective}; {content}")
+                )
+            self.datapack.private_functions["timer_add"]["main"].commands.extend(
+                self.datapack.process_function_content(
+                    f"execute as {target_selector} if score @s {objective} matches 0 run function {self.datapack.namespace}:__private__/timer_add/{count}"
+                    )
+                )
+        if run_mode == "runTick":
+            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+            commands = self.datapack.process_function_content(content)
+            if len(commands) == 1:
+                self.datapack.private_functions["timer_add"]["main"].commands.append(f"execute as {target_selector} unless score @s {objective} matches 1.. run {commands[0]}")
+            else:
+                count = self.datapack.get_pfc("timer_add")
+                self.datapack.private_functions["timer_add"][count] = Function(commands)
+                self.datapack.private_functions["timer_add"]["main"].commands.append(f"execute as {target_selector} unless score @s {objective} matches 1.. run function {self.datapack.namespace}:__private__/timer_add/{count}")
+        return ""
+
+    self.command = regex.sub(f'Timer\\.add{bracket_regex.match_bracket("()", 1)}',
+        lambda match: timer_add(match, bracket_regex), self.command)
+
+
+    bracket_regex = BracketRegex()
+    def timer_set(match: re.Match, bracket_regex: BracketRegex) -> str:
+        objective, target_selector, tick = split(bracket_regex.compile(match.groups())[0])
+        
+        return f"scoreboard players set {target_selector} {objective} {tick}"
+
+    self.command = regex.sub(f'Timer\\.set{bracket_regex.match_bracket("()", 1)}',
+        lambda match: timer_set(match, bracket_regex), self.command)
+
+    self.command = re.sub(r'Timer\.isOver\((.+?)\)', r'score @s \1 matches ', self.command)
+
+    
