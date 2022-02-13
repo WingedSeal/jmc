@@ -46,14 +46,20 @@ def built_in_functions(self: "Command") -> None:
             bracket_regex = BracketRegex()
             match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
             id_, content = bracket_regex.compile(match.groups())
-            count = self.datapack.get_pfc("rc_detection")
-            self.datapack.private_functions["rc_detection"][count] = Function(self.datapack.process_function_content(content))
-            commands += f" execute if score __item_id__ __variable__ matches {id_} run function {self.datapack.namespace}:__private__/rc_detection/{count};"
+            
+            __commands = self.datapack.process_function_content(content)
+            if len(__commands) == 1:
+                commands += f" execute if score __item_id__ __variable__ matches {id_} run {__commands[0].command};"
+            else:
+                count = self.datapack.get_pfc("rc_detection")
+                self.datapack.private_functions["rc_detection"][count] = Function(__commands)
+                commands += f" execute if score __item_id__ __variable__ matches {id_} run function {self.datapack.namespace}:__private__/rc_detection/{count};"
 
         self.datapack.private_functions["rc_detection"]["main"].commands.extend(
             self.datapack.process_function_content(commands)
         )
         return ""
+
     self.command = regex.sub(
         f'RightClick\\.setup{bracket_regex.match_bracket("()", 1)}', lambda match: rightclick_setup(match, bracket_regex), self.command)
 
@@ -87,9 +93,14 @@ def built_in_functions(self: "Command") -> None:
             self.datapack.loads.append('scoreboard objectives add __rejoin__ minecraft.custom:minecraft.leave_game')
             self.datapack.ticks.append(f'execute as @a[scores={{__rejoin__=1..}}] at @s run function {self.datapack.namespace}:__private__/player_rejoin/main')
             self.datapack.private_functions["player_rejoin"]["main"] = Function(self.datapack.process_function_content("scoreboard players reset @s __rejoin__;"))
-        count = self.datapack.get_pfc("player_rejoin")
-        self.datapack.private_functions["player_rejoin"][count] = Function(self.datapack.process_function_content(content))
-        self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
+
+        commands = self.datapack.process_function_content(content)
+        if len(commands) == 1:
+            self.datapack.private_functions["player_rejoin"]["main"].commands.extend(commands)
+        else:
+            count = self.datapack.get_pfc("player_rejoin")
+            self.datapack.private_functions["player_rejoin"][count] = Function(commands)
+            self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
         return ""
 
     self.command = regex.sub(
