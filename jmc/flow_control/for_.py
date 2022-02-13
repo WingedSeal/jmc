@@ -30,19 +30,26 @@ def capture_for(self: "DataPack", line: str) -> tuple[str, bool]:
 
 def handle_for(datapack: "DataPack", groups: tuple[str]) -> str:
     statements = split(groups[0], ';')
-    statements[0] = regex.match(
-        f'let\s*{Re.var_nosigncap}\s*=\s*{Re.integer}', statements[0]).groups()
+    match = regex.match(
+        f'let\s*{Re.var_nosigncap}\s*=\s*{Re.integer}', statements[0])
+    if match is not None:
+        statements_0 = match.groups()
+        set_score = f"scoreboard players set $__private__.{statements_0[0]} __variable__ {statements_0[1]}"
+    else:
+        statements_0 = regex.match(
+        f'let\s*{Re.var_nosigncap}\s*=\s*{Re.var}', statements[0]).groups()
+        set_score = f"scoreboard players operation $__private__.{statements_0[0]} __variable__ = {statements_0[1]} __variable__"
 
     condition = Condition(statements[1].replace(
-        f'${statements[0][0]}', f'$__private__.{statements[0][0]}'))
+        f'${statements_0[0]}', f'$__private__.{statements_0[0]}'))
     content = groups[1].replace(
-        f'${statements[0][0]}', f'$__private__.{statements[0][0]}')
+        f'${statements_0[0]}', f'$__private__.{statements_0[0]}')
     statement = statements[2].replace(
-        f"${statements[0][0]}", f"$__private__.{statements[0][0]}")
+        f"${statements_0[0]}", f"$__private__.{statements_0[0]}")
 
     count = datapack.get_pfc("for_loop")
 
     datapack.private_functions["for_loop"][count] = Function(datapack.process_function_content(
         f"{content}; {statement}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};"))
 
-    return f'scoreboard players set $__private__.{statements[0][0]} __variable__ {statements[0][1]}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};'
+    return f'{set_score}; {condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/for_loop/{count};'
