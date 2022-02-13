@@ -26,8 +26,8 @@ def built_in_functions(self: "Command") -> None:
             key, value = split(argument, '=')
             raw_json += f',"{key}":{value}'
         return f'{{"score":{{"name":"{var}","objective":"__variable__"}}{raw_json}}}'
-    self.command = regex.sub(
-        f'{Re.var}\\.toString{bracket_regex.match_bracket("()", 2)}', lambda match: to_string(match, bracket_regex), self.command)
+    self.command = regex.sub(f'{Re.var}\\.toString{bracket_regex.match_bracket("()", 2)}', 
+        lambda match: to_string(match, bracket_regex), self.command)
     
 
     bracket_regex = BracketRegex()
@@ -43,6 +43,8 @@ def built_in_functions(self: "Command") -> None:
 
         funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
         for func in funcs:
+            if func == '':
+                continue
             bracket_regex = BracketRegex()
             match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
             id_, content = bracket_regex.compile(match.groups())
@@ -81,9 +83,8 @@ def built_in_functions(self: "Command") -> None:
         self.datapack.private_functions["player_first_join"][count] = Function(self.datapack.process_function_content(content))
         return ""
         
-    self.command = regex.sub(
-        r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', lambda match: player_first_join(match, bracket_regex), self.command
-    )
+    self.command = regex.sub(r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', 
+        lambda match: player_first_join(match, bracket_regex), self.command)
         
     bracket_regex = BracketRegex()
     def player_rejoin(match: re.Match, bracket_regex: BracketRegex) -> str:
@@ -103,9 +104,8 @@ def built_in_functions(self: "Command") -> None:
             self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
         return ""
 
-    self.command = regex.sub(
-        r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', lambda match: player_rejoin(match, bracket_regex), self.command
-    )
+    self.command = regex.sub(r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)',
+        lambda match: player_rejoin(match, bracket_regex), self.command)
 
     def math_sqrt(match: re.Match) -> str:
         groups = match.groups()
@@ -133,8 +133,8 @@ def built_in_functions(self: "Command") -> None:
         return f"""scoreboard players operation __math__.N __variable__ = {groups[1]} __variable__
 function {self.datapack.namespace}:__private__/math/sqrt
 scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable__"""
-    self.command = regex.sub(
-        f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', math_sqrt, self.command)
+    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', 
+        math_sqrt, self.command)
 
 
     bracket_regex = BracketRegex()
@@ -147,7 +147,6 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
         def hard_code_calc(match: re.Match) -> str:
             formula = calc_bracket_regex.compile(match.groups())[0]
-            print(formula)
             return eval_expr(formula)
 
         for i in range(*[int(arg.split('=')[1]) for arg in (start, stop, step)]):
@@ -156,8 +155,8 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
             commands.extend(self.datapack.process_function_content(content))
         return "\n".join([command.command for command in commands])
         
-    self.command = regex.sub(
-        f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}', lambda match: hard_code_repeat(match, bracket_regex), self.command)
+    self.command = regex.sub(f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}', 
+        lambda match: hard_code_repeat(match, bracket_regex), self.command)
 
     bracket_regex = BracketRegex()
     def trigger_setup(match: re.Match, bracket_regex: BracketRegex) -> str:
@@ -166,28 +165,49 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
             self.datapack.booleans["trigger"] = True
             self.datapack.private_functions["trigger"]["main"] = Function([])
             self.datapack.ticks.append(f'function {self.datapack.namespace}:__private__/trigger/main')
+            # Setup enable
+            self.datapack.news["advancements"][f"__private__/trigger/enable"] = {
+                    "criteria": {
+                        "requirement": {
+                        "trigger": "minecraft:tick"
+                        }
+                    },
+                    "rewards": {
+                        "function": f"{self.datapack.namespace}:__private__/trigger/enable"
+                    }
+                }
+            self.datapack.private_functions["trigger"]["enable"] = Function([])
 
-        self.datapack.loads.append(f'scoreboard objectives add {objective} trigger')
-        commands = f"scoreboard players enable @a {objective};"
+        self.datapack.loads.extend([f'scoreboard objectives add {objective} trigger',
+            f'scoreboard players enable @a {objective}'])
 
         funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
+        trigger_count = self.datapack.get_pfc("trigger")
+        commands = ""
         for func in funcs:
+            if func == '':
+                continue
             bracket_regex = BracketRegex()
             match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
             id_, content = bracket_regex.compile(match.groups())
-            
             __commands = self.datapack.process_function_content(content)
             if len(__commands) == 1:
-                commands += f" execute as @a[scores={{{objective}={id_}}}] at @s run {__commands[0].command};"
+                commands += f" execute if score @s {objective} matches {id_} at @s run {__commands[0].command};"
             else:
                 count = self.datapack.get_pfc("trigger")
                 self.datapack.private_functions["trigger"][count] = Function(__commands)
-                commands += f" execute as @a[scores={{{objective}={id_}}}] at @s run function {self.datapack.namespace}:__private__/trigger/{count};"
+                commands += f" execute if score @s {objective} matches {id_} at @s run function {self.datapack.namespace}:__private__/trigger/{count};"
+
+        commands += f"scoreboard players reset @s {objective}; scoreboard players enable @s {objective};"
+        self.datapack.private_functions["trigger"][trigger_count] = Function(self.datapack.process_function_content(commands))
 
         self.datapack.private_functions["trigger"]["main"].commands.extend(
-            self.datapack.process_function_content(commands)
+            self.datapack.process_function_content(f"execute as @a[scores={{{objective}=1..}}] run function {self.datapack.namespace}:__private__/trigger/{trigger_count};")
+        )
+        self.datapack.private_functions["trigger"]["enable"].commands.extend(
+            self.datapack.process_function_content(f"scoreboard players enable @s {objective};")
         )
         return ""
 
-    self.command = regex.sub(
-        f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}', lambda match: trigger_setup(match, bracket_regex), self.command)
+    self.command = regex.sub(f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}',
+        lambda match: trigger_setup(match, bracket_regex), self.command)
