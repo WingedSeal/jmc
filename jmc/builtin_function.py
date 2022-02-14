@@ -2,11 +2,10 @@ import regex
 import re
 from typing import TYPE_CHECKING
 
-from jmc import command
-
 from .utils import BracketRegex, Re, split, eval_expr
 from .flow_control.function_ import Function
-from ast import literal_eval
+from .args_parse import args_parse, parse_func_json
+from ast import arg, literal_eval
 from . import Logger
 
 if TYPE_CHECKING:
@@ -34,7 +33,9 @@ def built_in_functions(self: "Command") -> None:
 
     bracket_regex = BracketRegex()
     def rightclick_setup(match: re.Match, bracket_regex: BracketRegex) -> str:
-        id_name, func_json = split(bracket_regex.compile(match.groups())[0])
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"id_name":"id", "func_json":""})
+        id_name = args["id_name"]
+        func_json = args["func_json"]
         if not self.datapack.booleans["rc_detection"]:
             self.datapack.booleans["rc_detection"] = True
             self.datapack.loads.append('scoreboard objectives add __rc__ minecraft.used:minecraft.carrot_on_a_stick')
@@ -43,14 +44,7 @@ def built_in_functions(self: "Command") -> None:
         
         commands = f"execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.{id_name};"
 
-        funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
-        for func in funcs:
-            if func == '':
-                continue
-            bracket_regex = BracketRegex()
-            match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
-            id_, content = bracket_regex.compile(match.groups())
-            
+        for id_, content in parse_func_json(func_json):
             __commands = self.datapack.process_function_content(content)
             if len(__commands) == 1:
                 commands += f" execute if score __item_id__ __variable__ matches {id_} run {__commands[0].command};"
@@ -141,8 +135,9 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     bracket_regex = BracketRegex()
     def hard_code_repeat(match: re.Match, bracket_regex: BracketRegex) -> str:
-        index_str, func, start, stop, step = split(bracket_regex.compile(match.groups())[0])
-        func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"index_string":"index", "func":"","start":"","stop":"","step":"1"})
+        index_str, func, start, stop, step = args.values()
+        func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
         commands: list[Command] = []
         calc_bracket_regex = BracketRegex()
         calc_regex = f'Hardcode.calc{calc_bracket_regex.match_bracket("()",1)}'
@@ -162,7 +157,9 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     bracket_regex = BracketRegex()
     def trigger_setup(match: re.Match, bracket_regex: BracketRegex) -> str:
-        objective, func_json = split(bracket_regex.compile(match.groups())[0])
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"objective":"__trigger__", "func_json":""})
+        objective = args["objective"]
+        func_json = args["func_json"]
         if not self.datapack.booleans["trigger"]:
             self.datapack.booleans["trigger"] = True
             self.datapack.private_functions["trigger"]["main"] = Function([])
@@ -183,15 +180,9 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
         self.datapack.loads.extend([f'scoreboard objectives add {objective} trigger',
             f'scoreboard players enable @a {objective}'])
 
-        funcs = split(re.sub(r'{(.*)}', r'\1', func_json))
         trigger_count = self.datapack.get_pfc("trigger")
         commands = ""
-        for func in funcs:
-            if func == '':
-                continue
-            bracket_regex = BracketRegex()
-            match: re.Match = regex.match(r'(\d+)\s*:\s*\(\s*\)\s*=>\s*' + bracket_regex.match_bracket('{}', 2), func)
-            id_, content = bracket_regex.compile(match.groups())
+        for id_, content in parse_func_json(func_json):
             __commands = self.datapack.process_function_content(content)
             if len(__commands) == 1:
                 commands += f" execute if score @s {objective} matches {id_} at @s run {__commands[0].command};"
@@ -217,14 +208,12 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     bracket_regex = BracketRegex()
     def timer_add(match: re.Match, bracket_regex: BracketRegex) -> str:
-        args = split(bracket_regex.compile(match.groups())[0])
-        objective = args[0]
-        run_mode = args[1]
-        if run_mode == "none":
-            target_selector = args[2]
-        else:
-            func = args[2]
-            target_selector = args[3]
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"objective":"__timer__", "runMode":"none", "func":"", "target_selector":"@a"})
+        objective = args["objective"]
+        run_mode = args["runMode"]
+        target_selector = list(args.values())[-1]
+        func = args["func"]
+
         self.datapack.scoreboards.add(objective)
         if not self.datapack.booleans["timer_add"]:
             self.datapack.booleans["timer_add"] = True
@@ -236,7 +225,7 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
             )
             
         if run_mode == "runOnce":
-            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
             count = self.datapack.get_pfc("timer_add")
             self.datapack.private_functions["timer_add"][count] = Function(
                 self.datapack.process_function_content(f"scoreboard players reset @s {objective}; {content}")
@@ -247,7 +236,7 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
                     )
                 )
         if run_mode == "runTick":
-            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func.strip())
+            content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
             commands = self.datapack.process_function_content(content)
             if len(commands) == 1:
                 self.datapack.private_functions["timer_add"]["main"].commands.append(f"execute as {target_selector} unless score @s {objective} matches 1.. run {commands[0]}")
@@ -263,8 +252,9 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     bracket_regex = BracketRegex()
     def timer_set(match: re.Match, bracket_regex: BracketRegex) -> str:
-        objective, target_selector, tick = split(bracket_regex.compile(match.groups())[0])
-        
+        objective, target_selector, tick = args_parse(bracket_regex.compile(match.groups())[0], {"objective":"__timer__", "target_selector":"@s", "tick":"1"}).values()
+        if re.match(Re.var, tick):
+            return f"scoreboard players operation {target_selector} {objective} = {tick} __variable__"
         return f"scoreboard players set {target_selector} {objective} {tick}"
 
     self.command = regex.sub(f'Timer\\.set{bracket_regex.match_bracket("()", 1)}',
