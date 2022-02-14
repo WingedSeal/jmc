@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 from .utils import BracketRegex, Re, split, eval_expr
 from .flow_control.function_ import Function
 from .args_parse import args_parse, parse_func_json
-from ast import arg, literal_eval
+from ast import  literal_eval
+from json import loads, dumps
 from . import Logger
 
 if TYPE_CHECKING:
@@ -262,4 +263,37 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
 
     self.command = re.sub(r'Timer\.isOver\((.+?)\)', r'score @s \1 matches ', self.command)
 
-    
+
+    bracket_regex = BracketRegex()
+    def recipe_table(match: re.Match, bracket_regex: BracketRegex) -> str:
+        json_str, base_item, func = args_parse(bracket_regex.compile(match.groups())[0], {"json":"{}", "baseItem":"minecraft:knowledge_book", "onCraft":""}).values()
+        json: dict = loads(json_str)
+        result_item = json["result"]["item"]
+        result_count = json["result"]["count"]
+        json["result"]["item"] = base_item if base_item.startswith("minecraft:") else f"minecraft:{base_item}"
+        json["result"]["count"] = 1
+
+        count = self.datapack.get_pfc("recipe_table")
+        self.datapack.news["recipes"][f"__private__/recipe_table/{count}"] = json
+        self.datapack.news["advancements"][f"__private__/recipe_table/{count}"] = {
+            "criteria": {
+                "requirement": {
+                "trigger": "minecraft:recipe_unlocked",
+                "conditions": {
+                    "recipe": f"{self.datapack.namespace}:__private__/recipe_table/{count}"
+                }
+                }
+            },
+            "rewards": {
+                "function": f"{self.datapack.namespace}:__private__/recipe_table/{count}"
+            }
+        }
+        self.datapack.private_functions["recipe_table"][count] = Function(
+            self.datapack.process_function_content(f"clear @s {base_item} 1; give @s {result_item} {result_count}; {func}")
+        )
+        
+        return ""
+
+    self.command = regex.sub(f'Recipe\\.table{bracket_regex.match_bracket("()", 1)}',
+        lambda match: recipe_table(match, bracket_regex), self.command)
+
