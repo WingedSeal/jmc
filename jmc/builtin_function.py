@@ -289,7 +289,7 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
             }
         }
         self.datapack.private_functions["recipe_table"][count] = Function(
-            self.datapack.process_function_content(f"clear @s {base_item} 1; give @s {result_item} {result_count}; {func}")
+            self.datapack.process_function_content(f"clear @s {base_item} 1; give @s {result_item} {result_count}; recipe take @s {self.datapack.namespace}:__private__/recipe_table/{count}; advancement revoke @s only {self.datapack.namespace}:__private__/recipe_table/{count}; {func}")
         )
         
         return ""
