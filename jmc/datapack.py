@@ -102,7 +102,7 @@ class DataPack:
     def process_function_content(self, content: str) -> list[Command]:
         logger.debug(f"Proccessing Function's content\n{content.strip()}")
         lines = split(content, ';')
-        commands = []
+        commands: list[Command] = []
         for line in lines:
             command = self.process_line(line)
             if line != '':

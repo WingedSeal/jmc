@@ -47,7 +47,7 @@ def built_in_functions(self: "Command") -> None:
 
         for id_, content in parse_func_json(func_json):
             __commands = self.datapack.process_function_content(content)
-            if len(__commands) == 1:
+            if len(__commands) == 1 and '\n' not in __commands[0].command:
                 commands += f" execute if score __item_id__ __variable__ matches {id_} run {__commands[0].command};"
             else:
                 count = self.datapack.get_pfc("rc_detection")
@@ -148,7 +148,7 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
                 }
             for i in range(1,31):
                 self.datapack.ints.add(2**i)
-            self.datapack.private_functions["math"]["random_seed"] = Function(self.datapack.process_function_content(f"execute store success score __math__.seed __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;" + "\n".join([f"""execute store success score __math__.random_tmp __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;
+            self.datapack.private_functions["math"]["random_seed"] = Function(self.datapack.process_function_content(f"execute store success score __math__.seed __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;" + "".join([f"""execute store success score __math__.random_tmp __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;
 scoreboard players operation __math__.random_tmp __variable__ *= {2**i} __int__;
 scoreboard players operation __math__.seed __variable__ += __math__.random_tmp __variable__;""" for i in range(1,31)])))
             self.datapack.private_functions["math"]["random_setup"] = Function(self.datapack.process_function_content(
@@ -226,7 +226,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         commands = ""
         for id_, content in parse_func_json(func_json):
             __commands = self.datapack.process_function_content(content)
-            if len(__commands) == 1:
+            if len(__commands) == 1 and '\n' not in __commands[0].command:
                 commands += f" execute if score @s {objective} matches {id_} at @s run {__commands[0].command};"
             else:
                 count = self.datapack.get_pfc("trigger")
@@ -357,5 +357,55 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
     self.command = regex.sub(f'Debug\\.track\\({bracket_regex.match_bracket("[]", 1)}\\)',
         lambda match: debug_track(match, bracket_regex), self.command)
 
+
     self.command = regex.sub(f'Debug\\.showTrack\\(\\)',
         'scoreboard objectives setdisplay sidebar __debug__.track', self.command)
+
+
+    bracket_regex = BracketRegex()
+    def debug_history(match: re.Match, bracket_regex: BracketRegex) -> str:
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"score":"", "cache":"3"})
+        obj, score = args['score'].split(':')
+        cache = int(args['cache'])
+        if cache > 20:
+            raise ValueError("Do not use Debug.History with more than 20 cache")
+        if not self.datapack.booleans["debug_history"]:
+            self.datapack.booleans["debug_history"] = True
+            self.datapack.loads.append(f'function {self.datapack.namespace}:__private__/debug_history/setup')
+            self.datapack.ticks.append(f'function {self.datapack.namespace}:__private__/debug_history/main')
+
+        self.datapack.private_functions["debug_history"]["setup"] = Function(
+            self.datapack.process_function_content(
+                f"""scoreboard objectives add __debug__.histor dummy;
+scoreboard objectives modify __debug__.histor displayname {{"text":"History of {obj}:{score}", "color":"gold", "bold":true}};"""))
+
+        self.datapack.private_functions["debug_history"]["main"] = Function(
+            self.datapack.process_function_content(
+        f"""scoreboard players operation __debug__.current __variable__ = {score} {obj};
+execute unless score __debug__.current __variable__ = __debug__.tmp __variable__ run function {self.datapack.namespace}:__private__/debug_history/record;
+scoreboard players operation __debug__.tmp __variable__ = __debug__.current __variable__;"""
+        ))
+
+        self.datapack.private_functions["debug_history"]["record"] = Function(
+            self.datapack.process_function_content(
+        ''.join([
+            f"scoreboard players operation [{i+1}] __debug__.histor = [{i}] __debug__.histor;"
+            for i in range(cache-1,0,-1)])
+        +
+        "scoreboard players operation [1] __debug__.histor = [CURRENT] __debug__.histor;"
+        +
+        "scoreboard players operation [CURRENT] __debug__.histor = __debug__.current __variable__;"
+        ))
+
+
+        return ""
+
+    self.command = regex.sub(f'Debug\\.history{bracket_regex.match_bracket("()", 1)}',
+        lambda match: debug_history(match, bracket_regex), self.command)
+
+
+    self.command = regex.sub(f'Debug\\.showHistory\\(\\)',
+        'scoreboard objectives setdisplay sidebar __debug__.histor', self.command)
+
+    self.command = regex.sub(f'Debug\\.cleanup\\(\\)',
+        'scoreboard objectives remove __debug__.histor\nscoreboard objectives remove __debug__.track', self.command)
