@@ -338,3 +338,24 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
     self.command = regex.sub(f'Recipe\\.table{bracket_regex.match_bracket("()", 1)}',
         lambda match: recipe_table(match, bracket_regex), self.command)
 
+    bracket_regex = BracketRegex()
+    def debug_track(match: re.Match, bracket_regex: BracketRegex) -> str:
+        scores = split(bracket_regex.compile(match.groups())[0][1:-2])
+        tracks = [score.split(':') for score in scores]
+        if not self.datapack.booleans["debug_track"]:
+            self.datapack.booleans["debug_track"] = True
+            self.datapack.loads.append('scoreboard objectives add __debug__.track dummy {"text":"Tracking Scores", "color":"gold", "bold":true}')
+            self.datapack.loads.append('scoreboard players reset * __debug__.track')
+            self.datapack.ticks.append(f'function {self.datapack.namespace}:__private__/debug_track/main')
+        self.datapack.private_functions["debug_track"]["main"] = Function(
+            self.datapack.process_function_content("\n".join([
+                f"execute unless score {score} {obj} matches -2147483648..2147483647 run scoreboard players operation {obj}:{score} __debug__.track = {score} {obj};" for obj, score in tracks
+                ]))
+        )
+        return ""
+
+    self.command = regex.sub(f'Debug\\.track\\({bracket_regex.match_bracket("[]", 1)}\\)',
+        lambda match: debug_track(match, bracket_regex), self.command)
+
+    self.command = regex.sub(f'Debug\\.showTrack\\(\\)',
+        'scoreboard objectives setdisplay sidebar __debug__.track', self.command)

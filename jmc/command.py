@@ -33,9 +33,9 @@ class Command:
                 self.command += f' say {say_command[1]}'
 
         logger.debug(f"Command - Delete whitespaces: {command}")
+        self.built_in_functions()
         self.function_call()
         self.do_while_loop()
-        self.built_in_functions()
         self.custom_syntax()
 
         logger.debug(f"Command created:\nText: {self.command}")
