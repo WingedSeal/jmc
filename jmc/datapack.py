@@ -186,7 +186,7 @@ class DataPack:
         # Handle __load__
         __load__ = "\n".join(
             [f'scoreboard objectives add {obj} dummy' for obj in self.scoreboards] +
-            [f'scoreboard players set {integer} __int__ {integer}' for integer in self.ints] +
+            [f'scoreboard players set {integer} __int__ {integer}' for integer in sorted(self.ints)] +
             self.loads +
             [''] +
             [str(command) for command in self.functions["__load__"].commands]

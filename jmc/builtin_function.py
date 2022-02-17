@@ -133,6 +133,47 @@ scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable_
     self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', 
         math_sqrt, self.command)
 
+    bracket_regex = BracketRegex()
+    def math_random(match: re.Match, bracket_regex: BracketRegex) -> str:
+        groups = bracket_regex.compile(match.groups())
+        target_var = groups[0]
+        args = args_parse(groups[1], {"min":"1", "max":"2147483647"})
+        start = int(args["min"])
+        end = int(args["max"])
+        if not self.datapack.booleans["math_random"]:
+            self.datapack.booleans["math_random"] = True
+            self.datapack.news["predicates"][f"__private__/math/random_0.5"] = {
+                    "condition": "minecraft:random_chance",
+                    "chance": 0.5
+                }
+            for i in range(1,31):
+                self.datapack.ints.add(2**i)
+            self.datapack.private_functions["math"]["random_seed"] = Function(self.datapack.process_function_content(f"execute store success score __math__.seed __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;" + "\n".join([f"""execute store success score __math__.random_tmp __variable__ if predicate {self.datapack.namespace}:__private__/math/random_0.5;
+scoreboard players operation __math__.random_tmp __variable__ *= {2**i} __int__;
+scoreboard players operation __math__.seed __variable__ += __math__.random_tmp __variable__;""" for i in range(1,31)])))
+            self.datapack.private_functions["math"]["random_setup"] = Function(self.datapack.process_function_content(
+f"""function {self.datapack.namespace}:__private__/math/random_seed;
+scoreboard players operation __math__.random_a __variable__ = __math__.seed __variable__;
+scoreboard players operation __math__.random_c __variable__ = __math__.seed __variable__;
+scoreboard players operation __math__.random_c __variable__ *= __math__.seed __variable__;"""))
+            self.datapack.loads.append(f'execute unless score __math__.seed __variable__ matches -2147483648..2147483647 run function {self.datapack.namespace}:__private__/math/random_setup')
+            self.datapack.private_functions["math"]["random"] = Function(self.datapack.process_function_content(
+f"""scoreboard players operation __math__.seed __variable__ *= __math__.random_a __variable__;
+scoreboard players operation __math__.seed __variable__ += __math__.random_c __variable__;"""))
+
+        mod = end-start+1
+        self.datapack.ints.add(mod)
+        self.datapack.ints.add(start)
+        return f"""function {self.datapack.namespace}:__private__/math/random
+scoreboard players operation {target_var} __variable__ = __math__.seed __variable__
+scoreboard players operation {target_var} __variable__ %= {mod} __int__
+scoreboard players operation {target_var} __variable__ += {start} __int__
+"""
+
+    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.random{bracket_regex.match_bracket("()", 2)}',
+        lambda match: math_random(match, bracket_regex), self.command)
+
+
 
     bracket_regex = BracketRegex()
     def hard_code_repeat(match: re.Match, bracket_regex: BracketRegex) -> str:
