@@ -2,6 +2,7 @@ import re
 import regex
 
 from .utils import split, BracketRegex
+from json import dumps
 from . import Logger
 
     
@@ -39,6 +40,7 @@ def args_parse(string: str, defaults: dict[str, str]) -> dict:
         else:
             json[keys[i]] = parse_value(arg)
     defaults.update(json)
+    logger.debug(f"args_parse returns {dumps(defaults, indent=2)}")
     return defaults
 
 
