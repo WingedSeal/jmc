@@ -191,7 +191,6 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         for i in range(int(start), int(stop), int(step)):
             content = func_content.replace(str(literal_eval(index_str)), str(i))
             content = regex.sub(calc_regex, hard_code_calc, content)
-            print(content)
             commands.extend(self.datapack.process_function_content(content))
         return "\n".join([command.command for command in commands])
         

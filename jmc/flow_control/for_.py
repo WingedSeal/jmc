@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 bracket_regex = BracketRegex()
-FOR_REGEX = f"for\s*{bracket_regex.match_bracket('()', 1)}\s*{bracket_regex.match_bracket('{}', 2)}"
+FOR_REGEX = f"^for\s*{bracket_regex.match_bracket('()', 1)}\s*{bracket_regex.match_bracket('{}', 2)}"
 
 
 def capture_for(self: "DataPack", line: str) -> tuple[str, bool]:

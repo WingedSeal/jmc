@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 bracket_regex = BracketRegex()
-IFELSE_REGEX = f"if\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}((?:\\s*else\\s+if\\s*{bracket_regex.match_bracket('()', 4)}\\s*{bracket_regex.match_bracket('{}', 5)})*)(?:\\s*else\\s*{bracket_regex.match_bracket('{}', 6)})?"
+IFELSE_REGEX = f"^if\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}((?:\\s*else\\s+if\\s*{bracket_regex.match_bracket('()', 4)}\\s*{bracket_regex.match_bracket('{}', 5)})*)(?:\\s*else\\s*{bracket_regex.match_bracket('{}', 6)})?"
 
 
 def capture_if_else(self: "DataPack", line: str) -> tuple[str, bool]:

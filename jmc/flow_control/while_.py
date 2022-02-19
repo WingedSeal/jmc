@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 bracket_regex = BracketRegex()
-WHILE_REGEX = f"while\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}"
+WHILE_REGEX = f"^while\\s*{bracket_regex.match_bracket('()', 1)}\\s*{bracket_regex.match_bracket('{}', 2)}"
 
 
 def capture_while(self: "DataPack", line: str) -> tuple[str, bool]:
