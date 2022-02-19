@@ -83,6 +83,7 @@ def built_in_functions(self: "Command") -> None:
     self.command = regex.sub(r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', 
         lambda match: player_first_join(match, bracket_regex), self.command)
         
+
     bracket_regex = BracketRegex()
     def player_rejoin(match: re.Match, bracket_regex: BracketRegex) -> str:
         content = bracket_regex.compile(match.groups())[0]
@@ -101,8 +102,45 @@ def built_in_functions(self: "Command") -> None:
             self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
         return ""
 
-    self.command = regex.sub(r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)',
+    self.command = regex.sub(r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', 
         lambda match: player_rejoin(match, bracket_regex), self.command)
+
+
+    bracket_regex = BracketRegex()
+    def player_die(match: re.Match, bracket_regex: BracketRegex) -> str:
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"onDeath":"", "onRespawn":""})
+        on_death = args["onDeath"]
+        on_respawn = args["onRespawn"]
+        if not self.datapack.booleans["player_die"]:
+            self.datapack.booleans["player_die"] = True
+            self.datapack.loads.append('scoreboard objectives add __die__ deathCount')
+            self.datapack.ticks.append(f'execute as @a[scores={{__die__=1..}}] at @s run function {self.datapack.namespace}:__private__/player_die/on_death')
+            self.datapack.ticks.append(f'execute as @e[type=player,scores={{__die__=2..}}] at @s run function {self.datapack.namespace}:__private__/player_die/on_respawn')
+            self.datapack.private_functions["player_die"]["on_death"] = Function(self.datapack.process_function_content("scoreboard players set @s __die__ 2;"))
+            self.datapack.private_functions["player_die"]["on_respawn"] = Function(self.datapack.process_function_content("scoreboard players reset @s __die__;"))
+
+        if on_death != "":
+            commands = self.datapack.process_function_content(on_death)
+            if len(commands) == 1:
+                self.datapack.private_functions["player_die"]["on_death"].commands.extend(commands)
+            else:
+                count = self.datapack.get_pfc("player_die")
+                self.datapack.private_functions["player_die"][count] = Function(commands)
+                self.datapack.private_functions["player_die"]["on_death"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_die/{count}"))
+
+        if on_respawn != "":
+            commands = self.datapack.process_function_content(on_respawn)
+            if len(commands) == 1:
+                self.datapack.private_functions["player_die"]["on_respawn"].commands.extend(commands)
+            else:
+                count = self.datapack.get_pfc("player_die")
+                self.datapack.private_functions["player_die"][count] = Function(commands)
+                self.datapack.private_functions["player_die"]["on_respawn"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_die/{count}"))
+
+        return ""
+
+    self.command = regex.sub(f'Player.die{bracket_regex.match_bracket("()", 1)}',
+        lambda match: player_die(match, bracket_regex), self.command)
 
     def math_sqrt(match: re.Match) -> str:
         groups = match.groups()
