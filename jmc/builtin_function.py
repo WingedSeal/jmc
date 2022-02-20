@@ -218,7 +218,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         args = args_parse(bracket_regex.compile(match.groups())[0], {"index_string":"index", "func":"","start":"","stop":"","step":"1"})
         index_str, func, start, stop, step = args.values()
         func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
-        commands: list[Command] = []
+        contents: str = []
         calc_bracket_regex = BracketRegex()
         calc_regex = f'Hardcode.calc{calc_bracket_regex.match_bracket("()",1)}'
 
@@ -229,7 +229,9 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         for i in range(int(start), int(stop), int(step)):
             content = func_content.replace(str(literal_eval(index_str)), str(i))
             content = regex.sub(calc_regex, hard_code_calc, content)
-            commands.extend(self.datapack.process_function_content(content))
+            contents += content
+
+        commands = self.datapack.process_function_content(content)
         return "\n".join([command.command for command in commands])
         
     self.command = regex.sub(f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}$', 

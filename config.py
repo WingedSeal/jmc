@@ -5,4 +5,4 @@ def set_configs(content: dict):
 class JMCSyntaxError(ValueError):
     def __init__(self, text: str, *args: object) -> None:
         self.text = text
-        super().__init__(*args)
+        super().__init__(*[text, *args])

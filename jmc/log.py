@@ -26,7 +26,7 @@ class Colors(Enum):
     UNDERLINE = '\033[4m'
 
 def color_print(text: str, color: Colors = Colors.FAIL):
-    print(color.value + text + '\033[0m')
+    print(color.value + str(text) + '\033[0m')
 
 class Logger(logging.Logger):
     Colors = Colors

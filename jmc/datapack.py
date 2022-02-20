@@ -16,7 +16,7 @@ logger = Logger(__name__)
 
 
 class DataPack:
-    from .flow_control import capture_new, capture_function, capture_if_else, capture_class, capture_for, capture_while
+    from .flow_control import capture_new, capture_function, capture_if_else, capture_class, capture_for, capture_while, capture_switch_case
 
     def __init__(self) -> None:
         self.namespace: str = configs['namespace']
@@ -124,6 +124,10 @@ class DataPack:
             return self.capture_flow_control(line)
 
         line, success = self.capture_while(line)
+        if success:
+            return self.capture_flow_control(line)
+
+        line, success = self.capture_switch_case(line)
         if success:
             return self.capture_flow_control(line)
 
