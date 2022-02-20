@@ -35,12 +35,11 @@ def capture_switch_case(self: "DataPack", line: str) -> tuple[str, bool]:
 def handle_switch_case(datapack: "DataPack", groups: tuple[str]) -> str:
     
     var = groups[0]
-    cases = split(groups[1], r'case\s*[0-9]+\s*:')
-    cases = [case[:-6] if case.endswith("break;") else case for case in cases][1:]
-
+    cases = split(groups[1].strip(), r'case\s*[0-9]+\s*:')
+    cases = [case[:-6] if case.endswith("break;") else case for case in cases]
     def binary(min_: int, max_: int, count: int) -> None:
         if max_ < min_:
-            raise JMCSyntaxError("Switch Case error: Do not use Hardcode.repeat() with Switch Case.")
+            raise JMCSyntaxError("Switch Case error: Do not use Hardcode.repeat() with Switch Case.\n Use Hardcode.switch() instead.")
         if max_ == min_:
             datapack.private_functions["switch_case"][count] = Function(datapack.process_function_content(cases[min_-1]))
         else:
@@ -54,8 +53,8 @@ def handle_switch_case(datapack: "DataPack", groups: tuple[str]) -> str:
             match_more = f"{half2}..{max_}" if half2!=max_ else max_
 
             datapack.private_functions["switch_case"][count] = Function(datapack.process_function_content(
-                f"""execute if score {var} __variable__ matches {match_less} run function {datapack.namespace}/__private__/switch_case/{count_less};
-execute if score {var} __variable__ matches {match_more} run function {datapack.namespace}/__private__/switch_case/{count_more};"""
+                f"""execute if score {var} __variable__ matches {match_less} run function {datapack.namespace}:__private__/switch_case/{count_less};
+execute if score {var} __variable__ matches {match_more} run function {datapack.namespace}:__private__/switch_case/{count_more};"""
             ))
 
             binary(min_, half1, count_less)
@@ -64,6 +63,6 @@ execute if score {var} __variable__ matches {match_more} run function {datapack.
     count = datapack.get_pfc("switch_case")
     binary(1, len(cases), count)
 
-    return f"function {datapack.namespace}/__private__/switch_case/{count};"
+    return f"function {datapack.namespace}:__private__/switch_case/{count};"
 
     

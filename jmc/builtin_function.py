@@ -218,7 +218,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         args = args_parse(bracket_regex.compile(match.groups())[0], {"index_string":"index", "func":"","start":"","stop":"","step":"1"})
         index_str, func, start, stop, step = args.values()
         func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
-        contents: str = []
+        contents: str = ""
         calc_bracket_regex = BracketRegex()
         calc_regex = f'Hardcode.calc{calc_bracket_regex.match_bracket("()",1)}'
 
@@ -236,6 +236,32 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         
     self.command = regex.sub(f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}$', 
         lambda match: hard_code_repeat(match, bracket_regex), self.command)
+
+    bracket_regex = BracketRegex()
+    def hard_code_switch(match: re.Match, bracket_regex: BracketRegex) -> str:
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"var":"", "index_string":"index", "func":"", "count":""})
+        var, index_str, func, stop = args.values()
+        func_content = re.sub(r'\(\s*\)\s*=>\s*{(.*)}', r'\1', func)
+        contents: str = ""
+        calc_bracket_regex = BracketRegex()
+        calc_regex = f'Hardcode.calc{calc_bracket_regex.match_bracket("()",1)}'
+
+        def hard_code_calc(match: re.Match) -> str:
+            formula = calc_bracket_regex.compile(match.groups())[0]
+            return eval_expr(formula)
+
+        for i in range(1, int(stop)+1, 1):
+            content = func_content.replace(str(literal_eval(index_str)), str(i))
+            content = regex.sub(calc_regex, hard_code_calc, content)
+            contents += f"case {i}: {content}"
+
+        count = self.datapack.get_pfc("hard_code_switch")
+        self.datapack.private_functions["hard_code_switch"][count] = Function(self.datapack.process_function_content(
+            f"switch ({var}) {{{contents}}}"))
+        return f"function {self.datapack.namespace}:__private__/hard_code_switch/{count}"
+        
+    self.command = regex.sub(f'Hardcode.switch{bracket_regex.match_bracket("()", 1)}$', 
+        lambda match: hard_code_switch(match, bracket_regex), self.command)
 
     bracket_regex = BracketRegex()
     def trigger_setup(match: re.Match, bracket_regex: BracketRegex) -> str:

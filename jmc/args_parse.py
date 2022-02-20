@@ -35,7 +35,7 @@ def args_parse(string: str, defaults: dict[str, str]) -> dict:
         if match is not None:
             key, value = match.groups()
             if key not in defaults.keys():
-                raise NoKeyExecption("Key does not exist")
+                raise NoKeyExecption(f"Key '{key}' does not exist")
             json[key] = parse_value(value)
         else:
             json[keys[i]] = parse_value(arg)
