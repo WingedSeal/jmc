@@ -60,7 +60,7 @@ def built_in_functions(self: "Command") -> None:
         return ""
 
     self.command = regex.sub(
-        f'RightClick\\.setup{bracket_regex.match_bracket("()", 1)}', lambda match: rightclick_setup(match, bracket_regex), self.command)
+        f'RightClick\\.setup{bracket_regex.match_bracket("()", 1)}$', lambda match: rightclick_setup(match, bracket_regex), self.command)
 
 
     bracket_regex = BracketRegex()
@@ -80,7 +80,7 @@ def built_in_functions(self: "Command") -> None:
         self.datapack.private_functions["player_first_join"][count] = Function(self.datapack.process_function_content(content))
         return ""
         
-    self.command = regex.sub(r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', 
+    self.command = regex.sub(r'Player.firstJoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)$', 
         lambda match: player_first_join(match, bracket_regex), self.command)
         
 
@@ -102,7 +102,7 @@ def built_in_functions(self: "Command") -> None:
             self.datapack.private_functions["player_rejoin"]["main"].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/player_rejoin/{count}"))
         return ""
 
-    self.command = regex.sub(r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)', 
+    self.command = regex.sub(r'Player.rejoin\(\s*\(\s*\)\s*=>\s*'+f'{bracket_regex.match_bracket("{}", 1)}\\s*\\)$', 
         lambda match: player_rejoin(match, bracket_regex), self.command)
 
 
@@ -139,7 +139,7 @@ def built_in_functions(self: "Command") -> None:
 
         return ""
 
-    self.command = regex.sub(f'Player.die{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Player.die{bracket_regex.match_bracket("()", 1)}$',
         lambda match: player_die(match, bracket_regex), self.command)
 
     def math_sqrt(match: re.Match) -> str:
@@ -168,7 +168,7 @@ def built_in_functions(self: "Command") -> None:
         return f"""scoreboard players operation __math__.N __variable__ = {groups[1]} __variable__
 function {self.datapack.namespace}:__private__/math/sqrt
 scoreboard players operation {groups[0]} __variable__ = __math__.x_n __variable__"""
-    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)', 
+    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.sqrt\\({Re.var}\\)$', 
         math_sqrt, self.command)
 
     bracket_regex = BracketRegex()
@@ -208,7 +208,7 @@ scoreboard players operation {target_var} __variable__ %= {mod} __int__
 scoreboard players operation {target_var} __variable__ += {start} __int__
 """
 
-    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.random{bracket_regex.match_bracket("()", 2)}',
+    self.command = regex.sub(f'{Re.var}\\s*=\\s*Math\\.random{bracket_regex.match_bracket("()", 2)}$',
         lambda match: math_random(match, bracket_regex), self.command)
 
 
@@ -232,7 +232,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
             commands.extend(self.datapack.process_function_content(content))
         return "\n".join([command.command for command in commands])
         
-    self.command = regex.sub(f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}', 
+    self.command = regex.sub(f'Hardcode.repeat{bracket_regex.match_bracket("()", 1)}$', 
         lambda match: hard_code_repeat(match, bracket_regex), self.command)
 
     bracket_regex = BracketRegex()
@@ -282,7 +282,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         )
         return ""
 
-    self.command = regex.sub(f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Trigger\\.setup{bracket_regex.match_bracket("()", 1)}$',
         lambda match: trigger_setup(match, bracket_regex), self.command)
 
 
@@ -326,7 +326,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
                 self.datapack.private_functions["timer_add"]["main"].commands.append(f"execute as {target_selector} unless score @s {objective} matches 1.. run function {self.datapack.namespace}:__private__/timer_add/{count}")
         return ""
 
-    self.command = regex.sub(f'Timer\\.add{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Timer\\.add{bracket_regex.match_bracket("()", 1)}$',
         lambda match: timer_add(match, bracket_regex), self.command)
 
 
@@ -337,10 +337,10 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
             return f"scoreboard players operation {target_selector} {objective} = {tick} __variable__"
         return f"scoreboard players set {target_selector} {objective} {tick}"
 
-    self.command = regex.sub(f'Timer\\.set{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Timer\\.set{bracket_regex.match_bracket("()", 1)}$',
         lambda match: timer_set(match, bracket_regex), self.command)
 
-    self.command = re.sub(r'Timer\.isOver\((.+?)\)', r'score @s \1 matches ', self.command)
+    self.command = re.sub(r'Timer\.isOver\((.+?)\)$', r'score @s \1 matches ', self.command)
 
 
     bracket_regex = BracketRegex()
@@ -373,7 +373,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         
         return ""
 
-    self.command = regex.sub(f'Recipe\\.table{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Recipe\\.table{bracket_regex.match_bracket("()", 1)}$',
         lambda match: recipe_table(match, bracket_regex), self.command)
 
     bracket_regex = BracketRegex()
@@ -392,7 +392,7 @@ scoreboard players operation {target_var} __variable__ += {start} __int__
         )
         return ""
 
-    self.command = regex.sub(f'Debug\\.track\\({bracket_regex.match_bracket("[]", 1)}\\)',
+    self.command = regex.sub(f'Debug\\.track\\({bracket_regex.match_bracket("[]", 1)}\\)$',
         lambda match: debug_track(match, bracket_regex), self.command)
 
 
@@ -438,12 +438,12 @@ scoreboard players operation __debug__.tmp __variable__ = __debug__.current __va
 
         return ""
 
-    self.command = regex.sub(f'Debug\\.history{bracket_regex.match_bracket("()", 1)}',
+    self.command = regex.sub(f'Debug\\.history{bracket_regex.match_bracket("()", 1)}$',
         lambda match: debug_history(match, bracket_regex), self.command)
 
 
-    self.command = regex.sub(f'Debug\\.showHistory\\(\\)',
+    self.command = regex.sub(f'Debug\\.showHistory\\(\\)$',
         'scoreboard objectives setdisplay sidebar __debug__.histor', self.command)
 
-    self.command = regex.sub(f'Debug\\.cleanup\\(\\)',
+    self.command = regex.sub(f'Debug\\.cleanup\\(\\)$',
         'scoreboard objectives remove __debug__.histor\nscoreboard objectives remove __debug__.track', self.command)

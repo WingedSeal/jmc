@@ -42,33 +42,38 @@ def handle_if_else(datapack: "DataPack", groups: tuple[str]) -> str:
             return f'{condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/if_else/{count};'
 
     count = datapack.get_pfc("if_else")
-    outputs = [
-        'scoreboard players set __tmp__ __variable__ 0;',
-        f'{condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/if_else/{count};',
-    ]
+    count_alt = datapack.get_pfc("if_else")
+    output = f"""scoreboard players set __tmp__ __variable__ 0;
+{condition.pre_commands}execute{condition} run function {datapack.namespace}:__private__/if_else/{count};
+execute if score __tmp__ __variable__ matches 0 run function {datapack.namespace}:__private__/if_else/{count_alt};"""
 
     datapack.private_functions["if_else"][count] = Function(datapack.process_function_content(
         f"{groups[1]} scoreboard players set __tmp__ __variable__ 1;"))
 
     if groups[2] != '':  # There's `else if`
-        else_if_chain = split(groups, r'else\s*if')[2][1:]
+        else_if_chain = split(groups[2], r'else\s*if')[1:]
         for else_if in else_if_chain:
             bracket_regex = BracketRegex()
             pattern = f"{bracket_regex.match_bracket('()', 1)} {bracket_regex.match_bracket('{}', 2)}"
             else_if_groups = bracket_regex.compile(
                 regex.match(pattern, else_if).groups())
-            count = datapack.get_pfc("if_else")
             condition = Condition(else_if_groups[0])
-            outputs.append(
-                f'{condition.pre_commands}execute if score __tmp__ __variable__ matches 0{condition} run function {datapack.namespace}:__private__/if_else/{count};')
+
+            count = datapack.get_pfc("if_else")
+            count_tmp = count_alt
+            count_alt = datapack.get_pfc("if_else")
+            
+            datapack.private_functions["if_else"][count_tmp] = Function(datapack.process_function_content(
+                f"""{condition.pre_commands}execute {condition} run function {datapack.namespace}:__private__/if_else/{count};
+execute if score __tmp__ __variable__ matches 0 run function {datapack.namespace}:__private__/if_else/{count_alt};"""))
+
             datapack.private_functions["if_else"][count] = Function(datapack.process_function_content(
                 f"{groups[1]} scoreboard players set __tmp__ __variable__ 1;"))
 
-    if groups[-1] is not None:  # There's `else`
-        count = datapack.get_pfc("if_else")
-        outputs.append(
-            f'execute if score __tmp__ __variable__ matches 0 run function {datapack.namespace}:__private__/if_else/{count};')
-        datapack.private_functions["if_else"][count] = Function(datapack.process_function_content(
-            f"{groups[-1]} scoreboard players set __tmp__ __variable__ 1;"))
 
-    return "; ".join(outputs) + ';'
+    if groups[-1] is not None:  # There's `else`
+        datapack.private_functions["if_else"][count_alt] = Function(datapack.process_function_content(
+            groups[-1]))
+    else: # If there's no `else` delete the `execute if score __tmp__ __variable__ matches 0 run function`
+        del datapack.private_functions["if_else"][count_tmp].commands[-1]
+    return output
