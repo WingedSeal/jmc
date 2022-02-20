@@ -12,6 +12,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from tkinter import filedialog
+from kivy.config import Config
 from kivy.base import Builder
 from kivy.clock import Clock
 from typing import Tuple
@@ -20,6 +21,7 @@ from kivy.app import App
 from sys import argv, exit
 
 from config import set_configs, JMCSyntaxError
+Config.set('kivy', 'exit_on_escape', '0')
 
 Builder.load_file((Path(__file__).parent/'main.kv').as_posix())
 CONFIG_FILE_NAME = 'jmc_config.json'
