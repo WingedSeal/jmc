@@ -142,6 +142,27 @@ def built_in_functions(self: "Command") -> None:
     self.command = regex.sub(f'Player.die{bracket_regex.match_bracket("()", 1)}$',
         lambda match: player_die(match, bracket_regex), self.command)
 
+    bracket_regex = BracketRegex()
+    def player_on_event(match: re.Match, bracket_regex: BracketRegex) -> str:
+        args = args_parse(bracket_regex.compile(match.groups())[0], {"obj":"", "func":""})
+        obj = args["obj"]
+        content = args["func"]
+        base_count = self.datapack.get_pfc("on_event")
+        self.datapack.ticks.append(f'execute as @a[scores={{{obj}=1..}}] at @s run function {self.datapack.namespace}:__private__/on_event/{base_count}')
+        self.datapack.private_functions["on_event"][base_count] = Function(self.datapack.process_function_content(f"scoreboard players reset @s {obj};"))
+
+        commands = self.datapack.process_function_content(content)
+        if len(commands) == 1:
+            self.datapack.private_functions["on_event"][base_count].commands.extend(commands)
+        else:
+            count = self.datapack.get_pfc("on_event")
+            self.datapack.private_functions["on_event"][count] = Function(commands)
+            self.datapack.private_functions["on_event"][base_count].commands.extend(self.datapack.process_function_content(f"function {self.datapack.namespace}:__private__/on_event/{count}"))
+        return ""
+
+    self.command = regex.sub(r'Player.onEvent'+f'{bracket_regex.match_bracket("()", 1)}$', 
+        lambda match: player_on_event(match, bracket_regex), self.command)
+
     def math_sqrt(match: re.Match) -> str:
         groups = match.groups()
         if not self.datapack.booleans["math_sqrt"]:
