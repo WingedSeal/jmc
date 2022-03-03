@@ -1,2 +1,0 @@
-class JMCSyntaxException(BaseException):
-    pass
