@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from ast import literal_eval
-from distutils import command
+from pprint import pprint
 from typing import Optional
 from enum import Enum
 import re
@@ -17,6 +17,7 @@ class TokenType(Enum):
     string = "StringLiteral"
     comment = "Comment"
     comma = "Comma"
+    func = "Function"
 
 
 @dataclass(frozen=True, eq=False)
@@ -230,7 +231,7 @@ class Tokenizer:
                         elif self.paren == Paren.L_SQUARE:
                             self.state = TokenType.paren_square
                         self.append_token()
-                        if is_end:
+                        if is_end and expect_semicolon:
                             self.append_keywords()
                         continue
 
@@ -247,7 +248,7 @@ class Tokenizer:
 
             self.is_slash = (char == Re.SLASH)
 
-        if not expect_semicolon:
+        if not expect_semicolon and self.state == TokenType.keyword:
             if self.token != "":
                 self.append_token()
             self.append_keywords()
@@ -261,7 +262,6 @@ class Tokenizer:
         elif len(self.keywords) != 0:
             raise JMCSyntaxException(
                 f"In {self.file_name}\nExpected semicolon(;) at line {self.line} (at the end of the file).")
-
         if expect_semicolon:
             return self.list_of_tokens
         else:
@@ -278,40 +278,82 @@ class Tokenizer:
         kwargs: dict[str, Token] = dict()
         key: str = ""
         arg: str = ""
+        arrow_func_state = 0
+        """
+        0: None
+        1: ()
+        2: =>
+        """
 
-        def add_arg(line: int, col: int) -> None:
+        def add_arg(token: Token) -> None:
             nonlocal arg
             nonlocal args
             if kwargs:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nPositional argument follows keyword argument at line {line} col {col+1}.\n{self.raw_string.split(Re.NEW_LINE)[line-1][:col+1]} <-"
+                    f"In {self.file_name}\nPositional argument follows keyword argument at line {token.line} col {token.col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+1]} <-"
                 )
-            args.append(arg)
+            args.append(Token(string=arg, line=token.line,
+                              col=token.col, token_type=token.token_type))
             arg = ""
 
-        def add_key(line: int, col: int) -> None:
+        def add_key(token: Token) -> None:
             nonlocal key
             nonlocal arg
             nonlocal kwargs
+            if key[0] in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
+                raise JMCSyntaxException(
+                    f"In {self.file_name}\nInvalid key({key}) at line {last_token.line} col {last_token.col}.\n{self.raw_string.split(Re.NEW_LINE)[last_token.line-1][:last_token.col]} <-"
+                )
             if key == "":
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nEmpty at line {line} col {col}.\n{self.raw_string.split(Re.NEW_LINE)[line-1][:col]} <-"
+                    f"In {self.file_name}\nEmpty at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
                 )
+
             if key in kwargs:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nDuplicated key({key}) at line {line} col {col}.\n{self.raw_string.split(Re.NEW_LINE)[line-1][:col]} <-"
+                    f"In {self.file_name}\nDuplicated key({key}) at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
                 )
-            kwargs[key] = arg
+            kwargs[key] = Token(string=arg, line=token.line,
+                                col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
+
         for token in keywords:
+            # print(token.string, args, kwargs, arrow_func_state)
+            if arrow_func_state > 0:
+                if arrow_func_state == 1:
+                    if token.string == "=>" and token.token_type == TokenType.keyword:
+                        arrow_func_state = 2
+                        last_token = token
+                        continue
+                    else:
+                        arg = last_token.string
+                        if key:
+                            add_key(last_token)
+                        arrow_func_state = 0
+                        continue
+                elif arrow_func_state == 2:
+                    if token.token_type == TokenType.paren_curly:
+                        new_token = Token(
+                            string=token.string[1:-1], line=token.line, col=token.col, token_type=TokenType.func)
+                        arg = new_token.string
+                        if key:
+                            add_key(new_token)
+                        last_token = new_token
+                        arrow_func_state = 0
+                        continue
+                    else:
+                        raise JMCSyntaxException(
+                            f"In {self.file_name}\nExpected {'{'} at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
+                        )
+
             if token.token_type == TokenType.keyword:
                 if arg:
                     if token.string.startswith("="):
                         key = arg
                         arg = token.string[1:]
                         if arg:
-                            add_key(token.line, token.col)
+                            add_key(token)
                     else:
                         raise JMCSyntaxException(
                             f"In {self.file_name}\nUnexpected token at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+len(token.string)]} <-"
@@ -323,7 +365,7 @@ class Tokenizer:
                         raise JMCSyntaxException(
                             f"In {self.file_name}\nDuplicated equal sign(=) at line {token.line} col {col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:col+1]} <-"
                         )
-                    add_key(token.line, token.col)
+                    add_key(token)
                 else:
                     equal_sign_count = token.string.count('=')
                     if equal_sign_count > 1:
@@ -335,20 +377,31 @@ class Tokenizer:
                         key = token.string[:-1]
                     elif "=" in token.string:
                         key, arg = token.string.split('=')
-                        add_key(token.line, token.col)
+                        add_key(token)
                     else:
                         arg = token.string
 
             elif token.token_type == TokenType.comma:
+                arrow_func_state = 0
                 if arg:
-                    add_arg(token.line, token.col)
-            elif token.token_type == TokenType.paren_round:
-                if token.string == "()":
-                    pass
+                    add_arg(last_token)
             elif token.token_type in [TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square]:
-                pass
+                if token.string == "()":
+                    arrow_func_state = 1
+                else:
+                    arg = token.string
+                    if key:
+                        add_key(token)
+
+            elif token.token_type == TokenType.string:
+                arg = token.string
+                if key:
+                    add_key(token)
+            last_token = token
 
         if arg:
-            add_arg(token.line, token.col)
+            add_arg(token)
+        pprint(args)
+        pprint(kwargs)
 
         return args, kwargs
