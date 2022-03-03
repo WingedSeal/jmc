@@ -131,7 +131,7 @@ dmypy.json
 # Custom
 tests/
 logs/
-test.py
+test.*
 .vscode
 jmc.config
 autopytoexe.json
