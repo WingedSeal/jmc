@@ -1,4 +1,5 @@
 COMMANDS = [
+    # OP Level 0-2
     "placefeature"
     "advancement",
     "attribute",
@@ -32,7 +33,7 @@ COMMANDS = [
     "particle",
     "playsound",
     "recipe",
-    "reload",  # TODO: Not sure about this one
+    "reload",
     "say",
     "schedule",
     "scoreboard",
@@ -60,5 +61,24 @@ COMMANDS = [
     "whitelist",
     "worldborder",
     "xp"
+    # OP Level 3-4
+    "jfr",
+    "perf",
+    "publish",
+    "save-all",
+    "save-off",
+    "save-on",
+    "stop",
+    "ban",
+    "ban-ip",
+    "banlist",
+    "debug",
+    "deop",
+    "kick",
+    "op",
+    "pardon",
+    "pardon-ip",
+    "setidletimeout",
+    "whitelist"
 ]
-"""All vanilla command (first argument only) with 0-2 OP Level"""
+"""All vanilla command (first argument only)"""
