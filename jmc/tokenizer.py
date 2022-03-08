@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from ast import literal_eval
 from pprint import pprint
 from typing import Optional
@@ -26,6 +26,11 @@ class Token:
     line: int
     col: int
     string: str
+    length: int = field(init=False)
+
+    def __post_init__(self):
+        object.__setattr__(self, "length", len(
+            self.string)+2 if self.token_type == TokenType.string else len(self.string))
 
 
 @dataclass(frozen=True, eq=False)
@@ -248,10 +253,11 @@ class Tokenizer:
 
             self.is_slash = (char == Re.SLASH)
 
-        if not expect_semicolon and self.state == TokenType.keyword:
+        if self.state == TokenType.keyword:
             if self.token != "":
                 self.append_token()
-            self.append_keywords()
+            if not expect_semicolon:
+                self.append_keywords()
 
         if self.state == TokenType.string:
             raise JMCSyntaxException(
@@ -262,6 +268,7 @@ class Tokenizer:
         elif len(self.keywords) != 0:
             raise JMCSyntaxException(
                 f"In {self.file_name}\nExpected semicolon(;) at line {self.line} (at the end of the file).")
+
         if expect_semicolon:
             return self.list_of_tokens
         else:
@@ -356,7 +363,7 @@ class Tokenizer:
                             add_key(token)
                     else:
                         raise JMCSyntaxException(
-                            f"In {self.file_name}\nUnexpected token at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+len(token.string)]} <-"
+                            f"In {self.file_name}\nUnexpected token at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+token.length]} <-"
                         )
                 elif key:
                     arg = token.string

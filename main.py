@@ -20,6 +20,7 @@ class Colors(Enum):
     INPUT = '\033[96;40m'
     PURPLE = '\033[35;40m'
     FAIL = '\033[91;40m'
+    FAIL_BOLD = '\033[1;91;40m'
     ENDC = '\033[0;0;40m'
     EXIT = '\033[0;0;0m'
     NONE = '\033[0;37;40m'
@@ -78,9 +79,7 @@ def main() -> None:
                 pprint("Invalid path: Target file needs to end with .jmc", Colors.FAIL)
                 continue
             try:
-                config["target"] = Path(config["target"])
-                if not config["target"].is_absolute():
-                    config["target"] = CWD/config["target"]
+                config["target"] = Path(config["target"]).resolve().as_posix()
             except BaseException:
                 pprint("Invalid path", Colors.FAIL)
                 continue
@@ -91,16 +90,13 @@ def main() -> None:
                 f"Output directory(Leave blank for default[current directory]): "
             )
             if config["output"] == "":
-                config["output"] = (
-                    CWD
-                ).resolve().as_posix()
+                config["output"] = CWD.resolve().as_posix()
                 break
             try:
-                config["output"] = Path(config["output"])
-                if not config["output"].is_absolute():
-                    config["output"] = CWD/config["output"]
-                if config["output"].is_file:
+                output = Path(config["output"]).resolve()
+                if output.is_file():
                     pprint("Path is not a directory.", Colors.FAIL)
+                config["output"] = output.as_posix()
             except BaseException:
                 pprint("Invalid path", Colors.FAIL)
                 continue
@@ -147,7 +143,11 @@ exit: Exit compiler
 
     @classmethod
     def compile(cls):
-        jmc.compile(config)
+        try:
+            jmc.compile(config)
+        except BaseException as error:
+            pprint(type(error).__name__, Colors.FAIL_BOLD)
+            pprint(error, Colors.FAIL)
 
     @classmethod
     def autocompile(cls):
@@ -179,6 +179,8 @@ Type `cancel` to cancel
         else:
             pprint(f"Current {key}: {config[key]}", Colors.YELLOW)
             config[key] = get_input("New Value: ")
+            with (CWD/CONFIG_FILE_NAME).open('w') as file:
+                dump(config, file, indent=2)
 
 
 if __name__ == '__main__':

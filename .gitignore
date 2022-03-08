@@ -133,6 +133,6 @@ tests/
 logs/
 test.*
 .vscode
-jmc.config
+jmc_config.json
 autopytoexe.json
 output/
