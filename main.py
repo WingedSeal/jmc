@@ -5,7 +5,9 @@ from pathlib import Path
 from enum import Enum
 from json import dump, load
 
-CWD = Path(sys.argv[0]).parent
+import jmc
+
+CWD = Path(os.getcwd())
 CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
 config = dict()
@@ -145,7 +147,7 @@ exit: Exit compiler
 
     @classmethod
     def compile(cls):
-        print("TEST")
+        jmc.compile(config)
 
     @classmethod
     def autocompile(cls):
