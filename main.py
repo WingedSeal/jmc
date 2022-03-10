@@ -1,9 +1,11 @@
 import os
 import atexit
 import threading
+import traceback
 from pathlib import Path
 from enum import Enum
 from json import dump, load
+from datetime import datetime
 
 import jmc
 
@@ -215,15 +217,26 @@ Type `cancel` to cancel
 
     @classmethod
     def log_debug(cls):
-        print(jmc.get_debug_log())
+        logger.info("Requesting debug log")
+        with (CWD/datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+            file.write(jmc.get_debug_log())
 
     @classmethod
     def log_info(cls):
-        print(jmc.get_info_log())
+        logger.info("Requesting info log")
+        with (CWD/datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+            file.write(jmc.get_info_log())
+        print()
 
 
 if __name__ == '__main__':
     atexit.register(lambda: print(Colors.EXIT.value, end=""))
-    logger.debug("DEBUG TEST")
     logger.info("Starting session")
-    main()
+    while True:
+        try:
+            main()
+        except BaseException as error:
+            pprint("Unexpected error causes program to crash", Colors.FAIL)
+            pprint(type(error).__name__, Colors.FAIL_BOLD)
+            pprint(error, Colors.FAIL)
+            logger.critical("Program crashed\n"+traceback.format_exc())
