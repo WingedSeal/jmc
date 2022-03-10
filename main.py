@@ -1,6 +1,6 @@
 import os
-import sys
 import atexit
+import threading
 from pathlib import Path
 from enum import Enum
 from json import dump, load
@@ -114,13 +114,20 @@ def main() -> None:
             "exit": CMD.exit,
             "compile": CMD.compile,
             "autocompile": CMD.autocompile,
-            "autocompile stop": CMD.autocompile_stop,
             "config reset": CMD.config_reset,
             "config edit": CMD.config_edit
         }.get(get_input(), CMD.default)()
 
 
 class CMD:
+    event = threading.Event()
+
+    @classmethod
+    def background(cls, interval: int):
+        while not cls.event.is_set():
+            cls.compile()
+            cls.event.wait(interval)
+
     @classmethod
     def default(cls):
         pprint("Command not regonized, try `help` for more info.", Colors.FAIL)
@@ -130,8 +137,7 @@ class CMD:
         pprint("""Avaliable commands:
 
 compile: Compile your JMC file(s)
-autocompile: Make compiler compile automatically after certain period
-autocompile stop: Stop auto-compiling
+autocompile: Start automatically compiling with certain interval
 config reset: Delete the configuration file and restart the compiler
 config edit: Override configuration file and bypass error checking
 exit: Exit compiler
@@ -143,19 +149,37 @@ exit: Exit compiler
 
     @classmethod
     def compile(cls):
+        pprint("Compiling...", Colors.INFO)
         try:
             jmc.compile(config)
+            pprint("Compiled successfully", Colors.INFO)
         except BaseException as error:
             pprint(type(error).__name__, Colors.FAIL_BOLD)
             pprint(error, Colors.FAIL)
 
     @classmethod
     def autocompile(cls):
-        print("TEST_AUTO")
+        while True:
+            try:
+                interval = int(get_input("Interval(second): "))
+                break
+            except ValueError:
+                pprint("Invalid integer", Colors.FAIL)
+            except BaseException as error:
+                pprint(type(error).__name__, Colors.FAIL_BOLD)
+                pprint(error, Colors.FAIL)
 
-    @classmethod
-    def autocompile_stop(cls):
-        print("TEST_AUTO_STOP")
+        thread = threading.Thread(
+            target=lambda: cls.background(interval),
+            daemon=True
+        )
+        cls.event.clear()
+        thread.start()
+
+        get_input("Press Enter to stop...\n")
+        pprint("Stopping...", Colors.INFO)
+        cls.event.set()
+        thread.join()
 
     @classmethod
     def config_reset(cls):
