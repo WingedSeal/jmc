@@ -12,6 +12,8 @@ CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
 config = dict()
 
+logger = jmc.Logger(__name__)
+
 
 class Colors(Enum):
     HEADER = '\033[1;33;40m'
@@ -113,6 +115,8 @@ def main() -> None:
             "help": CMD.help,
             "exit": CMD.exit,
             "compile": CMD.compile,
+            "log debug": CMD.log_debug,
+            "log info": CMD.log_info,
             "autocompile": CMD.autocompile,
             "config reset": CMD.config_reset,
             "config edit": CMD.config_edit
@@ -121,12 +125,6 @@ def main() -> None:
 
 class CMD:
     event = threading.Event()
-
-    @classmethod
-    def background(cls, interval: int):
-        while not cls.event.is_set():
-            cls.compile()
-            cls.event.wait(interval)
 
     @classmethod
     def default(cls):
@@ -138,8 +136,11 @@ class CMD:
 
 compile: Compile your JMC file(s)
 autocompile: Start automatically compiling with certain interval
+log debug: Create log file in output directory
+log info: Create log file in output directory
 config reset: Delete the configuration file and restart the compiler
 config edit: Override configuration file and bypass error checking
+help: Output this message
 exit: Exit compiler
 """, color=Colors.YELLOW)
 
@@ -182,6 +183,12 @@ exit: Exit compiler
         thread.join()
 
     @classmethod
+    def background(cls, interval: int):
+        while not cls.event.is_set():
+            cls.compile()
+            cls.event.wait(interval)
+
+    @classmethod
     def config_reset(cls):
         (CWD/CONFIG_FILE_NAME).unlink(missing_ok=True)
         pprint("Resetting configurations", Colors.PURPLE)
@@ -206,7 +213,17 @@ Type `cancel` to cancel
             with (CWD/CONFIG_FILE_NAME).open('w') as file:
                 dump(config, file, indent=2)
 
+    @classmethod
+    def log_debug(cls):
+        print(jmc.get_debug_log())
+
+    @classmethod
+    def log_info(cls):
+        print(jmc.get_info_log())
+
 
 if __name__ == '__main__':
     atexit.register(lambda: print(Colors.EXIT.value, end=""))
+    logger.debug("DEBUG TEST")
+    logger.info("Starting session")
     main()
