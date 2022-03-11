@@ -7,7 +7,7 @@ from json import dump, load
 from datetime import datetime
 
 import jmc
-from jmc.exception import JMCFileNotFoundError, JMCSyntaxException
+from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
@@ -163,7 +163,7 @@ exit: Exit compiler
         try:
             jmc.compile(config)
             pprint("Compiled successfully", Colors.INFO)
-        except (JMCSyntaxException, JMCFileNotFoundError) as error:
+        except (JMCSyntaxException, JMCFileNotFoundError, JMCDecodeJSONError) as error:
             error_report(error)
         except Exception as error:
             logger.exception("Non-JMC Exception occur")

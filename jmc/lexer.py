@@ -1,6 +1,7 @@
 from pathlib import Path
+from json import loads, JSONDecodeError
 
-from .exception import JMCFileNotFoundError, JMCSyntaxException
+from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
 from .vanilla_command import COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
@@ -97,7 +98,7 @@ class Lexer:
         func_content = command[3].string[1:-1]
         if func_path in self.datapack.functions:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate function declaration({func_path}) at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
+                f"In {tokenizer.file_path}\nDuplicate function declaration({func_path}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length]} <-"
             )
         elif func_path == self.datapack.LOAD_NAME:
             raise JMCSyntaxException(
@@ -134,10 +135,23 @@ class Lexer:
             )
 
         json_type = command[1].string
-        json_path = prefix + command[2].string[1:-1]
+        json_path = json_type + '/' + prefix + command[2].string[1:-1]
         logger.debug(f"JSON: {json_type}({json_path})")
-        json_content = command[3].string[1:-1]
-        # TODO: PARSE NEW
+        json_content = command[3].string
+        if json_path in self.datapack.jsons:
+            raise JMCSyntaxException(
+                f"In {tokenizer.file_path}\nDuplicate json({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1+command[2].length]} <-"
+            )
+        try:
+            json: dict[str, str] = loads(json_content)
+        except JSONDecodeError as error:
+            line = command[3].line + error.lineno - 1
+            col = command[3].col + error.colno - 1 \
+                if command[3].line == line else error.colno
+            raise JMCDecodeJSONError(
+                f"In {tokenizer.file_path}\n{error.msg} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[line-1][:col-1]} <-"
+            )
+        self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):
         logger.debug(f"Parsing Class, prefix = {prefix!r}")
