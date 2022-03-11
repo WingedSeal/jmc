@@ -82,7 +82,7 @@ class Lexer:
         logger.debug(f"Parsing function, prefix = {prefix!r}")
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(function's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                f"In {tokenizer.file_path}\nExpected keyword(function's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
             )
         elif command[2].string != '()':
             raise JMCSyntaxException(
@@ -119,7 +119,7 @@ class Lexer:
             )
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(json file's type) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                f"In {tokenizer.file_path}\nExpected keyword(json file's type) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
             )
         elif command[2].string == '()':
             raise JMCSyntaxException(
@@ -161,7 +161,7 @@ class Lexer:
             )
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(class's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                f"In {tokenizer.file_path}\nExpected keyword(class's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
             )
         elif command[2].token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
@@ -204,7 +204,7 @@ class Lexer:
                     is_expect_command = False
                     if token.token_type != TokenType.keyword:
                         raise JMCSyntaxException(
-                            f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length]} <-"
+                            f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
                         )
                     # TODO: PARSE FUNC
                     if token.string in BUILT_IN_FUNCTIONS:

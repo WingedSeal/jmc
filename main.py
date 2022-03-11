@@ -5,6 +5,7 @@ from pathlib import Path
 from enum import Enum
 from json import dump, load
 from datetime import datetime
+from time import perf_counter
 
 import jmc
 from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
@@ -161,8 +162,11 @@ exit: Exit compiler
     def compile(cls):
         pprint("Compiling...", Colors.INFO)
         try:
+            start_time = perf_counter()
             jmc.compile(config)
-            pprint("Compiled successfully", Colors.INFO)
+            stop_time = perf_counter()
+            pprint(
+                f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
         except (JMCSyntaxException, JMCFileNotFoundError, JMCDecodeJSONError) as error:
             error_report(error)
         except Exception as error:

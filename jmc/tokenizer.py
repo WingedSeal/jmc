@@ -30,11 +30,14 @@ class Token:
     line: int
     col: int
     string: str
-    length: int = field(init=False, repr=False)
+    _length: int = field(init=False, repr=False, default=None)
 
-    def __post_init__(self):
-        object.__setattr__(self, "length", len(
-            self.string)+2 if self.token_type == TokenType.string else len(self.string))
+    @property
+    def length(self) -> int:
+        if self._length is None:
+            object.__setattr__(self, "_length", len(
+                self.string)+2 if self.token_type == TokenType.string else len(self.string))
+        return self._length
 
 
 @dataclass(frozen=True, eq=False)
