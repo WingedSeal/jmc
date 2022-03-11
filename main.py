@@ -1,7 +1,6 @@
 import os
 import atexit
 import threading
-import traceback
 from pathlib import Path
 from enum import Enum
 from json import dump, load
@@ -10,6 +9,7 @@ from datetime import datetime
 import jmc
 
 CWD = Path(os.getcwd())
+LOG_PATH = CWD/'log'
 CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
 config = dict()
@@ -37,6 +37,7 @@ def pprint(values, color: Colors = Colors.NONE):
 def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
     input_value = input(f"{color.value}{prompt}")
     print(Colors.ENDC.value, end="")
+    logger.info(f"Input from user: {input_value}")
     return input_value
 
 
@@ -187,6 +188,7 @@ exit: Exit compiler
     @classmethod
     def background(cls, interval: int):
         while not cls.event.is_set():
+            logger.debug("Auto compiling")
             cls.compile()
             cls.event.wait(interval)
 
@@ -218,14 +220,22 @@ Type `cancel` to cancel
     @classmethod
     def log_debug(cls):
         logger.info("Requesting debug log")
-        with (CWD/datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
-            file.write(jmc.get_debug_log())
+        LOG_PATH.mkdir(exist_ok=True)
+        debug_log = jmc.get_debug_log()
+        with (LOG_PATH/datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+            file.write(debug_log)
+        with (LOG_PATH/"latest.log").open('w+') as file:
+            file.write(debug_log)
 
     @classmethod
     def log_info(cls):
         logger.info("Requesting info log")
-        with (CWD/datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
-            file.write(jmc.get_info_log())
+        LOG_PATH.mkdir(exist_ok=True)
+        info_log = jmc.get_info_log()
+        with (LOG_PATH/datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+            file.write(info_log)
+        with (LOG_PATH/"latest.log").open('w+') as file:
+            file.write(info_log)
         print()
 
 
@@ -235,8 +245,10 @@ if __name__ == '__main__':
     while True:
         try:
             main()
-        except BaseException as error:
+        except Exception as error:
             pprint("Unexpected error causes program to crash", Colors.FAIL)
             pprint(type(error).__name__, Colors.FAIL_BOLD)
             pprint(error, Colors.FAIL)
-            logger.critical("Program crashed\n"+traceback.format_exc())
+            logger.critical("Program crashed")
+            logger.exception("")
+            get_input("Press Enter to continue... ")

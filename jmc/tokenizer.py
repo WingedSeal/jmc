@@ -6,6 +6,10 @@ from enum import Enum
 import re
 
 from .exception import JMCSyntaxException
+from .log import Logger
+
+
+logger = Logger(__name__)
 
 
 class TokenType(Enum):
@@ -26,7 +30,7 @@ class Token:
     line: int
     col: int
     string: str
-    length: int = field(init=False)
+    length: int = field(init=False, repr=False)
 
     def __post_init__(self):
         object.__setattr__(self, "length", len(
@@ -96,9 +100,10 @@ class Tokenizer:
     # Comment
     is_slash: bool
 
-    def __init__(self, raw_string: str, file_name: str) -> None:
+    def __init__(self, raw_string: str, file_path_str: str) -> None:
+        logger.debug("Initializing Tokenizer")
         self.raw_string = raw_string
-        self.file_name = file_name
+        self.file_path = file_path_str
         self.programs = self.parse(self.raw_string, line=1, col=1)
 
     def append_token(self) -> None:
@@ -114,6 +119,7 @@ class Tokenizer:
 
     def append_keywords(self) -> None:
         if len(self.keywords) != 0:
+            logger.debug(f"Appending keywords: {self.keywords}")
             self.list_of_tokens.append(self.keywords)
             self.keywords = []
 
@@ -140,12 +146,12 @@ class Tokenizer:
             self.col += 1
             if not expect_semicolon and char == Re.SEMICOLON:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
+                    f"In {self.file_path}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
 
             if char == Re.NEW_LINE:
                 if self.state == TokenType.string:
                     raise JMCSyntaxException(
-                        f"In {self.file_name}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
+                        f"In {self.file_path}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
                 if self.state == TokenType.comment:
                     self.state = None
                 if self.state == TokenType.keyword:
@@ -193,7 +199,7 @@ class Tokenizer:
                     self.paren_count = 0
                 elif char in [Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE]:
                     raise JMCSyntaxException(
-                        f"In {self.file_name}\nUnexpected bracket at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
+                        f"In {self.file_path}\nUnexpected bracket at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
                 elif char == Re.HASH and self.col == 1:
                     self.state = TokenType.comment
                 elif char == Re.COMMA:
@@ -261,13 +267,13 @@ class Tokenizer:
 
         if self.state == TokenType.string:
             raise JMCSyntaxException(
-                f"In {self.file_name}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
+                f"In {self.file_path}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
         elif self.state == TokenType.paren:
             raise JMCSyntaxException(
-                f"In {self.file_name}\nBracket at line {self.token_pos.line} col {self.token_pos.col} was never closed.\n{self.raw_string.split(Re.NEW_LINE)[self.token_pos.line-1][:self.token_pos.col]} <-")
+                f"In {self.file_path}\nBracket at line {self.token_pos.line} col {self.token_pos.col} was never closed.\n{self.raw_string.split(Re.NEW_LINE)[self.token_pos.line-1][:self.token_pos.col]} <-")
         elif len(self.keywords) != 0:
             raise JMCSyntaxException(
-                f"In {self.file_name}\nExpected semicolon(;) at line {self.line} (at the end of the file).")
+                f"In {self.file_path}\nExpected semicolon(;) at line {self.line} (at the end of the file).")
 
         if expect_semicolon:
             return self.list_of_tokens
@@ -277,7 +283,7 @@ class Tokenizer:
     def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
         if token.token_type != TokenType.paren_round:
             raise JMCSyntaxException(
-                f"In {self.file_name}\nExpected ( at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-"
+                f"In {self.file_path}\nExpected ( at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-"
             )
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)
@@ -297,7 +303,7 @@ class Tokenizer:
             nonlocal args
             if kwargs:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nPositional argument follows keyword argument at line {token.line} col {token.col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+1]} <-"
+                    f"In {self.file_path}\nPositional argument follows keyword argument at line {token.line} col {token.col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+1]} <-"
                 )
             args.append(Token(string=arg, line=token.line,
                               col=token.col, token_type=token.token_type))
@@ -309,16 +315,16 @@ class Tokenizer:
             nonlocal kwargs
             if key[0] in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nInvalid key({key}) at line {last_token.line} col {last_token.col}.\n{self.raw_string.split(Re.NEW_LINE)[last_token.line-1][:last_token.col]} <-"
+                    f"In {self.file_path}\nInvalid key({key}) at line {last_token.line} col {last_token.col}.\n{self.raw_string.split(Re.NEW_LINE)[last_token.line-1][:last_token.col]} <-"
                 )
             if key == "":
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nEmpty at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
+                    f"In {self.file_path}\nEmpty at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
                 )
 
             if key in kwargs:
                 raise JMCSyntaxException(
-                    f"In {self.file_name}\nDuplicated key({key}) at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
+                    f"In {self.file_path}\nDuplicated key({key}) at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
                 )
             kwargs[key] = Token(string=arg, line=token.line,
                                 col=token.col, token_type=token.token_type)
@@ -351,7 +357,7 @@ class Tokenizer:
                         continue
                     else:
                         raise JMCSyntaxException(
-                            f"In {self.file_name}\nExpected {'{'} at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
+                            f"In {self.file_path}\nExpected {'{'} at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col]} <-"
                         )
 
             if token.token_type == TokenType.keyword:
@@ -363,14 +369,14 @@ class Tokenizer:
                             add_key(token)
                     else:
                         raise JMCSyntaxException(
-                            f"In {self.file_name}\nUnexpected token at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+token.length]} <-"
+                            f"In {self.file_path}\nUnexpected token at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+token.length]} <-"
                         )
                 elif key:
                     arg = token.string
                     if "=" in token.string:
                         col = token.col + token.string.find('=')
                         raise JMCSyntaxException(
-                            f"In {self.file_name}\nDuplicated equal sign(=) at line {token.line} col {col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:col+1]} <-"
+                            f"In {self.file_path}\nDuplicated equal sign(=) at line {token.line} col {col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:col+1]} <-"
                         )
                     add_key(token)
                 else:
@@ -378,7 +384,7 @@ class Tokenizer:
                     if equal_sign_count > 1:
                         col = token.col + token.string.rfind('=') + 1
                         raise JMCSyntaxException(
-                            f"In {self.file_name}\nDuplicated equal sign(=) at line {token.line} col {col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:col]} <-"
+                            f"In {self.file_path}\nDuplicated equal sign(=) at line {token.line} col {col}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:col]} <-"
                         )
                     if token.string.endswith("="):
                         key = token.string[:-1]

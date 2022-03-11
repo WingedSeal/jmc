@@ -1,4 +1,7 @@
 from collections import defaultdict
+from .log import Logger
+
+logger = Logger(__name__)
 
 
 class Function:
@@ -19,4 +22,5 @@ class DataPack:
     ticks: list[str] = []
 
     def __init__(self, namespace: str) -> None:
+        logger.debug("Initializing Datapack")
         self.namespace = namespace

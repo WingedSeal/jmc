@@ -1,9 +1,11 @@
+from json import dumps
+
 from .lexer import Lexer
-from time import sleep
+from .log import Logger
+
+logger = Logger(__name__)
 
 
 def compile(config: dict[str, str]) -> None:
+    logger.info("Configuration:\n"+dumps(config, indent=2))
     lexer = Lexer(config)
-    print("SIMULATING COMPILING")
-    sleep(3)
-    print("DONE")
