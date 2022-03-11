@@ -7,6 +7,7 @@ from json import dump, load
 from datetime import datetime
 
 import jmc
+from jmc.exception import JMCFileNotFoundError, JMCSyntaxException
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
@@ -39,6 +40,11 @@ def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
     print(Colors.ENDC.value, end="")
     logger.info(f"Input from user: {input_value}")
     return input_value
+
+
+def error_report(error: Exception):
+    pprint(type(error).__name__, Colors.FAIL_BOLD)
+    pprint(error, Colors.FAIL)
 
 
 def main() -> None:
@@ -157,9 +163,11 @@ exit: Exit compiler
         try:
             jmc.compile(config)
             pprint("Compiled successfully", Colors.INFO)
-        except BaseException as error:
-            pprint(type(error).__name__, Colors.FAIL_BOLD)
-            pprint(error, Colors.FAIL)
+        except (JMCSyntaxException, JMCFileNotFoundError) as error:
+            error_report(error)
+        except Exception as error:
+            logger.exception("Non-JMC Exception occur")
+            error_report(error)
 
     @classmethod
     def autocompile(cls):

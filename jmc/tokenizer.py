@@ -100,11 +100,15 @@ class Tokenizer:
     # Comment
     is_slash: bool
 
-    def __init__(self, raw_string: str, file_path_str: str) -> None:
+    def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1, file_string: str = None) -> None:
         logger.debug("Initializing Tokenizer")
         self.raw_string = raw_string
+        if file_string is None:
+            self.file_string = raw_string
+        else:
+            self.file_string = file_string
         self.file_path = file_path_str
-        self.programs = self.parse(self.raw_string, line=1, col=1)
+        self.programs = self.parse(self.raw_string, line=line, col=col)
 
     def append_token(self) -> None:
         self.keywords.append(
@@ -146,16 +150,18 @@ class Tokenizer:
             self.col += 1
             if not expect_semicolon and char == Re.SEMICOLON:
                 raise JMCSyntaxException(
-                    f"In {self.file_path}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
+                    f"In {self.file_path}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
 
             if char == Re.NEW_LINE:
                 if self.state == TokenType.string:
                     raise JMCSyntaxException(
                         f"In {self.file_path}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
-                if self.state == TokenType.comment:
+                elif self.state == TokenType.comment:
                     self.state = None
-                if self.state == TokenType.keyword:
+                elif self.state == TokenType.keyword:
                     self.append_token()
+                elif self.state == TokenType.paren:
+                    self.token += char
                 self.line += 1
                 self.col = 0
                 continue
@@ -273,7 +279,7 @@ class Tokenizer:
                 f"In {self.file_path}\nBracket at line {self.token_pos.line} col {self.token_pos.col} was never closed.\n{self.raw_string.split(Re.NEW_LINE)[self.token_pos.line-1][:self.token_pos.col]} <-")
         elif len(self.keywords) != 0:
             raise JMCSyntaxException(
-                f"In {self.file_path}\nExpected semicolon(;) at line {self.line} (at the end of the file).")
+                f"In {self.file_path}\nExpected semicolon(;) at line {self.keywords[-1].line} col {self.keywords[-1].col+self.keywords[-1].length}.\n{self.raw_string.split(Re.NEW_LINE)[self.keywords[-1].line-1][:self.keywords[-1].col+self.keywords[-1].length]} <-")
 
         if expect_semicolon:
             return self.list_of_tokens

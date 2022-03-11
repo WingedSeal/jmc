@@ -131,6 +131,7 @@ dmypy.json
 # Custom
 tests/
 logs/
+log/
 test.*
 .vscode
 jmc_config.json

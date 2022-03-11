@@ -1,4 +1,5 @@
 from collections import defaultdict
+from .tokenizer import Token
 from .log import Logger
 
 logger = Logger(__name__)
@@ -13,8 +14,13 @@ class Function:
 
 
 class DataPack:
+    PRIVATE_STR = '__private__'
+    LOAD_NAME = '__load__'
+    TICK_NAME = '__tick__'
+
     ints: set[int] = set()
     functions: dict[str, Function] = dict()
+    load_function: list[Token] = []
     jsons: dict[str, dict[str, dict]] = defaultdict(dict)
     private_functions: dict[str, dict[str, Function]] = defaultdict(dict)
 
