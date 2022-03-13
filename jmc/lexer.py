@@ -60,11 +60,11 @@ class Lexer:
             elif command[0].string == '@import':
                 if len(command) != 2:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected 1 arguments after '@import' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length]} <-"
+                        f"In {tokenizer.file_path}\nExpected 1 arguments after '@import' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
                     )
                 if command[1].token_type != TokenType.string:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected string after '@import' at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                        f"In {tokenizer.file_path}\nExpected string after '@import' at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
                     )
                 try:
                     new_path = Path(
@@ -77,13 +77,13 @@ class Lexer:
                         )
                 except Exception:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected invalid path ({command[1].string}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                        f"In {tokenizer.file_path}\nExpected invalid path ({command[1].string}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
                     )
                 self.parse_file(file_path=new_path)
             else:
                 if not is_load:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nCommand({command[1].string}) found inside non-load file at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                        f"In {tokenizer.file_path}\nCommand({command[1].string}) found inside non-load file at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
                     )
                 self.datapack.load_function.append(command)
 
@@ -107,7 +107,7 @@ class Lexer:
         func_content = command[3].string[1:-1]
         if func_path in self.datapack.functions:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate function declaration({func_path}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length]} <-"
+                f"In {tokenizer.file_path}\nDuplicate function declaration({func_path}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length-1]} <-"
             )
         elif func_path == self.datapack.LOAD_NAME:
             raise JMCSyntaxException(
@@ -124,7 +124,7 @@ class Lexer:
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
         if len(command) != 4:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected 3 arguments after 'new' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length]} <-"
+                f"In {tokenizer.file_path}\nExpected 3 arguments after 'new' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length -1]} <-"
             )
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
@@ -149,7 +149,7 @@ class Lexer:
         json_content = command[3].string
         if json_path in self.datapack.jsons:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate json({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1+command[2].length]} <-"
+                f"In {tokenizer.file_path}\nDuplicate json({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
             )
         try:
             json: dict[str, str] = loads(json_content)
@@ -166,7 +166,7 @@ class Lexer:
         logger.debug(f"Parsing Class, prefix = {prefix!r}")
         if len(command) != 3:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected 2 arguments after 'class' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length]} <-"
+                f"In {tokenizer.file_path}\nExpected 2 arguments after 'class' (got {len(command)-1}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length-1]} <-"
             )
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
@@ -216,7 +216,7 @@ class Lexer:
                 )
             elif command[0].string not in FIRST_ARGUMENTS:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length]} <-"
+                    f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
                 )
 
             if commands:
@@ -289,6 +289,8 @@ class Lexer:
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
                         commands.append(clean_up_paren(token.string))
+                    if token.token_type == TokenType.string:
+                        commands.append(repr(token.string))
                     else:
                         commands.append(token.string)
 
