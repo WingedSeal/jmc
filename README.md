@@ -3,7 +3,7 @@
 # (JMC)
 
 A compiler for compiling .jmc file (custom language) to minecraft datapack.
-The language is _inspired_ from JavaScript. It's not exactly like JavaScript
+The language is _inspired_ by JavaScript. It's not exactly like JavaScript
 
 ## Why use JMC
 

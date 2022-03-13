@@ -10,6 +10,12 @@ class JMCSyntaxException(SyntaxError):
         super().__init__(*args)
 
 
+class JMCSyntaxWarning(SyntaxWarning):
+    def __init__(self, *args: object) -> None:
+        logger.warning(f"JMCSyntaxWarning\n{args[0]}")
+        super().__init__(*args)
+
+
 class JMCFileNotFoundError(FileNotFoundError):
     def __init__(self, *args: object) -> None:
         logger.warning(f"JMCFileNotFoundError\n{args[0]}")

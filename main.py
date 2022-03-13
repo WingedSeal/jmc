@@ -8,7 +8,7 @@ from datetime import datetime
 from time import perf_counter
 
 import jmc
-from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
+from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
@@ -167,7 +167,7 @@ exit: Exit compiler
             stop_time = perf_counter()
             pprint(
                 f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
-        except (JMCSyntaxException, JMCFileNotFoundError, JMCDecodeJSONError) as error:
+        except (JMCSyntaxException, JMCFileNotFoundError, JMCDecodeJSONError, JMCSyntaxWarning) as error:
             error_report(error)
         except Exception as error:
             logger.exception("Non-JMC Exception occur")

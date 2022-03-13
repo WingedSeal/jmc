@@ -5,7 +5,7 @@ from typing import Optional
 from enum import Enum
 import re
 
-from .exception import JMCSyntaxException
+from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
 
@@ -103,7 +103,7 @@ class Tokenizer:
     # Comment
     is_slash: bool
 
-    def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1, file_string: str = None) -> None:
+    def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1, file_string: str = None, expect_semicolon: bool = True) -> None:
         logger.debug("Initializing Tokenizer")
         self.raw_string = raw_string
         if file_string is None:
@@ -111,7 +111,8 @@ class Tokenizer:
         else:
             self.file_string = file_string
         self.file_path = file_path_str
-        self.programs = self.parse(self.raw_string, line=line, col=col)
+        self.programs = self.parse(
+            self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon)
 
     def append_token(self) -> None:
         self.keywords.append(
@@ -129,8 +130,11 @@ class Tokenizer:
             logger.debug(f"Appending keywords: {self.keywords}")
             self.list_of_tokens.append(self.keywords)
             self.keywords = []
+        else:
+            raise JMCSyntaxWarning(
+                f"In {self.file_path}\nUnnecessary semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
 
-    def parse(self, string: str, line: int, col: int, expect_semicolon=True) -> list[list[Token]]:
+    def parse(self, string: str, line: int, col: int, expect_semicolon: bool) -> list[list[Token]]:
         self.list_of_tokens = []
         self.line = line
         self.col = col - 1
