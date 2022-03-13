@@ -2,19 +2,20 @@ from pathlib import Path
 from json import loads, JSONDecodeError
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
-from .vanilla_command import COMMANDS
+from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .datapack import DataPack, Function
+from .datapack import DataPack
 from .log import Logger
-from .command import BUILT_IN_FUNCTIONS, FLOW_CONTROLS
+from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, used_command, clean_up_paren
 
 logger = Logger(__name__)
 
 
 FIRST_ARGUMENTS = [
-    *COMMANDS,
-    *BUILT_IN_FUNCTIONS,
-    *FLOW_CONTROLS
+    *VANILLA_COMMANDS,
+    *LOAD_ONCE_COMMANDS,
+    *EXCLUDE_EXECUTE_COMMANDS,
+    *JMC_COMMANDS
 ]
 FIRST_ARGUMENTS.remove('if')
 """All vanilla commands and JMC custom syntax 
@@ -24,13 +25,19 @@ NEW_LINE = '\n'
 
 
 class Lexer:
+    load_tokenizer: Tokenizer
+
     def __init__(self, config: dict[str, str]) -> None:
         logger.debug("Initializing Lexer")
         self.config = config
         self.datapack = DataPack(config["namespace"])
-        self.parse_file(Path(self.config["target"]))
+        self.parse_file(Path(self.config["target"]), is_load=True)
 
-    def parse_file(self, file_path: Path) -> None:
+        logger.debug(f"Load Function")
+        self.datapack.functions[self.datapack.LOAD_NAME] = self.parse_func_content(
+            '', '', 0, 0, '', is_load=True, programs=self.datapack.load_function)
+
+    def parse_file(self, file_path: Path, is_load=False) -> None:
         logger.info(f"Parsing file: {file_path}")
         file_path_str = file_path.resolve().as_posix()
         try:
@@ -40,6 +47,8 @@ class Lexer:
             raise JMCFileNotFoundError(
                 f"JMC file not found: {file_path.resolve().as_posix()}")
         tokenizer = Tokenizer(raw_string, file_path_str)
+        if is_load:
+            self.load_tokenizer = tokenizer
 
         for command in tokenizer.programs:
             if command[0].string == 'function' and len(command) == 4:
@@ -71,12 +80,12 @@ class Lexer:
                         f"In {tokenizer.file_path}\nExpected invalid path ({command[1].string}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
                     )
                 self.parse_file(file_path=new_path)
-            elif command[0].string in COMMANDS:
-                self.datapack.load_function.extend(command)
-            elif command[0].string in BUILT_IN_FUNCTIONS:
-                self.datapack.load_function.extend(command)
-            elif command[0].string in FLOW_CONTROLS:
-                self.datapack.load_function.extend(command)
+            else:
+                if not is_load:
+                    raise JMCSyntaxException(
+                        f"In {tokenizer.file_path}\nCommand({command[1].string}) found inside non-load file at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length]} <-"
+                    )
+                self.datapack.load_function.append(command)
 
     def parse_func(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = '') -> None:
         logger.debug(f"Parsing function, prefix = {prefix!r}")
@@ -173,11 +182,21 @@ class Lexer:
         self.parse_class_content(class_path+'.',
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)
 
-    def parse_func_content(self, func_content: str, file_path_str: str, line: int, col: int, file_string: str, is_load=False) -> Function:
-        tokenizer = Tokenizer(func_content, file_path_str,
-                              line=line, col=col, file_string=file_string)
+    def parse_func_content(self,
+                           func_content: str, file_path_str: str, line: int, col: int, file_string: str,
+                           is_load=False, programs: list[list[Token]] = None
+                           ) -> list[str]:
+
+        if is_load:
+            tokenizer = self.load_tokenizer
+        else:
+            tokenizer = Tokenizer(func_content, file_path_str,
+                                  line=line, col=col, file_string=file_string)
+            programs = tokenizer.programs
+
         command_strings = []
-        for command in tokenizer.programs:
+        commands = []
+        for command in programs:
             if command[0].string == 'new':
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\n'new' keyword found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
@@ -195,8 +214,14 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
+            elif command[0].string not in FIRST_ARGUMENTS:
+                raise JMCSyntaxException(
+                    f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length]} <-"
+                )
 
-            command_str = ""
+            if commands:
+                command_strings.append(' '.join(commands))
+                commands = []
             is_expect_command = True
             is_execute = (command[0].string == 'execute')
             for key_pos, token in enumerate(command):
@@ -206,9 +231,50 @@ class Lexer:
                         raise JMCSyntaxException(
                             f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
                         )
-                    # TODO: PARSE FUNC
-                    if token.string in BUILT_IN_FUNCTIONS:
-                        pass
+
+                    matched_function = LOAD_ONCE_COMMANDS.get(
+                        token.string, None)
+
+                    if matched_function is not None:
+                        if is_execute:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
+                            )
+                        if token.string in used_command:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature only be used once per datapack at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
+                            )
+                        if not is_load:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
+                            )
+                        # TODO: RUN FUNCTION
+                        print('LOAD_ONCE_COMMANDS')
+                        break
+
+                    matched_function = EXCLUDE_EXECUTE_COMMANDS.get(
+                        token.string, None)
+
+                    if matched_function is not None:
+                        if is_execute:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos].line-1][:token.col + token.length - 1]} <-"
+                            )
+                        # TODO: RUN FUNCTION
+                        break
+
+                    matched_function = JMC_COMMANDS.get(
+                        token.string, None)
+
+                    if matched_function is not None:
+                        # TODO: RUN FUNCTION
+                        break
+
+                    if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
+                        commands.append(clean_up_paren(token.string))
+                    else:
+                        commands.append(token.string)
+
                 else:
                     if command == 'run' and is_execute:
                         is_expect_command = True
@@ -221,7 +287,16 @@ class Lexer:
                             f"In {tokenizer.file_path}\nKeyword({token.string}) at line {token.line} col {token.col} is regonized as a command.\nExpected semicolon(;) at line {command[key_pos-1].line} col {col}\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos-1].line-1][:col-1]} <-"
                         )
 
-        return Function(command_strings)
+                    if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
+                        commands.append(clean_up_paren(token.string))
+                    else:
+                        commands.append(token.string)
+
+        if commands:
+            command_strings.append(' '.join(commands))
+            commands = []
+
+        return command_strings
 
     def parse_class_content(self, prefix: str, class_content: str, file_path_str: str, line: int, col: int, file_string: str) -> None:
         tokenizer = Tokenizer(class_content, file_path_str,

@@ -1,16 +1,9 @@
 from collections import defaultdict
+from json import dumps
 from .tokenizer import Token
 from .log import Logger
 
 logger = Logger(__name__)
-
-
-class Function:
-    def __init__(self, commands: list[str]) -> None:
-        self.commands = commands
-
-    def __repr__(self) -> str:
-        return f"Function(commands={repr(self.commands)})"
 
 
 class DataPack:
@@ -19,10 +12,10 @@ class DataPack:
     TICK_NAME = '__tick__'
 
     ints: set[int] = set()
-    functions: dict[str, Function] = dict()
-    load_function: list[Token] = []
+    functions: dict[str, list[str]] = dict()
+    load_function: list[list[Token]] = []
     jsons: dict[str, dict[str, dict]] = defaultdict(dict)
-    private_functions: dict[str, dict[str, Function]] = defaultdict(dict)
+    private_functions: dict[str, dict[str, list[str]]] = defaultdict(dict)
 
     loads: list[str] = []
     ticks: list[str] = []
@@ -30,3 +23,19 @@ class DataPack:
     def __init__(self, namespace: str) -> None:
         logger.debug("Initializing Datapack")
         self.namespace = namespace
+
+    def __repr__(self) -> str:
+        return f"""DataPack(
+    PRIVATE_STR = {self.PRIVATE_STR},
+    LOAD_NAME = {self.LOAD_NAME},
+    TICK_NAME = {self.TICK_NAME},
+    
+    ints = {self.ints!r}
+    function = 
+{dumps(self.functions, indent=2)}
+    jsons =
+{dumps(self.jsons, indent=2)}
+    private_functions = 
+{dumps(self.private_functions, indent=2)}
+
+)"""

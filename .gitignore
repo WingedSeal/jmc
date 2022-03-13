@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # Custom
-tests/
+test/
 logs/
 log/
 test.*
