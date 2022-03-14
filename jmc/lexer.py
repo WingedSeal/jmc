@@ -313,7 +313,7 @@ class Lexer:
                                 f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
                         used_command.add(token.string)
-                        # TODO: RUN FUNCTION
+                        # TODO: Parse JMC commands that can only be used once in load
                         print('LOAD_ONCE_COMMANDS')
                         break
 
@@ -325,14 +325,16 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        # TODO: RUN FUNCTION
+                        # TODO: Parse JMC commands that can't be used with execute run
+                        # TODO: Add a new method in this class to tokenize switch case
+                        # TODO: Add while loop, switch case, do while etc. to EXCLUDE_EXECUTE_COMMANDS
                         break
 
                     matched_function = JMC_COMMANDS.get(
                         token.string, None)
 
                     if matched_function is not None:
-                        # TODO: RUN FUNCTION
+                        # TODO: Parse JMC commands that can be used anywhere
                         break
 
                     if token.string == 'if':
@@ -414,6 +416,6 @@ class Lexer:
                 )
 
     def parse_if_else(self, if_else_chain: list[tuple[Optional[Token], Token]]) -> None:
-        from pprint import pprint
-        pprint(if_else_chain)
+        # TODO: Use tokens to create if else in mcfunction
+        # TODO: Create `condition.py for parsing condition`
         if_else_chain = []
