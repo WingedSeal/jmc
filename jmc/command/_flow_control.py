@@ -2,7 +2,6 @@ import imp
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
-from .condition import _tokenize
 
 NEW_LINE = '\n'
 
@@ -88,7 +87,6 @@ def while_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer")
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nExpected {'{'} at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
             )
-        _tokenize([command[1]], tokenizer)
         return "TEST"
         # TODO: HANDLE WHILE
     else:
