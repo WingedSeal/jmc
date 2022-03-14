@@ -7,7 +7,7 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack
 from .log import Logger
-from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, used_command, clean_up_paren
+from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, FLOW_CONTROL_COMMANDS, used_command, clean_up_paren
 
 logger = Logger(__name__)
 
@@ -16,7 +16,8 @@ FIRST_ARGUMENTS = [
     *VANILLA_COMMANDS,
     *LOAD_ONCE_COMMANDS,
     *EXCLUDE_EXECUTE_COMMANDS,
-    *JMC_COMMANDS
+    *JMC_COMMANDS,
+    *FLOW_CONTROL_COMMANDS
 ]
 """All vanilla commands and JMC custom syntax 
 
@@ -30,7 +31,7 @@ class Lexer:
     def __init__(self, config: dict[str, str]) -> None:
         logger.debug("Initializing Lexer")
         self.config = config
-        self.datapack = DataPack(config["namespace"])
+        self.datapack = DataPack(config["namespace"], self)
         self.parse_file(Path(self.config["target"]), is_load=True)
 
         logger.debug(f"Load Function")
@@ -212,9 +213,11 @@ class Lexer:
 
         command_strings = []
         commands = []
+        """List of argument in a line of command"""
         if_else_chain: list[tuple[Optional[Token], Token]] = []
         "List of condition string and token"
         for command in programs:
+
             if command[0].token_type != TokenType.keyword:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nExpected keyword at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col]} <-"
@@ -250,8 +253,8 @@ class Lexer:
                     is_expect_command = False
                     if token.token_type != TokenType.keyword:
                         if token.token_type == TokenType.paren_curly and is_execute:
-                            # TODO: Add anonymous func
-                            print("ANONYMOUS FUNC")
+                            commands.append(self.datapack.add_private_functions(
+                                'anonymous', token, tokenizer))
                             break
                         else:
                             raise JMCSyntaxException(
@@ -319,7 +322,6 @@ class Lexer:
                             )
                         used_command.add(token.string)
                         # TODO: Parse JMC commands that can only be used once in load
-                        print('LOAD_ONCE_COMMANDS')
                         break
 
                     matched_function = EXCLUDE_EXECUTE_COMMANDS.get(
@@ -328,9 +330,21 @@ class Lexer:
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                                f"In {tokenizer.file_path}\nThis feature({token.string}) cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
                         # TODO: Parse JMC commands that can't be used with execute run
+                        break
+
+                    matched_function = FLOW_CONTROL_COMMANDS.get(
+                        token.string, None)
+
+                    if matched_function is not None:
+                        if is_execute:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature({token.string}) cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
+                        matched_function(
+                            command[key_pos:], self.datapack, tokenizer)
                         # TODO: Add a new method in this class to tokenize switch case
                         # TODO: Add while loop, switch case, do while etc. to EXCLUDE_EXECUTE_COMMANDS
                         break
