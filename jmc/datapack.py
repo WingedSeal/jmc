@@ -11,17 +11,17 @@ class DataPack:
     LOAD_NAME = '__load__'
     TICK_NAME = '__tick__'
 
-    ints: set[int] = set()
-    functions: dict[str, list[str]] = dict()
-    load_function: list[list[Token]] = []
-    jsons: dict[str, dict[str, dict]] = defaultdict(dict)
-    private_functions: dict[str, dict[str, list[str]]] = defaultdict(dict)
-
-    loads: list[str] = []
-    ticks: list[str] = []
-
     def __init__(self, namespace: str) -> None:
         logger.debug("Initializing Datapack")
+        self.ints: set[int] = set()
+        self.functions: dict[str, list[str]] = dict()
+        self.load_function: list[list[Token]] = []
+        self.jsons: dict[str, dict[str, dict]] = defaultdict(dict)
+        self.private_functions: dict[str,
+                                     dict[str, list[str]]] = defaultdict(dict)
+
+        self.loads: list[str] = []
+        self.ticks: list[str] = []
         self.namespace = namespace
 
     def __repr__(self) -> str:
