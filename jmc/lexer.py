@@ -249,9 +249,14 @@ class Lexer:
                 if is_expect_command:
                     is_expect_command = False
                     if token.token_type != TokenType.keyword:
-                        raise JMCSyntaxException(
-                            f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                        )
+                        if token.token_type == TokenType.paren_curly and is_execute:
+                            # TODO: Add anonymous func
+                            print("ANONYMOUS FUNC")
+                            break
+                        else:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
 
                     if token.string == 'else':
                         if not if_else_chain:
@@ -363,13 +368,22 @@ class Lexer:
                             (command[key_pos+1], command[key_pos+2]))
                         break
 
+                    if token.string in ['new', 'class' '@import'] or (
+                        token.string == 'function' and
+                        len(command) > key_pos + 2
+                    ):
+                        if is_execute:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
+
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
                         commands.append(clean_up_paren(token.string))
                     else:
                         commands.append(token.string)
 
                 else:
-                    if command == 'run' and is_execute:
+                    if token.string == 'run' and is_execute:
                         is_expect_command = True
                     if (
                         token.token_type == TokenType.keyword and
