@@ -7,7 +7,7 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack
 from .log import Logger
-from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, FLOW_CONTROL_COMMANDS, used_command, clean_up_paren
+from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, FLOW_CONTROL_COMMANDS, used_command
 
 logger = Logger(__name__)
 
@@ -338,7 +338,8 @@ class Lexer:
                             )
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
-                        commands.append(clean_up_paren(token.string))
+                        commands.append(tokenizer.clean_up_paren(
+                            token))
                     else:
                         commands.append(token.string)
 
@@ -355,9 +356,14 @@ class Lexer:
                         )
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
-                        commands.append(clean_up_paren(token.string))
+                        commands.append(tokenizer.clean_up_paren(
+                            token))
                     elif token.token_type == TokenType.paren_square:
-                        commands[-1] += clean_up_paren(token.string)
+                        if commands[-1] in ['@a', '@e', '@s', '@r', '@p']:
+                            commands[-1] += tokenizer.clean_up_paren(token)
+                        else:
+                            commands.append(tokenizer.clean_up_paren(
+                                token))
                     elif token.token_type == TokenType.string:
                         commands.append(repr(token.string))
                     else:

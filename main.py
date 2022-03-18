@@ -145,6 +145,7 @@ class CMD:
         pprint("""Avaliable commands:
 
 compile: Compile your JMC file(s)
+compile debug: Compile your JMC file(s) but log output datapack
 autocompile: Start automatically compiling with certain interval
 log debug: Create log file in output directory
 log info: Create log file in output directory
@@ -163,7 +164,7 @@ exit: Exit compiler
         pprint("Compiling...", Colors.INFO)
         try:
             start_time = perf_counter()
-            jmc.compile(config)
+            jmc.compile(config, debug=True)
             stop_time = perf_counter()
             pprint(
                 f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)

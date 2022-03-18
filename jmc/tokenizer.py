@@ -288,10 +288,19 @@ class Tokenizer:
             raise JMCSyntaxException(
                 f"In {self.file_path}\nExpected semicolon(;) at line {self.keywords[-1].line} col {self.keywords[-1].col+self.keywords[-1].length}.\n{self.raw_string.split(Re.NEW_LINE)[self.keywords[-1].line-1][:self.keywords[-1].col+self.keywords[-1].length]} <-")
 
-        if expect_semicolon:
-            return self.list_of_tokens
-        else:
-            return self.list_of_tokens[0]
+        return self.list_of_tokens
+
+    def split_token(self, token: Token, split_str: str) -> list[Token]:
+        if token.token_type != TokenType.keyword:
+            raise ValueError(
+                f"Called split_token on non-keyword token."
+            )
+        strings = token.string.split(split_str)
+        tokens = []
+        col = token.col
+        for string in strings:
+            tokens += Token(TokenType.keyword, token.line, col, string)
+            col += len(string)
 
     def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
         if token.token_type != TokenType.paren_round:
@@ -299,7 +308,7 @@ class Tokenizer:
                 f"In {self.file_path}\nExpected ( at line {token.line} col {token.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-"
             )
         keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)
+            token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)[0]
         args: list[Token] = []
         kwargs: dict[str, Token] = dict()
         key: str = ""
@@ -431,3 +440,16 @@ class Tokenizer:
         pprint(kwargs)
 
         return args, kwargs
+
+    def clean_up_paren(self, token: Token) -> str:
+        open = token.string[0]
+        close = token.string[-1]
+        tokenizer = Tokenizer(token.string[1:-1], self.file_path, token.line,
+                              token.col, self.file_string, expect_semicolon=False)
+        string = ""
+        for token_ in tokenizer.programs[0]:
+            if token_.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
+                string += tokenizer.clean_up_paren(token_)
+            else:
+                string += token_.string
+        return open+string+close
