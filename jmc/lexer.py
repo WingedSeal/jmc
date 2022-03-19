@@ -274,6 +274,26 @@ class Lexer:
                                 f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
 
+                    if token.string == 'say':
+                        if len(command[key_pos:]) == 1:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nExpected string after 'say' at line {token.line} col {token.col+token.length}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
+                        if command[key_pos+1].token_type != TokenType.string:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nExpected string after 'say' at line {token.line} col {token.col+token.length}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-\n(In JMC, you are required to wrapped say command's argument in quote.)"
+                            )
+                        if len(command[key_pos:]) > 2:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nUnexpected token at line {command[key_pos+2].line} col {command[key_pos+2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+2].line-1][:command[key_pos+2].col]} <-"
+                            )
+                        if '\n' in command[key_pos+1].string:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nNewline found in say command at line {command[key_pos+1]} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col+command[key_pos+1].string.find(NEW_LINE)+2]} <-"
+                            )
+                        commands.append(f"say {command[key_pos+1].string}")
+                        break
+
                     matched_function = LOAD_ONCE_COMMANDS.get(
                         token.string, None)
 
