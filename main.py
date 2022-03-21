@@ -255,6 +255,7 @@ Type `cancel` to cancel
 if __name__ == '__main__':
     atexit.register(lambda: print(Colors.EXIT.value, end=""))
     logger.info("Starting session")
+    # main()
     while True:
         try:
             main()
