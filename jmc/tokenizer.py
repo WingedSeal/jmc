@@ -113,7 +113,6 @@ class Tokenizer:
         self.file_path = file_path_str
         self.programs = self.parse(
             self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon)
-        print(self.parse_func_args(self.programs[0][0]))
 
     def append_token(self) -> None:
         self.keywords.append(

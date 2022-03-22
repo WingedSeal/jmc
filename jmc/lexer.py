@@ -379,7 +379,12 @@ class Lexer:
                         commands.append(tokenizer.clean_up_paren(
                             token))
                     elif token.token_type == TokenType.paren_square:
-                        if commands[-1] in ['@a', '@e', '@s', '@r', '@p']:
+                        if (
+                            commands[-1] in ['@a', '@e', '@s', '@r', '@p'] and
+                            command[key_pos-1].line == token.line and
+                            command[key_pos-1].col +
+                                command[key_pos-1].length == token.col
+                        ):
                             commands[-1] += tokenizer.clean_up_paren(token)
                         else:
                             commands.append(tokenizer.clean_up_paren(
