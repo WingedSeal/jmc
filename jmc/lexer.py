@@ -7,7 +7,12 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack
 from .log import Logger
-from .command import LOAD_ONCE_COMMANDS, EXCLUDE_EXECUTE_COMMANDS, JMC_COMMANDS, FLOW_CONTROL_COMMANDS, used_command
+from .command import (LOAD_ONCE_COMMANDS,
+                      EXCLUDE_EXECUTE_COMMANDS,
+                      JMC_COMMANDS,
+                      FLOW_CONTROL_COMMANDS,
+                      variable_operation,
+                      used_command)
 
 logger = Logger(__name__)
 
@@ -294,9 +299,12 @@ class Lexer:
                         commands.append(f"say {command[key_pos+1].string}")
                         break
 
+                    if token.string.startswith('$'):
+                        variable_operation(command[key_pos:])
+                        break
+
                     matched_function = LOAD_ONCE_COMMANDS.get(
                         token.string, None)
-
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
@@ -316,7 +324,6 @@ class Lexer:
 
                     matched_function = EXCLUDE_EXECUTE_COMMANDS.get(
                         token.string, None)
-
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
@@ -327,7 +334,6 @@ class Lexer:
 
                     matched_function = FLOW_CONTROL_COMMANDS.get(
                         token.string, None)
-
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
@@ -343,7 +349,6 @@ class Lexer:
 
                     matched_function = JMC_COMMANDS.get(
                         token.string, None)
-
                     if matched_function is not None:
                         # TODO: Parse JMC commands that can be used anywhere
                         break
