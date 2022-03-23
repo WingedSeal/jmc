@@ -457,6 +457,8 @@ class Tokenizer:
         return args, kwargs
 
     def clean_up_paren(self, token: Token) -> str:
+        if len(token.string) == 2:
+            return token.string
         open = token.string[0]
         close = token.string[-1]
         tokenizer = Tokenizer(token.string[1:-1], self.file_path, token.line,

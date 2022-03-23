@@ -131,7 +131,7 @@ def main() -> None:
             "log": CMD.log,
             "autocompile": CMD.autocompile,
             "config": CMD.config,
-        }.get(command[0], CMD.default)(command[1:])
+        }.get(command[0], CMD.default)(*command[1:])
 
 
 class CMD:

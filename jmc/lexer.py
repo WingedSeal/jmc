@@ -272,9 +272,10 @@ class Lexer:
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
             elif command[0].string not in FIRST_ARGUMENTS and command[0].string not in ['if', 'else']:
-                raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-                )
+                if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
+                    raise JMCSyntaxException(
+                        f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
+                    )
 
             # Boxes check
             if self.do_while_box is not None:
@@ -388,6 +389,14 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
+                    if len(command[key_pos:]) == 2 and command[key_pos+1].token_type == TokenType.paren_round:
+                        if command[key_pos+1].string != '()':
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nCustom function's parameter is not supported.\nExpected empty bracket at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col + command[key_pos+1].length - 1]} <-"
+                            )
+                        commands.append(
+                            f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
+                        break
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
                         commands.append(tokenizer.clean_up_paren(
