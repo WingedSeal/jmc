@@ -2,7 +2,7 @@ from pathlib import Path
 from json import loads, JSONDecodeError
 from typing import Optional
 
-from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException
+from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack
@@ -16,6 +16,25 @@ from .command import (LOAD_ONCE_COMMANDS,
 
 logger = Logger(__name__)
 
+JSON_FILE_TYPES = [
+    "advancements",
+    "dimension",
+    "dimension_type",
+    "functions",
+    "loot_tables",
+    "predicates",
+    "recipes",
+    "structures",
+    "tags",
+    "worldgen/biome",
+    "worldgen/configured_carver",
+    "worldgen/configured_feature",
+    "worldgen/configured_structure_feature",
+    "worldgen/configured_surface_builder",
+    "worldgen/noise_settings",
+    "worldgen/processor_list",
+    "worldgen/template_pool",
+]
 
 FIRST_ARGUMENTS = [
     *VANILLA_COMMANDS,
@@ -137,19 +156,19 @@ class Lexer:
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
         if len(command) < 2:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(json file's type) at line {command[0].line} col {command[0].col +  + command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
+                f"In {tokenizer.file_path}\nExpected keyword(JSON file's type) at line {command[0].line} col {command[0].col +  + command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
             )
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(json file's type) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
+                f"In {tokenizer.file_path}\nExpected keyword(JSON file's type) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
             )
         if len(command) < 3:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected json file's path in bracket at line {command[1].line + command[1].length} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length -1]} <-"
+                f"In {tokenizer.file_path}\nExpected JSON file's path in bracket at line {command[1].line + command[1].length} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length -1]} <-"
             )
         if command[2].string == '()':
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected json file's path in bracket at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col]} <-"
+                f"In {tokenizer.file_path}\nExpected JSON file's path in bracket at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col]} <-"
             )
         if command[2].token_type != TokenType.paren_round:
             raise JMCSyntaxException(
@@ -164,14 +183,22 @@ class Lexer:
                 f"In {tokenizer.file_path}\nExpected {'{'} at line {command[3].line} col {command[3].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[3].line-1][:command[3].col-1]} <-"
             )
 
-        json_type = command[1].string
-        json_path = json_type + '/' + prefix + \
-            command[2].string[1:-1].lower().replace('.', '/')
+        json_type = command[1].string.replace('.', '/')
+        if json_type not in JSON_FILE_TYPES:
+            raise MinecraftSyntaxWarning(
+                f"In {tokenizer.file_path}\nUnregonized JSON file's type({json_type}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-\nExample of valid JSON file type: advancements, predicates, etc."
+            )
+        json_path = json_type + '.' + prefix + \
+            command[2].string[1:-1].replace('.', '/')
+        if not json_path.islower():
+            raise MinecraftSyntaxWarning(
+                f"In {tokenizer.file_path}\nUppercase letter found in JSON file's path({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
+            )
         logger.debug(f"JSON: {json_type}({json_path})")
         json_content = command[3].string
         if json_path in self.datapack.jsons:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate json({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
+                f"In {tokenizer.file_path}\nDuplicate JSON({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
             )
         try:
             json: dict[str, str] = loads(json_content)
