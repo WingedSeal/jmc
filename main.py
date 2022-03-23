@@ -44,7 +44,7 @@ def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
     return input_value
 
 
-def error_report(error: Exception):
+def error_report(error: Exception) -> None:
     pprint(type(error).__name__, Colors.FAIL_BOLD)
     pprint(error, Colors.FAIL)
 
@@ -53,6 +53,7 @@ def main() -> None:
     global config
     os.system("")
     pprint(' JMC Compiler\n', Colors.HEADER)
+    pprint(f'Current Directory | {CWD}\n', Colors.YELLOW)
     if not (CWD/CONFIG_FILE_NAME).is_file():
         pprint(
             f'No confile file found, generating {CONFIG_FILE_NAME}...', Colors.INFO
