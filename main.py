@@ -8,7 +8,14 @@ from datetime import datetime
 from time import perf_counter
 
 import jmc
-from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
+from jmc.exception import (
+    JMCDecodeJSONError,
+    JMCFileNotFoundError,
+    JMCSyntaxException,
+    JMCSyntaxWarning,
+    MinecraftSyntaxWarning,
+    JMCError
+)
 from getpass import getpass
 
 CWD = Path(os.getcwd())
@@ -191,7 +198,8 @@ exit: Exit compiler
             JMCFileNotFoundError,
             JMCDecodeJSONError,
             JMCSyntaxWarning,
-            MinecraftSyntaxWarning
+            MinecraftSyntaxWarning,
+            JMCError
         ) as error:
             error_report(error)
         except Exception as error:

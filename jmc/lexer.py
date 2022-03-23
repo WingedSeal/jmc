@@ -145,7 +145,7 @@ class Lexer:
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nLoad function is defined at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
             )
-        elif func_path == self.datapack.PRIVATE_STR:
+        elif func_path == self.datapack.PRIVATE_NAME:
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nPrivate function is defined at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
             )

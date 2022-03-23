@@ -44,7 +44,7 @@ class Function:
 
 
 class DataPack:
-    PRIVATE_STR = '__private__'
+    PRIVATE_NAME = '__private__'
     LOAD_NAME = '__load__'
     TICK_NAME = '__tick__'
 
@@ -81,7 +81,7 @@ class DataPack:
         else:
             count = self.get_count()
             self.private_functions[name][count] = Function(commands)
-            return f"function {self.PRIVATE_STR}/{name}/{count}"
+            return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: int, precommands: list[str] = None, postcommands: list[str] = None) -> str:
         if precommands is None and postcommands is None:
@@ -98,16 +98,16 @@ class DataPack:
                     *postcommands]
         self.private_functions[name][count] = Function(commands)
         self.private_function_count[name] += 1
-        return f"function {self.PRIVATE_STR}/{name}/{count}"
+        return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
     def add_raw_private_function(self, name: str, commands: list[str]) -> str:
         count = self.get_count()
         self.private_functions[name][count] = Function(commands)
-        return f"function {self.PRIVATE_STR}/{name}/{count}"
+        return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
     def __repr__(self) -> str:
         return f"""DataPack(
-    PRIVATE_STR = {self.PRIVATE_STR},
+    PRIVATE_STR = {self.PRIVATE_NAME},
     LOAD_NAME = {self.LOAD_NAME},
     TICK_NAME = {self.TICK_NAME},
     
