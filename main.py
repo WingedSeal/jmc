@@ -9,6 +9,7 @@ from time import perf_counter
 
 import jmc
 from jmc.exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning
+from getpass import getpass
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
@@ -121,34 +122,33 @@ def main() -> None:
             config = load(file)
     pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
     while True:
+        command = get_input().split()
         {
+            "cd": CMD.cd,
             "help": CMD.help,
             "exit": CMD.exit,
             "compile": CMD.compile,
-            "log debug": CMD.log_debug,
-            "log info": CMD.log_info,
+            "log": CMD.log,
             "autocompile": CMD.autocompile,
-            "config reset": CMD.config_reset,
-            "config edit": CMD.config_edit
-        }.get(get_input(), CMD.default)()
+            "config": CMD.config,
+        }.get(command[0], CMD.default)(command[1:])
 
 
 class CMD:
     event = threading.Event()
 
     @classmethod
-    def default(cls):
+    def default(cls, *arg):
         pprint("Command not regonized, try `help` for more info.", Colors.FAIL)
 
     @classmethod
     def help(cls):
         pprint("""Avaliable commands:
 
+cd <path>: Change current directory
 compile: Compile your JMC file(s)
-compile debug: Compile your JMC file(s) but log output datapack
-autocompile: Start automatically compiling with certain interval
-log debug: Create log file in output directory
-log info: Create log file in output directory
+autocompile <interval (second)>: Start automatically compiling with certain interval
+log (debug|info): Create log file in output directory
 config reset: Delete the configuration file and restart the compiler
 config edit: Override configuration file and bypass error checking
 help: Output this message
@@ -156,11 +156,28 @@ exit: Exit compiler
 """, color=Colors.YELLOW)
 
     @classmethod
-    def exit(cls):
+    def cd(cls, *args):
+        if not args:
+            pprint("Usage: cd <path>", Colors.FAIL)
+        path = ' '.join(args)
+        try:
+            os.chdir(path)
+            global CWD
+            global LOG_PATH
+            CWD = Path(os.getcwd())
+            LOG_PATH = CWD/'log'
+            main()
+        except ValueError:
+            pprint("Invalid path", Colors.FAIL)
+
+    @classmethod
+    def exit(cls, *args):
         exit(0)
 
     @classmethod
-    def compile(cls):
+    def compile(cls, *args):
+        if args:
+            pprint("Usage: compile", Colors.FAIL)
         pprint("Compiling...", Colors.INFO)
         try:
             start_time = perf_counter()
@@ -175,10 +192,12 @@ exit: Exit compiler
             error_report(error)
 
     @classmethod
-    def autocompile(cls):
+    def autocompile(cls, *args):
+        if len(args) > 1:
+            pprint("Usage: autocompile <interval (second)>", Colors.FAIL)
         while True:
             try:
-                interval = int(get_input("Interval(second): "))
+                interval = int(args[0])
                 break
             except ValueError:
                 pprint("Invalid integer", Colors.FAIL)
@@ -187,7 +206,7 @@ exit: Exit compiler
                 pprint(error, Colors.FAIL)
 
         thread = threading.Thread(
-            target=lambda: cls.background(interval),
+            target=lambda: cls._background(interval),
             daemon=True
         )
         cls.event.clear()
@@ -199,21 +218,32 @@ exit: Exit compiler
         thread.join()
 
     @classmethod
-    def background(cls, interval: int):
+    def _background(cls, interval: int):
         while not cls.event.is_set():
             logger.debug("Auto compiling")
             cls.compile()
             cls.event.wait(interval)
 
     @classmethod
-    def config_reset(cls):
+    def config(cls, *args):
+        if not args:
+            pprint("Usage: config (reset|edit)", Colors.FAIL)
+        if args[0] == 'reset':
+            cls._config_reset()
+        elif args[0] == 'edit':
+            cls._config_reset()
+        else:
+            pprint("Usage: config (reset|edit)", Colors.FAIL)
+
+    @classmethod
+    def _config_reset(cls):
         (CWD/CONFIG_FILE_NAME).unlink(missing_ok=True)
         pprint("Resetting configurations", Colors.PURPLE)
         print('\n'*5)
         main()
 
     @classmethod
-    def config_edit(cls):
+    def _config_edit(cls):
         global config
         pprint(f"""Edit configurations (Bypass error checking)
 Type `cancel` to cancel
@@ -223,7 +253,7 @@ Type `cancel` to cancel
             if key.lower() == 'cancel':
                 return
             pprint("Invalid Key", Colors.FAIL)
-            cls.config_edit()
+            cls._config_edit()
         else:
             pprint(f"Current {key}: {config[key]}", Colors.YELLOW)
             config[key] = get_input("New Value: ")
@@ -231,7 +261,18 @@ Type `cancel` to cancel
                 dump(config, file, indent=2)
 
     @classmethod
-    def log_debug(cls):
+    def log(cls, *args):
+        if len(args) > 1 or not args:
+            pprint("Usage: log (debug|info)", Colors.FAIL)
+        if args[0] == 'debug':
+            cls._log_debug()
+        elif args[0] == 'info':
+            cls._log_info()
+        else:
+            pprint("Usage: log (debug|info)", Colors.FAIL)
+
+    @classmethod
+    def _log_debug(cls):
         logger.info("Requesting debug log")
         LOG_PATH.mkdir(exist_ok=True)
         debug_log = jmc.get_debug_log()
@@ -241,7 +282,7 @@ Type `cancel` to cancel
             file.write(debug_log)
 
     @classmethod
-    def log_info(cls):
+    def _log_info(cls):
         logger.info("Requesting info log")
         LOG_PATH.mkdir(exist_ok=True)
         info_log = jmc.get_info_log()
@@ -265,4 +306,5 @@ if __name__ == '__main__':
             pprint(error, Colors.FAIL)
             logger.critical("Program crashed")
             logger.exception("")
-            get_input("Press Enter to continue... ")
+            getpass(
+                f"{Colors.INPUT.value}Press Enter to continue...{Colors.ENDC.value}")
