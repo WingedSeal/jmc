@@ -100,3 +100,4 @@ def build(datapack: DataPack, config: dict[str, str]):
         if json:
             with path.open('w+') as file:
                 file.write(dumps(json, indent=2))
+    # TODO: Add load and tick function to minecraft function tag
