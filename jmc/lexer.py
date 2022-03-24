@@ -2,10 +2,10 @@ from pathlib import Path
 from json import loads, JSONDecodeError
 from typing import Optional
 
-from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
+from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .datapack import DataPack
+from .datapack import DataPack, Function
 from .log import Logger
 from .command import (LOAD_ONCE_COMMANDS,
                       EXCLUDE_EXECUTE_COMMANDS,
@@ -62,8 +62,8 @@ class Lexer:
         self.parse_file(Path(self.config["target"]), is_load=True)
 
         logger.debug(f"Load Function")
-        self.datapack.functions[self.datapack.LOAD_NAME] = self.parse_func_content(
-            '', '', 0, 0, '', is_load=True, programs=self.datapack.load_function)
+        self.datapack.functions[self.datapack.LOAD_NAME] = Function(self.parse_func_content(
+            '', '', 0, 0, '', is_load=True, programs=self.datapack.load_function))
 
     def parse_file(self, file_path: Path, is_load=False) -> None:
         logger.info(f"Parsing file: {file_path}")
@@ -135,6 +135,10 @@ class Lexer:
             )
 
         func_path = prefix + command[1].string.lower().replace('.', '/')
+        if func_path.startswith(self.datapack.PRIVATE_NAME+'/'):
+            raise JMCSyntaxWarning(
+                f"In {tokenizer.file_path}\nFunction({func_path}) may override private function of JMC at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length-1]} <-\nPlease avoid starting function's path with {self.datapack.PRIVATE_NAME}"
+            )
         logger.debug(f"Function: {func_path}")
         func_content = command[3].string[1:-1]
         if func_path in self.datapack.functions:
@@ -149,8 +153,8 @@ class Lexer:
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nPrivate function is defined at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
             )
-        self.datapack.functions[func_path] = self.parse_func_content(
-            func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string)
+        self.datapack.functions[func_path] = Function(self.parse_func_content(
+            func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 
     def parse_new(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
@@ -188,7 +192,7 @@ class Lexer:
             raise MinecraftSyntaxWarning(
                 f"In {tokenizer.file_path}\nUnregonized JSON file's type({json_type}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-\nExample of valid JSON file type: advancements, predicates, etc."
             )
-        json_path = json_type + '.' + prefix + \
+        json_path = json_type + '/' + prefix + \
             command[2].string[1:-1].replace('.', '/')
         if not json_path.islower():
             raise MinecraftSyntaxWarning(
