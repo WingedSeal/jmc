@@ -88,16 +88,16 @@ def build(datapack: DataPack, config: dict[str, str]):
     namespace_folder = Path(config["output"])/config["namespace"]
     for func_path, func in datapack.functions.items():
         path = namespace_folder/(func_path+'.mcfunction')
-        path.parent.mkdir(parents=True, exist_ok=True)
         content = func.content
         if content:
+            path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('w+') as file:
                 file.write(func.content)
 
     for json_path, json in datapack.jsons.items():
         path = namespace_folder/(json_path+'.json')
-        path.parent.mkdir(parents=True, exist_ok=True)
         if json:
+            path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('w+') as file:
                 file.write(dumps(json, indent=2))
     # TODO: Add load and tick function to minecraft function tag
