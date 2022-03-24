@@ -3,6 +3,7 @@ from ast import literal_eval
 from pprint import pprint
 from typing import Optional
 from enum import Enum
+from json import dumps
 import re
 
 from .exception import JMCSyntaxException, JMCSyntaxWarning
@@ -467,6 +468,8 @@ class Tokenizer:
         for token_ in tokenizer.programs[0]:
             if token_.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
                 string += tokenizer.clean_up_paren(token_)
+            elif token_.token_type == TokenType.string:
+                string += dumps(token_.string)
             else:
                 string += token_.string
         return open+string+close
