@@ -22,44 +22,59 @@ def compile(config: dict[str, str], debug: bool = False) -> None:
     build(lexer.datapack, config)
 
 
-def read_cert(config: dict[str, str]):
-    old_cert_config = f"""LOAD={DataPack.LOAD_NAME}
-TICK={DataPack.TICK_NAME}
-PRIVATE={DataPack.PRIVATE_NAME}"""
+def cert_config_to_string(cert_config: dict[str, str]) -> str:
+    return '\n'.join([f"{key}={value}" for key, value in cert_config.items()])
 
+
+def string_to_cert_config(string: str) -> dict[str, str]:
+    cert_config = dict()
+    for line in string.split('\n'):
+        key, value = line.split('=')
+        cert_config[key.strip()] = value.strip()
+    return cert_config
+
+
+def make_cert(cert_config: dict[str, str], path: Path) -> None:
+    path.parent.mkdir(exist_ok=False)
+    with path.open('w+') as file:
+        file.write(cert_config_to_string(cert_config))
+
+
+def get_cert() -> dict:
+    return {
+        "LOAD": DataPack.LOAD_NAME,
+        "TICK": DataPack.TICK_NAME,
+        "PRIVATE": DataPack.PRIVATE_NAME
+    }
+
+
+def read_cert(config: dict[str, str]):
     namespace_folder = Path(config["output"])/config["namespace"]
-    jmc_cert = namespace_folder/JMC_CERT_FILE_NAME
+    cert_file = namespace_folder/JMC_CERT_FILE_NAME
+    old_cert_config = get_cert()
     if namespace_folder.is_dir():
-        if not jmc_cert.is_file():
+        if not cert_file.is_file():
             raise JMCError(
                 f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself.")
 
-        with jmc_cert.open('r') as file:
-            jmc_cert_str = file.read()
+        with cert_file.open('r') as file:
+            cert_str = file.read()
             try:
-                cert_config = dict()
-                for line in jmc_cert_str.split('\n'):
-                    key, value = line.split('=')
-                    cert_config[key.strip()] = value.strip()
-                DataPack.LOAD_NAME = cert_config["LOAD"]
-                DataPack.TICK_NAME = cert_config["TICK"]
-                DataPack.PRIVATE_NAME = cert_config["PRIVATE"]
+                cert_config = string_to_cert_config(cert_str)
             except ValueError:
-                logger.warning(f"Fail to parse {JMC_CERT_FILE_NAME}")
-                with jmc_cert.open('w+') as file:
-                    file.write(old_cert_config)
                 cert_config = dict()
-                for line in old_cert_config.split('\n'):
-                    key, value = line.split('=')
-                    cert_config[key.strip()] = value.strip()
-                DataPack.LOAD_NAME = cert_config["LOAD"]
-                DataPack.TICK_NAME = cert_config["TICK"]
-                DataPack.PRIVATE_NAME = cert_config["PRIVATE"]
+            DataPack.LOAD_NAME = cert_config.get(
+                "LOAD", old_cert_config["LOAD"])
+            DataPack.TICK_NAME = cert_config.get(
+                "TICK", old_cert_config["TICK"])
+            DataPack.PRIVATE_NAME = cert_config.get(
+                "PRIVATE", old_cert_config["PRIVATE"])
+            cert_config = get_cert()
 
+        rmtree(namespace_folder.resolve().as_posix())
     else:
-        namespace_folder.mkdir(exist_ok=True)
-        with jmc_cert.open('w+') as file:
-            file.write(old_cert_config)
+        cert_config = old_cert_config
+    make_cert(cert_config, cert_file)
 
 
 def build(datapack: DataPack, config: dict[str, str]):
