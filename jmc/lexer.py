@@ -1,5 +1,5 @@
 from pathlib import Path
-from json import loads, JSONDecodeError
+from json import loads, JSONDecodeError, dumps
 from typing import Optional
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
@@ -435,7 +435,7 @@ class Lexer:
                             commands.append(tokenizer.clean_up_paren(
                                 token))
                     elif token.token_type == TokenType.string:
-                        commands.append(repr(token.string))
+                        commands.append(dumps(token.string))
                     else:
                         commands.append(token.string)
 
