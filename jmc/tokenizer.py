@@ -457,7 +457,7 @@ class Tokenizer:
 
         return args, kwargs
 
-    def clean_up_paren(self, token: Token) -> str:
+    def clean_up_paren(self, token: Token, is_nbt: bool = True) -> str:
         if len(token.string) == 2:
             return token.string
         open = token.string[0]
@@ -465,11 +465,16 @@ class Tokenizer:
         tokenizer = Tokenizer(token.string[1:-1], self.file_path, token.line,
                               token.col, self.file_string, expect_semicolon=False)
         string = ""
+        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
+            is_nbt = False
         for token_ in tokenizer.programs[0]:
             if token_.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
-                string += tokenizer.clean_up_paren(token_)
+                string += tokenizer.clean_up_paren(token_, is_nbt)
             elif token_.token_type == TokenType.string:
-                string += dumps(token_.string)
+                if is_nbt:
+                    string += repr(token_.string)
+                else:
+                    string += dumps(token_.string)
             else:
                 string += token_.string
         return open+string+close
