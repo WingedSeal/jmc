@@ -1,5 +1,6 @@
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
+import tokenize
 from typing import Optional
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
@@ -62,8 +63,8 @@ class Lexer:
         self.parse_file(Path(self.config["target"]), is_load=True)
 
         logger.debug(f"Load Function")
-        self.datapack.functions[self.datapack.LOAD_NAME] = Function(self.parse_func_content(
-            '', '', 0, 0, '', is_load=True, programs=self.datapack.load_function))
+        self.datapack.functions[self.datapack.LOAD_NAME] = Function(
+            self.parse_load_func_content(programs=self.datapack.load_function))
 
     def parse_file(self, file_path: Path, is_load=False) -> None:
         logger.info(f"Parsing file: {file_path}")
@@ -239,16 +240,19 @@ class Lexer:
         self.parse_class_content(class_path+'/',
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)
 
+    def parse_load_func_content(self, programs: list[list[Token]]):
+        tokenizer = self.load_tokenizer
+        return self.__parse_func_content(tokenizer, programs, is_load=True)
+
     def parse_func_content(self,
-                           func_content: str, file_path_str: str, line: int, col: int, file_string: str,
-                           is_load=False, programs: list[list[Token]] = None
-                           ) -> list[str]:
-        if is_load:
-            tokenizer = self.load_tokenizer
-        else:
-            tokenizer = Tokenizer(func_content, file_path_str,
-                                  line=line, col=col, file_string=file_string)
-            programs = tokenizer.programs
+                           func_content: str, file_path_str: str,
+                           line: int, col: int, file_string: str) -> list[str]:
+        tokenizer = Tokenizer(func_content, file_path_str,
+                              line=line, col=col, file_string=file_string)
+        programs = tokenizer.programs
+        return self.__parse_func_content(tokenizer, programs, is_load=False)
+
+    def __parse_func_content(self, tokenizer: Tokenizer, programs: list[list[Token]], is_load: bool) -> list[str]:
 
         command_strings = []
         commands: list[str] = []
