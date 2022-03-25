@@ -26,7 +26,7 @@ class JMCFileNotFoundError(FileNotFoundError):
         super().__init__(*args)
 
 
-class JMCError(Exception):
+class JMCBuildError(Exception):
     def __init__(self, *args: object) -> None:
         log(self, args)
         super().__init__(*args)

@@ -50,6 +50,9 @@ class Function(list):
     def __iter__(self) -> Iterable:
         return self.commands.__iter__()
 
+    def __bool__(self):
+        return bool(self.commands)
+
     def __split(self, strings: list[str]) -> list[str]:
         return [str_ for string in strings for str_ in string.split('\n') if str_]
 

@@ -1,11 +1,11 @@
-from json import dumps
+from json import JSONDecodeError, dump, dumps, loads
 from shutil import rmtree
 from pathlib import Path
 
 from .lexer import Lexer
 from .log import Logger
 from .datapack import DataPack
-from .exception import JMCError
+from .exception import JMCBuildError
 
 
 logger = Logger(__name__)
@@ -56,7 +56,7 @@ def read_cert(config: dict[str, str]):
     old_cert_config = get_cert()
     if namespace_folder.is_dir():
         if not cert_file.is_file():
-            raise JMCError(
+            raise JMCBuildError(
                 f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself.")
 
         with cert_file.open('r') as file:
@@ -82,10 +82,49 @@ def read_cert(config: dict[str, str]):
     make_cert(cert_config, cert_file)
 
 
+def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, str]:
+    if path.is_file():
+        with path.open('r') as file:
+            content = file.read()
+        try:
+            json: dict[str, str] = loads(content)
+            json["values"] = [
+                value for value in json["values"] if not value.startswith(config["namespace"]+':')]
+        except JSONDecodeError:
+            raise JMCBuildError(
+                f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.")
+        except KeyError:
+            raise JMCBuildError(
+                f'"values" key not found in {path.resolve().as_posix()}. Deleting the file to reset.')
+    else:
+        json = {"values": []}
+    return json
+
+
 def build(datapack: DataPack, config: dict[str, str]):
     logger.debug("Building")
     datapack.build()
-    namespace_folder = Path(config["output"])/config["namespace"]
+    output_folder = Path(config["output"])
+    namespace_folder = output_folder/config["namespace"]
+    functions_tags_folder = output_folder/'minecraft'/'tags'/'functions'
+
+    functions_tags_folder.mkdir(exist_ok=True, parents=True)
+    load_tag = functions_tags_folder/'load.json'
+    tick_tag = functions_tags_folder/'tick.json'
+
+    load_json = read_func_tag(load_tag, config)
+    tick_json = read_func_tag(tick_tag, config)
+
+    load_json["values"].append(f'{config["namespace"]}:{DataPack.LOAD_NAME}')
+    with load_tag.open('w+') as file:
+        dump(load_json, file, indent=2)
+
+    if datapack.functions[{DataPack.TICK_NAME}]:
+        tick_json["values"].append(
+            f'{config["namespace"]}:{DataPack.TICK_NAME}')
+        with tick_tag.open('w+') as file:
+            dump(tick_json, file, indent=2)
+
     for func_path, func in datapack.functions.items():
         path = namespace_folder/(func_path+'.mcfunction')
         content = func.content
@@ -100,4 +139,3 @@ def build(datapack: DataPack, config: dict[str, str]):
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('w+') as file:
                 file.write(dumps(json, indent=2))
-    # TODO: Add load and tick function to minecraft function tag
