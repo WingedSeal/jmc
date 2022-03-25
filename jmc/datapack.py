@@ -67,9 +67,7 @@ class DataPack:
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
         self.ints: set[int] = set()
-        self.functions: dict[str, Function] = {
-            self.TICK_NAME: Function()
-        }
+        self.functions: dict[str, Function] = dict()
         self.load_function: list[list[Token]] = []
         self.jsons: dict[str, dict[str, dict]] = defaultdict(dict)
         self.private_functions: dict[str,
@@ -140,8 +138,13 @@ class DataPack:
                 criteria in self.__scoreboards.items()],
             *[f"scoreboard players set {n} {self.INT_NAME} {n}" for n in self.ints],
         ]
-        self.functions[self.LOAD_NAME].insert_extend(self.loads, 0)
-        self.functions[self.TICK_NAME].insert_extend(self.ticks, 0)
+        if self.loads:
+            self.functions[self.LOAD_NAME].insert_extend(self.loads, 0)
+        if self.ticks:
+            if self.TICK_NAME in self.functions:
+                self.functions[self.TICK_NAME].insert_extend(self.ticks, 0)
+            else:
+                self.functions[self.TICK_NAME] = Function(self.ticks)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{name}/{path}"] = func

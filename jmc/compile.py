@@ -119,7 +119,7 @@ def build(datapack: DataPack, config: dict[str, str]):
     with load_tag.open('w+') as file:
         dump(load_json, file, indent=2)
 
-    if datapack.functions[DataPack.TICK_NAME]:
+    if DataPack.TICK_NAME in datapack.functions and datapack.functions[DataPack.TICK_NAME]:
         tick_json["values"].append(
             f'{config["namespace"]}:{DataPack.TICK_NAME}')
         with tick_tag.open('w+') as file:

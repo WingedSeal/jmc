@@ -174,7 +174,7 @@ class Tokenizer:
                 self.col = 0
                 continue
 
-            if char == Re.SLASH and self.is_slash and self.state != TokenType.string:
+            if char == Re.SLASH and self.is_slash and self.state != TokenType.paren:
                 self.state = TokenType.comment
                 self.token = self.token[:-1]
                 continue
