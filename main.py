@@ -14,7 +14,7 @@ from jmc.exception import (
     JMCSyntaxException,
     JMCSyntaxWarning,
     MinecraftSyntaxWarning,
-    JMCError
+    JMCBuildError
 )
 from getpass import getpass
 
@@ -199,7 +199,7 @@ exit: Exit compiler
             JMCDecodeJSONError,
             JMCSyntaxWarning,
             MinecraftSyntaxWarning,
-            JMCError
+            JMCBuildError
         ) as error:
             error_report(error)
         except Exception as error:
