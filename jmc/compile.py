@@ -51,7 +51,7 @@ def get_cert() -> dict:
 
 
 def read_cert(config: dict[str, str]):
-    namespace_folder = Path(config["output"])/config["namespace"]
+    namespace_folder = Path(config["output"])/'data'/config["namespace"]
     cert_file = namespace_folder/JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
     if namespace_folder.is_dir():
@@ -105,8 +105,8 @@ def build(datapack: DataPack, config: dict[str, str]):
     logger.debug("Building")
     datapack.build()
     output_folder = Path(config["output"])
-    namespace_folder = output_folder/config["namespace"]
-    functions_tags_folder = output_folder/'minecraft'/'tags'/'functions'
+    functions_folder = output_folder/'data'/config["namespace"]/'functions'
+    functions_tags_folder = output_folder/'data'/'minecraft'/'tags'/'functions'
 
     functions_tags_folder.mkdir(exist_ok=True, parents=True)
     load_tag = functions_tags_folder/'load.json'
@@ -126,7 +126,7 @@ def build(datapack: DataPack, config: dict[str, str]):
             dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
-        path = namespace_folder/(func_path+'.mcfunction')
+        path = functions_folder/(func_path+'.mcfunction')
         content = func.content
         if content:
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,8 +134,16 @@ def build(datapack: DataPack, config: dict[str, str]):
                 file.write(func.content)
 
     for json_path, json in datapack.jsons.items():
-        path = namespace_folder/(json_path+'.json')
+        path = functions_folder/(json_path+'.json')
         if json:
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('w+') as file:
                 file.write(dumps(json, indent=2))
+
+    with (output_folder/'pack.mcmeta').open('w+') as file:
+        dump({
+            "pack": {
+                "pack_format": config["pack_format"],
+                "description": config["description"]
+            }
+        }, file, indent=2)
