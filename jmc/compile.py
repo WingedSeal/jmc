@@ -105,7 +105,7 @@ def build(datapack: DataPack, config: dict[str, str]):
     logger.debug("Building")
     datapack.build()
     output_folder = Path(config["output"])
-    functions_folder = output_folder/'data'/config["namespace"]/'functions'
+    namespace_folder = output_folder/'data'/config["namespace"]
     functions_tags_folder = output_folder/'data'/'minecraft'/'tags'/'functions'
 
     functions_tags_folder.mkdir(exist_ok=True, parents=True)
@@ -126,7 +126,7 @@ def build(datapack: DataPack, config: dict[str, str]):
             dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
-        path = functions_folder/(func_path+'.mcfunction')
+        path = namespace_folder/'functions'/(func_path+'.mcfunction')
         content = func.content
         if content:
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,7 +134,7 @@ def build(datapack: DataPack, config: dict[str, str]):
                 file.write(func.content)
 
     for json_path, json in datapack.jsons.items():
-        path = functions_folder/(json_path+'.json')
+        path = namespace_folder/(json_path+'.json')
         if json:
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('w+') as file:
