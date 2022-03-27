@@ -147,7 +147,7 @@ class CMD:
 
     @classmethod
     def default(cls, *arg):
-        pprint("Command not regonized, try `help` for more info.", Colors.FAIL)
+        pprint("Command not recognized, try `help` for more info.", Colors.FAIL)
 
     @classmethod
     def help(cls):

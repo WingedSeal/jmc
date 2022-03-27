@@ -1,11 +1,11 @@
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
-import tokenize
 from typing import Optional
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
+from .command.condition import parse_condition
 from .datapack import DataPack, Function
 from .log import Logger
 from .command import (LOAD_ONCE_COMMANDS,
@@ -191,7 +191,7 @@ class Lexer:
         json_type = command[1].string.replace('.', '/')
         if json_type not in JSON_FILE_TYPES:
             raise MinecraftSyntaxWarning(
-                f"In {tokenizer.file_path}\nUnregonized JSON file's type({json_type}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-\nExample of valid JSON file type: advancements, predicates, etc."
+                f"In {tokenizer.file_path}\nUnrecognized JSON file's type({json_type}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-\nExample of valid JSON file type: advancements, predicates, etc."
             )
         json_path = json_type + '/' + prefix + \
             command[2].string[1:-1].replace('.', '/')
@@ -282,7 +282,7 @@ class Lexer:
             elif command[0].string not in FIRST_ARGUMENTS and command[0].string not in ['if', 'else']:
                 if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nUnregonized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
+                        f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
                     )
 
             # Boxes check
@@ -293,7 +293,7 @@ class Lexer:
                     )
             if self.if_else_box:
                 if command[0].string != 'else':
-                    commands.append(self.parse_if_else())
+                    commands.append(self.parse_if_else(tokenizer))
 
             if commands:
                 command_strings.append(' '.join(commands))
@@ -421,7 +421,7 @@ class Lexer:
                     ):
                         col = command[key_pos-1].col+command[key_pos-1].length
                         raise JMCSyntaxException(
-                            f"In {tokenizer.file_path}\nKeyword({token.string}) at line {token.line} col {token.col} is regonized as a command.\nExpected semicolon(;) at line {command[key_pos-1].line} col {col}\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos-1].line-1][:col-1]} <-"
+                            f"In {tokenizer.file_path}\nKeyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;) at line {command[key_pos-1].line} col {col}\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos-1].line-1][:col-1]} <-"
                         )
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
@@ -451,7 +451,7 @@ class Lexer:
                 f"In {tokenizer.file_path}\nExpected 'while' at line {programs[-1][-1].line} col {programs[-1][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[programs[-1][-1].line-1][:programs[-1][-1].col+programs[-1][-1].length-1]} <-"
             )
         if self.if_else_box:
-            commands.append(self.parse_if_else())
+            commands.append(self.parse_if_else(tokenizer))
 
         if commands:
             command_strings.append(' '.join(commands))
@@ -477,10 +477,11 @@ class Lexer:
                     f"In {tokenizer.file_path}\nExpected 'function' or 'new' or 'class' (got {command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
 
-    def parse_if_else(self) -> str:
+    def parse_if_else(self, tokenizer: Tokenizer) -> str:
         # TODO: Use tokens to create if else in mcfunction
         # TODO: Create `condition.py for parsing condition`
         # from pprint import pprint
         # pprint(self.if_else_box)
+        parse_condition(self.if_else_box[0][0], tokenizer)
         self.if_else_box = []
         return "IF/ELSE \nHERE"
