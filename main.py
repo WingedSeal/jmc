@@ -6,6 +6,7 @@ from enum import Enum
 from json import dump, load
 from datetime import datetime
 from time import perf_counter
+from getpass import getpass
 
 import jmc
 from jmc.exception import (
@@ -16,7 +17,6 @@ from jmc.exception import (
     MinecraftSyntaxWarning,
     JMCBuildError
 )
-from getpass import getpass
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
@@ -49,6 +49,10 @@ def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
     print(Colors.ENDC.value, end="")
     logger.info(f"Input from user: {input_value}")
     return input_value
+
+
+def press_enter(prompt: str, color: Colors = Colors.INPUT) -> None:
+    getpass(f"{color.value}{prompt}{Colors.ENDC.value}")
 
 
 def error_report(error: Exception) -> None:
@@ -167,6 +171,7 @@ exit: Exit compiler
     def cd(cls, *args):
         if not args:
             pprint("Usage: cd <path>", Colors.FAIL)
+            return
         path = ' '.join(args)
         try:
             os.chdir(path)
@@ -186,6 +191,7 @@ exit: Exit compiler
     def compile(cls, *args):
         if args:
             pprint("Usage: compile", Colors.FAIL)
+            return
         pprint("Compiling...", Colors.INFO)
         try:
             start_time = perf_counter()
@@ -208,17 +214,20 @@ exit: Exit compiler
 
     @classmethod
     def autocompile(cls, *args):
-        if len(args) > 1:
+        if len(args) > 1 or len(args) == 0:
             pprint("Usage: autocompile <interval (second)>", Colors.FAIL)
-        while True:
-            try:
-                interval = int(args[0])
-                break
-            except ValueError:
-                pprint("Invalid integer", Colors.FAIL)
-            except BaseException as error:
-                pprint(type(error).__name__, Colors.FAIL_BOLD)
-                pprint(error, Colors.FAIL)
+            return
+        try:
+            interval = int(args[0])
+        except ValueError:
+            pprint("Invalid integer", Colors.FAIL)
+            return
+        except BaseException as error:
+            pprint(type(error).__name__, Colors.FAIL_BOLD)
+            pprint(error, Colors.FAIL)
+        if interval == 0:
+            pprint("Interaval cannot be 0 seconds", Colors.FAIL)
+            return
 
         thread = threading.Thread(
             target=lambda: cls._background(interval),
@@ -227,7 +236,7 @@ exit: Exit compiler
         cls.event.clear()
         thread.start()
 
-        get_input("Press Enter to stop...\n")
+        press_enter("Press Enter to stop...\n")
         pprint("Stopping...", Colors.INFO)
         cls.event.set()
         thread.join()
@@ -243,12 +252,14 @@ exit: Exit compiler
     def config(cls, *args):
         if not args:
             pprint("Usage: config (reset|edit)", Colors.FAIL)
+            return
         if args[0] == 'reset':
             cls._config_reset()
         elif args[0] == 'edit':
             cls._config_reset()
         else:
             pprint("Usage: config (reset|edit)", Colors.FAIL)
+            return
 
     @classmethod
     def _config_reset(cls):
@@ -279,12 +290,14 @@ Type `cancel` to cancel
     def log(cls, *args):
         if len(args) > 1 or not args:
             pprint("Usage: log (debug|info)", Colors.FAIL)
+            return
         if args[0] == 'debug':
             cls._log_debug()
         elif args[0] == 'info':
             cls._log_info()
         else:
             pprint("Usage: log (debug|info)", Colors.FAIL)
+            return
 
     @classmethod
     def _log_debug(cls):
@@ -315,10 +328,10 @@ if __name__ == '__main__':
         try:
             main()
         except Exception as error:
+            CMD.event.set()
             pprint("Unexpected error causes program to crash", Colors.FAIL)
             pprint(type(error).__name__, Colors.FAIL_BOLD)
             pprint(error, Colors.FAIL)
             logger.critical("Program crashed")
             logger.exception("")
-            getpass(
-                f"{Colors.INPUT.value}Press Enter to continue...{Colors.ENDC.value}")
+            press_enter("Press Enter to continue...")
