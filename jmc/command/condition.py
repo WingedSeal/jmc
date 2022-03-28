@@ -186,7 +186,5 @@ return datapack.add_raw_private_function("if_else", commands)
     count = 0
     ast = condition_to_ast([condition_token], tokenizer)
     condition, precommand = commands_to_strings(ast)
-    precommand += '\n'
-    print(precommand)
-    print('\n'+condition)
+    precommand = precommand+'\n' if precommand else ""
     return condition, precommand

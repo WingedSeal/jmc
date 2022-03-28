@@ -1,5 +1,4 @@
 from collections import defaultdict
-from turtle import pos
 from typing import TYPE_CHECKING, Iterable
 from json import dumps
 from .tokenizer import Token, Tokenizer
@@ -35,6 +34,9 @@ class Function(list):
 
     def insert_extend(self, commands: list[str], index: int) -> None:
         self.commands[index:index] = self.__split(commands)
+
+    def delete(self, index: int) -> None:
+        del self.commands[index]
 
     @property
     def content(self) -> str:
@@ -91,7 +93,7 @@ class DataPack:
         self.__scoreboards[objective] = criteria
 
     def get_count(self, name: str) -> int:
-        count = self.private_function_count[name][count]
+        count = self.private_function_count[name]
         self.private_function_count[name] += 1
         return count
 
@@ -110,9 +112,9 @@ class DataPack:
             return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: int, precommands: list[str] = None, postcommands: list[str] = None) -> str:
-        if precommands is None and postcommands is None:
-            raise ValueError(
-                "add_custom_private_function is called without pre/post command")
+        # if precommands is None and postcommands is None:
+        #     raise ValueError(
+        #         "add_custom_private_function is called without pre/post command")
         if precommands is None:
             precommands = []
         if postcommands is None:
@@ -123,11 +125,11 @@ class DataPack:
                         token.string[1:-1], tokenizer.file_path, line=token.line, col=token.col, file_string=tokenizer.file_string),
                     *postcommands]
         self.private_functions[name][count] = Function(commands)
-        self.private_function_count[name] += 1
         return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
-    def add_raw_private_function(self, name: str, commands: list[str]) -> str:
-        count = self.get_count()
+    def add_raw_private_function(self, name: str, commands: list[str], count: int = None) -> str:
+        if count is None:
+            count = self.get_count()
         self.private_functions[name][count] = Function(commands)
         return f"function {self.PRIVATE_NAME}/{name}/{count}"
 
@@ -167,5 +169,5 @@ class DataPack:
     jsons =
 {dumps(self.jsons, indent=2)}
     private_functions = 
-{dumps({key:list(value) for key, value in self.private_functions.items()}, indent=2)}
+{dumps({key:{func_key:list(func_value) for func_key, func_value in value.items()} for key, value in self.private_functions.items()}, indent=2)}
 )"""

@@ -62,7 +62,7 @@ def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") 
         datapack.lexer.if_else_box.append(
             (None, command[1])
         )
-        return datapack.lexer.parse_if_else()
+        return datapack.lexer.parse_if_else(tokenizer)
     else:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpect 'if' or {'{'} at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col]} <-"

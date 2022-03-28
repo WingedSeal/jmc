@@ -305,7 +305,6 @@ Type `cancel` to cancel
             file.write(info_log)
         with (LOG_PATH/"latest.log").open('w+') as file:
             file.write(info_log)
-        print()
 
 
 if __name__ == '__main__':

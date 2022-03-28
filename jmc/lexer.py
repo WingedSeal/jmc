@@ -5,7 +5,6 @@ from typing import Optional
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .command.condition import parse_condition
 from .datapack import DataPack, Function
 from .log import Logger
 from .command import (LOAD_ONCE_COMMANDS,
@@ -13,6 +12,7 @@ from .command import (LOAD_ONCE_COMMANDS,
                       JMC_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
+                      parse_condition,
                       used_command)
 
 logger = Logger(__name__)
@@ -478,10 +478,55 @@ class Lexer:
                 )
 
     def parse_if_else(self, tokenizer: Tokenizer) -> str:
-        # TODO: Use tokens to create if else in mcfunction
-        # TODO: Create `condition.py for parsing condition`
-        # from pprint import pprint
-        # pprint(self.if_else_box)
-        parse_condition(self.if_else_box[0][0], tokenizer)
+        VAR = "__if_else__"
+        NAME = "if_else"
+
+        logger.debug("Handling if-else")
+        if_else_box = self.if_else_box
         self.if_else_box = []
-        return "IF/ELSE \nHERE"
+        condition, precommand = parse_condition(
+            if_else_box[0][0], tokenizer)
+        # Case 1: `if` only
+        if len(if_else_box) == 1:
+            return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(NAME, if_else_box[0][1], tokenizer)}"
+            return return_value
+
+        # Case 2
+        count = self.datapack.get_count(NAME)
+        count_alt = self.datapack.get_count(NAME)
+        output = [
+            f"scoreboard players set {VAR} {DataPack.VAR_NAME} 0",
+            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(NAME, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.VAR_NAME} 1'])}",
+            f"execute if score {VAR} {DataPack.VAR_NAME} matches 0 run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count_alt}"]
+        del if_else_box[0]
+
+        if if_else_box[-1][0] is None:
+            else_ = if_else_box[-1][1]
+            del if_else_box[-1]
+        else:
+            else_ = None
+
+        # `else if`
+        if if_else_box:
+            for else_if in if_else_box:
+                condition, precommand = parse_condition(
+                    else_if[0], tokenizer)
+                count = self.datapack.get_count(NAME)
+                count_tmp = count_alt
+                count_alt = self.datapack.get_count(NAME)
+
+                self.datapack.add_raw_private_function(NAME, [
+                    f"{precommand}execute {condition} run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count}",
+                    f"execute if score {VAR} {DataPack.VAR_NAME} matches 0 run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count_alt}"
+                ], count_tmp)
+
+                self.datapack.add_custom_private_function(NAME, else_if[1], tokenizer, count, postcommands=[
+                    f"scoreboard players set {VAR} {DataPack.VAR_NAME} 1"
+                ])
+        # `else`
+        if else_ is None:
+            self.datapack.private_functions[NAME][count_tmp].delete(-1)
+        else:
+            self.datapack.add_custom_private_function(
+                NAME, else_, tokenizer, count_alt)
+        return "\n".join(output)
