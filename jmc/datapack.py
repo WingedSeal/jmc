@@ -109,7 +109,7 @@ class DataPack:
         else:
             count = self.get_count()
             self.private_functions[name][count] = Function(commands)
-            return f"function {self.PRIVATE_NAME}/{name}/{count}"
+            return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: int, precommands: list[str] = None, postcommands: list[str] = None) -> str:
         # if precommands is None and postcommands is None:
@@ -125,13 +125,13 @@ class DataPack:
                         token.string[1:-1], tokenizer.file_path, line=token.line, col=token.col, file_string=tokenizer.file_string),
                     *postcommands]
         self.private_functions[name][count] = Function(commands)
-        return f"function {self.PRIVATE_NAME}/{name}/{count}"
+        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
     def add_raw_private_function(self, name: str, commands: list[str], count: int = None) -> str:
         if count is None:
             count = self.get_count()
         self.private_functions[name][count] = Function(commands)
-        return f"function {self.PRIVATE_NAME}/{name}/{count}"
+        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
     def build(self) -> None:
         logger.debug("Finializing DataPack")
@@ -149,7 +149,7 @@ class DataPack:
                 self.functions[self.TICK_NAME] = Function(self.ticks)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
-                self.functions[f"{name}/{path}"] = func
+                self.functions[f"{self.PRIVATE_NAME}/{name}/{path}"] = func
 
         self.private_functions = None
         self.loads = None
