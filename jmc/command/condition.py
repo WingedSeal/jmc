@@ -157,8 +157,12 @@ def commands_to_strings(ast: Union[dict, str]) -> tuple[str, str]:
                 current_count += 1
                 precommands.append(
                     f"scoreboard players reset {VAR}{current_count} {DataPack.VAR_NAME}")
+                precommands.append(
+                    f"execute {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.VAR_NAME} 1")
+                continue
+
             precommands.append(
-                f"execute {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.VAR_NAME} 1")
+                f"execute unless score {VAR}{current_count} {DataPack.VAR_NAME} matches 1 {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.VAR_NAME} 1")
         precommand = '\n'.join(precommands)
 
     condition_string = merge_condition(conditions)
