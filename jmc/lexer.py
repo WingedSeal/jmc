@@ -15,7 +15,7 @@ from .command import (LOAD_ONCE_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
-                      used_command)
+                      )
 
 logger = Logger(__name__)
 
@@ -282,7 +282,8 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
-            elif command[0].string not in FIRST_ARGUMENTS: #and command[0].string not in ['if', 'else']:
+            # and command[0].string not in ['if', 'else']:
+            elif command[0].string not in FIRST_ARGUMENTS:
                 if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
                     raise JMCSyntaxException(
                         f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
@@ -350,7 +351,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        if token.string in used_command:
+                        if token.string in self.datapack.used_command:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature only be used once per datapack at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
@@ -358,7 +359,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        used_command.add(token.string)
+                        self.datapack.used_command.add(token.string)
                         commands.append(matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
@@ -370,7 +371,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        used_command.add(token.string)
+                        self.datapack.used_command.add(token.string)
                         commands.append(matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break

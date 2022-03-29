@@ -92,6 +92,8 @@ class DataPack:
         self.ticks: list[str] = []
         self.namespace = namespace
 
+        self.used_command: set[str] = set()
+
         self.lexer = lexer
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:

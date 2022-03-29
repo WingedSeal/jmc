@@ -19,5 +19,3 @@ LOAD_ONCE_COMMANDS: dict[str, Callable[
     'Player.rejoin': player_rejoin,
     'Player.die': player_die,
 }
-
-used_command = set()
