@@ -30,7 +30,7 @@ class Token:
     line: int
     col: int
     string: str
-    _length: int = field(init=False, repr=False, default=None)
+    _length: Optional[int] = field(init=False, repr=False, default=None)
 
     @property
     def length(self) -> int:

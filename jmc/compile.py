@@ -1,6 +1,7 @@
 from json import JSONDecodeError, dump, dumps, loads
 from shutil import rmtree
 from pathlib import Path
+from typing import Any
 
 from .lexer import Lexer
 from .log import Logger
@@ -82,12 +83,12 @@ def read_cert(config: dict[str, str]):
     make_cert(cert_config, cert_file)
 
 
-def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, str]:
+def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
     if path.is_file():
         with path.open('r') as file:
             content = file.read()
         try:
-            json: dict[str, str] = loads(content)
+            json: dict[str, Any] = loads(content)
             json["values"] = [
                 value for value in json["values"] if not value.startswith(config["namespace"]+':')]
         except JSONDecodeError:

@@ -77,7 +77,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nUnexpected token in condition at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
     # End
-    conditions = []
+    conditions: list[str] = []
     for token in tokens:
         if token.token_type == TokenType.paren_square:
             if not conditions:
@@ -91,7 +91,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
 
 def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> list[list[Token]]:
     list_of_tokens = []
-    tokens = []
+    tokens: list[str] = []
     if _tokens[0].token_type == TokenType.keyword and _tokens[0].string == operator:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nUnexpected operator {operator} at line {_tokens[0].line} col {_tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[_tokens[0].line-1][:_tokens[0].col + _tokens[0].length]} <-")
@@ -148,7 +148,7 @@ def ast_to_commands(ast: Union[dict, str]) -> tuple[list[Condition], Optional[li
         return [Condition(ast, IF)], None
 
     if ast["operator"] == AND_OPERATOR:
-        conditions: tuple[Condition] = []
+        conditions: list[Condition] = []
         precommand_conditions: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
             condition, _precommand_conditions = ast_to_commands(body)  # noqa
@@ -169,7 +169,6 @@ def ast_to_commands(ast: Union[dict, str]) -> tuple[list[Condition], Optional[li
                 precommand_conditions.extend(_precommand_conditions)
             precommand_conditions.append((condition, _count))
 
-        print(precommand_conditions)
         return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_conditions
 
     if ast["operator"] == NOT_OPERATOR:

@@ -18,7 +18,7 @@ class PlayerType(Enum):
 @dataclass(frozen=True)
 class ScoreboardPlayer:
     player_type: PlayerType
-    value: Union[int, tuple[str, str]] = None
+    value: Union[int, tuple[str, str]]
     """Contains either integer or (objective and selector)"""
 
 

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 from json import JSONEncoder, dumps
 from .tokenizer import Token, Tokenizer
 from .exception import JMCSyntaxWarning
@@ -17,11 +17,11 @@ NEW_LINE = '\n'
 class FunctionEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, Function):
-            return Function.commands
+            return o.commands
         return super().default(o)
 
 
-class Function(list):
+class Function:
     commands: list[str]
 
     def __init__(self, commands: list[str] = None) -> None:
@@ -50,7 +50,7 @@ class Function(list):
         return '\n'.join(self.commands)
 
     @property
-    def length(self) -> str:
+    def length(self) -> int:
         return len(self.commands)
 
     def __repr__(self) -> str:
@@ -79,7 +79,7 @@ class DataPack:
         self.ints: set[int] = set()
         self.functions: dict[str, Function] = dict()
         self.load_function: list[list[Token]] = []
-        self.jsons: dict[str, dict[str, dict]] = defaultdict(dict)
+        self.jsons: dict[str, dict[str, Any]] = defaultdict(dict)
         self.private_functions: dict[str,
                                      dict[str, Function]] = defaultdict(dict)
         self.private_function_count: dict[str, int] = defaultdict(int)
@@ -102,10 +102,10 @@ class DataPack:
                 f"Conflict on adding scoreboard, '{objective}' objective with '{self.__scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
         self.__scoreboards[objective] = criteria
 
-    def get_count(self, name: str) -> int:
+    def get_count(self, name: str) -> str:
         count = self.private_function_count[name]
         self.private_function_count[name] += 1
-        return count
+        return str(count)
 
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
         if token.string == '{}':
@@ -117,11 +117,11 @@ class DataPack:
         if len(commands) == 1 and NEW_LINE not in commands[0]:
             return commands[0]
         else:
-            count = self.get_count()
+            count = self.get_count(name)
             self.private_functions[name][count] = Function(commands)
             return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
-    def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: int, precommands: list[str] = None, postcommands: list[str] = None) -> str:
+    def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
         # if precommands is None and postcommands is None:
         #     raise ValueError(
         #         "add_custom_private_function is called without pre/post command")
@@ -137,9 +137,9 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
-    def add_raw_private_function(self, name: str, commands: list[str], count: int = None) -> str:
+    def add_raw_private_function(self, name: str, commands: list[str], count: str = None) -> str:
         if count is None:
-            count = self.get_count()
+            count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
         return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 

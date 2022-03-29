@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 from ._flow_control import (
     if_,
     else_,
@@ -16,7 +16,7 @@ FLOW_CONTROL_COMMANDS: dict[str, Callable[
         list[Token],
         DataPack,
         Tokenizer,
-    ], str]] = {
+    ], Optional[str]]] = {
     'while': while_,
     'do': do,
     'if': if_,

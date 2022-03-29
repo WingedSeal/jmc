@@ -1,3 +1,4 @@
+from typing import Optional
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -26,7 +27,7 @@ def if_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") ->
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
 
-def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> Optional[str]:
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\n'else' cannot be used without 'if' at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
@@ -94,7 +95,7 @@ def while_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer")
         return "WHILE NOT IMPLEMENT (found `do`)"
 
 
-def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> None:
     if len(command) < 2:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpected {'{'} at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"

@@ -56,7 +56,7 @@ NEW_LINE = '\n'
 class Lexer:
     load_tokenizer: Tokenizer
     "List of condition string and token"
-    do_while_box: Token = None
+    do_while_box: Optional[Token] = None
 
     def __init__(self, config: dict[str, str]) -> None:
         logger.debug("Initializing Lexer")
