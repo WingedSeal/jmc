@@ -4,6 +4,7 @@ from typing import Optional, Union
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException
 from ..datapack import DataPack
+from .utils import find_scoreboard_player_type, PlayerType
 
 NEW_LINE = '\n'
 
@@ -37,10 +38,45 @@ def merge_condition(conditions: list[Condition]) -> str:
 
 
 def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
-    if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith('$'):
+    if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+        first_token = tokens[0]
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<'])
-        # TODO: IMPLEMENT CUSTOM CONDITION
-        return "CUSTOM_CONDITION " + ' '.join([token.string for token in tokens])
+        for operator in ['===', '==', '>=', '<=', '>', '<', '=']:  # sort key=len
+            list_of_tokens = tokenizer.find_tokens(tokens, operator)
+            if len(list_of_tokens) == 1:
+                continue
+            elif len(list_of_tokens) > 2:
+                raise JMCSyntaxException(
+                    f"In {tokenizer.file_path}\nDuplicated operator({operator}) in condition at line {list_of_tokens[2][-1].line} col {list_of_tokens[2][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[2][-1].line-1][:list_of_tokens[2][-1].col + list_of_tokens[2][-1].length - 1]} <-")
+
+            if len(list_of_tokens[1]) > 1:
+                raise JMCSyntaxException(
+                    f"In {tokenizer.file_path}\nUnexpected token in condition at line {list_of_tokens[1][-1].line} col {list_of_tokens[1][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][-1].line-1][:list_of_tokens[1][-1].col + list_of_tokens[1][-1].length - 1]} <-")
+            second_token = list_of_tokens[1][0]
+            scoreboard_player = find_scoreboard_player_type(
+                second_token, tokenizer)
+
+            if scoreboard_player.player_type == PlayerType.integer:
+                compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
+                if operator in ['===', '==', '=']:
+                    return f'{compared} {scoreboard_player.value}'
+                if operator == '>=':
+                    return f'{compared} {scoreboard_player.value}..'
+                if operator == '>':
+                    return f'{compared} {scoreboard_player.value+1}..'
+                if operator == '<=':
+                    return f'{compared} ..{scoreboard_player.value}'
+                if operator == '<':
+                    return f'{compared} ..{scoreboard_player.value-1}'
+            else:
+                if operator in ['===', '==', '=']:
+                    operator = '='
+                return f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}'
+            break
+
+        raise JMCSyntaxException(
+            f"In {tokenizer.file_path}\nUnexpected token in condition at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
+    # End
     conditions = []
     for token in tokens:
         if token.token_type == TokenType.paren_square:

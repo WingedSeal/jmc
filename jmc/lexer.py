@@ -8,7 +8,7 @@ from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
 from .command import (LOAD_ONCE_COMMANDS,
-                      EXCLUDE_EXECUTE_COMMANDS,
+                      LOAD_ONLY,
                       JMC_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
@@ -40,7 +40,7 @@ JSON_FILE_TYPES = [
 FIRST_ARGUMENTS = [
     *VANILLA_COMMANDS,
     *LOAD_ONCE_COMMANDS,
-    *EXCLUDE_EXECUTE_COMMANDS,
+    *LOAD_ONLY,
     *JMC_COMMANDS,
     *FLOW_CONTROL_COMMANDS
 ]
@@ -358,7 +358,7 @@ class Lexer:
                         # TODO: Parse JMC commands that can only be used once in load
                         break
 
-                    matched_function = EXCLUDE_EXECUTE_COMMANDS.get(
+                    matched_function = LOAD_ONLY.get(
                         token.string, None)
                     if matched_function is not None:
                         if is_execute:

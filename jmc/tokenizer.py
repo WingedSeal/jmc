@@ -320,6 +320,34 @@ class Tokenizer:
             tokens = new_tokens
         return tokens
 
+    def find_tokens(self, tokens: list[Token], string: str) -> list[list[Token]]:
+        state = 0
+        max_state = len(string)
+        result: list[list[Token]] = []
+        token_array: list[Token] = []
+        temp_array: list[Token] = []
+        for token in tokens:
+            if token.token_type != TokenType.keyword:
+                token_array.append(token)
+                continue
+            if token.string == string[state]:
+                state += 1
+                temp_array.append(token)
+                if state == max_state:
+                    state = 0
+                    result.append(token_array)
+                    token_array = []
+                    temp_array = []
+            else:
+                state = 0
+                token_array.extend(temp_array)
+                token_array.append(token)
+                temp_array = []
+
+        token_array.extend(temp_array)
+        result.append(token_array)
+        return result
+
     def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
         if token.token_type != TokenType.paren_round:
             raise JMCSyntaxException(

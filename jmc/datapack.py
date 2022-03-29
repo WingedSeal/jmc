@@ -65,6 +65,7 @@ class DataPack:
     TICK_NAME = '__tick__'
     VAR_NAME = '__variable__'
     INT_NAME = '__int__'
+    VARIABLE_SIGN = '$'
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
