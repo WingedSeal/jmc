@@ -174,12 +174,10 @@ class DataPack:
     INT_NAME = {self.INT_NAME}
     
     ints = {self.ints!r}
-    function = 
-{dumps(self.functions, indent=2, cls=FunctionEncoder)}
-    jsons =
-{dumps(self.jsons, indent=2)}
-    private_functions = 
-{dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
+    function = {dumps(self.functions, indent=2, cls=FunctionEncoder)}
+    jsons = {dumps(self.jsons, indent=2)}
+    private_functions = {dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
+    
 )"""
 
 # {dumps({key:list(value) for key, value in self.functions.items()}, indent=2)}

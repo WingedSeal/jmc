@@ -28,9 +28,9 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer) -> str:
                 )
 
             if operator == '++':
-                return f"scoreboard players add {list_of_tokens[0][0]} {DataPack.VAR_NAME} 1"
+                return f"scoreboard players add {list_of_tokens[0][0].string} {DataPack.VAR_NAME} 1"
             if operator == '--':
-                return f"scoreboard players remove {list_of_tokens[0][0]} {DataPack.VAR_NAME} 1"
+                return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.VAR_NAME} 1"
 
         if operator in ['+=', '-=', '=']:
             return "NOT IMPLEMENTED"
