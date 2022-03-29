@@ -282,12 +282,11 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
-            # and command[0].string not in ['if', 'else']:
-            elif command[0].string not in FIRST_ARGUMENTS:
-                if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
-                    raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-                    )
+            # elif command[0].string not in FIRST_ARGUMENTS:
+            #     if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
+            #         raise JMCSyntaxException(
+            #             f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
+            #         )
 
             # Boxes check
             if self.do_while_box is not None:
@@ -335,13 +334,14 @@ class Lexer:
                             )
                         if '\n' in command[key_pos+1].string:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nNewline found in say command at line {command[key_pos+1]} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col+command[key_pos+1].string.find(NEW_LINE)+2]} <-"
+                                f"In {tokenizer.file_path}\nNewline found in say command at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col+command[key_pos+1].string.find(NEW_LINE)+2]} <-"
                             )
                         commands.append(f"say {command[key_pos+1].string}")
                         break
 
-                    if token.string.startswith('$'):
-                        commands.append(variable_operation(command[key_pos:]))
+                    if token.string.startswith(DataPack.VARIABLE_SIGN):
+                        commands.append(variable_operation(
+                            command[key_pos:], tokenizer))
                         break
 
                     matched_function = LOAD_ONCE_COMMANDS.get(
