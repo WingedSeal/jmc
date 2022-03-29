@@ -1,6 +1,6 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Iterable
-from json import dumps
+from json import JSONEncoder, dumps
 from .tokenizer import Token, Tokenizer
 from .exception import JMCSyntaxWarning
 from .log import Logger
@@ -12,6 +12,13 @@ logger = Logger(__name__)
 
 
 NEW_LINE = '\n'
+
+
+class FunctionEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Function):
+            return Function.commands
+        return super().default(o)
 
 
 class Function(list):
@@ -166,9 +173,11 @@ class DataPack:
     
     ints = {self.ints!r}
     function = 
-{dumps({key:list(value) for key, value in self.functions.items()}, indent=2)}
+{dumps(self.functions, indent=2, cls=FunctionEncoder)}
     jsons =
 {dumps(self.jsons, indent=2)}
     private_functions = 
-{dumps({key:{func_key:list(func_value) for func_key, func_value in value.items()} for key, value in self.private_functions.items()}, indent=2)}
+{dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
 )"""
+
+# {dumps({key:list(value) for key, value in self.functions.items()}, indent=2)}
