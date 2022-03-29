@@ -2,13 +2,15 @@ from pathlib import Path
 from json import loads, JSONDecodeError, dumps
 from typing import Optional
 
+from jmc.command.execute_excluded import EXECUTE_EXCLUDED_COMMANDS
+
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
 from .command import (LOAD_ONCE_COMMANDS,
-                      LOAD_ONLY,
+                      LOAD_ONLY_COMMANDS,
                       JMC_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
@@ -40,9 +42,10 @@ JSON_FILE_TYPES = [
 FIRST_ARGUMENTS = [
     *VANILLA_COMMANDS,
     *LOAD_ONCE_COMMANDS,
-    *LOAD_ONLY,
+    *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
-    *FLOW_CONTROL_COMMANDS
+    *FLOW_CONTROL_COMMANDS,
+    *EXECUTE_EXCLUDED_COMMANDS
 ]
 """All vanilla commands and JMC custom syntax 
 
@@ -279,7 +282,7 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
-            elif command[0].string not in FIRST_ARGUMENTS and command[0].string not in ['if', 'else']:
+            elif command[0].string not in FIRST_ARGUMENTS: #and command[0].string not in ['if', 'else']:
                 if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
                     raise JMCSyntaxException(
                         f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
@@ -314,6 +317,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
+                    # End Handle Errors
 
                     if token.string == 'say':
                         if len(command[key_pos:]) == 1:
@@ -336,7 +340,7 @@ class Lexer:
                         break
 
                     if token.string.startswith('$'):
-                        variable_operation(command[key_pos:])
+                        commands.append(variable_operation(command[key_pos:]))
                         break
 
                     matched_function = LOAD_ONCE_COMMANDS.get(
@@ -355,17 +359,35 @@ class Lexer:
                                 f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
                         used_command.add(token.string)
-                        # TODO: Parse JMC commands that can only be used once in load
+                        commands.append(matched_function(
+                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
 
-                    matched_function = LOAD_ONLY.get(
+                    matched_function = EXECUTE_EXCLUDED_COMMANDS.get(
+                        token.string, None)
+                    if matched_function is not None:
+                        if is_execute:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
+                        used_command.add(token.string)
+                        commands.append(matched_function(
+                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
+                        break
+
+                    matched_function = LOAD_ONLY_COMMANDS.get(
                         token.string, None)
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature({token.string}) cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        # TODO: Parse JMC commands that can't be used with execute run
+                        if not is_load:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                            )
+                        commands.append(matched_function(
+                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
 
                     matched_function = FLOW_CONTROL_COMMANDS.get(
@@ -379,14 +401,17 @@ class Lexer:
                             command[key_pos:], self.datapack, tokenizer)
                         if return_value is not None:
                             commands.append(return_value)
-                        # TODO: Add a new method in this class to tokenize switch case
-                        # TODO: Add while loop, switch case, do while etc. to EXCLUDE_EXECUTE_COMMANDS
                         break
 
                     matched_function = JMC_COMMANDS.get(
                         token.string, None)
                     if matched_function is not None:
-                        # TODO: Parse JMC commands that can be used anywhere
+                        if len(command) > key_pos+1:
+                            raise JMCSyntaxException(
+                                f"In {tokenizer.file_path}\nUnexpected token at line {command[key_pos+2].line} col {command[key_pos+2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+2].line-1][:command[key_pos+2].col]} <-"
+                            )
+                        commands.append(matched_function(
+                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer, is_execute))
                         break
 
                     if token.string in ['new', 'class' '@import'] or (

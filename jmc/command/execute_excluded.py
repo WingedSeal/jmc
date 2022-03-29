@@ -1,22 +1,19 @@
 from typing import Callable
 
-from ._jmc_command import (
-    timer_set,
-    math_sqrt,
-    math_random
+from ._execute_excluded import (
+    hardcode_repeat,
+    hardcode_switch
 )
 from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
 
-JMC_COMMANDS: dict[str, Callable[
+EXECUTE_EXCLUDED_COMMANDS: dict[str, Callable[
     [
         tuple[list[Token], dict[str, Token]],
         DataPack,
         Tokenizer,
-        bool
     ], str]] = {
 
-    'Timer.set': timer_set,
-    'Math.sqrt': math_sqrt,
-    'Math.random': math_random,
+    'Hardcode.repeat': hardcode_repeat,
+    'Hardcode.switch': hardcode_switch,
 }

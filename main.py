@@ -7,6 +7,7 @@ from json import dump, load
 from datetime import datetime
 from time import perf_counter
 from getpass import getpass
+from traceback import format_exc
 
 import jmc
 from jmc.exception import (
@@ -161,6 +162,7 @@ cd <path>: Change current directory
 compile: Compile your JMC file(s)
 autocompile <interval (second)>: Start automatically compiling with certain interval
 log (debug|info): Create log file in output directory
+log clear: Delete every log file inside log folder except latest
 config reset: Delete the configuration file and restart the compiler
 config edit: Override configuration file and bypass error checking
 help: Output this message
@@ -207,6 +209,7 @@ exit: Exit compiler
             MinecraftSyntaxWarning,
             JMCBuildError
         ) as error:
+            logger.debug(format_exc())
             error_report(error)
         except Exception as error:
             logger.exception("Non-JMC Error occur")
@@ -289,15 +292,33 @@ Type `cancel` to cancel
     @classmethod
     def log(cls, *args):
         if len(args) > 1 or not args:
-            pprint("Usage: log (debug|info)", Colors.FAIL)
+            pprint("Usage: log (debug|info|clear)", Colors.FAIL)
             return
         if args[0] == 'debug':
             cls._log_debug()
         elif args[0] == 'info':
             cls._log_info()
+        elif args[0] == 'clear':
+            cls._log_clear()
         else:
-            pprint("Usage: log (debug|info)", Colors.FAIL)
+            pprint("Usage: log (debug|info|clear)", Colors.FAIL)
             return
+
+    @classmethod
+    def _log_clear(cls):
+        logger.info("Clearing logs")
+        if not LOG_PATH.is_dir():
+            logger.debug("Log folder not found")
+            return
+
+        for path in LOG_PATH.iterdir():
+            if not path.is_file():
+                continue
+            if path.suffix != '.log':
+                continue
+            if path.name == 'latest.log':
+                continue
+            path.unlink()
 
     @classmethod
     def _log_debug(cls):

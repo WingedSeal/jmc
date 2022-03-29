@@ -1,7 +1,23 @@
-from ._load_once import *
+from typing import Callable
 
-LOAD_ONCE_COMMANDS = {
-    'Rightclick.setup': rightclick_setup
+from ._load_once import (
+    player_first_join,
+    player_rejoin,
+    player_die
+)
+from ..tokenizer import Token, Tokenizer
+from ..datapack import DataPack
+
+LOAD_ONCE_COMMANDS: dict[str, Callable[
+    [
+        tuple[list[Token], dict[str, Token]],
+        DataPack,
+        Tokenizer,
+    ], str]] = {
+
+    'Player.firstJoin': player_first_join,
+    'Player.rejoin': player_rejoin,
+    'Player.die': player_die,
 }
 
 used_command = set()

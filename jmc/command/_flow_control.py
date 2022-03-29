@@ -1,4 +1,3 @@
-import imp
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -27,7 +26,7 @@ def if_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") ->
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
 
-def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> None:
+def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\n'else' cannot be used without 'if' at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
@@ -87,15 +86,15 @@ def while_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer")
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nExpected {'{'} at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
             )
-        return "TEST"
+        return "WHILE NOT IMPLEMENT"
         # TODO: HANDLE WHILE
     else:
         # TODO: HANDLE DO WHILE
         datapack.lexer.do_while_box = None
-        return "YAAAAAAY"
+        return "WHILE NOT IMPLEMENT (found `do`)"
 
 
-def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> None:
+def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
     if len(command) < 2:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpected {'{'} at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
@@ -105,3 +104,11 @@ def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> 
             f"In {tokenizer.file_path}\nExpected {'{'} at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
         )
     datapack.lexer.do_while_box = command[1]
+
+
+def switch(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+    return "switch"+str(command)
+
+
+def for_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+    return "for_"+str(command)

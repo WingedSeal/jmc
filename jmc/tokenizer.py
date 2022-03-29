@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
-from pprint import pprint
 from typing import Optional
 from enum import Enum
 from json import dumps
@@ -156,7 +155,7 @@ class Tokenizer:
 
         for char in string:
             self.col += 1
-            if not expect_semicolon and char == Re.SEMICOLON:
+            if not expect_semicolon and char == Re.SEMICOLON and self.state in [TokenType.keyword, None]:
                 raise JMCSyntaxException(
                     f"In {self.file_path}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
 
@@ -328,7 +327,10 @@ class Tokenizer:
         temp_array: list[Token] = []
         for token in tokens:
             if token.token_type != TokenType.keyword:
+                state = 0
+                token_array.extend(temp_array)
                 token_array.append(token)
+                temp_array = []
                 continue
             if token.string == string[state]:
                 state += 1
@@ -348,6 +350,42 @@ class Tokenizer:
         result.append(token_array)
         return result
 
+    def merge_tokens(self, tokens: list[Token], string: str) -> list[Token]:
+        state = 0
+        max_state = len(string)
+        result: list[Token] = []
+        token_array: list[Token] = []
+        for token in tokens:
+            if token.token_type != TokenType.keyword:
+                state = 0
+                result.extend(token_array)
+                result.append(token)
+                token_array = []
+                continue
+            if token.string == string[state]:
+                if token_array:
+                    if token.line != token_array[-1].line or token.col-1 != token_array[-1].col:
+                        state = 0
+                        result.extend(token_array)
+                        result.append(token)
+                        token_array = []
+                        continue
+                state += 1
+                token_array.append(token)
+                if state == max_state:
+                    state = 0
+                    result.append(
+                        Token(TokenType.keyword, token_array[0].line, token_array[0].col, string))
+                    token_array = []
+            else:
+                state = 0
+                result.extend(token_array)
+                result.append(token)
+                token_array = []
+
+        result.extend(token_array)
+        return result
+
     def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
         if token.token_type != TokenType.paren_round:
             raise JMCSyntaxException(
@@ -356,6 +394,7 @@ class Tokenizer:
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)[0]
         keywords = self.split_tokens(keywords, ['='])
+        keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []
         kwargs: dict[str, Token] = dict()
         key: str = ""
@@ -371,7 +410,7 @@ class Tokenizer:
             nonlocal arg
             nonlocal args
             nonlocal expecting_comma
-            expecting_comma = not from_comma
+            expecting_comma = False
             if kwargs:
                 raise JMCSyntaxException(
                     f"In {self.file_path}\nPositional argument follows keyword argument at line {token.line} col {token.col+1}.\n{self.raw_string.split(Re.NEW_LINE)[token.line-1][:token.col+1]} <-"
@@ -458,6 +497,7 @@ class Tokenizer:
 
             elif token.token_type == TokenType.comma:
                 arrow_func_state = 0
+                expecting_comma = False
                 if arg:
                     add_arg(last_token, from_comma=True)
             elif token.token_type in [TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square]:
@@ -480,8 +520,6 @@ class Tokenizer:
 
         if arg:
             add_arg(token)
-        pprint(args)
-        pprint(kwargs)
 
         return args, kwargs
 

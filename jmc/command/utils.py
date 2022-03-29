@@ -37,7 +37,6 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer) -> Scoreboar
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpected Integer, Variable, or ScoreboardPlayer(`objective:selector`) at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-")
     if len(splits) > 2:
-        print(splits)
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nScoreboardPlayer(`objective:selector`) cannot contain more than 1 colon(:) at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-")
     return ScoreboardPlayer(player_type=PlayerType.scoreboard, value=(splits[0], splits[1]))
