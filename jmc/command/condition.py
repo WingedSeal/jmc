@@ -142,14 +142,14 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> Union[dict, s
     return custom_condition(tokens, tokenizer)
 
 
-def ast_to_commands(ast: Union[dict, str]) -> tuple[list[Condition], Optional[tuple[list[Condition], int]]]:
+def ast_to_commands(ast: Union[dict, str]) -> tuple[list[Condition], Optional[list[tuple[list[Condition], int]]]]:
     global count
     if isinstance(ast, str):
         return [Condition(ast, IF)], None
 
     if ast["operator"] == AND_OPERATOR:
         conditions: tuple[Condition] = []
-        precommand_conditions: tuple[list[Condition], int] = []
+        precommand_conditions: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
             condition, _precommand_conditions = ast_to_commands(body)  # noqa
             conditions.extend(condition)
@@ -162,13 +162,14 @@ def ast_to_commands(ast: Union[dict, str]) -> tuple[list[Condition], Optional[tu
     if ast["operator"] == OR_OPERATOR:
         _count = count
         count += 1
-        precommand_conditions: tuple[list[Condition], int] = []
+        precommand_conditions: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
             condition, _precommand_conditions = ast_to_commands(body)
             if _precommand_conditions is not None:
                 precommand_conditions.extend(_precommand_conditions)
             precommand_conditions.append((condition, _count))
 
+        print(precommand_conditions)
         return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_conditions
 
     if ast["operator"] == NOT_OPERATOR:
