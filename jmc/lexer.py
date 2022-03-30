@@ -245,7 +245,7 @@ class Lexer:
 
     def parse_load_func_content(self, programs: list[list[Token]]):
         tokenizer = self.load_tokenizer
-        return self.__parse_func_content(tokenizer, programs, is_load=True)
+        return self._parse_func_content(tokenizer, programs, is_load=True)
 
     def parse_func_content(self,
                            func_content: str, file_path_str: str,
@@ -253,9 +253,9 @@ class Lexer:
         tokenizer = Tokenizer(func_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         programs = tokenizer.programs
-        return self.__parse_func_content(tokenizer, programs, is_load=False)
+        return self._parse_func_content(tokenizer, programs, is_load=False)
 
-    def __parse_func_content(self, tokenizer: Tokenizer, programs: list[list[Token]], is_load: bool) -> list[str]:
+    def _parse_func_content(self, tokenizer: Tokenizer, programs: list[list[Token]], is_load: bool) -> list[str]:
 
         command_strings = []
         commands: list[str] = []
@@ -282,12 +282,6 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
                 )
-            # elif command[0].string not in FIRST_ARGUMENTS:
-            #     if not (len(command) == 2 and command[1].token_type == TokenType.paren_round):
-            #         raise JMCSyntaxException(
-            #             f"In {tokenizer.file_path}\nUnrecognized command ({command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-            #         )
-
             # Boxes check
             if self.do_while_box is not None:
                 if command[0].string != 'while':
@@ -439,11 +433,12 @@ class Lexer:
                             f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
                         break
 
-                    if token.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
-                        commands.append(tokenizer.clean_up_paren(
-                            token))
-                    else:
+                    if token.string in VANILLA_COMMANDS:
                         commands.append(token.string)
+                    else:
+                        raise JMCSyntaxException(
+                            f"In {tokenizer.file_path}\nUnrecognized command ({token.string}) at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
+                        )
 
                 else:
                     if token.string == 'run' and is_execute:

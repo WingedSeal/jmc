@@ -291,6 +291,7 @@ class Tokenizer:
         return self.list_of_tokens
 
     def split_token(self, token: Token, split_str: str) -> list[Token]:
+        """Split a keyword token into multiple tokens"""
         if token.token_type != TokenType.keyword:
             raise ValueError(
                 f"Called split_token on non-keyword token."
@@ -309,6 +310,7 @@ class Tokenizer:
         return tokens
 
     def split_tokens(self, tokens: list[Token], split_strings: list[str]) -> list[Token]:
+        """Loop through all tokens and split a keyword token thta contain string inside split_strings"""
         for split_str in split_strings:
             new_tokens = []
             for token in tokens:
@@ -319,7 +321,22 @@ class Tokenizer:
             tokens = new_tokens
         return tokens
 
+    def find_token(self, tokens: list[Token], string: str) -> list[list[Token]]:
+        """Split tokens by token that match the string"""
+        result: list[list[Token]] = []
+        token_array: list[Token] = []
+        for token in tokens:
+            if token.string == string and token.token_type == TokenType.keyword:
+                result.append(token_array)
+                token_array = []
+            else:
+                token_array.append(token)
+
+        result.append(token_array)
+        return result
+
     def find_tokens(self, tokens: list[Token], string: str) -> list[list[Token]]:
+        """Splot tokens by set of tokens that can combined into the string"""
         state = 0
         max_state = len(string)
         result: list[list[Token]] = []
@@ -351,6 +368,7 @@ class Tokenizer:
         return result
 
     def merge_tokens(self, tokens: list[Token], string: str) -> list[Token]:
+        """Loop through tokens and merge tokens that can be combined into string"""
         state = 0
         max_state = len(string)
         result: list[Token] = []
