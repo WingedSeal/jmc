@@ -1,4 +1,6 @@
 from typing import Optional
+
+from .condition import parse_condition
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -6,7 +8,7 @@ from ..exception import JMCSyntaxException
 NEW_LINE = '\n'
 
 
-def if_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> None:
+def if_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     if len(command) < 2:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpected ( at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
@@ -27,7 +29,7 @@ def if_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") ->
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
 
-def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> Optional[str]:
+def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> Optional[str]:
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\n'else' cannot be used without 'if' at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
@@ -69,7 +71,8 @@ def else_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") 
         )
 
 
-def while_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+    NAME = 'while'
     if datapack.lexer.do_while_box is None:
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -87,15 +90,37 @@ def while_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer")
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nExpected {'{'} at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
             )
-        return "WHILE NOT IMPLEMENT"
-        # TODO: HANDLE WHILE
+        condition, precommand = parse_condition(command[1], tokenizer)
+        count = datapack.get_count(NAME)
+        call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{NAME}/{count}"
+        datapack.add_custom_private_function(
+            NAME, command[2], tokenizer, count, postcommands=[call_func])
+        return call_func
     else:
-        # TODO: HANDLE DO WHILE
+        func_content = datapack.lexer.do_while_box
         datapack.lexer.do_while_box = None
-        return "WHILE NOT IMPLEMENT (found `do`)"
+        if len(command) < 2:
+            raise JMCSyntaxException(
+                f"In {tokenizer.file_path}\nExpected ( at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
+            )
+        if command[1].token_type != TokenType.paren_round:
+            raise JMCSyntaxException(
+                f"In {tokenizer.file_path}\nExpected ( at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
+            )
+        if len(command) > 2:
+            raise JMCSyntaxException(
+                f"In {tokenizer.file_path}\nUnexpected token({command[2].string}) at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
+            )
+
+        condition, precommand = parse_condition(command[1], tokenizer)
+        count = datapack.get_count(NAME)
+        call_func = datapack.add_custom_private_function(
+            NAME, func_content, tokenizer, count, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{NAME}/{count}"])
+
+        return call_func
 
 
-def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> None:
+def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     if len(command) < 2:
         raise JMCSyntaxException(
             f"In {tokenizer.file_path}\nExpected {'{'} at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
@@ -107,9 +132,9 @@ def do(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> 
     datapack.lexer.do_while_box = command[1]
 
 
-def switch(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
     return "switch"+str(command)
 
 
-def for_(command: list["Token"], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
+def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
     return "for_"+str(command)

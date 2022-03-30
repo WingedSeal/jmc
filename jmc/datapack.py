@@ -122,9 +122,6 @@ class DataPack:
             return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
-        # if precommands is None and postcommands is None:
-        #     raise ValueError(
-        #         "add_custom_private_function is called without pre/post command")
         if precommands is None:
             precommands = []
         if postcommands is None:
