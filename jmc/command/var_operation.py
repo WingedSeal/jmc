@@ -7,11 +7,7 @@ NEW_LINE = '\n'
 
 
 def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> str:
-    if len(tokens) == 1:
-        raise JMCSyntaxException(
-            f"In {tokenizer.file_path}\nExpected operator after variable at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
-
-    if tokens[0].string.endswith('.get') and tokens[1].token_type == TokenType.paren_round:
+    if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.paren_round:
         if len(tokens) > 2:
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nUnexpected token at line {tokens[2].line} col {tokens[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[2].line-1][:tokens[2].col + tokens[2].length - 2]} <-")
@@ -22,6 +18,9 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
 
     tokens = tokenizer.split_tokens(
         tokens, ['-', '=', '+', '*', '%', '>', '<'])
+    if len(tokens) == 1:
+        raise JMCSyntaxException(
+            f"In {tokenizer.file_path}\nExpected operator after variable at line {tokens[0].line} col {tokens[0].col+ tokens[0].length - 1}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
     for operator in ['*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '=']:  # sort key=len
         list_of_tokens = tokenizer.find_tokens(tokens, operator)
         if len(list_of_tokens) == 1:

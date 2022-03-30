@@ -340,11 +340,7 @@ class Lexer:
                         break
 
                     if token.string.startswith(DataPack.VARIABLE_SIGN):
-                        if len(command[key_pos:]) == 1:
-                            raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nExpected operator after variable at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-")
-
-                        if command[key_pos+1].string == 'run' and command[key_pos+1].token_type == TokenType.keyword:
+                        if len(command) > key_pos+1 and command[key_pos+1].string == 'run' and command[key_pos+1].token_type == TokenType.keyword:
                             is_execute = True
                             commands.append(
                                 f"execute store result score {token.string} {DataPack.VAR_NAME}")
