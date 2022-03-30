@@ -341,7 +341,7 @@ class Lexer:
 
                     if token.string.startswith(DataPack.VARIABLE_SIGN):
                         commands.append(variable_operation(
-                            command[key_pos:], tokenizer))
+                            command[key_pos:], tokenizer, self.datapack))
                         break
 
                     matched_function = LOAD_ONCE_COMMANDS.get(

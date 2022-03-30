@@ -69,7 +69,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
                 if operator == '<':
                     return f'{compared} ..{scoreboard_player.value-1}'
             else:
-                if operator in ['===', '==', '=']:
+                if operator in {'===', '==', '='}:
                     operator = '='
                 return f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}'
             break
