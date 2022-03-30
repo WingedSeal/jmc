@@ -39,7 +39,6 @@ def merge_condition(conditions: list[Condition]) -> str:
 
 def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
     if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
-        first_token = tokens[0]
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<'])
         for operator in ['===', '==', '>=', '<=', '>', '<', '=']:  # sort key=len
             list_of_tokens = tokenizer.find_tokens(tokens, operator)
@@ -57,7 +56,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
                 second_token, tokenizer)
 
             if scoreboard_player.player_type == PlayerType.integer:
-                compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
+                compared = f'score {list_of_tokens[0][0].string} {DataPack.VAR_NAME} matches'
                 if operator in ['===', '==', '=']:
                     return f'{compared} {scoreboard_player.value}'
                 if operator == '>=':
@@ -71,7 +70,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
             else:
                 if operator in {'===', '==', '='}:
                     operator = '='
-                return f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}'
+                return f'score {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}'
             break
 
         raise JMCSyntaxException(
