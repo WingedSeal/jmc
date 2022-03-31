@@ -67,8 +67,6 @@ class Function:
 
     def optimize(self, string: str) -> str:
         if string.startswith('execute'):
-            if string.startswith('execute as @s '):
-                string = 'execute '+string[14:]  # len('execute as @s ') = 14
             if string.startswith('execute run '):
                 string = string[12:]  # len('execute run ') = 11
         return string
