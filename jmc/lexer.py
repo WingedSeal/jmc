@@ -189,13 +189,15 @@ class Lexer:
         json_type = command[1].string.replace('.', '/')
         if json_type not in JSON_FILE_TYPES:
             raise MinecraftSyntaxWarning(
-                f"In {tokenizer.file_path}\nUnrecognized JSON file's type({json_type}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-\nExample of valid JSON file type: advancements, predicates, etc."
+                f"Unrecognized JSON file's type({json_type})", command[2], tokenizer
             )
+
         json_path = json_type + '/' + prefix + \
             command[2].string[1:-1].replace('.', '/')
         if not json_path.islower():
             raise MinecraftSyntaxWarning(
-                f"In {tokenizer.file_path}\nUppercase letter found in JSON file's path({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
+                f"Uppercase letter found in JSON file's path({json_path})", command[
+                    2], tokenizer
             )
         logger.debug(f"JSON: {json_type}({json_path})")
         json_content = command[3].string
@@ -224,12 +226,10 @@ class Lexer:
                 "Expected keyword(class's name)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected {'{'} at line {command[1].line} col {command[1].col+command[1].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col+command[1].length-1]} <-"
-            )
+                "Expected {", command[1], tokenizer, col_length=True)
         if command[2].token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected {'{'} at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
-            )
+                "Expected {", command[2], tokenizer)
 
         class_path = prefix + command[1].string.lower().replace('.', '/')
         class_content = command[2].string[1:-1]
@@ -257,30 +257,25 @@ class Lexer:
         for command in programs:
             if command[0].token_type != TokenType.keyword:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nExpected keyword at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col]} <-"
-                )
+                    "Expected keyword", command[0], tokenizer)
             elif command[0].string == 'new':
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\n'new' keyword found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    "'new' keyword found in function", command[0], tokenizer)
             elif command[0].string == 'class':
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\n'class' keyword found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    "'class' keyword found in function", command[0], tokenizer)
             elif command[0].string == 'function' and len(command) == 4:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nFunction declaration found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    "Function declaration found in function", command[0], tokenizer)
             elif command[0].string == '@import':
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nImporting found in function at line {command[0].line} col {command[0].col}\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    "Importing found in function", command[0], tokenizer)
+
             # Boxes check
             if self.do_while_box is not None:
                 if command[0].string != 'while':
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected 'while' at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col-1]} <-"
-                    )
+                        "Expected 'while'", command[0], tokenizer)
             if self.if_else_box:
                 if command[0].string != 'else':
                     append_commands(commands, self.parse_if_else(tokenizer))
@@ -302,27 +297,26 @@ class Lexer:
                             break
                         else:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nExpected keyword at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                "Expected keyword", token, tokenizer)
+
                     # End Handle Errors
 
                     if token.string == 'say':
                         if len(command[key_pos:]) == 1:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nExpected string after 'say' at line {token.line} col {token.col+token.length}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                "Expected string after 'say' command", token, tokenizer, col_length=True)
+
                         if command[key_pos+1].token_type != TokenType.string:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nExpected string after 'say' at line {token.line} col {token.col+token.length}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-\n(In JMC, you are required to wrapped say command's argument in quote.)"
-                            )
+                                "Expected string after 'say' command", command[key_pos+1], tokenizer, display_col_length=False, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
+
                         if len(command[key_pos:]) > 2:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nUnexpected token at line {command[key_pos+2].line} col {command[key_pos+2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+2].line-1][:command[key_pos+2].col]} <-"
-                            )
+                                "Unexpected toke", command[key_pos+2], tokenizer, display_col_length=False)
+
                         if '\n' in command[key_pos+1].string:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nNewline found in say command at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col+command[key_pos+1].string.find(NEW_LINE)+2]} <-"
-                            )
+                                "Newline found in say command", command[key_pos+1], tokenizer)
                         append_commands(
                             commands, f"say {command[key_pos+1].string}")
                         break
@@ -344,16 +338,14 @@ class Lexer:
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         if token.string in self.datapack.used_command:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature only be used once per datapack at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) can only be used once per datapack", token, tokenizer)
                         if not is_load:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
+
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
@@ -364,8 +356,7 @@ class Lexer:
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
@@ -376,12 +367,10 @@ class Lexer:
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature({token.string}) cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         if not is_load:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
                         append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
@@ -391,8 +380,7 @@ class Lexer:
                     if matched_function is not None:
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature({token.string}) cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         return_value = matched_function(
                             command[key_pos:], self.datapack, tokenizer)
                         if return_value is not None:
@@ -404,8 +392,7 @@ class Lexer:
                     if matched_function is not None:
                         if len(command) > key_pos+1:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nUnexpected token at line {command[key_pos+2].line} col {command[key_pos+2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+2].line-1][:command[key_pos+2].col]} <-"
-                            )
+                                "Unexpected token", command[key_pos+2], tokenizer, display_col_length=False)
                         append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer, is_execute))
                         break
@@ -416,13 +403,11 @@ class Lexer:
                     ):
                         if is_execute:
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                            )
+                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
                     if len(command[key_pos:]) == 2 and command[key_pos+1].token_type == TokenType.paren_round:
                         if command[key_pos+1].string != '()':
                             raise JMCSyntaxException(
-                                f"In {tokenizer.file_path}\nCustom function's parameter is not supported.\nExpected empty bracket at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col + command[key_pos+1].length - 1]} <-"
-                            )
+                                "Custom function's parameter is not supported.\nExpected empty bracket", command[key_pos+1], tokenizer)
                         append_commands(commands,
                                         f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
                         break
@@ -431,27 +416,26 @@ class Lexer:
                         append_commands(commands, token.string)
                     else:
                         raise JMCSyntaxException(
-                            f"In {tokenizer.file_path}\nUnrecognized command ({token.string}) at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
-                        )
+                            f"Unrecognized command", token, tokenizer)
 
                 else:
-                    if token.string == 'run' and is_execute:
+                    if token.string == 'run':
+                        if not is_execute:
+                            raise MinecraftSyntaxWarning(
+                                "'run' keyword found outside 'execute' command", token, tokenizer)
                         is_expect_command = True
                     if (
                         token.token_type == TokenType.keyword and
                         token.string in FIRST_ARGUMENTS
                     ):
-                        col = command[key_pos-1].col+command[key_pos-1].length
                         raise JMCSyntaxException(
-                            f"In {tokenizer.file_path}\nKeyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;) at line {command[key_pos-1].line} col {col}\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos-1].line-1][:col-1]} <-"
-                        )
+                            f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", command[key_pos-1], tokenizer, col_length=True)
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
                         append_commands(commands, tokenizer.clean_up_paren(
                             token))
                     elif token.token_type == TokenType.paren_square:
                         if (
-                            # commands[-1] in ['@a', '@e', '@s', '@r', '@p'] and
                             command[key_pos-1].line == token.line and
                             command[key_pos-1].col +
                                 command[key_pos-1].length == token.col
@@ -470,8 +454,7 @@ class Lexer:
         # Boxes check
         if self.do_while_box is not None:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected 'while' at line {programs[-1][-1].line} col {programs[-1][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[programs[-1][-1].line-1][:programs[-1][-1].col+programs[-1][-1].length-1]} <-"
-            )
+                "Expected 'while'", programs[-1][-1], tokenizer)
         if self.if_else_box:
             append_commands(commands, self.parse_if_else(tokenizer))
 
@@ -492,12 +475,10 @@ class Lexer:
                 self.parse_class(tokenizer, command, file_path_str, prefix)
             elif command[0].string == '@import':
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nImporting is not supporteed in class at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    "Importing is not supported in class", command[0], tokenizer)
             else:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nExpected 'function' or 'new' or 'class' (got {command[0].string}) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col+command[0].length-1]} <-"
-                )
+                    f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer) -> str:
         VAR = "__if_else__"
