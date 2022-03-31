@@ -414,7 +414,7 @@ class Lexer:
                             f"Unrecognized command", token, tokenizer)
 
                 else:
-                    if token.string == 'run':
+                    if token.string == 'run' and token.token_type == TokenType.keyword:
                         if not is_execute:
                             raise MinecraftSyntaxWarning(
                                 "'run' keyword found outside 'execute' command", token, tokenizer)
@@ -425,6 +425,9 @@ class Lexer:
                     ):
                         raise JMCSyntaxException(
                             f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", command[key_pos-1], tokenizer, col_length=True)
+
+                    if token.string == '@s' and token.token_type == TokenType.keyword and commands[-1] == 'as':
+                        commands[-1] = 'if entity'
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
                         append_commands(commands, tokenizer.clean_up_paren(
