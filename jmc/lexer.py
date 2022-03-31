@@ -44,13 +44,26 @@ FIRST_ARGUMENTS = [
     *LOAD_ONCE_COMMANDS,
     *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
-    *FLOW_CONTROL_COMMANDS,
+    *[command for command in FLOW_CONTROL_COMMANDS if command != 'if'],
     *EXECUTE_EXCLUDED_COMMANDS
 ]
 """All vanilla commands and JMC custom syntax 
 
-`if` and `else` are excluded from the list since it can be used in execute"""
+`if` is excluded from the list since it can be used in execute"""
 NEW_LINE = '\n'
+
+
+def append_commands(commands: list[str], string: str) -> None:
+    if string.startswith('execute') and commands and commands[-1] == 'run':
+        if string == 'execute':
+            del commands[-1]
+            return
+        else:
+            del commands[-1]
+            commands.append(string[8:])  # len("execute ") = 8
+            return
+    commands.append(string)
+    return
 
 
 class Lexer:
@@ -290,7 +303,7 @@ class Lexer:
                     )
             if self.if_else_box:
                 if command[0].string != 'else':
-                    commands.append(self.parse_if_else(tokenizer))
+                    append_commands(commands, self.parse_if_else(tokenizer))
 
             if commands:
                 command_strings.append(' '.join(commands))
@@ -304,7 +317,7 @@ class Lexer:
                     # Handle Errors
                     if token.token_type != TokenType.keyword:
                         if token.token_type == TokenType.paren_curly and is_execute:
-                            commands.append(self.datapack.add_private_function(
+                            append_commands(commands, self.datapack.add_private_function(
                                 'anonymous', token, tokenizer))
                             break
                         else:
@@ -330,18 +343,19 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nNewline found in say command at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col+command[key_pos+1].string.find(NEW_LINE)+2]} <-"
                             )
-                        commands.append(f"say {command[key_pos+1].string}")
+                        append_commands(
+                            commands, f"say {command[key_pos+1].string}")
                         break
 
                     if token.string.startswith(DataPack.VARIABLE_SIGN):
                         if len(command) > key_pos+1 and command[key_pos+1].string == 'run' and command[key_pos+1].token_type == TokenType.keyword:
                             is_execute = True
-                            commands.append(
-                                f"execute store result score {token.string} {DataPack.VAR_NAME}")
+                            append_commands(commands,
+                                            f"execute store result score {token.string} {DataPack.VAR_NAME}")
                             continue
 
                         else:
-                            commands.append(variable_operation(
+                            append_commands(commands, variable_operation(
                                 command[key_pos:], tokenizer, self.datapack))
                             break
 
@@ -361,7 +375,7 @@ class Lexer:
                                 f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
                         self.datapack.used_command.add(token.string)
-                        commands.append(matched_function(
+                        append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
 
@@ -373,7 +387,7 @@ class Lexer:
                                 f"In {tokenizer.file_path}\nThis feature cannot be used with 'execute' at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
                         self.datapack.used_command.add(token.string)
-                        commands.append(matched_function(
+                        append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
 
@@ -388,7 +402,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nThis feature only be used in load function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
                             )
-                        commands.append(matched_function(
+                        append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
                         break
 
@@ -402,7 +416,7 @@ class Lexer:
                         return_value = matched_function(
                             command[key_pos:], self.datapack, tokenizer)
                         if return_value is not None:
-                            commands.append(return_value)
+                            append_commands(commands, return_value)
                         break
 
                     matched_function = JMC_COMMANDS.get(
@@ -412,7 +426,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nUnexpected token at line {command[key_pos+2].line} col {command[key_pos+2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+2].line-1][:command[key_pos+2].col]} <-"
                             )
-                        commands.append(matched_function(
+                        append_commands(commands, matched_function(
                             tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer, is_execute))
                         break
 
@@ -429,12 +443,12 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"In {tokenizer.file_path}\nCustom function's parameter is not supported.\nExpected empty bracket at line {command[key_pos+1].line} col {command[key_pos+1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[key_pos+1].line-1][:command[key_pos+1].col + command[key_pos+1].length - 1]} <-"
                             )
-                        commands.append(
-                            f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
+                        append_commands(commands,
+                                        f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
                         break
 
                     if token.string in VANILLA_COMMANDS:
-                        commands.append(token.string)
+                        append_commands(commands, token.string)
                     else:
                         raise JMCSyntaxException(
                             f"In {tokenizer.file_path}\nUnrecognized command ({token.string}) at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-"
@@ -453,7 +467,7 @@ class Lexer:
                         )
 
                     if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
-                        commands.append(tokenizer.clean_up_paren(
+                        append_commands(commands, tokenizer.clean_up_paren(
                             token))
                     elif token.token_type == TokenType.paren_square:
                         if (
@@ -464,12 +478,12 @@ class Lexer:
                         ):
                             commands[-1] += tokenizer.clean_up_paren(token)
                         else:
-                            commands.append(tokenizer.clean_up_paren(
+                            append_commands(commands, tokenizer.clean_up_paren(
                                 token))
                     elif token.token_type == TokenType.string:
-                        commands.append(dumps(token.string))
+                        append_commands(commands, dumps(token.string))
                     else:
-                        commands.append(token.string)
+                        append_commands(commands, token.string)
 
         # End of Program
 
@@ -479,7 +493,7 @@ class Lexer:
                 f"In {tokenizer.file_path}\nExpected 'while' at line {programs[-1][-1].line} col {programs[-1][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[programs[-1][-1].line-1][:programs[-1][-1].col+programs[-1][-1].length-1]} <-"
             )
         if self.if_else_box:
-            commands.append(self.parse_if_else(tokenizer))
+            append_commands(commands, self.parse_if_else(tokenizer))
 
         if commands:
             command_strings.append(' '.join(commands))

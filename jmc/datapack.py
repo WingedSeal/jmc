@@ -63,7 +63,15 @@ class Function:
         return bool(self.commands)
 
     def __split(self, strings: list[str]) -> list[str]:
-        return [str_ for string in strings for str_ in string.split('\n') if str_]
+        return [self.optimize(str_) for string in strings for str_ in string.split('\n') if str_]
+
+    def optimize(self, string: str) -> str:
+        if string.startswith('execute'):
+            if string.startswith('execute as @s '):
+                string = 'execute '+string[14:]  # len('execute as @s ') = 14
+            if string.startswith('execute run '):
+                string = string[12:]  # len('execute run ') = 11
+        return string
 
 
 class DataPack:
