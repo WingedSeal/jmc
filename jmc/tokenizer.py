@@ -157,12 +157,12 @@ class Tokenizer:
             self.col += 1
             if not expect_semicolon and char == Re.SEMICOLON and self.state in [TokenType.keyword, None]:
                 raise JMCSyntaxException(
-                    f"In {self.file_path}\nUnexpected semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
+                    "Unexpected semicolon(;)", self, self, display_col_length=False)
 
             if char == Re.NEW_LINE:
                 if self.state == TokenType.string:
                     raise JMCSyntaxException(
-                        f"In {self.file_path}\nString literal at line {self.line} contains an unescaped line break.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1]} <-")
+                        "String literal contains an unescaped line break.", self, self, entire_line=True)
                 elif self.state == TokenType.comment:
                     self.state = None
                 elif self.state == TokenType.keyword:
@@ -212,7 +212,7 @@ class Tokenizer:
                     self.paren_count = 0
                 elif char in [Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE]:
                     raise JMCSyntaxException(
-                        f"In {self.file_path}\nUnexpected bracket at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
+                        "Unexpected bracket", self, self, display_col_length=False)
                 elif char == Re.HASH and self.col == 1:
                     self.state = TokenType.comment
                 elif char == Re.COMMA:

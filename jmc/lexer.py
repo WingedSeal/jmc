@@ -105,16 +105,13 @@ class Lexer:
             elif command[0].string == '@import':
                 if len(command) < 2:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected string after '@import' at line {command[0].line} col {command[0].col+command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-                    )
+                        "Expected string after '@import'", command[0], tokenizer, col_length=True)
                 if command[1].token_type != TokenType.string:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected string after '@import' at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-                    )
+                        "Expected string after '@import'", command[1], tokenizer)
                 if len(command) > 2:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nUnexpected token at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col]} <-"
-                    )
+                        "Unexpected token", command[1], tokenizer, display_col_length=False)
                 try:
                     new_path = Path(
                         (file_path.parent/command[1].string).resolve()
@@ -126,50 +123,42 @@ class Lexer:
                         )
                 except Exception:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nExpected invalid path ({command[1].string}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-                    )
+                        f"Expected invalid path ({command[1].string})", command[1], tokenizer)
                 self.parse_file(file_path=new_path)
             else:
                 if not is_load:
                     raise JMCSyntaxException(
-                        f"In {tokenizer.file_path}\nCommand({command[1].string}) found inside non-load file at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-                    )
+                        f"Command({command[1].string}) found inside non-load file", command[1], tokenizer)
+
                 self.datapack.load_function.append(command)
 
     def parse_func(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = '') -> None:
         logger.debug(f"Parsing function, prefix = {prefix!r}")
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(function's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-            )
+                "Expected keyword(function's name)", command[1], tokenizer)
         elif command[2].string != '()':
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected ( at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col]} <-"
-            )
+                f"Expected (", command[2], tokenizer, display_col_length=False)
         elif command[3].token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected {'{'} at line {command[3].line} col {command[3].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[3].line-1][:command[3].col-1]} <-"
-            )
+                "Expected {", command[3], tokenizer, display_col_length=False)
 
         func_path = prefix + command[1].string.lower().replace('.', '/')
-        if func_path.startswith(self.datapack.PRIVATE_NAME+'/'):
-            raise JMCSyntaxWarning(
-                f"In {tokenizer.file_path}\nFunction({func_path}) may override private function of JMC at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length-1]} <-\nPlease avoid starting function's path with {self.datapack.PRIVATE_NAME}"
-            )
+        if func_path.startswith(DataPack.PRIVATE_NAME+'/'):
+            raise JMCSyntaxException(
+                f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.PRIVATE_NAME}")
         logger.debug(f"Function: {func_path}")
         func_content = command[3].string[1:-1]
         if func_path in self.datapack.functions:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate function declaration({func_path}) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1+command[1].length-1]} <-"
-            )
+                f"Duplicate function declaration({func_path})", command[1], tokenizer, display_col_length=False)
         elif func_path == self.datapack.LOAD_NAME:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nLoad function is defined at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
-            )
+                "Load function is defined", command[1], tokenizer, display_col_length=False)
         elif func_path == self.datapack.PRIVATE_NAME:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nPrivate function is defined at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col-1]} <-"
-            )
+                "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.functions[func_path] = Function(self.parse_func_content(
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 
@@ -177,32 +166,25 @@ class Lexer:
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
         if len(command) < 2:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(JSON file's type) at line {command[0].line} col {command[0].col +  + command[0].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-            )
+                "Expected keyword(JSON file's type)", command[0], tokenizer, col_length=True)
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(JSON file's type) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-            )
+                "Expected keyword(JSON file's type)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected JSON file's path in bracket at line {command[1].line + command[1].length} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length -1]} <-"
-            )
+                "Expected JSON file's path in bracket", command[1], tokenizer, col_length=True)
         if command[2].string == '()':
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected JSON file's path in bracket at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col]} <-"
-            )
+                "Expected JSON file's path in bracket", command[2], tokenizer)
         if command[2].token_type != TokenType.paren_round:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected ( at line {command[2].line} col {command[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1]} <-"
-            )
+                "Expected (", command[2], tokenizer)
         if len(command) < 4:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected {'{'} at line {command[2].line} col {command[2].col + command[2].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col-1] + command[2].length -1} <-"
-            )
+                "Expected {", command[2], tokenizer, col_length=True)
         if command[3].token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected {'{'} at line {command[3].line} col {command[3].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[3].line-1][:command[3].col-1]} <-"
-            )
+                "Expected {", command[3], tokenizer)
 
         json_type = command[1].string.replace('.', '/')
         if json_type not in JSON_FILE_TYPES:
@@ -219,8 +201,8 @@ class Lexer:
         json_content = command[3].string
         if json_path in self.datapack.jsons:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicate JSON({json_path}) at line {command[2].line} col {command[2].col+1}.\n{tokenizer.file_string.split(NEW_LINE)[command[2].line-1][:command[2].col+command[2].length-1]} <-"
-            )
+                f"Duplicate JSON({json_path})", command[2], tokenizer)
+
         try:
             json: dict[str, str] = loads(json_content)
         except JSONDecodeError as error:
@@ -236,12 +218,10 @@ class Lexer:
         logger.debug(f"Parsing Class, prefix = {prefix!r}")
         if len(command) < 2:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(class's name) at line {command[0].line} col {command[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[0].line-1][:command[0].col + command[0].length - 1]} <-"
-            )
+                "Expected keyword(class's name)", command[0], tokenizer)
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nExpected keyword(class's name) at line {command[1].line} col {command[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col + command[1].length - 1]} <-"
-            )
+                "Expected keyword(class's name)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nExpected {'{'} at line {command[1].line} col {command[1].col+command[1].length}.\n{tokenizer.file_string.split(NEW_LINE)[command[1].line-1][:command[1].col+command[1].length-1]} <-"

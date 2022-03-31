@@ -17,6 +17,4 @@ JMC_COMMANDS: dict[str, Callable[
     ], str]] = {
 
     'Timer.set': timer_set,
-    'Math.sqrt': math_sqrt,
-    'Math.random': math_random,
 }

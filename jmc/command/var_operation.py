@@ -1,9 +1,25 @@
+from typing import Callable
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
+from ._var_operation import (
+    math_sqrt,
+    math_random
+)
 
 NEW_LINE = '\n'
+
+VAR_OPERATION_COMMANDS: dict[str, Callable[
+    [
+        tuple[list[Token], dict[str, Token]],
+        DataPack,
+        Tokenizer,
+    ], str]] = {
+
+    'Math.sqrt': math_sqrt,
+    'Math.random': math_random
+}
 
 
 def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> str:
@@ -49,6 +65,18 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             raise JMCSyntaxException(
                 f"In {tokenizer.file_path}\nUnexpected token ({list_of_tokens[1][1]}) at line {list_of_tokens[1][1].line} col {list_of_tokens[1][1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][1].line-1][:list_of_tokens[1][1].col+list_of_tokens[1][1].length-1]} <-"
             )
+
+        if operator == '=' and list_of_tokens[1][0].token_type == TokenType.keyword and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
+            if len(list_of_tokens[1]) == 1:
+                raise JMCSyntaxException(
+                    f"In {tokenizer.file_path}\nExpect ( at line {list_of_tokens[1][0].line} col {list_of_tokens[1][0].col+list_of_tokens[1][0].length-1}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][0].line-1][:list_of_tokens[1][0].col+list_of_tokens[1][0].length-1]} <-"
+                )
+
+            if len(list_of_tokens[1]) > 2:
+                raise JMCSyntaxException(
+                    f"In {tokenizer.file_path}\nExpect ( at line {list_of_tokens[1][2].line} col {list_of_tokens[1][2].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][2].line-1][:list_of_tokens[1][2].col+list_of_tokens[1][2].length-1]} <-"
+                )
+            return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} = {VAR_OPERATION_COMMANDS[list_of_tokens[1][0]](tokenizer.parse_func_args(list_of_tokens[1][1]), datapack, tokenizer)}"
 
         scoreboard_player = find_scoreboard_player_type(
             list_of_tokens[1][0], tokenizer)
