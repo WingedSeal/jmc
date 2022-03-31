@@ -47,11 +47,12 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
                 continue
             elif len(list_of_tokens) > 2:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nDuplicated operator({operator}) in condition at line {list_of_tokens[2][-1].line} col {list_of_tokens[2][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[2][-1].line-1][:list_of_tokens[2][-1].col + list_of_tokens[2][-1].length - 1]} <-")
+                    f"Duplicated operator({operator}) in condition", list_of_tokens[2][-1], tokenizer)
 
             if len(list_of_tokens[1]) > 1:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnexpected token in condition at line {list_of_tokens[1][-1].line} col {list_of_tokens[1][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][-1].line-1][:list_of_tokens[1][-1].col + list_of_tokens[1][-1].length - 1]} <-")
+                    "Unexpected token in condition", list_of_tokens[1][-1], tokenizer)
+
             second_token = list_of_tokens[1][0]
             scoreboard_player = find_scoreboard_player_type(
                 second_token, tokenizer)
@@ -75,14 +76,15 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
             break
 
         raise JMCSyntaxException(
-            f"In {tokenizer.file_path}\nUnexpected token in condition at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
+            "Operator not found in custom condition", tokens[0], tokenizer)
+
     # End
     conditions: list[str] = []
     for token in tokens:
         if token.token_type == TokenType.paren_square:
             if not conditions:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnexpected square parenthesis [] at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col + token.length - 1]} <-")
+                    "Unexpected square parenthesis []", token, tokenizer)
             conditions[-1] += token.string
         else:
             conditions.append(token.string)
@@ -94,10 +96,11 @@ def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> 
     tokens: list[str] = []
     if _tokens[0].token_type == TokenType.keyword and _tokens[0].string == operator:
         raise JMCSyntaxException(
-            f"In {tokenizer.file_path}\nUnexpected operator {operator} at line {_tokens[0].line} col {_tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[_tokens[0].line-1][:_tokens[0].col + _tokens[0].length]} <-")
+            f"Unexpected operator ({operator})", _tokens[0], tokenizer)
+
     elif _tokens[-1].token_type == TokenType.keyword and _tokens[-1].string == operator:
         raise JMCSyntaxException(
-            f"In {tokenizer.file_path}\nUnexpected operator {operator} at line {_tokens[-1].line} col {_tokens[-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[_tokens[-1].line-1][:_tokens[-1].col + _tokens[-1].length]} <-")
+            f"Unexpected operator ({operator})", _tokens[-1], tokenizer)
 
     for token in _tokens:
         if token.token_type == TokenType.keyword and token.string == operator:
@@ -113,7 +116,8 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> Union[dict, s
     if len(tokens) == 1 and tokens[0].token_type == TokenType.paren_round:
         if tokens[0].string == '()':
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nEmpty round parenthesis () inside condition at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
+                f"Empty round parenthesis () inside condition", tokens[0], tokenizer)
+
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
                               tokens[0].line, tokens[0].col, tokenizer.file_string, expect_semicolon=False)
         tokens = tokenizer.programs[0]

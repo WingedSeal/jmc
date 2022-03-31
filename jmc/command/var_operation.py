@@ -26,17 +26,20 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
     if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.paren_round:
         if len(tokens) > 2:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nUnexpected token at line {tokens[2].line} col {tokens[2].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[2].line-1][:tokens[2].col + tokens[2].length - 2]} <-")
+                "Unexpected token", tokens[2], tokenizer)
+
         if tokens[1].string != "()":
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\n`get` function takes no arguments, expected empty bracket () at line {tokens[1].line} col {tokens[1].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[1].line-1][:tokens[1].col + tokens[1].length - 1]} <-")
+                "'get' function takes no arguments, expected empty bracket ()", tokens[1], tokenizer)
+
         return f"scoreboard players get {tokens[0].string[:-4]} {DataPack.VAR_NAME}"
 
     tokens = tokenizer.split_tokens(
         tokens, ['-', '=', '+', '*', '%', '>', '<'])
     if len(tokens) == 1:
         raise JMCSyntaxException(
-            f"In {tokenizer.file_path}\nExpected operator after variable at line {tokens[0].line} col {tokens[0].col+ tokens[0].length - 1}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
+            "Expected operator after variable", tokens[0], tokenizer, col_length=True)
+
     for operator in ['*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '=']:  # sort key=len
         list_of_tokens = tokenizer.find_tokens(tokens, operator)
         if len(list_of_tokens) == 1:
@@ -44,17 +47,15 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
 
         if len(list_of_tokens) > 2:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nDuplicated operator({operator}) at line {list_of_tokens[2][-1].line} col {list_of_tokens[2][-1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[2][-1].line-1][:list_of_tokens[2][-1].col + list_of_tokens[2][-1].length - 1]} <-")
+                f"Duplicated operator({operator})", list_of_tokens[2][-1], tokenizer)
 
         if operator in ['++', '--']:
             if list_of_tokens[1]:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnexpected token after `++` at line {list_of_tokens[1][0].line} col {list_of_tokens[1][0].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][0].line-1][:list_of_tokens[1][0].col+list_of_tokens[1][0].length-1]} <-"
-                )
+                    f"Unexpected token after '{operator}'", list_of_tokens[1][0], tokenizer)
             if len(list_of_tokens[0]) > 1:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nUnexpected token after `--` at line {list_of_tokens[0][1].line} col {list_of_tokens[0][1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[0][1].line-1][:list_of_tokens[0][1].col+list_of_tokens[0][1].length-1]} <-"
-                )
+                    f"Unexpected token before '{operator}'", list_of_tokens[0][1], tokenizer)
 
             if operator == '++':
                 return f"scoreboard players add {list_of_tokens[0][0].string} {DataPack.VAR_NAME} 1"
@@ -63,28 +64,31 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
 
         if len(list_of_tokens[1]) > 1:
             raise JMCSyntaxException(
-                f"In {tokenizer.file_path}\nUnexpected token ({list_of_tokens[1][1]}) at line {list_of_tokens[1][1].line} col {list_of_tokens[1][1].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][1].line-1][:list_of_tokens[1][1].col+list_of_tokens[1][1].length-1]} <-"
-            )
+                "Unexpected token", list_of_tokens[1][1], tokenizer)
 
         if operator == '=' and list_of_tokens[1][0].token_type == TokenType.keyword and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
             if len(list_of_tokens[1]) == 1:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nExpect ( at line {list_of_tokens[1][0].line} col {list_of_tokens[1][0].col+list_of_tokens[1][0].length-1}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][0].line-1][:list_of_tokens[1][0].col+list_of_tokens[1][0].length-1]} <-"
-                )
+                    "Expected (", list_of_tokens[1][0], tokenizer, col_length=True)
+
+            if list_of_tokens[1][1].token_type == TokenType.paren_round:
+                raise JMCSyntaxException(
+                    "Expected (", list_of_tokens[1][1], tokenizer)
 
             if len(list_of_tokens[1]) > 2:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nExpect ( at line {list_of_tokens[1][2].line} col {list_of_tokens[1][2].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][2].line-1][:list_of_tokens[1][2].col+list_of_tokens[1][2].length-1]} <-"
-                )
+                    "Unexpected token", list_of_tokens[1][2], tokenizer)
+
             return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} = {VAR_OPERATION_COMMANDS[list_of_tokens[1][0]](tokenizer.parse_func_args(list_of_tokens[1][1]), datapack, tokenizer)}"
 
         scoreboard_player = find_scoreboard_player_type(
-            list_of_tokens[1][0], tokenizer)
+            list_of_tokens[1][0], tokenizer, allow_integer=False)
 
         if operator == '->':
             if scoreboard_player.player_type == PlayerType.integer:
                 raise JMCSyntaxException(
-                    f"In {tokenizer.file_path}\nCannot copy score into integer at line {list_of_tokens[1][0].line} col {list_of_tokens[1][0].col}.\n{tokenizer.file_string.split(NEW_LINE)[list_of_tokens[1][0].line-1][:list_of_tokens[1][0].col + list_of_tokens[1][0].length - 1]} <-")
+                    "Cannot copy score into integer", list_of_tokens[1][0], tokenizer)
+
             return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {list_of_tokens[0][0].string} {DataPack.VAR_NAME}"
 
         if scoreboard_player.player_type == PlayerType.integer:
@@ -101,4 +105,4 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
         return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
 
     raise JMCSyntaxException(
-        f"In {tokenizer.file_path}\nUnexpected token(No operator found) at line {tokens[0].line} col {tokens[0].col}.\n{tokenizer.file_string.split(NEW_LINE)[tokens[0].line-1][:tokens[0].col + tokens[0].length - 1]} <-")
+        "No operator found in variable operation", tokens[0], tokenizer)

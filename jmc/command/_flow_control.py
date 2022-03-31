@@ -240,7 +240,9 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
         raise JMCSyntaxException(
             f"Unexpected token({tokens[1].string})", tokens[1], tokenizer)
 
-    scoreboard_player = find_scoreboard_player_type(tokens[0], tokenizer)
+    scoreboard_player = find_scoreboard_player_type(
+        tokens[0], tokenizer, allow_integer=False)
+
     if scoreboard_player.player_type == PlayerType.integer:
         raise JMCSyntaxException(
             f"Unexpected integer in switch case", tokens[0], tokenizer)
