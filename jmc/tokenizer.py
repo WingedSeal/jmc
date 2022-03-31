@@ -131,8 +131,7 @@ class Tokenizer:
             self.list_of_tokens.append(self.keywords)
             self.keywords = []
         else:
-            raise JMCSyntaxWarning(
-                f"In {self.file_path}\nUnnecessary semicolon(;) at line {self.line} col {self.col}.\n{self.raw_string.split(Re.NEW_LINE)[self.line-1][:self.col]} <-")
+            raise JMCSyntaxWarning("Unnecessary semicolon(;)", self, self)
 
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool) -> list[list[Token]]:
         self.list_of_tokens = []
@@ -524,7 +523,7 @@ class Tokenizer:
             elif token.token_type == TokenType.string:
                 if arg:
                     raise JMCSyntaxException(
-                            "Unexpected token", token, self)
+                        "Unexpected token", token, self)
                 arg = token.string
                 if key:
                     add_kwarg(token)

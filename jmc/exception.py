@@ -43,9 +43,11 @@ class JMCSyntaxException(SyntaxError):
 
 
 class JMCSyntaxWarning(SyntaxWarning):
-    def __init__(self, *args: object) -> None:
-        log(self, args)
-        super().__init__(*args)
+    def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+        msg = error_msg(message, token, tokenizer, col_length,
+                        display_col_length, entire_line, suggestion)
+        log(self, [msg])
+        super().__init__(msg)
 
 
 class JMCFileNotFoundError(FileNotFoundError):
@@ -61,9 +63,15 @@ class JMCBuildError(Exception):
 
 
 class JMCDecodeJSONError(ValueError):
-    def __init__(self, *args: object) -> None:
-        log(self, args)
-        super().__init__(*args)
+    def __init__(self, error: JSONDecodeError, token: "Token", tokenizer: "Tokenizer") -> None:
+        line = token.line + error.lineno - 1
+        col = token.col + error.colno - 1 \
+            if token.line == line else error.colno
+
+        msg = f"In {tokenizer.file_path}\n{error.msg} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[line-1][:col-1]} <-"
+
+        log(self, [msg])
+        super().__init__(msg)
 
 
 class MinecraftSyntaxWarning(SyntaxError):

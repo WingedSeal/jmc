@@ -208,12 +208,7 @@ class Lexer:
         try:
             json: dict[str, str] = loads(json_content)
         except JSONDecodeError as error:
-            line = command[3].line + error.lineno - 1
-            col = command[3].col + error.colno - 1 \
-                if command[3].line == line else error.colno
-            raise JMCDecodeJSONError(
-                f"In {tokenizer.file_path}\n{error.msg} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[line-1][:col-1]} <-"
-            )
+            raise JMCDecodeJSONError(error, command[3], tokenizer)
         self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):

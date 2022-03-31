@@ -115,9 +115,8 @@ class DataPack:
 
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
         if token.string == '{}':
-            raise JMCSyntaxWarning(
-                f"In {tokenizer.file_path}\nEmpty function at line {token.line} col {token.col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:token.col+1]} <-"
-            )
+            raise JMCSyntaxWarning("Empty function", token, tokenizer)
+
         commands = self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, line=token.line, col=token.col, file_string=tokenizer.file_string)
         if len(commands) == 1 and NEW_LINE not in commands[0]:
