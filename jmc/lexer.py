@@ -421,7 +421,11 @@ class Lexer:
                         is_expect_command = True
                     if (
                         token.token_type == TokenType.keyword and
-                        token.string in FIRST_ARGUMENTS
+                        token.string in FIRST_ARGUMENTS and
+                        not (
+                            token.string == 'function' and
+                            commands[-1] == 'schedule'
+                        )
                     ):
                         raise JMCSyntaxException(
                             f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", command[key_pos-1], tokenizer, col_length=True)
