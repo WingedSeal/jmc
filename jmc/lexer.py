@@ -235,6 +235,9 @@ class Lexer:
         tokenizer = self.load_tokenizer
         return self._parse_func_content(tokenizer, programs, is_load=True)
 
+    def parse_line(self, tokens: list[Token], tokenizer: Tokenizer) -> list[str]:
+        return self._parse_func_content(tokenizer, [tokens], is_load=False)
+
     def parse_func_content(self,
                            func_content: str, file_path_str: str,
                            line: int, col: int, file_string: str) -> list[str]:

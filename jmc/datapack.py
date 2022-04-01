@@ -113,6 +113,9 @@ class DataPack:
         self.private_function_count[name] += 1
         return str(count)
 
+    def call_func(self, name: str, count: str) -> str:
+        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
+
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
         if token.string == '{}':
             raise JMCSyntaxWarning("Empty function", token, tokenizer)
@@ -124,7 +127,7 @@ class DataPack:
         else:
             count = self.get_count(name)
             self.private_functions[name][count] = Function(commands)
-            return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
+            return self.call_func(name, count)
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
         if precommands is None:
@@ -137,13 +140,13 @@ class DataPack:
                         token.string[1:-1], tokenizer.file_path, line=token.line, col=token.col, file_string=tokenizer.file_string),
                     *postcommands]
         self.private_functions[name][count] = Function(commands)
-        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
+        return self.call_func(name, count)
 
     def add_raw_private_function(self, name: str, commands: list[str], count: str = None) -> str:
         if count is None:
             count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
-        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
+        return self.call_func(name, count)
 
     def build(self) -> None:
         logger.debug("Finializing DataPack")

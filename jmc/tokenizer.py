@@ -112,7 +112,7 @@ class Tokenizer:
             self.file_string = file_string
         self.file_path = file_path_str
         self.programs = self.parse(
-            self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon)
+            self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon, allow_last_missing_semicolon=False)
 
     def append_token(self) -> None:
         self.keywords.append(
@@ -133,7 +133,7 @@ class Tokenizer:
         else:
             raise JMCSyntaxWarning("Unnecessary semicolon(;)", self, self)
 
-    def parse(self, string: str, line: int, col: int, expect_semicolon: bool) -> list[list[Token]]:
+    def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool) -> list[list[Token]]:
         self.list_of_tokens = []
         self.line = line
         self.col = col - 1
@@ -283,9 +283,14 @@ class Tokenizer:
         elif self.state == TokenType.paren:
             raise JMCSyntaxException(
                 "Bracket was never closed", self.token_pos, self, display_col_length=False)
-        elif self.keywords:
-            raise JMCSyntaxException(
-                "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
+        elif self.keywords or self.token:
+            if self.token != "":
+                self.append_token()
+            if allow_last_missing_semicolon:
+                self.append_keywords()
+            else:
+                raise JMCSyntaxException(
+                    "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
 
         return self.list_of_tokens
 

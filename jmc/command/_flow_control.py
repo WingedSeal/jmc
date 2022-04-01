@@ -62,8 +62,10 @@ def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> Opt
             "Expected 'if' or {", command[1], tokenizer, display_col_length=False)
 
 
+WHILE_NAME = 'while_loop'
+
+
 def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -> str:
-    NAME = 'while'
     if datapack.lexer.do_while_box is None:
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -79,10 +81,10 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
                 "Expected {", command[2], tokenizer, display_col_length=False)
 
         condition, precommand = parse_condition(command[1], tokenizer)
-        count = datapack.get_count(NAME)
-        call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{NAME}/{count}"
+        count = datapack.get_count(WHILE_NAME)
+        call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{WHILE_NAME}/{count}"
         datapack.add_custom_private_function(
-            NAME, command[2], tokenizer, count, postcommands=[call_func])
+            WHILE_NAME, command[2], tokenizer, count, postcommands=[call_func])
         return call_func
     else:
         func_content = datapack.lexer.do_while_box
@@ -98,9 +100,9 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
                 f"Unexpected token", command[2], tokenizer, display_col_length=False)
 
         condition, precommand = parse_condition(command[1], tokenizer)
-        count = datapack.get_count(NAME)
+        count = datapack.get_count(WHILE_NAME)
         call_func = datapack.add_custom_private_function(
-            NAME, func_content, tokenizer, count, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{NAME}/{count}"])
+            WHILE_NAME, func_content, tokenizer, count, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{WHILE_NAME}/{count}"])
 
         return call_func
 
@@ -250,5 +252,64 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
     return parse_switch(scoreboard_player, func_contents, datapack)
 
 
+FOR_NAME = 'for_loop'
+
+
 def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
-    return "for_"+str(command)
+    if len(command) == 1:
+        raise JMCSyntaxException(
+            "Expected (", command[0], tokenizer, col_length=True)
+    if command[1].token_type != TokenType.paren_round:
+        raise JMCSyntaxException(
+            "Expected (", command[1], tokenizer, display_col_length=False)
+    if len(command) == 2:
+        raise JMCSyntaxException(
+            "Expected {", command[1], tokenizer, col_length=True)
+    if command[2].token_type != TokenType.paren_curly:
+        raise JMCSyntaxException(
+            "Expected {", command[2], tokenizer, display_col_length=False)
+    if command[2].string == '{}':
+        raise JMCSyntaxException(
+            "For loop content cannot be empty", command[2], tokenizer)
+    statements = tokenizer.parse(command[1].string[1:-1], command[1].line,
+                                 command[1].col, expect_semicolon=True, allow_last_missing_semicolon=True)
+    if len(statements) != 3:
+        raise JMCSyntaxException(
+            f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)
+
+    if statements[0][0].string in ['let', 'var'] and statements[0][0].token_type == TokenType.keyword:
+        raise JMCSyntaxException(
+            f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
+
+    _first_statement = tokenizer.split_tokens(statements[0], ['='])
+    if not (_first_statement[0].string.startswith(DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.keyword):
+        raise JMCSyntaxException(
+            "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
+
+    first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
+
+    if not (_first_statement[1].string == '=' and _first_statement[1].token_type == TokenType.keyword):
+        raise JMCSyntaxException(
+            "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
+
+    condition, precommand = parse_condition(statements[1], tokenizer)
+    last_statement = datapack.lexer.parse_line(statements[2], tokenizer)
+
+    count = datapack.get_count(FOR_NAME)
+    call_func = f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+
+    datapack.add_custom_private_function(
+        FOR_NAME,
+        command[2],
+        tokenizer,
+        count,
+        postcommands=[
+            *last_statement,
+            call_func
+        ]
+    )
+
+    return '\n'.join([
+        *first_statement,
+        call_func
+    ])

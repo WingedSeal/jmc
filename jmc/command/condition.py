@@ -39,8 +39,8 @@ def merge_condition(conditions: list[Condition]) -> str:
 
 def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
     if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
-        first_token = tokens[0]
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<'])
+        first_token = tokens[0]
         for operator in ['===', '==', '>=', '<=', '>', '<', '=']:  # sort key=len
             list_of_tokens = tokenizer.find_tokens(tokens, operator)
             if len(list_of_tokens) == 1:
@@ -209,7 +209,7 @@ def commands_to_strings(ast: Union[dict, str]) -> tuple[str, str]:
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Token, tokenizer: Tokenizer) -> tuple[str, str]:
+def parse_condition(condition_token: Union[Token, list[Token]], tokenizer: Tokenizer) -> tuple[str, str]:
     """Return `if ...` and pre-commands with newline
 Example:
 ```py
@@ -224,7 +224,10 @@ return datapack.add_raw_private_function("if_else", commands)
 """
     global count
     count = 0
-    ast = condition_to_ast([condition_token], tokenizer)
+    tokens = condition_token if isinstance(
+        condition_token, list) else [condition_token]
+
+    ast = condition_to_ast(tokens, tokenizer)
     condition, precommand = commands_to_strings(ast)
     precommand = precommand+'\n' if precommand else ""
     return condition, precommand
