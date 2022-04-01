@@ -10,7 +10,7 @@ from ..datapack import DataPack
 
 JMC_COMMANDS: dict[str, Callable[
     [
-        tuple[list[Token], dict[str, Token]],
+        Token,
         DataPack,
         Tokenizer,
         bool

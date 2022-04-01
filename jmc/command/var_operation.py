@@ -79,7 +79,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
                 raise JMCSyntaxException(
                     "Unexpected token", list_of_tokens[1][2], tokenizer)
 
-            return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} = {VAR_OPERATION_COMMANDS[list_of_tokens[1][0]](tokenizer.parse_func_args(list_of_tokens[1][1]), datapack, tokenizer)}"
+            return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} = {VAR_OPERATION_COMMANDS[list_of_tokens[1][0]](list_of_tokens[1][1], datapack, tokenizer)}"
 
         scoreboard_player = find_scoreboard_player_type(
             list_of_tokens[1][0], tokenizer, allow_integer=False)

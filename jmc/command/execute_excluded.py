@@ -9,7 +9,7 @@ from ..datapack import DataPack
 
 EXECUTE_EXCLUDED_COMMANDS: dict[str, Callable[
     [
-        tuple[list[Token], dict[str, Token]],
+        Token,
         DataPack,
         Tokenizer,
     ], str]] = {

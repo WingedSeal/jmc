@@ -346,7 +346,7 @@ class Lexer:
 
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
-                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer))
                         break
 
                     matched_function = EXECUTE_EXCLUDED_COMMANDS.get(
@@ -357,7 +357,7 @@ class Lexer:
                                 f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
-                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer))
                         break
 
                     matched_function = LOAD_ONLY_COMMANDS.get(
@@ -370,7 +370,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) can only be used in load function", token, tokenizer)
                         append_commands(commands, matched_function(
-                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer))
                         break
 
                     matched_function = FLOW_CONTROL_COMMANDS.get(
@@ -388,11 +388,11 @@ class Lexer:
                     matched_function = JMC_COMMANDS.get(
                         token.string, None)
                     if matched_function is not None:
-                        if len(command) > key_pos+1:
+                        if len(command) > key_pos+2:
                             raise JMCSyntaxException(
                                 "Unexpected token", command[key_pos+2], tokenizer, display_col_length=False)
                         append_commands(commands, matched_function(
-                            tokenizer.parse_func_args(command[key_pos+1]), self.datapack, tokenizer, is_execute))
+                            command[key_pos+1], self.datapack, tokenizer, is_execute))
                         break
 
                     if token.string in ['new', 'class' '@import'] or (

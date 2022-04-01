@@ -15,7 +15,7 @@ from ..datapack import DataPack
 
 LOAD_ONLY_COMMANDS: dict[str, Callable[
     [
-        tuple[list[Token], dict[str, Token]],
+        Token,
         DataPack,
         Tokenizer,
     ], str]] = {

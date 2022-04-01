@@ -20,15 +20,26 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
     # if token is None and tokenizer is None:
     #     return message
     col = token.col
-    display_col = token.col
+    line = token.line
     if col_length:
-        col += token.length
+        if '\n' in token.string:
+            line += token.string.count('\n')
+            col = token.length - token.string.rfind('\n')
+        else:
+            col += token.length
+    display_line = line
+    display_col = col
+
     if display_col_length:
-        display_col += token.length
+        if '\n' in token.string:
+            display_line += token.string.count('\n')
+            display_col = token.length - token.string.rfind('\n')
+        else:
+            display_col += token.length
     if entire_line:
-        msg = f"In {tokenizer.file_path}\n{message} at line {token.line}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1]} <-"
+        msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{tokenizer.file_string.split(NEW_LINE)[display_line-1]} <-"
     else:
-        msg = f"In {tokenizer.file_path}\n{message} at line {token.line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[token.line-1][:display_col-1]} <-"
+        msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[display_line-1][:display_col-1]} <-"
     if suggestion is not None:
         msg += '\n'+suggestion
     return msg

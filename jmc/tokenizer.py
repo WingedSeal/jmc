@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
-from typing import Optional
+from typing import Any, Optional
 from enum import Enum
 from json import dumps
 import re
@@ -112,7 +112,7 @@ class Tokenizer:
             self.file_string = file_string
         self.file_path = file_path_str
         self.programs = self.parse(
-            self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon, allow_last_missing_semicolon=False)
+            self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon)
 
     def append_token(self) -> None:
         self.keywords.append(
@@ -133,7 +133,7 @@ class Tokenizer:
         else:
             raise JMCSyntaxWarning("Unnecessary semicolon(;)", self, self)
 
-    def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool) -> list[list[Token]]:
+    def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         self.list_of_tokens = []
         self.line = line
         self.col = col - 1
@@ -313,17 +313,30 @@ class Tokenizer:
             col += len(string)
         return tokens
 
-    def split_tokens(self, tokens: list[Token], split_strings: list[str]) -> list[Token]:
+    def split_tokens(self, tokens: list[Token], split_strings: list[str], max: int = None) -> list[Token]:
         """Loop through all tokens and split a keyword token thta contain string inside split_strings"""
-        for split_str in split_strings:
-            new_tokens = []
-            for token in tokens:
-                if token.token_type == TokenType.keyword:
-                    new_tokens.extend(self.split_token(token, split_str))
-                else:
-                    new_tokens.append(token)
-            tokens = new_tokens
-        return tokens
+        if max is None:
+            for split_str in split_strings:
+                new_tokens = []
+                for token in tokens:
+                    if token.token_type == TokenType.keyword:
+                        new_tokens.extend(self.split_token(token, split_str))
+                    else:
+                        new_tokens.append(token)
+                tokens = new_tokens
+            return tokens
+        else:
+            count = 0
+            for split_str in split_strings:
+                new_tokens = []
+                for token in tokens:
+                    if token.token_type == TokenType.keyword and count < max:
+                        count += 1
+                        new_tokens.extend(self.split_token(token, split_str))
+                    else:
+                        new_tokens.append(token)
+                tokens = new_tokens
+            return tokens
 
     def find_token(self, tokens: list[Token], string: str) -> list[list[Token]]:
         """Split tokens by token that match the string"""
@@ -466,6 +479,23 @@ class Tokenizer:
         expecting_comma = False
         for token in keywords:
             if expecting_comma and token.token_type != TokenType.comma:
+                if token.token_type == TokenType.paren_square:
+                    if kwargs:
+                        last_key = list(kwargs)[-1]
+                        last_arg = kwargs[last_key]
+                    else:
+                        last_arg = args[-1]
+
+                    if token.line == last_arg.line and (last_arg.col +
+                                                        last_arg.length) == token.col:
+                        new_token = Token(
+                            TokenType.keyword, last_arg.line, last_arg.col, last_arg.string+token.string)
+                        if kwargs:
+                            kwargs[last_key] = new_token
+                        else:
+                            args[-1] = new_token
+                        continue
+
                 raise JMCSyntaxException(
                     f"Expected comma(,)", token, self, display_col_length=False)
 
@@ -488,6 +518,8 @@ class Tokenizer:
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)
+                        else:
+                            add_arg(new_token)
                         last_token = new_token
                         arrow_func_state = 0
                         continue
@@ -538,6 +570,124 @@ class Tokenizer:
             add_arg(token)
 
         return args, kwargs
+
+    def parse_js_obj(self, token: Token) -> dict[Any, Token]:
+        if token.token_type != TokenType.paren_curly:
+            raise JMCSyntaxException(
+                "Expected JavaScript Object", token, self, suggestion="Expected {")
+        keywords = self.parse(
+            token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)[0]
+        keywords = self.split_tokens(keywords, [':'], max=1)
+        kwargs: dict[str, Token] = dict()
+        key: str = ""
+        arg: str = ""
+        arrow_func_state = 0
+        """
+        0: None
+        1: ()
+        2: =>
+        """
+
+        def add_kwarg(token: Token) -> None:
+            nonlocal key
+            nonlocal arg
+            nonlocal kwargs
+            nonlocal expecting_comma
+            expecting_comma = True
+            if key[0] in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
+                raise JMCSyntaxException(
+                    f"Invalid key({key})", last_token, self, display_col_length=False)
+
+            if key == "":
+                raise JMCSyntaxException(
+                    "Empty key", token, self, display_col_length=False)
+
+            if key in kwargs:
+                raise JMCSyntaxException(
+                    f"Duplicated key({key})", token, self, display_col_length=False)
+
+            kwargs[key] = Token(string=arg, line=token.line,
+                                col=token.col, token_type=token.token_type)
+            key = ""
+            arg = ""
+
+        expecting_comma = False
+        for token in keywords:
+            if expecting_comma and token.token_type != TokenType.comma:
+                raise JMCSyntaxException(
+                    f"Expected comma(,)", token, self, display_col_length=False)
+
+            if arrow_func_state > 0:
+                if arrow_func_state == 1:
+                    if token.string == "=>" and token.token_type == TokenType.keyword:
+                        arrow_func_state = 2
+                        last_token = token
+                        continue
+                    else:
+                        arg = last_token.string
+                        if key:
+                            add_kwarg(last_token)
+                        arrow_func_state = 0
+                        continue
+                elif arrow_func_state == 2:
+                    if token.token_type == TokenType.paren_curly:
+                        new_token = Token(
+                            string=token.string[1:-1], line=token.line, col=token.col, token_type=TokenType.func)
+                        arg = new_token.string
+                        if key:
+                            add_kwarg(new_token)
+                        last_token = new_token
+                        arrow_func_state = 0
+                        continue
+                    else:
+                        raise JMCSyntaxException(
+                            "Expected {", token, self, display_col_length=False)
+
+            if token.token_type == TokenType.keyword:
+                if arg:
+                    if token.string == '=':
+                        key = arg
+                        arg = ""
+                    else:
+                        raise JMCSyntaxException(
+                            "Unexpected token", token, self)
+                elif key:
+                    arg = token.string
+                    if token.string == '=':
+                        raise JMCSyntaxException(
+                            "Duplicated equal-sign(=)", token, self)
+                    add_kwarg(token)
+                else:
+                    arg = token.string
+
+            elif token.token_type == TokenType.comma:
+                arrow_func_state = 0
+                expecting_comma = False
+                if arg:
+                    raise JMCSyntaxException(
+                        "Unexpected colon(:)", token, self)
+            elif token.token_type in [TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square]:
+                if token.string == "()":
+                    arrow_func_state = 1
+                else:
+                    arg = token.string
+                    if key:
+                        add_kwarg(token)
+
+            elif token.token_type == TokenType.string:
+                if arg:
+                    raise JMCSyntaxException(
+                        "Unexpected token", token, self)
+                arg = token.string
+                if key:
+                    add_kwarg(token)
+            last_token = token
+
+        if arg:
+            raise JMCSyntaxException(
+                "Unexpected colon(:)", token, self)
+
+        return kwargs
 
     def clean_up_paren(self, token: Token, is_nbt: bool = True) -> str:
         if len(token.string) == 2:
