@@ -37,7 +37,7 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
     if len(splits) == 1:
         if allow_integer:
             raise JMCSyntaxException(
-                f"Expected integer, variable, or objective:selector ", token, tokenizer)
+                f"Expected integer, variable, or objective:selector", token, tokenizer)
         else:
             raise JMCSyntaxException(
                 f"Expected variable or objective:selector", token, tokenizer)
@@ -57,6 +57,10 @@ class ArgType(Enum):
     string = "string"
     keyword = "keyword"
     selector = "target selector"
+
+    func = "function"
+    scoreboard_player = "integer, variable, or objective:selector"
+    any = None
 
 
 def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
@@ -101,6 +105,18 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
     for key, value in result.items():
         if value is not None:
             arg_type = find_arg_type(value, tokenizer)
+            if params[key] == ArgType.any:
+                continue
+            if params[key] == ArgType.scoreboard_player:
+                if arg_type in {ArgType.scoreboard, ArgType.integer}:
+                    continue
+                raise JMCSyntaxException(
+                    f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
+            if params[key] == ArgType.func:
+                if arg_type in {ArgType.arrow_func, ArgType.keyword}:
+                    continue
+                raise JMCSyntaxException(
+                    f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
             if params[key] != arg_type:
                 raise JMCSyntaxException(
                     f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
