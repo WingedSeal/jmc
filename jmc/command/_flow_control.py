@@ -121,15 +121,15 @@ def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
 SWITCH_CASE_NAME = 'switch_case'
 
 
-def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer) -> None:
+def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str) -> None:
     if max_ < min_:
         raise ValueError("min_ is less than max_ in __parse_switch_binary")
     if max_ == min_:
         datapack.add_raw_private_function(
-            SWITCH_CASE_NAME, func_contents[min_-1], count)
+            name, func_contents[min_-1], count)
     else:
-        count_less = datapack.get_count(SWITCH_CASE_NAME)
-        count_more = datapack.get_count(SWITCH_CASE_NAME)
+        count_less = datapack.get_count(name)
+        count_more = datapack.get_count(name)
 
         half2 = min_+(max_-min_+1)//2
         half1 = half2-1
@@ -138,22 +138,22 @@ def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, 
         match_more = f"{half2}..{max_}" if half2 != max_ else max_
 
         datapack.add_raw_private_function(
-            SWITCH_CASE_NAME, [
-                f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_less} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{SWITCH_CASE_NAME}/{count_less}",
-                f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_more} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{SWITCH_CASE_NAME}/{count_more}",
+            name, [
+                f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_less} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{name}/{count_less}",
+                f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_more} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{name}/{count_more}",
             ], count)
 
         __parse_switch_binary(min_, half1, count_less,
-                              datapack, func_contents, scoreboard_player)
+                              datapack, func_contents, scoreboard_player, name)
         __parse_switch_binary(half2, max_, count_more,
-                              datapack, func_contents, scoreboard_player)
+                              datapack, func_contents, scoreboard_player, name)
 
 
-def parse_switch(scoreboard_player: ScoreboardPlayer, func_contents: list[list[str]], datapack: DataPack) -> list[Token]:
-    count = datapack.get_count(SWITCH_CASE_NAME)
+def parse_switch(scoreboard_player: ScoreboardPlayer, func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
+    count = datapack.get_count(name)
     __parse_switch_binary(1, len(func_contents), count,
-                          datapack, func_contents, scoreboard_player)
-    return f"function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{SWITCH_CASE_NAME}/{count}"
+                          datapack, func_contents, scoreboard_player, name)
+    return f"function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{name}/{count}"
 
 
 def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:

@@ -21,14 +21,15 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
     #     return message
     col = token.col
     line = token.line
+    display_line = line
+    display_col = col
+
     if col_length:
         if '\n' in token.string:
             line += token.string.count('\n')
             col = token.length - token.string.rfind('\n')
         else:
             col += token.length
-    display_line = line
-    display_col = col
 
     if display_col_length:
         if '\n' in token.string:
