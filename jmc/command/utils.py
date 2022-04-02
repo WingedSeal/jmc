@@ -59,8 +59,36 @@ class ArgType(Enum):
     selector = "target selector"
 
     func = "function"
+    func_call = "function"
     scoreboard_player = "integer, variable, or objective:selector"
     any = None
+
+
+class Arg:
+    def __init__(self, token: Token, arg_type: ArgType = None,) -> None:
+        self.token = token
+        self.arg_type = arg_type
+
+    def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
+        if verifier == ArgType.any:
+            return
+        if verifier == ArgType.scoreboard_player:
+            if self.arg_type in {ArgType.scoreboard, ArgType.integer}:
+                return
+            raise JMCSyntaxException(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier == ArgType.func:
+            if self.arg_type == ArgType.arrow_func:
+                return
+            if self.arg_type == ArgType.keyword:
+                self.arg_type = ArgType.func_call
+                return
+            raise JMCSyntaxException(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier != self.arg_type:
+            raise JMCSyntaxException(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        return self
 
 
 def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
@@ -87,7 +115,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
         f"Unknown argument type", token, tokenizer)
 
 
-def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Token]:
+def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg]:
     args, kwargs = tokenizer.parse_func_args(token)
     result = {key: None for key in params}
     key_list = list(params)
@@ -95,30 +123,13 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
         raise JMCSyntaxException(
             f"{feature_name} takes {len(key_list)} positional arguments, got {len(args)}", token, tokenizer)
     for key, arg in zip(key_list, args):
-        result[key] = arg
+        arg_type = find_arg_type(arg, tokenizer)
+        result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
     for key, arg in kwargs.items():
         if key not in result:
             raise JMCSyntaxException(
                 f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
-        result[key] = arg
-
-    for key, value in result.items():
-        if value is not None:
-            arg_type = find_arg_type(value, tokenizer)
-            if params[key] == ArgType.any:
-                continue
-            if params[key] == ArgType.scoreboard_player:
-                if arg_type in {ArgType.scoreboard, ArgType.integer}:
-                    continue
-                raise JMCSyntaxException(
-                    f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
-            if params[key] == ArgType.func:
-                if arg_type in {ArgType.arrow_func, ArgType.keyword}:
-                    continue
-                raise JMCSyntaxException(
-                    f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
-            if params[key] != arg_type:
-                raise JMCSyntaxException(
-                    f"For '{key}' key, expected {params[key].value}, got {arg_type.value}", token, tokenizer)
+        arg_type = find_arg_type(arg, tokenizer)
+        result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
 
     return result

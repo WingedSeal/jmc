@@ -85,6 +85,15 @@ class JMCDecodeJSONError(ValueError):
         super().__init__(msg)
 
 
+class JMCTypeError(TypeError):
+    def __init__(self, missing_argument: str, token: "Token", tokenizer: "Tokenizer", *, suggestion: str = None) -> None:
+        msg = error_msg(f"Missing required positional argument: '{missing_argument}'", token, tokenizer, col_length=False,
+                        display_col_length=False, entire_line=False, suggestion=suggestion)
+
+        log(self, [msg])
+        super().__init__(msg)
+
+
 class MinecraftSyntaxWarning(SyntaxError):
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,

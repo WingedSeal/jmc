@@ -1,3 +1,4 @@
+from jmc.exception import JMCSyntaxException, JMCTypeError
 from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
 from .utils import ArgType, verify_args
@@ -5,14 +6,52 @@ from .utils import ArgType, verify_args
 
 HARDCODE_REPEAT_ARG_TYPE = {
     "index_string": ArgType.string,
-    "function": ArgType.arrow_func
+    "function": ArgType.arrow_func,
+    "count": ArgType.integer,
+    "start": ArgType.integer,
+    "stop": ArgType.integer,
+    "step": ArgType.integer
 }
 
 
 def hardcode_repeat(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
     args = verify_args(HARDCODE_REPEAT_ARG_TYPE,
                        "Hardcode.repeat", token, tokenizer)
-    return "hardcode_repeat"+str(args)
+
+    if args["index_string"] is None:
+        raise JMCTypeError("index_string", token, tokenizer)
+    else:
+        index_string = args["index_string"].token.string
+
+    if args["function"] is None:
+        raise JMCTypeError("function", token, tokenizer)
+
+    if args["start"] is None:
+        start = 0
+    else:
+        start = int(args["start"].token.string)
+
+    if args["stop"] is None:
+        raise JMCTypeError("stop", token, tokenizer)
+    else:
+        stop = int(args["stop"].token.string)
+
+    if args["step"] is None:
+        step = 1
+    else:
+        step = int(args["step"].token.string)
+        if step == 0:
+            raise JMCSyntaxException(
+                "'step' must not be zero", args["step"].token, tokenizer)
+
+    code = datapack.parse_function_token(
+        args["function"].token, tokenizer)
+
+    commands: list[str] = []
+    for i in range(start, stop, step):
+        commands.extend(line.replace(index_string, str(i)) for line in code)
+
+    return "\n".join(commands)
 
 
 HARDCODE_SWITCH_ARG_TYPE = {
@@ -26,6 +65,7 @@ HARDCODE_SWITCH_ARG_TYPE = {
 def hardcode_switch(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
     args = verify_args(HARDCODE_SWITCH_ARG_TYPE,
                        "Hardcode.switch", token, tokenizer)
+
     return f"""TEST
 {args["switch"].string}
 {args["index_string"].string}
