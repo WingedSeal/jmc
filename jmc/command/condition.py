@@ -41,7 +41,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
     if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<'])
         first_token = tokens[0]
-        for operator in ['===', '==', '>=', '<=', '>', '<', '=']:  # sort key=len
+        for operator in {'===', '==', '>=', '<=', '>', '<', '='}:  # sort key=len
             list_of_tokens = tokenizer.find_tokens(tokens, operator)
             if len(list_of_tokens) == 1:
                 continue
@@ -59,7 +59,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
 
             if scoreboard_player.player_type == PlayerType.integer:
                 compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
-                if operator in ['===', '==', '=']:
+                if operator in {'===', '==', '='}:
                     return f'{compared} {scoreboard_player.value}'
                 if operator == '>=':
                     return f'{compared} {scoreboard_player.value}..'

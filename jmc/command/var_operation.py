@@ -40,7 +40,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
         raise JMCSyntaxException(
             "Expected operator after variable", tokens[0], tokenizer, col_length=True)
 
-    for operator in ['*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '=']:  # sort key=len
+    for operator in {'*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '='}:  # sort key=len
         list_of_tokens = tokenizer.find_tokens(tokens, operator)
         if len(list_of_tokens) == 1:
             continue
@@ -49,7 +49,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             raise JMCSyntaxException(
                 f"Duplicated operator({operator})", list_of_tokens[2][-1], tokenizer)
 
-        if operator in ['++', '--']:
+        if operator in {'++', '--'}:
             if list_of_tokens[1]:
                 raise JMCSyntaxException(
                     f"Unexpected token after '{operator}'", list_of_tokens[1][0], tokenizer)

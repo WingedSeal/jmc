@@ -154,7 +154,7 @@ class Tokenizer:
 
         for char in string:
             self.col += 1
-            if not expect_semicolon and char == Re.SEMICOLON and self.state in [TokenType.keyword, None]:
+            if not expect_semicolon and char == Re.SEMICOLON and self.state in {TokenType.keyword, None}:
                 raise JMCSyntaxException(
                     "Unexpected semicolon(;)", self, self, display_col_length=False)
 
@@ -178,7 +178,7 @@ class Tokenizer:
                 continue
 
             if self.state == TokenType.keyword:
-                if char in [
+                if char in {
                     Quote.SINGLE,
                     Quote.DOUBLE,
                     Paren.L_CURLY,
@@ -186,14 +186,14 @@ class Tokenizer:
                     Paren.L_SQUARE,
                     Re.SEMICOLON,
                     Re.COMMA
-                ] or re.match(Re.WHITESPACE, char):
+                } or re.match(Re.WHITESPACE, char):
                     self.append_token()
                 else:
                     self.token += char
                     continue
 
             if self.state == None:
-                if char in [Quote.SINGLE, Quote.DOUBLE]:
+                if char in {Quote.SINGLE, Quote.DOUBLE}:
                     self.state = TokenType.string
                     self.token_pos = Pos(self.line, self.col)
                     self.quote = char
@@ -202,14 +202,14 @@ class Tokenizer:
                     continue
                 elif char == Re.SEMICOLON:
                     self.append_keywords()
-                elif char in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
+                elif char in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
                     self.state = TokenType.paren
                     self.token += char
                     self.token_pos = Pos(self.line, self.col)
                     self.paren = char
                     self.r_paren = PAREN_PAIR[char]
                     self.paren_count = 0
-                elif char in [Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE]:
+                elif char in {Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE}:
                     raise JMCSyntaxException(
                         "Unexpected bracket", self, self, display_col_length=False)
                 elif char == Re.HASH and self.col == 1:
@@ -262,7 +262,7 @@ class Tokenizer:
                         self.paren_count += 1
                     elif char == self.r_paren:
                         self.paren_count -= 1
-                    elif char in [Quote.SINGLE, Quote.DOUBLE]:
+                    elif char in {Quote.SINGLE, Quote.DOUBLE}:
                         self.is_string = True
                         self.quote = char
 
@@ -459,7 +459,7 @@ class Tokenizer:
             nonlocal kwargs
             nonlocal expecting_comma
             expecting_comma = True
-            if key[0] in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
+            if key[0] in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
                 raise JMCSyntaxException(
                     f"Invalid key({key})", last_token, self, display_col_length=False)
 
@@ -549,7 +549,7 @@ class Tokenizer:
                 expecting_comma = False
                 if arg:
                     add_arg(last_token, from_comma=True)
-            elif token.token_type in [TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square]:
+            elif token.token_type in {TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square}:
                 if token.string == "()":
                     arrow_func_state = 1
                 else:
@@ -594,7 +594,7 @@ class Tokenizer:
             nonlocal kwargs
             nonlocal expecting_comma
             expecting_comma = True
-            if key[0] in [Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE]:
+            if key[0] in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
                 raise JMCSyntaxException(
                     f"Invalid key({key})", last_token, self, display_col_length=False)
 
@@ -666,7 +666,7 @@ class Tokenizer:
                 if arg:
                     raise JMCSyntaxException(
                         "Unexpected colon(:)", token, self)
-            elif token.token_type in [TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square]:
+            elif token.token_type in {TokenType.paren_round, TokenType.paren_curly, TokenType.paren_square}:
                 if token.string == "()":
                     arrow_func_state = 1
                 else:
@@ -700,7 +700,7 @@ class Tokenizer:
         if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
             is_nbt = False
         for token_ in tokenizer.programs[0]:
-            if token_.token_type in [TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square]:
+            if token_.token_type in {TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square}:
                 string += tokenizer.clean_up_paren(token_, is_nbt)
             elif token_.token_type == TokenType.string:
                 if is_nbt:

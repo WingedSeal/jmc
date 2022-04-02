@@ -277,7 +277,7 @@ def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
         raise JMCSyntaxException(
             f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)
 
-    if statements[0][0].string in ['let', 'var'] and statements[0][0].token_type == TokenType.keyword:
+    if statements[0][0].string in {'let', 'var'} and statements[0][0].token_type == TokenType.keyword:
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 

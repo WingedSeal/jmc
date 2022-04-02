@@ -395,7 +395,7 @@ class Lexer:
                             command[key_pos+1], self.datapack, tokenizer, is_execute))
                         break
 
-                    if token.string in ['new', 'class' '@import'] or (
+                    if token.string in {'new', 'class' '@import'} or (
                         token.string == 'function' and
                         len(command) > key_pos + 2
                     ):
@@ -436,7 +436,7 @@ class Lexer:
                     if token.string == '@s' and token.token_type == TokenType.keyword and commands[-1] == 'as':
                         commands[-1] = 'if entity'
 
-                    if token.token_type in [TokenType.paren_curly, TokenType.paren_round]:
+                    if token.token_type in {TokenType.paren_curly, TokenType.paren_round}:
                         append_commands(commands, tokenizer.clean_up_paren(
                             token))
                     elif token.token_type == TokenType.paren_square:
