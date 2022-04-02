@@ -174,7 +174,7 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
             "Switch content cannot be empty", command[2], tokenizer)
 
     list_of_tokens = tokenizer.parse(
-        command[2].string[1:-1], command[2].line, command[2].col, expect_semicolon=True)
+        command[2].string[1:-1], command[2].line, command[2].col+1, expect_semicolon=True)
 
     case_count = 1
     cases_content: list[list[list[Token]]] = []
@@ -237,7 +237,7 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
 
     # Parse variable
     tokens = tokenizer.parse(
-        command[1].string[1:-1], command[1].line, command[1].col, expect_semicolon=False)[0]
+        command[1].string[1:-1], command[1].line, command[1].col+1, expect_semicolon=False)[0]
     if len(tokens) > 1:
         raise JMCSyntaxException(
             f"Unexpected token({tokens[1].string})", tokens[1], tokenizer)
@@ -272,7 +272,7 @@ def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
         raise JMCSyntaxException(
             "For loop content cannot be empty", command[2], tokenizer)
     statements = tokenizer.parse(command[1].string[1:-1], command[1].line,
-                                 command[1].col, expect_semicolon=True, allow_last_missing_semicolon=True)
+                                 command[1].col+1, expect_semicolon=True, allow_last_missing_semicolon=True)
     if len(statements) != 3:
         raise JMCSyntaxException(
             f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)

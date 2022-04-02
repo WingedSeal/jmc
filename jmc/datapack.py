@@ -148,7 +148,7 @@ class DataPack:
 
     def parse_function_token(self, token: Token, tokenizer: Tokenizer) -> list[str]:
         """Parse a curly bracket token into a list of string"""
-        return self.lexer.parse_func_content(token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
+        return self.lexer.parse_func_content(token.string[1:-1], tokenizer.file_path, token.line, token.col+1, tokenizer.file_string)
 
     def build(self) -> None:
         logger.debug("Finializing DataPack")

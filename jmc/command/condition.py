@@ -75,6 +75,38 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> str:
                 return f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}'
             break
 
+        if tokens[1].token_type == TokenType.keyword and tokens[1].string == 'matches':
+            if len(tokens) > 3:
+                raise JMCSyntaxException(
+                    "Unexpected token in condition", tokens[3], tokenizer)
+            if tokens[2].token_type != TokenType.keyword:
+                raise JMCSyntaxException(
+                    "Expected keyword", tokens[2], tokenizer)
+
+            match_tokens = tokenizer.split_token(tokens[2], '..')
+            match_tokens = tokenizer.find_token(match_tokens, '..')
+            if len(match_tokens) != 2 or len(match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
+                raise JMCSyntaxException(
+                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer)
+            if not match_tokens[0]:
+                raise JMCSyntaxException(
+                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}<={match_tokens[1][0].string} instead")
+            if not match_tokens[1]:
+                raise JMCSyntaxException(
+                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead")
+
+            first_int = int(match_tokens[0][0].string)
+            second_int = int(match_tokens[1][0].string)
+            if first_int == second_int:
+                raise JMCSyntaxException(
+                    "First integer must not equal second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead")
+            if first_int > second_int:
+                print(tokens[2])
+                raise JMCSyntaxException(
+                    "First integer must be less than second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?")
+
+            return f'score {first_token.string} {DataPack.VAR_NAME} matches {tokens[2].string}'
+
         raise JMCSyntaxException(
             "Operator not found in custom condition", tokens[0], tokenizer)
 
@@ -119,7 +151,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> Union[dict, s
                 f"Empty round parenthesis () inside condition", tokens[0], tokenizer)
 
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
-                              tokens[0].line, tokens[0].col, tokenizer.file_string, expect_semicolon=False)
+                              tokens[0].line, tokens[0].col+1, tokenizer.file_string, expect_semicolon=False)
         tokens = tokenizer.programs[0]
     tokens = tokenizer.split_tokens(tokens, [OR_OPERATOR])
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)

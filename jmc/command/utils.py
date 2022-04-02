@@ -9,6 +9,15 @@ from ..exception import JMCSyntaxException
 NEW_LINE = '\n'
 
 
+def is_number(string: str) -> bool:
+    try:
+        int(string)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
 class PlayerType(Enum):
     variable = auto()
     integer = auto()
@@ -30,7 +39,7 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
     if token.string.startswith(DataPack.VARIABLE_SIGN):
         return ScoreboardPlayer(player_type=PlayerType.variable, value=(DataPack.VAR_NAME, token.string))
 
-    if token.string.isnumeric():
+    if is_number(token.string):
         return ScoreboardPlayer(player_type=PlayerType.integer, value=int(token.string))
 
     splits = token.string.split(':')
@@ -103,7 +112,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
     if token.token_type == TokenType.keyword:
         if token.string.startswith(DataPack.VARIABLE_SIGN) or ':' in token.string:
             return ArgType.scoreboard
-        if token.string.isnumeric():
+        if is_number(token.string):
             return ArgType.integer
         if token.string.startswith('@'):
             return ArgType.selector

@@ -426,7 +426,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected (", token, self, display_col_length=False)
         keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)[0]
+            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
         keywords = self.split_tokens(keywords, ['='])
         keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []
@@ -514,7 +514,7 @@ class Tokenizer:
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
                         new_token = Token(
-                            string=token.string[1:-1], line=token.line, col=token.col, token_type=TokenType.func)
+                            string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)
@@ -576,7 +576,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
         keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col, expect_semicolon=False)[0]
+            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
         keywords = self.split_tokens(keywords, [':'], max=1)
         kwargs: dict[str, Token] = dict()
         key: str = ""
@@ -632,7 +632,7 @@ class Tokenizer:
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
                         new_token = Token(
-                            string=token.string[1:-1], line=token.line, col=token.col, token_type=TokenType.func)
+                            string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)
@@ -695,7 +695,7 @@ class Tokenizer:
         open = token.string[0]
         close = token.string[-1]
         tokenizer = Tokenizer(token.string[1:-1], self.file_path, token.line,
-                              token.col, self.file_string, expect_semicolon=False)
+                              token.col+1, self.file_string, expect_semicolon=False)
         string = ""
         if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
             is_nbt = False
