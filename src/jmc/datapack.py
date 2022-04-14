@@ -184,9 +184,8 @@ class DataPack:
     functions = {dumps(self.functions, indent=2, cls=FunctionEncoder)}
     jsons = {dumps(self.jsons, indent=2)}
     private_functions = {dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
-    
-    loads = {self.loads}
-    tick = {self.ticks}
+    loads = {dumps(self.loads, indent=2)}
+    tick = {dumps(self.ticks, indent=2)}
 
 )"""
 
