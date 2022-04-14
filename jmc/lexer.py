@@ -2,16 +2,17 @@ from pathlib import Path
 from json import loads, JSONDecodeError, dumps
 from typing import Optional
 
-from jmc.command.execute_excluded import EXECUTE_EXCLUDED_COMMANDS
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
+from .utils import is_number, is_connected
 from .command import (LOAD_ONCE_COMMANDS,
                       LOAD_ONLY_COMMANDS,
                       JMC_COMMANDS,
+                      EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
@@ -51,6 +52,11 @@ FIRST_ARGUMENTS = [
 
 `if` is excluded from the list since it can be used in execute"""
 NEW_LINE = '\n'
+
+ALLOW_NUMBER_AFTER = [
+    'give',
+    'clear'
+]
 
 
 def append_commands(commands: list[str], string: str) -> None:
@@ -248,7 +254,7 @@ class Lexer:
 
     def _parse_func_content(self, tokenizer: Tokenizer, programs: list[list[Token]], is_load: bool) -> list[str]:
 
-        command_strings = []
+        command_strings: list[str] = []
         commands: list[str] = []
         """List of argument in a line of command"""
 
@@ -298,6 +304,40 @@ class Lexer:
                                 "Expected keyword", token, tokenizer)
 
                     # End Handle Errors
+
+                    if is_number(token.string):
+                        if len(command[key_pos:]) > 1:
+                            raise JMCSyntaxException(
+                                "Unexpected token", command[key_pos+1], tokenizer, display_col_length=False)
+
+                        if not command_strings:
+                            raise JMCSyntaxException(
+                                "Expected command, got number", token, tokenizer, display_col_length=False)
+
+                        is_break = False
+                        if not command_strings[-1].startswith('execute'):
+                            for _cmd in ALLOW_NUMBER_AFTER:
+                                if command_strings[-1].startswith(_cmd):
+                                    command_strings[-1] += ' '+token.string
+                                    is_break = True
+                                    break
+                            else:
+                                raise JMCSyntaxException(
+                                    "Unexpected number", token, tokenizer, display_col_length=False)
+                        if is_break:
+                            break
+
+                        is_break = False
+                        for _cmd in ALLOW_NUMBER_AFTER:
+                            if _cmd in command_strings[-1]:
+                                command_strings[-1] += ' '+token.string
+                                is_break = True
+                                break
+                        else:
+                            raise JMCSyntaxException(
+                                "Unexpected number", token, tokenizer, display_col_length=False)
+                        if is_break:
+                            break
 
                     if token.string == 'say':
                         if len(command[key_pos:]) == 1:
@@ -436,15 +476,8 @@ class Lexer:
                     if token.string == '@s' and token.token_type == TokenType.keyword and commands[-1] == 'as':
                         commands[-1] = 'if entity'
 
-                    if token.token_type in {TokenType.paren_curly, TokenType.paren_round}:
-                        append_commands(commands, tokenizer.clean_up_paren(
-                            token))
-                    elif token.token_type == TokenType.paren_square:
-                        if (
-                            command[key_pos-1].line == token.line and
-                            command[key_pos-1].col +
-                                command[key_pos-1].length == token.col
-                        ):
+                    if token.token_type in {TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square}:
+                        if is_connected(token, command[key_pos-1]):
                             commands[-1] += tokenizer.clean_up_paren(token)
                         else:
                             append_commands(commands, tokenizer.clean_up_paren(

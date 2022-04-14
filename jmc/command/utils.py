@@ -7,17 +7,9 @@ from enum import Enum, auto
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException
+from ..utils import is_number
 
 NEW_LINE = '\n'
-
-
-def is_number(string: str) -> bool:
-    try:
-        int(string)
-    except ValueError:
-        return False
-    else:
-        return True
 
 
 class PlayerType(Enum):

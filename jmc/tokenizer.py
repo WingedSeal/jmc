@@ -5,6 +5,7 @@ from enum import Enum
 from json import dumps
 import re
 
+from .utils import is_connected
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
@@ -131,7 +132,8 @@ class Tokenizer:
             self.list_of_tokens.append(self.keywords)
             self.keywords = []
         else:
-            raise JMCSyntaxWarning("Unnecessary semicolon(;)", self, self)
+            raise JMCSyntaxWarning(
+                "Unnecessary semicolon(;)", self, self, display_col_length=False)
 
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         self.list_of_tokens = []
@@ -161,7 +163,7 @@ class Tokenizer:
             if char == Re.NEW_LINE:
                 if self.state == TokenType.string:
                     raise JMCSyntaxException(
-                        "String literal contains an unescaped line break.", self, self, entire_line=True)
+                        "String literal contains an unescaped line break.", self, self, entire_line=True, display_col_length=False)
                 elif self.state == TokenType.comment:
                     self.state = None
                 elif self.state == TokenType.keyword:
@@ -279,7 +281,7 @@ class Tokenizer:
 
         if self.state == TokenType.string:
             raise JMCSyntaxException(
-                "String literal contains an unescaped line break", self, self, entire_line=True)
+                "String literal contains an unescaped line break", self, self, entire_line=True, display_col_length=False)
         elif self.state == TokenType.paren:
             raise JMCSyntaxException(
                 "Bracket was never closed", self.token_pos, self, display_col_length=False)
@@ -486,8 +488,7 @@ class Tokenizer:
                     else:
                         last_arg = args[-1]
 
-                    if token.line == last_arg.line and (last_arg.col +
-                                                        last_arg.length) == token.col:
+                    if is_connected(token, last_arg):
                         new_token = Token(
                             TokenType.keyword, last_arg.line, last_arg.col, last_arg.string+token.string)
                         if kwargs:
