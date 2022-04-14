@@ -3,9 +3,44 @@ from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
 from .utils import ArgType, verify_args
 
+PLAYER_FIRST_JOIN_ARG_TYPE = {
+    "function": ArgType.func,
+}
+PLAYER_FIRST_JOIN_NAME = 'player_first_join'
+
 
 def player_first_join(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
-    return "player_first_join"+str(token)
+    args = verify_args(PLAYER_FIRST_JOIN_ARG_TYPE,
+                       "Player.die", token, tokenizer)
+    if args["function"] is None:
+        raise JMCTypeError("function", token, tokenizer)
+
+    if args["function"].arg_type == ArgType._func_call:
+        datapack.add_private_json("advancements", PLAYER_FIRST_JOIN_NAME, {
+            "criteria": {
+                "requirement": {
+                    "trigger": "minecraft:tick"
+                }
+            },
+            "rewards": {
+                "function": f"{datapack.namespace}:{args['function'].token.string}"
+            }
+        })
+    else:
+        datapack.add_custom_private_function(
+            'player', args['function'].token, tokenizer, PLAYER_FIRST_JOIN_NAME)
+        datapack.add_private_json("advancements", PLAYER_FIRST_JOIN_NAME, {
+            "criteria": {
+                "requirement": {
+                    "trigger": "minecraft:tick"
+                }
+            },
+            "rewards": {
+                "function": f"{datapack.namespace}:{DataPack.PRIVATE_NAME}/player/{PLAYER_FIRST_JOIN_NAME}"
+            }
+        })
+
+    return ""
 
 
 def player_rejoin(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:

@@ -116,6 +116,9 @@ class DataPack:
     def call_func(self, name: str, count: str) -> str:
         return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
+    def add_private_json(self, json_type: str, name: str, json: dict[str, Any]) -> None:
+        self.jsons[f"{json_type}/{self.PRIVATE_NAME}/{name}"] = json
+
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
         if token.string == '{}':
             raise JMCSyntaxWarning("Empty function", token, tokenizer)

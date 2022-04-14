@@ -205,6 +205,10 @@ class Lexer:
                 f"Uppercase letter found in JSON file's path({json_path})", command[
                     2], tokenizer
             )
+        if json_path.startswith(DataPack.PRIVATE_NAME+'/'):
+            raise JMCSyntaxException(
+                f"JSON({json_path}) may override private function of JMC", command[2], tokenizer, suggestion=f"Please avoid starting JSON's path with {DataPack.PRIVATE_NAME}")
+
         logger.debug(f"JSON: {json_type}({json_path})")
         json_content = command[3].string
         if json_path in self.datapack.jsons:
