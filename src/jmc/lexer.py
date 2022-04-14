@@ -41,7 +41,7 @@ JSON_FILE_TYPES = [
 ]
 
 FIRST_ARGUMENTS = [
-    *VANILLA_COMMANDS,
+    *[command for command in FLOW_CONTROL_COMMANDS if command != 'give'],
     *LOAD_ONCE_COMMANDS,
     *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
@@ -305,7 +305,7 @@ class Lexer:
 
                     # End Handle Errors
 
-                    if is_number(token.string):
+                    if is_number(token.string) and key_pos == 0:
                         if len(command[key_pos:]) > 1:
                             raise JMCSyntaxException(
                                 "Unexpected token", command[key_pos+1], tokenizer, display_col_length=False)

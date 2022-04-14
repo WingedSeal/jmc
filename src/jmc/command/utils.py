@@ -62,7 +62,7 @@ class ArgType(Enum):
     selector = "target selector"
 
     func = "function"
-    func_call = "function"
+    _func_call = "function"
     scoreboard_player = "integer, variable, or objective:selector"
     any = None
 
@@ -74,18 +74,18 @@ class Arg:
 
     def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
         if verifier == ArgType.any:
-            return
+            return self
         if verifier == ArgType.scoreboard_player:
             if self.arg_type in {ArgType.scoreboard, ArgType.integer}:
-                return
+                return self
             raise JMCSyntaxException(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier == ArgType.func:
             if self.arg_type == ArgType.arrow_func:
-                return
+                return self
             if self.arg_type == ArgType.keyword:
-                self.arg_type = ArgType.func_call
-                return
+                self.arg_type = ArgType._func_call
+                return self
             raise JMCSyntaxException(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier != self.arg_type:
