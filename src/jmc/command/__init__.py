@@ -1,6 +1,6 @@
 from .condition import parse_condition
-from .load_only import LOAD_ONLY_COMMANDS
 from .execute_excluded import EXECUTE_EXCLUDED_COMMANDS
+from . import load_only
 from . import load_once
 from . import jmc_command
 from .jmc_function import JMCFunction, FuncType

@@ -9,8 +9,7 @@ from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
 from .utils import is_number, is_connected
-from .command import (LOAD_ONLY_COMMANDS,
-                      EXECUTE_EXCLUDED_COMMANDS,
+from .command import (EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
@@ -22,6 +21,7 @@ logger = Logger(__name__)
 
 LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
 JMC_COMMANDS = JMCFunction._get(FuncType.jmc_command)
+LOAD_ONLY_COMMANDS = JMCFunction._get(FuncType.load_only)
 
 JSON_FILE_TYPES = [
     "advancements",
@@ -417,7 +417,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) can only be used in load function", token, tokenizer)
                         append_commands(commands, matched_function(
-                            command[key_pos+1], self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer).call())
                         break
 
                     matched_function = FLOW_CONTROL_COMMANDS.get(
