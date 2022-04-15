@@ -87,7 +87,7 @@ class MathRandom(JMCFunction):
             self.datapack.used_command.add(self.call_string)
             self.datapack.add_private_json('loot_tables', f"{self.name}/rng", {
                 "pools": [
-                    {"rolls": {"min": -2147483648, "max": 2147483647},
+                    {"rolls": {"min": 1, "max": 2147483647},
                         "entries": [
                             {
                                 "type": "minecraft:item",
@@ -110,7 +110,9 @@ class MathRandom(JMCFunction):
                         [
                             f"execute store result score {seed} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
                             f"execute store result score {a} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
-                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng"
+                            f"scoreboard players operation {a} {var} *= {a} {var}",
+                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
+                            f"scoreboard players operation {c} {var} *= {c} {var}"
                         ],
                         'setup'
                     )
