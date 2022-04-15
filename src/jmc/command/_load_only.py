@@ -1,4 +1,6 @@
-from ..exception import JMCTypeError
+from json import JSONDecodeError, loads, dumps
+
+from ..exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
 from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
 from .utils import ArgType, verify_args
@@ -54,8 +56,82 @@ def timer_add(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
     return "timer_add"+str(token)
 
 
+RECIPE_TABLE_ARG_TYPE = {
+    "recipe": ArgType.json,
+    "baseItem": ArgType.keyword,
+    "onCraft": ArgType.func
+}
+RECIPE_TABLE_NAME = 'recipe_table'
+
+
 def recipe_table(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
-    return "recipe_table"+str(token)
+    args = verify_args(RECIPE_TABLE_ARG_TYPE,
+                       "Recipe.table", token, tokenizer)
+
+    if args["recipe"] is None:
+        raise JMCTypeError("recipe", token, tokenizer)
+    if args["baseItem"] is None:
+        base_item = 'minecraft:knowledge_book'
+    else:
+        base_item = args["baseItem"].token.string
+        if not base_item.startswith("minecraft:"):
+            base_item = 'minecraft:'+base_item
+
+    if args["onCraft"] is None:
+        func = ""
+    elif args["onCraft"].arg_type == ArgType._func_call:
+        func = f"function {datapack.namespace}:{args['onCraft'].token.string.lower().replace('.', '/')}"
+    else:
+        func = '\n'.join(datapack.parse_function_token(
+            args["onCraft"].token, tokenizer))
+
+    count = datapack.get_count(RECIPE_TABLE_NAME)
+    datapack.add_private_json('advancements', f'{RECIPE_TABLE_NAME}/{count}', {
+        "criteria": {
+            "requirement": {
+                "trigger": "minecraft:recipe_unlocked",
+                "conditions": {
+                    "recipe": f"{datapack.namespace}:{DataPack.PRIVATE_NAME}/{RECIPE_TABLE_NAME}/{count}"
+                }
+            }
+        },
+        "rewards": {
+            "function": f"{datapack.namespace}:{DataPack.PRIVATE_NAME}/{RECIPE_TABLE_NAME}/{count}"
+        }
+    })
+
+    try:
+        json = loads(args["recipe"].token.string)
+    except JSONDecodeError as error:
+        raise JMCDecodeJSONError(error, args["recipe"].token, tokenizer)
+
+    if "result" not in json:
+        raise JMCSyntaxException("'result' key not found in recipe",
+                                 args["recipe"].token, tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+    if "item" not in json["result"]:
+        raise JMCSyntaxException("'item' key not found in 'result' in recipe",
+                                 args["recipe"].token, tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+    if "count" not in json["result"]:
+        raise JMCSyntaxException("'count' key not found in 'result' in recipe",
+                                 args["recipe"].token, tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+    result_item = json["result"]["item"]
+    json["result"]["item"] = base_item
+    result_count = json["result"]["count"]
+    json["result"]["count"] = 1
+
+    datapack.add_private_json('recipes', f'{RECIPE_TABLE_NAME}/{count}', json)
+    datapack.add_raw_private_function(
+        RECIPE_TABLE_NAME,
+        [
+            f"clear @s {base_item} 1",
+            f"give @s {result_item} {result_count}",
+            f"recipe take @s {datapack.namespace}:{DataPack.PRIVATE_NAME}/{RECIPE_TABLE_NAME}/{count}",
+            f"advancement revoke @s only {datapack.namespace}:{DataPack.PRIVATE_NAME}/{RECIPE_TABLE_NAME}/{count}",
+            func
+        ],
+        count
+    )
+    return ""
 
 
 def debug_track(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:

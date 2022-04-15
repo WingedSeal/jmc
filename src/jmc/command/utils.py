@@ -1,5 +1,6 @@
 import ast
 import operator as op
+import re
 from typing import Union
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -99,7 +100,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
     if token.token_type == TokenType.func:
         return ArgType.arrow_func
     if token.token_type == TokenType.paren_curly:
-        if token.string.startswith('{"'):
+        if re.match(r'^{\s*"', token.string) is not None:
             return ArgType.json
         else:
             return ArgType.js_object
