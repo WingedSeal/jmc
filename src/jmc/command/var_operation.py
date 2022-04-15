@@ -1,28 +1,17 @@
 from typing import Callable
+
+from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
-from ._var_operation import (
-    math_sqrt,
-    math_random
-)
 
 NEW_LINE = '\n'
 
-VAR_OPERATION_COMMANDS: dict[str, Callable[
-    [
-        tuple[list[Token], dict[str, Token]],
-        DataPack,
-        Tokenizer,
-    ], str]] = {
-
-    'Math.sqrt': math_sqrt,
-    'Math.random': math_random
-}
+VAR_OPERATION_COMMANDS = JMCFunction._get(FuncType.variable_operation)
 
 
-def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> str:
+def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool) -> str:
     if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.paren_round:
         if len(tokens) > 2:
             raise JMCSyntaxException(
@@ -62,16 +51,12 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             if operator == '--':
                 return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.VAR_NAME} 1"
 
-        if len(list_of_tokens[1]) > 1:
-            raise JMCSyntaxException(
-                "Unexpected token", list_of_tokens[1][1], tokenizer)
-
         if operator == '=' and list_of_tokens[1][0].token_type == TokenType.keyword and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
             if len(list_of_tokens[1]) == 1:
                 raise JMCSyntaxException(
                     "Expected (", list_of_tokens[1][0], tokenizer, col_length=True)
 
-            if list_of_tokens[1][1].token_type == TokenType.paren_round:
+            if list_of_tokens[1][1].token_type != TokenType.paren_round:
                 raise JMCSyntaxException(
                     "Expected (", list_of_tokens[1][1], tokenizer)
 
@@ -79,7 +64,12 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
                 raise JMCSyntaxException(
                     "Unexpected token", list_of_tokens[1][2], tokenizer)
 
-            return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} = {VAR_OPERATION_COMMANDS[list_of_tokens[1][0]](list_of_tokens[1][1], datapack, tokenizer)}"
+            return VAR_OPERATION_COMMANDS[list_of_tokens[1][0].string](
+                list_of_tokens[1][1], datapack, tokenizer, var=list_of_tokens[0][0].string, is_execute=is_execute).call()
+
+        if len(list_of_tokens[1]) > 1:
+            raise JMCSyntaxException(
+                "Unexpected token", list_of_tokens[1][1], tokenizer)
 
         scoreboard_player = find_scoreboard_player_type(
             list_of_tokens[1][0], tokenizer, allow_integer=False)

@@ -3,6 +3,7 @@ from . import load_once
 from . import jmc_command
 from . import bool_function
 from . import condition
+from . import _var_operation
 from .condition import parse_condition
 from .execute_excluded import EXECUTE_EXCLUDED_COMMANDS
 from .jmc_function import JMCFunction, FuncType

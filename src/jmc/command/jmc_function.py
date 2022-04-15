@@ -14,6 +14,7 @@ class FuncType(Enum):
     jmc_command = auto()
     load_once = auto()
     load_only = auto()
+    variable_operation = auto()
 
 
 class JMCFunction:
@@ -24,11 +25,12 @@ class JMCFunction:
     call_string: str
     defaults: dict[str, str] = dict()
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: Optional[bool] = None) -> None:
+    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: Optional[bool] = None, var: str = None) -> None:
         self.token = token
         self.datapack = datapack
         self.tokenizer = tokenizer
         self.is_execute = is_execute
+        self.var = var
         if self.func_type is None:
             raise NotImplementedError("missing func_type")
 

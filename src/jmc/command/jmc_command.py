@@ -19,19 +19,3 @@ class TimerSet(JMCFunction):
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
         else:
             return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
-
-
-class MathSqrt(JMCFunction):
-    func_type = FuncType.jmc_command
-    call_string = 'Math.sqrt'
-    arg_type = {
-    }
-    name = 'mart_sqrt'
-
-
-class MathRandom(JMCFunction):
-    func_type = FuncType.jmc_command
-    call_string = 'Math.random'
-    arg_type = {
-    }
-    name = 'mart_random'

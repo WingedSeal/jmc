@@ -375,7 +375,7 @@ class Lexer:
 
                         else:
                             append_commands(commands, variable_operation(
-                                command[key_pos:], tokenizer, self.datapack))
+                                command[key_pos:], tokenizer, self.datapack, is_execute))
                             break
 
                     matched_function = LOAD_ONCE_COMMANDS.get(
