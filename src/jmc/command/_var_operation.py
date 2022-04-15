@@ -78,8 +78,8 @@ class MathRandom(JMCFunction):
 
     def call(self) -> str:
         seed = '__math__.seed'
-        a = '__math__.a'
-        c = '__math__.c'
+        a = '__math__.rng.a'
+        c = '__math__.rng.c'
         var = DataPack.VAR_NAME
         start = int(self.args["min"])
         end = int(self.args["max"])
