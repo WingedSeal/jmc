@@ -4,6 +4,7 @@ from typing import Optional, Union
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException
 from ..datapack import DataPack
+from .bool_function import BOOL_FUNCTIONS
 from .utils import find_scoreboard_player_type, PlayerType
 
 NEW_LINE = '\n'
@@ -41,7 +42,7 @@ def merge_condition(conditions: list[Condition]) -> str:
     return ' '.join(str(condition) for condition in conditions)
 
 
-def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> Condition:
+def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> Condition:
     if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<', '!'])
         first_token = tokens[0]
@@ -116,8 +117,14 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer) -> Condition:
         raise JMCSyntaxException(
             "Operator not found in custom condition", tokens[0], tokenizer)
 
-    #TODO: bool_function
+    matched_function = BOOL_FUNCTIONS.get(
+        tokens[0].string, None)
+    if matched_function is not None:
+        if len(tokens) > 2:
+            raise JMCSyntaxException(
+                "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
+        return Condition(*matched_function(tokens[1], datapack, tokenizer))
     # End
     conditions: list[str] = []
     for token in tokens:
@@ -152,7 +159,7 @@ def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> 
     return list_of_tokens
 
 
-def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> AST_TYPE:
+def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> AST_TYPE:
     if len(tokens) == 1 and tokens[0].token_type == TokenType.paren_round:
         if tokens[0].string == '()':
             raise JMCSyntaxException(
@@ -165,7 +172,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> AST_TYPE:
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": OR_OPERATOR, "body": [
-            condition_to_ast(tokens, tokenizer) for tokens in list_of_tokens]}
+            condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
     else:
         tokens = list_of_tokens[0]
 
@@ -173,7 +180,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> AST_TYPE:
     list_of_tokens = find_operator(tokens, AND_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": AND_OPERATOR, "body": [
-            condition_to_ast(tokens, tokenizer) for tokens in list_of_tokens]}
+            condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
     else:
         tokens = list_of_tokens[0]
 
@@ -181,9 +188,9 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer) -> AST_TYPE:
     tokens = tokenizer.split_tokens(tokens, [NOT_OPERATOR])
     if tokens[0].token_type == TokenType.keyword and tokens[0].string == NOT_OPERATOR:
         return {"operator": NOT_OPERATOR, "body":
-                condition_to_ast(tokens[1:], tokenizer)}
+                condition_to_ast(tokens[1:], tokenizer, datapack)}
 
-    return custom_condition(tokens, tokenizer)
+    return custom_condition(tokens, tokenizer, datapack)
 
 
 def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], Optional[list[tuple[list[Condition], int]]]]:
@@ -249,7 +256,7 @@ def commands_to_strings(ast: AST_TYPE) -> tuple[str, str]:
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Union[Token, list[Token]], tokenizer: Tokenizer) -> tuple[str, str]:
+def parse_condition(condition_token: Union[Token, list[Token]], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     """Return `if ...` and pre-commands with newline
 Example:
 ```py
@@ -267,7 +274,7 @@ return datapack.add_raw_private_function("if_else", commands)
     tokens = condition_token if isinstance(
         condition_token, list) else [condition_token]
 
-    ast = condition_to_ast(tokens, tokenizer)
+    ast = condition_to_ast(tokens, tokenizer, datapack)
     condition, precommand = commands_to_strings(ast)
     precommand = precommand+'\n' if precommand else ""
     return condition, precommand

@@ -80,7 +80,8 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, display_col_length=False)
 
-        condition, precommand = parse_condition(command[1], tokenizer)
+        condition, precommand = parse_condition(
+            command[1], tokenizer, datapack)
         count = datapack.get_count(WHILE_NAME)
         call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{WHILE_NAME}/{count}"
         datapack.add_custom_private_function(
@@ -99,7 +100,8 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
             raise JMCSyntaxException(
                 f"Unexpected token", command[2], tokenizer, display_col_length=False)
 
-        condition, precommand = parse_condition(command[1], tokenizer)
+        condition, precommand = parse_condition(
+            command[1], tokenizer, datapack)
         count = datapack.get_count(WHILE_NAME)
         call_func = datapack.add_custom_private_function(
             WHILE_NAME, func_content, tokenizer, count, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{WHILE_NAME}/{count}"])
@@ -292,7 +294,7 @@ def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
         raise JMCSyntaxException(
             "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 
-    condition, precommand = parse_condition(statements[1], tokenizer)
+    condition, precommand = parse_condition(statements[1], tokenizer, datapack)
     last_statement = datapack.lexer.parse_line(statements[2], tokenizer)
 
     count = datapack.get_count(FOR_NAME)

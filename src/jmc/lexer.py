@@ -16,6 +16,7 @@ from .command import (LOAD_ONCE_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
+                      BOOL_FUNCTIONS
                       )
 
 logger = Logger(__name__)
@@ -439,6 +440,10 @@ class Lexer:
                             command[key_pos+1], self.datapack, tokenizer, is_execute))
                         break
 
+                    if token.string in BOOL_FUNCTIONS:
+                        raise JMCSyntaxException(
+                            f"This feature({token.string}) only works in JMC's custom condition", token, tokenizer)
+
                     if token.string in {'new', 'class' '@import'} or (
                         token.string == 'function' and
                         len(command) > key_pos + 2
@@ -530,7 +535,7 @@ class Lexer:
         if_else_box = self.if_else_box
         self.if_else_box = []
         condition, precommand = parse_condition(
-            if_else_box[0][0], tokenizer)
+            if_else_box[0][0], tokenizer, self.datapack)
         # Case 1: `if` only
         if len(if_else_box) == 1:
             return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(NAME, if_else_box[0][1], tokenizer)}"
@@ -555,7 +560,7 @@ class Lexer:
         if if_else_box:
             for else_if in if_else_box:
                 condition, precommand = parse_condition(
-                    else_if[0], tokenizer)
+                    else_if[0], tokenizer, self.datapack)
                 count = self.datapack.get_count(NAME)
                 count_tmp = count_alt
                 count_alt = self.datapack.get_count(NAME)

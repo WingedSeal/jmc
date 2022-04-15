@@ -12,7 +12,7 @@ BOOL_FUNCTIONS: dict[str, Callable[
         DataPack,
         Tokenizer,
         bool
-    ], str]] = {
+    ], tuple[str, bool]]] = {
 
     'Timer.isOver': timer_is_over,
 }
