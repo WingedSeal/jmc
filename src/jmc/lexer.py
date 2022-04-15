@@ -9,17 +9,19 @@ from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
 from .utils import is_number, is_connected
-from .command import (LOAD_ONCE_COMMANDS,
-                      LOAD_ONLY_COMMANDS,
+from .command import (LOAD_ONLY_COMMANDS,
                       JMC_COMMANDS,
                       EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
+                      FuncType,
+                      JMCFunction,
                       BOOL_FUNCTIONS
                       )
-
 logger = Logger(__name__)
+
+LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
 
 JSON_FILE_TYPES = [
     "advancements",
@@ -391,7 +393,7 @@ class Lexer:
 
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
-                            command[key_pos+1], self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer).call())
                         break
 
                     matched_function = EXECUTE_EXCLUDED_COMMANDS.get(

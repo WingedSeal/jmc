@@ -14,7 +14,6 @@ PLAYER_ON_EVENT_ARG_TYPE = {
     "objective": ArgType.keyword,
     "function": ArgType.func,
 }
-
 PLAYER_ON_EVENT_NAME = 'player_on_event'
 
 
@@ -48,7 +47,17 @@ def player_on_event(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> s
     return ""
 
 
+TRIGGER_SETUP_ARG_TYPE = {
+    "objective": ArgType.keyword,
+    "triggers": ArgType.js_object
+}
+
+
 def trigger_setup(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
+    args = verify_args(TRIGGER_SETUP_ARG_TYPE,
+                       "Trigger.setup", token, tokenizer)
+    if args["objective"] is None:
+        raise JMCTypeError("objective", token, tokenizer)
     return "trigger_setup"+str(token)
 
 
