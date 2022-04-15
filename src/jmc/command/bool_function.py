@@ -1,18 +1,23 @@
-from typing import Callable
-
-from ._bool_function import (
-    timer_is_over
-)
-from ..tokenizer import Token, Tokenizer
+from ..exception import JMCTypeError
 from ..datapack import DataPack
+from .utils import ArgType
+from .jmc_function import JMCFunction, FuncType
 
-BOOL_FUNCTIONS: dict[str, Callable[
-    [
-        Token,
-        DataPack,
-        Tokenizer,
-        bool
-    ], tuple[str, bool]]] = {
+IF = True
+UNLESS = False
 
-    'Timer.isOver': timer_is_over,
-}
+
+class TimerIsOver(JMCFunction):
+    func_type = FuncType.bool_function
+    call_string = 'Timer.isOver'
+    arg_type = {
+        "objective": ArgType.keyword,
+        "target_selector": ArgType.selector
+    }
+    name = 'timer_is_over'
+    defaults = {
+        "target_selector": "@s"
+    }
+
+    def call(self) -> tuple[str, bool]:
+        return f'score {self.args["target_selector"]} {self.args["objective"]} matches 1..', UNLESS

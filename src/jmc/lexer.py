@@ -9,13 +9,13 @@ from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
 from .utils import is_number, is_connected
+from .command.condition import BOOL_FUNCTIONS
 from .command import (EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
                       FuncType,
                       JMCFunction,
-                      BOOL_FUNCTIONS
                       )
 logger = Logger(__name__)
 
@@ -357,7 +357,7 @@ class Lexer:
 
                         if len(command[key_pos:]) > 2:
                             raise JMCSyntaxException(
-                                "Unexpected toke", command[key_pos+2], tokenizer, display_col_length=False)
+                                "Unexpected token", command[key_pos+2], tokenizer, display_col_length=False)
 
                         if '\n' in command[key_pos+1].string:
                             raise JMCSyntaxException(
@@ -456,7 +456,7 @@ class Lexer:
                     if len(command[key_pos:]) == 2 and command[key_pos+1].token_type == TokenType.paren_round:
                         if command[key_pos+1].string != '()':
                             raise JMCSyntaxException(
-                                "Custom function's parameter is not supported.\nExpected empty bracket", command[key_pos+1], tokenizer)
+                                f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", command[key_pos+1], tokenizer)
                         append_commands(commands,
                                         f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
                         break

@@ -36,18 +36,28 @@ class TriggerSetup(JMCFunction):
     call_string = 'Trigger.setup'
     arg_type = {
         "objective": ArgType.keyword,
+        "triggers": ArgType.js_object
+    }
+    name = 'trigger_setup'
+
+
+class TimerAdd(JMCFunction):
+    func_type = FuncType.load_only
+    call_string = 'Timer.add'
+    arg_type = {
+        "objective": ArgType.keyword,
         "mode": ArgType.keyword,
         "selector": ArgType.selector,
         "function": ArgType.func
     }
-    name = 'trigger_setup'
+    name = 'timer_add'
     defaults = {
         "function": ""
     }
 
     def call(self) -> str:
         mode = self.args["mode"]
-        obj = self.args["obj"]
+        obj = self.args["objective"]
         selector = self.args["selector"]
         if mode not in {'runOnce', 'runTick', 'none'}:
             raise JMCSyntaxException(

@@ -4,8 +4,8 @@ from typing import Optional, Union
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException
 from ..datapack import DataPack
-from .bool_function import BOOL_FUNCTIONS
 from .utils import find_scoreboard_player_type, PlayerType
+from .jmc_function import JMCFunction, FuncType
 
 NEW_LINE = '\n'
 
@@ -17,8 +17,7 @@ IF = True
 UNLESS = False
 
 VAR = '__logic__'
-
-
+BOOL_FUNCTIONS = JMCFunction._get(FuncType.bool_function)
 count = 0
 
 
@@ -124,7 +123,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
             raise JMCSyntaxException(
                 "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
-        return Condition(*matched_function(tokens[1], datapack, tokenizer))
+        return Condition(*matched_function(tokens[1], datapack, tokenizer).call())
     # End
     conditions: list[str] = []
     for token in tokens:
