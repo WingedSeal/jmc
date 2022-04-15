@@ -2,7 +2,7 @@ from json import JSONDecodeError, loads, dumps
 
 from ..exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
 from ..tokenizer import Token, Tokenizer
-from ..datapack import DataPack
+from ..datapack import DataPack, Function
 from .utils import ArgType, verify_args
 
 
@@ -52,8 +52,73 @@ def trigger_setup(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str
     return "trigger_setup"+str(token)
 
 
+TIMER_ADD_ARG_TYPE = {
+    "objective": ArgType.keyword,
+    "mode": ArgType.keyword,
+    "selector": ArgType.selector,
+    "function": ArgType.func
+}
+TIMER_ADD_NAME = 'timer_add'
+
+
 def timer_add(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
-    return "timer_add"+str(token)
+    args = verify_args(TIMER_ADD_ARG_TYPE,
+                       "Timer.add", token, tokenizer)
+    if args["objective"] is None:
+        raise JMCTypeError("objective", token, tokenizer)
+    else:
+        obj = args["objective"].token.string
+
+    if args["mode"] is None:
+        raise JMCTypeError("mode", token, tokenizer)
+    else:
+        mode = args["mode"].token.string
+        if mode not in {'runOnce', 'runTick', 'none'}:
+            raise JMCSyntaxException(
+                f"Avaliable modes for Timer.add are 'runOnce', 'runTick' and 'none' (got '{mode}')", args["mode"].token, tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
+
+    if args["selector"] is None:
+        raise JMCTypeError("selector", token, tokenizer,
+                           suggestion="For all players, use '@a'")
+    else:
+        selector = args["selector"].token.string
+
+    if mode in {'runOnce', 'runTick'} and args["function"] is None:
+        raise JMCTypeError("function", token, tokenizer)
+    if mode == 'none' and args["function"] is not None:
+        raise JMCSyntaxException(
+            "'function' is provided in 'none' mode Timer.add", args["function"], tokenizer)
+    if args["function"] is not None:
+        func = args["function"].token
+
+    datapack.add_objective('dummy', obj)
+    if 'Timer.add' not in datapack.used_command:
+        datapack.used_command.add('Timer.add')
+        datapack.ticks.append(datapack.call_func(TIMER_ADD_NAME, 'main'))
+        datapack.private_functions[TIMER_ADD_NAME]['main'] = Function()
+
+    main_func = datapack.private_functions[TIMER_ADD_NAME]['main']
+    main_func.append(
+        f"execute as {selector} if score @s {obj} matches 1.. run scoreboard players remove @s {obj} 1")
+    if mode == 'runOnce':
+        count = datapack.get_count(TIMER_ADD_NAME)
+        main_func.append(
+            f"""execute as {selector} if score @s {obj} matches 0 run {datapack.add_custom_private_function(
+                TIMER_ADD_NAME,
+                func,
+                tokenizer,
+                count,
+                precommands=[f"scoreboard players reset @s {obj}"]
+            )}""")
+    elif mode == 'runTick':
+        main_func.append(
+            f"""execute as {selector} unless score @s {obj} matches 1.. run {datapack.add_private_function(
+                TIMER_ADD_NAME,
+                func,
+                tokenizer,
+            )}""")
+
+    return ""
 
 
 RECIPE_TABLE_ARG_TYPE = {

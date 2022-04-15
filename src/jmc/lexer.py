@@ -41,14 +41,14 @@ JSON_FILE_TYPES = [
     "worldgen/template_pool",
 ]
 
-FIRST_ARGUMENTS = [
-    *[command for command in FLOW_CONTROL_COMMANDS if command != 'give'],
+FIRST_ARGUMENTS = {
+    *FLOW_CONTROL_COMMANDS,
     *LOAD_ONCE_COMMANDS,
     *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
-    *[command for command in FLOW_CONTROL_COMMANDS if command != 'if'],
+    *FLOW_CONTROL_COMMANDS,
     *EXECUTE_EXCLUDED_COMMANDS
-]
+} - {'give', 'if'}
 """All vanilla commands and JMC custom syntax 
 
 `if` is excluded from the list since it can be used in execute"""
