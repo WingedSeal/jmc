@@ -71,5 +71,74 @@ class MathRandom(JMCFunction):
     func_type = FuncType.variable_operation
     call_string = 'Math.random'
     arg_type = {
+        "min": ArgType.scoreboard_player,
+        "max": ArgType.scoreboard_player
     }
     name = 'mart_random'
+
+    def call(self) -> str:
+        seed = '__math__.seed'
+        a = '__math__.a'
+        c = '__math__.c'
+        var = DataPack.VAR_NAME
+        start = int(self.args["min"])
+        end = int(self.args["max"])
+        if self.call_string not in self.datapack.used_command:
+            self.datapack.used_command.add(self.call_string)
+            self.datapack.add_private_json('loot_tables', f"{self.name}/rng", {
+                "pools": [
+                    {"rolls": {"min": -2147483648, "max": 2147483647},
+                        "entries": [
+                            {
+                                "type": "minecraft:item",
+                                "name": "minecraft:stone",
+                                "functions": [
+                                    {
+                                        "function": "minecraft:set_count",
+                                        "count": 0
+                                    }
+                                ]
+                            }
+                    ]
+                    }
+                ]
+            })
+            self.datapack.loads.append(
+                f"""execute unless score {seed} {var} matches -2147483648..2147483647 run {
+                    self.datapack.add_raw_private_function(
+                        self.name,
+                        [
+                            f"execute store result score {seed} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
+                            f"execute store result score {a} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
+                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng"
+                        ],
+                        'setup'
+                    )
+                }""")
+            self.datapack.add_raw_private_function(
+                self.name,
+                [
+                    f"scoreboard players operation {seed} {var} *= {a} {var}",
+                    f"scoreboard players operation {seed} {var} += {c} {var}"
+                ],
+                'main'
+            )
+
+        mod = end-start+1
+        self.datapack.ints.add(mod)
+
+        run = [
+            self.datapack.call_func(self.name, 'main'),
+            f"scoreboard players operation {self.var} {var} = {seed} {var}",
+            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.INT_NAME}",
+            f"scoreboard players add {self.var} {var} {start}"
+        ]
+
+        if self.is_execute:
+            count = self.datapack.get_count(self.name)
+            return self.datapack.add_raw_private_function(
+                self.name,
+                run,
+                count
+            )
+        return '\n'.join(run)
