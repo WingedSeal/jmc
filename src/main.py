@@ -191,9 +191,14 @@ exit: Exit compiler
 
     @classmethod
     def compile(cls, *args):
+        debug_compile = False
         if args:
-            pprint("Usage: compile", Colors.FAIL)
-            return
+            if len(args) == 1 and args[0] == 'debug':
+                debug_compile = True
+                pprint("DEBUG MODE", Colors.INFO)
+            else:
+                pprint("Usage: compile", Colors.FAIL)
+                return
         pprint("Compiling...", Colors.INFO)
         try:
             start_time = perf_counter()
@@ -214,6 +219,10 @@ exit: Exit compiler
         except Exception as error:
             logger.exception("Non-JMC Error occur")
             error_report(error)
+
+        if debug_compile:
+            cls._log_debug()
+            cls._log_clear()
 
     @classmethod
     def autocompile(cls, *args):
