@@ -2,12 +2,10 @@ from enum import Enum, auto
 from functools import wraps
 from typing import Optional
 
-from .utils import ArgType, verify_args
+from .utils import ArgType, find_scoreboard_player_type, verify_args
 from ..datapack import DataPack
 from ..exception import JMCTypeError
 from ..tokenizer import Token, Tokenizer, TokenType
-
-LOAD_ONCE_COMMANDS = []
 
 
 class FuncType(Enum):
@@ -49,6 +47,13 @@ class JMCFunction:
                 elif arg.arg_type == ArgType.arrow_func:
                     self.args[key] = '\n'.join(
                         datapack.parse_function_token(arg.token, tokenizer))
+                elif arg.arg_type == ArgType.integer:
+                    self.args[key] = str(find_scoreboard_player_type(
+                        arg.token, tokenizer).value)
+                elif arg.arg_type in {ArgType.scoreboard_player, ArgType.scoreboard}:
+                    scoreboard_player = find_scoreboard_player_type(
+                        arg.token, tokenizer)
+                    self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
                 else:
                     self.args[key] = arg.token.string
 

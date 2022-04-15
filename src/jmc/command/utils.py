@@ -61,7 +61,6 @@ class ArgType(Enum):
     string = "string"
     keyword = "keyword"
     selector = "target selector"
-
     func = "function"
     _func_call = "function"
     scoreboard_player = "integer, variable, or objective:selector"

@@ -1,20 +1,37 @@
-from typing import Callable
-
-from ._jmc_command import (
-    timer_set,
-    math_sqrt,
-    math_random
-)
-from ..tokenizer import Token, Tokenizer
+from ..exception import JMCTypeError
 from ..datapack import DataPack
+from .utils import ArgType
+from .jmc_function import JMCFunction, FuncType
 
-JMC_COMMANDS: dict[str, Callable[
-    [
-        Token,
-        DataPack,
-        Tokenizer,
-        bool
-    ], str]] = {
 
-    'Timer.set': timer_set,
-}
+class TimerSet(JMCFunction):
+    func_type = FuncType.jmc_command
+    call_string = 'Timer.set'
+    arg_type = {
+        "objective": ArgType.keyword,
+        "target_selector": ArgType.selector,
+        "tick": ArgType.scoreboard_player
+    }
+    name = 'timer_set'
+
+    def call(self) -> str:
+        if self._args["tick"].arg_type == ArgType.integer:
+            return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
+        else:
+            return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
+
+
+class MathSqrt(JMCFunction):
+    func_type = FuncType.jmc_command
+    call_string = 'Math.sqrt'
+    arg_type = {
+    }
+    name = 'mart_sqrt'
+
+
+class MathRandom(JMCFunction):
+    func_type = FuncType.jmc_command
+    call_string = 'Math.random'
+    arg_type = {
+    }
+    name = 'mart_random'

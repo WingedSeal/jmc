@@ -10,7 +10,6 @@ from .datapack import DataPack, Function
 from .log import Logger
 from .utils import is_number, is_connected
 from .command import (LOAD_ONLY_COMMANDS,
-                      JMC_COMMANDS,
                       EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
                       variable_operation,
@@ -22,6 +21,7 @@ from .command import (LOAD_ONLY_COMMANDS,
 logger = Logger(__name__)
 
 LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
+JMC_COMMANDS = JMCFunction._get(FuncType.jmc_command)
 
 JSON_FILE_TYPES = [
     "advancements",
@@ -439,7 +439,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 "Unexpected token", command[key_pos+2], tokenizer, display_col_length=False)
                         append_commands(commands, matched_function(
-                            command[key_pos+1], self.datapack, tokenizer, is_execute))
+                            command[key_pos+1], self.datapack, tokenizer, is_execute).call())
                         break
 
                     if token.string in BOOL_FUNCTIONS:

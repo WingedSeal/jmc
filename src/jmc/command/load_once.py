@@ -1,7 +1,6 @@
 from ..exception import JMCTypeError
-from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
-from .utils import ArgType, verify_args
+from .utils import ArgType
 from .jmc_function import JMCFunction, FuncType
 
 
