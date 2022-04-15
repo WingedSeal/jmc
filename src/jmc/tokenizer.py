@@ -480,23 +480,19 @@ class Tokenizer:
 
         expecting_comma = False
         for token in keywords:
+            if token.token_type == TokenType.paren_square:
+                if not arg:
+                    raise JMCSyntaxException(
+                        f"Unexpected square parenthesis", token, self, display_col_length=False)
+                if is_connected(token, last_token):
+                    arg += token.string
+                    add_arg(last_token)
+                    continue
+                else:
+                    raise JMCSyntaxException(
+                        f"Unexpected square parenthesis", token, self, display_col_length=False)
+
             if expecting_comma and token.token_type != TokenType.comma:
-                if token.token_type == TokenType.paren_square:
-                    if kwargs:
-                        last_key = list(kwargs)[-1]
-                        last_arg = kwargs[last_key]
-                    else:
-                        last_arg = args[-1]
-
-                    if is_connected(token, last_arg):
-                        new_token = Token(
-                            TokenType.keyword, last_arg.line, last_arg.col, last_arg.string+token.string)
-                        if kwargs:
-                            kwargs[last_key] = new_token
-                        else:
-                            args[-1] = new_token
-                        continue
-
                 raise JMCSyntaxException(
                     f"Expected comma(,)", token, self, display_col_length=False)
 

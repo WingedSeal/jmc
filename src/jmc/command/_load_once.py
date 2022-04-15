@@ -43,7 +43,6 @@ def player_first_join(token: Token, datapack: DataPack, tokenizer: Tokenizer) ->
     return ""
 
 
-#TODO: IMPLEMENT
 PLAYER_REJOIN_ARG_TYPE = {
     "function": ArgType.func
 }
