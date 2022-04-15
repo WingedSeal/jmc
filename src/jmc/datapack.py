@@ -183,6 +183,7 @@ class DataPack:
     VAR_NAME = {self.VAR_NAME},
     INT_NAME = {self.INT_NAME}
     
+    objectives = {dumps(self.__scoreboards, indent=2)}
     ints = {self.ints!r}
     functions = {dumps(self.functions, indent=2, cls=FunctionEncoder)}
     jsons = {dumps(self.jsons, indent=2)}

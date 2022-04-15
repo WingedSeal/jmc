@@ -43,8 +43,41 @@ def player_first_join(token: Token, datapack: DataPack, tokenizer: Tokenizer) ->
     return ""
 
 
+#TODO: IMPLEMENT
+PLAYER_REJOIN_ARG_TYPE = {
+    "function": ArgType.func
+}
+PLAYER_REJOIN_OBJ = '__rejoin__'
+PLAYER_REJOIN_RESET = f'scoreboard players reset @s {PLAYER_REJOIN_OBJ}'
+
+
 def player_rejoin(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
-    return "player_rejoin"+str(token)
+    args = verify_args(PLAYER_REJOIN_ARG_TYPE,
+                       "Player.rejoin", token, tokenizer)
+
+    if args["function"] is None:
+        raise JMCTypeError("function", token, tokenizer)
+
+    datapack.add_objective(
+        PLAYER_REJOIN_OBJ, 'custom:leave_game')
+    datapack.ticks.append(
+        f'execute as @a[scores={{{PLAYER_REJOIN_OBJ}=1..}}] at @s run {datapack.call_func("player", "rejoin")}')
+
+    if args["function"].arg_type == ArgType._func_call:
+        datapack.add_raw_private_function(
+            "player", [
+                PLAYER_REJOIN_RESET,
+                f"function {datapack.namespace}:{args['function'].token.string.lower().replace('.', '/')}"
+            ], "rejoin")
+    else:
+        datapack.add_custom_private_function(
+            "player",
+            args["function"].token,
+            tokenizer,
+            "rejoin",
+            precommands=[PLAYER_REJOIN_RESET]
+        )
+    return ""
 
 
 PLAYER_DIE_ARG_TYPE = {
@@ -64,12 +97,11 @@ def player_die(token: Token, datapack: DataPack, tokenizer: Tokenizer) -> str:
     if args["onDeath"] is None and args["onRespawn"] is None:
         raise JMCTypeError("onDeath or onRespawn", token, tokenizer)
 
-    datapack.loads.append(
-        f'scoreboard objectives add {PLAYER_DIE_OBJ} deathCount')
+    datapack.add_objective(PLAYER_DIE_OBJ, 'deathCount')
     datapack.ticks.append(
-        f'execute as @a[scores={{{PLAYER_DIE_OBJ}=1..}}] at @s run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{PLAYER_DIE_NAME}/on_death')
+        f'execute as @a[scores={{{PLAYER_DIE_OBJ}=1..}}] at @s run {datapack.call_func(PLAYER_DIE_NAME, "on_death")}')
     datapack.ticks.append(
-        f'execute as @e[type=player,scores={{{PLAYER_DIE_OBJ}=2..}}] at @s run function {datapack.namespace}:{DataPack.PRIVATE_NAME}/{PLAYER_DIE_NAME}/on_respawn')
+        f'execute as @e[type=player,scores={{{PLAYER_DIE_OBJ}=2..}}] at @s run {datapack.call_func(PLAYER_DIE_NAME, "on_respawn")}')
 
     if args["onDeath"] is None:
         datapack.add_raw_private_function(
