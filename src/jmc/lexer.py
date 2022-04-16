@@ -489,7 +489,7 @@ class Lexer:
 
                     if token.token_type == TokenType.paren_round:
                         commands[-1], success = search_to_string(
-                            commands[-1], token, DataPack.VAR_NAME)
+                            commands[-1], token, DataPack.VAR_NAME, tokenizer)
                         if not success:
                             if is_connected(token, command[key_pos-1]):
                                 commands[-1] += self.clean_up_paren(
@@ -606,7 +606,7 @@ class Lexer:
         for token_ in tokenizer.programs[0]:
             if token_.token_type == TokenType.paren_round:
                 string, success = search_to_string(
-                    string, token_, DataPack.VAR_NAME)
+                    string, token_, DataPack.VAR_NAME, tokenizer)
                 if success:
                     _string = ""
                 else:

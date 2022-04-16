@@ -5,7 +5,7 @@ from enum import Enum
 from json import dumps
 import re
 
-from .utils import is_connected, search_to_string
+from .utils import is_connected
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
