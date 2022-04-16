@@ -8,7 +8,7 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
-from .utils import is_number, is_connected
+from .utils import is_number, is_connected, search_to_string
 from .command.condition import BOOL_FUNCTIONS
 from .command import (EXECUTE_EXCLUDED_COMMANDS,
                       FLOW_CONTROL_COMMANDS,
@@ -487,17 +487,27 @@ class Lexer:
                     if token.string == '@s' and token.token_type == TokenType.keyword and commands[-1] == 'as':
                         commands[-1] = 'if entity'
 
-                    if token.token_type in {TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square}:
+                    if token.token_type == TokenType.paren_round:
+                        commands[-1], success = search_to_string(
+                            commands[-1], token, DataPack.VAR_NAME)
+                        if not success:
+                            if is_connected(token, command[key_pos-1]):
+                                commands[-1] += self.clean_up_paren(
+                                    token, tokenizer)
+                            else:
+                                append_commands(
+                                    commands, self.clean_up_paren(token, tokenizer))
+                    elif token.token_type in {TokenType.paren_curly, TokenType.paren_square}:
                         if is_connected(token, command[key_pos-1]):
-                            commands[-1] += tokenizer.clean_up_paren(token)
+                            commands[-1] += self.clean_up_paren(
+                                token, tokenizer)
                         else:
-                            append_commands(commands, tokenizer.clean_up_paren(
-                                token))
+                            append_commands(
+                                commands, self.clean_up_paren(token, tokenizer))
                     elif token.token_type == TokenType.string:
                         append_commands(commands, dumps(token.string))
                     else:
                         append_commands(commands, token.string)
-
         # End of Program
 
         # Boxes check
@@ -582,3 +592,34 @@ class Lexer:
             self.datapack.add_custom_private_function(
                 NAME, else_, tokenizer, count_alt)
         return "\n".join(output)
+
+    def clean_up_paren(self, token: Token, tokenizer: Tokenizer, is_nbt: bool = True) -> str:
+        if len(token.string) == 2:
+            return token.string
+        open = token.string[0]
+        close = token.string[-1]
+        tokenizer = Tokenizer(token.string[1:-1], tokenizer.file_path, token.line,
+                              token.col+1, tokenizer.file_string, expect_semicolon=False)
+        string = ""
+        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
+            is_nbt = False
+        for token_ in tokenizer.programs[0]:
+            if token_.token_type == TokenType.paren_round:
+                string, success = search_to_string(
+                    string, token_, DataPack.VAR_NAME)
+                if success:
+                    _string = ""
+                else:
+                    _string = self.clean_up_paren(token_, tokenizer, is_nbt)
+            elif token_.token_type in {TokenType.paren_curly, TokenType.paren_square}:
+                _string = self.clean_up_paren(token_, tokenizer, is_nbt)
+            elif token_.token_type == TokenType.string:
+                if is_nbt:
+                    _string = repr(token_.string)
+                else:
+                    _string = dumps(token_.string)
+            else:
+                _string = token_.string
+            string += _string
+
+        return open+string+close

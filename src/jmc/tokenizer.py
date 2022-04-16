@@ -5,7 +5,7 @@ from enum import Enum
 from json import dumps
 import re
 
-from .utils import is_connected
+from .utils import is_connected, search_to_string
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
@@ -685,25 +685,3 @@ class Tokenizer:
                 "Unexpected colon(:)", token, self)
 
         return kwargs
-
-    def clean_up_paren(self, token: Token, is_nbt: bool = True) -> str:
-        if len(token.string) == 2:
-            return token.string
-        open = token.string[0]
-        close = token.string[-1]
-        tokenizer = Tokenizer(token.string[1:-1], self.file_path, token.line,
-                              token.col+1, self.file_string, expect_semicolon=False)
-        string = ""
-        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
-            is_nbt = False
-        for token_ in tokenizer.programs[0]:
-            if token_.token_type in {TokenType.paren_curly, TokenType.paren_round, TokenType.paren_square}:
-                string += tokenizer.clean_up_paren(token_, is_nbt)
-            elif token_.token_type == TokenType.string:
-                if is_nbt:
-                    string += repr(token_.string)
-                else:
-                    string += dumps(token_.string)
-            else:
-                string += token_.string
-        return open+string+close
