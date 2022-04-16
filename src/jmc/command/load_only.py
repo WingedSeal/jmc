@@ -2,26 +2,30 @@ from json import JSONDecodeError, loads
 from ..exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
 from ..datapack import DataPack, Function
 from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType
+from .jmc_function import JMCFunction, FuncType, func_property
 
 
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='RightClick.setup',
+    arg_type={
+    },
+    name='right_click_setup'
+)
 class RightClickSetup(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'RightClick.setup'
-    arg_type = {
-    }
-    name = 'right_click_setup'
+    pass
 
 
-class PlayerOnEvent(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Player.onEvent'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Player.onEvent',
+    arg_type={
         "objective": ArgType.keyword,
         "function": ArgType.func,
-    }
-    name = 'player_on_event'
-
+    },
+    name='player_on_event'
+)
+class PlayerOnEvent(JMCFunction):
     def call(self) -> str:
         count = self.datapack.get_count(self.name)
         func = self.datapack.add_raw_private_function(
@@ -31,30 +35,34 @@ class PlayerOnEvent(JMCFunction):
         return ""
 
 
-class TriggerSetup(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Trigger.setup'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Trigger.setup',
+    arg_type={
         "objective": ArgType.keyword,
         "triggers": ArgType.js_object
-    }
-    name = 'trigger_setup'
+    },
+    name='trigger_setup'
+)
+class TriggerSetup(JMCFunction):
+    pass
 
 
-class TimerAdd(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Timer.add'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Timer.add',
+    arg_type={
         "objective": ArgType.keyword,
         "mode": ArgType.keyword,
         "selector": ArgType.selector,
         "function": ArgType.func
-    }
-    name = 'timer_add'
-    defaults = {
+    },
+    name='timer_add',
+    defaults={
         "function": ""
     }
-
+)
+class TimerAdd(JMCFunction):
     def call(self) -> str:
         mode = self.args["mode"]
         obj = self.args["objective"]
@@ -100,20 +108,21 @@ class TimerAdd(JMCFunction):
         return ""
 
 
-class RecipeTable(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Recipe.table'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Recipe.table',
+    arg_type={
         "recipe": ArgType.json,
         "baseItem": ArgType.keyword,
         "onCraft": ArgType.func
-    }
-    name = 'recipe_table'
-    defaults = {
+    },
+    name='recipe_table',
+    defaults={
         "baseItem": "minecraft:knowledge_book",
         "onCraft": ""
     }
-
+)
+class RecipeTable(JMCFunction):
     def call(self) -> str:
         base_item = self.args["baseItem"]
         if not base_item.startswith("minecraft:"):
@@ -170,22 +179,31 @@ class RecipeTable(JMCFunction):
         return ""
 
 
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Debug.track',
+    arg_type={},
+    name='debug_track'
+)
 class DebugTrack(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Debug.track'
-    arg_type = {}
-    name = 'debug_track'
+    pass
 
 
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Debug.history',
+    arg_type={},
+    name='debug_history'
+)
 class DebugHistory(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Debug.history'
-    arg_type = {}
-    name = 'debug_history'
+    pass
 
 
+@func_property(
+    func_type=FuncType.load_only,
+    call_string='Debug.cleanup',
+    arg_type={},
+    name='debug_cleanup'
+)
 class DebugCleanup(JMCFunction):
-    func_type = FuncType.load_only
-    call_string = 'Debug.cleanup'
-    arg_type = {}
-    name = 'debug_cleanup'
+    pass

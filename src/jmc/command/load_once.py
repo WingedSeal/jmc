@@ -1,17 +1,18 @@
 from ..exception import JMCTypeError
 from ..datapack import DataPack
 from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType
+from .jmc_function import JMCFunction, FuncType, func_property
 
 
-class PlayerFirstJoin(JMCFunction):
-    func_type = FuncType.load_once
-    call_string = 'Player.firstJoin'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_once,
+    call_string='Player.firstJoin',
+    arg_type={
         "function": ArgType.func
-    }
-    name = 'player_first_join'
-
+    },
+    name='player_first_join'
+)
+class PlayerFirstJoin(JMCFunction):
     def call(self) -> str:
         self.datapack.add_raw_private_function(
             self.name,
@@ -31,14 +32,15 @@ class PlayerFirstJoin(JMCFunction):
         return ""
 
 
-class PlayerRejoin(JMCFunction):
-    func_type = FuncType.load_once
-    call_string = 'Player.rejoin'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_once,
+    call_string='Player.rejoin',
+    arg_type={
         "function": ArgType.func
-    }
-    name = 'player_rejoin'
-
+    },
+    name='player_rejoin'
+)
+class PlayerRejoin(JMCFunction):
     obj = '__rejoin__'
     reset = f'scoreboard players reset @s {obj}'
 
@@ -55,19 +57,20 @@ class PlayerRejoin(JMCFunction):
         return ""
 
 
-class PlayerDie(JMCFunction):
-    func_type = FuncType.load_once
-    call_string = 'Player.die'
-    arg_type = {
+@func_property(
+    func_type=FuncType.load_once,
+    call_string='Player.die',
+    arg_type={
         "onDeath": ArgType.func,
         "onRespawn": ArgType.func
-    }
-    name = 'player_die'
-    defaults = {
+    },
+    name='player_die',
+    defaults={
         "onDeath": "",
         "onRespawn": ""
     }
-
+)
+class PlayerDie(JMCFunction):
     obj = '__die__'
     on_death = f'scoreboard players set @s {obj} 2'
     on_respawn = f'scoreboard players reset @s {obj}'

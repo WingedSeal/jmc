@@ -1,17 +1,18 @@
 from ..exception import JMCTypeError
 from ..datapack import DataPack
 from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType
+from .jmc_function import JMCFunction, FuncType, func_property
 
 
-class MathSqrt(JMCFunction):
-    func_type = FuncType.variable_operation
-    call_string = 'Math.sqrt'
-    arg_type = {
+@func_property(
+    func_type=FuncType.variable_operation,
+    call_string='Math.sqrt',
+    arg_type={
         "n": ArgType.scoreboard
-    }
-    name = 'mart_sqrt'
-
+    },
+    name='mart_sqrt'
+)
+class MathSqrt(JMCFunction):
     def call(self) -> str:
         x = '__math__.x'
         x_n = '__math__.x_n'
@@ -67,15 +68,16 @@ class MathSqrt(JMCFunction):
         return '\n'.join(run)
 
 
-class MathRandom(JMCFunction):
-    func_type = FuncType.variable_operation
-    call_string = 'Math.random'
-    arg_type = {
+@func_property(
+    func_type=FuncType.variable_operation,
+    call_string='Math.random',
+    arg_type={
         "min": ArgType.scoreboard_player,
         "max": ArgType.scoreboard_player
-    }
-    name = 'mart_random'
-
+    },
+    name='mart_random'
+)
+class MathRandom(JMCFunction):
     def call(self) -> str:
         seed = '__math__.seed'
         a = '__math__.rng.a'

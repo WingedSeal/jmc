@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from functools import wraps
-from typing import Optional
+from typing import Callable, Optional, Union
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args
 from ..datapack import DataPack
@@ -20,10 +20,11 @@ class FuncType(Enum):
 class JMCFunction:
     _decorated = False
     arg_type: dict[str, ArgType]
-    func_type: FuncType = None
+    func_type: FuncType
     name: str
     call_string: str
-    defaults: dict[str, str] = dict()
+    defaults: dict[str, str]
+    _ignore: set[str]
 
     def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: Optional[bool] = None, var: str = None) -> None:
         self.token = token
@@ -31,6 +32,8 @@ class JMCFunction:
         self.tokenizer = tokenizer
         self.is_execute = is_execute
         self.var = var
+        if not self._decorated:
+            raise NotImplementedError("missing decorator")
         if self.func_type is None:
             raise NotImplementedError("missing func_type")
 
@@ -44,6 +47,8 @@ class JMCFunction:
                     raise JMCTypeError(key, token, tokenizer)
                 self.args[key] = self.defaults[key]
             else:
+                if key in self._ignore:
+                    self.args[key] = None
                 if arg.arg_type == ArgType._func_call:
                     self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
                 elif arg.arg_type == ArgType.arrow_func:
@@ -74,3 +79,17 @@ class JMCFunction:
             if subcls.func_type == func_type:
                 commands[subcls.call_string] = subcls
         return commands
+
+
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: Optional[dict[str, Union[str, int]]] = dict(), ignore: set[str] = set()) -> Callable:
+    def decorator(cls: JMCFunction) -> JMCFunction:
+        cls.func_type = func_type
+        cls.call_string = call_string
+        cls.arg_type = arg_type
+        cls.defaults = defaults
+        cls._ignore = ignore
+        cls.name = name
+
+        cls._decorated = True
+        return cls
+    return decorator
