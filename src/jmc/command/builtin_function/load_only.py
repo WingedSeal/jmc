@@ -10,11 +10,63 @@ from .._flow_control import parse_switch
     func_type=FuncType.load_only,
     call_string='RightClick.setup',
     arg_type={
+        "id_name": ArgType.keyword,
+        "func_map": ArgType.js_object
     },
     name='right_click_setup'
 )
 class RightClickSetup(JMCFunction):
-    pass
+    obj = '__rc__'
+    obj_id = '__item_id__'
+
+    def call(self) -> str:
+        func_map = parse_func_map(
+            self.args_Args["func_map"].token, self.tokenizer, self.datapack)
+        is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
+
+        id_name = self.args["id_name"]
+        self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
+        if self.call_string not in self.datapack.used_command:
+            self.datapack.used_command.add(self.call_string)
+            self.datapack.ticks.append(
+                f"""execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
+                                                       [f'scoreboard players reset @s {self.obj}'], 'main')}""")
+
+        main_func = self.datapack.private_functions[self.name]['main']
+
+        main_count = self.datapack.get_count(self.name)
+        main_func.append(
+            f"execute store result score {self.obj_id} {DataPack.VAR_NAME} run data get entity @s SelectedItem.tag.{id_name}")
+
+        if is_switch:
+            func_contents = []
+            for func, is_arrow_func in func_map.values():
+                if is_arrow_func:
+                    func_contents.append(
+                        [func]
+                    )
+                else:
+                    func_contents.append(
+                        [f"function {self.datapack.namespace}:{func}"])
+
+            main_func.append(
+                f"""execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {parse_switch(ScoreboardPlayer(
+                    PlayerType.scoreboard, (self.obj_id, '@s')), func_contents, self.datapack, self.name)}""")
+        else:
+            main_func.append(
+                f"execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
+            run = []
+            for num, (func, is_arrow_func) in func_map.items():
+                if is_arrow_func:
+                    run.append(
+                        f'execute if score @s {self.obj_id} {DataPack.VAR_NAME} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                else:
+                    run.append(
+                        f'execute if score @s {self.obj_id} {DataPack.VAR_NAME} matches {num} at @s run function {self.datapack.namespace}:{func}')
+
+            self.datapack.add_raw_private_function(self.name, run, main_count)
+
+        return ""
 
 
 @func_property(
@@ -89,11 +141,11 @@ class TriggerSetup(JMCFunction):
             for func, is_arrow_func in func_map.values():
                 if is_arrow_func:
                     func_contents.append(
-                        [f"function {self.datapack.namespace}:{func}"])
-                else:
-                    func_contents.append(
                         [func]
                     )
+                else:
+                    func_contents.append(
+                        [f"function {self.datapack.namespace}:{func}"])
             run = [
                 parse_switch(ScoreboardPlayer(
                     PlayerType.scoreboard, (obj, '@s')), func_contents, self.datapack, self.name),
@@ -103,10 +155,10 @@ class TriggerSetup(JMCFunction):
             for num, (func, is_arrow_func) in func_map.items():
                 if is_arrow_func:
                     run.append(
-                        f'execute if score @s {obj} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                        f'execute if score @s {obj} {DataPack.VAR_NAME} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {obj} matches {num} at @s run function {self.datapack.namespace}:{func}')
+                        f'execute if score @s {obj} {DataPack.VAR_NAME} matches {num} at @s run function {self.datapack.namespace}:{func}')
 
         run.extend([f"scoreboard players reset @s {obj}",
                     f"scoreboard players enable @s {obj}"])
