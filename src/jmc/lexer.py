@@ -10,8 +10,7 @@ from .datapack import DataPack, Function
 from .log import Logger
 from .utils import is_number, is_connected, search_to_string
 from .command.condition import BOOL_FUNCTIONS
-from .command import (EXECUTE_EXCLUDED_COMMANDS,
-                      FLOW_CONTROL_COMMANDS,
+from .command import (FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       parse_condition,
                       FuncType,
@@ -19,6 +18,7 @@ from .command import (EXECUTE_EXCLUDED_COMMANDS,
                       )
 logger = Logger(__name__)
 
+EXECUTE_EXCLUDED_COMMANDS = JMCFunction._get(FuncType.execute_excluded)
 LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
 JMC_COMMANDS = JMCFunction._get(FuncType.jmc_command)
 LOAD_ONLY_COMMANDS = JMCFunction._get(FuncType.load_only)
@@ -404,7 +404,7 @@ class Lexer:
                                 f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         self.datapack.used_command.add(token.string)
                         append_commands(commands, matched_function(
-                            command[key_pos+1], self.datapack, tokenizer))
+                            command[key_pos+1], self.datapack, tokenizer).call())
                         break
 
                     matched_function = LOAD_ONLY_COMMANDS.get(

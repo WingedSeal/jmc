@@ -1,11 +1,10 @@
 from enum import Enum, auto
-from functools import wraps
 from typing import Callable, Optional, Union
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args
 from ..datapack import DataPack
 from ..exception import JMCTypeError
-from ..tokenizer import Token, Tokenizer, TokenType
+from ..tokenizer import Token, Tokenizer
 
 
 class FuncType(Enum):
@@ -37,19 +36,19 @@ class JMCFunction:
         if self.func_type is None:
             raise NotImplementedError("missing func_type")
 
-        self._args = verify_args(self.arg_type,
-                                 self.call_string, token, tokenizer)
+        self.args_token = verify_args(self.arg_type,
+                                      self.call_string, token, tokenizer)
         self.args: dict[str, str] = dict()
 
-        for key, arg in self._args.items():
+        for key, arg in self.args_token.items():
             if arg is None:
                 if key not in self.defaults:
                     raise JMCTypeError(key, token, tokenizer)
                 self.args[key] = self.defaults[key]
             else:
                 if key in self._ignore:
-                    self.args[key] = None
-                if arg.arg_type == ArgType._func_call:
+                    pass
+                elif arg.arg_type == ArgType._func_call:
                     self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
                 elif arg.arg_type == ArgType.arrow_func:
                     self.args[key] = '\n'.join(
@@ -73,7 +72,7 @@ class JMCFunction:
         raise NotImplementedError("call function not implemented")
 
     @classmethod
-    def _get(cls, func_type: FuncType) -> dict[str, "JMCFunction"]:
+    def _get(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
         commands = dict()
         for subcls in cls.__subclasses__():
             if subcls.func_type == func_type:

@@ -69,13 +69,13 @@ class TimerAdd(JMCFunction):
         selector = self.args["selector"]
         if mode not in {'runOnce', 'runTick', 'none'}:
             raise JMCSyntaxException(
-                f"Avaliable modes for Timer.add are 'runOnce', 'runTick' and 'none' (got '{mode}')", self._args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
+                f"Avaliable modes for Timer.add are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.args_token["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
-        if mode in {'runOnce', 'runTick'} and self._args["function"] is None:
+        if mode in {'runOnce', 'runTick'} and self.args_token["function"] is None:
             raise JMCTypeError("function", self.token, self.tokenizer)
-        if mode == 'none' and self._args["function"] is not None:
+        if mode == 'none' and self.args_token["function"] is not None:
             raise JMCSyntaxException(
-                "'function' is provided in 'none' mode Timer.add", self._args["function"], self.tokenizer)
+                "'function' is provided in 'none' mode Timer.add", self.args_token["function"], self.tokenizer)
         self.datapack.add_objective('dummy', obj)
         if 'Timer.add' not in self.datapack.used_command:
             self.datapack.used_command.add('Timer.add')
@@ -146,17 +146,17 @@ class RecipeTable(JMCFunction):
             json = loads(self.args["recipe"])
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
-                error, self._args["recipe"].token, self.tokenizer)
+                error, self.args_token["recipe"].token, self.tokenizer)
 
         if "result" not in json:
             raise JMCSyntaxException("'result' key not found in recipe",
-                                     self._args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "item" not in json["result"]:
             raise JMCSyntaxException("'item' key not found in 'result' in recipe",
-                                     self._args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "count" not in json["result"]:
             raise JMCSyntaxException("'count' key not found in 'result' in recipe",
-                                     self._args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
 
         result_item = json["result"]["item"]
         json["result"]["item"] = base_item
