@@ -1,10 +1,15 @@
 import React from "react";
 import "./App.css";
+import Feature from "./components/Feature";
 
 function App() {
     return (
         <div className="App">
-            <h1>Hello World</h1>
+            <Feature summary="Anonymous Function Test">
+                TEST
+                <br />
+                TESt
+            </Feature>
         </div>
     );
 }

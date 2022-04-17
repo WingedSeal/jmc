@@ -10,5 +10,32 @@ html {
   margin: 0;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background);
+}
+
+:root {
+  --primary: rgb(152, 0, 223);
+  --secondary: rgb(224, 90, 0);
+  --background: rgb(26, 26, 26);
+  --fs2: 48px;
+}
+
+@media only screen and (max-width: 1200px) {
+  :root {
+    --fs2: 36px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  :root {
+    --fs2: 24px;
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  :root {
+    --fs2: 12px;
+  }
 }
 /*# sourceMappingURL=index.css.map */

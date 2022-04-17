@@ -1,0 +1,74 @@
+.feature {
+  width: 90%;
+  height: 15vw;
+  max-height: 10vh;
+  min-height: 5vh;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1em;
+}
+
+.feature > summary {
+  width: 100%;
+  height: 100%;
+  list-style: none;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  position: relative;
+}
+
+.feature > summary::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background: -webkit-gradient(linear, left top, right top, from(var(--primary)), to(var(--secondary)));
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-transform: translate(-50%, -50%) skewX(-25deg);
+          transform: translate(-50%, -50%) skewX(-25deg);
+}
+
+.feature > summary > .icon {
+  width: 5em;
+  height: 50%;
+  position: relative;
+  margin-left: 3em;
+}
+
+.feature > summary > .icon::after, .feature > summary > .icon::before {
+  content: "";
+  margin-left: 0;
+  width: 90%;
+  height: 30%;
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  background-color: var(--secondary);
+}
+
+.feature > summary > .icon::after {
+  -webkit-transform: translate(-50%, 50%) skewX(25deg);
+          transform: translate(-50%, 50%) skewX(25deg);
+}
+
+.feature > summary > .icon::before {
+  -webkit-transform: translate(-50%, -150%) skewX(25deg);
+          transform: translate(-50%, -150%) skewX(25deg);
+}
+
+.feature > summary > .text {
+  font-size: var(--fs2);
+  color: white;
+  text-align: center;
+}
+/*# sourceMappingURL=Feature.css.map */
