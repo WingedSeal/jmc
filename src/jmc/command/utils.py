@@ -10,8 +10,6 @@ from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException
 from ..utils import is_number
 
-NEW_LINE = '\n'
-
 
 class PlayerType(Enum):
     variable = auto()
@@ -156,3 +154,24 @@ def __eval(node):
         return OPERATORS[type(node.op)](__eval(node.operand))
     else:
         raise TypeError(node)
+
+
+def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> dict[int, tuple[str, bool]]:
+    """Returns map of integer key and tuple of function_string and is_arrow_func"""
+    func_map = dict()
+    for key, value in tokenizer.parse_js_obj(token).items():
+        try:
+            num = int(key)
+        except ValueError:
+            raise JMCSyntaxException(
+                f"Expected number as key (got {key})", token, tokenizer)
+
+        if value.token_type == TokenType.keyword:
+            func_map[num] = value.string, False
+        elif value.token_type == TokenType.func:
+            func_map[num] = '\n'.join(
+                datapack.parse_function_token(value, tokenizer)), True
+        else:
+            raise JMCSyntaxException(
+                f"Expected function, got {value.token_type.value}", token, tokenizer)
+    return func_map

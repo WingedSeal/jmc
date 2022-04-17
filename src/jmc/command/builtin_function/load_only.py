@@ -1,8 +1,9 @@
 from json import JSONDecodeError, loads
-from ..exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
-from ..datapack import DataPack, Function
-from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType, func_property
+from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
+from ...datapack import DataPack, Function
+from ..utils import ArgType, PlayerType, ScoreboardPlayer, parse_func_map
+from ..jmc_function import JMCFunction, FuncType, func_property
+from .._flow_control import parse_switch
 
 
 @func_property(
@@ -42,13 +43,79 @@ class PlayerOnEvent(JMCFunction):
         "objective": ArgType.keyword,
         "triggers": ArgType.js_object
     },
-    name='trigger_setup'
+    name='trigger_setup',
+    ignore={
+        "triggers"
+    }
 )
 class TriggerSetup(JMCFunction):
-    pass
+    def call(self) -> str:
+        func_map = parse_func_map(
+            self.args_Args["triggers"].token, self.tokenizer, self.datapack)
+        is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
+
+        obj = self.args["objective"]
+        self.datapack.add_objective(obj, 'trigger')
+        if self.call_string not in self.datapack.used_command:
+            self.datapack.used_command.add(self.call_string)
+            self.datapack.ticks.append(
+                self.datapack.call_func(self.name, 'main'))
+            self.datapack.private_functions[self.name]['main'] = Function()
+            self.datapack.ticks.append(
+                self.datapack.call_func(self.name, 'enable'))
+            self.datapack.private_functions[self.name]['enable'] = Function()
+
+            self.datapack.add_private_json('advancements', f"{self.name}/enable", {
+                "criteria": {
+                    "requirement": {
+                        "trigger": "minecraft:tick"
+                    }
+                },
+                "rewards": {
+                    "function": f"{self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/enable"
+                }
+            })
+
+        main_func = self.datapack.private_functions[self.name]['main']
+        self.datapack.private_functions[self.name]['enable'].append(
+            f"scoreboard players enable @s {obj}")
+
+        main_count = self.datapack.get_count(self.name)
+        main_func.append(
+            f"execute as @a[scores={{{obj}=1..}}] run {self.datapack.call_func(self.name, main_count)}")
+
+        if is_switch:
+            func_contents = []
+            for func, is_arrow_func in func_map.values():
+                if is_arrow_func:
+                    func_contents.append(
+                        [f"function {self.datapack.namespace}:{func}"])
+                else:
+                    func_contents.append(
+                        [func]
+                    )
+            run = [
+                parse_switch(ScoreboardPlayer(
+                    PlayerType.scoreboard, (obj, '@s')), func_contents, self.datapack, self.name),
+            ]
+        else:
+            run = []
+            for num, (func, is_arrow_func) in func_map.items():
+                if is_arrow_func:
+                    run.append(
+                        f'execute if score @s {obj} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                else:
+                    run.append(
+                        f'execute if score @s {obj} matches {num} at @s run function {self.datapack.namespace}:{func}')
+
+        run.extend([f"scoreboard players reset @s {obj}",
+                    f"scoreboard players enable @s {obj}"])
+        self.datapack.add_raw_private_function(self.name, run, main_count)
+
+        return ""
 
 
-@func_property(
+@ func_property(
     func_type=FuncType.load_only,
     call_string='Timer.add',
     arg_type={
@@ -61,6 +128,8 @@ class TriggerSetup(JMCFunction):
     defaults={
         "function": ""
     }
+
+
 )
 class TimerAdd(JMCFunction):
     def call(self) -> str:
@@ -69,16 +138,16 @@ class TimerAdd(JMCFunction):
         selector = self.args["selector"]
         if mode not in {'runOnce', 'runTick', 'none'}:
             raise JMCSyntaxException(
-                f"Avaliable modes for Timer.add are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.args_token["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
+                f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.args_Args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
-        if mode in {'runOnce', 'runTick'} and self.args_token["function"] is None:
+        if mode in {'runOnce', 'runTick'} and self.args_Args["function"] is None:
             raise JMCTypeError("function", self.token, self.tokenizer)
-        if mode == 'none' and self.args_token["function"] is not None:
+        if mode == 'none' and self.args_Args["function"] is not None:
             raise JMCSyntaxException(
-                "'function' is provided in 'none' mode Timer.add", self.args_token["function"], self.tokenizer)
+                f"'function' is provided in 'none' mode {self.call_string}", self.args_Args["function"], self.tokenizer)
         self.datapack.add_objective('dummy', obj)
-        if 'Timer.add' not in self.datapack.used_command:
-            self.datapack.used_command.add('Timer.add')
+        if self.call_string not in self.datapack.used_command:
+            self.datapack.used_command.add(self.call_string)
             self.datapack.ticks.append(
                 self.datapack.call_func(self.name, 'main'))
             self.datapack.private_functions[self.name]['main'] = Function()
@@ -108,7 +177,7 @@ class TimerAdd(JMCFunction):
         return ""
 
 
-@func_property(
+@ func_property(
     func_type=FuncType.load_only,
     call_string='Recipe.table',
     arg_type={
@@ -146,17 +215,17 @@ class RecipeTable(JMCFunction):
             json = loads(self.args["recipe"])
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
-                error, self.args_token["recipe"].token, self.tokenizer)
+                error, self.args_Args["recipe"].token, self.tokenizer)
 
         if "result" not in json:
             raise JMCSyntaxException("'result' key not found in recipe",
-                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "item" not in json["result"]:
             raise JMCSyntaxException("'item' key not found in 'result' in recipe",
-                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "count" not in json["result"]:
             raise JMCSyntaxException("'count' key not found in 'result' in recipe",
-                                     self.args_token["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
 
         result_item = json["result"]["item"]
         json["result"]["item"] = base_item
@@ -179,7 +248,7 @@ class RecipeTable(JMCFunction):
         return ""
 
 
-@func_property(
+@ func_property(
     func_type=FuncType.load_only,
     call_string='Debug.track',
     arg_type={},
@@ -189,7 +258,7 @@ class DebugTrack(JMCFunction):
     pass
 
 
-@func_property(
+@ func_property(
     func_type=FuncType.load_only,
     call_string='Debug.history',
     arg_type={},
@@ -199,7 +268,7 @@ class DebugHistory(JMCFunction):
     pass
 
 
-@func_property(
+@ func_property(
     func_type=FuncType.load_only,
     call_string='Debug.cleanup',
     arg_type={},

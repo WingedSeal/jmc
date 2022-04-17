@@ -133,7 +133,7 @@ class Tokenizer:
             self.keywords = []
         else:
             raise JMCSyntaxWarning(
-                "Unnecessary semicolon(;)", self, self, display_col_length=False)
+                "Unnecessary semicolon(;)", self, self)
 
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         self.list_of_tokens = []
@@ -568,13 +568,13 @@ class Tokenizer:
 
         return args, kwargs
 
-    def parse_js_obj(self, token: Token) -> dict[Any, Token]:
+    def parse_js_obj(self, token: Token) -> dict[str, Token]:
         if token.token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
-        keywords = self.split_tokens(keywords, [':'], max=1)
+        keywords = self.split_tokens(keywords, [':'])
         kwargs: dict[str, Token] = dict()
         key: str = ""
         arg: str = ""
@@ -642,7 +642,7 @@ class Tokenizer:
 
             if token.token_type == TokenType.keyword:
                 if arg:
-                    if token.string == '=':
+                    if token.string == ':':
                         key = arg
                         arg = ""
                     else:
@@ -650,9 +650,9 @@ class Tokenizer:
                             "Unexpected token", token, self)
                 elif key:
                     arg = token.string
-                    if token.string == '=':
+                    if token.string == ':':
                         raise JMCSyntaxException(
-                            "Duplicated equal-sign(=)", token, self)
+                            "Duplicated colon(:)", token, self)
                     add_kwarg(token)
                 else:
                     arg = token.string

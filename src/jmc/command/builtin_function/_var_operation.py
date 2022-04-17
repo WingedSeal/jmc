@@ -1,7 +1,6 @@
-from ..exception import JMCTypeError
-from ..datapack import DataPack
-from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType, func_property
+from ...datapack import DataPack
+from ..utils import ArgType
+from ..jmc_function import JMCFunction, FuncType, func_property
 
 
 @func_property(

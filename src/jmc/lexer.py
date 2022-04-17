@@ -539,26 +539,25 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
-    def parse_if_else(self, tokenizer: Tokenizer) -> str:
+    def parse_if_else(self, tokenizer: Tokenizer, name: str = 'if_else') -> str:
         VAR = "__if_else__"
-        NAME = "if_else"
 
-        logger.debug("Handling if-else")
+        logger.debug(f"Handling if-else (name={name})")
         if_else_box = self.if_else_box
         self.if_else_box = []
         condition, precommand = parse_condition(
             if_else_box[0][0], tokenizer, self.datapack)
         # Case 1: `if` only
         if len(if_else_box) == 1:
-            return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(NAME, if_else_box[0][1], tokenizer)}"
+            return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(name, if_else_box[0][1], tokenizer)}"
             return return_value
 
         # Case 2
-        count = self.datapack.get_count(NAME)
-        count_alt = self.datapack.get_count(NAME)
+        count = self.datapack.get_count(name)
+        count_alt = self.datapack.get_count(name)
         output = [
             f"scoreboard players set {VAR} {DataPack.VAR_NAME} 0",
-            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(NAME, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.VAR_NAME} 1'])}",
+            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.VAR_NAME} 1'])}",
             f"execute if score {VAR} {DataPack.VAR_NAME} matches 0 run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count_alt}"]
         del if_else_box[0]
 
@@ -573,24 +572,24 @@ class Lexer:
             for else_if in if_else_box:
                 condition, precommand = parse_condition(
                     else_if[0], tokenizer, self.datapack)
-                count = self.datapack.get_count(NAME)
+                count = self.datapack.get_count(name)
                 count_tmp = count_alt
-                count_alt = self.datapack.get_count(NAME)
+                count_alt = self.datapack.get_count(name)
 
-                self.datapack.add_raw_private_function(NAME, [
+                self.datapack.add_raw_private_function(name, [
                     f"{precommand}execute {condition} run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count}",
                     f"execute if score {VAR} {DataPack.VAR_NAME} matches 0 run function {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{VAR}/{count_alt}"
                 ], count_tmp)
 
-                self.datapack.add_custom_private_function(NAME, else_if[1], tokenizer, count, postcommands=[
+                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, postcommands=[
                     f"scoreboard players set {VAR} {DataPack.VAR_NAME} 1"
                 ])
         # `else`
         if else_ is None:
-            self.datapack.private_functions[NAME][count_tmp].delete(-1)
+            self.datapack.private_functions[name][count_tmp].delete(-1)
         else:
             self.datapack.add_custom_private_function(
-                NAME, else_, tokenizer, count_alt)
+                name, else_, tokenizer, count_alt)
         return "\n".join(output)
 
     def clean_up_paren(self, token: Token, tokenizer: Tokenizer, is_nbt: bool = True) -> str:

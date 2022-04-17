@@ -1,7 +1,7 @@
-from ..exception import JMCTypeError
-from ..datapack import DataPack
-from .utils import ArgType
-from .jmc_function import JMCFunction, FuncType, func_property
+from ...exception import JMCTypeError
+from ...datapack import DataPack
+from ..utils import ArgType
+from ..jmc_function import JMCFunction, FuncType, func_property
 
 
 @func_property(
@@ -76,7 +76,7 @@ class PlayerDie(JMCFunction):
     on_respawn = f'scoreboard players reset @s {obj}'
 
     def call(self) -> str:
-        if self.args_token["onDeath"] is None and self.args_token["onRespawn"] is None:
+        if self.args_Args["onDeath"] is None and self.args_Args["onRespawn"] is None:
             raise JMCTypeError("onDeath or onRespawn",
                                self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')

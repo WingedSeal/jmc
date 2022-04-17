@@ -1,8 +1,8 @@
-from ..tokenizer import Token, Tokenizer, TokenType
-from ..exception import JMCSyntaxException
-from .jmc_function import JMCFunction, FuncType, func_property
-from .utils import ArgType, eval_expr, find_scoreboard_player_type, verify_args
-from ._flow_control import parse_switch
+from ...tokenizer import Token, Tokenizer, TokenType
+from ...exception import JMCSyntaxException
+from ..jmc_function import JMCFunction, FuncType, func_property
+from ..utils import ArgType, eval_expr, find_scoreboard_player_type
+from .._flow_control import parse_switch
 
 
 def _hardcode_parse(calc_pos: int, string: str, token: Token, tokenizer: Tokenizer) -> str:
@@ -69,7 +69,7 @@ class HardcodeRepeat(JMCFunction):
         stop = int(self.args["stop"])
         if step == 0:
             raise JMCSyntaxException(
-                "'step' must not be zero", self.args_token["step"].token, self.tokenizer)
+                "'step' must not be zero", self.args_Args["step"].token, self.tokenizer)
 
         commands: list[str] = []
         for i in range(start, stop, step):
@@ -77,10 +77,10 @@ class HardcodeRepeat(JMCFunction):
                 commands.extend(self.datapack.parse_function_token(
                     Token(
                         TokenType.paren_curly,
-                        self.args_token["function"].token.line,
-                        self.args_token["function"].token.col,
+                        self.args_Args["function"].token.line,
+                        self.args_Args["function"].token.col,
                         _hardcode_process(
-                            self.args_token["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.args_Args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )
@@ -111,16 +111,16 @@ class HardcodeSwitch(JMCFunction):
         count = int(self.args["count"])
         func_contents: list[list[str]] = []
         scoreboard_player = find_scoreboard_player_type(
-            self.args_token["switch"].token, self.tokenizer)
+            self.args_Args["switch"].token, self.tokenizer)
         for i in range(count):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(
                         TokenType.paren_curly,
-                        self.args_token["function"].token.line,
-                        self.args_token["function"].token.col,
+                        self.args_Args["function"].token.line,
+                        self.args_Args["function"].token.col,
                         _hardcode_process(
-                            self.args_token["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.args_Args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )

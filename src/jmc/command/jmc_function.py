@@ -36,11 +36,11 @@ class JMCFunction:
         if self.func_type is None:
             raise NotImplementedError("missing func_type")
 
-        self.args_token = verify_args(self.arg_type,
-                                      self.call_string, token, tokenizer)
+        self.args_Args = verify_args(self.arg_type,
+                                     self.call_string, token, tokenizer)
         self.args: dict[str, str] = dict()
 
-        for key, arg in self.args_token.items():
+        for key, arg in self.args_Args.items():
             if arg is None:
                 if key not in self.defaults:
                     raise JMCTypeError(key, token, tokenizer)
