@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/jmc.docs/static/css/main.073c9b0a.css",
-    "main.js": "/jmc.docs/static/js/main.5c99a9e9.js",
-    "static/js/787.1e9db1aa.chunk.js": "/jmc.docs/static/js/787.1e9db1aa.chunk.js",
-    "static/media/logo.svg": "/jmc.docs/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
-    "index.html": "/jmc.docs/index.html",
-    "main.073c9b0a.css.map": "/jmc.docs/static/css/main.073c9b0a.css.map",
-    "main.5c99a9e9.js.map": "/jmc.docs/static/js/main.5c99a9e9.js.map",
-    "787.1e9db1aa.chunk.js.map": "/jmc.docs/static/js/787.1e9db1aa.chunk.js.map"
+    "main.css": "/jmc/static/css/main.073c9b0a.css",
+    "main.js": "/jmc/static/js/main.83058afa.js",
+    "static/js/787.1e9db1aa.chunk.js": "/jmc/static/js/787.1e9db1aa.chunk.js",
+    "static/media/logo.svg": "/jmc/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/jmc/index.html",
+    "main.073c9b0a.css.map": "/jmc/static/css/main.073c9b0a.css.map",
+    "main.83058afa.js.map": "/jmc/static/js/main.83058afa.js.map",
+    "787.1e9db1aa.chunk.js.map": "/jmc/static/js/787.1e9db1aa.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.5c99a9e9.js"
+    "static/js/main.83058afa.js"
   ]
 }
