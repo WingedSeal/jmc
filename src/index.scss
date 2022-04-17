@@ -1,0 +1,11 @@
+*,
+*::before,
+*::after {
+    margin: inherit;
+    box-sizing: inherit;
+}
+
+html {
+    margin: 0;
+    box-sizing: border-box;
+}
