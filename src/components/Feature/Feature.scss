@@ -7,6 +7,11 @@
     margin-right: auto;
     margin-top: 1em;
 
+    & > .child {
+        font-size: larger;
+        color: aqua;
+    }
+
     & > summary {
         width: 100%;
         height: 100%;
