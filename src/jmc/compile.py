@@ -144,7 +144,7 @@ def build(datapack: DataPack, config: dict[str, str]):
     with (output_folder/'pack.mcmeta').open('w+') as file:
         dump({
             "pack": {
-                "pack_format": config["pack_format"],
+                "pack_format": int(config["pack_format"]),
                 "description": config["description"]
             }
         }, file, indent=2)
