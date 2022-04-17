@@ -66,7 +66,7 @@ def error_report(error: Exception) -> None:
 def main() -> None:
     global config
     os.system("")
-    logger.info(VERSION)
+    logger.info(f"Build-version: {VERSION}")
     pprint(' JMC Compiler\n', Colors.HEADER)
     pprint(f'Current Directory | {CWD}\n', Colors.YELLOW)
     if not (CWD/CONFIG_FILE_NAME).is_file():
