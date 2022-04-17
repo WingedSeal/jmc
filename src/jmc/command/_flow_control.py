@@ -7,8 +7,6 @@ from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 
-NEW_LINE = '\n'
-
 
 def if_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     if len(command) < 2:

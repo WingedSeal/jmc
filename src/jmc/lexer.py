@@ -54,7 +54,6 @@ FIRST_ARGUMENTS = {
 """All vanilla commands and JMC custom syntax 
 
 `if` is excluded from the list since it can be used in execute"""
-NEW_LINE = '\n'
 
 ALLOW_NUMBER_AFTER = [
     'give',

@@ -6,8 +6,6 @@ from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
 
-NEW_LINE = '\n'
-
 VAR_OPERATION_COMMANDS = JMCFunction._get(FuncType.variable_operation)
 
 
