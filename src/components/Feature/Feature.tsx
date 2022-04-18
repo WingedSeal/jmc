@@ -13,7 +13,6 @@ const Feature: React.FC<Props> = ({ children, summary }) => {
                 <div className="icon" />
                 <span className="text">{summary}</span>
             </summary>
-
             <div className="child">{children}</div>
         </details>
     );

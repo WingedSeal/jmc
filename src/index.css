@@ -1,35 +1,54 @@
 *,
 *::before,
 *::after {
-  margin: inherit;
-  -webkit-box-sizing: inherit;
-          box-sizing: inherit;
-}
-
-html {
   margin: 0;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
+}
+
+html {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--background);
 }
 
 :root {
-  --primary: rgb(152, 0, 223);
-  --secondary: rgb(224, 90, 0);
+  --primary: rgb(174, 0, 255);
+  --primary-dark: rgb(118, 0, 173);
+  --secondary: rgb(255, 166, 0);
+  --secondary-dark: rgb(192, 77, 0);
+  --gradiant: linear-gradient(
+        45deg,
+        var(--primary) 0%,
+        var(--secondary) 100%
+    );
+  --gradiant-reverse: linear-gradient(
+        -45deg,
+        var(--primary) 0%,
+        var(--secondary) 100%
+    );
+  --gradiant-dark: linear-gradient(
+        45deg,
+        var(--primary-dark) 0%,
+        var(--secondary-dark) 100%
+    );
+  --gradiant-dark-reverse: linear-gradient(
+        -45deg,
+        var(--primary-dark) 0%,
+        var(--secondary-dark) 100%
+    );
   --background: rgb(26, 26, 26);
-  --fs2: 48px;
+  --fs2: 36px;
 }
 
 @media only screen and (max-width: 1200px) {
   :root {
-    --fs2: 36px;
+    --fs2: 32px;
   }
 }
 
 @media only screen and (max-width: 768px) {
   :root {
-    --fs2: 24px;
+    --fs2: 20px;
   }
 }
 
