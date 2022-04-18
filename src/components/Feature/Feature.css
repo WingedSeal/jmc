@@ -7,10 +7,12 @@
   background-image: none;
   -webkit-transition: height 0.3s ease-out, margin 0.15s ease-in;
   transition: height 0.3s ease-out, margin 0.15s ease-in;
-  margin-left: 8vw;
-  margin-right: 8vw;
+  margin-left: 10vw;
+  margin-right: 10vw;
   margin-top: 1em;
   height: 0;
+  margin-bottom: 4em;
+  font-size: var(--fs4);
 }
 
 .feature[open] {
@@ -82,6 +84,16 @@
   z-index: 0;
   max-height: 10vw;
   font-size: var(--fs2);
+  cursor: pointer;
+  -webkit-transition: -webkit-transform 0.1s ease-in;
+  transition: -webkit-transform 0.1s ease-in;
+  transition: transform 0.1s ease-in;
+  transition: transform 0.1s ease-in, -webkit-transform 0.1s ease-in;
+}
+
+.feature > summary:hover {
+  -webkit-transform: scaleX(102%);
+          transform: scaleX(102%);
 }
 
 .feature > summary::before {
@@ -144,5 +156,6 @@
 
 .feature > .child {
   color: aliceblue;
+  padding: 1em;
 }
 /*# sourceMappingURL=Feature.css.map */

@@ -6,10 +6,12 @@
     border-radius: 1em;
     background-image: none;
     transition: height 0.3s ease-out, margin 0.15s ease-in;
-    margin-left: 8vw;
-    margin-right: 8vw;
+    margin-left: 10vw;
+    margin-right: 10vw;
     margin-top: 1em;
     height: 0;
+    margin-bottom: 4em;
+    font-size: var(--fs4);
 
     &[open] {
         background-image: linear-gradient(var(--background), var(--background)),
@@ -70,6 +72,13 @@
         z-index: 0;
         max-height: 10vw;
         font-size: var(--fs2);
+        cursor: pointer;
+
+        transition: transform 0.1s ease-in;
+
+        &:hover {
+            transform: scaleX(102%);
+        }
 
         &::before {
             content: "";
@@ -123,5 +132,6 @@
 
     & > .child {
         color: aliceblue;
+        padding: 1em;
     }
 }

@@ -11,6 +11,24 @@ function App() {
                 <div>TEST3</div>
                 <div>TEST4</div>
             </Feature>
+            <Feature summary="Anonymous Function">
+                <div>TEST1</div>
+                <div>TEST2</div>
+                <div>TEST3</div>
+                <div>TEST4</div>
+            </Feature>
+            <Feature summary="Anonymous Function">
+                <div>TEST1</div>
+                <div>TEST2</div>
+                <div>TEST3</div>
+                <div>TEST4</div>
+            </Feature>
+            <Feature summary="Anonymous Function">
+                <div>TEST1</div>
+                <div>TEST2</div>
+                <div>TEST3</div>
+                <div>TEST4</div>
+            </Feature>
         </div>
     );
 }

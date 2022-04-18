@@ -10,6 +10,10 @@ html {
     background-color: var(--background); //var(--background);
 }
 
+body {
+    overflow-x: hidden;
+}
+
 :root {
     --primary: rgb(174, 0, 255);
     --primary-dark: rgb(118, 0, 173);
@@ -38,20 +42,24 @@ html {
     --background: rgb(26, 26, 26);
 
     --fs2: 36px;
+    --fs4: 22px;
 }
 
 @media only screen and (max-width: 1200px) {
     :root {
         --fs2: 32px;
+        --fs4: 18px;
     }
 }
 @media only screen and (max-width: 768px) {
     :root {
         --fs2: 20px;
+        --fs4: 14px;
     }
 }
 @media only screen and (max-width: 320px) {
     :root {
         --fs2: 12px;
+        --fs4: 8px;
     }
 }
