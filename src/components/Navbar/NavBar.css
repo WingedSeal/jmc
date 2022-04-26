@@ -1,0 +1,23 @@
+.glow {
+  -webkit-animation: glow 1s ease-in-out infinite alternate;
+          animation: glow 1s ease-in-out infinite alternate;
+}
+
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 0.1em #fff, 0 0 0.2em #fff, 0 0 0.3em #00b9e7, 0 0 0.4em #00b9e7, 0 0 0.5em #00b9e7, 0 0 0.6em #00b9e7;
+  }
+  to {
+    text-shadow: 0 0 0.1em #fff, 0 0 0.2em #34dcfa, 0 0 3em #34dcfa, 0 0 0.4em #34dcfa, 0 0 0.5em #00b9e7, 0 0 0.6em #34dcfa;
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 0.1em #fff, 0 0 0.2em #fff, 0 0 0.3em #00b9e7, 0 0 0.4em #00b9e7, 0 0 0.5em #00b9e7, 0 0 0.6em #00b9e7;
+  }
+  to {
+    text-shadow: 0 0 0.1em #fff, 0 0 0.2em #34dcfa, 0 0 3em #34dcfa, 0 0 0.4em #34dcfa, 0 0 0.5em #00b9e7, 0 0 0.6em #34dcfa;
+  }
+}
+/*# sourceMappingURL=NavBar.css.map */

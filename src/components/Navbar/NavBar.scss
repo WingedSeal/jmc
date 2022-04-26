@@ -1,0 +1,20 @@
+$glow-color-1: #00b9e7;
+$glow-color-2: #34dcfa;
+
+.glow {
+    animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 0.1em #fff, 0 0 0.2em #fff, 0 0 0.3em $glow-color-1,
+            0 0 0.4em $glow-color-1, 0 0 0.5em $glow-color-1,
+            0 0 0.6em $glow-color-1;
+    }
+
+    to {
+        text-shadow: 0 0 0.1em #fff, 0 0 0.2em $glow-color-2,
+            0 0 3em $glow-color-2, 0 0 0.4em $glow-color-2,
+            0 0 0.5em $glow-color-1, 0 0 0.6em $glow-color-2;
+    }
+}

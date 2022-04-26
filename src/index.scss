@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *,
 *::before,
 *::after {
@@ -5,61 +9,39 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: MinecraftTen;
+    src: url(assets/font/MinecraftTen-VGORe.ttf);
+}
+
+@font-face {
+    font-family: Minecraft;
+    src: url(assets/font/MinecraftRegular-Bmg3.otf);
+}
+
+@font-face {
+    font-family: Minecraft;
+    font-weight: bold;
+    src: url(assets/font/MinecraftBold-nMK1.otf);
+}
+
+@font-face {
+    font-family: Minecraft;
+    font-weight: bold;
+    font-style: italic;
+    src: url(assets/font/MinecraftBoldItalic-1y1e.otf);
+}
+
+@font-face {
+    font-family: Minecraft;
+    font-style: italic;
+    src: url(assets/font/MinecraftItalic-R8Mo.otf);
+}
+
 html {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--background); //var(--background);
+    font-family: Minecraft, sans-serif;
 }
 
 body {
-    overflow-x: hidden;
-}
-
-:root {
-    --primary: rgb(174, 0, 255);
-    --primary-dark: rgb(118, 0, 173);
-    --secondary: rgb(255, 166, 0);
-    --secondary-dark: rgb(192, 77, 0);
-    --gradiant: linear-gradient(
-        45deg,
-        var(--primary) 0%,
-        var(--secondary) 100%
-    );
-    --gradiant-reverse: linear-gradient(
-        -45deg,
-        var(--primary) 0%,
-        var(--secondary) 100%
-    );
-    --gradiant-dark: linear-gradient(
-        45deg,
-        var(--primary-dark) 0%,
-        var(--secondary-dark) 100%
-    );
-    --gradiant-dark-reverse: linear-gradient(
-        -45deg,
-        var(--primary-dark) 0%,
-        var(--secondary-dark) 100%
-    );
-    --background: rgb(26, 26, 26);
-
-    --fs2: 36px;
-    --fs4: 22px;
-}
-
-@media only screen and (max-width: 1200px) {
-    :root {
-        --fs2: 32px;
-        --fs4: 18px;
-    }
-}
-@media only screen and (max-width: 768px) {
-    :root {
-        --fs2: 20px;
-        --fs4: 14px;
-    }
-}
-@media only screen and (max-width: 320px) {
-    :root {
-        --fs2: 12px;
-        --fs4: 8px;
-    }
+    background-color: dimgray;
 }
