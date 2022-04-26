@@ -1,13 +1,19 @@
 {
   "files": {
-    "main.css": "/jmc/static/css/main.bfead2ae.css",
-    "main.js": "/jmc/static/js/main.1e99b88b.js",
+    "main.css": "/jmc/static/css/main.1fba0180.css",
+    "main.js": "/jmc/static/js/main.39313836.js",
+    "static/media/jmc_icon.png": "/jmc/static/media/jmc_icon.91c8f873ccc4cb864414.png",
+    "static/media/MinecraftItalic-R8Mo.otf": "/jmc/static/media/MinecraftItalic-R8Mo.ce040688d15f830ad909.otf",
+    "static/media/MinecraftBoldItalic-1y1e.otf": "/jmc/static/media/MinecraftBoldItalic-1y1e.9693305371d02954a88f.otf",
+    "static/media/MinecraftBold-nMK1.otf": "/jmc/static/media/MinecraftBold-nMK1.a9b3bc2a90dd462c9c18.otf",
+    "static/media/MinecraftRegular-Bmg3.otf": "/jmc/static/media/MinecraftRegular-Bmg3.82ba08919dc2add9422f.otf",
+    "static/media/MinecraftTen-VGORe.ttf": "/jmc/static/media/MinecraftTen-VGORe.cd1235551b5f89f4710f.ttf",
     "index.html": "/jmc/index.html",
-    "main.bfead2ae.css.map": "/jmc/static/css/main.bfead2ae.css.map",
-    "main.1e99b88b.js.map": "/jmc/static/js/main.1e99b88b.js.map"
+    "main.1fba0180.css.map": "/jmc/static/css/main.1fba0180.css.map",
+    "main.39313836.js.map": "/jmc/static/js/main.39313836.js.map"
   },
   "entrypoints": [
-    "static/css/main.bfead2ae.css",
-    "static/js/main.1e99b88b.js"
+    "static/css/main.1fba0180.css",
+    "static/js/main.39313836.js"
   ]
 }
