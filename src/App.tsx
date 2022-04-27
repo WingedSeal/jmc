@@ -29,7 +29,7 @@ import Submitted from "./pages/Submitted";
 function App() {
     return (
         <Router>
-            <div className="App w-screen">
+            <div className="App w-[100%] overflow-x-hidden">
                 <NavBar />
                 <Routes>
                     <Route path="/" element={<Home />} />

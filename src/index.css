@@ -53,4 +53,19 @@ img.minecraft {
       image-rendering: -o-pixelated;
       image-rendering: pixelated;
 }
+
+::-webkit-scrollbar {
+  width: 0.9rem;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #141414;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 0.3rem solid transparent;
+  background-clip: content-box;
+}
 /*# sourceMappingURL=index.css.map */
