@@ -7,9 +7,17 @@ const NavBar = () => {
     const exampleBtn = useRef<HTMLUListElement>(null);
     const documentationBtn = useRef<HTMLUListElement>(null);
     const gettingStartedBtn = useRef<HTMLUListElement>(null);
+    const exampleBtnMobile = useRef<HTMLUListElement>(null);
+    const documentationBtnMobile = useRef<HTMLUListElement>(null);
+    const gettingStartedBtnMobile = useRef<HTMLUListElement>(null);
     const mobileMenu = useRef<HTMLUListElement>(null);
     const mobileMenuButton = useRef<HTMLButtonElement>(null);
     const ulRefs = [exampleBtn, documentationBtn, gettingStartedBtn];
+    const ulRefsMobile = [
+        exampleBtnMobile,
+        documentationBtnMobile,
+        gettingStartedBtnMobile,
+    ];
     return (
         <nav className="fixed top-0 flex flex-row h-[11vh] w-screen items-center bg-black">
             <Link to="/" className="h-3/4 mx-10 aspect-square">
@@ -39,128 +47,149 @@ const NavBar = () => {
             </button>
             <ul
                 ref={mobileMenu}
-                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-3xl text-white"
+                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-4xl text-white"
                 style={{ transform: "translateX(100%)" }}
             >
                 <li className="mr-5 ml-auto mt-20">
-                    <LinkItem to="/" ulRefs={ulRefs}>
+                    <LinkItem to="/" ulRefs={ulRefsMobile}>
                         Home
                     </LinkItem>
                 </li>
-                <li className="mr-5 ml-auto mt-2">
-                    <LinkItem to="/download" ulRefs={ulRefs}>
+                <li className="mr-5 ml-auto mt-3">
+                    <LinkItem to="/download" ulRefs={ulRefsMobile}>
                         Download
                     </LinkItem>
                 </li>
-                <li className="mr-5 ml-auto relative mt-2 flex justify-end">
+                <li className="mr-5 ml-auto relative mt-3 flex justify-end">
                     <DropDownButton
                         to="/getting-started"
-                        ulRef={gettingStartedBtn}
-                        others={[documentationBtn, exampleBtn]}
+                        ulRef={gettingStartedBtnMobile}
+                        others={[documentationBtnMobile, exampleBtnMobile]}
                     >
                         Getting-Started
                     </DropDownButton>
 
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%]"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
                         style={{ transform: "scaleY(0)" }}
-                        ref={gettingStartedBtn}
+                        ref={gettingStartedBtnMobile}
                     >
                         <LinkItem
                             to="/getting-started/introduction"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             Introduction
                         </LinkItem>
                         <LinkItem
                             to="/getting-started/how-it-works"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             How it works
                         </LinkItem>
                         <LinkItem
                             to="/getting-started/installation"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             Installation
                         </LinkItem>
-                        <LinkItem to="/getting-started/code" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/getting-started/code"
+                            ulRefs={ulRefsMobile}
+                        >
                             Code
                         </LinkItem>
                     </ul>
                 </li>
-                <li className="mr-5 ml-auto relative mt-2 flex justify-end">
+                <li className="mr-5 ml-auto relative mt-3 flex justify-end">
                     <DropDownButton
                         to="/documentation"
-                        ulRef={documentationBtn}
-                        others={[gettingStartedBtn, exampleBtn]}
+                        ulRef={documentationBtnMobile}
+                        others={[gettingStartedBtnMobile, exampleBtnMobile]}
                     >
                         Documentation
                     </DropDownButton>
 
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%]"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
                         style={{ transform: "scaleY(0)" }}
-                        ref={documentationBtn}
+                        ref={documentationBtnMobile}
                     >
                         <LinkItem
                             to="/documentation/multiline-command"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             Multiline-Command
                         </LinkItem>
-                        <LinkItem to="/documentation/import" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/documentation/import"
+                            ulRefs={ulRefsMobile}
+                        >
                             Import
                         </LinkItem>
-                        <LinkItem to="/documentation/comment" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/documentation/comment"
+                            ulRefs={ulRefsMobile}
+                        >
                             Comment
                         </LinkItem>
-                        <LinkItem to="/documentation/load-tick" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/documentation/load-tick"
+                            ulRefs={ulRefsMobile}
+                        >
                             Load/Tick
                         </LinkItem>
-                        <LinkItem to="/documentation/variable" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/documentation/variable"
+                            ulRefs={ulRefsMobile}
+                        >
                             Variable
                         </LinkItem>
                         <LinkItem
                             to="/documentation/flow-controls"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             Flow Controls
                         </LinkItem>
                         <LinkItem
                             to="/documentation/json-files"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             JSON Files
                         </LinkItem>
                         <LinkItem
                             to="/documentation/built-in-function"
-                            ulRefs={ulRefs}
+                            ulRefs={ulRefsMobile}
                         >
                             Built-in Function
                         </LinkItem>
                     </ul>
                 </li>
-                <li className="mr-5 ml-auto relative mt-2 flex justify-end">
+                <li className="mr-5 ml-auto relative mt-3 flex justify-end">
                     <DropDownButton
                         to="/examples"
-                        ulRef={exampleBtn}
-                        others={[gettingStartedBtn, documentationBtn]}
+                        ulRef={exampleBtnMobile}
+                        others={[
+                            gettingStartedBtnMobile,
+                            documentationBtnMobile,
+                        ]}
                     >
                         Examples
                     </DropDownButton>
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%]"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
                         style={{ transform: "scaleY(0)" }}
-                        ref={exampleBtn}
+                        ref={exampleBtnMobile}
                     >
-                        <LinkItem to="/examples/basics" ulRefs={ulRefs}>
+                        <LinkItem to="/examples/basics" ulRefs={ulRefsMobile}>
                             Basics
                         </LinkItem>
-                        <LinkItem to="/examples/advanced" ulRefs={ulRefs}>
+                        <LinkItem to="/examples/advanced" ulRefs={ulRefsMobile}>
                             Advanced
                         </LinkItem>
-                        <LinkItem to="/examples/submitted" ulRefs={ulRefs}>
+                        <LinkItem
+                            to="/examples/submitted"
+                            ulRefs={ulRefsMobile}
+                        >
                             Submitted
                         </LinkItem>
                     </ul>
