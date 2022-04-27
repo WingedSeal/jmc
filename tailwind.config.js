@@ -4,6 +4,10 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    fontFamily: {
+      'minecraft': ['Minecraft', 'san-serif'],
+      'minecraft-ten': ['MinecraftTen', 'ui-serif'],
+    }
   },
   plugins: [],
 }

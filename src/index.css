@@ -45,4 +45,12 @@ html {
 body {
   background-color: dimgray;
 }
+
+img.minecraft {
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -o-pixelated;
+      image-rendering: pixelated;
+}
 /*# sourceMappingURL=index.css.map */
