@@ -112,8 +112,8 @@ def main() -> None:
             except BaseException:
                 pprint("Invalid path", Colors.FAIL)
                 continue
-            Path(config["output"]).touch(exist_ok=True)
             break
+        Path(config["target"]).touch(exist_ok=True)
 
         while True:
             config["output"] = get_input(

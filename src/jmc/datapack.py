@@ -120,6 +120,7 @@ class DataPack:
         self.jsons[f"{json_type}/{self.PRIVATE_NAME}/{name}"] = json
 
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
+        """Add private function for User"""
         if token.string == '{}':
             raise JMCSyntaxWarning("Empty function", token, tokenizer)
 
@@ -132,6 +133,7 @@ class DataPack:
             return self.call_func(name, count)
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
+        """Wrap custom commands around user's command"""
         if precommands is None:
             precommands = []
         if postcommands is None:
@@ -144,6 +146,7 @@ class DataPack:
         return self.call_func(name, count)
 
     def add_raw_private_function(self, name: str, commands: list[str], count: str = None) -> str:
+        """Add private function for JMC"""
         if count is None:
             count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)

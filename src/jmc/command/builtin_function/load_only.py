@@ -196,7 +196,7 @@ class TimerAdd(JMCFunction):
             raise JMCTypeError("function", self.token, self.tokenizer)
         if mode == 'none' and self.args_Args["function"] is not None:
             raise JMCSyntaxException(
-                f"'function' is provided in 'none' mode {self.call_string}", self.args_Args["function"], self.tokenizer)
+                f"'function' is provided in 'none' mode {self.call_string}", self.args_Args["function"].token, self.tokenizer)
         self.datapack.add_objective('dummy', obj)
         if self.call_string not in self.datapack.used_command:
             self.datapack.used_command.add(self.call_string)
