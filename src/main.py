@@ -112,6 +112,7 @@ def main() -> None:
             except BaseException:
                 pprint("Invalid path", Colors.FAIL)
                 continue
+            Path(config["output"]).touch(exist_ok=True)
             break
 
         while True:
@@ -353,18 +354,21 @@ Type `cancel` to cancel
             file.write(info_log)
 
 
+def handle_exception(error: Exception):
+    CMD.event.set()
+    pprint("Unexpected error causes program to crash", Colors.FAIL)
+    pprint(type(error).__name__, Colors.FAIL_BOLD)
+    pprint(error, Colors.FAIL)
+    logger.critical("Program crashed")
+    logger.exception("")
+    press_enter("Press Enter to continue...")
+
+
 if __name__ == '__main__':
     atexit.register(lambda: print(Colors.EXIT.value, end=""))
     logger.info("Starting session")
-    # main()
     while True:
         try:
             main()
         except Exception as error:
-            CMD.event.set()
-            pprint("Unexpected error causes program to crash", Colors.FAIL)
-            pprint(type(error).__name__, Colors.FAIL_BOLD)
-            pprint(error, Colors.FAIL)
-            logger.critical("Program crashed")
-            logger.exception("")
-            press_enter("Press Enter to continue...")
+            handle_exception(error)
