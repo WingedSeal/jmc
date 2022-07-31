@@ -1,9 +1,10 @@
 {
   "files": {
-    "main.css": "/jmc/static/css/main.c8b9e545.css",
-    "main.js": "/jmc/static/js/main.27270e61.js",
+    "main.css": "/jmc/static/css/main.e3e6891f.css",
+    "main.js": "/jmc/static/js/main.b764c78c.js",
     "static/media/background.jpg": "/jmc/static/media/background.2f910f698191ec5b6f03.jpg",
     "static/media/jmc_icon.png": "/jmc/static/media/jmc_icon.91c8f873ccc4cb864414.png",
+    "static/media/what_is_jmc.png": "/jmc/static/media/what_is_jmc.3bb867036c4d1770b740.png",
     "static/media/MinecraftItalic-R8Mo.otf": "/jmc/static/media/MinecraftItalic-R8Mo.ce040688d15f830ad909.otf",
     "static/media/MinecraftBoldItalic-1y1e.otf": "/jmc/static/media/MinecraftBoldItalic-1y1e.9693305371d02954a88f.otf",
     "static/media/MinecraftBold-nMK1.otf": "/jmc/static/media/MinecraftBold-nMK1.a9b3bc2a90dd462c9c18.otf",
@@ -11,11 +12,11 @@
     "static/media/MinecraftTen-VGORe.ttf": "/jmc/static/media/MinecraftTen-VGORe.cd1235551b5f89f4710f.ttf",
     "static/media/menu.svg": "/jmc/static/media/menu.1bb7d0b14d4f1a7485e3b1084d7b9957.svg",
     "index.html": "/jmc/index.html",
-    "main.c8b9e545.css.map": "/jmc/static/css/main.c8b9e545.css.map",
-    "main.27270e61.js.map": "/jmc/static/js/main.27270e61.js.map"
+    "main.e3e6891f.css.map": "/jmc/static/css/main.e3e6891f.css.map",
+    "main.b764c78c.js.map": "/jmc/static/js/main.b764c78c.js.map"
   },
   "entrypoints": [
-    "static/css/main.c8b9e545.css",
-    "static/js/main.27270e61.js"
+    "static/css/main.e3e6891f.css",
+    "static/js/main.b764c78c.js"
   ]
 }
