@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ReactComponent as MenuSvg } from "../../assets/image/menu.svg";
 import "./NavBar.css";
@@ -18,8 +18,42 @@ const NavBar = () => {
         documentationBtnMobile,
         gettingStartedBtnMobile,
     ];
+
+    const oldScrollY = useRef(window.scrollY);
+    const [scrollY, setScrollY] = useState(window.scrollY);
+    const [isScrollUp, setIsScrollUp] = useState(false);
+    const handleScroll = () => {
+        setIsScrollUp(window.scrollY < oldScrollY.current);
+        setScrollY(window.scrollY);
+        oldScrollY.current = window.scrollY;
+    };
+    // const getWindowHeight = () => {
+    //     return window.innerHeight;
+    // };
+    // const [windowY, setWindowY] = useState(getWindowHeight());
+    // const handleWindowResize = () => {
+    //     setWindowY(getWindowHeight());
+    // };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        // window.addEventListener("resize", handleWindowResize, {
+        //     passive: true,
+        // });
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            // window.removeEventListener("resize", handleWindowResize);
+        };
+    }, []);
     return (
-        <nav className="fixed top-0 flex flex-row h-[11vh] w-screen items-center bg-black">
+        <nav
+            className={
+                "fixed top-0 flex flex-row h-[11vh] w-screen items-center transition-all duration-500 " +
+                (scrollY < 1 ? "bg-transparent" : "bg-black") +
+                " " +
+                (isScrollUp && scrollY != 0 ? "-translate-y-full" : "")
+            }
+        >
             <Link to="/" className="h-3/4 mx-10 aspect-square">
                 <img
                     className="h-full"

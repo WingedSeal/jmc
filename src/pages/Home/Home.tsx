@@ -49,6 +49,21 @@ const JMC_Icon = () => {
     );
 };
 
+const WhatIsJMC = () => {
+    return (
+        <div className="flex-col flex">
+            <p className="font-minecraft font-bold underline text-white text-[10vw] md:text-[5vh]">
+                What is JMC
+            </p>
+            <img
+                src={require("../../assets/image/code/what_is_jmc.png")}
+                alt="Code Example"
+                className="rounded-[2rem]"
+            />
+        </div>
+    );
+};
+
 const Home = () => {
     return (
         <>
@@ -56,7 +71,9 @@ const Home = () => {
                 <JMC_Icon />
                 <Mantra />
             </section>
-            <section className="h-screen bg-[#002029]"></section>
+            <section className="h-screen bg-[#002029] flex flex-wrap overflow-y-hidden">
+                <WhatIsJMC />
+            </section>
             <section className="h-screen bg-[#18001A]"></section>
         </>
     );
