@@ -4,4 +4,41 @@
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+@-webkit-keyframes bouncing-arrow {
+  0%,
+  100% {
+    -webkit-transform: translateY(-8%);
+            transform: translateY(-8%);
+    -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    -webkit-transform: none;
+            transform: none;
+    -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes bouncing-arrow {
+  0%,
+  100% {
+    -webkit-transform: translateY(-8%);
+            transform: translateY(-8%);
+    -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    -webkit-transform: none;
+            transform: none;
+    -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bouncing-arrow {
+  -webkit-animation: bouncing-arrow 1s infinite;
+          animation: bouncing-arrow 1s infinite;
+}
 /*# sourceMappingURL=Home.css.map */
