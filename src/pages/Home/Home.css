@@ -36,9 +36,4 @@
             animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
-
-.animate-bouncing-arrow {
-  -webkit-animation: bouncing-arrow 1s infinite;
-          animation: bouncing-arrow 1s infinite;
-}
 /*# sourceMappingURL=Home.css.map */
