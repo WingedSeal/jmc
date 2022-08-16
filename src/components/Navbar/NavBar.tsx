@@ -48,7 +48,7 @@ const NavBar = () => {
     return (
         <nav
             className={
-                "fixed top-0 flex flex-row h-[11vh] w-screen items-center transition-[transform,background-color] duration-500 " +
+                "fixed top-0 flex flex-row h-[11vh] w-screen items-center transition-[transform,background-color] duration-500 z-10 " +
                 (scrollY < 1 ? "bg-transparent" : "bg-black") +
                 " " +
                 (isScrollUp && scrollY != 0 ? "-translate-y-full" : "")

@@ -17,3 +17,60 @@
         animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
     }
 }
+
+.avoid-repetitive-task {
+    position: relative;
+    :hover::before {
+        content: "Notice yourself implementing the same algorithm again and again? JMC has features to implement those for you and the code will already be optimized without you having to put in any work.";
+        z-index: 100;
+        font-size: 3vw;
+        background-color: black;
+        padding: 0.4em;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        width: auto;
+        width: 70vw;
+        border: 0.1em solid white;
+        border-radius: 0.2em;
+    }
+}
+
+.superior-syntax {
+    position: relative;
+    :hover::before {
+        content: "Aren't you tired of creating new file for each function? In JMC, you can write everything in a single file if you want. But, you still have option to split it into multiple file. JMC also supports  inline-comment, multiline-command. And you no longer need to create tick.json or load.json";
+        z-index: 100;
+        font-size: 3vw;
+        background-color: black;
+        padding: 0.4em;
+        color: white;
+        position: absolute;
+        top: 0%;
+        left: 20%;
+        width: auto;
+        width: 70vw;
+        border: 0.1em solid white;
+        border-radius: 0.2em;
+    }
+}
+
+.low-learning-curve {
+    position: relative;
+    :hover::before {
+        content: "It takes 5-10 minutes to learn basic JMC if you already know Minecraft Datapack";
+        z-index: 100;
+        font-size: 3vw;
+        background-color: black;
+        padding: 0.4em;
+        color: white;
+        position: absolute;
+        top: -10%;
+        left: 20%;
+        width: auto;
+        width: 70vw;
+        border: 0.1em solid white;
+        border-radius: 0.2em;
+    }
+}

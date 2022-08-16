@@ -8,7 +8,7 @@ const DownwardArrow = () => {
             viewBox="0 0 490.03 490.03"
             width="48"
             height="86"
-            className="h-auto w-[10vw] md:w-[7vh] mx-auto fill-white animate-[bouncing-arrow_1s_infinite] -z-100"
+            className="h-auto w-[10vw] md:w-[7vh] mx-auto fill-white animate-[bouncing-arrow_1s_infinite] -z-10"
         >
             <path
                 d="M245.015,490.015L490.03,234.132l-69.802-69.773L490.03,91.46L398.548,0.015L245.015,160.352L91.482,0.015L0,91.46
@@ -122,18 +122,75 @@ const WhatIsJMCDesc = () => {
     );
 };
 
+const WhyJMC = () => {
+    return (
+        <div className="flex-col-reverse flex flex-grow">
+            <p className="font-minecraft font-bold underline text-white text-[10vw] md:text-[8vh] mx-auto my-10">
+                What is JMC
+            </p>
+            <div className="flex-grow max-w-[70vw] max-h-[50vh] m-auto w-full">
+                <img
+                    src={require("../../assets/image/code/what_is_jmc.png")}
+                    alt="Code Example"
+                    className="rounded-[1rem] md:rounded-[2rem] object-contain h-full w-full"
+                />
+            </div>
+        </div>
+    );
+};
+const WhyJMCDesc = () => {
+    return (
+        <div className="grid grid-cols-1 gap-4 mx-auto">
+            <div className="flex avoid-repetitive-task">
+                <img
+                    src={require("../../assets/image/minecraft/diamond_pickaxe.png")}
+                    alt="minecraft:diamond_pickaxe"
+                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                />
+                <p className="font-minecraft italic text-[#2BC7AC] my-auto mx-5 text-4xl md:text-5xl">
+                    Avoid repetitive tasks
+                </p>
+            </div>
+            <div className="flex superior-syntax">
+                <img
+                    src={require("../../assets/image/minecraft/command_block.png")}
+                    alt="minecraft:command_block"
+                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                />
+                <p className="font-minecraft italic text-[#CE8F66] my-auto mx-5 text-4xl md:text-5xl">
+                    Superior Syntax
+                </p>
+            </div>
+
+            <div className="flex low-learning-curve">
+                <img
+                    src={require("../../assets/image/minecraft/redstone_lamp_on.png")}
+                    alt="minecraft:redstone_lamp"
+                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                />
+                <p className="font-minecraft italic text-[#F6DAB4] my-auto mx-5 text-4xl md:text-5xl">
+                    Low learning curve
+                </p>
+            </div>
+        </div>
+    );
+};
+
 const Home = () => {
     return (
         <>
-            <section className="h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-20 px-10 pb-10">
+            <section className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-20 px-10 pb-10">
                 <JMC_Icon />
                 <Mantra />
             </section>
-            <section className="h-screen bg-[#002029] flex flex-wrap overflow-y-auto pt-4 md:pt-16 px-2 md:px-10">
+            <section className="min-h-screen bg-[#002029] flex flex-wrap pt-4 md:pt-16 px-2 md:px-10">
                 <WhatIsJMC />
                 <WhatIsJMCDesc />
             </section>
-            <section className="h-screen bg-[#18001A]"></section>
+            <section className="min-h-screen bg-[#18001A] flex flex-wrap flex-row-reverse px-2 py-4 md:px-10">
+                <WhyJMC />
+                <WhyJMCDesc />
+            </section>
         </>
     );
 };
