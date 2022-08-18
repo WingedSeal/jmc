@@ -153,7 +153,7 @@ class ParticleSpiral(JMCFunction):
         "mode": "normal",
     }
 )
-class ParticleLine(JMCFunction):
+class ParticleCylinder(JMCFunction):
     def draw(self, radius: int, height: int, spread_xz: int, spread_y: int) -> list[tuple[int, int]]:
         points = []
         d_y = height/spread_y
