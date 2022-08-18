@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 from jmc.exception import JMCSyntaxException
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -67,7 +66,7 @@ class ParticleCircle(JMCFunction):
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
-                f"Unrecognized shape, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -117,7 +116,7 @@ class ParticleSpiral(JMCFunction):
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
-                f"Unrecognized shape, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -126,6 +125,57 @@ class ParticleSpiral(JMCFunction):
                     int(self.args["radius"]),
                     int(self.args["height"]),
                     int(self.args["spread"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.jmc_command,
+    call_string='Particle.cylinder',
+    arg_type={
+        "particle": ArgType.string,
+        "radius": ArgType.integer,
+        "height": ArgType.integer,
+        "spread_xz": ArgType.integer,
+        "spread_y": ArgType.integer,
+        "speed": ArgType.integer,
+        "count": ArgType.integer,
+        "mode": ArgType.keyword,
+    },
+    name='particle_cylinder',
+    defaults={
+        "speed": 1,
+        "count": 1,
+        "mode": "normal",
+    }
+)
+class ParticleLine(JMCFunction):
+    def draw(self, radius: int, height: int, spread_xz: int, spread_y: int) -> list[tuple[int, int]]:
+        points = []
+        d_y = height/spread_y
+        for y in range(spread_y):
+            angle = 2*math.pi/spread_xz
+            for i in drange(0, spread_xz, angle):
+                points.append((radius*math.cos(i), y*d_y, radius*math.sin(i)))
+        return points
+
+    def call(self) -> str:
+        if self.args['mode'] not in {'force', 'normal'}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    int(self.args["radius"]),
+                    int(self.args["height"]),
+                    int(self.args["spread_xz"]),
+                    int(self.args["spread_y"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
