@@ -5,7 +5,7 @@ from typing import Any
 
 from .lexer import Lexer
 from .log import Logger
-from .datapack import DataPack
+from .datapack import DataPack, Header
 from .exception import JMCBuildError
 
 
@@ -16,6 +16,10 @@ JMC_CERT_FILE_NAME = 'jmc.txt'
 def compile(config: dict[str, str], debug: bool = False) -> None:
     logger.info("Configuration:\n"+dumps(config, indent=2))
     read_cert(config)
+    if read_header(config):
+        logger.info("Header file found.")
+    else:
+        logger.info("Header file not found.")
     logger.info("Parsing")
     lexer = Lexer(config)
     if debug:
@@ -50,6 +54,22 @@ def get_cert() -> dict:
         "INT": DataPack.INT_NAME
     }
 
+
+def parse_header(header_str: str) -> Header:
+    pass
+
+
+def read_header(config: dict[str, str]) -> bool:
+    namespace_folder = Path(config["output"])/'data'/config["namespace"]
+    header_file = namespace_folder/config["target"]
+    if header_file.is_file():
+        with header_file.open('r') as file:
+            header_str = file.read()
+        DataPack.HEADER_DATA = parse_header(header_str)
+        return True
+    else:
+        DataPack.HEADER_DATA = None
+        return False
 
 def read_cert(config: dict[str, str]):
     namespace_folder = Path(config["output"])/'data'/config["namespace"]

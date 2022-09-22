@@ -72,6 +72,9 @@ class Function:
         return string
 
 
+class Header:
+    pass
+
 class DataPack:
     PRIVATE_NAME = '__private__'
     LOAD_NAME = '__load__'
@@ -79,6 +82,7 @@ class DataPack:
     VAR_NAME = '__variable__'
     INT_NAME = '__int__'
     VARIABLE_SIGN = '$'
+    HEADER_DATA = None | Header
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
