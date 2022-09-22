@@ -3,9 +3,10 @@ from shutil import rmtree
 from pathlib import Path
 from typing import Any
 
+from .header import parse_header
 from .lexer import Lexer
 from .log import Logger
-from .datapack import DataPack, Header
+from .datapack import DataPack
 from .exception import JMCBuildError
 
 
@@ -55,17 +56,13 @@ def get_cert() -> dict:
     }
 
 
-def parse_header(header_str: str) -> Header:
-    pass
-
-
 def read_header(config: dict[str, str]) -> bool:
     namespace_folder = Path(config["output"])/'data'/config["namespace"]
-    header_file = namespace_folder/config["target"]
+    header_file = namespace_folder/(config["target"][:-len(".jmc")]+".hjmc")
     if header_file.is_file():
         with header_file.open('r') as file:
             header_str = file.read()
-        DataPack.HEADER_DATA = parse_header(header_str)
+        DataPack.HEADER_DATA = parse_header(header_str, header_file.as_posix())
         return True
     else:
         DataPack.HEADER_DATA = None

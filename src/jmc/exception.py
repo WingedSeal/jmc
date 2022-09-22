@@ -45,6 +45,15 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
         msg += '\n'+suggestion
     return msg
 
+class HeaderDuplicatedMacro(ValueError):
+    def __init__(self, message: str):
+        log(self, [message])
+        super().__init__(message)
+
+class HeaderSyntaxException(SyntaxError):
+    def __init__(self, message: str):
+        log(self, [message])
+        super().__init__(message)
 
 class JMCSyntaxException(SyntaxError):
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:

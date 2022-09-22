@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 from json import JSONEncoder, dumps
 from .tokenizer import Token, Tokenizer
 from .exception import JMCSyntaxWarning
@@ -7,6 +7,7 @@ from .log import Logger
 
 if TYPE_CHECKING:
     from .lexer import Lexer
+    from .header import Header
 
 logger = Logger(__name__)
 
@@ -72,9 +73,6 @@ class Function:
         return string
 
 
-class Header:
-    pass
-
 class DataPack:
     PRIVATE_NAME = '__private__'
     LOAD_NAME = '__load__'
@@ -82,7 +80,7 @@ class DataPack:
     VAR_NAME = '__variable__'
     INT_NAME = '__int__'
     VARIABLE_SIGN = '$'
-    HEADER_DATA = None | Header
+    HEADER_DATA: Optional["Header"] = None
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")

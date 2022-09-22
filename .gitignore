@@ -130,6 +130,7 @@ dmypy.json
 
 # Custom
 test/
+testing/
 logs/
 log/
 test.*
