@@ -3,7 +3,7 @@ from shutil import rmtree
 from pathlib import Path
 from typing import Any
 
-from .header import parse_header
+from .header import parse_header, Header
 from .lexer import Lexer
 from .log import Logger
 from .datapack import DataPack
@@ -16,11 +16,9 @@ JMC_CERT_FILE_NAME = 'jmc.txt'
 
 def compile(config: dict[str, str], debug: bool = False) -> None:
     logger.info("Configuration:\n"+dumps(config, indent=2))
+    Header.clear()
     read_cert(config)
-    if read_header(config):
-        logger.info("Header file found.")
-    else:
-        logger.info("Header file not found.")
+    read_header(config)
     logger.info("Parsing")
     lexer = Lexer(config)
     if debug:
@@ -57,16 +55,17 @@ def get_cert() -> dict:
 
 
 def read_header(config: dict[str, str]) -> bool:
-    namespace_folder = Path(config["output"])/'data'/config["namespace"]
-    header_file = namespace_folder/(config["target"][:-len(".jmc")]+".hjmc")
+    header_file = Path(config["target"][:-len(".jmc")]+".hjmc")
+    parent_target = Path(config["target"]).parent
     if header_file.is_file():
+        Header.add_file_read(header_file)
+        logger.info("Header file found.")
         with header_file.open('r') as file:
             header_str = file.read()
-        DataPack.HEADER_DATA = parse_header(header_str, header_file.as_posix())
-        return True
+        logger.info(f"Parsing {header_file}")
+        parse_header(header_str, header_file.as_posix(), parent_target)
     else:
-        DataPack.HEADER_DATA = None
-        return False
+        logger.info("Header file not found.")
 
 def read_cert(config: dict[str, str]):
     namespace_folder = Path(config["output"])/'data'/config["namespace"]

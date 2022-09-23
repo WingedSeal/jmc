@@ -140,6 +140,8 @@ def main() -> None:
     pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
     while True:
         command = get_input().split()
+        if not command:
+            continue
         {
             "cd": CMD.cd,
             "help": CMD.help,

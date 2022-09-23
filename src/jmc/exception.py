@@ -1,4 +1,5 @@
 from json import JSONDecodeError
+from pathlib import Path
 from typing import TYPE_CHECKING
 from .log import Logger
 
@@ -45,15 +46,22 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
         msg += '\n'+suggestion
     return msg
 
+class HeaderFileNotFoundError(FileNotFoundError):
+    def __init__(self, path: Path):
+        msg = f"Header file not found: {path.as_posix()}"
+        log(self, [msg])
+        super().__init__(msg)
 class HeaderDuplicatedMacro(ValueError):
-    def __init__(self, message: str):
-        log(self, [message])
-        super().__init__(message)
+    def __init__(self, message: str,file_name: str, line: int, line_str: str):
+        msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
+        log(self, [msg])
+        super().__init__(msg)
 
 class HeaderSyntaxException(SyntaxError):
-    def __init__(self, message: str):
+    def __init__(self, message: str,file_name: str, line: int, line_str: str):
+        msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
         log(self, [message])
-        super().__init__(message)
+        super().__init__(msg)
 
 class JMCSyntaxException(SyntaxError):
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
