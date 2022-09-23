@@ -29,7 +29,7 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
         line += 1
-        if line_str.isspace() or line_str.startswith("//"):
+        if line_str.isspace() or line_str.startswith("//") or line_str=="":
             continue
 
         if not line_str.startswith("#"):
@@ -51,6 +51,7 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
             else:
                 raise HeaderSyntaxException(
                     f"'define' takes 2 arguments (got {len(args)-1})", file_name, line, line_str)
+
         elif args[0] == "include":
             if len(args) == 2:
                 included = args[1]
@@ -78,6 +79,10 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
             else:
                 raise HeaderSyntaxException(
                     "Whitespace is not supported in header file name", file_name, line, line_str)
+
+        elif args[0] == "replace":
+            raise Exception("Replace feature hasn't been implemented yet.")
+
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{args[0]}'", file_name, line, line_str)
