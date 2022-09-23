@@ -5,6 +5,7 @@ logger = Logger(__name__)
 
 class Header:
     macros: dict[str, str] = {}
+    replaces: dict[str, str] = {}
 
 def parse_header(header_str: str, file_name: str) -> Header:
     header = Header()

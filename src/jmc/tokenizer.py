@@ -6,6 +6,7 @@ from json import dumps
 import re
 
 from .utils import is_connected
+from .header import Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
@@ -31,7 +32,7 @@ class Token:
     line: int
     col: int
     string: str
-    _length: Optional[int] = field(init=False, repr=False, default=None)
+    _length: Optional[int] = field(init=True, repr=False, default=None)
 
     @property
     def length(self) -> int:
@@ -39,6 +40,14 @@ class Token:
             object.__setattr__(self, "_length", len(
                 self.string)+2 if self.token_type == TokenType.string else len(self.string))
         return self._length
+
+
+def make_token(token_type: TokenType, line: int, col: int, string:str) -> Token:
+    if token_type != TokenType.keyword or string not in Header.macros:
+        return Token(token_type=token_type, line=line, col=col, string=string)
+    string = Header.macros[string]
+    length = len(string) 
+    return Token(token_type=token_type, line=line, col=col, string=string, _length=length)
 
 
 @dataclass(frozen=True, eq=False)
@@ -117,7 +126,7 @@ class Tokenizer:
 
     def append_token(self) -> None:
         self.keywords.append(
-            Token(self.state,
+            make_token(self.state,
                   self.token_pos.line,
                   self.token_pos.col,
                   self.token)
@@ -311,7 +320,7 @@ class Tokenizer:
         tokens = []
         col = token.col
         for string in strings:
-            tokens.append(Token(TokenType.keyword, token.line, col, string))
+            tokens.append(make_token(TokenType.keyword, token.line, col, string))
             col += len(string)
         return tokens
 
@@ -412,7 +421,7 @@ class Tokenizer:
                 if state == max_state:
                     state = 0
                     result.append(
-                        Token(TokenType.keyword, token_array[0].line, token_array[0].col, string))
+                        make_token(TokenType.keyword, token_array[0].line, token_array[0].col, string))
                     token_array = []
             else:
                 state = 0
@@ -451,7 +460,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     "Positional argument follows keyword argument", token, self, display_col_length=False)
 
-            args.append(Token(string=arg, line=token.line,
+            args.append(make_token(string=arg, line=token.line,
                               col=token.col, token_type=token.token_type))
             arg = ""
 
@@ -473,7 +482,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
-            kwargs[key] = Token(string=arg, line=token.line,
+            kwargs[key] = make_token(string=arg, line=token.line,
                                 col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
@@ -510,7 +519,7 @@ class Tokenizer:
                         continue
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
-                        new_token = Token(
+                        new_token = make_token(
                             string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:
@@ -603,7 +612,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
-            kwargs[key] = Token(string=arg, line=token.line,
+            kwargs[key] = make_token(string=arg, line=token.line,
                                 col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
@@ -628,7 +637,7 @@ class Tokenizer:
                         continue
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
-                        new_token = Token(
+                        new_token = make_token(
                             string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:
