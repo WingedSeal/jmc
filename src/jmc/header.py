@@ -83,6 +83,9 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
         elif args[0] == "replace":
             raise Exception("Replace feature hasn't been implemented yet.")
 
+        elif args[0] == "credit":
+            raise Exception("Credit feature hasn't been implemented yet.")
+
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{args[0]}'", file_name, line, line_str)

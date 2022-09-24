@@ -42,11 +42,21 @@ class Token:
         return self._length
 
 
-def make_token(token_type: TokenType, line: int, col: int, string:str) -> Token:
-    if token_type != TokenType.keyword or string not in Header.macros:
+def make_token(token_type: TokenType, line: int, col: int, string: str) -> Token:
+    if token_type != TokenType.keyword:
         return Token(token_type=token_type, line=line, col=col, string=string)
-    string = Header.macros[string]
-    length = len(string) 
+
+    if string in Header.macros:
+        string = Header.macros[string]
+
+    splitters = {":", "."}
+    for splitter in splitters:
+        if splitter in string:
+            string = splitter.join(
+                [Header.macros[keyword] if keyword in Header.macros else keyword for keyword in string.split(":")])
+
+
+    length = len(string)
     return Token(token_type=token_type, line=line, col=col, string=string, _length=length)
 
 
@@ -127,9 +137,9 @@ class Tokenizer:
     def append_token(self) -> None:
         self.keywords.append(
             make_token(self.state,
-                  self.token_pos.line,
-                  self.token_pos.col,
-                  self.token)
+                       self.token_pos.line,
+                       self.token_pos.col,
+                       self.token)
         )
         self.token = ""
         self.token_pos = None
@@ -320,7 +330,8 @@ class Tokenizer:
         tokens = []
         col = token.col
         for string in strings:
-            tokens.append(make_token(TokenType.keyword, token.line, col, string))
+            tokens.append(make_token(
+                TokenType.keyword, token.line, col, string))
             col += len(string)
         return tokens
 
@@ -461,7 +472,7 @@ class Tokenizer:
                     "Positional argument follows keyword argument", token, self, display_col_length=False)
 
             args.append(make_token(string=arg, line=token.line,
-                              col=token.col, token_type=token.token_type))
+                                   col=token.col, token_type=token.token_type))
             arg = ""
 
         def add_kwarg(token: Token) -> None:
@@ -483,7 +494,7 @@ class Tokenizer:
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
             kwargs[key] = make_token(string=arg, line=token.line,
-                                col=token.col, token_type=token.token_type)
+                                     col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
 
@@ -613,7 +624,7 @@ class Tokenizer:
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
             kwargs[key] = make_token(string=arg, line=token.line,
-                                col=token.col, token_type=token.token_type)
+                                     col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
 

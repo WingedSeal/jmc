@@ -20,6 +20,10 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
     #         f"JMCSyntaxException argument error {'token' if token is None else 'tokenizer'} is not provided")
     # if token is None and tokenizer is None:
     #     return message
+    if not hasattr(token, "string"):
+        token.string = ""
+        token.length = 1
+
     col = token.col
     line = token.line
     display_line = line
