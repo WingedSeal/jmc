@@ -20,7 +20,7 @@ def log(self: object, args: tuple):
     logger.warning(f"{self.__class__.__name__}\n{args[0]}")
 
 
-def error_msg(message: str, token: "Token"|"Tokenizer", tokenizer: "Tokenizer", col_length: bool, display_col_length: bool, entire_line: bool, suggestion: str) -> str:
+def error_msg(message: str, token: "Token|Tokenizer", tokenizer: "Tokenizer", col_length: bool, display_col_length: bool, entire_line: bool, suggestion: str) -> str:
     """
     Generate error message
 

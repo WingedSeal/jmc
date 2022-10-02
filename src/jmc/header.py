@@ -1,31 +1,36 @@
 from pathlib import Path
+
+from jmc.utils import SingleTon
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException
 from .log import Logger
 
 logger = Logger(__name__)
 
 
-class Header:
+class Header(SingleTon):
+    """
+    A SingleTon class containing all information from header 
+    """
     file_read: set[str] = set()
     macros: dict[str, str] = {}
     replaces: dict[str, str] = {}
 
     @classmethod
     def clear(cls) -> None:
-        cls.file_read = set()
-        cls.macros = {}
-        cls.replaces = {}
+        self = cls()
+        self.file_read = set()
+        self.macros = {}
+        self.replaces = {}
 
-    @classmethod
-    def add_file_read(cls, path: Path) -> None:
-        cls.file_read.add(path.as_posix())
+    def add_file_read(self, path: Path) -> None:
+        self.file_read.add(path.as_posix())
 
-    @classmethod
-    def is_header_exist(cls, path: Path) -> bool:
-        return path.as_posix() in cls.file_read
+    def is_header_exist(self, path: Path) -> bool:
+        return path.as_posix() in self.file_read
 
 
 def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header:
+    header = Header()
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
         line += 1
@@ -44,10 +49,10 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
                 key = args[1]
                 value = args[2]
                 logger.debug(f'Define "{key}" as "{value}"')
-                if key in Header.macros:
+                if key in header.macros:
                     raise HeaderDuplicatedMacro(
                         f"'{key}' macro is already defined", file_name, line, line_str)
-                Header.macros[key] = value
+                header.macros[key] = value
             else:
                 raise HeaderSyntaxException(
                     f"'define' takes 2 arguments (got {len(args)-1})", file_name, line, line_str)
@@ -71,10 +76,10 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
                 with header_file.open('r') as file:
                     header_str = file.read()
                 logger.info(f"Parsing {header_file}")
-                if Header.is_header_exist(header_file):
+                if header.is_header_exist(header_file):
                     raise HeaderSyntaxException(
                         f"File {header_file.as_posix()} is already included.", file_name, line, line_str)
-                Header.add_file_read(header_file)
+                header.add_file_read(header_file)
                 parse_header(header_str, header_file.as_posix(), parent_target)
             else:
                 raise HeaderSyntaxException(
@@ -89,3 +94,4 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{args[0]}'", file_name, line, line_str)
+

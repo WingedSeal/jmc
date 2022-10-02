@@ -43,17 +43,18 @@ class Token:
 
 
 def make_token(token_type: TokenType, line: int, col: int, string: str) -> Token:
+    header = Header()
     if token_type != TokenType.keyword:
         return Token(token_type=token_type, line=line, col=col, string=string)
 
-    if string in Header.macros:
-        string = Header.macros[string]
+    if string in header.macros:
+        string = header.macros[string]
 
     splitters = {":", "."}
     for splitter in splitters:
         if splitter in string:
             string = splitter.join(
-                [Header.macros[keyword] if keyword in Header.macros else keyword for keyword in string.split(":")])
+                [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(":")])
 
 
     length = len(string)

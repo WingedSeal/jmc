@@ -90,10 +90,11 @@ def read_header(config: dict[str, str]) -> bool:
     :param config: JMC configuration
     :return: Whether the main header file was found
     """
+    header = Header()
     header_file = Path(config["target"][:-len(".jmc")]+".hjmc")
     parent_target = Path(config["target"]).parent
     if header_file.is_file():
-        Header.add_file_read(header_file)
+        header.add_file_read(header_file)
         logger.info("Header file found.")
         with header_file.open('r') as file:
             header_str = file.read()
