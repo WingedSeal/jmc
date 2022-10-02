@@ -44,10 +44,23 @@ class Colors(Enum):
 
 
 def pprint(values, color: Colors = Colors.NONE):
+    """
+    Print but with colors
+    
+    :param values: Value for printing
+    :param color: color of printing
+    """
     print(f"{color.value}{values}{Colors.ENDC.value}")
 
 
 def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
+    """
+    Get an input from user
+
+    :param promt: Display string infront
+    :param color: Color of the input and promt
+    :return: input from user 
+    """
     input_value = input(f"{color.value}{prompt}")
     print(Colors.ENDC.value, end="")
     logger.info(f"Input from user: {input_value}")
@@ -55,10 +68,21 @@ def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
 
 
 def press_enter(prompt: str, color: Colors = Colors.INPUT) -> None:
+    """
+    Wait for Enter key from user
+
+    :param prompt: Display string
+    :param color: Color of prompt
+    """
     getpass(f"{color.value}{prompt}{Colors.ENDC.value}")
 
 
 def error_report(error: Exception) -> None:
+    """
+    Report error to user
+
+    :param error: Exception for reporting
+    """
     pprint(type(error).__name__, Colors.FAIL_BOLD)
     pprint(error, Colors.FAIL)
 
@@ -357,6 +381,11 @@ Type `cancel` to cancel
 
 
 def handle_exception(error: Exception):
+    """
+    Tell user when unexpected crash happens and reset
+
+    :param error: Exception
+    """
     CMD.event.set()
     pprint("Unexpected error causes program to crash", Colors.FAIL)
     pprint(type(error).__name__, Colors.FAIL_BOLD)

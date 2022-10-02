@@ -15,6 +15,12 @@ JMC_CERT_FILE_NAME = 'jmc.txt'
 
 
 def compile(config: dict[str, str], debug: bool = False) -> None:
+    """
+    Compile the files and build the datapack
+
+    :param config: Configuration dictionary
+    :param debug: Whether to debug into log, defaults to False
+    """
     logger.info("Configuration:\n"+dumps(config, indent=2))
     Header.clear()
     read_cert(config)
@@ -27,10 +33,22 @@ def compile(config: dict[str, str], debug: bool = False) -> None:
 
 
 def cert_config_to_string(cert_config: dict[str, str]) -> str:
+    """
+    Turns certificate configuration dictionary into a string for output
+
+    :param cert_config: Certificate configuration dictionary
+    :return: Converted string
+    """
     return '\n'.join([f"{key}={value}" for key, value in cert_config.items()])
 
 
 def string_to_cert_config(string: str) -> dict[str, str]:
+    """
+    Turns string into certificate configuration dictionary for further read
+
+    :param string: String for convertion
+    :return: Converted cert_config
+    """
     cert_config = dict()
     for line in string.split('\n'):
         key, value = line.split('=')
@@ -39,12 +57,23 @@ def string_to_cert_config(string: str) -> dict[str, str]:
 
 
 def make_cert(cert_config: dict[str, str], path: Path) -> None:
+    """
+    Write certificate file
+
+    :param cert_config: Certificate configuration
+    :param path: Path to write `cert_config` to
+    """
     path.parent.mkdir(parents=True, exist_ok=False)
     with path.open('w+') as file:
         file.write(cert_config_to_string(cert_config))
 
 
-def get_cert() -> dict:
+def get_cert() -> dict[str, str]:
+    """
+    Make a new Certificate configuration from current DataPack class info
+
+    :return: Certificate configuration
+    """
     return {
         "LOAD": DataPack.LOAD_NAME,
         "TICK": DataPack.TICK_NAME,
@@ -55,6 +84,12 @@ def get_cert() -> dict:
 
 
 def read_header(config: dict[str, str]) -> bool:
+    """
+    Read the main header file
+
+    :param config: JMC configuration
+    :return: Whether the main header file was found
+    """
     header_file = Path(config["target"][:-len(".jmc")]+".hjmc")
     parent_target = Path(config["target"]).parent
     if header_file.is_file():
@@ -68,6 +103,12 @@ def read_header(config: dict[str, str]) -> bool:
         logger.info("Header file not found.")
 
 def read_cert(config: dict[str, str]):
+    """
+    Read Certificate(JMC.txt)
+
+    :param config: JMC configuration
+    :raises JMCBuildError: Can't find JMC.txt
+    """
     namespace_folder = Path(config["output"])/'data'/config["namespace"]
     cert_file = namespace_folder/JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
@@ -100,6 +141,15 @@ def read_cert(config: dict[str, str]):
 
 
 def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
+    """
+    Read minecraft function tag file
+
+    :param path: Path to minecraft function tag file
+    :param config: JMC configuration
+    :raises JMCBuildError: MalformedJsonException
+    :raises JMCBuildError: Can't find `values` key in json
+    :return: Content of function tag file in dictionary
+    """
     if path.is_file():
         with path.open('r') as file:
             content = file.read()
@@ -119,6 +169,12 @@ def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
 
 
 def build(datapack: DataPack, config: dict[str, str]):
+    """
+    Build and write files for minecraft datapack
+
+    :param datapack: DataPack object
+    :param config: JMC configuration
+    """
     logger.debug("Building")
     datapack.build()
     output_folder = Path(config["output"])
