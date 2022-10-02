@@ -16,6 +16,9 @@ NEW_LINE = '\n'
 
 
 class FunctionEncoder(JSONEncoder):
+    """
+    Custom minecraft function encoder for json.dump
+    """
     def default(self, o):
         if isinstance(o, Function):
             return o.commands
@@ -23,6 +26,11 @@ class FunctionEncoder(JSONEncoder):
 
 
 class Function:
+    """
+    A class representation for a minecraft function (.mcfunction)
+
+    :param commands: List of minecraft commands(string), defaults to empty list
+    """
     commands: list[str]
 
     def __init__(self, commands: list[str] = None) -> None:
@@ -32,26 +40,60 @@ class Function:
             self.commands = self.__split(commands)
 
     def add_empty_line(self) -> None:
+        """
+        Add empty line at the end of the function
+        """
         self.commands.append('')
 
     def append(self, command: str) -> None:
+        """
+        Append 1 or more command in form of a single string
+
+        :param command: 1 or more line of minecraft command string
+        """
         self.commands.extend(self.__split([command]))
 
     def extend(self, commands: list[str]) -> None:
+        """
+        Append multiple minecraft commands
+
+        :param commands: List of minecraft commands(strings), each string can have multiple lines 
+        """
         self.commands.extend(self.__split(commands))
 
     def insert_extend(self, commands: list[str], index: int) -> None:
+        """
+        Append multiple minecraft commands to a certine line of function
+
+        :param commands:  List of minecraft commands(strings), each string can have multiple lines 
+        :param index: Line/Position of the function to insert to
+        """
         self.commands[index:index] = self.__split(commands)
 
     def delete(self, index: int) -> None:
+        """
+        Delete a command
+
+        :param index: Line/Position of the function to delete
+        """
         del self.commands[index]
 
     @property
     def content(self) -> str:
+        """
+        Content of the function in 1 string
+
+        :return: Commands of the function in form of a single string
+        """
         return '\n'.join(self.commands)
 
     @property
     def length(self) -> int:
+        """
+        Amount of lines in the function (including empty lines)
+
+        :return: Length of commands attribute
+        """
         return len(self.commands)
 
     def __repr__(self) -> str:
@@ -64,16 +106,34 @@ class Function:
         return bool(self.commands)
 
     def __split(self, strings: list[str]) -> list[str]:
+        """
+        Loop through every line in each string of command(s) and make a new list with every element having only 1 line of command while optimizing every command
+
+        :param strings: minecraft commands(strings),each string can have multiple lines 
+        :return: minecraft commands(strings),each string can have only a single line
+        """
         return [self.optimize(str_) for string in strings for str_ in string.split('\n') if str_]
 
     def optimize(self, string: str) -> str:
+        """
+        Optimize minecraft command by remove redundancy
+
+        :param string: A minecraft command
+        :return: An optimized minecraft command
+
+        .. todo:: Finish optimization
+        """
         if string.startswith('execute'):
             if string.startswith('execute run '):
                 string = string[12:]  # len('execute run ') = 11
         return string
-
-
 class DataPack:
+    """
+    A class representation for entire minecraft datapack
+
+    :param namespace: Datapack's namespace
+    :param lexer: Lexer object
+    """
     PRIVATE_NAME = '__private__'
     LOAD_NAME = '__load__'
     TICK_NAME = '__tick__'
@@ -81,48 +141,96 @@ class DataPack:
     INT_NAME = '__int__'
     VARIABLE_SIGN = '$'
     HEADER_DATA: Optional["Header"] = None
+    """Data read from header file(s)"""
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
         self.ints: set[int] = set()
+        """Set of integers going to be used in scoreboard"""
         self.functions: dict[str, Function] = dict()
+        """Dictionary of function name and a Function object"""
         self.load_function: list[list[Token]] = []
+        """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any]] = defaultdict(dict)
+        """Dictionary of json name and a dictionary(jsobject)"""
         self.private_functions: dict[str,
                                      dict[str, Function]] = defaultdict(dict)
+        """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
+        """Current count of how many private functions there are in each group name"""
         self.__scoreboards: dict[str, str] = {
             self.VAR_NAME: 'dummy',
             self.INT_NAME: 'dummy'
         }
+        """Minecraft scoreboards that are going to be created"""
 
         self.loads: list[str] = []
+        """Output list of commands for load"""
         self.ticks: list[str] = []
+        """Output list of commands for tick"""
         self.namespace = namespace
+        """Datapack's namespace"""
 
         self.used_command: set[str] = set()
+        """Used JMC command that's for one time call only"""
 
         self.lexer = lexer
+        """Lexer object"""
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:
+        """
+        Add minecraft scoreboard objective
+
+        :param objective: Name of scoreboard
+        :param criteria: Criteria of scoreboard, defaults to 'dummy'
+        :raises ValueError: If scoreboard already exists
+        """
         if objective in self.__scoreboards and self.__scoreboards[objective] != criteria:
             raise ValueError(
                 f"Conflict on adding scoreboard, '{objective}' objective with '{self.__scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
         self.__scoreboards[objective] = criteria
 
     def get_count(self, name: str) -> str:
+        """
+        Get count as a string from private function's group
+
+        :param name: Name of the function group
+        :return: Count as a string
+        """
         count = self.private_function_count[name]
         self.private_function_count[name] += 1
         return str(count)
 
     def call_func(self, name: str, count: str) -> str:
+        """
+        Get command string for calling minecraft private function
+
+        :param name: Name of the private function group
+        :param count: Name of the function (usually as count)
+        :return: String for calling minecraft function
+        """
         return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
 
     def add_private_json(self, json_type: str, name: str, json: dict[str, Any]) -> None:
+        """
+        Add new private json to datapack
+
+        :param json_type: Minecraft json type, for example: tags/functions
+        :param name: Name of the private json
+        :param json: Dictionary object
+        """
         self.jsons[f"{json_type}/{self.PRIVATE_NAME}/{name}"] = json
 
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
-        """Add private function for User"""
+        """
+        Add private function for User
+
+        :param name: Private function's group name
+        :param token: paren_curly token
+        :param tokenizer: token's tokenizer
+        :raises JMCSyntaxWarning: If the string in curly bracket is empty
+        :return: Minecraft function call string
+        """
         if token.string == '{}':
             raise JMCSyntaxWarning("Empty function", token, tokenizer)
 
@@ -135,7 +243,17 @@ class DataPack:
             return self.call_func(name, count)
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
-        """Wrap custom commands around user's command"""
+        """
+        Wrap custom commands around user's commands
+
+        :param name: Private function's group name
+        :param token: paren_curly token
+        :param tokenizer: token's tokenizer
+        :param count: Name of the function (usually as count)
+        :param precommands: Commands before user's commands
+        :param postcommands: Commands after user's commands
+        :return: Minecraft function call string
+        """
         if precommands is None:
             precommands = []
         if postcommands is None:
@@ -148,17 +266,33 @@ class DataPack:
         return self.call_func(name, count)
 
     def add_raw_private_function(self, name: str, commands: list[str], count: str = None) -> str:
-        """Add private function for JMC"""
+        """
+        Add private function for JMC
+
+        :param name: Name of the private function's group
+        :param commands: List of commands(string)
+        :param count: Name of the function (usually as count), defaults to current count + 1
+        :return: Minecraft function call string
+        """
         if count is None:
             count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
     def parse_function_token(self, token: Token, tokenizer: Tokenizer) -> list[str]:
-        """Parse a curly bracket token into a list of string"""
+        """
+        "Parse a paren_curly token into a list of commands(string)
+
+        :param token: paren_curly token
+        :param tokenizer: token's tokenizer
+        :return: List of minecraft commands(string)
+        """
         return self.lexer.parse_func_content(token.string[1:-1], tokenizer.file_path, token.line, token.col+1, tokenizer.file_string)
 
     def build(self) -> None:
+        """
+        Finializing DataPack for building (NO file writing)
+        """
         logger.debug("Finializing DataPack")
         self.loads[0:0] = [
             *[f"scoreboard objectives add {objective} {criteria}" for objective,
