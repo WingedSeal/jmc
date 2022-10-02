@@ -1,5 +1,5 @@
 from json import JSONDecodeError, loads
-from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCTypeError
+from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCValueError
 from ...datapack import DataPack, Function
 from ..utils import ArgType, PlayerType, ScoreboardPlayer, parse_func_map
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -193,7 +193,7 @@ class TimerAdd(JMCFunction):
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.args_Args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
         if mode in {'runOnce', 'runTick'} and self.args_Args["function"] is None:
-            raise JMCTypeError("function", self.token, self.tokenizer)
+            raise JMCValueError("function", self.token, self.tokenizer)
         if mode == 'none' and self.args_Args["function"] is not None:
             raise JMCSyntaxException(
                 f"'function' is provided in 'none' mode {self.call_string}", self.args_Args["function"].token, self.tokenizer)

@@ -11,15 +11,28 @@ NEW_LINE = '\n'
 
 
 def log(self: object, args: tuple):
+    """
+    Log the exception as warning
+
+    :param self: Exception itself
+    :param args: Exception's arguments (Starting with message)
+    """
     logger.warning(f"{self.__class__.__name__}\n{args[0]}")
 
 
-def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: bool, display_col_length: bool, entire_line: bool, suggestion: str) -> str:
-    # if (token is None) != (tokenizer is None):
-    #     raise ValueError(
-    #         f"JMCSyntaxException argument error {'token' if token is None else 'tokenizer'} is not provided")
-    # if token is None and tokenizer is None:
-    #     return message
+def error_msg(message: str, token: "Token"|"Tokenizer", tokenizer: "Tokenizer", col_length: bool, display_col_length: bool, entire_line: bool, suggestion: str) -> str:
+    """
+    Generate error message
+
+    :param message: Main message at the front of the error
+    :param token: A token/tokenizer where the error happens
+    :param tokenizer: token's tokenizer
+    :param col_length: Whether to add token's length to column count
+    :param display_col_length: Whether to display the code until the end of the token
+    :param entire_line: Whether to display the entire line of code
+    :param suggestion: A suggestion message at the end of the error message
+    :return: Error message
+    """
     if not hasattr(token, "string"):
         token.string = ""
         token.length = 1
@@ -51,23 +64,27 @@ def error_msg(message: str, token: "Token", tokenizer: "Tokenizer", col_length: 
     return msg
 
 class HeaderFileNotFoundError(FileNotFoundError):
+    """Header file not found"""
     def __init__(self, path: Path):
         msg = f"Header file not found: {path.as_posix()}"
         log(self, [msg])
         super().__init__(msg)
 class HeaderDuplicatedMacro(ValueError):
+    """Define same macro twice"""
     def __init__(self, message: str,file_name: str, line: int, line_str: str):
         msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
         log(self, [msg])
         super().__init__(msg)
 
 class HeaderSyntaxException(SyntaxError):
+    """Invalid syntax for header"""
     def __init__(self, message: str,file_name: str, line: int, line_str: str):
         msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
         log(self, [message])
         super().__init__(msg)
 
 class JMCSyntaxException(SyntaxError):
+    """Invalid syntax for JMC"""
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
@@ -76,6 +93,7 @@ class JMCSyntaxException(SyntaxError):
 
 
 class JMCSyntaxWarning(SyntaxWarning):
+    """Warnings about dubious JMC syntax"""
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
@@ -84,18 +102,21 @@ class JMCSyntaxWarning(SyntaxWarning):
 
 
 class JMCFileNotFoundError(FileNotFoundError):
+    """JMC file not found"""
     def __init__(self, *args: object) -> None:
         log(self, args)
         super().__init__(*args)
 
 
 class JMCBuildError(Exception):
+    """Cannot build the datapack"""
     def __init__(self, *args: object) -> None:
         log(self, args)
         super().__init__(*args)
 
 
 class JMCDecodeJSONError(ValueError):
+    """Invalid syntax for JSON"""
     def __init__(self, error: JSONDecodeError, token: "Token", tokenizer: "Tokenizer") -> None:
         line = token.line + error.lineno - 1
         col = token.col + error.colno - 1 \
@@ -107,7 +128,8 @@ class JMCDecodeJSONError(ValueError):
         super().__init__(msg)
 
 
-class JMCTypeError(TypeError):
+class JMCValueError(ValueError):
+    """Missing required positional argument"""
     def __init__(self, missing_argument: str, token: "Token", tokenizer: "Tokenizer", *, suggestion: str = None) -> None:
         msg = error_msg(f"Missing required positional argument: '{missing_argument}'", token, tokenizer, col_length=False,
                         display_col_length=False, entire_line=False, suggestion=suggestion)
@@ -117,6 +139,7 @@ class JMCTypeError(TypeError):
 
 
 class MinecraftSyntaxWarning(SyntaxError):
+    """Warnings about dubious Minecraft syntax"""
     def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)

@@ -3,7 +3,7 @@ from typing import Callable, Optional, Union
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args
 from ..datapack import DataPack
-from ..exception import JMCTypeError
+from ..exception import JMCValueError
 from ..tokenizer import Token, Tokenizer
 
 
@@ -43,7 +43,7 @@ class JMCFunction:
         for key, arg in self.args_Args.items():
             if arg is None:
                 if key not in self.defaults:
-                    raise JMCTypeError(key, token, tokenizer)
+                    raise JMCValueError(key, token, tokenizer)
                 self.args[key] = self.defaults[key]
             else:
                 if key in self._ignore:

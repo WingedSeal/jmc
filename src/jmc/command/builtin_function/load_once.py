@@ -1,4 +1,4 @@
-from ...exception import JMCTypeError
+from ...exception import JMCValueError
 from ...datapack import DataPack
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -77,7 +77,7 @@ class PlayerDie(JMCFunction):
 
     def call(self) -> str:
         if self.args_Args["onDeath"] is None and self.args_Args["onRespawn"] is None:
-            raise JMCTypeError("onDeath or onRespawn",
+            raise JMCValueError("onDeath or onRespawn",
                                self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')
         self.datapack.ticks.append(
