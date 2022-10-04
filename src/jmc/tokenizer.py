@@ -32,9 +32,9 @@ class Token:
 
     :param token_type: Type of the token
     :param line: Which line it's found in
-    :param col: Which line it's found in
-    :param string: The string representation
-    :param _length: For setting length of the function, defaults to None
+    :param col: Which column it's found in
+    :param string: The string representation (excluding parentheses)
+    :param _length: For setting length of the token string, defaults to None
     """
     token_type: TokenType
     line: int
@@ -43,6 +43,9 @@ class Token:
     _length: Optional[int] = field(init=True, repr=False, default=None)
 
     def __post_init__(self) -> None:
+        """
+        Edit string and _length according to macros(`#define something`) defined
+        """
         header = Header()
         if self.token_type != TokenType.keyword:
             return
@@ -64,7 +67,7 @@ class Token:
     @property
     def length(self) -> int:
         """
-        Getting the length of the string in token, calculate one if it's currently None 
+        Getting the length of the string in token(including parenthesis), calculate one if it's currently None 
 
         :return: Length of the string 
         """
@@ -76,6 +79,9 @@ class Token:
 
 @dataclass(frozen=True, eq=False)
 class Pos:
+    """
+    Dataclass containing line and column
+    """
     line: int
     col: int
 
@@ -110,32 +116,54 @@ PAREN_PAIR = {
     Paren.L_SQUARE: Paren.R_SQUARE,
     Paren.L_ROUND: Paren.R_ROUND,
 }
+"""Dictionary of left bracket(string) and right bracket(string)"""
 
 
 class Tokenizer:
+    """
+    A class for converting string into tokens
+
+    :param raw_string: Raw string read from file/given from another tokenizer
+    :param file_path_str: File path to current JMC function as string
+    :param line: Current line, defaults to 1
+    :param col: Current column, defaults to 1
+    :param file_string: Entire string read from current file, defaults to None
+    :param expect_semicolon: Whether to expect semicolon at the end, defaults to True
+    """
     line: int
     col: int
 
     state: Optional[TokenType]
+    """Current TokenType"""
     token: str
+    """Current string for token"""
     token_pos: Optional[Pos]
+    """Position for creating token"""
     keywords: list[Token]
+    """Current list of tokens"""
 
-    list_of_tokens: list[list[Token]]
+    list_of_keywords: list[list[Token]]
+    """List of keywords(list_of_tokens)"""
 
     # String
     quote: Optional[str]
+    """Type of quote"""
     is_escaped: bool
-    """Is it an escaped character (Backslashed)"""
+    """Whether it is an escaped character (Backslashed)"""
 
     # Parenthesis
     paren: Optional[str]
+    """Type of left parenthesis"""
     r_paren: Optional[str]
+    """Type of matching right parenthesis"""
     paren_count: Optional[int]
+    """Count of left parenthesis / Count of current layer"""
     is_string: bool
+    """Whether the current character is in string (For paren TokenType)"""
 
     # Comment
     is_slash: bool
+    """Whether there's a slash infront of the current character"""
 
     def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1, file_string: str = None, expect_semicolon: bool = True) -> None:
         logger.debug("Initializing Tokenizer")
@@ -149,6 +177,9 @@ class Tokenizer:
             self.raw_string, line=line, col=col, expect_semicolon=expect_semicolon)
 
     def append_token(self) -> None:
+        """
+        Append the current token into self.keywords
+        """
         self.keywords.append(
             Token(self.state,
                        self.token_pos.line,
@@ -160,16 +191,37 @@ class Tokenizer:
         self.state = None
 
     def append_keywords(self) -> None:
+        """
+        Append keywords into list_of_keywords
+
+        :raises JMCSyntaxWarning: Unnecessary semicolon
+        """
         if len(self.keywords) != 0:
             logger.debug(f"Appending keywords: {self.keywords}")
-            self.list_of_tokens.append(self.keywords)
+            self.list_of_keywords.append(self.keywords)
             self.keywords = []
         else:
             raise JMCSyntaxWarning(
                 "Unnecessary semicolon(;)", self, self)
 
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
-        self.list_of_tokens = []
+        """
+        Start the parsing of Tokenizer
+
+        :param string: String to parse
+        :param line: Current line
+        :param col: Current column
+        :param expect_semicolon: Whether to expect a semicolon at the end
+        :param allow_last_missing_semicolon: Whether to allow last missing last semicolon, defaults to False
+        :raises JMCSyntaxException: Unexpected semicolon
+        :raises JMCSyntaxException: String literal contains an unescaped line break
+        :raises JMCSyntaxException: Unexpected right bracket (Right brackets > Left brackets)
+        :raises JMCSyntaxException: String literal contains an unescaped line break
+        :raises JMCSyntaxException: Bracket was never closed (Left brackets > Right brackets)
+        :raises JMCSyntaxException: Semicolon missing
+        :return: List of keywords(list of tokens)
+        """
+        self.list_of_keywords = []
         self.line = line
         self.col = col - 1
         self.keywords = []
@@ -327,10 +379,17 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
 
-        return self.list_of_tokens
+        return self.list_of_keywords
 
     def split_token(self, token: Token, split_str: str) -> list[Token]:
-        """Split a keyword token into multiple tokens"""
+        """
+        Split a keyword token into multiple tokens 
+
+        :param token: A token that will be splitted
+        :param split_str: The string for splitting token
+        :raises ValueError: non-keyword token used
+        :return: List of tokens
+        """
         if token.token_type != TokenType.keyword:
             raise ValueError(
                 f"Called split_token on non-keyword token."
@@ -350,7 +409,14 @@ class Tokenizer:
         return tokens
 
     def split_tokens(self, tokens: list[Token], split_strings: list[str], max: int = None) -> list[Token]:
-        """Loop through all tokens and split a keyword token thta contain string inside split_strings"""
+        """
+        Loop through all tokens and split a keyword token that contain string inside split_strings
+
+        :param tokens: List of all tokens to split
+        :param split_strings: The string for splitting token
+        :param max: Maximum amount of split that will happen, defaults to None(No maximum)
+        :return: List of tokens
+        """
         if max is None:
             for split_str in split_strings:
                 new_tokens = []
@@ -375,7 +441,18 @@ class Tokenizer:
             return tokens
 
     def find_token(self, tokens: list[Token], string: str) -> list[list[Token]]:
-        """Split tokens by token that match the string"""
+        """
+        Split list of tokens by token that match the string
+
+        Example:
+        ```python
+        find_token([a,b,c,d], b.string) #[[a], [c,d]]
+        ```
+
+        :param tokens: List of token
+        :param string: String to match for splitting
+        :return: List of list of tokens
+        """
         result: list[list[Token]] = []
         token_array: list[Token] = []
         for token in tokens:
@@ -389,7 +466,18 @@ class Tokenizer:
         return result
 
     def find_tokens(self, tokens: list[Token], string: str) -> list[list[Token]]:
-        """Splot tokens by set of tokens that can combined into the string"""
+        """
+        Split tokens by (set of tokens that can be combined into the string)
+
+        Example:
+        ```python
+        find_tokens([a, b, c, d], b.string+c.string) # [[a], [d]]
+        ```
+
+        :param tokens: List of tokens
+        :param string: String for splitting
+        :return: List of list of tokens
+        """
         state = 0
         max_state = len(string)
         result: list[list[Token]] = []
@@ -421,7 +509,18 @@ class Tokenizer:
         return result
 
     def merge_tokens(self, tokens: list[Token], string: str) -> list[Token]:
-        """Loop through tokens and merge tokens that can be combined into string"""
+        """
+        Loop through tokens and merge tokens that can be combined into string
+        
+        Example:
+        ```python
+        merge_tokens([a,b,c,d], b.string+c.string) # [a,bc,d]
+        ```
+
+        :param tokens: List of tokens
+        :param string: String to merge into
+        :return: List of tokens
+        """
         state = 0
         max_state = len(string)
         result: list[Token] = []
@@ -458,6 +557,12 @@ class Tokenizer:
         return result
 
     def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
+        """
+        Parse arguments of custom JMC function
+
+        :param token: paren_round token containing arguments for custom JMC function
+        :return: Tuple of arguments(list of tokens) and keyword arguments(dictionary of key(string) and token)
+        """
         if token.token_type != TokenType.paren_round:
             raise JMCSyntaxException(
                 "Expected (", token, self, display_col_length=False)
@@ -603,6 +708,12 @@ class Tokenizer:
         return args, kwargs
 
     def parse_js_obj(self, token: Token) -> dict[str, Token]:
+        """
+        Parse JavaScript Object (Not JSON)
+
+        :param token: paren_curly token containing JS object
+        :return: Dictionary of key(string) and Token
+        """
         if token.token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
