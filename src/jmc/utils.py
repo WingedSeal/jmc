@@ -1,6 +1,6 @@
 import re
 from json import dumps
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from .exception import JMCSyntaxException
 
@@ -8,17 +8,31 @@ if TYPE_CHECKING:
     from .tokenizer import Token, Tokenizer
 
 class __SingleTonMeta(type):
+    """
+    Metaclass for singleton
+    """
     _instances = {}
+    
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
 class SingleTon(metaclass=__SingleTonMeta):
-    pass
+    """
+    Super class for a singleton class
+
+    - Cannot be instantiated directly
+    """
+    def __new__(cls, *args, **kwargs):
+        print(args, kwargs)
+        if cls is SingleTon:
+            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
+        super.__new__(cls, *args, **kwargs)
 
 
 def is_number(string: str) -> bool:
+    """Whether string can be converted to integer"""
     try:
         int(string)
     except ValueError:
@@ -28,6 +42,7 @@ def is_number(string: str) -> bool:
 
 
 def is_connected(current_token: "Token", previous_token: "Token") -> bool:
+    """Whether 2 tokens are next to each other"""
     return (
         previous_token.line == current_token.line and
         previous_token.col +
@@ -35,7 +50,14 @@ def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     )
 
 
-def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, Union[str, bool]]:
+def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str|bool]:
+    """
+    Parse `toString` in JMC
+
+    :param token: paren_round token (arguments of `toString`)
+    :param tokenizer: token's tokenizer
+    :return: Dictionary of key(key) and value(string or true or false)
+    """
     json = dict()
     if token.string == '()':
         return json
@@ -78,6 +100,15 @@ def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, Union
 
 
 def __search_to_string(match: re.Match, token: "Token", VAR_NAME: str, tokenizer: "Tokenizer") -> str:
+    """
+    Function for regex.subn
+
+    :param match: Match object
+    :param token: Token to search for `toString`
+    :param VAR_NAME: `DataPack.VARNAME`
+    :param tokenizer: token's tokenizer
+    :return: JSON formatted string
+    """
     var = match.group(1)
     properties = __parse_to_string(token, tokenizer)
     properties["score"] = {"name": var, "objective": VAR_NAME}
@@ -85,6 +116,15 @@ def __search_to_string(match: re.Match, token: "Token", VAR_NAME: str, tokenizer
 
 
 def search_to_string(last_str: str, token: "Token", VAR_NAME: str, tokenizer: "Tokenizer") -> tuple[str, bool]:
+    """
+    Find `toString` in a last_str
+
+    :param last_str: Last string before this token
+    :param token: paren_round token (Arguments of `toString`)
+    :param VAR_NAME: `DataPack.VARNAME``
+    :param tokenizer: token's tokenizer
+    :return: Whether `toString` is found
+    """
     new_str, count = re.subn(
         r'(\$[A-z0-9\-\.\_]+)\.toString$', lambda match: __search_to_string(match, token, VAR_NAME, tokenizer), last_str)
     if count:

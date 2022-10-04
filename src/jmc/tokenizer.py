@@ -467,7 +467,7 @@ class Tokenizer:
 
     def find_tokens(self, tokens: list[Token], string: str) -> list[list[Token]]:
         """
-        Split tokens by (set of tokens that can be combined into the string)
+        Split list of tokens by (group(list) of tokens that can be combined into the string given)
 
         Example:
         ```python
