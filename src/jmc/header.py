@@ -65,7 +65,7 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
     :raises HeaderSyntaxException: Directive (`#something`) is unrecognized
     :return: Header singleton object
 
-    ..TODO::
+    .. TODO::
         implement replace and credit
 
     """

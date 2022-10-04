@@ -223,7 +223,7 @@ class DataPack:
 
     def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
         """
-        Add private function for User
+        Add private function for user (arrow function)
 
         :param name: Private function's group name
         :param token: paren_curly token

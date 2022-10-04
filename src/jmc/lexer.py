@@ -19,9 +19,13 @@ from .command import (FLOW_CONTROL_COMMANDS,
 logger = Logger(__name__)
 
 EXECUTE_EXCLUDED_COMMANDS = JMCFunction._get(FuncType.execute_excluded)
+"""Dictionary of command's name and a class of JMCFunction type for custom jmc command that can't be used with `/execute`"""
 LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
+"""Dictionary of command's name and a class of JMCFunction type for custom jmc command that can be only used *once* in load"""
 JMC_COMMANDS = JMCFunction._get(FuncType.jmc_command)
+"""Dictionary of command's name and a class of JMCFunction type for custom jmc command"""
 LOAD_ONLY_COMMANDS = JMCFunction._get(FuncType.load_only)
+"""Dictionary of command's name and a class of JMCFunction type for custom jmc command that can only be used in load"""
 
 JSON_FILE_TYPES = [
     "advancements",
@@ -42,6 +46,7 @@ JSON_FILE_TYPES = [
     "worldgen/processor_list",
     "worldgen/template_pool",
 ]
+"""List of all possible vanilla json file types"""
 
 FIRST_ARGUMENTS = {
     *FLOW_CONTROL_COMMANDS,
@@ -51,17 +56,24 @@ FIRST_ARGUMENTS = {
     *FLOW_CONTROL_COMMANDS,
     *EXECUTE_EXCLUDED_COMMANDS
 } - {'give', 'if'}
-"""All vanilla commands and JMC custom syntax 
-
-`if` is excluded from the list since it can be used in execute"""
+"""Set of all vanilla commands and JMC custom syntax 
+- `if` is excluded since it can be used in execute
+- `give` is exluced since it can also be arguments (`/effect give`)"""
 
 ALLOW_NUMBER_AFTER = [
     'give',
     'clear'
 ]
+"""List of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
 
 def append_commands(commands: list[str], string: str) -> None:
+    """
+    Append a new argument to a comand(list of minecraft arguments) while optimizing it
+
+    :param commands: Entire command(list of minecraft arguments) to add to
+    :param string: A new argument to add
+    """
     if string.startswith('execute') and commands and commands[-1] == 'run':
         if string == 'execute':
             del commands[-1]
@@ -75,15 +87,24 @@ def append_commands(commands: list[str], string: str) -> None:
 
 
 class Lexer:
+    """
+    Lexical Analyizer
+
+    :param config: JMC configuration
+    """
     load_tokenizer: Tokenizer
-    "List of condition string and token"
+    """Tokenizer for load function"""
     do_while_box: Optional[Token] = None
+    """paren_curly token for code block of `do` in `do while`"""
 
     def __init__(self, config: dict[str, str]) -> None:
         logger.debug("Initializing Lexer")
         self.if_else_box: list[tuple[Optional[Token], Token]] = []
+        """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
         self.config = config
+        """JMC configuration"""
         self.datapack = DataPack(config["namespace"], self)
+        """Datapack object"""
         self.parse_file(Path(self.config["target"]), is_load=True)
 
         logger.debug(f"Load Function")
@@ -91,6 +112,18 @@ class Lexer:
             self.parse_load_func_content(programs=self.datapack.load_function))
 
     def parse_file(self, file_path: Path, is_load=False) -> None:
+        """
+        Parse JMC file
+
+        :param file_path: Path to file to parse
+        :param is_load: Whether the file is for load function, defaults to False
+        :raises JMCFileNotFoundError: Can't find the JMC file
+        :raises JMCSyntaxException: Nothing after `@import`
+        :raises JMCSyntaxException: A token after `@import` is not a string
+        :raises JMCSyntaxException: Unexpected argument token in `@import`
+        :raises JMCSyntaxException: Path in `@import` is invalid
+        :raises JMCSyntaxException: _description_
+        """
         logger.info(f"Parsing file: {file_path}")
         file_path_str = file_path.resolve().as_posix()
         try:
@@ -131,7 +164,7 @@ class Lexer:
                         )
                 except Exception:
                     raise JMCSyntaxException(
-                        f"Expected invalid path ({command[1].string})", command[1], tokenizer)
+                        f"Unexpected invalid path ({command[1].string})", command[1], tokenizer)
                 self.parse_file(file_path=new_path)
             else:
                 if not is_load:
@@ -141,6 +174,21 @@ class Lexer:
                 self.datapack.load_function.append(command)
 
     def parse_func(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = '') -> None:
+        """
+        Parse a function definition in form of list of token
+
+        :param tokenizer: Tokenizer
+        :param command: List of token inside a function definition
+        :param file_path_str: File path to current JMC function as string
+        :param prefix: Prefix of function(for Class feature), defaults to ''
+        :raises JMCSyntaxException: Function name isn't keyword token
+        :raises JMCSyntaxException: Function name is not followed by paren_round token
+        :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
+        :raises JMCSyntaxException: Start function name with JMC's PRIVATE_NAME
+        :raises JMCSyntaxException: Duplicate function declaration
+        :raises JMCSyntaxException: Define load function
+        :raises JMCSyntaxException: Define private function
+        """
         logger.debug(f"Parsing function, prefix = {prefix!r}")
         if command[1].token_type != TokenType.keyword:
             raise JMCSyntaxException(
@@ -171,6 +219,26 @@ class Lexer:
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 
     def parse_new(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):
+        """
+        Parse a new json definition in form of list of token
+
+        :param tokenizer: Tokenizer
+        :param command: List of token inside a new json definition
+        :param file_path_str: File path to current JMC function as string
+        :param prefix: Prefix of json(for Class feature), defaults to ''
+        :raises JMCSyntaxException: JSON file's type is not given
+        :raises JMCSyntaxException: JSON file's type is not a keyword token
+        :raises JMCSyntaxException: JSON file's type is not followed by JSON file's path
+        :raises JMCSyntaxException: JSON file's path is not a paren_round token
+        :raises JMCSyntaxException: JSON file's path is not followed by paren_round token
+        :raises JMCSyntaxException: paren_round token is not followed by anything
+        :raises JMCSyntaxException: paren_round token is not followed by paren_curly token
+        :raises MinecraftSyntaxWarning: JSON file's type isn't in JSON_FILE_TYPES
+        :raises MinecraftSyntaxWarning: Uppercase letter found in JSON file's path
+        :raises JMCSyntaxException: Start JSON file's name with JMC's PRIVATE_NAME
+        :raises JMCSyntaxException: Duplicate new json declaration
+        :raises JMCDecodeJSONError: Invalid JSON
+        """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -224,6 +292,18 @@ class Lexer:
         self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):
+        """
+        _summary_
+
+        :param tokenizer: Tokenizer
+        :param command: List of token inside a class definition
+        :param file_path_str: File path to current JMC function as string
+        :param prefix: Prefix of class(for Class feature), defaults to '', defaults to ''
+        :raises JMCSyntaxException: Class's name is not given
+        :raises JMCSyntaxException: Class's name is not a keyword token
+        :raises JMCSyntaxException: Class's name is not followed by anything
+        :raises JMCSyntaxException: Class's name is not followed by paren_round token
+        """
         logger.debug(f"Parsing Class, prefix = {prefix!r}")
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -243,11 +323,24 @@ class Lexer:
         self.parse_class_content(class_path+'/',
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)
 
-    def parse_load_func_content(self, programs: list[list[Token]]):
+    def parse_load_func_content(self, programs: list[list[Token]]) -> list[str]:
+        """
+        Parse content inside load function
+
+        :param programs: List of commands(List of arguments(Token))
+        :return: List of commands(string)
+        """
         tokenizer = self.load_tokenizer
         return self._parse_func_content(tokenizer, programs, is_load=True)
 
     def parse_line(self, tokens: list[Token], tokenizer: Tokenizer) -> list[str]:
+        """
+        Parse just a line of command(List of arguments(Token))
+
+        :param tokens: A minecraft command(List of arguments(Token))
+        :param tokenizer: Tokenizer
+        :return: List of minecraft commands 
+        """
         return self._parse_func_content(tokenizer, [tokens], is_load=False)
 
     def parse_func_content(self,
@@ -259,6 +352,14 @@ class Lexer:
         return self._parse_func_content(tokenizer, programs, is_load=False)
 
     def _parse_func_content(self, tokenizer: Tokenizer, programs: list[list[Token]], is_load: bool) -> list[str]:
+        """
+        Parse a content inside function
+
+        :param tokenizer: Tokenizer
+        :param programs: List of commands(List of arguments(Token))
+        :param is_load: Whether the function is a load function
+        :return: List of commands(String)
+        """
 
         command_strings: list[str] = []
         commands: list[str] = []
@@ -522,6 +623,18 @@ class Lexer:
         return command_strings
 
     def parse_class_content(self, prefix: str, class_content: str, file_path_str: str, line: int, col: int, file_string: str) -> None:
+        """
+        Parse content of a class
+
+        :param prefix: Prefix of class(for Class feature)
+        :param class_content: Content inside class as string
+        :param file_path_str: File path to current JMC function as string
+        :param line: Current line in current JMC function
+        :param col: Current column in current JMC function
+        :param file_string: Content of current JMC function
+        :raises JMCSyntaxException: Importing in class
+        :raises JMCSyntaxException: Got something else beside 'function' or 'new' or 'class'
+        """
         tokenizer = Tokenizer(class_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         for command in tokenizer.programs:
@@ -539,6 +652,13 @@ class Lexer:
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer, name: str = 'if_else') -> str:
+        """
+        Parse if-else chain using if_else_box attribute
+
+        :param tokenizer: Tokenizer
+        :param name: Private function's group name, defaults to 'if_else'
+        :return: A minecraft command to initiate the if-else chain
+        """
         VAR = "__if_else__"
 
         logger.debug(f"Handling if-else (name={name})")
@@ -551,7 +671,7 @@ class Lexer:
             return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(name, if_else_box[0][1], tokenizer)}"
             return return_value
 
-        # Case 2
+        # Case 2: Has `else` or `else if`
         count = self.datapack.get_count(name)
         count_alt = self.datapack.get_count(name)
         output = [
@@ -592,6 +712,14 @@ class Lexer:
         return "\n".join(output)
 
     def clean_up_paren(self, token: Token, tokenizer: Tokenizer, is_nbt: bool = True) -> str:
+        """
+        Turn a paren token into a clean string
+
+        :param token: paren token
+        :param tokenizer: token's Tokenizer
+        :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
+        :return: Clean string representing paren token for output
+        """
         if len(token.string) == 2:
             return token.string
         open = token.string[0]
