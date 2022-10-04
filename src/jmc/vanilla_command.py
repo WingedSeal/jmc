@@ -1,6 +1,5 @@
 COMMANDS = [
     # OP Level 0-2
-    "placefeature"
     "advancement",
     "attribute",
     "bossbar",
@@ -31,6 +30,7 @@ COMMANDS = [
     "me",
     "msg",
     "particle",
+    "placefeature",
     "playsound",
     "recipe",
     "reload",

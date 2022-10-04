@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
-from typing import Any, Optional
+from typing import Optional
 from enum import Enum
-from json import dumps
 import re
 
 from .utils import is_connected
@@ -28,37 +27,51 @@ class TokenType(Enum):
 
 @dataclass(frozen=True, eq=False)
 class Token:
+    """
+    A dataclass containing information for Token for Lexical Analysis
+
+    :param token_type: Type of the token
+    :param line: Which line it's found in
+    :param col: Which line it's found in
+    :param string: The string representation
+    :param _length: For setting length of the function, defaults to None
+    """
     token_type: TokenType
     line: int
     col: int
     string: str
     _length: Optional[int] = field(init=True, repr=False, default=None)
 
+    def __post_init__(self) -> None:
+        header = Header()
+        if self.token_type != TokenType.keyword:
+            return
+
+        string = header.macros.get(self.string, self.string)
+
+        splitters = {":", "."}
+        for splitter in splitters:
+            if splitter in string:
+                string = splitter.join(
+                    [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(":")])
+                    
+        if string == self.string:
+            return
+        length = len(string)  
+        object.__setattr__(self, "_length", length)
+        object.__setattr__(self, "string", string)
+
     @property
     def length(self) -> int:
+        """
+        Getting the length of the string in token, calculate one if it's currently None 
+
+        :return: Length of the string 
+        """
         if self._length is None:
             object.__setattr__(self, "_length", len(
                 self.string)+2 if self.token_type == TokenType.string else len(self.string))
         return self._length
-
-
-def make_token(token_type: TokenType, line: int, col: int, string: str) -> Token:
-    header = Header()
-    if token_type != TokenType.keyword:
-        return Token(token_type=token_type, line=line, col=col, string=string)
-
-    if string in header.macros:
-        string = header.macros[string]
-
-    splitters = {":", "."}
-    for splitter in splitters:
-        if splitter in string:
-            string = splitter.join(
-                [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(":")])
-
-
-    length = len(string)
-    return Token(token_type=token_type, line=line, col=col, string=string, _length=length)
 
 
 @dataclass(frozen=True, eq=False)
@@ -137,7 +150,7 @@ class Tokenizer:
 
     def append_token(self) -> None:
         self.keywords.append(
-            make_token(self.state,
+            Token(self.state,
                        self.token_pos.line,
                        self.token_pos.col,
                        self.token)
@@ -331,7 +344,7 @@ class Tokenizer:
         tokens = []
         col = token.col
         for string in strings:
-            tokens.append(make_token(
+            tokens.append(Token(
                 TokenType.keyword, token.line, col, string))
             col += len(string)
         return tokens
@@ -433,7 +446,7 @@ class Tokenizer:
                 if state == max_state:
                     state = 0
                     result.append(
-                        make_token(TokenType.keyword, token_array[0].line, token_array[0].col, string))
+                        Token(TokenType.keyword, token_array[0].line, token_array[0].col, string))
                     token_array = []
             else:
                 state = 0
@@ -472,7 +485,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     "Positional argument follows keyword argument", token, self, display_col_length=False)
 
-            args.append(make_token(string=arg, line=token.line,
+            args.append(Token(string=arg, line=token.line,
                                    col=token.col, token_type=token.token_type))
             arg = ""
 
@@ -494,7 +507,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
-            kwargs[key] = make_token(string=arg, line=token.line,
+            kwargs[key] = Token(string=arg, line=token.line,
                                      col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
@@ -531,7 +544,7 @@ class Tokenizer:
                         continue
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
-                        new_token = make_token(
+                        new_token = Token(
                             string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:
@@ -624,7 +637,7 @@ class Tokenizer:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
-            kwargs[key] = make_token(string=arg, line=token.line,
+            kwargs[key] = Token(string=arg, line=token.line,
                                      col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
@@ -649,7 +662,7 @@ class Tokenizer:
                         continue
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.paren_curly:
-                        new_token = make_token(
+                        new_token = Token(
                             string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.func)
                         arg = new_token.string
                         if key:

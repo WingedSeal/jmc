@@ -9,7 +9,7 @@ logger = Logger(__name__)
 
 class Header(SingleTon):
     """
-    A SingleTon class containing all information from header 
+    A SingleTon class containing all information from header
     """
     file_read: set[str] = set()
     """Set of files that was already read (to prevent reading the same file multiple times"""
