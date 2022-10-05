@@ -17,13 +17,33 @@ class FuncType(Enum):
 
 
 class JMCFunction:
+    """
+    Base function for all custom JMC function
+
+    :param token: paren_round token containing arguments
+    :param datapack: Datapack object
+    :param tokenizer: Tokenizer
+    :param is_execute: Whether the function is in execute command (Can be None if not used), defaults to None
+    :param var: For containing minecraft variable (Can be None if not used), defaults to None
+
+    :raises NotImplementedError: If JMCFunction isn't used with decorator
+    :raises NotImplementedError: Missing func_type
+    :raises JMCValueError: Missing required positional argument
+    :raises NotImplementedError: Call function not implemented
+    """
     _decorated = False
+    """A private attribute that will be changed by a decorator to check for missing decorator"""
     arg_type: dict[str, ArgType]
     func_type: FuncType
     name: str
     call_string: str
     defaults: dict[str, str]
     _ignore: set[str]
+
+    def __new__(cls, *args, **kwargs):
+        if cls is JMCFunction:
+            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
+        return super().__new__(cls)
 
     def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: bool|None = None, var: str = None) -> None:
         self.token = token
@@ -32,9 +52,9 @@ class JMCFunction:
         self.is_execute = is_execute
         self.var = var
         if not self._decorated:
-            raise NotImplementedError("missing decorator")
+            raise NotImplementedError("Missing decorator")
         if self.func_type is None:
-            raise NotImplementedError("missing func_type")
+            raise NotImplementedError("Missing func_type")
 
         self.args_Args = verify_args(self.arg_type,
                                      self.call_string, token, tokenizer)
@@ -66,13 +86,28 @@ class JMCFunction:
         self.__post__init__()
 
     def __post__init__(self) -> None:
+        """
+        This function will be called after initiation of the object
+        """
         pass
 
     def call(self) -> str:
-        raise NotImplementedError("call function not implemented")
+        """
+        This function will be called when user call matching JMC custom function 
+
+        :raises NotImplementedError: When the subclass's call method is not implemented
+        :return: Minecraft command as string
+        """
+        raise NotImplementedError("Call function not implemented")
 
     @classmethod
     def _get(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
+        """
+        Get dictionary of funtion name and a class matching function type
+
+        :param func_type: Function type to search for
+        :return: Dictionary of jmcfunction name and jmcfunction class
+        """
         commands = dict()
         for subcls in cls.__subclasses__():
             if subcls.func_type == func_type:
@@ -81,7 +116,24 @@ class JMCFunction:
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str| int]|None = dict(), ignore: set[str] = set()) -> Callable:
+    """
+    Decorator factory for setting property of custom JMC function
+
+    :param func_type: Type of custom function
+    :param call_string: String for user to call the function
+    :param name: Name for further usage
+    :param arg_type: Dictionary of arguments(string) and type of the argument(ArgType)
+    :param defaults: Dictionary of arguments(string and default of it(string or integer)), defaults to dict()
+    :param ignore: Set of arguments(string) for parser to ignore and don't parse(For futher custom parsing), defaults to set()
+    :return: A decorator
+    """
     def decorator(cls: JMCFunction) -> JMCFunction:
+        """
+        A decorator to set the class's attributes for setting JMC function's properties
+
+        :param cls: A subclass of JMCFunction
+        :return: Same class that was passed in  
+        """
         cls.func_type = func_type
         cls.call_string = call_string
         cls.arg_type = arg_type

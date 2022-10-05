@@ -1,3 +1,5 @@
+"""Module for parsing flow controls (if-e;se, while, etc.), called from command/flow_control.py"""
+
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -22,7 +24,7 @@ def if_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
 
-def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str|None:
+def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str | None:
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             "'else' cannot be used without 'if'", command[0], tokenizer)
@@ -119,8 +121,20 @@ SWITCH_CASE_NAME = 'switch_case'
 
 
 def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str) -> None:
+    """
+    For recursion of JMC switch-case's binary tree
+
+    :param min_: Minimum integer to trigger minecraft function
+    :param max_: Maximum integer to trigger minecraft function
+    :param count: Private function count for creating name of private function
+    :param datapack: Datapack object
+    :param func_contents: List of function content(List of commands(string)) given by user
+    :param scoreboard_player: Minecraft scoreboard objective to check the integer
+    :param name: Private function's group name
+    :raises ValueError: min_ is more than max_
+    """
     if max_ < min_:
-        raise ValueError("min_ is less than max_ in __parse_switch_binary")
+        raise ValueError("min_ is more than max_ in __parse_switch_binary")
     if max_ == min_:
         datapack.add_raw_private_function(
             name, func_contents[min_-1], count)
@@ -147,6 +161,15 @@ def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, 
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer, func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
+    """
+    Create a binary tree for JMC switch-case
+
+    :param scoreboard_player: Minecraft scoreboard objective to check the integer
+    :param func_contents: List of function content(List of commands(string)) given by user
+    :param datapack: Datapack object
+    :param name: Private function's group name, defaults to SWITCH_CASE_NAME
+    :return: Minecraft function call to initiate switch case
+    """
     count = datapack.get_count(name)
     __parse_switch_binary(1, len(func_contents), count,
                           datapack, func_contents, scoreboard_player, name)

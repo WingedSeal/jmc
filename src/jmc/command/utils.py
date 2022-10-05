@@ -7,7 +7,7 @@ from enum import Enum, auto
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException
-from ..utils import is_number
+from ..utils import is_number, monitor_results
 
 
 class PlayerType(Enum):
@@ -24,6 +24,15 @@ class ScoreboardPlayer:
 
 
 def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_integer: bool = True) -> ScoreboardPlayer:
+    """
+    Generate ScoreboardPlayer including its type from a keyword token
+
+    :param token: keyword token to parse
+    :param tokenizer: token's Tokenizer
+    :param allow_integer: Whether to allow integer(rvalue), defaults to True
+    :raises JMCSyntaxException: Token is not a keyword token
+    :return: ScoreboardPlayer
+    """
     if token.token_type != TokenType.keyword:
         raise JMCSyntaxException(
             f"Expected keyword", token, tokenizer)
@@ -70,6 +79,14 @@ class Arg:
         self.arg_type = arg_type
 
     def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
+        """
+        Verify if the argument is valid
+
+        :param verifier: Argument's type
+        :param tokenizer: _description_
+        :param key_string: Key(kwarg) in from of string
+        :return: self
+        """
         if verifier == ArgType.any:
             return self
         if verifier == ArgType.scoreboard_player:
@@ -92,7 +109,14 @@ class Arg:
 
 
 def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
-    """Cannot find ArgType.func type"""
+    """
+    Find type of the argument in form of token and return the ArgType
+
+    :param token: any token representing argument
+    :param tokenizer: Tokenizer
+    :raises JMCSyntaxException: Cannot find ArgType.func type
+    :return: Argument's type of the token
+    """
     if token.token_type == TokenType.func:
         return ArgType.arrow_func
     if token.token_type == TokenType.paren_curly:
@@ -116,6 +140,17 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
 
 
 def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg]:
+    """
+    Verify argument types of a paren_round token
+
+    :param params: Dictionary of arguments(string) and its type(ArgType)
+    :param feature_name: Feature name to show up in error
+    :param token: paren_round token
+    :param tokenizer: token's tokenizer
+    :raises JMCSyntaxException: Got too many positional arguments
+    :raises JMCSyntaxException: Unknown key
+    :return: Dictionary of arguments(string) and said argument in Arg form
+    """
     args, kwargs = tokenizer.parse_func_args(token)
     result = {key: None for key in params}
     key_list = list(params)
@@ -134,8 +169,14 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
 
     return result
 
+@monitor_results
+def eval_expr(expr: str) -> str:
+    """
+    Evaluate mathematical expression and calculate the result number then cast it to string
 
-def eval_expr(expr) -> str:
+    :param expr: Expression string
+    :return: String representation of result number
+    """
     return str(__eval(ast.parse(expr, mode='eval').body))
 
 
@@ -145,6 +186,13 @@ OPERATORS = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
 
 
 def __eval(node):
+    """
+    Inner working of eval_expr
+
+    :param node: expr(body of Expression returned from ast.parse)
+    :raises TypeError: Invalid type of node
+    :return: Result number
+    """
     if isinstance(node, ast.Num):  # <number>
         return node.n
     elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
@@ -156,7 +204,14 @@ def __eval(node):
 
 
 def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> dict[int, tuple[str, bool]]:
-    """Returns map of integer key and tuple of function_string and is_arrow_func"""
+    """
+    Parse JMC function hashmap
+
+    :param token: paren_curly token
+    :param tokenizer: token's tokenizer
+    :param datapack: Datapack object
+    :return: Dictionary of integer key and (tuple of function string and whether it is an arrow function)
+    """
     func_map = dict()
     for key, value in tokenizer.parse_js_obj(token).items():
         try:

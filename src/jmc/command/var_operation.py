@@ -1,5 +1,3 @@
-from typing import Callable
-
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -10,6 +8,15 @@ VAR_OPERATION_COMMANDS = JMCFunction._get(FuncType.variable_operation)
 
 
 def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool) -> str:
+    """
+    Parse statement for variable operation including custom JMC command that return and integer to be stored in scoreboard value
+
+    :param tokens: Statement(List of tokens) for parsing
+    :param tokenizer: Tokenizer
+    :param datapack: Datapack object
+    :param is_execute: Whether the statement/function is in `/execute`
+    :return: Full minecraft command
+    """
     if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.paren_round:
         if len(tokens) > 2:
             raise JMCSyntaxException(

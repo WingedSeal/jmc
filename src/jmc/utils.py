@@ -1,5 +1,6 @@
+import functools
 import re
-from json import dumps
+from json import JSONEncoder, dumps
 from typing import TYPE_CHECKING
 
 from .exception import JMCSyntaxException
@@ -25,10 +26,9 @@ class SingleTon(metaclass=__SingleTonMeta):
     - Cannot be instantiated directly
     """
     def __new__(cls, *args, **kwargs):
-        print(args, kwargs)
         if cls is SingleTon:
             raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
-        super.__new__(cls, *args, **kwargs)
+        return super().__new__(cls, *args, **kwargs)
 
 
 def is_number(string: str) -> bool:
@@ -130,3 +130,35 @@ def search_to_string(last_str: str, token: "Token", VAR_NAME: str, tokenizer: "T
     if count:
         return new_str, True
     return last_str, False
+
+class JSONUniversalEncoder(JSONEncoder):
+    """
+    JSONEncoder that can encode everything, used for displaying results
+    """
+    def default(self, o):
+        try:
+            iterator = iter(o)
+        except TypeError:
+            pass
+        else:
+            return list(iterator)
+        
+        return repr(o)
+
+def monitor_results(func):
+    """
+    Decorator to monitor a function for debugging
+
+    :param func: Function for decorator
+    :return: Wrapper function
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return_value = func(*args,**kwargs)
+        print(f"""Function call {func.__name__}(
+args={dumps(args, indent=2, cls=JSONUniversalEncoder)}, 
+kwargs={dumps(kwargs, indent=2, cls=JSONUniversalEncoder)}
+) returns {dumps(return_value, indent=2, cls=JSONUniversalEncoder)}
+""")
+        return return_value
+    return wrapper

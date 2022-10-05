@@ -48,7 +48,6 @@ def _hardcode_process(string: str, index_string: str, i: int, token: Token, toke
     arg_type={
         "index_string": ArgType.string,
         "function": ArgType.arrow_func,
-        "count": ArgType.integer,
         "start": ArgType.integer,
         "stop": ArgType.integer,
         "step": ArgType.integer
