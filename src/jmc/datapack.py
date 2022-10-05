@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable
 from json import JSONEncoder, dumps
 from .tokenizer import Token, Tokenizer
 from .exception import JMCSyntaxWarning
@@ -140,7 +140,7 @@ class DataPack:
     VAR_NAME = '__variable__'
     INT_NAME = '__int__'
     VARIABLE_SIGN = '$'
-    HEADER_DATA: Optional["Header"] = None
+    HEADER_DATA: "Header|None" = None
     """Data read from header file(s)"""
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:

@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
-from typing import Optional
 from enum import Enum
 import re
 
@@ -40,7 +39,7 @@ class Token:
     line: int
     col: int
     string: str
-    _length: Optional[int] = field(init=True, repr=False, default=None)
+    _length: int|None = field(init=True, repr=False, default=None)
 
     def __post_init__(self) -> None:
         """
@@ -133,11 +132,11 @@ class Tokenizer:
     line: int
     col: int
 
-    state: Optional[TokenType]
+    state: TokenType|None
     """Current TokenType"""
     token: str
     """Current string for token"""
-    token_pos: Optional[Pos]
+    token_pos: Pos|None
     """Position for creating token"""
     keywords: list[Token]
     """Current list of tokens"""
@@ -146,17 +145,17 @@ class Tokenizer:
     """List of keywords(list_of_tokens)"""
 
     # String
-    quote: Optional[str]
+    quote: str|None
     """Type of quote"""
     is_escaped: bool
     """Whether it is an escaped character (Backslashed)"""
 
     # Parenthesis
-    paren: Optional[str]
+    paren: str|None
     """Type of left parenthesis"""
-    r_paren: Optional[str]
+    r_paren: str|None
     """Type of matching right parenthesis"""
-    paren_count: Optional[int]
+    paren_count: int|None
     """Count of left parenthesis / Count of current layer"""
     is_string: bool
     """Whether the current character is in string (For paren TokenType)"""

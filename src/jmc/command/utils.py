@@ -1,7 +1,6 @@
 import ast
 import operator as op
 import re
-from typing import Union
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -20,7 +19,7 @@ class PlayerType(Enum):
 @dataclass(frozen=True)
 class ScoreboardPlayer:
     player_type: PlayerType
-    value: Union[int, tuple[str, str]]
+    value: int|tuple[str, str]
     """Contains either integer or (objective and selector)"""
 
 

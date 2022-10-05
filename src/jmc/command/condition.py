@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Union
 
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException
@@ -190,7 +190,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     return custom_condition(tokens, tokenizer, datapack)
 
 
-def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], Optional[list[tuple[list[Condition], int]]]]:
+def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]]]|None:
     global count
     if isinstance(ast, Condition):
         return [ast], None
@@ -253,7 +253,7 @@ def commands_to_strings(ast: AST_TYPE) -> tuple[str, str]:
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Union[Token, list[Token]], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
+def parse_condition(condition_token: Token|list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     """Return `if ...` and pre-commands with newline
 Example:
 ```py

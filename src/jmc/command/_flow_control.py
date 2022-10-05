@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -25,7 +22,7 @@ def if_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
 
-def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> Optional[str]:
+def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str|None:
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             "'else' cannot be used without 'if'", command[0], tokenizer)

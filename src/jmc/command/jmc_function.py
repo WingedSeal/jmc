@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Callable, Optional, Union
+from typing import Callable
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args
 from ..datapack import DataPack
@@ -25,7 +25,7 @@ class JMCFunction:
     defaults: dict[str, str]
     _ignore: set[str]
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: Optional[bool] = None, var: str = None) -> None:
+    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: bool|None = None, var: str = None) -> None:
         self.token = token
         self.datapack = datapack
         self.tokenizer = tokenizer
@@ -80,7 +80,7 @@ class JMCFunction:
         return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: Optional[dict[str, Union[str, int]]] = dict(), ignore: set[str] = set()) -> Callable:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str| int]|None = dict(), ignore: set[str] = set()) -> Callable:
     def decorator(cls: JMCFunction) -> JMCFunction:
         cls.func_type = func_type
         cls.call_string = call_string

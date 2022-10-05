@@ -1,6 +1,5 @@
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
-from typing import Optional
 
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, JMCSyntaxWarning, MinecraftSyntaxWarning
@@ -94,12 +93,12 @@ class Lexer:
     """
     load_tokenizer: Tokenizer
     """Tokenizer for load function"""
-    do_while_box: Optional[Token] = None
+    do_while_box: Token|None = None
     """paren_curly token for code block of `do` in `do while`"""
 
     def __init__(self, config: dict[str, str]) -> None:
         logger.debug("Initializing Lexer")
-        self.if_else_box: list[tuple[Optional[Token], Token]] = []
+        self.if_else_box: list[tuple[Token|None, Token]] = []
         """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
         self.config = config
         """JMC configuration"""
