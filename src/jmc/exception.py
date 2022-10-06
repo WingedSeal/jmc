@@ -1,3 +1,4 @@
+from dataclasses import FrozenInstanceError
 from json import JSONDecodeError
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -34,8 +35,11 @@ def error_msg(message: str, token: "Token|Tokenizer", tokenizer: "Tokenizer", co
     :return: Error message
     """
     if not hasattr(token, "string"):
-        token.string = ""
-        token.length = 1
+        try:
+            token.string = ""
+            token.length = 1
+        except FrozenInstanceError:
+            pass
 
     col = token.col
     line = token.line

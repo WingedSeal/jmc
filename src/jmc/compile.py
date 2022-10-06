@@ -83,7 +83,7 @@ def get_cert() -> dict[str, str]:
     }
 
 
-def read_header(config: dict[str, str]) -> bool:
+def read_header(config: dict[str, str], _test_file: str = None) -> bool:
     """
     Read the main header file
 
@@ -93,17 +93,21 @@ def read_header(config: dict[str, str]) -> bool:
     header = Header()
     header_file = Path(config["target"][:-len(".jmc")]+".hjmc")
     parent_target = Path(config["target"]).parent
-    if header_file.is_file():
+    if header_file.is_file() or _test_file is not None:
         header.add_file_read(header_file)
         logger.info("Header file found.")
-        with header_file.open('r') as file:
-            header_str = file.read()
+        if _test_file is None:
+            with header_file.open('r') as file:
+                header_str = file.read()
+        else:
+            header_str = _test_file
         logger.info(f"Parsing {header_file}")
         parse_header(header_str, header_file.as_posix(), parent_target)
     else:
         logger.info("Header file not found.")
 
-def read_cert(config: dict[str, str]):
+
+def read_cert(config: dict[str, str], _test_file: str = None):
     """
     Read Certificate(JMC.txt)
 
@@ -113,32 +117,36 @@ def read_cert(config: dict[str, str]):
     namespace_folder = Path(config["output"])/'data'/config["namespace"]
     cert_file = namespace_folder/JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
-    if namespace_folder.is_dir():
-        if not cert_file.is_file():
+    if namespace_folder.is_dir() or _test_file is not None:
+        if not cert_file.is_file() and _test_file is None:
             raise JMCBuildError(
                 f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself.")
-
-        with cert_file.open('r') as file:
-            cert_str = file.read()
-            try:
-                cert_config = string_to_cert_config(cert_str)
-            except ValueError:
-                cert_config = dict()
-            DataPack.LOAD_NAME = cert_config.get(
-                "LOAD", old_cert_config["LOAD"])
-            DataPack.TICK_NAME = cert_config.get(
-                "TICK", old_cert_config["TICK"])
-            DataPack.PRIVATE_NAME = cert_config.get(
-                "PRIVATE", old_cert_config["PRIVATE"])
-            DataPack.VAR_NAME = cert_config.get(
-                "VAR", old_cert_config["VAR"])
-            DataPack.INT_NAME = cert_config.get(
-                "INT", old_cert_config["INT"])
-            cert_config = get_cert()
-        rmtree(namespace_folder.resolve().as_posix())
+        if _test_file is None:
+            with cert_file.open('r') as file:
+                cert_str = file.read()
+        else:
+            cert_str = _test_file
+        try:
+            cert_config = string_to_cert_config(cert_str)
+        except ValueError:
+            cert_config = dict()
+        DataPack.LOAD_NAME = cert_config.get(
+            "LOAD", old_cert_config["LOAD"])
+        DataPack.TICK_NAME = cert_config.get(
+            "TICK", old_cert_config["TICK"])
+        DataPack.PRIVATE_NAME = cert_config.get(
+            "PRIVATE", old_cert_config["PRIVATE"])
+        DataPack.VAR_NAME = cert_config.get(
+            "VAR", old_cert_config["VAR"])
+        DataPack.INT_NAME = cert_config.get(
+            "INT", old_cert_config["INT"])
+        cert_config = get_cert()
+        if _test_file is None:
+            rmtree(namespace_folder.resolve().as_posix())
     else:
         cert_config = old_cert_config
-    make_cert(cert_config, cert_file)
+    if _test_file is None:
+        make_cert(cert_config, cert_file)
 
 
 def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
@@ -169,51 +177,74 @@ def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
     return json
 
 
-def build(datapack: DataPack, config: dict[str, str]):
+def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False) -> dict[str, str] | None:
     """
     Build and write files for minecraft datapack
 
     :param datapack: DataPack object
     :param config: JMC configuration
+    :param _is_virtual: Whether to make a dictionary of output result instead of writing to files
+    :returns: Dictionary of file path and file content if _is_virtual is True
     """
+
+    if _is_virtual:
+        output = dict()
+
     logger.debug("Building")
     datapack.build()
     output_folder = Path(config["output"])
     namespace_folder = output_folder/'data'/config["namespace"]
     functions_tags_folder = output_folder/'data'/'minecraft'/'tags'/'functions'
 
-    functions_tags_folder.mkdir(exist_ok=True, parents=True)
+    if not _is_virtual:
+        functions_tags_folder.mkdir(exist_ok=True, parents=True)
     load_tag = functions_tags_folder/'load.json'
     tick_tag = functions_tags_folder/'tick.json'
 
-    load_json = read_func_tag(load_tag, config)
-    tick_json = read_func_tag(tick_tag, config)
+    load_json = {"values": []} if _is_virtual else read_func_tag(
+        load_tag, config)
+    tick_json = {"values": []} if _is_virtual else read_func_tag(
+        tick_tag, config)
 
     load_json["values"].append(f'{config["namespace"]}:{DataPack.LOAD_NAME}')
-    with load_tag.open('w+') as file:
-        dump(load_json, file, indent=2)
+    if _is_virtual:
+        output[load_tag.as_posix()] = dumps(load_json, indent=2)
+    else:
+        with load_tag.open('w+') as file:
+            dump(load_json, file, indent=2)
 
     if DataPack.TICK_NAME in datapack.functions and datapack.functions[DataPack.TICK_NAME]:
         tick_json["values"].append(
             f'{config["namespace"]}:{DataPack.TICK_NAME}')
-        with tick_tag.open('w+') as file:
-            dump(tick_json, file, indent=2)
+        if _is_virtual:
+            output[tick_tag.as_posix()] = dumps(tick_json, indent=2)
+        else:
+            with tick_tag.open('w+') as file:
+                dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
         path = namespace_folder/'functions'/(func_path+'.mcfunction')
         content = func.content
         if content:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with path.open('w+') as file:
-                file.write(func.content)
+            if _is_virtual:
+                output[path.as_posix()] = func.content
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with path.open('w+') as file:
+                    file.write(func.content)
 
     for json_path, json in datapack.jsons.items():
         path = namespace_folder/(json_path+'.json')
         if json:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with path.open('w+') as file:
-                file.write(dumps(json, indent=2))
-
+            if _is_virtual:
+                output[path.as_posix()] = dumps(json, indent=2)
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with path.open('w+') as file:
+                    dump(json, file, indent=2)
+    if _is_virtual:
+        return output
+        
     with (output_folder/'pack.mcmeta').open('w+') as file:
         dump({
             "pack": {
@@ -221,3 +252,4 @@ def build(datapack: DataPack, config: dict[str, str]):
                 "description": config["description"]
             }
         }, file, indent=2)
+    

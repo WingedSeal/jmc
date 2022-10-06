@@ -143,6 +143,9 @@ class DataPack:
     HEADER_DATA: "Header|None" = None
     """Data read from header file(s)"""
 
+    _tick_json = None
+
+
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
         self.ints: set[int] = set()

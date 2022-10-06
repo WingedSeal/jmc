@@ -96,7 +96,7 @@ class Lexer:
     do_while_box: Token|None = None
     """paren_curly token for code block of `do` in `do while`"""
 
-    def __init__(self, config: dict[str, str]) -> None:
+    def __init__(self, config: dict[str, str], _test_file: str = None) -> None:
         logger.debug("Initializing Lexer")
         self.if_else_box: list[tuple[Token|None, Token]] = []
         """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
@@ -104,13 +104,13 @@ class Lexer:
         """JMC configuration"""
         self.datapack = DataPack(config["namespace"], self)
         """Datapack object"""
-        self.parse_file(Path(self.config["target"]), is_load=True)
+        self.parse_file(Path(self.config["target"]), _test_file, is_load=True)
 
         logger.debug(f"Load Function")
         self.datapack.functions[self.datapack.LOAD_NAME] = Function(
             self.parse_load_func_content(programs=self.datapack.load_function))
 
-    def parse_file(self, file_path: Path, is_load=False) -> None:
+    def parse_file(self, file_path: Path, _test_file, is_load=False) -> None:
         """
         Parse JMC file
 
@@ -125,12 +125,15 @@ class Lexer:
         """
         logger.info(f"Parsing file: {file_path}")
         file_path_str = file_path.resolve().as_posix()
-        try:
-            with file_path.open('r') as file:
-                raw_string = file.read()
-        except FileNotFoundError:
-            raise JMCFileNotFoundError(
-                f"JMC file not found: {file_path.resolve().as_posix()}")
+        if _test_file is None:
+            try:
+                with file_path.open('r') as file:
+                    raw_string = file.read()
+            except FileNotFoundError:
+                raise JMCFileNotFoundError(
+                    f"JMC file not found: {file_path.resolve().as_posix()}")
+        else: 
+            raw_string = _test_file    
         tokenizer = Tokenizer(raw_string, file_path_str)
         if is_load:
             self.load_tokenizer = tokenizer

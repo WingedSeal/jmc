@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('.')  # noqa
+sys.path.append('./src')  # noqa
 from jmc import tokenizer, JMCSyntaxException, JMCSyntaxWarning
 import unittest
 import random

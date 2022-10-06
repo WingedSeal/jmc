@@ -169,7 +169,6 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
 
     return result
 
-@monitor_results
 def eval_expr(expr: str) -> str:
     """
     Evaluate mathematical expression and calculate the result number then cast it to string
