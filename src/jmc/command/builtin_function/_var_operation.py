@@ -1,3 +1,5 @@
+"""Module containing JMCFunction subclasses for custom JMC function that returns a minecraft integer"""
+
 from ...datapack import DataPack
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property

@@ -1,3 +1,5 @@
+"""Module containing JMCFunction subclasses for custom JMC function that can only be used on load function and used once"""
+
 from ...exception import JMCValueError
 from ...datapack import DataPack
 from ..utils import ArgType

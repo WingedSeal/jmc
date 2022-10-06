@@ -1,3 +1,5 @@
+"""Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
+
 from json import JSONDecodeError, loads
 from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCValueError
 from ...datapack import DataPack, Function

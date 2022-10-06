@@ -115,7 +115,7 @@ class JMCFunction:
         return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str| int]|None = dict(), ignore: set[str] = set()) -> Callable:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str| int]|None = dict(), ignore: set[str] = set()) -> Callable[[JMCFunction], JMCFunction]:
     """
     Decorator factory for setting property of custom JMC function
 

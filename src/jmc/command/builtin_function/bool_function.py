@@ -1,3 +1,5 @@
+"""Module containing JMCFunction subclasses for custom JMC function that returns a part of `/execute if` command"""
+
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType
 

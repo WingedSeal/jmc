@@ -1,10 +1,21 @@
+"""Module containing JMCFunction subclasses for custom JMC function"""
+
 import math
+from typing import Iterator
 from jmc.exception import JMCSyntaxException
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
-def drange(start, stop, step):
+def drange(start: float|int, stop: float|int, step: float|int) -> Iterator[float|int]:
+    """
+    Similar to built-in range() function but with float
+
+    :param start: Included starting point
+    :param stop: Excluded ending point
+    :param step: Step
+    :yield: Float/Integer
+    """
     result = start
     while result < stop:
         yield result
@@ -22,6 +33,12 @@ def drange(start, stop, step):
     name='timer_set'
 )
 class TimerSet(JMCFunction):
+    """
+    ```py
+    TimerSet(objective, target_selector: selector, tick: number|$variable)
+    ```
+    Set entity's score to start the timer.
+    """
     def call(self) -> str:
         if self.args_Args["tick"].arg_type == ArgType.integer:
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'

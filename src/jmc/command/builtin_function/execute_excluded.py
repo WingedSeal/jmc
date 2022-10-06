@@ -1,3 +1,5 @@
+"""Module containing JMCFunction subclasses for custom JMC function thatcannot be used with `/execute`"""
+
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException
 from ..jmc_function import JMCFunction, FuncType, func_property
