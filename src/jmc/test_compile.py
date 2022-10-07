@@ -1,3 +1,4 @@
+from json import dumps
 from .log import Logger
 from .header import Header
 from .compile import read_cert, read_header, build
@@ -22,7 +23,7 @@ VAR=__variable__
 INT=__int__"""
     jmc_file = ""
     header_file = None
-    built: dict[str, str] = None
+    __built: dict[str, str] = None
     """Dictionary of file name and file content"""
 
     def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
@@ -52,13 +53,19 @@ INT=__int__"""
         read_cert(self.config, _test_file=self.cert)
         read_header(self.config, _test_file=self.header_file)
         lexer = Lexer(self.config, _test_file=self.jmc_file)
-        self.built = build(lexer.datapack, self.config, _is_virtual=True)
+        self.__built = build(lexer.datapack, self.config, _is_virtual=True)
         return self
 
-    def __str__(self) -> str:
-        if self.built is None:
+    @property
+    def built(self) -> str:
+        if self.__built is None:
             self.build()
+        return self.__built
 
+    def dumps(self, *, indent: int = 4) -> str:
+        return dumps(self.built, indent=indent)
+
+    def __str__(self) -> str:
         ouput_str = ""
         for key, value in self.built.items():
             ouput_str += f"""
