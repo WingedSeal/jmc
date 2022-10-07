@@ -32,7 +32,7 @@ class Token:
     :param token_type: Type of the token
     :param line: Which line it's found in
     :param col: Which column it's found in
-    :param string: The string representation (excluding parentheses)
+    :param string: The string representation (including parentheses)
     :param _length: For setting length of the token string, defaults to None
     """
     token_type: TokenType

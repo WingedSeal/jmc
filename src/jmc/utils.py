@@ -23,7 +23,7 @@ class SingleTon(metaclass=__SingleTonMeta):
     """
     Super class for a singleton class
 
-    - Cannot be instantiated directly
+    :raises TypeError: Instantiated directly
     """
     def __new__(cls, *args, **kwargs):
         if cls is SingleTon:
@@ -123,7 +123,7 @@ def search_to_string(last_str: str, token: "Token", VAR_NAME: str, tokenizer: "T
     :param token: paren_round token (Arguments of `toString`)
     :param VAR_NAME: `DataPack.VARNAME``
     :param tokenizer: token's tokenizer
-    :return: Whether `toString` is found
+    :return: Tuple of New string and Whether `toString` is found
     """
     new_str, count = re.subn(
         r'(\$[A-z0-9\-\.\_]+)\.toString$', lambda match: __search_to_string(match, token, VAR_NAME, tokenizer), last_str)
