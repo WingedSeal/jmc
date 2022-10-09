@@ -42,7 +42,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
                     "File name is given without file content")
             elif value is not None and key is None:
                 raise NotImplementedError("This case shouldn't be possible")
-            else:
+            elif value is not None and key is not None:
                 result[key] = value
                 value = None
                 key = line[2:]  # len("> ") = 2
@@ -61,6 +61,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
     if value is None:
         raise ValueError(
             "File name is given without file content")
-    result[key] = value
+    if key is not None:
+        result[key] = value
 
     return result

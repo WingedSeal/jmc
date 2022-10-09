@@ -10,4 +10,9 @@ def load_tests(loader: unittest.loader.TestLoader, tests: unittest.loader.TestLo
     return suite
 
 
-unittest.main()
+def test_all():
+    unittest.main()
+
+
+if __name__ == "__main__":
+    test_all()
