@@ -567,7 +567,7 @@ class Lexer:
                         append_commands(commands, token.string)
                     else:
                         raise JMCSyntaxException(
-                            f"Unrecognized command", token, tokenizer)
+                            f"Unrecognized command ({token.string})", token, tokenizer)
 
                 else:
                     if token.string == 'run' and token.token_type == TokenType.keyword:

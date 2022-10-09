@@ -67,6 +67,9 @@ INT=__int__"""
     def dumps(self, *, indent: int = 4) -> str:
         return dumps(self.built, indent=indent)
 
+    def to_string(self) -> str:
+        return "\n".join([f"> {file_name}\n{file_content}" for file_name, file_content in self.built.items()])
+
     def __str__(self) -> str:
         ouput_str = ""
         for key, value in self.built.items():
