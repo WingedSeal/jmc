@@ -1,6 +1,8 @@
 import sys
+
 sys.path.append('./src')  # noqa
 
+from tests.utils import string_to_tree_dict
 from jmc.datapack import DataPack
 from jmc.utils import SingleTon, is_connected, is_number, search_to_string
 from jmc.command.utils import ArgType, PlayerType, eval_expr, find_arg_type, find_scoreboard_player_type
@@ -85,6 +87,37 @@ class TestCommandUtils(unittest.TestCase):
         self.assertEqual(eval_expr("10+10"), "20")
         self.assertEqual(eval_expr("5**2"), "25")
         self.assertEqual(eval_expr("17*(10-9)"), "17")
+
+
+class TestTestUtils(unittest.TestCase):
+    def test_string_to_tree_dict(self):
+        self.assertDictEqual(string_to_tree_dict("""
+> FILE_NAME_1
+FILE_CONTENT_1_1
+FILE_CONTENT_1_2
+> FILE_NAME_2
+FILE_CONTENT_2_1
+FILE_CONTENT_2_2
+        """),
+                             {"FILE_NAME_1": "FILE_CONTENT_1_1\nFILE_CONTENT_1_2",
+                              "FILE_NAME_2": "FILE_CONTENT_2_1\nFILE_CONTENT_2_2"})
+        self.assertDictEqual(string_to_tree_dict("""
+> FILE_NAME_1
+FILE_CONTENT_1_1
+FILE_CONTENT_1_2
+        """),
+                             {"FILE_NAME_1": "FILE_CONTENT_1_1\nFILE_CONTENT_1_2"})
+        with self.assertRaises(ValueError):
+            string_to_tree_dict("""TEST""")
+
+        with self.assertRaises(ValueError):
+            string_to_tree_dict(string_to_tree_dict("""
+> FILE_NAME_1
+        """))
+        with self.assertRaises(ValueError):
+            string_to_tree_dict(string_to_tree_dict("""
+FILE_CONTENT_1_1
+        """))
 
 
 if __name__ == '__main__':

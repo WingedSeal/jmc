@@ -447,14 +447,13 @@ class Tokenizer:
         """
         Split list of tokens by token that match the string
 
-        Example:
-        ```python
-        find_token([a,b,c,d], b.string) #[[a], [c,d]]
-        ```
-
         :param tokens: List of token
         :param string: String to match for splitting
         :return: List of list of tokens
+
+        .. example::
+        >>> find_token([a,b,c,d], b.string)
+        [[a], [c,d]]
         """
         result: list[list[Token]] = []
         token_array: list[Token] = []
@@ -472,14 +471,13 @@ class Tokenizer:
         """
         Split list of tokens by (group(list) of tokens that can be combined into the string given)
 
-        Example:
-        ```python
-        find_tokens([a, b, c, d], b.string+c.string) # [[a], [d]]
-        ```
-
         :param tokens: List of tokens
         :param string: String for splitting
         :return: List of list of tokens
+
+        .. example::
+        >>> find_tokens([a, b, c, d], b.string+c.string)
+        [[a], [d]]
         """
         state = 0
         max_state = len(string)
@@ -515,14 +513,13 @@ class Tokenizer:
         """
         Loop through tokens and merge tokens that can be combined into string
 
-        Example:
-        ```python
-        merge_tokens([a,b,c,d], b.string+c.string) # [a,bc,d]
-        ```
-
         :param tokens: List of tokens
         :param string: String to merge into
         :return: List of tokens
+
+        .. example::
+        >>> merge_tokens([a,b,c,d], b.string+c.string)
+        [a,Token(TokenType.keyword, b.line, b.col, b.string+c.string),d]
         """
         state = 0
         max_state = len(string)
