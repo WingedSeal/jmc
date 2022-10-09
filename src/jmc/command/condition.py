@@ -39,8 +39,10 @@ class Condition:
         return f"{'if' if self.if_unless else 'unless'} {self.string}"
 
 
-AST_TYPE = Union["AST_TYPE", Condition]
-
+AST_TYPE = Union[dict[str,  # type: ignore
+                      Union[str, list["AST_TYPE"], "AST_TYPE"]  # type: ignore
+                      ],
+                 Condition]
 
 def merge_condition(conditions: list[Condition]) -> str:
     """
@@ -81,6 +83,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                 second_token, tokenizer)
 
             if scoreboard_player.player_type == PlayerType.integer:
+                if not isinstance(scoreboard_player.value, int):
+                    raise ValueError("scoreboard_player.value is not int")
                 compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
                 if operator in {'===', '==', '='}:
                     return Condition(f'{compared} {scoreboard_player.value}', IF)
@@ -94,10 +98,15 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                     return Condition(f'{compared} ..{scoreboard_player.value-1}', IF)
             else:
                 if operator == '!=':
+                    if isinstance(scoreboard_player.value, int):
+                        raise ValueError("scoreboard_player.value is int")
                     return Condition(f'score {first_token.string} {DataPack.VAR_NAME} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
 
                 if operator in {'===', '==', '='}:
                     operator = '='
+
+                if isinstance(scoreboard_player.value, int):
+                    raise ValueError("scoreboard_player.value is int")
                 return Condition(f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
             break
 
@@ -109,8 +118,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                 raise JMCSyntaxException(
                     "Expected keyword", tokens[2], tokenizer)
 
-            match_tokens = tokenizer.split_token(tokens[2], '..')
-            match_tokens = tokenizer.find_token(match_tokens, '..')
+            match_tokens_ = tokenizer.split_token(tokens[2], '..')
+            match_tokens = tokenizer.find_token(match_tokens_, '..')
             if len(match_tokens) != 2 or len(match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
                 raise JMCSyntaxException(
                     "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer)
@@ -142,7 +151,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
             raise JMCSyntaxException(
                 "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
-        return Condition(*matched_function(tokens[1], datapack, tokenizer).call())
+        return Condition(*matched_function(tokens[1], datapack, tokenizer).call_bool())
     # End
     conditions: list[str] = []
     for token in tokens:
@@ -165,8 +174,8 @@ def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> 
     :param tokenizer: Tokenizer
     :return: List of (list of tokens)
     """
-    list_of_tokens = []
-    tokens: list[str] = []
+    list_of_tokens: list[list[Token]] = []
+    tokens: list[Token] = []
     if _tokens[0].token_type == TokenType.keyword and _tokens[0].string == operator:
         raise JMCSyntaxException(
             f"Unexpected operator ({operator})", _tokens[0], tokenizer)
@@ -252,27 +261,32 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
         conditions: list[Condition] = []
         precommand_conditions: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
-            condition, _precommand_conditions = ast_to_commands(body)  # noqa
-            conditions.extend(condition)
+            if isinstance(body, str):
+                raise ValueError('ast["body"] is string')
+            _conditions, _precommand_conditions = ast_to_commands(body)  # noqa
+            conditions.extend(_conditions)
             if _precommand_conditions is not None:
                 precommand_conditions.extend(_precommand_conditions)
-        if not precommand_conditions:
-            precommand_conditions = None
-        return conditions, precommand_conditions
+        return conditions, (precommand_conditions if precommand_conditions else None)
 
-    if ast["operator"] == OR_OPERATOR:
+    elif ast["operator"] == OR_OPERATOR:
         _count = count
         count += 1
         precommand_conditions: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
-            condition, _precommand_conditions = ast_to_commands(body)
+            if isinstance(body, str):
+                raise ValueError('ast["body"] is string')
+            _conditions, _precommand_conditions = ast_to_commands(body)
             if _precommand_conditions is not None:
                 precommand_conditions.extend(_precommand_conditions)
-            precommand_conditions.append((condition, _count))
+            precommand_conditions.append((_conditions, _count))
 
         return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_conditions
 
-    if ast["operator"] == NOT_OPERATOR:
+    elif ast["operator"] == NOT_OPERATOR:
+        body = ast["body"]
+        if not isinstance(ast["body"], Condition):
+            raise ValueError('ast["body"] is noy Condition')
         conditions, _precommand_conditions = ast_to_commands(ast["body"])
         for condition in conditions:
             condition.reverse()

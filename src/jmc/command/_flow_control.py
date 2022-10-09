@@ -49,6 +49,7 @@ def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str
 
         datapack.lexer.if_else_box.append(
             (command[2], command[3]))
+        return None
     elif command[1].token_type == TokenType.paren_curly:
         datapack.lexer.if_else_box.append(
             (None, command[1])
@@ -120,7 +121,7 @@ def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
 SWITCH_CASE_NAME = 'switch_case'
 
 
-def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str) -> None:
+def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack, func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str) -> None:
     """
     For recursion of JMC switch-case's binary tree
 
@@ -147,6 +148,9 @@ def __parse_switch_binary(min_: int, max_: int, count: int, datapack: DataPack, 
 
         match_less = f"{min_}..{half1}" if min_ != half1 else min_
         match_more = f"{half2}..{max_}" if half2 != max_ else max_
+
+        if isinstance(scoreboard_player.value, int):
+            raise ValueError("scoreboard_player.value is int")
 
         datapack.add_raw_private_function(
             name, [
@@ -233,7 +237,7 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
                 if count != case_count:
                     raise JMCSyntaxException(
                         f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
-                if len(tokens < 3):
+                if len(tokens) < 3:
                     raise JMCSyntaxException(
                         "Expected colon (:)", tokens[1], tokenizer, col_length=True)
                 if tokens[2].token_type != TokenType.keyword or tokens[2].string != ':':

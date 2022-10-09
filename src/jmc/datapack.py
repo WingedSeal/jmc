@@ -313,9 +313,9 @@ class DataPack:
             for path, func in functions.items():
                 self.functions[f"{self.PRIVATE_NAME}/{name}/{path}"] = func
 
-        self.private_functions = None
-        self.loads = None
-        self.ticks = None
+        self.private_functions = dict()
+        self.loads = []
+        self.ticks = []
 
     def __repr__(self) -> str:
         return f"""DataPack(

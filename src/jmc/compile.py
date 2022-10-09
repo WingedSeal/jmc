@@ -103,8 +103,10 @@ def read_header(config: dict[str, str], _test_file: str = None) -> bool:
             header_str = _test_file
         logger.info(f"Parsing {header_file}")
         parse_header(header_str, header_file.as_posix(), parent_target)
+        return True
     else:
         logger.info("Header file not found.")
+        return False
 
 
 def read_cert(config: dict[str, str], _test_file: str = None):
@@ -252,4 +254,4 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
                 "description": config["description"]
             }
         }, file, indent=2)
-    
+    return None

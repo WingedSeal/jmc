@@ -110,7 +110,7 @@ class Lexer:
         self.datapack.functions[self.datapack.LOAD_NAME] = Function(
             self.parse_load_func_content(programs=self.datapack.load_function))
 
-    def parse_file(self, file_path: Path, _test_file, is_load=False) -> None:
+    def parse_file(self, file_path: Path, _test_file: str | None = None, is_load=False) -> None:
         """
         Parse JMC file
 
@@ -509,38 +509,38 @@ class Lexer:
                             command[key_pos+1], self.datapack, tokenizer).call())
                         break
 
-                    matched_function = LOAD_ONLY_COMMANDS.get(
+                    matched_function_load_only = LOAD_ONLY_COMMANDS.get(
                         token.string, None)
-                    if matched_function is not None:
+                    if matched_function_load_only is not None:
                         if is_execute:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
                         if not is_load:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) can only be used in load function", token, tokenizer)
-                        append_commands(commands, matched_function(
+                        append_commands(commands, matched_function_load_only(
                             command[key_pos+1], self.datapack, tokenizer).call())
                         break
 
-                    matched_function = FLOW_CONTROL_COMMANDS.get(
+                    matched_function_flow_control = FLOW_CONTROL_COMMANDS.get(
                         token.string, None)
-                    if matched_function is not None:
+                    if matched_function_flow_control is not None:
                         if is_execute:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
-                        return_value = matched_function(
+                        return_value = matched_function_flow_control(
                             command[key_pos:], self.datapack, tokenizer)
                         if return_value is not None:
                             append_commands(commands, return_value)
                         break
 
-                    matched_function = JMC_COMMANDS.get(
+                    matched_function_jmc = JMC_COMMANDS.get(
                         token.string, None)
-                    if matched_function is not None:
+                    if matched_function_jmc is not None:
                         if len(command) > key_pos+2:
                             raise JMCSyntaxException(
                                 "Unexpected token", command[key_pos+2], tokenizer, display_col_length=False)
-                        append_commands(commands, matched_function(
+                        append_commands(commands, matched_function_jmc(
                             command[key_pos+1], self.datapack, tokenizer, is_execute).call())
                         break
 
@@ -666,6 +666,8 @@ class Lexer:
         logger.debug(f"Handling if-else (name={name})")
         if_else_box = self.if_else_box
         self.if_else_box = []
+        if if_else_box[0][0] is None:
+            raise ValueError("if_else_box[0][0] is None")
         condition, precommand = parse_condition(
             if_else_box[0][0], tokenizer, self.datapack)
         # Case 1: `if` only
@@ -691,6 +693,8 @@ class Lexer:
         # `else if`
         if if_else_box:
             for else_if in if_else_box:
+                if else_if[0] is None:
+                    raise ValueError("else_if[0] is None")
                 condition, precommand = parse_condition(
                     else_if[0], tokenizer, self.datapack)
                 count = self.datapack.get_count(name)

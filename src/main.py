@@ -185,7 +185,7 @@ class CMD:
         pprint("Command not recognized, try `help` for more info.", Colors.FAIL)
 
     @classmethod
-    def help(cls):
+    def help(cls, *arg):
         pprint("""Avaliable commands:
 
 cd <path>: Change current directory

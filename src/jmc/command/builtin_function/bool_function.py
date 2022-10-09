@@ -19,5 +19,5 @@ class TimerIsOver(JMCFunction):
         "target_selector": "@s"
     }
 
-    def call(self) -> tuple[str, bool]:
+    def call_bool(self) -> tuple[str, bool]:
         return f'score {self.args["target_selector"]} {self.args["objective"]} matches 1..', UNLESS

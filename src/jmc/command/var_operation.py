@@ -83,6 +83,8 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             if scoreboard_player.player_type == PlayerType.integer:
                 raise JMCSyntaxException(
                     "Cannot copy score into integer", list_of_tokens[1][0], tokenizer)
+            if isinstance(scoreboard_player.value, int):
+                raise ValueError("scoreboard_player.value is int")
 
             return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {list_of_tokens[0][0].string} {DataPack.VAR_NAME}"
 
@@ -94,8 +96,13 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             if operator == '=':
                 return f"scoreboard players set {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {scoreboard_player.value}"
 
+            if not isinstance(scoreboard_player.value, int):
+                raise ValueError("scoreboard_player.value is not int")
             datapack.ints.add(scoreboard_player.value)
             return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value} {DataPack.INT_NAME}"
+
+        if isinstance(scoreboard_player.value, int):
+            raise ValueError("scoreboard_player.value is int")
 
         return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
 

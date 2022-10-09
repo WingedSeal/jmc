@@ -18,7 +18,7 @@ class PlayerFirstJoin(JMCFunction):
     def call(self) -> str:
         self.datapack.add_raw_private_function(
             self.name,
-            self.args,
+            [self.args["function"]],
             'main'
         )
         self.datapack.add_private_json("advancements", self.name, {

@@ -133,4 +133,4 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{args[0]}'", file_name, line, line_str)
-
+    return header

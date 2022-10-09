@@ -32,14 +32,12 @@ class Token:
     :param token_type: Type of the token
     :param line: Which line it's found in
     :param col: Which column it's found in
-    :param string: The string representation (including parentheses)
-    :param _length: For setting length of the token string, defaults to None
+    :param string: The string representation (including parentheses, excluding quotation mark)
     """
     token_type: TokenType
     line: int
     col: int
     string: str
-    _length: int|None = field(init=True, repr=False, default=None)
 
     def __post_init__(self) -> None:
         """
@@ -56,30 +54,29 @@ class Token:
             if splitter in string:
                 string = splitter.join(
                     [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(":")])
-                    
+
         if string == self.string:
             return
-        length = len(string)  
+        length = len(string)
         object.__setattr__(self, "_length", length)
         object.__setattr__(self, "string", string)
 
     @property
     def length(self) -> int:
         """
-        Getting the length of the string in token(including parenthesis), calculate one if it's currently None 
+        Getting the length of the string in token(including quotation mark)
 
         :return: Length of the string 
         """
-        if self._length is None:
-            object.__setattr__(self, "_length", len(
-                self.string)+2 if self.token_type == TokenType.string else len(self.string))
-        return self._length
+        return len(self.string)+2 if self.token_type == TokenType.string else len(self.string)
 
 
 @dataclass(frozen=True, eq=False)
 class Pos:
     """
     Dataclass containing line and column
+    :var line:
+    :var col: 
     """
     line: int
     col: int
@@ -132,11 +129,11 @@ class Tokenizer:
     line: int
     col: int
 
-    state: TokenType|None
+    state: TokenType | None
     """Current TokenType"""
     token: str
     """Current string for token"""
-    token_pos: Pos|None
+    token_pos: Pos | None
     """Position for creating token"""
     keywords: list[Token]
     """Current list of tokens"""
@@ -145,17 +142,17 @@ class Tokenizer:
     """List of keywords(list_of_tokens)"""
 
     # String
-    quote: str|None
+    quote: str | None
     """Type of quote"""
     is_escaped: bool
     """Whether it is an escaped character (Backslashed)"""
 
     # Parenthesis
-    paren: str|None
+    paren: str | None
     """Type of left parenthesis"""
-    r_paren: str|None
+    r_paren: str | None
     """Type of matching right parenthesis"""
-    paren_count: int|None
+    paren_count: int | None
     """Count of left parenthesis / Count of current layer"""
     is_string: bool
     """Whether the current character is in string (For paren TokenType)"""
@@ -179,11 +176,17 @@ class Tokenizer:
         """
         Append the current token into self.keywords
         """
+        if self.state is None:
+            raise ValueError(
+                f"Tokenizer.append_token() called but Tokenizer.state is still None")
+        if self.token_pos is None:
+            raise ValueError(
+                f"Tokenizer.token_pos() called but Tokenizer.token_pos is still None")
         self.keywords.append(
             Token(self.state,
-                       self.token_pos.line,
-                       self.token_pos.col,
-                       self.token)
+                  self.token_pos.line,
+                  self.token_pos.col,
+                  self.token)
         )
         self.token = ""
         self.token_pos = None
@@ -201,7 +204,7 @@ class Tokenizer:
             self.keywords = []
         else:
             raise JMCSyntaxWarning(
-                "Unnecessary semicolon(;)", self, self)
+                "Unnecessary semicolon(;)", None, self)
 
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         """
@@ -233,7 +236,7 @@ class Tokenizer:
         # Parenthesis
         self.paren = None
         self.r_paren = None
-        self.paren_count = None
+        self.paren_count = 0
         self.is_string = False
         # Comment
         self.is_slash = False
@@ -242,12 +245,12 @@ class Tokenizer:
             self.col += 1
             if not expect_semicolon and char == Re.SEMICOLON and self.state in {TokenType.keyword, None}:
                 raise JMCSyntaxException(
-                    "Unexpected semicolon(;)", self, self, display_col_length=False)
+                    "Unexpected semicolon(;)", None, self, display_col_length=False)
 
             if char == Re.NEW_LINE:
                 if self.state == TokenType.string:
                     raise JMCSyntaxException(
-                        "String literal contains an unescaped line break.", self, self, entire_line=True, display_col_length=False)
+                        "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)
                 elif self.state == TokenType.comment:
                     self.state = None
                 elif self.state == TokenType.keyword:
@@ -297,7 +300,7 @@ class Tokenizer:
                     self.paren_count = 0
                 elif char in {Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE}:
                     raise JMCSyntaxException(
-                        "Unexpected bracket", self, self, display_col_length=False)
+                        "Unexpected bracket", None, self, display_col_length=False)
                 elif char == Re.HASH and self.col == 1:
                     self.state = TokenType.comment
                 elif char == Re.COMMA:
@@ -365,10 +368,12 @@ class Tokenizer:
 
         if self.state == TokenType.string:
             raise JMCSyntaxException(
-                "String literal contains an unescaped line break", self, self, entire_line=True, display_col_length=False)
+                "String literal contains an unescaped line break", None, self, entire_line=True, display_col_length=False)
         elif self.state == TokenType.paren:
+            if self.token_pos is None:
+                raise ValueError("Tokenizer.token_pos is stil None")
             raise JMCSyntaxException(
-                "Bracket was never closed", self.token_pos, self, display_col_length=False)
+                "Bracket was never closed", Token(TokenType.keyword, self.token_pos.line, self.token_pos.col, ""), self, display_col_length=False)
         elif self.keywords or self.token:
             if self.token != "":
                 self.append_token()
@@ -510,7 +515,7 @@ class Tokenizer:
     def merge_tokens(self, tokens: list[Token], string: str) -> list[Token]:
         """
         Loop through tokens and merge tokens that can be combined into string
-        
+
         Example:
         ```python
         merge_tokens([a,b,c,d], b.string+c.string) # [a,bc,d]
@@ -579,6 +584,8 @@ class Tokenizer:
         1: ()
         2: =>
         """
+        expecting_comma = False
+        last_token: Token = Token(TokenType.keyword, -1, -1, "")
 
         def add_arg(token: Token, from_comma: bool = False) -> None:
             nonlocal arg
@@ -590,7 +597,7 @@ class Tokenizer:
                     "Positional argument follows keyword argument", token, self, display_col_length=False)
 
             args.append(Token(string=arg, line=token.line,
-                                   col=token.col, token_type=token.token_type))
+                              col=token.col, token_type=token.token_type))
             arg = ""
 
         def add_kwarg(token: Token) -> None:
@@ -612,11 +619,10 @@ class Tokenizer:
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
             kwargs[key] = Token(string=arg, line=token.line,
-                                     col=token.col, token_type=token.token_type)
+                                col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
 
-        expecting_comma = False
         for token in keywords:
             if token.token_type == TokenType.paren_square:
                 if not arg:
@@ -728,6 +734,7 @@ class Tokenizer:
         1: ()
         2: =>
         """
+        expecting_comma = False
 
         def add_kwarg(token: Token) -> None:
             nonlocal key
@@ -748,11 +755,10 @@ class Tokenizer:
                     f"Duplicated key({key})", token, self, display_col_length=False)
 
             kwargs[key] = Token(string=arg, line=token.line,
-                                     col=token.col, token_type=token.token_type)
+                                col=token.col, token_type=token.token_type)
             key = ""
             arg = ""
 
-        expecting_comma = False
         for token in keywords:
             if expecting_comma and token.token_type != TokenType.comma:
                 raise JMCSyntaxException(

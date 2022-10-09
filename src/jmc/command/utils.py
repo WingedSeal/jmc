@@ -74,7 +74,7 @@ class ArgType(Enum):
 
 
 class Arg:
-    def __init__(self, token: Token, arg_type: ArgType = None,) -> None:
+    def __init__(self, token: Token, arg_type: ArgType) -> None:
         self.token = token
         self.arg_type = arg_type
 
@@ -152,7 +152,7 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
     :return: Dictionary of arguments(string) and said argument in Arg form
     """
     args, kwargs = tokenizer.parse_func_args(token)
-    result = {key: None for key in params}
+    result: dict[str, None | Arg] = {key: None for key in params}
     key_list = list(params)
     if len(args) > len(key_list):
         raise JMCSyntaxException(
@@ -166,7 +166,8 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
                 f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
         arg_type = find_arg_type(arg, tokenizer)
         result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
-
+    if None in result.values():
+        raise ValueError("None is in values of return value of verify_args")
     return result
 
 def eval_expr(expr: str) -> str:

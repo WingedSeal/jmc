@@ -59,8 +59,8 @@ def _hardcode_process(string: str, index_string: str, i: int, token: Token, toke
         "function"
     },
     defaults={
-        "start": 0,
-        "step": 1
+        "start": "0",
+        "step": "1"
     }
 )
 class HardcodeRepeat(JMCFunction):

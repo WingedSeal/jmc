@@ -37,7 +37,7 @@ class JMCFunction:
     func_type: FuncType
     name: str
     call_string: str
-    defaults: dict[str, str]
+    defaults: dict[str, str] | None
     _ignore: set[str]
 
     def __new__(cls, *args, **kwargs):
@@ -79,6 +79,9 @@ class JMCFunction:
                 elif arg.arg_type in {ArgType.scoreboard_player, ArgType.scoreboard}:
                     scoreboard_player = find_scoreboard_player_type(
                         arg.token, tokenizer)
+                    if isinstance(scoreboard_player.value, int):
+                        raise ValueError(
+                            "scoreboard_player.value is int for minecraft scorboard")
                     self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
                 else:
                     self.args[key] = arg.token.string
@@ -100,6 +103,15 @@ class JMCFunction:
         """
         raise NotImplementedError("Call function not implemented")
 
+    def call_bool(self) -> tuple[str, bool]:
+        """
+        This function will be called when user call matching JMC *boolean* function 
+
+        :raises NotImplementedError: When the subclass's call method is not implemented
+        :return: Tuple of Minecraft command as string and IF/UNLESS(boolean)
+        """
+        raise NotImplementedError("Call(Bool) function not implemented")
+
     @classmethod
     def _get(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
         """
@@ -115,7 +127,7 @@ class JMCFunction:
         return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str| int]|None = dict(), ignore: set[str] = set()) -> Callable[[JMCFunction], JMCFunction]:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] | None = dict(), ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -127,7 +139,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
     :param ignore: Set of arguments(string) for parser to ignore and don't parse(For futher custom parsing), defaults to set()
     :return: A decorator
     """
-    def decorator(cls: JMCFunction) -> JMCFunction:
+    def decorator(cls: type[JMCFunction]) -> type[JMCFunction]:
         """
         A decorator to set the class's attributes for setting JMC function's properties
 

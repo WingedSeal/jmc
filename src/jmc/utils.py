@@ -1,7 +1,7 @@
 import functools
 import re
 from json import JSONEncoder, dumps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .exception import JMCSyntaxException
 
@@ -12,7 +12,7 @@ class __SingleTonMeta(type):
     """
     Metaclass for singleton
     """
-    _instances = {}
+    _instances: dict["__SingleTonMeta", Any] = dict()
     
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -50,7 +50,7 @@ def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     )
 
 
-def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str|bool]:
+def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, Any]:
     """
     Parse `toString` in JMC
 
@@ -58,7 +58,7 @@ def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str|b
     :param tokenizer: token's tokenizer
     :return: Dictionary of key(key) and value(string or true or false)
     """
-    json = dict()
+    json: dict[str, Any] = dict()
     if token.string == '()':
         return json
 

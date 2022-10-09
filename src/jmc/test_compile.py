@@ -23,7 +23,7 @@ VAR=__variable__
 INT=__int__"""
     jmc_file = ""
     header_file = None
-    __built: dict[str, str] = None
+    __built: dict[str, str] | None = None
     """Dictionary of file name and file content"""
 
     def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
@@ -57,9 +57,11 @@ INT=__int__"""
         return self
 
     @property
-    def built(self) -> str:
+    def built(self) -> dict[str, str]:
         if self.__built is None:
             self.build()
+        if self.__built is None:
+            raise ValueError("self.__built is None")
         return self.__built
 
     def dumps(self, *, indent: int = 4) -> str:
