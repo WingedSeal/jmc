@@ -57,8 +57,7 @@ class Token:
 
         if string == self.string:
             return
-        length = len(string)
-        object.__setattr__(self, "_length", length)
+
         object.__setattr__(self, "string", string)
 
     @property
