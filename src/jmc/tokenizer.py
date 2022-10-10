@@ -39,6 +39,9 @@ class Token:
     col: int
     string: str
 
+    # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
+    #     return super().__new__(cls)
+
     def __post_init__(self) -> None:
         """
         Edit string and _length according to macros(`#define something`) defined

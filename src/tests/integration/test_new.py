@@ -10,3 +10,7 @@ from jmc.test_compile import JMCPack
 
 class TestNew(unittest.TestCase):
     def test_new(self): ...
+
+
+if __name__ == '__main__':
+    unittest.main()

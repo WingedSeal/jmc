@@ -261,8 +261,8 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
         for body in ast["body"]:
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
-            conditions, precommand = ast_to_commands(body)  # noqa
-            conditions.extend(conditions)
+            _conditions, precommand = ast_to_commands(body)  # noqa
+            conditions.extend(_conditions)
             if precommand is not None:
                 precommand_and.extend(precommand)
         return conditions, (precommand_and if precommand_and else None)
