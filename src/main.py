@@ -25,7 +25,7 @@ CWD = Path(os.getcwd())
 LOG_PATH = CWD/'log'
 CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
-config = dict()
+config = {}
 
 logger = jmc.Logger(__name__)
 

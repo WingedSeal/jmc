@@ -49,7 +49,7 @@ def string_to_cert_config(string: str) -> dict[str, str]:
     :param string: String for convertion
     :return: Converted cert_config
     """
-    cert_config = dict()
+    cert_config = {}
     for line in string.split('\n'):
         key, value = line.split('=')
         cert_config[key.strip()] = value.strip()
@@ -131,7 +131,7 @@ def read_cert(config: dict[str, str], _test_file: str = None):
         try:
             cert_config = string_to_cert_config(cert_str)
         except ValueError:
-            cert_config = dict()
+            cert_config = {}
         DataPack.LOAD_NAME = cert_config.get(
             "LOAD", old_cert_config["LOAD"])
         DataPack.TICK_NAME = cert_config.get(
@@ -190,7 +190,7 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
     """
 
     if _is_virtual:
-        output = dict()
+        output = {}
 
     logger.debug("Building")
     datapack.build()

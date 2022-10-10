@@ -150,7 +150,7 @@ class DataPack:
         logger.debug("Initializing Datapack")
         self.ints: set[int] = set()
         """Set of integers going to be used in scoreboard"""
-        self.functions: dict[str, Function] = dict()
+        self.functions: dict[str, Function] = {}
         """Dictionary of function name and a Function object"""
         self.load_function: list[list[Token]] = []
         """List of commands(list of tokens) in load function"""
@@ -313,7 +313,7 @@ class DataPack:
             for path, func in functions.items():
                 self.functions[f"{self.PRIVATE_NAME}/{name}/{path}"] = func
 
-        self.private_functions = dict()
+        self.private_functions = {}
         self.loads = []
         self.ticks = []
 

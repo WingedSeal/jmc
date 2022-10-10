@@ -571,7 +571,7 @@ class Tokenizer:
         keywords = self.split_tokens(keywords, ['='])
         keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []
-        kwargs: dict[str, Token] = dict()
+        kwargs: dict[str, Token] = {}
         key: str = ""
         arg: str = ""
         arrow_func_state = 0
@@ -721,7 +721,7 @@ class Tokenizer:
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
         keywords = self.split_tokens(keywords, [':'])
-        kwargs: dict[str, Token] = dict()
+        kwargs: dict[str, Token] = {}
         key: str = ""
         arg: str = ""
         arrow_func_state = 0

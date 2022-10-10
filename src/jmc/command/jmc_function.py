@@ -58,7 +58,7 @@ class JMCFunction:
 
         self.args_Args = verify_args(self.arg_type,
                                      self.call_string, token, tokenizer)
-        self.args: dict[str, str] = dict()
+        self.args: dict[str, str] = {}
 
         for key, arg in self.args_Args.items():
             if arg is None:
@@ -120,14 +120,14 @@ class JMCFunction:
         :param func_type: Function type to search for
         :return: Dictionary of jmcfunction name and jmcfunction class
         """
-        commands = dict()
+        commands = {}
         for subcls in cls.__subclasses__():
             if subcls.func_type == func_type:
                 commands[subcls.call_string] = subcls
         return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] | None = dict(), ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] | None = {}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -135,7 +135,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
     :param call_string: String for user to call the function
     :param name: Name for further usage
     :param arg_type: Dictionary of arguments(string) and type of the argument(ArgType)
-    :param defaults: Dictionary of arguments(string and default of it(string or integer)), defaults to dict()
+    :param defaults: Dictionary of arguments(string and default of it(string or integer)), defaults to {}
     :param ignore: Set of arguments(string) for parser to ignore and don't parse(For futher custom parsing), defaults to set()
     :return: A decorator
     """

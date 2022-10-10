@@ -212,7 +212,7 @@ def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> di
     :param datapack: Datapack object
     :return: Dictionary of integer key and (tuple of function string and whether it is an arrow function)
     """
-    func_map = dict()
+    func_map: dict[int, tuple[str, bool]] = {}
     for key, value in tokenizer.parse_js_obj(token).items():
         try:
             num = int(key)

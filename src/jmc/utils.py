@@ -12,7 +12,7 @@ class __SingleTonMeta(type):
     """
     Metaclass for singleton
     """
-    _instances: dict["__SingleTonMeta", Any] = dict()
+    _instances: dict["__SingleTonMeta", Any] = {}
     
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -58,7 +58,7 @@ def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, Any]:
     :param tokenizer: token's tokenizer
     :return: Dictionary of key(key) and value(string or true or false)
     """
-    json: dict[str, Any] = dict()
+    json: dict[str, Any] = {}
     if token.string == '()':
         return json
 

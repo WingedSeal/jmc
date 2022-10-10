@@ -28,7 +28,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
     del lines[0]
     del lines[-1]
 
-    result: dict[str, str] = dict()
+    result: dict[str, str] = {}
     key: None | str = None
     value: None | str = None
 
