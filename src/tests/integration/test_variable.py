@@ -1,4 +1,4 @@
-import sys
+import sys  # noqa
 sys.path.append('./src')  # noqa
 
 import unittest

@@ -1,13 +1,12 @@
-import sys
-
+import sys  # noqa
 sys.path.append('./src')  # noqa
+import unittest
 
 from tests.utils import string_to_tree_dict
 from jmc.datapack import DataPack
 from jmc.utils import SingleTon, is_connected, is_number, search_to_string
 from jmc.command.utils import ArgType, PlayerType, eval_expr, find_arg_type, find_scoreboard_player_type
 from jmc.tokenizer import Token, TokenType, Tokenizer
-import unittest
 
 
 class SingleTonClass(SingleTon):

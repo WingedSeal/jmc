@@ -1,12 +1,11 @@
-import unittest
-import sys
-
-
+import sys  # noqa
 sys.path.append('./src')  # noqa
 
-from jmc.exception import HeaderSyntaxException
+import unittest
 from tests.utils import string_to_tree_dict
 from jmc.test_compile import JMCPack
+
+from jmc.exception import HeaderSyntaxException
 
 
 class TestHeader(unittest.TestCase):

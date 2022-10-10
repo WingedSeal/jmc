@@ -1,9 +1,9 @@
-import sys
-
+import sys  # noqa
 sys.path.append('./src')  # noqa
-from jmc import tokenizer, JMCSyntaxException, JMCSyntaxWarning
 import unittest
+
 import random
+from jmc import tokenizer, JMCSyntaxException, JMCSyntaxWarning
 
 
 class Tokenizer(tokenizer.Tokenizer):
