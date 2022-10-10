@@ -161,7 +161,7 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
         arg_type = find_arg_type(arg, tokenizer)
         result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
     for key, arg in kwargs.items():
-        if key not in result:
+        if key not in key_list:
             raise JMCSyntaxException(
                 f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
         arg_type = find_arg_type(arg, tokenizer)
