@@ -40,7 +40,7 @@ class TestTokenizer(unittest.TestCase):
                 self.assertEqual(token.token_type, tokenizer.TokenType.keyword)
 
     def test_string(self):
-        for quote in {'"', "'"}:
+        for quote in ['"', "'"]:
             for _ in range(10):
                 string = ' '.join([f"{quote}{sample}{quote}" for sample in
                                    random.sample(self.SAMPLE,

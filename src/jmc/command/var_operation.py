@@ -34,7 +34,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
         raise JMCSyntaxException(
             "Expected operator after variable", tokens[0], tokenizer, col_length=True)
 
-    for operator in {'*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '='}:  # sort key=len
+    for operator in ['*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '=']:  # sort key=len
         list_of_tokens = tokenizer.find_tokens(tokens, operator)
         if len(list_of_tokens) == 1:
             continue
