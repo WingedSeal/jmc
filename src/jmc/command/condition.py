@@ -244,12 +244,10 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
     :param ast: Abstract syntax tree
     :raises ValueError: Invalid AST
     :return: A tuple of (
-        A chain of condition(List of Condition)
-        and
-        A commands(
-            List of Condition
-            and
-            n (`__logic__n` for minecraft function name)
+        A chain of conditions(List of Condition)
+        
+        Commands(
+            List of Condition and n (`__logic__n` for minecraft function name)
         ) that need to come before (can be None)
     )
     """
@@ -259,38 +257,38 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
 
     if ast["operator"] == AND_OPERATOR:
         conditions: list[Condition] = []
-        precommand_conditions: list[tuple[list[Condition], int]] = []
+        precommand_and: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
-            _conditions, _precommand_conditions = ast_to_commands(body)  # noqa
-            conditions.extend(_conditions)
-            if _precommand_conditions is not None:
-                precommand_conditions.extend(_precommand_conditions)
-        return conditions, (precommand_conditions if precommand_conditions else None)
+            conditions, precommand = ast_to_commands(body)  # noqa
+            conditions.extend(conditions)
+            if precommand is not None:
+                precommand_and.extend(precommand)
+        return conditions, (precommand_and if precommand_and else None)
 
     elif ast["operator"] == OR_OPERATOR:
         _count = count
         count += 1
-        precommand_conditions: list[tuple[list[Condition], int]] = []
+        precommand_or: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
-            _conditions, _precommand_conditions = ast_to_commands(body)
-            if _precommand_conditions is not None:
-                precommand_conditions.extend(_precommand_conditions)
-            precommand_conditions.append((_conditions, _count))
+            conditions, precommand = ast_to_commands(body)
+            if precommand is not None:
+                precommand_or.extend(precommand)
+            precommand_or.append((conditions, _count))
 
-        return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_conditions
+        return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_or
 
     elif ast["operator"] == NOT_OPERATOR:
         body = ast["body"]
         if not isinstance(ast["body"], Condition):
             raise ValueError('ast["body"] is noy Condition')
-        conditions, _precommand_conditions = ast_to_commands(ast["body"])
+        conditions, precommand = ast_to_commands(ast["body"])
         for condition in conditions:
             condition.reverse()
-        return conditions, _precommand_conditions
+        return conditions, precommand
 
     raise ValueError("Invalid AST")
 
