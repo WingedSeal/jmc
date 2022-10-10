@@ -1,6 +1,6 @@
 import unittest
-import unit
-import integration
+from . import unit
+from . import integration
 
 
 def load_tests(loader: unittest.loader.TestLoader, tests: unittest.loader.TestLoader, pattern: None) -> unittest.suite.TestSuite:

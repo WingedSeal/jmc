@@ -50,15 +50,15 @@ def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     )
 
 
-def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, Any]:
+def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str | bool | dict[str, str]]:
     """
     Parse `toString` in JMC
 
     :param token: paren_round token (arguments of `toString`)
     :param tokenizer: token's tokenizer
-    :return: Dictionary of key(key) and value(string or true or false)
+    :return: Dictionary of key(key) and value(string or boolean)
     """
-    json: dict[str, Any] = {}
+    json: dict[str, str | bool | dict[str, str]] = {}
     if token.string == '()':
         return json
 
@@ -109,7 +109,7 @@ def __search_to_string(match: re.Match, token: "Token", VAR_NAME: str, tokenizer
     :param tokenizer: token's tokenizer
     :return: JSON formatted string
     """
-    var = match.group(1)
+    var: str = match.group(1)
     properties = __parse_to_string(token, tokenizer)
     properties["score"] = {"name": var, "objective": VAR_NAME}
     return dumps(properties)
