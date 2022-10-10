@@ -157,7 +157,6 @@ execute if condition run function TEST:__private__/while_loop/0
 
 
 class TestCondition(unittest.TestCase):
-    maxDiff: int | None = None
     def test_eq(self):
         pack = JMCPack().set_jmc_file("""
 if ($i==1) {
