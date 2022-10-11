@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from jmc.utils import SingleTon
+from .utils import SingleTon
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException
 from .log import Logger
 

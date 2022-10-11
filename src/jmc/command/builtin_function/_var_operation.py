@@ -3,6 +3,7 @@
 from ...datapack import DataPack
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
+from ...exception import JMCValueError
 
 
 @func_property(
@@ -90,6 +91,9 @@ class MathRandom(JMCFunction):
         var = DataPack.VAR_NAME
         start = int(self.args["min"])
         end = int(self.args["max"])
+        if end < start:
+            raise JMCValueError(
+                f"max cannot be less than min in {self.call_string}", self.token, self.tokenizer, suggestion="Try swapping max and min")
         if self.call_string not in self.datapack.used_command:
             self.datapack.used_command.add(self.call_string)
             self.datapack.add_private_json('loot_tables', f"{self.name}/rng", {

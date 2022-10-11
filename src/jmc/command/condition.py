@@ -3,8 +3,6 @@
 from dataclasses import dataclass
 from typing import Union
 
-from jmc.utils import monitor_results
-
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException
 from ..datapack import DataPack
@@ -43,6 +41,7 @@ AST_TYPE = Union[dict[str,  # type: ignore
                       Union[str, list["AST_TYPE"], "AST_TYPE"]  # type: ignore
                       ],
                  Condition]
+
 
 def merge_condition(conditions: list[Condition]) -> str:
     """
@@ -237,7 +236,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     return custom_condition(tokens, tokenizer, datapack)
 
 
-def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]]|None]:
+def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
     """
     Parse abstract syntax tree into list of conditions and list of commands that need to come before for it to works
 
@@ -245,7 +244,7 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
     :raises ValueError: Invalid AST
     :return: A tuple of (
         A chain of conditions(List of Condition)
-        
+
         Commands(
             List of Condition and n (`__logic__n` for minecraft function name)
         ) that need to come before (can be None)
@@ -324,7 +323,7 @@ def ast_to_strings(ast: AST_TYPE) -> tuple[str, str]:
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Token|list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
+def parse_condition(condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     """
     Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
     Example:

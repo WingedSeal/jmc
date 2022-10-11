@@ -5,6 +5,7 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.test_compile import JMCPack
 
+from jmc.exception import JMCMissingValueError, JMCValueError
 
 class TestVarOperation(unittest.TestCase):
     def test_MathSqrt(self):
@@ -53,7 +54,90 @@ execute if score __main__.x_n_sq __variable__ > __math__.N __variable__ run scor
             """)
         )
 
-    def test_MathRandom(self): ...
+        with self.assertRaises(JMCMissingValueError):
+            JMCPack().set_jmc_file("""
+$x = Math.sqrt();
+        """).build()
+
+        with self.assertRaises(JMCValueError):
+            JMCPack().set_jmc_file("""
+$x = Math.sqrt(10);
+        """).build()
+
+    def test_MathRandom(self):
+        pack = JMCPack().set_jmc_file("""
+$x = Math.random();
+$y = Math.random(min=5, max=10);
+$z = Math.random(max=10);
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard players set 10 __int__ 10
+scoreboard players set 6 __int__ 6
+scoreboard players set 2147483647 __int__ 2147483647
+execute unless score __math__.seed __variable__ matches -2147483648..2147483647 run function TEST:__private__/math_random/setup
+function TEST:__private__/math_random/main
+scoreboard players operation $x __variable__ = __math__.seed __variable__
+scoreboard players operation $x __variable__ %= 2147483647 __int__
+scoreboard players add $x __variable__ 1
+function TEST:__private__/math_random/main
+scoreboard players operation $y __variable__ = __math__.seed __variable__
+scoreboard players operation $y __variable__ %= 6 __int__
+scoreboard players add $y __variable__ 5
+function TEST:__private__/math_random/main
+scoreboard players operation $z __variable__ = __math__.seed __variable__
+scoreboard players operation $z __variable__ %= 10 __int__
+scoreboard players add $z __variable__ 1
+> VIRTUAL/data/TEST/functions/__private__/math_random/setup.mcfunction
+execute store result score __math__.seed __variable__ run loot spawn ~ ~ ~ loot TEST:__private__/math_random/rng
+execute store result score __math__.rng.a __variable__ run loot spawn ~ ~ ~ loot TEST:__private__/math_random/rng
+scoreboard players operation __math__.rng.a __variable__ *= __math__.rng.a __variable__
+execute store result score __math__.rng.c __variable__ run loot spawn ~ ~ ~ loot TEST:__private__/math_random/rng
+scoreboard players operation __math__.rng.c __variable__ *= __math__.rng.c __variable__
+> VIRTUAL/data/TEST/functions/__private__/math_random/main.mcfunction
+scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
+scoreboard players operation __math__.seed __variable__ += __math__.rng.c __variable__
+> VIRTUAL/data/TEST/loot_tables/__private__/math_random/rng.json
+{
+  "pools": [
+    {
+      "rolls": {
+        "min": 1,
+        "max": 2147483647
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stone",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+            """)
+        )
+
+        with self.assertRaises(JMCValueError):
+            JMCPack().set_jmc_file("""
+$x = Math.random(min=100,max=1);
+        """).build()
 
 
 class TestBoolFunction(unittest.TestCase):

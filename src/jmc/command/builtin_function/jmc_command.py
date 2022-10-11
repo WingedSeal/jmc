@@ -2,7 +2,7 @@
 
 import math
 from typing import Iterator
-from jmc.exception import JMCSyntaxException
+from ...exception import JMCSyntaxException
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
 

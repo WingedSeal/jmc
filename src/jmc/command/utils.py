@@ -6,8 +6,8 @@ from enum import Enum, auto
 
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
-from ..exception import JMCSyntaxException
-from ..utils import is_number, monitor_results
+from ..exception import JMCSyntaxException, JMCValueError
+from ..utils import is_number
 
 
 class PlayerType(Enum):
@@ -92,7 +92,7 @@ class Arg:
         if verifier == ArgType.scoreboard_player:
             if self.arg_type in {ArgType.scoreboard, ArgType.integer}:
                 return self
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier == ArgType.func:
             if self.arg_type == ArgType.arrow_func:
@@ -100,10 +100,10 @@ class Arg:
             if self.arg_type == ArgType.keyword:
                 self.arg_type = ArgType._func_call
                 return self
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier != self.arg_type:
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         return self
 
@@ -114,7 +114,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
 
     :param token: any token representing argument
     :param tokenizer: Tokenizer
-    :raises JMCSyntaxException: Cannot find ArgType.func type
+    :raises JMCValueError: Cannot find ArgType.func type
     :return: Argument's type of the token
     """
     if token.token_type == TokenType.func:
@@ -135,7 +135,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
     if token.token_type == TokenType.string:
         return ArgType.string
 
-    raise JMCSyntaxException(
+    raise JMCValueError(
         f"Unknown argument type", token, tokenizer)
 
 
@@ -147,25 +147,25 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
     :param feature_name: Feature name to show up in error
     :param token: paren_round token
     :param tokenizer: token's tokenizer
-    :raises JMCSyntaxException: Got too many positional arguments
-    :raises JMCSyntaxException: Unknown key
+    :raises JMCValueError: Got too many positional arguments
+    :raises JMCValueError: Unknown key
     :return: Dictionary of arguments(string) and said argument in Arg form
     """
     args, kwargs = tokenizer.parse_func_args(token)
     result: dict[str, Arg | None] = {key: None for key in params}
     key_list = list(params)
     if len(args) > len(key_list):
-        raise JMCSyntaxException(
+        raise JMCValueError(
             f"{feature_name} takes {len(key_list)} positional arguments, got {len(args)}", token, tokenizer)
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
         result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
     for key, kwarg in kwargs.items():
         if key not in key_list:
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
         arg_type = find_arg_type(kwarg, tokenizer)
-        result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
+        result[key] = Arg(kwarg, arg_type).verify(params[key], tokenizer, key)
     return result
 
 def eval_expr(expr: str) -> str:
@@ -215,7 +215,7 @@ def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> di
         try:
             num = int(key)
         except ValueError:
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"Expected number as key (got {key})", token, tokenizer)
 
         if value.token_type == TokenType.keyword:
@@ -224,6 +224,6 @@ def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> di
             func_map[num] = '\n'.join(
                 datapack.parse_function_token(value, tokenizer)), True
         else:
-            raise JMCSyntaxException(
+            raise JMCValueError(
                 f"Expected function, got {value.token_type.value}", token, tokenizer)
     return func_map
