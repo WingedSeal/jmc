@@ -8,7 +8,7 @@ UNLESS = False
 
 
 @func_property(
-    func_type=FuncType.load_once,
+    func_type=FuncType.bool_function,
     call_string='Timer.isOver',
     arg_type={
         "objective": ArgType.keyword,

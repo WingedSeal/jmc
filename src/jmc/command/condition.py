@@ -9,6 +9,8 @@ from ..datapack import DataPack
 from .utils import find_scoreboard_player_type, PlayerType
 from .jmc_function import JMCFunction, FuncType
 
+from .builtin_function import bool_function
+
 AND_OPERATOR = '&&'
 OR_OPERATOR = '||'
 NOT_OPERATOR = '!'
