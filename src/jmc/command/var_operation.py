@@ -4,7 +4,8 @@ from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
 
-VAR_OPERATION_COMMANDS = JMCFunction._get(FuncType.variable_operation)
+VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
+    FuncType.variable_operation)
 
 
 def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool) -> str:
@@ -74,7 +75,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
 
         if len(list_of_tokens[1]) > 1:
             raise JMCSyntaxException(
-                "Unexpected token", list_of_tokens[1][1], tokenizer)
+                f"Unexpected token ({list_of_tokens[1][1].string})", list_of_tokens[1][1], tokenizer)
 
         scoreboard_player = find_scoreboard_player_type(
             list_of_tokens[1][0], tokenizer, allow_integer=False)

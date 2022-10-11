@@ -1,3 +1,4 @@
+from collections import defaultdict
 from enum import Enum, auto
 from typing import Callable
 
@@ -39,6 +40,10 @@ class JMCFunction:
     call_string: str
     defaults: dict[str, str]
     _ignore: set[str]
+
+    __subcls: dict[FuncType, dict[str, type["JMCFunction"]]
+                   ] = defaultdict(dict)
+    """:cvar: Dictionary of (Function type and according dictionary of funtion name and a subclass)"""
 
     def __new__(cls, *args, **kwargs):
         if cls is JMCFunction:
@@ -115,18 +120,25 @@ class JMCFunction:
         raise NotImplementedError("Call(Bool) function not implemented")
 
     @classmethod
-    def _get(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
+    def get_subclasses(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
         """
         Get dictionary of funtion name and a class matching function type
 
         :param func_type: Function type to search for
         :return: Dictionary of jmcfunction name and jmcfunction class
         """
-        commands = {}
-        for subcls in cls.__subclasses__():
-            if subcls.func_type == func_type:
-                commands[subcls.call_string] = subcls
-        return commands
+        if func_type not in cls.__subcls:
+            for subcls in cls.__subclasses__():
+                cls.__subcls[subcls.func_type][subcls.call_string] = subcls
+
+        
+        return cls.__subcls[func_type]
+
+        # commands = {}
+        # for subcls in cls.__subclasses__():
+        #     if subcls.func_type == func_type:
+        #         commands[subcls.call_string] = subcls
+        # return commands
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:

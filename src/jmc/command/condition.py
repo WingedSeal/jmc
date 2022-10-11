@@ -19,7 +19,7 @@ IF = True
 UNLESS = False
 
 VAR = '__logic__'
-BOOL_FUNCTIONS = JMCFunction._get(FuncType.bool_function)
+BOOL_FUNCTIONS = JMCFunction.get_subclasses(FuncType.bool_function)
 count = 0
 
 

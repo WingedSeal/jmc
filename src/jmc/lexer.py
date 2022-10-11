@@ -17,13 +17,14 @@ from .command import (FLOW_CONTROL_COMMANDS,
                       )
 logger = Logger(__name__)
 
-EXECUTE_EXCLUDED_COMMANDS = JMCFunction._get(FuncType.execute_excluded)
+EXECUTE_EXCLUDED_COMMANDS = JMCFunction.get_subclasses(
+    FuncType.execute_excluded)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can't be used with `/execute`"""
-LOAD_ONCE_COMMANDS = JMCFunction._get(FuncType.load_once)
+LOAD_ONCE_COMMANDS = JMCFunction.get_subclasses(FuncType.load_once)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can be only used *once* in load"""
-JMC_COMMANDS = JMCFunction._get(FuncType.jmc_command)
+JMC_COMMANDS = JMCFunction.get_subclasses(FuncType.jmc_command)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command"""
-LOAD_ONLY_COMMANDS = JMCFunction._get(FuncType.load_only)
+LOAD_ONLY_COMMANDS = JMCFunction.get_subclasses(FuncType.load_only)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can only be used in load"""
 
 JSON_FILE_TYPES = [
