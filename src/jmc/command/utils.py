@@ -139,7 +139,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
         f"Unknown argument type", token, tokenizer)
 
 
-def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg]:
+def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
     """
     Verify argument types of a paren_round token
 
@@ -152,7 +152,7 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
     :return: Dictionary of arguments(string) and said argument in Arg form
     """
     args, kwargs = tokenizer.parse_func_args(token)
-    result: dict[str, Arg] = {}
+    result: dict[str, Arg | None] = {key: None for key in params}
     key_list = list(params)
     if len(args) > len(key_list):
         raise JMCSyntaxException(
@@ -160,11 +160,11 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
         result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
-    for key, arg in kwargs.items():
+    for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCSyntaxException(
                 f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
-        arg_type = find_arg_type(arg, tokenizer)
+        arg_type = find_arg_type(kwarg, tokenizer)
         result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
     return result
 

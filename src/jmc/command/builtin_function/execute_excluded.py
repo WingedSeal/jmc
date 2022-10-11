@@ -70,7 +70,7 @@ class HardcodeRepeat(JMCFunction):
         stop = int(self.args["stop"])
         if step == 0:
             raise JMCSyntaxException(
-                "'step' must not be zero", self.args_Args["step"].token, self.tokenizer)
+                "'step' must not be zero", self.raw_args["step"].token, self.tokenizer)
 
         commands: list[str] = []
         for i in range(start, stop, step):
@@ -78,10 +78,10 @@ class HardcodeRepeat(JMCFunction):
                 commands.extend(self.datapack.parse_function_token(
                     Token(
                         TokenType.paren_curly,
-                        self.args_Args["function"].token.line,
-                        self.args_Args["function"].token.col,
+                        self.raw_args["function"].token.line,
+                        self.raw_args["function"].token.col,
                         _hardcode_process(
-                            self.args_Args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.raw_args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )
@@ -112,16 +112,16 @@ class HardcodeSwitch(JMCFunction):
         count = int(self.args["count"])
         func_contents: list[list[str]] = []
         scoreboard_player = find_scoreboard_player_type(
-            self.args_Args["switch"].token, self.tokenizer)
+            self.raw_args["switch"].token, self.tokenizer)
         for i in range(count):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(
                         TokenType.paren_curly,
-                        self.args_Args["function"].token.line,
-                        self.args_Args["function"].token.col,
+                        self.raw_args["function"].token.line,
+                        self.raw_args["function"].token.col,
                         _hardcode_process(
-                            self.args_Args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.raw_args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )

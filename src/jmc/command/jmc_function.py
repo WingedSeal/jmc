@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from typing import Callable
 
-from .utils import ArgType, find_scoreboard_player_type, verify_args
+from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack
 from ..exception import JMCValueError
 from ..tokenizer import Token, Tokenizer
@@ -37,7 +37,7 @@ class JMCFunction:
     func_type: FuncType
     name: str
     call_string: str
-    defaults: dict[str, str] | None
+    defaults: dict[str, str]
     _ignore: set[str]
 
     def __new__(cls, *args, **kwargs):
@@ -56,16 +56,18 @@ class JMCFunction:
         if self.func_type is None:
             raise NotImplementedError("Missing func_type")
 
-        self.args_Args = verify_args(self.arg_type,
+        self.__args_Args = verify_args(self.arg_type,
                                      self.call_string, token, tokenizer)
         self.args: dict[str, str] = {}
+        self.raw_args: dict[str, Arg] = {}
 
-        for key, arg in self.args_Args.items():
+        for key, arg in self.__args_Args.items():
             if arg is None:
                 if key not in self.defaults:
                     raise JMCValueError(key, token, tokenizer)
                 self.args[key] = self.defaults[key]
             else:
+                self.raw_args[key] = arg
                 if key in self._ignore:
                     pass
                 elif arg.arg_type == ArgType._func_call:
@@ -127,7 +129,7 @@ class JMCFunction:
         return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] | None = {}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 

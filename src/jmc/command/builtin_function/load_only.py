@@ -23,7 +23,7 @@ class RightClickSetup(JMCFunction):
 
     def call(self) -> str:
         func_map = parse_func_map(
-            self.args_Args["func_map"].token, self.tokenizer, self.datapack)
+            self.raw_args["func_map"].token, self.tokenizer, self.datapack)
         is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
 
         id_name = self.args["id_name"]
@@ -105,7 +105,7 @@ class PlayerOnEvent(JMCFunction):
 class TriggerSetup(JMCFunction):
     def call(self) -> str:
         func_map = parse_func_map(
-            self.args_Args["triggers"].token, self.tokenizer, self.datapack)
+            self.raw_args["triggers"].token, self.tokenizer, self.datapack)
         is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
 
         obj = self.args["objective"]
@@ -192,13 +192,13 @@ class TimerAdd(JMCFunction):
         selector = self.args["selector"]
         if mode not in {'runOnce', 'runTick', 'none'}:
             raise JMCSyntaxException(
-                f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.args_Args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
+                f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
-        if mode in {'runOnce', 'runTick'} and self.args_Args["function"] is None:
+        if mode in {'runOnce', 'runTick'} and self.raw_args["function"] is None:
             raise JMCValueError("function", self.token, self.tokenizer)
-        if mode == 'none' and self.args_Args["function"] is not None:
+        if mode == 'none' and self.raw_args["function"] is not None:
             raise JMCSyntaxException(
-                f"'function' is provided in 'none' mode {self.call_string}", self.args_Args["function"].token, self.tokenizer)
+                f"'function' is provided in 'none' mode {self.call_string}", self.raw_args["function"].token, self.tokenizer)
         self.datapack.add_objective('dummy', obj)
         if self.call_string not in self.datapack.used_command:
             self.datapack.used_command.add(self.call_string)
@@ -269,17 +269,17 @@ class RecipeTable(JMCFunction):
             json = loads(self.args["recipe"])
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
-                error, self.args_Args["recipe"].token, self.tokenizer)
+                error, self.raw_args["recipe"].token, self.tokenizer)
 
         if "result" not in json:
             raise JMCSyntaxException("'result' key not found in recipe",
-                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "item" not in json["result"]:
             raise JMCSyntaxException("'item' key not found in 'result' in recipe",
-                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
         if "count" not in json["result"]:
             raise JMCSyntaxException("'count' key not found in 'result' in recipe",
-                                     self.args_Args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
 
         result_item = json["result"]["item"]
         json["result"]["item"] = base_item
@@ -302,31 +302,31 @@ class RecipeTable(JMCFunction):
         return ""
 
 
-@ func_property(
-    func_type=FuncType.load_only,
-    call_string='Debug.track',
-    arg_type={},
-    name='debug_track'
-)
-class DebugTrack(JMCFunction):
-    pass
+# @ func_property(
+#     func_type=FuncType.load_only,
+#     call_string='Debug.track',
+#     arg_type={},
+#     name='debug_track'
+# )
+# class DebugTrack(JMCFunction):
+#     pass
 
 
-@ func_property(
-    func_type=FuncType.load_only,
-    call_string='Debug.history',
-    arg_type={},
-    name='debug_history'
-)
-class DebugHistory(JMCFunction):
-    pass
+# @ func_property(
+#     func_type=FuncType.load_only,
+#     call_string='Debug.history',
+#     arg_type={},
+#     name='debug_history'
+# )
+# class DebugHistory(JMCFunction):
+#     pass
 
 
-@ func_property(
-    func_type=FuncType.load_only,
-    call_string='Debug.cleanup',
-    arg_type={},
-    name='debug_cleanup'
-)
-class DebugCleanup(JMCFunction):
-    pass
+# @ func_property(
+#     func_type=FuncType.load_only,
+#     call_string='Debug.cleanup',
+#     arg_type={},
+#     name='debug_cleanup'
+# )
+# class DebugCleanup(JMCFunction):
+#     pass

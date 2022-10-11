@@ -40,7 +40,7 @@ class TimerSet(JMCFunction):
     Set entity's score to start the timer.
     """
     def call(self) -> str:
-        if self.args_Args["tick"].arg_type == ArgType.integer:
+        if self.raw_args["tick"].arg_type == ArgType.integer:
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
         else:
             return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
@@ -83,7 +83,7 @@ class ParticleCircle(JMCFunction):
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -133,7 +133,7 @@ class ParticleSpiral(JMCFunction):
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -183,7 +183,7 @@ class ParticleCylinder(JMCFunction):
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.args_Args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
         return self.datapack.add_raw_private_function(
             self.name,

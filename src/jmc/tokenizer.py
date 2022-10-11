@@ -569,8 +569,11 @@ class Tokenizer:
         if token.token_type != TokenType.paren_round:
             raise JMCSyntaxException(
                 "Expected (", token, self, display_col_length=False)
-        keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
+        _keywords = self.parse(
+            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)
+        if not _keywords:
+            return ([], {})
+        keywords = _keywords[0]
         keywords = self.split_tokens(keywords, ['='])
         keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []

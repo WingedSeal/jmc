@@ -5,8 +5,6 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.test_compile import JMCPack
 
-from jmc.exception import HeaderSyntaxException
-
 
 class TestJMCtxt(unittest.TestCase):
     def test_load(self):
@@ -240,6 +238,7 @@ scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )
+
 
 if __name__ == '__main__':
     unittest.main()
