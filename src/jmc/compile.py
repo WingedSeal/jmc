@@ -51,6 +51,8 @@ def string_to_cert_config(string: str) -> dict[str, str]:
     """
     cert_config = {}
     for line in string.split('\n'):
+        if not line or line.isspace():
+            continue
         key, value = line.split('=')
         cert_config[key.strip()] = value.strip()
     return cert_config

@@ -5,7 +5,7 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.test_compile import JMCPack
 
-from jmc.exception import JMCSyntaxException
+from jmc.exception import JMCFileNotFoundError, JMCSyntaxException
 
 class TestFunction(unittest.TestCase):
     def test_define(self):
@@ -134,11 +134,99 @@ scoreboard objectives add __int__ dummy
             """)
         )
 
+    def test_json_empty_error(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+new advancements(foo) {
+}
+            """).build()
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+new advancements(foo) {}
+            """).build()
+
 
 class TestFeatures(unittest.TestCase):
-    def test_import(self): ...
-    def test_comment(self): ...
-    def test_tick(self): ...
+    def test_import_error(self):
+        with self.assertRaises(JMCFileNotFoundError):
+            JMCPack().set_jmc_file("""
+@import "foo";
+            """).build()
+        with self.assertRaises(JMCFileNotFoundError):
+            JMCPack().set_jmc_file("""
+@import "foo.jmc";
+            """).build()
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+@import;
+            """).build()
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+@import foo;
+            """).build()
+
+    def test_comment(self):
+        pack = JMCPack().set_jmc_file("""
+say "Hello World 1";
+# This is comment
+// This is jmc comment
+say "Hello World 2"; // This is also a jmc comment
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+say Hello World 1
+say Hello World 2
+            """)
+        )
+
+    def test_tick(self):
+        pack = JMCPack().set_jmc_file("""
+function __tick__() {
+    say "Hello World";
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+say Hello World
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+            """)
+        )
+
+    def test_load_define_error(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+function __load__() {
+    say "Hello World";
+}
+            """).build()
 
 
 if __name__ == '__main__':

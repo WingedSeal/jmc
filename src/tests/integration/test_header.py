@@ -46,6 +46,8 @@ Hello World
 #Unknown
         """).build()
 
+    def test_replace(self): ...
+    def test_credit(self): ...
 
 if __name__ == '__main__':
     unittest.main()

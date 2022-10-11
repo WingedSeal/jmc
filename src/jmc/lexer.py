@@ -263,6 +263,7 @@ class Lexer:
         if command[3].token_type != TokenType.paren_curly:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer)
+            
 
         json_type = command[1].string.replace('.', '/')
         if json_type not in JSON_FILE_TYPES:
@@ -291,6 +292,9 @@ class Lexer:
             json: dict[str, str] = loads(json_content)
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(error, command[3], tokenizer)
+        if not json:
+            raise JMCSyntaxException(
+                "JSON content cannot be empty", command[3], tokenizer)
         self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer, command: list[Token], file_path_str: str, prefix: str = ''):
