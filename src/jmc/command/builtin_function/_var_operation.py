@@ -11,7 +11,7 @@ from ..jmc_function import JMCFunction, FuncType, func_property
     arg_type={
         "n": ArgType.scoreboard
     },
-    name='mart_sqrt'
+    name='math_sqrt'
 )
 class MathSqrt(JMCFunction):
     def call(self) -> str:
@@ -76,7 +76,11 @@ class MathSqrt(JMCFunction):
         "min": ArgType.scoreboard_player,
         "max": ArgType.scoreboard_player
     },
-    name='mart_random'
+    name='math_random',
+    defaults={
+        "min": "1",
+        "max": "2147483647"
+    }
 )
 class MathRandom(JMCFunction):
     def call(self) -> str:

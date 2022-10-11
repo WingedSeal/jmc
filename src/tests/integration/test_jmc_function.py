@@ -27,12 +27,12 @@ scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
 scoreboard players set 2 __int__ 2
 scoreboard players operation __math__.N __variable__ = $x __variable__
-function TEST:__private__/mart_sqrt/main
+function TEST:__private__/math_sqrt/main
 scoreboard players operation $i __variable__ = __math__.x_n __variable__
 scoreboard players operation __math__.N __variable__ = $i __variable__
-function TEST:__private__/mart_sqrt/main
+function TEST:__private__/math_sqrt/main
 scoreboard players operation $i __variable__ = __math__.x_n __variable__
-> VIRTUAL/data/TEST/functions/__private__/mart_sqrt/newton_raphson.mcfunction
+> VIRTUAL/data/TEST/functions/__private__/math_sqrt/newton_raphson.mcfunction
 scoreboard players operation __math__.x __variable__ = __math__.x_n __variable__
 scoreboard players operation __math__.x_n __variable__ = __math__.N __variable__
 scoreboard players operation __math__.x_n __variable__ /= __math__.x __variable__
@@ -40,10 +40,10 @@ scoreboard players operation __math__.x_n __variable__ += __math__.x __variable_
 scoreboard players operation __math__.x_n __variable__ /= 2 __int__
 scoreboard players operation __math__.different __variable__ = __math__.x __variable__
 scoreboard players operation __math__.different __variable__ -= __math__.x_n __variable__
-execute unless score __math__.different __variable__ 0..1 run function TEST:__private__/mart_sqrt/newton_raphson
-> VIRTUAL/data/TEST/functions/__private__/mart_sqrt/main.mcfunction
+execute unless score __math__.different __variable__ 0..1 run function TEST:__private__/math_sqrt/newton_raphson
+> VIRTUAL/data/TEST/functions/__private__/math_sqrt/main.mcfunction
 scoreboard players set __math__.x_n __variable__ 1225
-function TEST:__private__/mart_sqrt/newton_raphson
+function TEST:__private__/math_sqrt/newton_raphson
 scoreboard players operation __main__.x_n_sq __variable__ = __math__.x_n __variable__
 scoreboard players operation __main__.x_n_sq __variable__ *= __math__.x_n __variable__
 scoreboard players operation __math__.x_n __variable__ /= 2 __int__

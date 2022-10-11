@@ -1,6 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function and used once"""
 
-from ...exception import JMCValueError
+from ...exception import JMCMissingValueError
 from ...datapack import DataPack
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -79,7 +79,7 @@ class PlayerDie(JMCFunction):
 
     def call(self) -> str:
         if self.raw_args["onDeath"] is None and self.raw_args["onRespawn"] is None:
-            raise JMCValueError("onDeath or onRespawn",
+            raise JMCMissingValueError("onDeath or onRespawn",
                                self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')
         self.datapack.ticks.append(

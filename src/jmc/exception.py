@@ -107,6 +107,17 @@ class JMCSyntaxException(SyntaxError):
         super().__init__(msg)
 
 
+class JMCValueError(ValueError):
+    """Invalid syntax for JMC"""
+
+    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+        msg = error_msg(message, token, tokenizer, col_length,
+                        display_col_length, entire_line, suggestion)
+        log(self, (msg, ))
+        super().__init__(msg)
+
+
+
 class JMCSyntaxWarning(SyntaxWarning):
     """Warnings about dubious JMC syntax"""
 
@@ -147,7 +158,7 @@ class JMCDecodeJSONError(ValueError):
         super().__init__(msg)
 
 
-class JMCValueError(ValueError):
+class JMCMissingValueError(ValueError):
     """Missing required positional argument"""
 
     def __init__(self, missing_argument: str, token: "Token", tokenizer: "Tokenizer", *, suggestion: str = None) -> None:

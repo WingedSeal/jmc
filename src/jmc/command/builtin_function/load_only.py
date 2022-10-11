@@ -1,7 +1,7 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 
 from json import JSONDecodeError, loads
-from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCValueError
+from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError
 from ...datapack import DataPack, Function
 from ..utils import ArgType, PlayerType, ScoreboardPlayer, parse_func_map
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -195,7 +195,7 @@ class TimerAdd(JMCFunction):
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
         if mode in {'runOnce', 'runTick'} and self.raw_args["function"] is None:
-            raise JMCValueError("function", self.token, self.tokenizer)
+            raise JMCMissingValueError("function", self.token, self.tokenizer)
         if mode == 'none' and self.raw_args["function"] is not None:
             raise JMCSyntaxException(
                 f"'function' is provided in 'none' mode {self.call_string}", self.raw_args["function"].token, self.tokenizer)
