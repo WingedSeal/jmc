@@ -309,7 +309,7 @@ scoreboard players set @s my_objective 5
 
     def test_ParticleCircle(self):
         pack = JMCPack().set_jmc_file("""
-Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2, spread=10);
+Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2.0, spread=10);
         """).build()
 
         self.assertDictEqual(
@@ -347,7 +347,7 @@ particle dust 1.0 1.0 1.0 0.7 ^-2.0000000000 ^ ^0.0000000000 0 0 0 1 1 normal
 
     def test_ParticleSpiral(self):
         pack = JMCPack().set_jmc_file("""
-Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1, spread=10);
+Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1.0, spread=10);
         """).build()
 
         self.assertDictEqual(
@@ -409,21 +409,338 @@ particle dust 1.0 1.0 1.0 0.7 ^0.8090169944 ^0.9000000000 ^-0.5877852523 0 0 0 1
             """)
         )
 
+    def test_ParticleLine(self):
+        pack = JMCPack().set_jmc_file("""
+Particle.line("dust 1.0 1.0 1.0 0.7", distance=10.5, spread=10);
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+function TEST:__private__/particle_line/0
+> VIRTUAL/data/TEST/functions/__private__/particle_line/0.mcfunction
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^1.0000000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^2.0500000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^3.1000000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^4.1500000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^5.2000000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^6.2500000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^7.3000000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^8.3500000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^9.4000000000 0 0 0 1 1 normal
+particle dust 1.0 1.0 1.0 0.7 ^ ^ ^10.4500000000 0 0 0 1 1 normal
+            """)
+        )
+
 class TestLoadOnce(unittest.TestCase):
-    def test_error_load_twice(self): ...
-    def test_error_no_load(self): ...
-    def test_PlayerFirstJoin(self): ...
-    def test_PlayerRejoin(self): ...
-    def test_PlayerDie(self): ...
+    def test_error_load_twice(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+Player.firstJoin(()=>{
+    tellraw @s "Welcome!";
+});  
+Player.firstJoin(()=>{
+    tellraw @s "Welcome!";
+});  
+            """).build()
+
+    def test_error_no_load(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+function test() {
+    Player.firstJoin(()=>{
+        tellraw @s "Welcome!";
+    });    
+}
+
+            """).build()
+
+    def test_PlayerFirstJoin(self):
+        pack = JMCPack().set_jmc_file("""
+Player.firstJoin(()=>{
+    tellraw @s "Welcome!";
+});  
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+> VIRTUAL/data/TEST/functions/__private__/player_first_join/main.mcfunction
+tellraw @s "Welcome!"
+> VIRTUAL/data/TEST/advancements/__private__/player_first_join.json
+{
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {
+    "function": "TEST:__private__/player_first_join/main"
+  }
+}
+            """)
+        )
+
+    def test_PlayerRejoin(self):
+        pack = JMCPack().set_jmc_file("""
+Player.rejoin(()=>{
+    tellraw @s "Welcome!";
+});  
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add __rejoin__ custom:leave_game
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+execute as @a[scores={__rejoin__=1..}] at @s run function TEST:__private__/player_rejoin/main
+> VIRTUAL/data/TEST/functions/__private__/player_rejoin/main.mcfunction
+scoreboard players reset @s __rejoin__
+tellraw @s "Welcome!"
+            """)
+        )
+
+    def test_PlayerDie(self):
+        pack = JMCPack().set_jmc_file("""
+Player.die(onDeath=()=>{
+    tellraw @s "You died";
+},onRespawn=()=>{
+    tellraw @s "Welcome back to live";
+    say "I'm back";
+});  
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add __die__ deathCount
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+execute as @a[scores={__die__=1..}] at @s run function TEST:__private__/player_die/on_death
+execute as @e[type=player,scores={__die__=2..}] at @s run function TEST:__private__/player_die/on_respawn
+> VIRTUAL/data/TEST/functions/__private__/player_die/on_death.mcfunction
+scoreboard players set @s __die__ 2
+tellraw @s "You died"
+> VIRTUAL/data/TEST/functions/__private__/player_die/on_respawn.mcfunction
+scoreboard players reset @s __die__
+tellraw @s "Welcome back to live"
+say I'm back
+            """)
+        )
 
 
 class TestLoadOnly(unittest.TestCase):
-    def test_error_no_load(self): ...
-    def test_RightClickSetup(self): ...
+    def test_error_no_load(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+function notLoad() {
+    Timer.add(help_cd, runOnce, @a, ()=>{
+        tellraw @s "Your help command is ready!";
+    });
+}
+            """).build()
+
+    def test_RightClickSetup(self):
+        pack = JMCPack().set_jmc_file("""
+RightClick.setup(
+    custom_id,
+    {
+        1: ()=>{
+            say "1";
+        },
+        2: ()=>{
+            say "2";
+        }
+    }   
+);
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add __rc__ used:carrot_on_a_stick
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+execute as @a[scores={__rc__=1..}] at @s run function TEST:__private__/right_click_setup/main
+> VIRTUAL/data/TEST/functions/__private__/right_click_setup/main.mcfunction
+scoreboard players reset @s __rc__
+execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.custom_id
+execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/right_click_setup/1
+> VIRTUAL/data/TEST/functions/__private__/right_click_setup/1.mcfunction
+execute if score @s __item_id__ matches 1 run function TEST:__private__/right_click_setup/2
+execute if score @s __item_id__ matches 2 run function TEST:__private__/right_click_setup/3
+> VIRTUAL/data/TEST/functions/__private__/right_click_setup/2.mcfunction
+say 1
+> VIRTUAL/data/TEST/functions/__private__/right_click_setup/3.mcfunction
+say 2
+            """)
+        )
     def test_PlayerOnEvent(self): ...
     def test_TriggerSetup(self): ...
-    def test_TimerAdd(self): ...
-    def test_RecipeTable(self): ...
+
+    def test_TimerAdd(self):
+        pack = JMCPack().set_jmc_file("""
+Timer.add(help_cd, runOnce, @a, ()=>{
+    tellraw @s "Your help command is ready!";
+});
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add dummy help_cd
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+function TEST:__private__/timer_add/main
+> VIRTUAL/data/TEST/functions/__private__/timer_add/main.mcfunction
+execute as @a if score @s help_cd matches 1.. run scoreboard players remove @s help_cd 1
+execute as @a if score @s help_cd matches 0 run function TEST:__private__/timer_add/0
+> VIRTUAL/data/TEST/functions/__private__/timer_add/0.mcfunction
+scoreboard players reset @s help_cd
+tellraw @s "Your help command is ready!"
+            """)
+        )
+
+    def test_RecipeTable(self):
+        pack = JMCPack().set_jmc_file("""
+Recipe.table({
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:oak_planks"
+        }
+    ],
+    "result": {
+        "item": "minecraft:diamond{test:1b}",
+        "count": 5
+    }
+}, baseItem=barrier, onCraft=()=>{
+    tellraw @s "Wow! You crafted a special diamond";
+});  
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+> VIRTUAL/data/TEST/functions/__private__/recipe_table/0.mcfunction
+clear @s minecraft:barrier 1
+give @s minecraft:diamond{test:1b} 5
+recipe take @s TEST:__private__/recipe_table/0
+advancement revoke @s only TEST:__private__/recipe_table/0
+tellraw @s "Wow! You crafted a special diamond"
+> VIRTUAL/data/TEST/advancements/__private__/recipe_table/0.json
+{
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "TEST:__private__/recipe_table/0"
+      }
+    }
+  },
+  "rewards": {
+    "function": "TEST:__private__/recipe_table/0"
+  }
+}
+> VIRTUAL/data/TEST/recipes/__private__/recipe_table/0.json
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:oak_planks"
+    }
+  ],
+  "result": {
+    "item": "minecraft:barrier",
+    "count": 1
+  }
+}
+            """)
+        )
 
 
 if __name__ == '__main__':

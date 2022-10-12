@@ -82,7 +82,7 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str, 
     call_string='Particle.circle',
     arg_type={
         "particle": ArgType.string,
-        "radius": ArgType.integer,
+        "radius": ArgType.float,
         "spread": ArgType.integer,
         "speed": ArgType.integer,
         "count": ArgType.integer,
@@ -96,7 +96,7 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str, 
     }
 )
 class ParticleCircle(JMCFunction):
-    def draw(self, radius: int, spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, spread: int) -> list[tuple[float, float, float]]:
         points = []
         angle = 2*math.pi/spread
         for i in drange(0, spread, angle):
@@ -112,7 +112,7 @@ class ParticleCircle(JMCFunction):
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    int(self.args["radius"]),
+                    float(self.args["radius"]),
                     int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
@@ -127,8 +127,8 @@ class ParticleCircle(JMCFunction):
     call_string='Particle.spiral',
     arg_type={
         "particle": ArgType.string,
-        "radius": ArgType.integer,
-        "height": ArgType.integer,
+        "radius": ArgType.float,
+        "height": ArgType.float,
         "spread": ArgType.integer,
         "speed": ArgType.integer,
         "count": ArgType.integer,
@@ -142,7 +142,7 @@ class ParticleCircle(JMCFunction):
     }
 )
 class ParticleSpiral(JMCFunction):
-    def draw(self, radius: int, height: int, spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, height: float, spread: int) -> list[tuple[float, float, float]]:
         points = []
         angle = 2*math.pi/spread
         d_y = height/spread
@@ -162,8 +162,8 @@ class ParticleSpiral(JMCFunction):
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    int(self.args["radius"]),
-                    int(self.args["height"]),
+                    float(self.args["radius"]),
+                    float(self.args["height"]),
                     int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
@@ -178,8 +178,8 @@ class ParticleSpiral(JMCFunction):
     call_string='Particle.cylinder',
     arg_type={
         "particle": ArgType.string,
-        "radius": ArgType.integer,
-        "height": ArgType.integer,
+        "radius": ArgType.float,
+        "height": ArgType.float,
         "spread_xz": ArgType.integer,
         "spread_y": ArgType.integer,
         "speed": ArgType.integer,
@@ -194,7 +194,7 @@ class ParticleSpiral(JMCFunction):
     }
 )
 class ParticleCylinder(JMCFunction):
-    def draw(self, radius: int, height: int, spread_xz: int, spread_y: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, height: float, spread_xz: int, spread_y: int) -> list[tuple[float, float, float]]:
         points = []
         d_y = height/spread_y
         for y in range(spread_y):
@@ -212,8 +212,8 @@ class ParticleCylinder(JMCFunction):
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    int(self.args["radius"]),
-                    int(self.args["height"]),
+                    float(self.args["radius"]),
+                    float(self.args["height"]),
                     int(self.args["spread_xz"]),
                     int(self.args["spread_y"])),
                 self.args["particle"],
@@ -229,7 +229,7 @@ class ParticleCylinder(JMCFunction):
     call_string='Particle.line',
     arg_type={
         "particle": ArgType.string,
-        "distance": ArgType.integer,
+        "distance": ArgType.float,
         "spread": ArgType.integer,
         "speed": ArgType.integer,
         "count": ArgType.integer,
@@ -242,8 +242,10 @@ class ParticleCylinder(JMCFunction):
         "mode": "normal",
     }
 )
+
+
 class ParticleLine(JMCFunction):
-    def draw(self, distance: int, spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, distance: float, spread: int) -> list[tuple[float, float, float]]:
         return [(0, 0, n) for n in drange(1, distance+1, distance/spread)]
 
     def call(self) -> str:
@@ -255,7 +257,7 @@ class ParticleLine(JMCFunction):
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    int(self.args["distance"]),
+                    float(self.args["distance"]),
                     int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
