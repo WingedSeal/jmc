@@ -82,8 +82,11 @@ class JMCFunction:
                     self.args[key] = '\n'.join(
                         datapack.parse_function_token(arg.token, tokenizer))
                 elif arg.arg_type == ArgType.integer:
-                    self.args[key] = str(find_scoreboard_player_type(
-                        arg.token, tokenizer).value)
+                    self.args[key] = arg.token.string
+                    # self.args[key] = str(find_scoreboard_player_type(
+                    #     arg.token, tokenizer).value)
+                elif arg.arg_type == ArgType.float:
+                    self.args[key] = str(float(arg.token.string))
                 elif arg.arg_type in {ArgType.scoreboard_player, ArgType.scoreboard}:
                     scoreboard_player = find_scoreboard_player_type(
                         arg.token, tokenizer)

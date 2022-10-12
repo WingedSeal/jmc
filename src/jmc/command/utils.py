@@ -7,7 +7,7 @@ from enum import Enum, auto
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import is_number
+from ..utils import is_number, is_float
 
 
 class PlayerType(Enum):
@@ -64,6 +64,7 @@ class ArgType(Enum):
     json = "JSON"
     scoreboard = "variable or objective:selector"
     integer = "integer"
+    float = "integer or decimal(real number)"
     string = "string"
     keyword = "keyword"
     selector = "target selector"
@@ -91,6 +92,11 @@ class Arg:
             return self
         if verifier == ArgType.scoreboard_player:
             if self.arg_type in {ArgType.scoreboard, ArgType.integer}:
+                return self
+            raise JMCValueError(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier == ArgType.float:
+            if self.arg_type in {ArgType.float, ArgType.integer}:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
@@ -129,6 +135,8 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
             return ArgType.scoreboard
         if is_number(token.string):
             return ArgType.integer
+        if is_float(token.string):
+            return ArgType.float
         if token.string.startswith('@'):
             return ArgType.selector
         return ArgType.keyword

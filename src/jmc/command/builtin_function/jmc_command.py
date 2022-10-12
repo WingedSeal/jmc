@@ -46,11 +46,34 @@ class TimerSet(JMCFunction):
             return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
 
 
-def points_to_commands(points: list[tuple[float, float, float]], particle: str, speed: str, count: str, mode: str) -> list[str]:
+def __normalize_decimal(n: float):
+    """
+    Parse float into string
+
+    :param n: _description_
+    """
+    if n == 0:
+        return ""
+    stripped = f'{n:.10f}'  # .rstrip('0').rstrip('.')
+    return stripped
+
+
+def points_to_commands(points: list[tuple[float, float, float]], particle: str, speed: str, count: str, mode: str, notation: str = "~") -> list[str]:
+    """
+    Parse list of points(x,y,z position) into particle commands
+
+    :param points: List of points(x,y,z position)
+    :param particle: particle type
+    :param speed: particle speed
+    :param count: particle count
+    :param mode: particle mode
+    :param notation: Notation (~) or (^)
+    :return: particle commands
+    """
     commands = []
     for x_pos, y_pos, z_pos in points:
         commands.append(
-            f'particle {particle} ^{x_pos:.10f} ^{y_pos:.10f} ^{z_pos:.10f} 0 0 0 {speed} {count} {mode}')
+            f'particle {particle} ^{__normalize_decimal(x_pos)} ^{__normalize_decimal(y_pos)} ^{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}')
     return commands
 
 
@@ -193,6 +216,47 @@ class ParticleCylinder(JMCFunction):
                     int(self.args["height"]),
                     int(self.args["spread_xz"]),
                     int(self.args["spread_y"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.jmc_command,
+    call_string='Particle.line',
+    arg_type={
+        "particle": ArgType.string,
+        "distance": ArgType.integer,
+        "spread": ArgType.integer,
+        "speed": ArgType.integer,
+        "count": ArgType.integer,
+        "mode": ArgType.keyword,
+    },
+    name='particle_line',
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "mode": "normal",
+    }
+)
+class ParticleLine(JMCFunction):
+    def draw(self, distance: int, spread: int) -> list[tuple[float, float, float]]:
+        return [(0, 0, n) for n in drange(1, distance+1, distance/spread)]
+
+    def call(self) -> str:
+        if self.args['mode'] not in {'force', 'normal'}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    int(self.args["distance"]),
+                    int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],

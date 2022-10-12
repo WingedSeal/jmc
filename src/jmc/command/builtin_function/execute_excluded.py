@@ -113,7 +113,7 @@ class HardcodeSwitch(JMCFunction):
         func_contents: list[list[str]] = []
         scoreboard_player = find_scoreboard_player_type(
             self.raw_args["switch"].token, self.tokenizer)
-        for i in range(count):
+        for i in range(1, count+1):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(

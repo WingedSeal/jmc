@@ -41,6 +41,16 @@ def is_number(string: str) -> bool:
         return True
 
 
+def is_float(string: str) -> bool:
+    """Whether string can be converted to integer"""
+    try:
+        float(string)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
 def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     """Whether 2 tokens are next to each other"""
     return (
