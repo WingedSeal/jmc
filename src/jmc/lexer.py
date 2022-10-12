@@ -18,13 +18,13 @@ from .command import (FLOW_CONTROL_COMMANDS,
 logger = Logger(__name__)
 
 EXECUTE_EXCLUDED_COMMANDS = JMCFunction.get_subclasses(
-    FuncType.execute_excluded)
+    FuncType.EXECUTE_EXCLUDED)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can't be used with `/execute`"""
-LOAD_ONCE_COMMANDS = JMCFunction.get_subclasses(FuncType.load_once)
+LOAD_ONCE_COMMANDS = JMCFunction.get_subclasses(FuncType.LOAD_ONCE)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can be only used *once* in load"""
-JMC_COMMANDS = JMCFunction.get_subclasses(FuncType.jmc_command)
+JMC_COMMANDS = JMCFunction.get_subclasses(FuncType.JMC_COMMAND)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command"""
-LOAD_ONLY_COMMANDS = JMCFunction.get_subclasses(FuncType.load_only)
+LOAD_ONLY_COMMANDS = JMCFunction.get_subclasses(FuncType.LOAD_ONLY)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can only be used in load"""
 
 JSON_FILE_TYPES = [
@@ -150,7 +150,7 @@ class Lexer:
                 if len(command) < 2:
                     raise JMCSyntaxException(
                         "Expected string after '@import'", command[0], tokenizer, col_length=True)
-                if command[1].token_type != TokenType.string:
+                if command[1].token_type != TokenType.STRING:
                     raise JMCSyntaxException(
                         "Expected string after '@import'", command[1], tokenizer)
                 if len(command) > 2:
@@ -193,13 +193,13 @@ class Lexer:
         :raises JMCSyntaxException: Define private function
         """
         logger.debug(f"Parsing function, prefix = {prefix!r}")
-        if command[1].token_type != TokenType.keyword:
+        if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(function's name)", command[1], tokenizer)
         elif command[2].string != '()':
             raise JMCSyntaxException(
                 f"Expected (", command[2], tokenizer, display_col_length=False)
-        elif command[3].token_type != TokenType.paren_curly:
+        elif command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
 
@@ -246,7 +246,7 @@ class Lexer:
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)", command[0], tokenizer, col_length=True)
-        if command[1].token_type != TokenType.keyword:
+        if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)", command[1], tokenizer)
         if len(command) < 3:
@@ -255,13 +255,13 @@ class Lexer:
         if command[2].string == '()':
             raise JMCSyntaxException(
                 "Expected JSON file's path in bracket", command[2], tokenizer)
-        if command[2].token_type != TokenType.paren_round:
+        if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected (", command[2], tokenizer)
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, col_length=True)
-        if command[3].token_type != TokenType.paren_curly:
+        if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer)
             
@@ -315,13 +315,13 @@ class Lexer:
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(class's name)", command[0], tokenizer)
-        if command[1].token_type != TokenType.keyword:
+        if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(class's name)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
                 "Expected {", command[1], tokenizer, col_length=True)
-        if command[2].token_type != TokenType.paren_curly:
+        if command[2].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer)
 
@@ -373,7 +373,7 @@ class Lexer:
         """List of argument in a line of command"""
 
         for command in programs:
-            if command[0].token_type != TokenType.keyword:
+            if command[0].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
                     "Expected keyword", command[0], tokenizer)
             elif command[0].string == 'new':
@@ -408,8 +408,8 @@ class Lexer:
                 if is_expect_command:
                     is_expect_command = False
                     # Handle Errors
-                    if token.token_type != TokenType.keyword:
-                        if token.token_type == TokenType.paren_curly and is_execute:
+                    if token.token_type != TokenType.KEYWORD:
+                        if token.token_type == TokenType.PAREN_CURLY and is_execute:
                             append_commands(commands, self.datapack.add_private_function(
                                 'anonymous', token, tokenizer))
                             break
@@ -458,7 +458,7 @@ class Lexer:
                             raise JMCSyntaxException(
                                 "Expected string after 'say' command", token, tokenizer, col_length=True)
 
-                        if command[key_pos+1].token_type != TokenType.string:
+                        if command[key_pos+1].token_type != TokenType.STRING:
                             raise JMCSyntaxException(
                                 "Expected string after 'say' command", command[key_pos+1], tokenizer, display_col_length=False, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
 
@@ -474,7 +474,7 @@ class Lexer:
                         break
 
                     if token.string.startswith(DataPack.VARIABLE_SIGN):
-                        if len(command) > key_pos+1 and command[key_pos+1].string == 'run' and command[key_pos+1].token_type == TokenType.keyword:
+                        if len(command) > key_pos+1 and command[key_pos+1].string == 'run' and command[key_pos+1].token_type == TokenType.KEYWORD:
                             is_execute = True
                             append_commands(commands,
                                             f"execute store result score {token.string} {DataPack.VAR_NAME}")
@@ -560,7 +560,7 @@ class Lexer:
                         if is_execute:
                             raise JMCSyntaxException(
                                 f"This feature({token.string}) can only be used in load function", token, tokenizer)
-                    if len(command[key_pos:]) == 2 and command[key_pos+1].token_type == TokenType.paren_round:
+                    if len(command[key_pos:]) == 2 and command[key_pos+1].token_type == TokenType.PAREN_ROUND:
                         if command[key_pos+1].string != '()':
                             raise JMCSyntaxException(
                                 f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", command[key_pos+1], tokenizer)
@@ -575,13 +575,13 @@ class Lexer:
                             f"Unrecognized command ({token.string})", token, tokenizer)
 
                 else:
-                    if token.string == 'run' and token.token_type == TokenType.keyword:
+                    if token.string == 'run' and token.token_type == TokenType.KEYWORD:
                         if not is_execute:
                             raise MinecraftSyntaxWarning(
                                 "'run' keyword found outside 'execute' command", token, tokenizer)
                         is_expect_command = True
                     if (
-                        token.token_type == TokenType.keyword and
+                        token.token_type == TokenType.KEYWORD and
                         token.string in FIRST_ARGUMENTS and
                         not (
                             token.string == 'function' and
@@ -591,10 +591,10 @@ class Lexer:
                         raise JMCSyntaxException(
                             f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", command[key_pos-1], tokenizer, col_length=True)
 
-                    if token.string == '@s' and token.token_type == TokenType.keyword and commands[-1] == 'as':
+                    if token.string == '@s' and token.token_type == TokenType.KEYWORD and commands[-1] == 'as':
                         commands[-1] = 'if entity'
 
-                    if token.token_type == TokenType.paren_round:
+                    if token.token_type == TokenType.PAREN_ROUND:
                         commands[-1], success = search_to_string(
                             commands[-1], token, DataPack.VAR_NAME, tokenizer)
                         if not success:
@@ -604,14 +604,14 @@ class Lexer:
                             else:
                                 append_commands(
                                     commands, self.clean_up_paren(token, tokenizer))
-                    elif token.token_type in {TokenType.paren_curly, TokenType.paren_square}:
+                    elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
                         if is_connected(token, command[key_pos-1]):
                             commands[-1] += self.clean_up_paren(
                                 token, tokenizer)
                         else:
                             append_commands(
                                 commands, self.clean_up_paren(token, tokenizer))
-                    elif token.token_type == TokenType.string:
+                    elif token.token_type == TokenType.STRING:
                         append_commands(commands, dumps(token.string))
                     else:
                         append_commands(commands, token.string)
@@ -738,19 +738,19 @@ class Lexer:
         tokenizer = Tokenizer(token.string[1:-1], tokenizer.file_path, token.line,
                               token.col+1, tokenizer.file_string, expect_semicolon=False)
         string = ""
-        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.string:
+        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.STRING:
             is_nbt = False
         for token_ in tokenizer.programs[0]:
-            if token_.token_type == TokenType.paren_round:
+            if token_.token_type == TokenType.PAREN_ROUND:
                 string, success = search_to_string(
                     string, token_, DataPack.VAR_NAME, tokenizer)
                 if success:
                     _string = ""
                 else:
                     _string = self.clean_up_paren(token_, tokenizer, is_nbt)
-            elif token_.token_type in {TokenType.paren_curly, TokenType.paren_square}:
+            elif token_.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
                 _string = self.clean_up_paren(token_, tokenizer, is_nbt)
-            elif token_.token_type == TokenType.string:
+            elif token_.token_type == TokenType.STRING:
                 if is_nbt:
                     _string = repr(token_.string)
                 else:

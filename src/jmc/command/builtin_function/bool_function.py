@@ -8,11 +8,11 @@ UNLESS = False
 
 
 @func_property(
-    func_type=FuncType.bool_function,
+    func_type=FuncType.BOOL_FUNCTION,
     call_string='Timer.isOver',
     arg_type={
-        "objective": ArgType.keyword,
-        "target_selector": ArgType.selector
+        "objective": ArgType.KEYWORD,
+        "target_selector": ArgType.SELECTOR
     },
     name='timer_is_over',
     defaults={

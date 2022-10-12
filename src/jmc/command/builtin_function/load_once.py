@@ -7,10 +7,10 @@ from ..jmc_function import JMCFunction, FuncType, func_property
 
 
 @func_property(
-    func_type=FuncType.load_once,
+    func_type=FuncType.LOAD_ONCE,
     call_string='Player.firstJoin',
     arg_type={
-        "function": ArgType.func
+        "function": ArgType.FUNC
     },
     name='player_first_join'
 )
@@ -35,10 +35,10 @@ class PlayerFirstJoin(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.load_once,
+    func_type=FuncType.LOAD_ONCE,
     call_string='Player.rejoin',
     arg_type={
-        "function": ArgType.func
+        "function": ArgType.FUNC
     },
     name='player_rejoin'
 )
@@ -60,11 +60,11 @@ class PlayerRejoin(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.load_once,
+    func_type=FuncType.LOAD_ONCE,
     call_string='Player.die',
     arg_type={
-        "onDeath": ArgType.func,
-        "onRespawn": ArgType.func
+        "onDeath": ArgType.FUNC,
+        "onRespawn": ArgType.FUNC
     },
     name='player_die',
     defaults={

@@ -37,7 +37,7 @@ class TestTokenizer(unittest.TestCase):
                                   1, len(self.SAMPLE))
                               )) + ';'
             for token in Tokenizer(string).programs[0]:
-                self.assertEqual(token.token_type, tokenizer.TokenType.keyword)
+                self.assertEqual(token.token_type, tokenizer.TokenType.KEYWORD)
 
     def test_string(self):
         for quote in ['"', "'"]:
@@ -49,7 +49,7 @@ class TestTokenizer(unittest.TestCase):
                                                  )]) + ';'
                 for token in Tokenizer(string).programs[0]:
                     self.assertEqual(token.token_type,
-                                     tokenizer.TokenType.string)
+                                     tokenizer.TokenType.STRING)
 
     def test_diff_quote_type(self):
         with self.assertRaises(JMCSyntaxException):

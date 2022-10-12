@@ -11,9 +11,9 @@ from ..utils import is_number, is_float
 
 
 class PlayerType(Enum):
-    variable = auto()
-    integer = auto()
-    scoreboard = auto()
+    VARIABLE = auto()
+    INTEGER = auto()
+    SCOREBOARD = auto()
 
 
 @dataclass(frozen=True)
@@ -33,15 +33,15 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
     :raises JMCSyntaxException: Token is not a keyword token
     :return: ScoreboardPlayer
     """
-    if token.token_type != TokenType.keyword:
+    if token.token_type != TokenType.KEYWORD:
         raise JMCSyntaxException(
             f"Expected keyword", token, tokenizer)
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
-        return ScoreboardPlayer(player_type=PlayerType.variable, value=(DataPack.VAR_NAME, token.string))
+        return ScoreboardPlayer(player_type=PlayerType.VARIABLE, value=(DataPack.VAR_NAME, token.string))
 
     if is_number(token.string):
-        return ScoreboardPlayer(player_type=PlayerType.integer, value=int(token.string))
+        return ScoreboardPlayer(player_type=PlayerType.INTEGER, value=int(token.string))
 
     splits = token.string.split(':')
     if len(splits) == 1:
@@ -55,23 +55,23 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
         raise JMCSyntaxException(
             "Scoreboard's player cannot contain more than 1 colon(:)", token, tokenizer)
 
-    return ScoreboardPlayer(player_type=PlayerType.scoreboard, value=(splits[0], splits[1]))
+    return ScoreboardPlayer(player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
 
 class ArgType(Enum):
-    arrow_func = "arrow(anonymous) function"
-    js_object = "JavaScript object (dictionary)"
-    json = "JSON"
-    scoreboard = "variable or objective:selector"
-    integer = "integer"
-    float = "integer or decimal(real number)"
-    string = "string"
-    keyword = "keyword"
-    selector = "target selector"
-    func = "function"
-    _func_call = "function"
-    scoreboard_player = "integer, variable, or objective:selector"
-    any = None
+    ARROW_FUNC = "arrow(anonymous) function"
+    JS_OBJECT = "JavaScript object (dictionary)"
+    JSON = "JSON"
+    SCOREBOARD = "variable or objective:selector"
+    INTEGER = "integer"
+    FLOAT = "integer or decimal(real number)"
+    STRING = "string"
+    KEYWORD = "keyword"
+    SELECTOR = "target selector"
+    FUNC = "function"
+    _FUNC_CALL = "function"
+    SCOREBOARD_PLAYER = "integer, variable, or objective:selector"
+    ANY = None
 
 
 class Arg:
@@ -88,23 +88,23 @@ class Arg:
         :param key_string: Key(kwarg) in from of string
         :return: self
         """
-        if verifier == ArgType.any:
+        if verifier == ArgType.ANY:
             return self
-        if verifier == ArgType.scoreboard_player:
-            if self.arg_type in {ArgType.scoreboard, ArgType.integer}:
+        if verifier == ArgType.SCOREBOARD_PLAYER:
+            if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
-        if verifier == ArgType.float:
-            if self.arg_type in {ArgType.float, ArgType.integer}:
+        if verifier == ArgType.FLOAT:
+            if self.arg_type in {ArgType.FLOAT, ArgType.INTEGER}:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
-        if verifier == ArgType.func:
-            if self.arg_type == ArgType.arrow_func:
+        if verifier == ArgType.FUNC:
+            if self.arg_type == ArgType.ARROW_FUNC:
                 return self
-            if self.arg_type == ArgType.keyword:
-                self.arg_type = ArgType._func_call
+            if self.arg_type == ArgType.KEYWORD:
+                self.arg_type = ArgType._FUNC_CALL
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
@@ -120,28 +120,28 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
 
     :param token: any token representing argument
     :param tokenizer: Tokenizer
-    :raises JMCValueError: Cannot find ArgType.func type
+    :raises JMCValueError: Cannot find ArgType.FUNC type
     :return: Argument's type of the token
     """
-    if token.token_type == TokenType.func:
-        return ArgType.arrow_func
-    if token.token_type == TokenType.paren_curly:
+    if token.token_type == TokenType.FUNC:
+        return ArgType.ARROW_FUNC
+    if token.token_type == TokenType.PAREN_CURLY:
         if re.match(r'^{\s*"', token.string) is not None:
-            return ArgType.json
+            return ArgType.JSON
         else:
-            return ArgType.js_object
-    if token.token_type == TokenType.keyword:
+            return ArgType.JS_OBJECT
+    if token.token_type == TokenType.KEYWORD:
         if token.string.startswith(DataPack.VARIABLE_SIGN) or ':' in token.string:
-            return ArgType.scoreboard
+            return ArgType.SCOREBOARD
         if is_number(token.string):
-            return ArgType.integer
+            return ArgType.INTEGER
         if is_float(token.string):
-            return ArgType.float
+            return ArgType.FLOAT
         if token.string.startswith('@'):
-            return ArgType.selector
-        return ArgType.keyword
-    if token.token_type == TokenType.string:
-        return ArgType.string
+            return ArgType.SELECTOR
+        return ArgType.KEYWORD
+    if token.token_type == TokenType.STRING:
+        return ArgType.STRING
 
     raise JMCValueError(
         "Unknown argument type", token, tokenizer)
@@ -226,9 +226,9 @@ def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> di
             raise JMCValueError(
                 f"Expected number as key (got {key})", token, tokenizer)
 
-        if value.token_type == TokenType.keyword:
+        if value.token_type == TokenType.KEYWORD:
             func_map[num] = value.string, False
-        elif value.token_type == TokenType.func:
+        elif value.token_type == TokenType.FUNC:
             func_map[num] = '\n'.join(
                 datapack.parse_function_token(value, tokenizer)), True
         else:

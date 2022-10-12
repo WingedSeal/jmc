@@ -9,11 +9,11 @@ from .._flow_control import parse_switch
 
 
 @func_property(
-    func_type=FuncType.load_only,
+    func_type=FuncType.LOAD_ONLY,
     call_string='RightClick.setup',
     arg_type={
-        "id_name": ArgType.keyword,
-        "func_map": ArgType.js_object
+        "id_name": ArgType.KEYWORD,
+        "func_map": ArgType.JS_OBJECT
     },
     name='right_click_setup'
 )
@@ -53,7 +53,7 @@ class RightClickSetup(JMCFunction):
 
             main_func.append(
                 f"""execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.scoreboard, (self.obj_id, '@s')), func_contents, self.datapack, self.name)}""")
+                    PlayerType.SCOREBOARD, (self.obj_id, '@s')), func_contents, self.datapack, self.name)}""")
         else:
             main_func.append(
                 f"execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
@@ -72,11 +72,11 @@ class RightClickSetup(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.load_only,
+    func_type=FuncType.LOAD_ONLY,
     call_string='Player.onEvent',
     arg_type={
-        "objective": ArgType.keyword,
-        "function": ArgType.func,
+        "objective": ArgType.KEYWORD,
+        "function": ArgType.FUNC,
     },
     name='player_on_event'
 )
@@ -91,11 +91,11 @@ class PlayerOnEvent(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.load_only,
+    func_type=FuncType.LOAD_ONLY,
     call_string='Trigger.setup',
     arg_type={
-        "objective": ArgType.keyword,
-        "triggers": ArgType.js_object
+        "objective": ArgType.KEYWORD,
+        "triggers": ArgType.JS_OBJECT
     },
     name='trigger_setup',
     ignore={
@@ -150,7 +150,7 @@ class TriggerSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
             run = [
                 parse_switch(ScoreboardPlayer(
-                    PlayerType.scoreboard, (obj, '@s')), func_contents, self.datapack, self.name),
+                    PlayerType.SCOREBOARD, (obj, '@s')), func_contents, self.datapack, self.name),
             ]
         else:
             run = []
@@ -170,13 +170,13 @@ class TriggerSetup(JMCFunction):
 
 
 @ func_property(
-    func_type=FuncType.load_only,
+    func_type=FuncType.LOAD_ONLY,
     call_string='Timer.add',
     arg_type={
-        "objective": ArgType.keyword,
-        "mode": ArgType.keyword,
-        "selector": ArgType.selector,
-        "function": ArgType.func
+        "objective": ArgType.KEYWORD,
+        "mode": ArgType.KEYWORD,
+        "selector": ArgType.SELECTOR,
+        "function": ArgType.FUNC
     },
     name='timer_add',
     defaults={
@@ -232,12 +232,12 @@ class TimerAdd(JMCFunction):
 
 
 @ func_property(
-    func_type=FuncType.load_only,
+    func_type=FuncType.LOAD_ONLY,
     call_string='Recipe.table',
     arg_type={
-        "recipe": ArgType.json,
-        "baseItem": ArgType.keyword,
-        "onCraft": ArgType.func
+        "recipe": ArgType.JSON,
+        "baseItem": ArgType.KEYWORD,
+        "onCraft": ArgType.FUNC
     },
     name='recipe_table',
     defaults={

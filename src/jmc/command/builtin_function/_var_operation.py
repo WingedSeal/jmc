@@ -7,10 +7,10 @@ from ...exception import JMCValueError
 
 
 @func_property(
-    func_type=FuncType.variable_operation,
+    func_type=FuncType.VARIABLE_OPERATION,
     call_string='Math.sqrt',
     arg_type={
-        "n": ArgType.scoreboard
+        "n": ArgType.SCOREBOARD
     },
     name='math_sqrt'
 )
@@ -71,11 +71,11 @@ class MathSqrt(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.variable_operation,
+    func_type=FuncType.VARIABLE_OPERATION,
     call_string='Math.random',
     arg_type={
-        "min": ArgType.scoreboard_player,
-        "max": ArgType.scoreboard_player
+        "min": ArgType.SCOREBOARD_PLAYER,
+        "max": ArgType.SCOREBOARD_PLAYER
     },
     name='math_random',
     defaults={

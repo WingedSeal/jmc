@@ -11,13 +11,13 @@ def if_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
-    if command[1].token_type != TokenType.paren_round:
+    if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
             "Expected (", command[1], tokenizer, display_col_length=False)
     if len(command) < 3:
         raise JMCSyntaxException(
             "Expected {", command[1], tokenizer, col_length=True)
-    if command[2].token_type != TokenType.paren_curly:
+    if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[2], tokenizer, display_col_length=False)
 
@@ -33,24 +33,24 @@ def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str
         raise JMCSyntaxException(
             "Expected 'if' or {", command[0], tokenizer, col_length=True)
 
-    if command[1].token_type == TokenType.keyword and command[1].string == 'if':
+    if command[1].token_type == TokenType.KEYWORD and command[1].string == 'if':
         if len(command) < 3:
             raise JMCSyntaxException(
                 "Expected (", command[1], tokenizer, col_length=True)
-        if command[2].token_type != TokenType.paren_round:
+        if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected (", command[2], tokenizer, display_col_length=False)
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, col_length=True)
-        if command[3].token_type != TokenType.paren_curly:
+        if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
 
         datapack.lexer.if_else_box.append(
             (command[2], command[3]))
         return None
-    if command[1].token_type == TokenType.paren_curly:
+    if command[1].token_type == TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append(
             (None, command[1])
         )
@@ -68,13 +68,13 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected (", command[0], tokenizer, col_length=True)
-        if command[1].token_type != TokenType.paren_round:
+        if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected (", command[1], tokenizer, display_col_length=False)
         if len(command) < 3:
             raise JMCSyntaxException(
                 "Expected {", command[1], tokenizer, col_length=True)
-        if command[1].token_type != TokenType.paren_round:
+        if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, display_col_length=False)
 
@@ -92,7 +92,7 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected (", command[0], tokenizer, col_length=True)
-        if command[1].token_type != TokenType.paren_round:
+        if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected (", command[1], tokenizer, display_col_length=False)
         if len(command) > 2:
@@ -112,7 +112,7 @@ def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected {", command[0], tokenizer, col_length=True)
-    if command[1].token_type != TokenType.paren_curly:
+    if command[1].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[1], tokenizer, display_col_length=False)
 
@@ -185,13 +185,13 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
     if len(command) == 1:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
-    if command[1].token_type != TokenType.paren_round:
+    if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
             "Expected (", command[1], tokenizer, display_col_length=False)
     if len(command) == 2:
         raise JMCSyntaxException(
             "Expected {", command[1], tokenizer, col_length=True)
-    if command[2].token_type != TokenType.paren_curly:
+    if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[2], tokenizer, display_col_length=False)
     if command[2].string == '{}':
@@ -204,12 +204,12 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
     case_count = 1
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
-    if list_of_tokens[0][0].string != 'case' or list_of_tokens[0][0].token_type != TokenType.keyword:
+    if list_of_tokens[0][0].string != 'case' or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
         raise JMCSyntaxException(
             "Expected 'case'", list_of_tokens[0][0], tokenizer)
 
     for tokens in list_of_tokens:
-        if tokens[0].string == 'case' and tokens[0].token_type == TokenType.keyword:
+        if tokens[0].string == 'case' and tokens[0].token_type == TokenType.KEYWORD:
             cases_content.append(current_case_content)
             current_case_content = []
             if len(tokens) == 1:
@@ -241,14 +241,14 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
                 if len(tokens) < 3:
                     raise JMCSyntaxException(
                         "Expected colon (:)", tokens[1], tokenizer, col_length=True)
-                if tokens[2].token_type != TokenType.keyword or tokens[2].string != ':':
+                if tokens[2].token_type != TokenType.KEYWORD or tokens[2].string != ':':
                     raise JMCSyntaxException(
                         "Expected colon (:)", tokens[2], tokenizer)
 
                 tokens = tokens[3:]
             case_count += 1
         # End If case
-        if tokens[0].string == 'break' and tokens[0].token_type == TokenType.keyword and len(tokens) == 1:
+        if tokens[0].string == 'break' and tokens[0].token_type == TokenType.KEYWORD and len(tokens) == 1:
             continue
         current_case_content.append(tokens)
 
@@ -270,7 +270,7 @@ def switch(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> st
     scoreboard_player = find_scoreboard_player_type(
         tokens[0], tokenizer, allow_integer=False)
 
-    if scoreboard_player.player_type == PlayerType.integer:
+    if scoreboard_player.player_type == PlayerType.INTEGER:
         raise JMCSyntaxException(
             f"Unexpected integer in switch case", tokens[0], tokenizer)
 
@@ -284,13 +284,13 @@ def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
     if len(command) == 1:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
-    if command[1].token_type != TokenType.paren_round:
+    if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
             "Expected (", command[1], tokenizer, display_col_length=False)
     if len(command) == 2:
         raise JMCSyntaxException(
             "Expected {", command[1], tokenizer, col_length=True)
-    if command[2].token_type != TokenType.paren_curly:
+    if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[2], tokenizer, display_col_length=False)
     if command[2].string == '{}':
@@ -302,18 +302,18 @@ def for_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str:
         raise JMCSyntaxException(
             f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)
 
-    if statements[0][0].string in {'let', 'var'} and statements[0][0].token_type == TokenType.keyword:
+    if statements[0][0].string in {'let', 'var'} and statements[0][0].token_type == TokenType.KEYWORD:
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
     _first_statement = tokenizer.split_tokens(statements[0], ['='])
-    if not (_first_statement[0].string.startswith(DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.keyword):
+    if not (_first_statement[0].string.startswith(DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
         raise JMCSyntaxException(
             "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
 
     first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
 
-    if not (_first_statement[1].string == '=' and _first_statement[1].token_type == TokenType.keyword):
+    if not (_first_statement[1].string == '=' and _first_statement[1].token_type == TokenType.KEYWORD):
         raise JMCSyntaxException(
             "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 

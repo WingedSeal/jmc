@@ -23,12 +23,12 @@ def drange(start: float|int, stop: float|int, step: float|int) -> Iterator[float
 
 
 @func_property(
-    func_type=FuncType.jmc_command,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Timer.set',
     arg_type={
-        "objective": ArgType.keyword,
-        "target_selector": ArgType.selector,
-        "tick": ArgType.scoreboard_player
+        "objective": ArgType.KEYWORD,
+        "target_selector": ArgType.SELECTOR,
+        "tick": ArgType.SCOREBOARD_PLAYER
     },
     name='timer_set'
 )
@@ -40,7 +40,7 @@ class TimerSet(JMCFunction):
     Set entity's score to start the timer.
     """
     def call(self) -> str:
-        if self.raw_args["tick"].arg_type == ArgType.integer:
+        if self.raw_args["tick"].arg_type == ArgType.INTEGER:
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
         else:
             return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
@@ -78,15 +78,15 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str, 
 
 
 @func_property(
-    func_type=FuncType.jmc_command,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Particle.circle',
     arg_type={
-        "particle": ArgType.string,
-        "radius": ArgType.float,
-        "spread": ArgType.integer,
-        "speed": ArgType.integer,
-        "count": ArgType.integer,
-        "mode": ArgType.keyword,
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
     },
     name='particle_circle',
     defaults={
@@ -123,16 +123,16 @@ class ParticleCircle(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.jmc_command,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Particle.spiral',
     arg_type={
-        "particle": ArgType.string,
-        "radius": ArgType.float,
-        "height": ArgType.float,
-        "spread": ArgType.integer,
-        "speed": ArgType.integer,
-        "count": ArgType.integer,
-        "mode": ArgType.keyword,
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "height": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
     },
     name='particle_spiral',
     defaults={
@@ -174,17 +174,17 @@ class ParticleSpiral(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.jmc_command,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Particle.cylinder',
     arg_type={
-        "particle": ArgType.string,
-        "radius": ArgType.float,
-        "height": ArgType.float,
-        "spread_xz": ArgType.integer,
-        "spread_y": ArgType.integer,
-        "speed": ArgType.integer,
-        "count": ArgType.integer,
-        "mode": ArgType.keyword,
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "height": ArgType.FLOAT,
+        "spread_xz": ArgType.INTEGER,
+        "spread_y": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
     },
     name='particle_cylinder',
     defaults={
@@ -225,15 +225,15 @@ class ParticleCylinder(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.jmc_command,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Particle.line',
     arg_type={
-        "particle": ArgType.string,
-        "distance": ArgType.float,
-        "spread": ArgType.integer,
-        "speed": ArgType.integer,
-        "count": ArgType.integer,
-        "mode": ArgType.keyword,
+        "particle": ArgType.STRING,
+        "distance": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
     },
     name='particle_line',
     defaults={

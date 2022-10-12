@@ -19,7 +19,7 @@ IF = True
 UNLESS = False
 
 VAR = '__logic__'
-BOOL_FUNCTIONS = JMCFunction.get_subclasses(FuncType.bool_function)
+BOOL_FUNCTIONS = JMCFunction.get_subclasses(FuncType.BOOL_FUNCTION)
 count = 0
 
 
@@ -64,7 +64,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     :param datapack: Datapack object
     :return: Condition object parsed from list of tokens
     """
-    if tokens[0].token_type == TokenType.keyword and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<', '!'])
         first_token = tokens[0]
         for operator in ['===', '==', '>=', '<=', '!=', '>', '<', '=']:  # sort key=len
@@ -83,7 +83,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
             scoreboard_player = find_scoreboard_player_type(
                 second_token, tokenizer)
 
-            if scoreboard_player.player_type == PlayerType.integer:
+            if scoreboard_player.player_type == PlayerType.INTEGER:
                 if not isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is not int")
                 compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
@@ -111,11 +111,11 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                 return Condition(f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
             break
 
-        if tokens[1].token_type == TokenType.keyword and tokens[1].string == 'matches':
+        if tokens[1].token_type == TokenType.KEYWORD and tokens[1].string == 'matches':
             if len(tokens) > 3:
                 raise JMCSyntaxException(
                     "Unexpected token in condition", tokens[3], tokenizer)
-            if tokens[2].token_type != TokenType.keyword:
+            if tokens[2].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
                     "Expected keyword", tokens[2], tokenizer)
 
@@ -156,7 +156,7 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     # End
     conditions: list[str] = []
     for token in tokens:
-        if token.token_type == TokenType.paren_square:
+        if token.token_type == TokenType.PAREN_SQUARE:
             if not conditions:
                 raise JMCSyntaxException(
                     "Unexpected square parenthesis []", token, tokenizer)
@@ -177,16 +177,16 @@ def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> 
     """
     list_of_tokens: list[list[Token]] = []
     tokens: list[Token] = []
-    if _tokens[0].token_type == TokenType.keyword and _tokens[0].string == operator:
+    if _tokens[0].token_type == TokenType.KEYWORD and _tokens[0].string == operator:
         raise JMCSyntaxException(
             f"Unexpected operator ({operator})", _tokens[0], tokenizer)
 
-    elif _tokens[-1].token_type == TokenType.keyword and _tokens[-1].string == operator:
+    elif _tokens[-1].token_type == TokenType.KEYWORD and _tokens[-1].string == operator:
         raise JMCSyntaxException(
             f"Unexpected operator ({operator})", _tokens[-1], tokenizer)
 
     for token in _tokens:
-        if token.token_type == TokenType.keyword and token.string == operator:
+        if token.token_type == TokenType.KEYWORD and token.string == operator:
             list_of_tokens.append(tokens)
             tokens = []
         else:
@@ -205,7 +205,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     :raises JMCSyntaxException: Empty round parenthesis inside condition
     :return: Abstract syntax tree
     """
-    if len(tokens) == 1 and tokens[0].token_type == TokenType.paren_round:
+    if len(tokens) == 1 and tokens[0].token_type == TokenType.PAREN_ROUND:
         if tokens[0].string == '()':
             raise JMCSyntaxException(
                 f"Empty round parenthesis () inside condition", tokens[0], tokenizer)
@@ -231,7 +231,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
 
     # NotOperator should have a body as either dict or string and not list
     tokens = tokenizer.split_tokens(tokens, [NOT_OPERATOR])
-    if tokens[0].token_type == TokenType.keyword and tokens[0].string == NOT_OPERATOR:
+    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string == NOT_OPERATOR:
         return {"operator": NOT_OPERATOR, "body":
                 condition_to_ast(tokens[1:], tokenizer, datapack)}
 

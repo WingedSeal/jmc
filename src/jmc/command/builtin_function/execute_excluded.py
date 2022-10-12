@@ -45,14 +45,14 @@ def _hardcode_process(string: str, index_string: str, i: int, token: Token, toke
 
 
 @func_property(
-    func_type=FuncType.execute_excluded,
+    func_type=FuncType.EXECUTE_EXCLUDED,
     call_string='Hardcode.repeat',
     arg_type={
-        "index_string": ArgType.string,
-        "function": ArgType.arrow_func,
-        "start": ArgType.integer,
-        "stop": ArgType.integer,
-        "step": ArgType.integer
+        "index_string": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "start": ArgType.INTEGER,
+        "stop": ArgType.INTEGER,
+        "step": ArgType.INTEGER
     },
     name='hardcode_repeat',
     ignore={
@@ -77,7 +77,7 @@ class HardcodeRepeat(JMCFunction):
             try:
                 commands.extend(self.datapack.parse_function_token(
                     Token(
-                        TokenType.paren_curly,
+                        TokenType.PAREN_CURLY,
                         self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(
@@ -93,13 +93,13 @@ class HardcodeRepeat(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.execute_excluded,
+    func_type=FuncType.EXECUTE_EXCLUDED,
     call_string='Hardcode.switch',
     arg_type={
-        "switch": ArgType.scoreboard,
-        "index_string": ArgType.string,
-        "function": ArgType.arrow_func,
-        "count": ArgType.integer
+        "switch": ArgType.SCOREBOARD,
+        "index_string": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "count": ArgType.INTEGER
     },
     name='hard_code_switch',
     ignore={
@@ -117,7 +117,7 @@ class HardcodeSwitch(JMCFunction):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(
-                        TokenType.paren_curly,
+                        TokenType.PAREN_CURLY,
                         self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(

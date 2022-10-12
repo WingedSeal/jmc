@@ -5,7 +5,7 @@ from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
 
 VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
-    FuncType.variable_operation)
+    FuncType.VARIABLE_OPERATION)
 
 
 def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool) -> str:
@@ -18,7 +18,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
     :param is_execute: Whether the statement/function is in `/execute`
     :return: Full minecraft command
     """
-    if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.paren_round:
+    if tokens[0].string.endswith('.get') and len(tokens) > 1 and tokens[1].token_type == TokenType.PAREN_ROUND:
         if len(tokens) > 2:
             raise JMCSyntaxException(
                 "Unexpected token", tokens[2], tokenizer)
@@ -57,12 +57,12 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             if operator == '--':
                 return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.VAR_NAME} 1"
 
-        if operator == '=' and list_of_tokens[1][0].token_type == TokenType.keyword and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
+        if operator == '=' and list_of_tokens[1][0].token_type == TokenType.KEYWORD and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
             if len(list_of_tokens[1]) == 1:
                 raise JMCSyntaxException(
                     "Expected (", list_of_tokens[1][0], tokenizer, col_length=True)
 
-            if list_of_tokens[1][1].token_type != TokenType.paren_round:
+            if list_of_tokens[1][1].token_type != TokenType.PAREN_ROUND:
                 raise JMCSyntaxException(
                     "Expected (", list_of_tokens[1][1], tokenizer)
 
@@ -81,7 +81,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
             list_of_tokens[1][0], tokenizer, allow_integer=False)
 
         if operator == '->':
-            if scoreboard_player.player_type == PlayerType.integer:
+            if scoreboard_player.player_type == PlayerType.INTEGER:
                 raise JMCSyntaxException(
                     "Cannot copy score into integer", list_of_tokens[1][0], tokenizer)
             if isinstance(scoreboard_player.value, int):
@@ -89,7 +89,7 @@ def variable_operation(tokens: list[Token], tokenizer: Tokenizer, datapack: Data
 
             return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {list_of_tokens[0][0].string} {DataPack.VAR_NAME}"
 
-        if scoreboard_player.player_type == PlayerType.integer:
+        if scoreboard_player.player_type == PlayerType.INTEGER:
             if operator == '+=':
                 return f"scoreboard players add {list_of_tokens[0][0].string} {DataPack.VAR_NAME} {scoreboard_player.value}"
             if operator == '-=':

@@ -9,12 +9,12 @@ from ..tokenizer import Token, Tokenizer
 
 
 class FuncType(Enum):
-    bool_function = auto()
-    execute_excluded = auto()
-    jmc_command = auto()
-    load_once = auto()
-    load_only = auto()
-    variable_operation = auto()
+    BOOL_FUNCTION = auto()
+    EXECUTE_EXCLUDED = auto()
+    JMC_COMMAND = auto()
+    LOAD_ONCE = auto()
+    LOAD_ONLY = auto()
+    VARIABLE_OPERATION = auto()
 
 
 class JMCFunction:
@@ -76,18 +76,18 @@ class JMCFunction:
                 self.raw_args[key] = arg
                 if key in self._ignore:
                     pass
-                elif arg.arg_type == ArgType._func_call:
+                elif arg.arg_type == ArgType._FUNC_CALL:
                     self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
-                elif arg.arg_type == ArgType.arrow_func:
+                elif arg.arg_type == ArgType.ARROW_FUNC:
                     self.args[key] = '\n'.join(
                         datapack.parse_function_token(arg.token, tokenizer))
-                elif arg.arg_type == ArgType.integer:
+                elif arg.arg_type == ArgType.INTEGER:
                     self.args[key] = arg.token.string
                     # self.args[key] = str(find_scoreboard_player_type(
                     #     arg.token, tokenizer).value)
-                elif arg.arg_type == ArgType.float:
+                elif arg.arg_type == ArgType.FLOAT:
                     self.args[key] = str(float(arg.token.string))
-                elif arg.arg_type in {ArgType.scoreboard_player, ArgType.scoreboard}:
+                elif arg.arg_type in {ArgType.SCOREBOARD_PLAYER, ArgType.SCOREBOARD}:
                     scoreboard_player = find_scoreboard_player_type(
                         arg.token, tokenizer)
                     if isinstance(scoreboard_player.value, int):

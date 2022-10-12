@@ -30,9 +30,9 @@ class TestJMCutils(unittest.TestCase):
         self.assertTrue(is_number("0"))
 
     def test_is_connected(self):
-        token1 = Token(TokenType.keyword, line=1, col=0, string="ABC")
-        token2 = Token(TokenType.keyword, line=1, col=3, string="DEF")
-        token3 = Token(TokenType.keyword, line=1, col=6, string="GHI")
+        token1 = Token(TokenType.KEYWORD, line=1, col=0, string="ABC")
+        token2 = Token(TokenType.KEYWORD, line=1, col=3, string="DEF")
+        token3 = Token(TokenType.KEYWORD, line=1, col=6, string="GHI")
         self.assertTrue(is_connected(token2, token1))
         self.assertTrue(is_connected(token3, token2))
         self.assertFalse(is_connected(token3, token1))
@@ -41,46 +41,46 @@ class TestJMCutils(unittest.TestCase):
 
     def test_search_to_string(self):
         new_str, found = search_to_string("$TEST.toString", Token(
-            TokenType.paren_round, line=-1, col=-1, string="()"), "VAR_NAME", None)
+            TokenType.PAREN_ROUND, line=-1, col=-1, string="()"), "VAR_NAME", None)
         self.assertTrue(found)
         self.assertEqual(
             new_str, '{"score": {"name": "$TEST", "objective": "VAR_NAME"}}')
         new_str, found = search_to_string("$TEST.toString", Token(
-            TokenType.paren_round, line=-1, col=-1, string='(color=red)'), "VAR_NAME", None)
+            TokenType.PAREN_ROUND, line=-1, col=-1, string='(color=red)'), "VAR_NAME", None)
         self.assertTrue(found)
         self.assertEqual(
             new_str, '{"color": "red", "score": {"name": "$TEST", "objective": "VAR_NAME"}}')
 
         with self.assertRaises(Exception):
             search_to_string("$TEST.toString", Token(
-                TokenType.paren_round, line=-1, col=-1, string='(color="red")'), "VAR_NAME", None)
+                TokenType.PAREN_ROUND, line=-1, col=-1, string='(color="red")'), "VAR_NAME", None)
 
 
 class TestCommandUtils(unittest.TestCase):
 
     def test_find_scoreboard_player_type(self):
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.keyword, -1, -1, "10"), None)
-        self.assertEqual(scoreboard_player.player_type, PlayerType.integer)
+            Token(TokenType.KEYWORD, -1, -1, "10"), None)
+        self.assertEqual(scoreboard_player.player_type, PlayerType.INTEGER)
         self.assertEqual(scoreboard_player.value, 10)
 
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.keyword, -1, -1, "$jmc_var"), None)
-        self.assertEqual(scoreboard_player.player_type, PlayerType.variable)
+            Token(TokenType.KEYWORD, -1, -1, "$jmc_var"), None)
+        self.assertEqual(scoreboard_player.player_type, PlayerType.VARIABLE)
         self.assertEqual(scoreboard_player.value,
                          (DataPack.VAR_NAME, "$jmc_var"))
 
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.keyword, -1, -1, "OBJ:SELECTOR"), None)
-        self.assertEqual(scoreboard_player.player_type, PlayerType.scoreboard)
+            Token(TokenType.KEYWORD, -1, -1, "OBJ:SELECTOR"), None)
+        self.assertEqual(scoreboard_player.player_type, PlayerType.SCOREBOARD)
         self.assertEqual(scoreboard_player.value,
                          ("OBJ", "SELECTOR"))
 
     def test_find_arg_type(self):
         self.assertEqual(find_arg_type(
-            Token(TokenType.keyword, -1, -1, "5"), None), ArgType.integer)
+            Token(TokenType.KEYWORD, -1, -1, "5"), None), ArgType.INTEGER)
         self.assertEqual(find_arg_type(
-            Token(TokenType.keyword, -1, -1, "@a"), None), ArgType.selector)
+            Token(TokenType.KEYWORD, -1, -1, "@a"), None), ArgType.SELECTOR)
 
     def test_eval_expr(self):
         self.assertEqual(eval_expr("10+10"), "20")
