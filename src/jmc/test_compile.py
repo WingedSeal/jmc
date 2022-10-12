@@ -16,17 +16,23 @@ class JMCPack:
     :param namespace: Namespace of the virtual datapack, defaults to "TEST"
     :param output: virtual directory for output, defaults to "VIRTUAL"
     """
-    cert = """LOAD=__load__
+    __slots__ = ('cert', 'jmc_file', 'header_file',
+                 '__built', 'config')
+    cert: str
+    jmc_file: str
+    header_file: str | None
+    __built: dict[str, str] | None
+    """Dictionary of file name and file content"""
+
+    def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
+        self.__built = None
+        self.cert = """LOAD=__load__
 TICK=__tick__
 PRIVATE=__private__
 VAR=__variable__
 INT=__int__"""
-    jmc_file = ""
-    header_file = None
-    __built: dict[str, str] | None = None
-    """Dictionary of file name and file content"""
-
-    def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
+        self.jmc_file = ""
+        self.header_file = None
         self.config = {
             "namespace": namespace,
             "description": "__THIS_IS_FOR_TESTING__",

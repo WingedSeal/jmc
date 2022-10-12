@@ -1,4 +1,4 @@
-COMMANDS = [
+COMMANDS = {
     # OP Level 0-2
     "advancement",
     "attribute",
@@ -80,5 +80,5 @@ COMMANDS = [
     "pardon-ip",
     "setidletimeout",
     "whitelist"
-]
+}
 """All vanilla command (first argument only)"""

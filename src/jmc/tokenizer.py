@@ -24,7 +24,7 @@ class TokenType(Enum):
     FUNC = "Function"
 
 
-@dataclass(frozen=True, eq=False)
+@dataclass(frozen=True, eq=False, slots=True)
 class Token:
     """
     A dataclass containing information for Token for Lexical Analysis
@@ -73,7 +73,7 @@ class Token:
         return len(self.string)+2 if self.token_type == TokenType.STRING else len(self.string)
 
 
-@dataclass(frozen=True, eq=False)
+@dataclass(frozen=True, eq=False, slots=True)
 class Pos:
     """
     Dataclass containing line and column
@@ -128,6 +128,13 @@ class Tokenizer:
     :param file_string: Entire string read from current file, defaults to None
     :param expect_semicolon: Whether to expect semicolon at the end, defaults to True
     """
+    __slots__ = ('line', 'col', 'state',
+                 'token', 'token_pos', 'keywords',
+                 'list_of_keywords', 'quote', 'is_escaped',
+                 'paren', 'r_paren', 'paren_count',
+                 'is_string', 'is_slash', 'raw_string',
+                 'file_string', 'file_path', 'programs')
+
     line: int
     col: int
 

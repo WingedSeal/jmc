@@ -11,22 +11,31 @@ class Header(SingleTon):
     """
     A SingleTon class containing all information from header
     """
-    file_read: set[str] = set()
+    __slots__ = ('file_read', 'macros', 'credits')
+
+    file_read: set[str]
     """Set of files that was already read (to prevent reading the same file multiple times"""
-    macros: dict[str, str] = {}
+    macros: dict[str, str]
     """Dictionary of keyword to replace and what to replace it with"""
-    credits: list[str] = []
+    credits: list[str]
     """Dictionary of string to replace and what to replace it with"""
+
+    def __init__(self) -> None:
+        self.__clear(self)
 
     @classmethod
     def clear(cls) -> None:
         """
         Reset the single object
         """
-        self = cls()
-        self.file_read = set()
-        self.macros = {}
-        self.credits = []
+        cls.__clear(cls())
+
+    @staticmethod
+    def __clear(obj: "Header"):
+        obj.file_read = set()
+        obj.macros = {}
+        obj.credits = []
+
 
     def add_file_read(self, path: Path) -> None:
         """

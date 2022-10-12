@@ -16,7 +16,7 @@ class PlayerType(Enum):
     SCOREBOARD = auto()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ScoreboardPlayer:
     player_type: PlayerType
     value: int|tuple[str, str]
@@ -75,6 +75,7 @@ class ArgType(Enum):
 
 
 class Arg:
+    __slots__ = ('token', 'arg_type')
     def __init__(self, token: Token, arg_type: ArgType) -> None:
         self.token = token
         self.arg_type = arg_type

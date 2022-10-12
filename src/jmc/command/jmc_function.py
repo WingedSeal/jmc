@@ -32,7 +32,12 @@ class JMCFunction:
     :raises JMCValueError: Missing required positional argument
     :raises NotImplementedError: Call function not implemented
     """
-    _decorated = False
+    __slots__ = ('arg_type', 'func_type', 'name',
+                 'call_string', 'defaults', '_ignore',
+                 'token', 'datapack', 'tokenizer',
+                 'is_execute', 'var', 'args',
+                 'raw_args')
+    _decorated: bool = False
     """A private attribute that will be changed by a decorator to check for missing decorator"""
     arg_type: dict[str, ArgType]
     func_type: FuncType
@@ -62,12 +67,12 @@ class JMCFunction:
         if self.func_type is None:
             raise NotImplementedError("Missing func_type")
 
-        self.__args_Args = verify_args(self.arg_type,
+        args_Args = verify_args(self.arg_type,
                                        self.call_string, token, tokenizer)
         self.args: dict[str, str] = {}
         self.raw_args: dict[str, Arg] = {}
 
-        for key, arg in self.__args_Args.items():
+        for key, arg in args_Args.items():
             if arg is None:
                 if key not in self.defaults:
                     raise JMCMissingValueError(key, token, tokenizer)
