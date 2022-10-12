@@ -54,7 +54,7 @@ class Header(SingleTon):
         return path.as_posix() in self.file_read
 
 
-def parse_header(header_str: int, file_name: str,
+def parse_header(header_str: str, file_name: str,
                  parent_target: Path) -> Header:
     """
     Parse header and store the information in the header object

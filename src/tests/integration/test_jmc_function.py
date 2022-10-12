@@ -640,10 +640,92 @@ say 2
         )
 
     def test_PlayerOnEvent(self):
-        ...
+        pack = JMCPack().set_jmc_file("""
+Player.onEvent(my_objective, ()=>{
+    say "Hello World";
+});
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+execute as @a[scores={my_objective=1..}] at @s run function TEST:__private__/player_on_event/0
+> VIRTUAL/data/TEST/functions/__private__/player_on_event/0.mcfunction
+scoreboard players reset @s my_objective
+say Hello World
+            """)
+        )
 
     def test_TriggerSetup(self):
-        ...
+        pack = JMCPack().set_jmc_file("""
+Trigger.setup(help, {
+    1: ()=>{
+        tellraw @s {"text":"Cool help commands", "color":"gold"}
+    }
+});
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add help trigger
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+function TEST:__private__/trigger_setup/main
+function TEST:__private__/trigger_setup/enable
+> VIRTUAL/data/TEST/functions/__private__/trigger_setup/main.mcfunction
+execute as @a[scores={help=1..}] run function TEST:__private__/trigger_setup/0
+> VIRTUAL/data/TEST/functions/__private__/trigger_setup/enable.mcfunction
+scoreboard players enable @s help
+> VIRTUAL/data/TEST/functions/__private__/trigger_setup/1.mcfunction
+tellraw @s {"text":"Cool help commands","color":"gold"}
+> VIRTUAL/data/TEST/functions/__private__/trigger_setup/0.mcfunction
+function TEST:__private__/trigger_setup/1
+scoreboard players reset @s help
+scoreboard players enable @s help
+> VIRTUAL/data/TEST/advancements/__private__/trigger_setup/enable.json
+{
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {
+    "function": "TEST:__private__/trigger_setup/enable"
+  }
+}
+            """)
+        )
 
     def test_TimerAdd(self):
         pack = JMCPack().set_jmc_file("""
