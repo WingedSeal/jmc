@@ -522,7 +522,7 @@ class Tokenizer:
 
         .. example::
         >>> merge_tokens([a,b,c,d], b.string+c.string)
-        [a,Token(TokenType.keyword, b.line, b.col, b.string+c.string),d]
+        [a,Token(TokenType.KEYWORD, b.line, b.col, b.string+c.string),d]
         """
         state = 0
         max_state = len(string)

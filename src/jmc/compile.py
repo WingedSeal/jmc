@@ -181,6 +181,27 @@ def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
     return json
 
 
+def post_process(string: str) -> str:
+    """
+    Post processing of .mcfunction files
+
+    - Add credits at the end of every .mcfunction file
+
+    :param string: File content
+    :return: Processed file content
+    """
+    header = Header()
+    if not header.credits:
+        return string
+
+    string += "\n"*2
+    for line in header.credits:
+        if line:
+            string += f"\n# {line}" 
+        else:
+            string += "\n#"
+    return string
+
 def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False) -> dict[str, str] | None:
     """
     Build and write files for minecraft datapack
@@ -228,14 +249,14 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
 
     for func_path, func in datapack.functions.items():
         path = namespace_folder/'functions'/(func_path+'.mcfunction')
-        content = func.content
+        content = post_process(func.content)
         if content:
             if _is_virtual:
-                output[path.as_posix()] = func.content
+                output[path.as_posix()] = content
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 with path.open('w+') as file:
-                    file.write(func.content)
+                    file.write(content)
 
     for json_path, json in datapack.jsons.items():
         path = namespace_folder/(json_path+'.json')

@@ -129,11 +129,9 @@ dmypy.json
 .pyre/
 
 # Custom
-test/
 testing/
 logs/
 log/
-test.*
 .vscode
 jmc_config.json
 autopytoexe.json

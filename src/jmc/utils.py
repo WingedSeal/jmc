@@ -12,7 +12,7 @@ class __SingleTonMeta(type):
     """
     Metaclass for singleton
     """
-    _instances: dict["__SingleTonMeta", Any] = {}
+    _instances: dict["__SingleTonMeta"] = {}
     
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

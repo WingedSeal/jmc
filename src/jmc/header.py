@@ -15,7 +15,7 @@ class Header(SingleTon):
     """Set of files that was already read (to prevent reading the same file multiple times"""
     macros: dict[str, str] = {}
     """Dictionary of keyword to replace and what to replace it with"""
-    replaces: dict[str, str] = {}
+    credits: list[str] = []
     """Dictionary of string to replace and what to replace it with"""
 
     @classmethod
@@ -26,7 +26,7 @@ class Header(SingleTon):
         self = cls()
         self.file_read = set()
         self.macros = {}
-        self.replaces = {}
+        self.credits = []
 
     def add_file_read(self, path: Path) -> None:
         """
@@ -73,7 +73,7 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
         line += 1
-        if line_str.isspace() or line_str.startswith("//") or line_str=="":
+        if line_str.isspace() or line_str.startswith("//") or line_str == "":
             continue
 
         if not line_str.startswith("#"):
@@ -124,11 +124,11 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
                 raise HeaderSyntaxException(
                     "Whitespace is not supported in header file name", file_name, line, line_str)
 
-        elif args[0] == "replace":
-            raise NotImplementedError("Replace feature hasn't been implemented yet.")
-
         elif args[0] == "credit":
-            raise NotImplementedError("Credit feature hasn't been implemented yet.")
+            if len(args) == 1:
+                header.credits.append("")
+            else:
+                header.credits.append(" ".join(args[1:]))
 
         else:
             raise HeaderSyntaxException(

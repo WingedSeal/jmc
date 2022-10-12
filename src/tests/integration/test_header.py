@@ -46,8 +46,46 @@ Hello World
 #Unknown
         """).build()
 
-    def test_replace(self): ...
-    def test_credit(self): ...
+    def test_credit(self):
+        pack = JMCPack().set_jmc_file("""
+say "Hello World";
+function myFunc() {
+    say "My function";
+}  
+        """).set_header_file("""
+#credit JMC by WingedSeal
+#credit
+#credit Made by WingedSeal
+        """).build()
+
+        self.maxDiff = None
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/myfunc.mcfunction
+say My function
+
+
+# JMC by WingedSeal
+#
+# Made by WingedSeal
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+say Hello World
+
+
+# JMC by WingedSeal
+#
+# Made by WingedSeal
+            """)
+        )
 
 if __name__ == '__main__':
     unittest.main()
