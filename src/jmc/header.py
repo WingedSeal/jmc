@@ -36,7 +36,6 @@ class Header(SingleTon):
         obj.macros = {}
         obj.credits = []
 
-
     def add_file_read(self, path: Path) -> None:
         """
         Add path to file_read
@@ -55,7 +54,8 @@ class Header(SingleTon):
         return path.as_posix() in self.file_read
 
 
-def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header:
+def parse_header(header_str: str, file_name: str,
+                 parent_target: Path) -> Header:
     """
     Parse header and store the information in the header object
 
@@ -118,7 +118,7 @@ def parse_header(header_str: str, file_name: str, parent_target: Path) -> Header
                 file_name = included[1:-1]
                 if not file_name.endswith(".hjmc"):
                     file_name += ".hjmc"
-                header_file = parent_target/file_name
+                header_file = parent_target / file_name
                 if not header_file.is_file():
                     raise HeaderFileNotFoundError(header_file)
                 with header_file.open('r') as file:

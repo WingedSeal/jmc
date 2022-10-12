@@ -7,21 +7,23 @@ from ..utils import ArgType, eval_expr, find_scoreboard_player_type
 from .._flow_control import parse_switch
 
 
-def _hardcode_parse(calc_pos: int, string: str, token: Token, tokenizer: Tokenizer) -> str:
+def _hardcode_parse(calc_pos: int, string: str, token: Token,
+                    tokenizer: Tokenizer) -> str:
     count = 0
     expression = ''
     index = calc_pos
-    if len(string) < calc_pos+14 or string[calc_pos+13] != '(':
+    if len(string) < calc_pos + 14 or string[calc_pos + 13] != '(':
         raise JMCSyntaxException(
             f"Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
-    for char in string[calc_pos+13:]:  # len('Hardcode.calc') = 13
+    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
         index += 1
         if char == '(':
             count += 1
         elif char == ')':
             count -= 1
 
-        if char not in {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', ' ', '\t', '\n', '(', ')'}:
+        if char not in {'0', '1', '2', '3', '4', '5', '6', '7',
+                        '8', '9', '+', '-', '*', '/', ' ', '\t', '\n', '(', ')'}:
             raise JMCSyntaxException(
                 f"Invalid charater({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 
@@ -33,10 +35,11 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token, tokenizer: Tokeniz
         raise JMCSyntaxException(
             f"Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
 
-    return string[:calc_pos]+eval_expr(expression)+string[index+13:]
+    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
 
 
-def _hardcode_process(string: str, index_string: str, i: int, token: Token, tokenizer: Tokenizer) -> str:
+def _hardcode_process(string: str, index_string: str,
+                      i: int, token: Token, tokenizer: Tokenizer) -> str:
     string = string.replace(index_string, str(i))
     calc_pos = string.find('Hardcode.calc')
     if calc_pos != -1:
@@ -113,7 +116,7 @@ class HardcodeSwitch(JMCFunction):
         func_contents: list[list[str]] = []
         scoreboard_player = find_scoreboard_player_type(
             self.raw_args["switch"].token, self.tokenizer)
-        for i in range(1, count+1):
+        for i in range(1, count + 1):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(
@@ -129,4 +132,5 @@ class HardcodeSwitch(JMCFunction):
                 error.msg = 'WARNING: This error happens inside Hardcode.switch, if you use Hardcode.calc the error position might not be accurate\n\n' + error.msg
                 raise error
 
-        return parse_switch(scoreboard_player, func_contents, self.datapack, self.name)
+        return parse_switch(scoreboard_player, func_contents,
+                            self.datapack, self.name)

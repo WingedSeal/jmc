@@ -68,9 +68,14 @@ class Token:
         """
         Getting the length of the string in token(including quotation mark)
 
-        :return: Length of the string 
+        :return: Length of the string
         """
-        return len(self.string)+2 if self.token_type == TokenType.STRING else len(self.string)
+        return len(self.string) + \
+            2 if self.token_type == TokenType.STRING else len(self.string)
+
+    @classmethod
+    def empty(cls, string: str = "") -> "Token":
+        return cls(TokenType.KEYWORD, -1, -1, string)
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -78,7 +83,7 @@ class Pos:
     """
     Dataclass containing line and column
     :var line:
-    :var col: 
+    :var col:
     """
     line: int
     col: int
@@ -170,7 +175,8 @@ class Tokenizer:
     is_slash: bool
     """Whether there's a slash infront of the current character"""
 
-    def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1, file_string: str = None, expect_semicolon: bool = True) -> None:
+    def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1,
+                 file_string: str | None = None, expect_semicolon: bool = True) -> None:
         logger.debug("Initializing Tokenizer")
         self.raw_string = raw_string
         if file_string is None:
@@ -215,7 +221,8 @@ class Tokenizer:
             raise JMCSyntaxWarning(
                 "Unnecessary semicolon(;)", None, self)
 
-    def parse(self, string: str, line: int, col: int, expect_semicolon: bool, allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
+    def parse(self, string: str, line: int, col: int, expect_semicolon: bool,
+              allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         """
         Start the parsing of Tokenizer
 
@@ -252,7 +259,8 @@ class Tokenizer:
 
         for char in string:
             self.col += 1
-            if not expect_semicolon and char == Re.SEMICOLON and self.state in {TokenType.KEYWORD, None}:
+            if not expect_semicolon and char == Re.SEMICOLON and self.state in {
+                    TokenType.KEYWORD, None}:
                 raise JMCSyntaxException(
                     "Unexpected semicolon(;)", None, self, display_col_length=False)
 
@@ -290,7 +298,7 @@ class Tokenizer:
                     self.token += char
                     continue
 
-            if self.state == None:
+            if self.state is None:
                 if char in {Quote.SINGLE, Quote.DOUBLE}:
                     self.state = TokenType.STRING
                     self.token_pos = Pos(self.line, self.col)
@@ -396,7 +404,7 @@ class Tokenizer:
 
     def split_token(self, token: Token, split_str: str) -> list[Token]:
         """
-        Split a keyword token into multiple tokens 
+        Split a keyword token into multiple tokens
 
         :param token: A token that will be splitted
         :param split_str: The string for splitting token
@@ -421,7 +429,8 @@ class Tokenizer:
             col += len(string)
         return tokens
 
-    def split_tokens(self, tokens: list[Token], split_strings: list[str], max: int = None) -> list[Token]:
+    def split_tokens(
+            self, tokens: list[Token], split_strings: list[str], max: int | None = None) -> list[Token]:
         """
         Loop through all tokens and split a keyword token that contain string inside split_strings
 
@@ -453,7 +462,8 @@ class Tokenizer:
                 tokens = new_tokens
             return tokens
 
-    def find_token(self, tokens: list[Token], string: str) -> list[list[Token]]:
+    def find_token(self, tokens: list[Token],
+                   string: str) -> list[list[Token]]:
         """
         Split list of tokens by token that match the string
 
@@ -477,7 +487,8 @@ class Tokenizer:
         result.append(token_array)
         return result
 
-    def find_tokens(self, tokens: list[Token], string: str) -> list[list[Token]]:
+    def find_tokens(self, tokens: list[Token],
+                    string: str) -> list[list[Token]]:
         """
         Split list of tokens by (group(list) of tokens that can be combined into the string given)
 
@@ -544,7 +555,8 @@ class Tokenizer:
                 continue
             if token.string == string[state]:
                 if token_array:
-                    if token.line != token_array[-1].line or token.col-1 != token_array[-1].col:
+                    if token.line != token_array[-1].line or token.col - \
+                            1 != token_array[-1].col:
                         state = 0
                         result.extend(token_array)
                         result.append(token)
@@ -566,7 +578,8 @@ class Tokenizer:
         result.extend(token_array)
         return result
 
-    def parse_func_args(self, token: Token) -> tuple[list[Token], dict[str, Token]]:
+    def parse_func_args(
+            self, token: Token) -> tuple[list[Token], dict[str, Token]]:
         """
         Parse arguments of custom JMC function
 
@@ -577,7 +590,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected (", token, self, display_col_length=False)
         _keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)
+            token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)
         if not _keywords:
             return ([], {})
         keywords = _keywords[0]
@@ -594,7 +607,7 @@ class Tokenizer:
         2: =>
         """
         expecting_comma = False
-        last_token: Token = Token(TokenType.KEYWORD, -1, -1, "")
+        last_token: Token = Token.empty()
 
         def add_arg(token: Token, from_comma: bool = False) -> None:
             nonlocal arg
@@ -664,7 +677,7 @@ class Tokenizer:
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.PAREN_CURLY:
                         new_token = Token(
-                            string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.FUNC)
+                            string=token.string[1:-1], line=token.line, col=token.col + 1, token_type=TokenType.FUNC)
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)
@@ -732,7 +745,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
         keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col+1, expect_semicolon=False)[0]
+            token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
         keywords = self.split_tokens(keywords, [':'])
         kwargs: dict[str, Token] = {}
         key: str = ""
@@ -768,6 +781,7 @@ class Tokenizer:
             key = ""
             arg = ""
 
+        last_token = Token.empty()
         for token in keywords:
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
@@ -788,7 +802,7 @@ class Tokenizer:
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.PAREN_CURLY:
                         new_token = Token(
-                            string=token.string[1:-1], line=token.line, col=token.col+1, token_type=TokenType.FUNC)
+                            string=token.string[1:-1], line=token.line, col=token.col + 1, token_type=TokenType.FUNC)
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)

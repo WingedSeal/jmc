@@ -56,7 +56,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
         if value is None:
             value = line
         else:
-            value += '\n'+line
+            value += '\n' + line
 
     if value is None:
         raise ValueError(

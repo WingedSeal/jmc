@@ -56,7 +56,8 @@ class JMCFunction:
                 f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: bool | None = None, var: str = None) -> None:
+    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer,
+                 is_execute: bool | None = None, var: str | None = None) -> None:
         self.token = token
         self.datapack = datapack
         self.tokenizer = tokenizer
@@ -68,7 +69,7 @@ class JMCFunction:
             raise NotImplementedError("Missing func_type")
 
         args_Args = verify_args(self.arg_type,
-                                       self.call_string, token, tokenizer)
+                                self.call_string, token, tokenizer)
         self.args: dict[str, str] = {}
         self.raw_args: dict[str, Arg] = {}
 
@@ -128,7 +129,8 @@ class JMCFunction:
         raise NotImplementedError("Call(Bool) function not implemented")
 
     @classmethod
-    def get_subclasses(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
+    def get_subclasses(
+            cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
         """
         Get dictionary of funtion name and a class matching function type
 
@@ -148,7 +150,8 @@ class JMCFunction:
         # return commands
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
+}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -165,7 +168,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
         A decorator to set the class's attributes for setting JMC function's properties
 
         :param cls: A subclass of JMCFunction
-        :return: Same class that was passed in  
+        :return: Same class that was passed in
         """
         cls.func_type = func_type
         cls.call_string = call_string

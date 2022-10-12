@@ -20,7 +20,8 @@ def log(self: object, args: tuple):
     logger.warning(f"{self.__class__.__name__}\n{args[0]}")
 
 
-def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_length: bool, display_col_length: bool, entire_line: bool, suggestion: str | None) -> str:
+def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_length: bool,
+              display_col_length: bool, entire_line: bool, suggestion: str | None) -> str:
     """
     Generate error message
 
@@ -66,7 +67,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     else:
         msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[display_line-1][:display_col-1]} <-"
     if suggestion is not None:
-        msg += '\n'+suggestion
+        msg += '\n' + suggestion
     return msg
 
 
@@ -100,7 +101,8 @@ class HeaderSyntaxException(SyntaxError):
 class JMCSyntaxException(SyntaxError):
     """Invalid syntax for JMC"""
 
-    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False,
+                 display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))
@@ -110,18 +112,19 @@ class JMCSyntaxException(SyntaxError):
 class JMCValueError(ValueError):
     """Invalid syntax for JMC"""
 
-    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False,
+                 display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))
         super().__init__(msg)
 
 
-
 class JMCSyntaxWarning(SyntaxWarning):
     """Warnings about dubious JMC syntax"""
 
-    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False,
+                 display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))
@@ -147,7 +150,8 @@ class JMCBuildError(Exception):
 class JMCDecodeJSONError(ValueError):
     """Invalid syntax for JSON"""
 
-    def __init__(self, error: JSONDecodeError, token: "Token", tokenizer: "Tokenizer") -> None:
+    def __init__(self, error: JSONDecodeError, token: "Token",
+                 tokenizer: "Tokenizer") -> None:
         line = token.line + error.lineno - 1
         col = token.col + error.colno - 1 \
             if token.line == line else error.colno
@@ -161,7 +165,8 @@ class JMCDecodeJSONError(ValueError):
 class JMCMissingValueError(ValueError):
     """Missing required positional argument"""
 
-    def __init__(self, missing_argument: str, token: "Token", tokenizer: "Tokenizer", *, suggestion: str = None) -> None:
+    def __init__(self, missing_argument: str, token: "Token",
+                 tokenizer: "Tokenizer", *, suggestion: str | None = None) -> None:
         msg = error_msg(f"Missing required positional argument: '{missing_argument}'", token, tokenizer, col_length=False,
                         display_col_length=False, entire_line=False, suggestion=suggestion)
 
@@ -172,7 +177,8 @@ class JMCMissingValueError(ValueError):
 class MinecraftSyntaxWarning(SyntaxError):
     """Warnings about dubious Minecraft syntax"""
 
-    def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False, display_col_length: bool = True, entire_line: bool = False, suggestion: str = None) -> None:
+    def __init__(self, message: str, token: "Token", tokenizer: "Tokenizer", *, col_length: bool = False,
+                 display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))

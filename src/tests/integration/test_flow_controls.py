@@ -182,7 +182,7 @@ execute if score $i __variable__ matches 1 run say Hello World
         pack = JMCPack().set_jmc_file("""
 if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
     say "Hello World";
-} 
+}
         """).build()
 
         self.assertDictEqual(

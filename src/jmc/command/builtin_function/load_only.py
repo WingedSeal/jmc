@@ -24,7 +24,7 @@ class RightClickSetup(JMCFunction):
     def call(self) -> str:
         func_map = parse_func_map(
             self.raw_args["func_map"].token, self.tokenizer, self.datapack)
-        is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
+        is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["id_name"]
         self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
@@ -38,7 +38,7 @@ class RightClickSetup(JMCFunction):
 
         main_count = self.datapack.get_count(self.name)
         main_func.append(
-            f"execute store result score {self.obj_id} {DataPack.VAR_NAME} run data get entity @s SelectedItem.tag.{id_name}")
+            f"execute store result score {self.obj_id} {DataPack.var_name} run data get entity @s SelectedItem.tag.{id_name}")
 
         if is_switch:
             func_contents = []
@@ -52,19 +52,19 @@ class RightClickSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
 
             main_func.append(
-                f"""execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {parse_switch(ScoreboardPlayer(
+                f"""execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
                     PlayerType.SCOREBOARD, (self.obj_id, '@s')), func_contents, self.datapack, self.name)}""")
         else:
             main_func.append(
-                f"execute if score {self.obj_id} {DataPack.VAR_NAME} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
+                f"execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
             run = []
             for num, (func, is_arrow_func) in func_map.items():
                 if is_arrow_func:
                     run.append(
-                        f'execute if score @s {self.obj_id} {DataPack.VAR_NAME} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                        f'execute if score @s {self.obj_id} {DataPack.var_name} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {self.obj_id} {DataPack.VAR_NAME} matches {num} at @s run function {self.datapack.namespace}:{func}')
+                        f'execute if score @s {self.obj_id} {DataPack.var_name} matches {num} at @s run function {self.datapack.namespace}:{func}')
 
             self.datapack.add_raw_private_function(self.name, run, main_count)
 
@@ -106,7 +106,7 @@ class TriggerSetup(JMCFunction):
     def call(self) -> str:
         func_map = parse_func_map(
             self.raw_args["triggers"].token, self.tokenizer, self.datapack)
-        is_switch = sorted(func_map) == list(range(1, len(func_map)+1))
+        is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         obj = self.args["objective"]
         self.datapack.add_objective(obj, 'trigger')
@@ -126,7 +126,7 @@ class TriggerSetup(JMCFunction):
                     }
                 },
                 "rewards": {
-                    "function": f"{self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/enable"
+                    "function": f"{self.datapack.namespace}:{DataPack.private_name}/{self.name}/enable"
                 }
             })
 
@@ -157,10 +157,10 @@ class TriggerSetup(JMCFunction):
             for num, (func, is_arrow_func) in func_map.items():
                 if is_arrow_func:
                     run.append(
-                        f'execute if score @s {obj} {DataPack.VAR_NAME} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                        f'execute if score @s {obj} {DataPack.var_name} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {obj} {DataPack.VAR_NAME} matches {num} at @s run function {self.datapack.namespace}:{func}')
+                        f'execute if score @s {obj} {DataPack.var_name} matches {num} at @s run function {self.datapack.namespace}:{func}')
 
         run.extend([f"scoreboard players reset @s {obj}",
                     f"scoreboard players enable @s {obj}"])
@@ -194,7 +194,8 @@ class TimerAdd(JMCFunction):
             raise JMCSyntaxException(
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
-        if mode in {'runOnce', 'runTick'} and self.raw_args["function"] is None:
+        if mode in {'runOnce',
+                    'runTick'} and self.raw_args["function"] is None:
             raise JMCMissingValueError("function", self.token, self.tokenizer)
         if mode == 'none' and self.raw_args["function"] is not None:
             raise JMCSyntaxException(
@@ -221,6 +222,7 @@ class TimerAdd(JMCFunction):
                     count
                 )}""")
         elif mode == 'runTick':
+            count = self.datapack.get_count(self.name)
             main_func.append(
                 f"""execute as {selector} unless score @s {obj} matches 1.. run {self.datapack.add_raw_private_function(
                     self.name,
@@ -249,19 +251,19 @@ class RecipeTable(JMCFunction):
     def call(self) -> str:
         base_item = self.args["baseItem"]
         if not base_item.startswith("minecraft:"):
-            base_item = 'minecraft:'+base_item
+            base_item = 'minecraft:' + base_item
         count = self.datapack.get_count(self.name)
         self.datapack.add_private_json('advancements', f'{self.name}/{count}', {
             "criteria": {
                 "requirement": {
                     "trigger": "minecraft:recipe_unlocked",
                     "conditions": {
-                        "recipe": f"{self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/{count}"
+                        "recipe": f"{self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}"
                     }
                 }
             },
             "rewards": {
-                "function": f"{self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/{count}"
+                "function": f"{self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}"
             }
         })
 
@@ -293,8 +295,8 @@ class RecipeTable(JMCFunction):
             [
                 f"clear @s {base_item} 1",
                 f"give @s {result_item} {result_count}",
-                f"recipe take @s {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/{count}",
-                f"advancement revoke @s only {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/{count}",
+                f"recipe take @s {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
+                f"advancement revoke @s only {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
                 self.args["onCraft"]
             ],
             count

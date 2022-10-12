@@ -56,7 +56,8 @@ def merge_condition(conditions: list[Condition]) -> str:
     return ' '.join(str(condition) for condition in conditions)
 
 
-def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> Condition:
+def custom_condition(
+        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> Condition:
     """
     Create a custom JMC condition from list of tokens representing statement
 
@@ -65,10 +66,12 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     :param datapack: Datapack object
     :return: Condition object parsed from list of tokens
     """
-    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(
+            DataPack.VARIABLE_SIGN):
         tokens = tokenizer.split_tokens(tokens, ['>', '=', '<', '!'])
         first_token = tokens[0]
-        for operator in ['===', '==', '>=', '<=', '!=', '>', '<', '=']:  # sort key=len
+        for operator in ['===', '==',
+                         '>=', '<=', '!=', '>', '<', '=']:  # sort key=len
             list_of_tokens = tokenizer.find_tokens(tokens, operator)
             if len(list_of_tokens) == 1:
                 continue
@@ -87,29 +90,36 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 if not isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is not int")
-                compared = f'score {first_token.string} {DataPack.VAR_NAME} matches'
+                compared = f'score {first_token.string} {DataPack.var_name} matches'
                 if operator in {'===', '==', '='}:
-                    return Condition(f'{compared} {scoreboard_player.value}', IF)
+                    return Condition(
+                        f'{compared} {scoreboard_player.value}', IF)
                 if operator == '>=':
-                    return Condition(f'{compared} {scoreboard_player.value}..', IF)
+                    return Condition(
+                        f'{compared} {scoreboard_player.value}..', IF)
                 if operator == '>':
-                    return Condition(f'{compared} {scoreboard_player.value+1}..', IF)
+                    return Condition(
+                        f'{compared} {scoreboard_player.value+1}..', IF)
                 if operator == '<=':
-                    return Condition(f'{compared} ..{scoreboard_player.value}', IF)
+                    return Condition(
+                        f'{compared} ..{scoreboard_player.value}', IF)
                 if operator == '<':
-                    return Condition(f'{compared} ..{scoreboard_player.value-1}', IF)
+                    return Condition(
+                        f'{compared} ..{scoreboard_player.value-1}', IF)
             else:
                 if operator == '!=':
                     if isinstance(scoreboard_player.value, int):
                         raise ValueError("scoreboard_player.value is int")
-                    return Condition(f'score {first_token.string} {DataPack.VAR_NAME} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
+                    return Condition(
+                        f'score {first_token.string} {DataPack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
 
                 if operator in {'===', '==', '='}:
                     operator = '='
 
                 if isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is int")
-                return Condition(f'score {first_token.string} {DataPack.VAR_NAME} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
+                return Condition(
+                    f'score {first_token.string} {DataPack.var_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
             break
 
         if tokens[1].token_type == TokenType.KEYWORD and tokens[1].string == 'matches':
@@ -122,7 +132,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
 
             match_tokens_ = tokenizer.split_token(tokens[2], '..')
             match_tokens = tokenizer.find_token(match_tokens_, '..')
-            if len(match_tokens) != 2 or len(match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
+            if len(match_tokens) != 2 or len(
+                    match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
                 raise JMCSyntaxException(
                     "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer)
             if not match_tokens[0]:
@@ -141,7 +152,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                 raise JMCSyntaxException(
                     "First integer must be less than second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?")
 
-            return Condition(f'score {first_token.string} {DataPack.VAR_NAME} matches {tokens[2].string}', IF)
+            return Condition(
+                f'score {first_token.string} {DataPack.var_name} matches {tokens[2].string}', IF)
 
         raise JMCSyntaxException(
             "Operator not found in custom condition", tokens[0], tokenizer)
@@ -153,7 +165,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
             raise JMCSyntaxException(
                 "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
-        return Condition(*matched_function(tokens[1], datapack, tokenizer).call_bool())
+        return Condition(
+            *matched_function(tokens[1], datapack, tokenizer).call_bool())
     # End
     conditions: list[str] = []
     for token in tokens:
@@ -167,7 +180,8 @@ def custom_condition(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     return Condition(' '.join(conditions), IF)
 
 
-def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> list[list[Token]]:
+def find_operator(_tokens: list[Token], operator: str,
+                  tokenizer: Tokenizer) -> list[list[Token]]:
     """
     Find sepecific operator in tokens and split them
 
@@ -196,7 +210,8 @@ def find_operator(_tokens: list[Token], operator: str, tokenizer: Tokenizer) -> 
     return list_of_tokens
 
 
-def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> AST_TYPE:
+def condition_to_ast(
+        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> AST_TYPE:
     """
     Turn condition in form of list of tokens to abstract syntax tree
 
@@ -212,7 +227,7 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
                 f"Empty round parenthesis () inside condition", tokens[0], tokenizer)
 
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
-                              tokens[0].line, tokens[0].col+1, tokenizer.file_string, expect_semicolon=False)
+                              tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)
         tokens = tokenizer.programs[0]
     tokens = tokenizer.split_tokens(tokens, [OR_OPERATOR])
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
@@ -239,7 +254,8 @@ def condition_to_ast(tokens: list[Token], tokenizer: Tokenizer, datapack: DataPa
     return custom_condition(tokens, tokenizer, datapack)
 
 
-def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
+def ast_to_commands(
+        ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
     """
     Parse abstract syntax tree into list of conditions and list of commands that need to come before for it to works
 
@@ -260,7 +276,7 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
     if ast["operator"] == AND_OPERATOR:
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
-        for body in ast["body"]:
+        for body in ast["body"]:  # type: ignore
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
             _conditions, precommand = ast_to_commands(body)  # noqa
@@ -273,7 +289,7 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
         _count = count
         count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
-        for body in ast["body"]:
+        for body in ast["body"]:  # type: ignore
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
             conditions, precommand = ast_to_commands(body)
@@ -281,7 +297,8 @@ def ast_to_commands(ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Con
                 precommand_or.extend(precommand)
             precommand_or.append((conditions, _count))
 
-        return [Condition(f"score {VAR}{_count} {DataPack.VAR_NAME} matches 1", IF)], precommand_or
+        return [Condition(
+            f"score {VAR}{_count} {DataPack.var_name} matches 1", IF)], precommand_or
 
     elif ast["operator"] == NOT_OPERATOR:
         body = ast["body"]
@@ -313,20 +330,21 @@ def ast_to_strings(ast: AST_TYPE) -> tuple[str, str]:
             if conditions_and_count[1] > current_count:
                 current_count += 1
                 precommands.append(
-                    f"scoreboard players reset {VAR}{current_count} {DataPack.VAR_NAME}")
+                    f"scoreboard players reset {VAR}{current_count} {DataPack.var_name}")
                 precommands.append(
-                    f"execute {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.VAR_NAME} 1")
+                    f"execute {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.var_name} 1")
                 continue
 
             precommands.append(
-                f"execute unless score {VAR}{current_count} {DataPack.VAR_NAME} matches 1 {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.VAR_NAME} 1")
+                f"execute unless score {VAR}{current_count} {DataPack.var_name} matches 1 {merge_condition(conditions_and_count[0])} run scoreboards players set {VAR}{current_count} {DataPack.var_name} 1")
         precommand = '\n'.join(precommands)
 
     condition_string = merge_condition(conditions)
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
+def parse_condition(condition_token: Token |
+                    list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     """
     Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
     Example:
@@ -352,5 +370,5 @@ def parse_condition(condition_token: Token | list[Token], tokenizer: Tokenizer, 
 
     ast = condition_to_ast(tokens, tokenizer, datapack)
     condition, precommand = ast_to_strings(ast)
-    precommand = precommand+'\n' if precommand else ""
+    precommand = precommand + '\n' if precommand else ""
     return condition, precommand

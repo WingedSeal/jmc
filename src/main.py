@@ -22,7 +22,7 @@ from jmc.exception import (
 VERSION = 'v1.2.0-alpha'
 
 CWD = Path(os.getcwd())
-LOG_PATH = CWD/'log'
+LOG_PATH = CWD / 'log'
 CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
 config = {}
@@ -59,7 +59,7 @@ def get_input(prompt: str = "> ", color: Colors = Colors.INPUT) -> str:
 
     :param promt: Display string infront
     :param color: Color of the input and promt
-    :return: input from user 
+    :return: input from user
     """
     input_value = input(f"{color.value}{prompt}")
     print(Colors.ENDC.value, end="")
@@ -93,7 +93,7 @@ def main() -> None:
     logger.info(f"Build-version: {VERSION}")
     pprint(' JMC Compiler\n', Colors.HEADER)
     pprint(f'Current Directory | {CWD}\n', Colors.YELLOW)
-    if not (CWD/CONFIG_FILE_NAME).is_file():
+    if not (CWD / CONFIG_FILE_NAME).is_file():
         pprint(
             f'No confile file found, generating {CONFIG_FILE_NAME}...', Colors.INFO
         )
@@ -108,14 +108,18 @@ def main() -> None:
                 )
                 continue
             if not config["namespace"].islower():
-                pprint("Invalid Namespace: Uppercase character detected.", Colors.FAIL)
+                pprint(
+                    "Invalid Namespace: Uppercase character detected.",
+                    Colors.FAIL)
                 continue
             break
         config["description"] = get_input("Description: ")
         while True:
             config["pack_format"] = get_input("Pack Format: ")
             if not config["pack_format"].isdigit():
-                pprint("Invalid Pack Format: Non integer detected.", Colors.FAIL)
+                pprint(
+                    "Invalid Pack Format: Non integer detected.",
+                    Colors.FAIL)
                 continue
             break
 
@@ -125,11 +129,13 @@ def main() -> None:
             )
             if config["target"] == "":
                 config["target"] = (
-                    CWD/'main.jmc'
+                    CWD / 'main.jmc'
                 ).resolve().as_posix()
                 break
             if not config["target"].endswith(".jmc"):
-                pprint("Invalid path: Target file needs to end with .jmc", Colors.FAIL)
+                pprint(
+                    "Invalid path: Target file needs to end with .jmc",
+                    Colors.FAIL)
                 continue
             try:
                 config["target"] = Path(config["target"]).resolve().as_posix()
@@ -156,10 +162,10 @@ def main() -> None:
                 continue
             break
 
-        with (CWD/CONFIG_FILE_NAME).open('w') as file:
+        with (CWD / CONFIG_FILE_NAME).open('w') as file:
             dump(config, file, indent=2)
     else:
-        with (CWD/CONFIG_FILE_NAME).open('r') as file:
+        with (CWD / CONFIG_FILE_NAME).open('r') as file:
             config = load(file)
     pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
     while True:
@@ -178,7 +184,6 @@ def main() -> None:
 
 
 class CMD:
-    __slots__ = 'event'
     event = threading.Event()
 
     @classmethod
@@ -211,7 +216,7 @@ exit: Exit compiler
             global CWD
             global LOG_PATH
             CWD = Path(os.getcwd())
-            LOG_PATH = CWD/'log'
+            LOG_PATH = CWD / 'log'
             main()
         except ValueError:
             pprint("Invalid path", Colors.FAIL)
@@ -306,9 +311,9 @@ exit: Exit compiler
 
     @classmethod
     def _config_reset(cls):
-        (CWD/CONFIG_FILE_NAME).unlink(missing_ok=True)
+        (CWD / CONFIG_FILE_NAME).unlink(missing_ok=True)
         pprint("Resetting configurations", Colors.PURPLE)
-        print('\n'*5)
+        print('\n' * 5)
         main()
 
     @classmethod
@@ -326,7 +331,7 @@ Type `cancel` to cancel
         else:
             pprint(f"Current {key}: {config[key]}", Colors.YELLOW)
             config[key] = get_input("New Value: ")
-            with (CWD/CONFIG_FILE_NAME).open('w') as file:
+            with (CWD / CONFIG_FILE_NAME).open('w') as file:
                 dump(config, file, indent=2)
 
     @classmethod
@@ -365,9 +370,9 @@ Type `cancel` to cancel
         logger.info("Requesting debug log")
         LOG_PATH.mkdir(exist_ok=True)
         debug_log = jmc.get_debug_log()
-        with (LOG_PATH/datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+        with (LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
             file.write(debug_log)
-        with (LOG_PATH/"latest.log").open('w+') as file:
+        with (LOG_PATH / "latest.log").open('w+') as file:
             file.write(debug_log)
 
     @classmethod
@@ -375,9 +380,9 @@ Type `cancel` to cancel
         logger.info("Requesting info log")
         LOG_PATH.mkdir(exist_ok=True)
         info_log = jmc.get_info_log()
-        with (LOG_PATH/datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+        with (LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
             file.write(info_log)
-        with (LOG_PATH/"latest.log").open('w+') as file:
+        with (LOG_PATH / "latest.log").open('w+') as file:
             file.write(info_log)
 
 

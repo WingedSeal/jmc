@@ -51,7 +51,7 @@ Hello World
 say "Hello World";
 function myFunc() {
     say "My function";
-}  
+}
         """).set_header_file("""
 #credit JMC by WingedSeal
 #credit
@@ -86,6 +86,7 @@ say Hello World
 # Made by WingedSeal
             """)
         )
+
 
 if __name__ == '__main__':
     unittest.main()

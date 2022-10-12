@@ -7,6 +7,7 @@ from jmc.test_compile import JMCPack
 
 from jmc.exception import JMCSyntaxException
 
+
 class TestVariable(unittest.TestCase):
     def test_declaration(self):
         pack = JMCPack().set_jmc_file("""

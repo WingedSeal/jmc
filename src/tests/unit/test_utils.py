@@ -8,6 +8,8 @@ from jmc.utils import SingleTon, is_connected, is_number, search_to_string
 from jmc.command.utils import ArgType, PlayerType, eval_expr, find_arg_type, find_scoreboard_player_type
 from jmc.tokenizer import Token, TokenType, Tokenizer
 
+EMPTY_TOKENIZER = Tokenizer("", "")
+
 
 class SingleTonClass(SingleTon):
     pass
@@ -41,46 +43,46 @@ class TestJMCutils(unittest.TestCase):
 
     def test_search_to_string(self):
         new_str, found = search_to_string("$TEST.toString", Token(
-            TokenType.PAREN_ROUND, line=-1, col=-1, string="()"), "VAR_NAME", None)
+            TokenType.PAREN_ROUND, line=-1, col=-1, string="()"), "VAR_NAME", EMPTY_TOKENIZER)
         self.assertTrue(found)
         self.assertEqual(
             new_str, '{"score": {"name": "$TEST", "objective": "VAR_NAME"}}')
         new_str, found = search_to_string("$TEST.toString", Token(
-            TokenType.PAREN_ROUND, line=-1, col=-1, string='(color=red)'), "VAR_NAME", None)
+            TokenType.PAREN_ROUND, line=-1, col=-1, string='(color=red)'), "VAR_NAME", EMPTY_TOKENIZER)
         self.assertTrue(found)
         self.assertEqual(
             new_str, '{"color": "red", "score": {"name": "$TEST", "objective": "VAR_NAME"}}')
 
         with self.assertRaises(Exception):
             search_to_string("$TEST.toString", Token(
-                TokenType.PAREN_ROUND, line=-1, col=-1, string='(color="red")'), "VAR_NAME", None)
+                TokenType.PAREN_ROUND, line=-1, col=-1, string='(color="red")'), "VAR_NAME", EMPTY_TOKENIZER)
 
 
 class TestCommandUtils(unittest.TestCase):
 
     def test_find_scoreboard_player_type(self):
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.KEYWORD, -1, -1, "10"), None)
+            Token.empty("10"), EMPTY_TOKENIZER)
         self.assertEqual(scoreboard_player.player_type, PlayerType.INTEGER)
         self.assertEqual(scoreboard_player.value, 10)
 
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.KEYWORD, -1, -1, "$jmc_var"), None)
+            Token.empty("$jmc_var"), EMPTY_TOKENIZER)
         self.assertEqual(scoreboard_player.player_type, PlayerType.VARIABLE)
         self.assertEqual(scoreboard_player.value,
-                         (DataPack.VAR_NAME, "$jmc_var"))
+                         (DataPack.var_name, "$jmc_var"))
 
         scoreboard_player = find_scoreboard_player_type(
-            Token(TokenType.KEYWORD, -1, -1, "OBJ:SELECTOR"), None)
+            Token.empty("OBJ:SELECTOR"), EMPTY_TOKENIZER)
         self.assertEqual(scoreboard_player.player_type, PlayerType.SCOREBOARD)
         self.assertEqual(scoreboard_player.value,
                          ("OBJ", "SELECTOR"))
 
     def test_find_arg_type(self):
         self.assertEqual(find_arg_type(
-            Token(TokenType.KEYWORD, -1, -1, "5"), None), ArgType.INTEGER)
+            Token.empty("5"), EMPTY_TOKENIZER), ArgType.INTEGER)
         self.assertEqual(find_arg_type(
-            Token(TokenType.KEYWORD, -1, -1, "@a"), None), ArgType.SELECTOR)
+            Token.empty("@a"), EMPTY_TOKENIZER), ArgType.SELECTOR)
 
     def test_eval_expr(self):
         self.assertEqual(eval_expr("10+10"), "20")
@@ -110,13 +112,13 @@ FILE_CONTENT_1_2
             string_to_tree_dict("""TEST""")
 
         with self.assertRaises(ValueError):
-            string_to_tree_dict(string_to_tree_dict("""
+            string_to_tree_dict("""
 > FILE_NAME_1
-        """))
+        """)
         with self.assertRaises(ValueError):
-            string_to_tree_dict(string_to_tree_dict("""
+            string_to_tree_dict("""
 FILE_CONTENT_1_1
-        """))
+        """)
 
 
 if __name__ == '__main__':

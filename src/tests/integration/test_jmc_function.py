@@ -7,6 +7,7 @@ from jmc.test_compile import JMCPack
 
 from jmc.exception import JMCMissingValueError, JMCSyntaxException, JMCValueError
 
+
 class TestVarOperation(unittest.TestCase):
     def test_MathSqrt(self):
         pack = JMCPack().set_jmc_file("""
@@ -181,7 +182,7 @@ Hardcode.repeat();
         pack = JMCPack().set_jmc_file("""
 Hardcode.repeat("index", ()=>{
     tellraw @a "Hello World: index";
-}, start=1, stop=6, step=1); 
+}, start=1, stop=6, step=1);
         """).build()
 
         self.assertDictEqual(
@@ -208,7 +209,7 @@ tellraw @a "Hello World: 5"
         pack = JMCPack().set_jmc_file("""
 Hardcode.repeat("index", ()=>{
     tellraw @a "index^2=Hardcode.calc(index**2)";
-}, start=1, stop=6, step=1);  
+}, start=1, stop=6, step=1);
         """).build()
 
         self.assertDictEqual(
@@ -286,8 +287,8 @@ tellraw @s "25"
 class TestJMCCommand(unittest.TestCase):
     def test_TimerSet(self):
         pack = JMCPack().set_jmc_file("""
-Timer.set(my_objective, @a, $i); 
-Timer.set(my_objective, @s, 5); 
+Timer.set(my_objective, @a, $i);
+Timer.set(my_objective, @s, 5);
         """).build()
 
         self.assertDictEqual(
@@ -441,16 +442,17 @@ particle dust 1.0 1.0 1.0 0.7 ^ ^ ^10.4500000000 0 0 0 1 1 normal
             """)
         )
 
+
 class TestLoadOnce(unittest.TestCase):
     def test_error_load_twice(self):
         with self.assertRaises(JMCSyntaxException):
             JMCPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
-});  
+});
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
-});  
+});
             """).build()
 
     def test_error_no_load(self):
@@ -459,7 +461,7 @@ Player.firstJoin(()=>{
 function test() {
     Player.firstJoin(()=>{
         tellraw @s "Welcome!";
-    });    
+    });
 }
 
             """).build()
@@ -468,7 +470,7 @@ function test() {
         pack = JMCPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
-});  
+});
         """).build()
 
         self.assertDictEqual(
@@ -503,7 +505,7 @@ tellraw @s "Welcome!"
         pack = JMCPack().set_jmc_file("""
 Player.rejoin(()=>{
     tellraw @s "Welcome!";
-});  
+});
         """).build()
 
         self.assertDictEqual(
@@ -540,7 +542,7 @@ Player.die(onDeath=()=>{
 },onRespawn=()=>{
     tellraw @s "Welcome back to live";
     say "I'm back";
-});  
+});
         """).build()
 
         self.assertDictEqual(
@@ -598,7 +600,7 @@ RightClick.setup(
         2: ()=>{
             say "2";
         }
-    }   
+    }
 );
         """).build()
 
@@ -636,8 +638,12 @@ say 1
 say 2
             """)
         )
-    def test_PlayerOnEvent(self): ...
-    def test_TriggerSetup(self): ...
+
+    def test_PlayerOnEvent(self):
+        ...
+
+    def test_TriggerSetup(self):
+        ...
 
     def test_TimerAdd(self):
         pack = JMCPack().set_jmc_file("""
@@ -691,7 +697,7 @@ Recipe.table({
     }
 }, baseItem=barrier, onCraft=()=>{
     tellraw @s "Wow! You crafted a special diamond";
-});  
+});
         """).build()
 
         self.assertDictEqual(

@@ -19,6 +19,7 @@ class FunctionEncoder(JSONEncoder):
     """
     Custom minecraft function encoder for json.dump
     """
+
     def default(self, o):
         if isinstance(o, Function):
             return o.commands
@@ -34,7 +35,7 @@ class Function:
     __slots__ = 'commands'
     commands: list[str]
 
-    def __init__(self, commands: list[str] = None) -> None:
+    def __init__(self, commands: list[str] | None = None) -> None:
         if commands is None:
             self.commands = []
         else:
@@ -58,7 +59,7 @@ class Function:
         """
         Append multiple minecraft commands
 
-        :param commands: List of minecraft commands(strings), each string can have multiple lines 
+        :param commands: List of minecraft commands(strings), each string can have multiple lines
         """
         self.commands.extend(self.__split(commands))
 
@@ -66,7 +67,7 @@ class Function:
         """
         Append multiple minecraft commands to a certine line of function
 
-        :param commands:  List of minecraft commands(strings), each string can have multiple lines 
+        :param commands:  List of minecraft commands(strings), each string can have multiple lines
         :param index: Line/Position of the function to insert to
         """
         self.commands[index:index] = self.__split(commands)
@@ -110,10 +111,11 @@ class Function:
         """
         Loop through every line in each string of command(s) and make a new list with every element having only 1 line of command while optimizing every command
 
-        :param strings: minecraft commands(strings),each string can have multiple lines 
+        :param strings: minecraft commands(strings),each string can have multiple lines
         :return: minecraft commands(strings),each string can have only a single line
         """
-        return [self.optimize(str_) for string in strings for str_ in string.split('\n') if str_]
+        return [self.optimize(
+            str_) for string in strings for str_ in string.split('\n') if str_]
 
     def optimize(self, string: str) -> str:
         """
@@ -128,6 +130,8 @@ class Function:
             if string.startswith('execute run '):
                 string = string[12:]  # len('execute run ') = 11
         return string
+
+
 class DataPack:
     """
     A class representation for entire minecraft datapack
@@ -142,17 +146,16 @@ class DataPack:
                 'private_functions', 'private_function_count',
                 '__scoreboards', 'loads', 'ticks', 'namespace',
                 'used_command', 'lexer')
-    PRIVATE_NAME = '__private__'
-    LOAD_NAME = '__load__'
-    TICK_NAME = '__tick__'
-    VAR_NAME = '__variable__'
-    INT_NAME = '__int__'
+    private_name = '__private__'
+    load_name = '__load__'
+    tick_name = '__tick__'
+    var_name = '__variable__'
+    int_name = '__int__'
     VARIABLE_SIGN = '$'
     HEADER_DATA: "Header|None" = None
     """Data read from header file(s)"""
 
     _tick_json = None
-
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
@@ -170,8 +173,8 @@ class DataPack:
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
         self.__scoreboards: dict[str, str] = {
-            self.VAR_NAME: 'dummy',
-            self.INT_NAME: 'dummy'
+            self.var_name: 'dummy',
+            self.int_name: 'dummy'
         }
         """Minecraft scoreboards that are going to be created"""
 
@@ -220,9 +223,10 @@ class DataPack:
         :param count: Name of the function (usually as count)
         :return: String for calling minecraft function
         """
-        return f"function {self.namespace}:{self.PRIVATE_NAME}/{name}/{count}"
+        return f"function {self.namespace}:{self.private_name}/{name}/{count}"
 
-    def add_private_json(self, json_type: str, name: str, json: dict[str, Any]) -> None:
+    def add_private_json(self, json_type: str, name: str,
+                         json: dict[str, Any]) -> None:
         """
         Add new private json to datapack
 
@@ -230,9 +234,10 @@ class DataPack:
         :param name: Name of the private json
         :param json: Dictionary object
         """
-        self.jsons[f"{json_type}/{self.PRIVATE_NAME}/{name}"] = json
+        self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 
-    def add_private_function(self, name: str, token: Token, tokenizer: Tokenizer) -> str:
+    def add_private_function(self, name: str, token: Token,
+                             tokenizer: Tokenizer) -> str:
         """
         Add private function for user (arrow function)
 
@@ -253,7 +258,8 @@ class DataPack:
             self.private_functions[name][count] = Function(commands)
             return self.call_func(name, count)
 
-    def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str, precommands: list[str] = None, postcommands: list[str] = None) -> str:
+    def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str,
+                                    precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
         """
         Wrap custom commands around user's commands
 
@@ -276,7 +282,8 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def add_raw_private_function(self, name: str, commands: list[str], count: str = None) -> str:
+    def add_raw_private_function(
+            self, name: str, commands: list[str], count: str | None = None) -> str:
         """
         Add private function for JMC
 
@@ -290,7 +297,8 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def parse_function_token(self, token: Token, tokenizer: Tokenizer) -> list[str]:
+    def parse_function_token(self, token: Token,
+                             tokenizer: Tokenizer) -> list[str]:
         """
         "Parse a paren_curly token into a list of commands(string)
 
@@ -298,7 +306,8 @@ class DataPack:
         :param tokenizer: token's tokenizer
         :return: List of minecraft commands(string)
         """
-        return self.lexer.parse_func_content(token.string[1:-1], tokenizer.file_path, token.line, token.col+1, tokenizer.file_string)
+        return self.lexer.parse_func_content(
+            token.string[1:-1], tokenizer.file_path, token.line, token.col + 1, tokenizer.file_string)
 
     def build(self) -> None:
         """
@@ -308,18 +317,18 @@ class DataPack:
         self.loads[0:0] = [
             *[f"scoreboard objectives add {objective} {criteria}" for objective,
                 criteria in self.__scoreboards.items()],
-            *[f"scoreboard players set {n} {self.INT_NAME} {n}" for n in self.ints],
+            *[f"scoreboard players set {n} {self.int_name} {n}" for n in self.ints],
         ]
         if self.loads:
-            self.functions[self.LOAD_NAME].insert_extend(self.loads, 0)
+            self.functions[self.load_name].insert_extend(self.loads, 0)
         if self.ticks:
-            if self.TICK_NAME in self.functions:
-                self.functions[self.TICK_NAME].insert_extend(self.ticks, 0)
+            if self.tick_name in self.functions:
+                self.functions[self.tick_name].insert_extend(self.ticks, 0)
             else:
-                self.functions[self.TICK_NAME] = Function(self.ticks)
+                self.functions[self.tick_name] = Function(self.ticks)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
-                self.functions[f"{self.PRIVATE_NAME}/{name}/{path}"] = func
+                self.functions[f"{self.private_name}/{name}/{path}"] = func
 
         self.private_functions = {}
         self.loads = []
@@ -327,12 +336,12 @@ class DataPack:
 
     def __repr__(self) -> str:
         return f"""DataPack(
-    PRIVATE_NAME = {self.PRIVATE_NAME},
-    LOAD_NAME = {self.LOAD_NAME},
-    TICK_NAME = {self.TICK_NAME},
-    VAR_NAME = {self.VAR_NAME},
-    INT_NAME = {self.INT_NAME}
-    
+    PRIVATE_NAME = {self.private_name},
+    LOAD_NAME = {self.load_name},
+    TICK_NAME = {self.tick_name},
+    VAR_NAME = {self.var_name},
+    INT_NAME = {self.int_name}
+
     objectives = {dumps(self.__scoreboards, indent=2)}
     ints = {self.ints!r}
     functions = {dumps(self.functions, indent=2, cls=FunctionEncoder)}

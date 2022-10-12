@@ -28,7 +28,7 @@ class PlayerFirstJoin(JMCFunction):
                 }
             },
             "rewards": {
-                "function": f"{self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/main"
+                "function": f"{self.datapack.namespace}:{DataPack.private_name}/{self.name}/main"
             }
         })
         return ""
@@ -80,7 +80,7 @@ class PlayerDie(JMCFunction):
     def call(self) -> str:
         if self.raw_args["onDeath"] is None and self.raw_args["onRespawn"] is None:
             raise JMCMissingValueError("onDeath or onRespawn",
-                               self.token, self.tokenizer)
+                                       self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')
         self.datapack.ticks.append(
             f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "on_death")}')

@@ -21,7 +21,7 @@ def compile(config: dict[str, str], debug: bool = False) -> None:
     :param config: Configuration dictionary
     :param debug: Whether to debug into log, defaults to False
     """
-    logger.info("Configuration:\n"+dumps(config, indent=2))
+    logger.info("Configuration:\n" + dumps(config, indent=2))
     Header.clear()
     read_cert(config)
     read_header(config)
@@ -77,15 +77,15 @@ def get_cert() -> dict[str, str]:
     :return: Certificate configuration
     """
     return {
-        "LOAD": DataPack.LOAD_NAME,
-        "TICK": DataPack.TICK_NAME,
-        "PRIVATE": DataPack.PRIVATE_NAME,
-        "VAR": DataPack.VAR_NAME,
-        "INT": DataPack.INT_NAME
+        "LOAD": DataPack.load_name,
+        "TICK": DataPack.tick_name,
+        "PRIVATE": DataPack.private_name,
+        "VAR": DataPack.var_name,
+        "INT": DataPack.int_name
     }
 
 
-def read_header(config: dict[str, str], _test_file: str = None) -> bool:
+def read_header(config: dict[str, str], _test_file: str | None = None) -> bool:
     """
     Read the main header file
 
@@ -93,7 +93,7 @@ def read_header(config: dict[str, str], _test_file: str = None) -> bool:
     :return: Whether the main header file was found
     """
     header = Header()
-    header_file = Path(config["target"][:-len(".jmc")]+".hjmc")
+    header_file = Path(config["target"][:-len(".jmc")] + ".hjmc")
     parent_target = Path(config["target"]).parent
     if header_file.is_file() or _test_file is not None:
         header.add_file_read(header_file)
@@ -111,15 +111,15 @@ def read_header(config: dict[str, str], _test_file: str = None) -> bool:
         return False
 
 
-def read_cert(config: dict[str, str], _test_file: str = None):
+def read_cert(config: dict[str, str], _test_file: str | None = None):
     """
     Read Certificate(JMC.txt)
 
     :param config: JMC configuration
     :raises JMCBuildError: Can't find JMC.txt
     """
-    namespace_folder = Path(config["output"])/'data'/config["namespace"]
-    cert_file = namespace_folder/JMC_CERT_FILE_NAME
+    namespace_folder = Path(config["output"]) / 'data' / config["namespace"]
+    cert_file = namespace_folder / JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
     if namespace_folder.is_dir() or _test_file is not None:
         if not cert_file.is_file() and _test_file is None:
@@ -134,15 +134,15 @@ def read_cert(config: dict[str, str], _test_file: str = None):
             cert_config = string_to_cert_config(cert_str)
         except ValueError:
             cert_config = {}
-        DataPack.LOAD_NAME = cert_config.get(
+        DataPack.load_name = cert_config.get(
             "LOAD", old_cert_config["LOAD"])
-        DataPack.TICK_NAME = cert_config.get(
+        DataPack.tick_name = cert_config.get(
             "TICK", old_cert_config["TICK"])
-        DataPack.PRIVATE_NAME = cert_config.get(
+        DataPack.private_name = cert_config.get(
             "PRIVATE", old_cert_config["PRIVATE"])
-        DataPack.VAR_NAME = cert_config.get(
+        DataPack.var_name = cert_config.get(
             "VAR", old_cert_config["VAR"])
-        DataPack.INT_NAME = cert_config.get(
+        DataPack.int_name = cert_config.get(
             "INT", old_cert_config["INT"])
         cert_config = get_cert()
         if _test_file is None:
@@ -169,7 +169,7 @@ def read_func_tag(path: Path, config: dict[str, str]) -> dict[str, Any]:
         try:
             json: dict[str, Any] = loads(content)
             json["values"] = [
-                value for value in json["values"] if not value.startswith(config["namespace"]+':')]
+                value for value in json["values"] if not value.startswith(config["namespace"] + ':')]
         except JSONDecodeError:
             raise JMCBuildError(
                 f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.")
@@ -194,12 +194,14 @@ def post_process(string: str) -> str:
     if not header.credits:
         return string
 
-    string += "\n"*2
+    string += "\n" * 2
     for line in header.credits:
         string += f"\n# {line}" if line else "\n#"
     return string
 
-def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False) -> dict[str, str] | None:
+
+def build(datapack: DataPack, config: dict[str, str],
+          _is_virtual: bool = False) -> dict[str, str] | None:
     """
     Build and write files for minecraft datapack
 
@@ -208,36 +210,35 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
     :param _is_virtual: Whether to make a dictionary of output result instead of writing to files
     :returns: Dictionary of file path and file content if _is_virtual is True
     """
-
-    if _is_virtual:
-        output = {}
+    output: dict[str, Any] = {}
 
     logger.debug("Building")
     datapack.build()
     output_folder = Path(config["output"])
-    namespace_folder = output_folder/'data'/config["namespace"]
-    functions_tags_folder = output_folder/'data'/'minecraft'/'tags'/'functions'
+    namespace_folder = output_folder / 'data' / config["namespace"]
+    functions_tags_folder = output_folder / \
+        'data' / 'minecraft' / 'tags' / 'functions'
 
     if not _is_virtual:
         functions_tags_folder.mkdir(exist_ok=True, parents=True)
-    load_tag = functions_tags_folder/'load.json'
-    tick_tag = functions_tags_folder/'tick.json'
+    load_tag = functions_tags_folder / 'load.json'
+    tick_tag = functions_tags_folder / 'tick.json'
 
     load_json = {"values": []} if _is_virtual else read_func_tag(
         load_tag, config)
     tick_json = {"values": []} if _is_virtual else read_func_tag(
         tick_tag, config)
 
-    load_json["values"].append(f'{config["namespace"]}:{DataPack.LOAD_NAME}')
+    load_json["values"].append(f'{config["namespace"]}:{DataPack.load_name}')
     if _is_virtual:
         output[load_tag.as_posix()] = dumps(load_json, indent=2)
     else:
         with load_tag.open('w+') as file:
             dump(load_json, file, indent=2)
 
-    if DataPack.TICK_NAME in datapack.functions and datapack.functions[DataPack.TICK_NAME]:
+    if DataPack.tick_name in datapack.functions and datapack.functions[DataPack.tick_name]:
         tick_json["values"].append(
-            f'{config["namespace"]}:{DataPack.TICK_NAME}')
+            f'{config["namespace"]}:{DataPack.tick_name}')
         if _is_virtual:
             output[tick_tag.as_posix()] = dumps(tick_json, indent=2)
         else:
@@ -245,7 +246,7 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
                 dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
-        path = namespace_folder/'functions'/(func_path+'.mcfunction')
+        path = namespace_folder / 'functions' / (func_path + '.mcfunction')
         content = post_process(func.content)
         if content:
             if _is_virtual:
@@ -256,7 +257,7 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
                     file.write(content)
 
     for json_path, json in datapack.jsons.items():
-        path = namespace_folder/(json_path+'.json')
+        path = namespace_folder / (json_path + '.json')
         if json:
             if _is_virtual:
                 output[path.as_posix()] = dumps(json, indent=2)
@@ -266,8 +267,8 @@ def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False)
                     dump(json, file, indent=2)
     if _is_virtual:
         return output
-        
-    with (output_folder/'pack.mcmeta').open('w+') as file:
+
+    with (output_folder / 'pack.mcmeta').open('w+') as file:
         dump({
             "pack": {
                 "pack_format": int(config["pack_format"]),

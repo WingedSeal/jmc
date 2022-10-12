@@ -7,7 +7,8 @@ from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
-def drange(start: float|int, stop: float|int, step: float|int) -> Iterator[float|int]:
+def drange(start: float | int, stop: float | int,
+           step: float | int) -> Iterator[float | int]:
     """
     Similar to built-in range() function but with float
 
@@ -39,6 +40,7 @@ class TimerSet(JMCFunction):
     ```
     Set entity's score to start the timer.
     """
+
     def call(self) -> str:
         if self.raw_args["tick"].arg_type == ArgType.INTEGER:
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
@@ -58,7 +60,8 @@ def __normalize_decimal(n: float):
     return stripped
 
 
-def points_to_commands(points: list[tuple[float, float, float]], particle: str, speed: str, count: str, mode: str, notation: str = "~") -> list[str]:
+def points_to_commands(points: list[tuple[float, float, float]], particle: str,
+                       speed: str, count: str, mode: str, notation: str = "~") -> list[str]:
     """
     Parse list of points(x,y,z position) into particle commands
 
@@ -96,11 +99,12 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str, 
     }
 )
 class ParticleCircle(JMCFunction):
-    def draw(self, radius: float, spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float,
+             spread: int) -> list[tuple[float, float, float]]:
         points = []
-        angle = 2*math.pi/spread
+        angle = 2 * math.pi / spread
         for i in drange(0, spread, angle):
-            points.append((radius*math.cos(i), 0.0, radius*math.sin(i)))
+            points.append((radius * math.cos(i), 0.0, radius * math.sin(i)))
         return points
 
     def call(self) -> str:
@@ -142,15 +146,16 @@ class ParticleCircle(JMCFunction):
     }
 )
 class ParticleSpiral(JMCFunction):
-    def draw(self, radius: float, height: float, spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, height: float,
+             spread: int) -> list[tuple[float, float, float]]:
         points = []
-        angle = 2*math.pi/spread
-        d_y = height/spread
+        angle = 2 * math.pi / spread
+        d_y = height / spread
         for i in range(spread):
             points.append((
-                radius*math.cos(i*angle),
-                i*d_y,
-                radius*math.sin(i*angle)))
+                radius * math.cos(i * angle),
+                i * d_y,
+                radius * math.sin(i * angle)))
         return points
 
     def call(self) -> str:
@@ -194,13 +199,15 @@ class ParticleSpiral(JMCFunction):
     }
 )
 class ParticleCylinder(JMCFunction):
-    def draw(self, radius: float, height: float, spread_xz: int, spread_y: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, height: float, spread_xz: int,
+             spread_y: int) -> list[tuple[float, float, float]]:
         points = []
-        d_y = height/spread_y
+        d_y = height / spread_y
         for y in range(spread_y):
-            angle = 2*math.pi/spread_xz
+            angle = 2 * math.pi / spread_xz
             for i in drange(0, spread_xz, angle):
-                points.append((radius*math.cos(i), y*d_y, radius*math.sin(i)))
+                points.append(
+                    (radius * math.cos(i), y * d_y, radius * math.sin(i)))
         return points
 
     def call(self) -> str:
@@ -242,11 +249,10 @@ class ParticleCylinder(JMCFunction):
         "mode": "normal",
     }
 )
-
-
 class ParticleLine(JMCFunction):
-    def draw(self, distance: float, spread: int) -> list[tuple[float, float, float]]:
-        return [(0, 0, n) for n in drange(1, distance+1, distance/spread)]
+    def draw(self, distance: float,
+             spread: int) -> list[tuple[float, float, float]]:
+        return [(0, 0, n) for n in drange(1, distance + 1, distance / spread)]
 
     def call(self) -> str:
         if self.args['mode'] not in {'force', 'normal'}:

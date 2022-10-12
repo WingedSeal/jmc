@@ -8,16 +8,18 @@ from .exception import JMCSyntaxException
 if TYPE_CHECKING:
     from .tokenizer import Token, Tokenizer
 
+
 class __SingleTonMeta(type):
     """
     Metaclass for singleton
     """
-    _instances: dict["__SingleTonMeta"] = {}
-    
+    _instances: dict["__SingleTonMeta", Any] = {}
+
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
+
 
 class SingleTon(metaclass=__SingleTonMeta):
     """
@@ -27,7 +29,8 @@ class SingleTon(metaclass=__SingleTonMeta):
     """
     def __new__(cls, *args, **kwargs):
         if cls is SingleTon:
-            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(
+                f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls, *args, **kwargs)
 
 
@@ -60,7 +63,8 @@ def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     )
 
 
-def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str | bool | dict[str, str]]:
+def __parse_to_string(
+        token: "Token", tokenizer: "Tokenizer") -> dict[str, str | bool | dict[str, str]]:
     """
     Parse `toString` in JMC
 
@@ -109,7 +113,8 @@ def __parse_to_string(token: "Token", tokenizer: "Tokenizer") -> dict[str, str |
     return json
 
 
-def __search_to_string(match: re.Match, token: "Token", VAR_NAME: str, tokenizer: "Tokenizer") -> str:
+def __search_to_string(match: re.Match, token: "Token",
+                       VAR_NAME: str, tokenizer: "Tokenizer") -> str:
     """
     Function for regex.subn
 
@@ -125,7 +130,8 @@ def __search_to_string(match: re.Match, token: "Token", VAR_NAME: str, tokenizer
     return dumps(properties)
 
 
-def search_to_string(last_str: str, token: "Token", VAR_NAME: str, tokenizer: "Tokenizer") -> tuple[str, bool]:
+def search_to_string(last_str: str, token: "Token",
+                     VAR_NAME: str, tokenizer: "Tokenizer") -> tuple[str, bool]:
     """
     Find `toString` in a last_str
 
@@ -141,10 +147,12 @@ def search_to_string(last_str: str, token: "Token", VAR_NAME: str, tokenizer: "T
         return new_str, True
     return last_str, False
 
+
 class JSONUniversalEncoder(JSONEncoder):
     """
     JSONEncoder that can encode everything, used for displaying results
     """
+
     def default(self, o):
         try:
             iterator = iter(o)
@@ -152,8 +160,9 @@ class JSONUniversalEncoder(JSONEncoder):
             pass
         else:
             return list(iterator)
-        
+
         return repr(o)
+
 
 def monitor_results(func):
     """
@@ -164,9 +173,9 @@ def monitor_results(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        return_value = func(*args,**kwargs)
+        return_value = func(*args, **kwargs)
         print(f"""Function call {func.__name__}(
-args={dumps(args, indent=2, cls=JSONUniversalEncoder)}, 
+args={dumps(args, indent=2, cls=JSONUniversalEncoder)},
 kwargs={dumps(kwargs, indent=2, cls=JSONUniversalEncoder)}
 ) returns {dumps(return_value, indent=2, cls=JSONUniversalEncoder)}
 """)

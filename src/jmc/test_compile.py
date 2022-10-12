@@ -11,7 +11,7 @@ logger = Logger(__name__)
 class JMCPack:
     """
     Class representation of folder structure containing entire JMC files
-    
+
     - Used for testing to prevent having to write and read files
     :param namespace: Namespace of the virtual datapack, defaults to "TEST"
     :param output: virtual directory for output, defaults to "VIRTUAL"
@@ -24,7 +24,8 @@ class JMCPack:
     __built: dict[str, str] | None
     """Dictionary of file name and file content"""
 
-    def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
+    def __init__(self, namespace: str = "TEST",
+                 output: str = "VIRTUAL") -> None:
         self.__built = None
         self.cert = """LOAD=__load__
 TICK=__tick__
@@ -74,7 +75,8 @@ INT=__int__"""
         return dumps(self.built, indent=indent)
 
     def to_string(self) -> str:
-        return "\n".join([f"> {file_name}\n{file_content}" for file_name, file_content in self.built.items()])
+        return "\n".join(
+            [f"> {file_name}\n{file_content}" for file_name, file_content in self.built.items()])
 
     def __str__(self) -> str:
         ouput_str = ""

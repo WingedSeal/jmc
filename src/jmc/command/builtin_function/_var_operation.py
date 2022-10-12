@@ -21,7 +21,7 @@ class MathSqrt(JMCFunction):
         x_n_sq = '__main__.x_n_sq'
         N = '__math__.N'
         diff = '__math__.different'
-        var = DataPack.VAR_NAME
+        var = DataPack.var_name
         if self.call_string not in self.datapack.used_command:
             self.datapack.used_command.add(self.call_string)
             self.datapack.ints.add(2)
@@ -32,7 +32,7 @@ class MathSqrt(JMCFunction):
                     f"scoreboard players operation {x_n} {var} = {N} {var}",
                     f"scoreboard players operation {x_n} {var} /= {x} {var}",
                     f"scoreboard players operation {x_n} {var} += {x} {var}",
-                    f"scoreboard players operation {x_n} {var} /= 2 {DataPack.INT_NAME}",
+                    f"scoreboard players operation {x_n} {var} /= 2 {DataPack.int_name}",
                     f"scoreboard players operation {diff} {var} = {x} {var}",
                     f"scoreboard players operation {diff} {var} -= {x_n} {var}",
                     f"execute unless score {diff} {var} 0..1 run {self.datapack.call_func(self.name, 'newton_raphson')}",
@@ -46,7 +46,7 @@ class MathSqrt(JMCFunction):
                     self.datapack.call_func(self.name, 'newton_raphson'),
                     f"scoreboard players operation {x_n_sq} {var} = {x_n} {var}",
                     f"scoreboard players operation {x_n_sq} {var} *= {x_n} {var}",
-                    f"scoreboard players operation {x_n} {var} /= 2 {DataPack.INT_NAME}",
+                    f"scoreboard players operation {x_n} {var} /= 2 {DataPack.int_name}",
                     f"scoreboard players operation {diff} {var} = {x} {var}",
                     f"scoreboard players operation {diff} {var} -= {x_n} {var}",
                     f"execute if score {x_n_sq} {var} > {N} {var} run scoreboard players remove {x_n} {var} 1",
@@ -88,7 +88,7 @@ class MathRandom(JMCFunction):
         seed = '__math__.seed'
         a = '__math__.rng.a'
         c = '__math__.rng.c'
-        var = DataPack.VAR_NAME
+        var = DataPack.var_name
         start = int(self.args["min"])
         end = int(self.args["max"])
         if end < start:
@@ -119,10 +119,10 @@ class MathRandom(JMCFunction):
                     self.datapack.add_raw_private_function(
                         self.name,
                         [
-                            f"execute store result score {seed} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
-                            f"execute store result score {a} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
+                            f"execute store result score {seed} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
+                            f"execute store result score {a} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
                             f"scoreboard players operation {a} {var} *= {a} {var}",
-                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.PRIVATE_NAME}/{self.name}/rng",
+                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
                             f"scoreboard players operation {c} {var} *= {c} {var}"
                         ],
                         'setup'
@@ -137,13 +137,13 @@ class MathRandom(JMCFunction):
                 'main'
             )
 
-        mod = end-start+1
+        mod = end - start + 1
         self.datapack.ints.add(mod)
 
         run = [
             self.datapack.call_func(self.name, 'main'),
             f"scoreboard players operation {self.var} {var} = {seed} {var}",
-            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.INT_NAME}",
+            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.int_name}",
             f"scoreboard players add {self.var} {var} {start}"
         ]
 

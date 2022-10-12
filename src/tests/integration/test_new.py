@@ -8,7 +8,6 @@ from jmc.test_compile import JMCPack
 from jmc.exception import MinecraftSyntaxWarning
 
 
-
 class TestNew(unittest.TestCase):
     def test_new(self):
         pack = JMCPack().set_jmc_file("""
@@ -57,7 +56,7 @@ new advancements(myDatapack.firstJoin) {
           "trigger": "minecraft:tick"
         }
     },
-    "rewards": {"function": "namespace:mydatapack/rejoin/first_join"}                        
+    "rewards": {"function": "namespace:mydatapack/rejoin/first_join"}
 }
             """).build()
 

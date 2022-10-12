@@ -3,6 +3,7 @@ import operator as op
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Any, Callable
 
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -19,11 +20,12 @@ class PlayerType(Enum):
 @dataclass(frozen=True, slots=True)
 class ScoreboardPlayer:
     player_type: PlayerType
-    value: int|tuple[str, str]
+    value: int | tuple[str, str]
     """Contains either integer or (objective and selector)"""
 
 
-def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_integer: bool = True) -> ScoreboardPlayer:
+def find_scoreboard_player_type(
+        token: Token, tokenizer: Tokenizer, allow_integer: bool = True) -> ScoreboardPlayer:
     """
     Generate ScoreboardPlayer including its type from a keyword token
 
@@ -38,10 +40,12 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
             f"Expected keyword", token, tokenizer)
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
-        return ScoreboardPlayer(player_type=PlayerType.VARIABLE, value=(DataPack.VAR_NAME, token.string))
+        return ScoreboardPlayer(player_type=PlayerType.VARIABLE, value=(
+            DataPack.var_name, token.string))
 
     if is_number(token.string):
-        return ScoreboardPlayer(player_type=PlayerType.INTEGER, value=int(token.string))
+        return ScoreboardPlayer(
+            player_type=PlayerType.INTEGER, value=int(token.string))
 
     splits = token.string.split(':')
     if len(splits) == 1:
@@ -55,7 +59,8 @@ def find_scoreboard_player_type(token: Token, tokenizer: Tokenizer, allow_intege
         raise JMCSyntaxException(
             "Scoreboard's player cannot contain more than 1 colon(:)", token, tokenizer)
 
-    return ScoreboardPlayer(player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
+    return ScoreboardPlayer(
+        player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
 
 class ArgType(Enum):
@@ -76,11 +81,13 @@ class ArgType(Enum):
 
 class Arg:
     __slots__ = ('token', 'arg_type')
+
     def __init__(self, token: Token, arg_type: ArgType) -> None:
         self.token = token
         self.arg_type = arg_type
 
-    def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
+    def verify(self, verifier: ArgType, tokenizer: Tokenizer,
+               key_string: str) -> "Arg":
         """
         Verify if the argument is valid
 
@@ -132,7 +139,8 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
         else:
             return ArgType.JS_OBJECT
     if token.token_type == TokenType.KEYWORD:
-        if token.string.startswith(DataPack.VARIABLE_SIGN) or ':' in token.string:
+        if token.string.startswith(
+                DataPack.VARIABLE_SIGN) or ':' in token.string:
             return ArgType.SCOREBOARD
         if is_number(token.string):
             return ArgType.INTEGER
@@ -148,7 +156,8 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
         "Unknown argument type", token, tokenizer)
 
 
-def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
+def verify_args(params: dict[str, ArgType], feature_name: str,
+                token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
     """
     Verify argument types of a paren_round token
 
@@ -177,6 +186,7 @@ def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tok
         result[key] = Arg(kwarg, arg_type).verify(params[key], tokenizer, key)
     return result
 
+
 def eval_expr(expr: str) -> str:
     """
     Evaluate mathematical expression and calculate the result number then cast it to string
@@ -187,9 +197,9 @@ def eval_expr(expr: str) -> str:
     return str(__eval(ast.parse(expr, mode='eval').body))
 
 
-OPERATORS = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-             ast.Div: op.truediv, ast.Pow: op.pow,
-             ast.USub: op.neg}
+OPERATORS: dict[type, Callable[..., Any]] = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+                                             ast.Div: op.truediv, ast.Pow: op.pow,
+                                             ast.USub: op.neg}
 
 
 def __eval(node):
@@ -210,7 +220,8 @@ def __eval(node):
         raise TypeError(node)
 
 
-def parse_func_map(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> dict[int, tuple[str, bool]]:
+def parse_func_map(token: Token, tokenizer: Tokenizer,
+                   datapack: DataPack) -> dict[int, tuple[str, bool]]:
     """
     Parse JMC function hashmap
 

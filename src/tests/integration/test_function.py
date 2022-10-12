@@ -7,6 +7,7 @@ from jmc.test_compile import JMCPack
 
 from jmc.exception import JMCFileNotFoundError, JMCSyntaxException
 
+
 class TestFunction(unittest.TestCase):
     def test_define(self):
         pack = JMCPack().set_jmc_file("""
@@ -42,7 +43,7 @@ function customFunction(parameter) {
 
         with self.assertRaises(JMCSyntaxException):
             JMCPack().set_jmc_file("""
-customFunction(argument); 
+customFunction(argument);
         """).build()
 
     def test_call(self):
@@ -71,7 +72,7 @@ function TEST:customfunction
 execute as @a run {
     say "Hello World 1";
     say "Hello World 2";
-}  
+}
         """).build()
 
         self.assertDictEqual(
@@ -106,7 +107,7 @@ class foo {
             }
         }
     }
-} 
+}
         """).build()
 
         self.assertDictEqual(
