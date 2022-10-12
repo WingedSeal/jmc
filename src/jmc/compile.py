@@ -196,10 +196,7 @@ def post_process(string: str) -> str:
 
     string += "\n"*2
     for line in header.credits:
-        if line:
-            string += f"\n# {line}" 
-        else:
-            string += "\n#"
+        string += f"\n# {line}" if line else "\n#"
     return string
 
 def build(datapack: DataPack, config: dict[str, str], _is_virtual: bool = False) -> dict[str, str] | None:

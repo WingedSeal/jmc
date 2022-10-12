@@ -178,6 +178,7 @@ def main() -> None:
 
 
 class CMD:
+    __slots__ = 'event'
     event = threading.Event()
 
     @classmethod

@@ -28,6 +28,7 @@ class Condition:
     """
     Dataclass for condition containing string representation(excluding if/unless) and whether it's for `if` or `unless`
     """
+    __slots__ = 'string', 'if_unless'
     string: str
     if_unless: bool
     """`True` means 'if', `False` means 'unless'"""

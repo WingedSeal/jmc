@@ -31,6 +31,7 @@ class Function:
 
     :param commands: List of minecraft commands(string), defaults to empty list
     """
+    __slots__ = 'commands'
     commands: list[str]
 
     def __init__(self, commands: list[str] = None) -> None:
@@ -134,6 +135,7 @@ class DataPack:
     :param namespace: Datapack's namespace
     :param lexer: Lexer object
     """
+    __slot__ = 'PRIVATE_NAME', 'LOAD_NAME', 'TICK_NAME', 'VAR_NAME', 'INT_NAME', 'VARIABLE_SIGN', 'HEADER_DATA', '_tick_json', 'ints', 'functions', 'load_function', 'jsons', 'private_functions', 'private_function_count', '__scoreboards', 'loads', 'ticks', 'namespace', 'used_command', 'lexer'
     PRIVATE_NAME = '__private__'
     LOAD_NAME = '__load__'
     TICK_NAME = '__tick__'
