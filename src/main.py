@@ -46,7 +46,7 @@ class Colors(Enum):
 def pprint(values, color: Colors = Colors.NONE):
     """
     Print but with colors
-    
+
     :param values: Value for printing
     :param color: color of printing
     """
@@ -98,7 +98,7 @@ def main() -> None:
             f'No confile file found, generating {CONFIG_FILE_NAME}...', Colors.INFO
         )
         while True:
-            config["namespace"] = get_input(f"Namespace: ")
+            config["namespace"] = get_input("Namespace: ")
             if " " in config["namespace"] or "\t" in config["namespace"]:
                 pprint("Invalid Namespace: Space detected.", Colors.FAIL)
                 continue
@@ -111,9 +111,9 @@ def main() -> None:
                 pprint("Invalid Namespace: Uppercase character detected.", Colors.FAIL)
                 continue
             break
-        config["description"] = get_input(f"Description: ")
+        config["description"] = get_input("Description: ")
         while True:
-            config["pack_format"] = get_input(f"Pack Format: ")
+            config["pack_format"] = get_input("Pack Format: ")
             if not config["pack_format"].isdigit():
                 pprint("Invalid Pack Format: Non integer detected.", Colors.FAIL)
                 continue
@@ -141,7 +141,7 @@ def main() -> None:
 
         while True:
             config["output"] = get_input(
-                f"Output directory(Leave blank for default[current directory]): "
+                "Output directory(Leave blank for default[current directory]): "
             )
             if config["output"] == "":
                 config["output"] = CWD.resolve().as_posix()

@@ -50,14 +50,14 @@ def else_(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> str
         datapack.lexer.if_else_box.append(
             (command[2], command[3]))
         return None
-    elif command[1].token_type == TokenType.paren_curly:
+    if command[1].token_type == TokenType.paren_curly:
         datapack.lexer.if_else_box.append(
             (None, command[1])
         )
         return datapack.lexer.parse_if_else(tokenizer)
-    else:
-        raise JMCSyntaxException(
-            "Expected 'if' or {", command[1], tokenizer, display_col_length=False)
+
+    raise JMCSyntaxException(
+        "Expected 'if' or {", command[1], tokenizer, display_col_length=False)
 
 
 WHILE_NAME = 'while_loop'
@@ -85,6 +85,7 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
         datapack.add_custom_private_function(
             WHILE_NAME, command[2], tokenizer, count, postcommands=[call_func])
         return call_func
+
     else:
         func_content = datapack.lexer.do_while_box
         datapack.lexer.do_while_box = None
@@ -96,7 +97,7 @@ def while_(command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer") -
                 "Expected (", command[1], tokenizer, display_col_length=False)
         if len(command) > 2:
             raise JMCSyntaxException(
-                f"Unexpected token", command[2], tokenizer, display_col_length=False)
+                "Unexpected token", command[2], tokenizer, display_col_length=False)
 
         condition, precommand = parse_condition(
             command[1], tokenizer, datapack)

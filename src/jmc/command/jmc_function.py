@@ -47,10 +47,11 @@ class JMCFunction:
 
     def __new__(cls, *args, **kwargs):
         if cls is JMCFunction:
-            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(
+                f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: bool|None = None, var: str = None) -> None:
+    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer, is_execute: bool | None = None, var: str = None) -> None:
         self.token = token
         self.datapack = datapack
         self.tokenizer = tokenizer
@@ -62,7 +63,7 @@ class JMCFunction:
             raise NotImplementedError("Missing func_type")
 
         self.__args_Args = verify_args(self.arg_type,
-                                     self.call_string, token, tokenizer)
+                                       self.call_string, token, tokenizer)
         self.args: dict[str, str] = {}
         self.raw_args: dict[str, Arg] = {}
 
@@ -99,11 +100,10 @@ class JMCFunction:
         """
         This function will be called after initiation of the object
         """
-        pass
 
     def call(self) -> str:
         """
-        This function will be called when user call matching JMC custom function 
+        This function will be called when user call matching JMC custom function
 
         :raises NotImplementedError: When the subclass's call method is not implemented
         :return: Minecraft command as string
@@ -112,7 +112,7 @@ class JMCFunction:
 
     def call_bool(self) -> tuple[str, bool]:
         """
-        This function will be called when user call matching JMC *boolean* function 
+        This function will be called when user call matching JMC *boolean* function
 
         :raises NotImplementedError: When the subclass's call method is not implemented
         :return: Tuple of Minecraft command as string and IF/UNLESS(boolean)
@@ -131,7 +131,6 @@ class JMCFunction:
             for subcls in cls.__subclasses__():
                 cls.__subcls[subcls.func_type][subcls.call_string] = subcls
 
-        
         return cls.__subcls[func_type]
 
         # commands = {}

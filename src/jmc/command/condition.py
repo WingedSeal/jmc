@@ -26,7 +26,7 @@ count = 0
 @dataclass(eq=False, repr=True)
 class Condition:
     """
-    Dataclass for condition containing string representation(excluding if/unless) and whether it's for `if` or `unless` 
+    Dataclass for condition containing string representation(excluding if/unless) and whether it's for `if` or `unless`
     """
     string: str
     if_unless: bool

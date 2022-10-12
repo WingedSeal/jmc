@@ -788,9 +788,9 @@ class Tokenizer:
                         last_token = new_token
                         arrow_func_state = 0
                         continue
-                    else:
-                        raise JMCSyntaxException(
-                            "Expected {", token, self, display_col_length=False)
+
+                    raise JMCSyntaxException(
+                        "Expected {", token, self, display_col_length=False)
 
             if token.token_type == TokenType.keyword:
                 if arg:

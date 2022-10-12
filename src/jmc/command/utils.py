@@ -136,7 +136,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
         return ArgType.string
 
     raise JMCValueError(
-        f"Unknown argument type", token, tokenizer)
+        "Unknown argument type", token, tokenizer)
 
 
 def verify_args(params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
