@@ -17,6 +17,13 @@ Normal function from .mcfunction file will not works in JMC, the syntax is almos
 Everything you need to know about JMC can be found at https://wingedseal.github.io/docs.jmc/
 
 
+## Build
+
+If you would like to build the file yourself.
+1. Install [Python 3.10](https://www.python.org/downloads/release/python-3108/)
+2. Go to repository directory using `cd`
+3. Run `pip install -r build_requirements.txt`  as administrator
+4. Run `build`
 
 ## License
 
