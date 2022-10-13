@@ -609,7 +609,7 @@ class Tokenizer:
         expecting_comma = False
         last_token: Token = Token.empty()
 
-        def add_arg(token: Token, from_comma: bool = False) -> None:
+        def add_arg(token: Token) -> None:
             nonlocal arg
             nonlocal args
             nonlocal expecting_comma
@@ -711,7 +711,7 @@ class Tokenizer:
                 arrow_func_state = 0
                 expecting_comma = False
                 if arg:
-                    add_arg(last_token, from_comma=True)
+                    add_arg(last_token)
             elif token.token_type in {TokenType.PAREN_ROUND, TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
                 if token.string == "()":
                     arrow_func_state = 1

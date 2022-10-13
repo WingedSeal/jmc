@@ -1,7 +1,7 @@
 @echo off
-echo ================================================
+echo =====================================
 echo ^> Code Cyclomatic Complexity (radon)
-echo ================================================
+echo =====================================
 radon cc src/jmc src/main.py --min C -s --total-average
 echo =====================================
 echo ^> Code Maintainability Index (radon) 
