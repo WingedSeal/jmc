@@ -130,9 +130,6 @@ dmypy.json
 
 # Custom
 testing/
-logs/
-log/
 .vscode
 jmc_config.json
-autopytoexe.json
-output/
+dist/

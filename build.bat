@@ -1,0 +1,1 @@
+nuitka src/main.py --onefile --windows-icon-from-ico=JMC-icon.ico -o JMC --remove-output --output-dir=./dist
