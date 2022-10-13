@@ -1,1 +1,4 @@
-nuitka src/main.py --onefile --windows-icon-from-ico=JMC-icon.ico -o JMC --remove-output --output-dir=./dist
+START /B /wait cmd /c "nuitka src/main.py --onefile --standalone --windows-icon-from-ico=./JMC-icon.ico --remove-output --output-dir=./dist"
+cd dist
+ren "main.exe" "JMC.exe"
+cd ..
