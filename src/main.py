@@ -8,6 +8,7 @@ from datetime import datetime
 from time import perf_counter
 from getpass import getpass
 from traceback import format_exc
+from sys import exit
 
 import jmc
 from jmc.exception import (
