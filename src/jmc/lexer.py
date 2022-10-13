@@ -86,6 +86,323 @@ def append_commands(commands: list[str], string: str) -> None:
     return
 
 
+class FuncContent:
+    """
+    A class representation of a row function for parsing content inside the function
+
+    :param tokenizer: Tokenizer
+    :param programs: List of commands(List of arguments(Token))
+    :param is_load: Whether the function is a load function
+    """
+    __slots__ = 'tokenizer', 'programs', 'is_load', 'command_strings', 'commands', 'command', 'is_expect_command', 'is_execute', 'lexer'
+
+    command: list[Token]
+    is_expect_command: bool
+    is_execute: bool
+
+    def __init__(self, tokenizer: Tokenizer,
+                 programs: list[list[Token]], is_load: bool, lexer: "Lexer") -> None:
+
+        self.tokenizer = tokenizer
+        self.programs = programs
+        self.is_load = is_load
+        self.command_strings: list[str] = []
+        self.commands: list[str] = []
+        self.lexer = lexer
+
+    def parse(self) -> list[str]:
+        """
+        Parse the content
+        :return: List of commands(String)
+        """
+        for command in self.programs:
+            self.command = command
+            if self.command[0].token_type != TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    "Expected keyword", self.command[0], self.tokenizer)
+            elif self.command[0].string == 'new':
+                raise JMCSyntaxException(
+                    "'new' keyword found in function", self.command[0], self.tokenizer)
+            elif self.command[0].string == 'class':
+                raise JMCSyntaxException(
+                    "'class' keyword found in function", self.command[0], self.tokenizer)
+            elif self.command[0].string == 'function' and len(self.command) == 4:
+                raise JMCSyntaxException(
+                    "Function declaration found in function", self.command[0], self.tokenizer)
+            elif self.command[0].string == '@import':
+                raise JMCSyntaxException(
+                    "Importing found in function", self.command[0], self.tokenizer)
+
+            # Boxes check
+            if self.lexer.do_while_box is not None:
+                if self.command[0].string != 'while':
+                    raise JMCSyntaxException(
+                        "Expected 'while'", self.command[0], self.tokenizer)
+            if self.lexer.if_else_box:
+                if self.command[0].string != 'else':
+                    append_commands(
+                        self.commands, self.lexer.parse_if_else(
+                            self.tokenizer))
+
+            if self.commands:
+                self.command_strings.append(' '.join(self.commands))
+                self.commands = []
+
+            self.parse_commands()
+        # End of Program
+
+        # Boxes check
+        if self.lexer.do_while_box is not None:
+            raise JMCSyntaxException(
+                "Expected 'while'", self.programs[-1][-1], self.tokenizer)
+        if self.lexer.if_else_box:
+            append_commands(
+                self.commands,
+                self.lexer.parse_if_else(
+                    self.tokenizer))
+
+        if self.commands:
+            self.command_strings.append(' '.join(self.commands))
+            self.commands = []
+        return self.command_strings
+
+    def parse_commands(self) -> None:
+        self.is_expect_command = True
+        self.is_execute = (self.command[0].string == 'execute')
+
+        for key_pos, token in enumerate(self.command):
+            if not self.is_expect_command:
+                self._not_expect_command(key_pos, token)
+                continue
+            if self._expect_command(key_pos, token):
+                break
+
+    def _not_expect_command(self, key_pos: int, token: Token) -> None:
+        if token.string == 'run' and token.token_type == TokenType.KEYWORD:
+            if not self.is_execute:
+                raise MinecraftSyntaxWarning(
+                    "'run' keyword found outside 'execute' command", token, self.tokenizer)
+            self.is_expect_command = True
+
+        if (
+            token.token_type == TokenType.KEYWORD and
+            token.string in FIRST_ARGUMENTS and
+            not (
+                token.string == 'function' and
+                self.commands[-1] == 'schedule'
+            )
+        ):
+            raise JMCSyntaxException(
+                f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)
+
+        if token.string == '@s' and token.token_type == TokenType.KEYWORD and self.commands[-1] == 'as':
+            self.commands[-1] = 'if entity'
+
+        if token.token_type == TokenType.PAREN_ROUND:
+            self.commands[-1], success = search_to_string(
+                self.commands[-1], token, DataPack.var_name, self.tokenizer)
+            if not success:
+                if is_connected(token, self.command[key_pos - 1]):
+                    self.commands[-1] += self.lexer.clean_up_paren(
+                        token, self.tokenizer)
+                else:
+                    append_commands(
+                        self.commands, self.lexer.clean_up_paren(token, self.tokenizer))
+        elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
+            if is_connected(token, self.command[key_pos - 1]):
+                self.commands[-1] += self.lexer.clean_up_paren(
+                    token, self.tokenizer)
+            else:
+                append_commands(
+                    self.commands, self.lexer.clean_up_paren(token, self.tokenizer))
+        elif token.token_type == TokenType.STRING:
+            append_commands(self.commands, dumps(token.string))
+        else:
+            append_commands(self.commands, token.string)
+
+    def _expect_command(self, key_pos: int, token: Token) -> bool:
+        self.is_expect_command = False
+        # Handle Errors
+        if token.token_type != TokenType.KEYWORD:
+            if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
+                append_commands(self.commands, self.lexer.datapack.add_private_function(
+                    'anonymous', token, self.tokenizer))
+                return True
+            else:
+                raise JMCSyntaxException(
+                    "Expected keyword", token, self.tokenizer)
+
+        # End Handle Errors
+
+        if is_number(token.string) and key_pos == 0:
+            self.__is_number(key_pos, token)
+            return True
+
+        if token.string == 'say':
+            self.__is_say(key_pos, token)
+            return True
+
+        if token.string.startswith(DataPack.VARIABLE_SIGN):
+            if self.__is_startswith_varsign(key_pos, token):
+                return True
+
+        if self.__is_jmc_function(key_pos, token):
+            return True
+
+        if token.string in {'new', 'class' '@import'} or (
+            token.string == 'function'
+            and
+            len(self.command) > key_pos + 2
+        ):
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
+        if len(self.command[key_pos:]) == 2 and self.command[key_pos +
+                                                             1].token_type == TokenType.PAREN_ROUND:
+            if self.command[key_pos + 1].string != '()':
+                raise JMCSyntaxException(
+                    f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
+            append_commands(self.commands,
+                            f"function {self.lexer.datapack.namespace}:{token.string.lower().replace('.','/')}")
+            return True
+
+        if token.string not in VANILLA_COMMANDS:
+            raise JMCSyntaxException(
+                f"Unrecognized command ({token.string})", token, self.tokenizer)
+
+        append_commands(self.commands, token.string)
+        return False
+
+    def __is_number(self, key_pos: int, token: Token) -> None:
+        if len(self.command[key_pos:]) > 1:
+            raise JMCSyntaxException(
+                "Unexpected token", self.command[key_pos + 1], self.tokenizer, display_col_length=False)
+
+        if not self.command_strings:
+            raise JMCSyntaxException(
+                "Expected command, got number", token, self.tokenizer, display_col_length=False)
+
+        if not self.command_strings[-1].startswith('execute'):
+            for _cmd in ALLOW_NUMBER_AFTER:
+                if self.command_strings[-1].startswith(_cmd):
+                    self.command_strings[-1] += ' ' + token.string
+                    return
+            raise JMCSyntaxException(
+                "Unexpected number", token, self.tokenizer, display_col_length=False)
+
+        for _cmd in ALLOW_NUMBER_AFTER:
+            if _cmd in self.command_strings[-1]:
+                self.command_strings[-1] += ' ' + token.string
+                return
+
+        raise JMCSyntaxException(
+            "Unexpected number", token, self.tokenizer, display_col_length=False)
+
+    def __is_say(self, key_pos: int, token: Token) -> None:
+        if len(self.command[key_pos:]) == 1:
+            raise JMCSyntaxException(
+                "Expected string after 'say' command", token, self.tokenizer, col_length=True)
+
+        if self.command[key_pos + 1].token_type != TokenType.STRING:
+            raise JMCSyntaxException(
+                "Expected string after 'say' command", self.command[key_pos + 1], self.tokenizer, display_col_length=False, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
+
+        if len(self.command[key_pos:]) > 2:
+            raise JMCSyntaxException(
+                "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
+
+        if '\n' in self.command[key_pos + 1].string:
+            raise JMCSyntaxException(
+                "Newline found in say command", self.command[key_pos + 1], self.tokenizer)
+        append_commands(
+            self.commands, f"say {self.command[key_pos+1].string}")
+
+    def __is_startswith_varsign(self, key_pos: int, token: Token) -> bool:
+        if len(
+                self.command) > key_pos + 1 and self.command[key_pos + 1].string == 'run' and self.command[key_pos + 1].token_type == TokenType.KEYWORD:
+            self.is_execute = True
+            append_commands(self.commands,
+                            f"execute store result score {token.string} {DataPack.var_name}")
+            return False
+
+        else:
+            append_commands(self.commands, variable_operation(
+                self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute))
+            return True
+
+    def __is_jmc_function(self, key_pos: int, token: Token) -> bool:
+        load_once_command = self.get_function(token, LOAD_ONCE_COMMANDS)
+        if load_once_command is not None:
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+            if token.string in self.lexer.datapack.used_command:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) can only be used once per datapack", token, self.tokenizer)
+            if not self.is_load:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
+
+            self.lexer.datapack.used_command.add(token.string)
+            append_commands(self.commands, load_once_command(
+                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+            return True
+
+        execute_excluded_command = self.get_function(
+            token, EXECUTE_EXCLUDED_COMMANDS)
+        if execute_excluded_command is not None:
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+            self.lexer.datapack.used_command.add(token.string)
+            append_commands(self.commands, execute_excluded_command(
+                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+            return True
+
+        load_only_command = self.get_function(token, LOAD_ONLY_COMMANDS)
+        if load_only_command is not None:
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+            if not self.is_load:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
+            append_commands(self.commands, load_only_command(
+                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+            return True
+
+        flow_control_command = FLOW_CONTROL_COMMANDS.get(
+            token.string, None)
+        if flow_control_command is not None:
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+            return_value = flow_control_command(
+                self.command[key_pos:], self.lexer.datapack, self.tokenizer)
+            if return_value is not None:
+                append_commands(self.commands, return_value)
+            return True
+
+        jmc_command = self.get_function(token, JMC_COMMANDS)
+        if jmc_command is not None:
+            if len(self.command) > key_pos + 2:
+                raise JMCSyntaxException(
+                    "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
+            append_commands(self.commands, jmc_command(
+                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, self.is_execute).call())
+            return True
+
+        if token.string in BOOL_FUNCTIONS:
+            raise JMCSyntaxException(
+                f"This feature({token.string}) only works in JMC's custom condition", token, self.tokenizer)
+
+        return False
+
+    def get_function(self, token: Token,
+                     command_functions: dict[str, type["JMCFunction"]]) -> type["JMCFunction"] | None:
+        return command_functions.get(token.string, None)
+
+
 class Lexer:
     """
     Lexical Analyizer
@@ -368,276 +685,14 @@ class Lexer:
                             programs: list[list[Token]], is_load: bool) -> list[str]:
         """
         Parse a content inside function
-
         :param tokenizer: Tokenizer
         :param programs: List of commands(List of arguments(Token))
         :param is_load: Whether the function is a load function
+
         :return: List of commands(String)
         """
 
-        command_strings: list[str] = []
-        commands: list[str] = []
-        """List of argument in a line of command"""
-
-        for command in programs:
-            if command[0].token_type != TokenType.KEYWORD:
-                raise JMCSyntaxException(
-                    "Expected keyword", command[0], tokenizer)
-            elif command[0].string == 'new':
-                raise JMCSyntaxException(
-                    "'new' keyword found in function", command[0], tokenizer)
-            elif command[0].string == 'class':
-                raise JMCSyntaxException(
-                    "'class' keyword found in function", command[0], tokenizer)
-            elif command[0].string == 'function' and len(command) == 4:
-                raise JMCSyntaxException(
-                    "Function declaration found in function", command[0], tokenizer)
-            elif command[0].string == '@import':
-                raise JMCSyntaxException(
-                    "Importing found in function", command[0], tokenizer)
-
-            # Boxes check
-            if self.do_while_box is not None:
-                if command[0].string != 'while':
-                    raise JMCSyntaxException(
-                        "Expected 'while'", command[0], tokenizer)
-            if self.if_else_box:
-                if command[0].string != 'else':
-                    append_commands(commands, self.parse_if_else(tokenizer))
-
-            if commands:
-                command_strings.append(' '.join(commands))
-                commands = []
-            is_expect_command = True
-            is_execute = (command[0].string == 'execute')
-
-            for key_pos, token in enumerate(command):
-                if is_expect_command:
-                    is_expect_command = False
-                    # Handle Errors
-                    if token.token_type != TokenType.KEYWORD:
-                        if token.token_type == TokenType.PAREN_CURLY and is_execute:
-                            append_commands(commands, self.datapack.add_private_function(
-                                'anonymous', token, tokenizer))
-                            break
-                        else:
-                            raise JMCSyntaxException(
-                                "Expected keyword", token, tokenizer)
-
-                    # End Handle Errors
-
-                    if is_number(token.string) and key_pos == 0:
-                        if len(command[key_pos:]) > 1:
-                            raise JMCSyntaxException(
-                                "Unexpected token", command[key_pos + 1], tokenizer, display_col_length=False)
-
-                        if not command_strings:
-                            raise JMCSyntaxException(
-                                "Expected command, got number", token, tokenizer, display_col_length=False)
-
-                        is_break = False
-                        if not command_strings[-1].startswith('execute'):
-                            for _cmd in ALLOW_NUMBER_AFTER:
-                                if command_strings[-1].startswith(_cmd):
-                                    command_strings[-1] += ' ' + token.string
-                                    is_break = True
-                                    break
-                            else:
-                                raise JMCSyntaxException(
-                                    "Unexpected number", token, tokenizer, display_col_length=False)
-                        if is_break:
-                            break
-
-                        is_break = False
-                        for _cmd in ALLOW_NUMBER_AFTER:
-                            if _cmd in command_strings[-1]:
-                                command_strings[-1] += ' ' + token.string
-                                is_break = True
-                                break
-                        else:
-                            raise JMCSyntaxException(
-                                "Unexpected number", token, tokenizer, display_col_length=False)
-                        if is_break:
-                            break
-
-                    if token.string == 'say':
-                        if len(command[key_pos:]) == 1:
-                            raise JMCSyntaxException(
-                                "Expected string after 'say' command", token, tokenizer, col_length=True)
-
-                        if command[key_pos + 1].token_type != TokenType.STRING:
-                            raise JMCSyntaxException(
-                                "Expected string after 'say' command", command[key_pos + 1], tokenizer, display_col_length=False, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
-
-                        if len(command[key_pos:]) > 2:
-                            raise JMCSyntaxException(
-                                "Unexpected token", command[key_pos + 2], tokenizer, display_col_length=False)
-
-                        if '\n' in command[key_pos + 1].string:
-                            raise JMCSyntaxException(
-                                "Newline found in say command", command[key_pos + 1], tokenizer)
-                        append_commands(
-                            commands, f"say {command[key_pos+1].string}")
-                        break
-
-                    if token.string.startswith(DataPack.VARIABLE_SIGN):
-                        if len(
-                                command) > key_pos + 1 and command[key_pos + 1].string == 'run' and command[key_pos + 1].token_type == TokenType.KEYWORD:
-                            is_execute = True
-                            append_commands(commands,
-                                            f"execute store result score {token.string} {DataPack.var_name}")
-                            continue
-
-                        else:
-                            append_commands(commands, variable_operation(
-                                command[key_pos:], tokenizer, self.datapack, is_execute))
-                            break
-
-                    matched_function = LOAD_ONCE_COMMANDS.get(
-                        token.string, None)
-                    if matched_function is not None:
-                        if is_execute:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
-                        if token.string in self.datapack.used_command:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) can only be used once per datapack", token, tokenizer)
-                        if not is_load:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
-
-                        self.datapack.used_command.add(token.string)
-                        append_commands(commands, matched_function(
-                            command[key_pos + 1], self.datapack, tokenizer).call())
-                        break
-
-                    matched_function = EXECUTE_EXCLUDED_COMMANDS.get(
-                        token.string, None)
-                    if matched_function is not None:
-                        if is_execute:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
-                        self.datapack.used_command.add(token.string)
-                        append_commands(commands, matched_function(
-                            command[key_pos + 1], self.datapack, tokenizer).call())
-                        break
-
-                    matched_function_load_only = LOAD_ONLY_COMMANDS.get(
-                        token.string, None)
-                    if matched_function_load_only is not None:
-                        if is_execute:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
-                        if not is_load:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
-                        append_commands(commands, matched_function_load_only(
-                            command[key_pos + 1], self.datapack, tokenizer).call())
-                        break
-
-                    matched_function_flow_control = FLOW_CONTROL_COMMANDS.get(
-                        token.string, None)
-                    if matched_function_flow_control is not None:
-                        if is_execute:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) cannot be used with 'execute'", token, tokenizer)
-                        return_value = matched_function_flow_control(
-                            command[key_pos:], self.datapack, tokenizer)
-                        if return_value is not None:
-                            append_commands(commands, return_value)
-                        break
-
-                    matched_function_jmc = JMC_COMMANDS.get(
-                        token.string, None)
-                    if matched_function_jmc is not None:
-                        if len(command) > key_pos + 2:
-                            raise JMCSyntaxException(
-                                "Unexpected token", command[key_pos + 2], tokenizer, display_col_length=False)
-                        append_commands(commands, matched_function_jmc(
-                            command[key_pos + 1], self.datapack, tokenizer, is_execute).call())
-                        break
-
-                    if token.string in BOOL_FUNCTIONS:
-                        raise JMCSyntaxException(
-                            f"This feature({token.string}) only works in JMC's custom condition", token, tokenizer)
-
-                    if token.string in {'new', 'class' '@import'} or (
-                        token.string == 'function'
-                        and
-                        len(command) > key_pos + 2
-                    ):
-                        if is_execute:
-                            raise JMCSyntaxException(
-                                f"This feature({token.string}) can only be used in load function", token, tokenizer)
-                    if len(command[key_pos:]) == 2 and command[key_pos +
-                                                               1].token_type == TokenType.PAREN_ROUND:
-                        if command[key_pos + 1].string != '()':
-                            raise JMCSyntaxException(
-                                f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", command[key_pos + 1], tokenizer)
-                        append_commands(commands,
-                                        f"function {self.datapack.namespace}:{token.string.lower().replace('.','/')}")
-                        break
-
-                    if token.string in VANILLA_COMMANDS:
-                        append_commands(commands, token.string)
-                    else:
-                        raise JMCSyntaxException(
-                            f"Unrecognized command ({token.string})", token, tokenizer)
-
-                else:
-                    if token.string == 'run' and token.token_type == TokenType.KEYWORD:
-                        if not is_execute:
-                            raise MinecraftSyntaxWarning(
-                                "'run' keyword found outside 'execute' command", token, tokenizer)
-                        is_expect_command = True
-                    if (
-                        token.token_type == TokenType.KEYWORD and
-                        token.string in FIRST_ARGUMENTS and
-                        not (
-                            token.string == 'function' and
-                            commands[-1] == 'schedule'
-                        )
-                    ):
-                        raise JMCSyntaxException(
-                            f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", command[key_pos - 1], tokenizer, col_length=True)
-
-                    if token.string == '@s' and token.token_type == TokenType.KEYWORD and commands[-1] == 'as':
-                        commands[-1] = 'if entity'
-
-                    if token.token_type == TokenType.PAREN_ROUND:
-                        commands[-1], success = search_to_string(
-                            commands[-1], token, DataPack.var_name, tokenizer)
-                        if not success:
-                            if is_connected(token, command[key_pos - 1]):
-                                commands[-1] += self.clean_up_paren(
-                                    token, tokenizer)
-                            else:
-                                append_commands(
-                                    commands, self.clean_up_paren(token, tokenizer))
-                    elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
-                        if is_connected(token, command[key_pos - 1]):
-                            commands[-1] += self.clean_up_paren(
-                                token, tokenizer)
-                        else:
-                            append_commands(
-                                commands, self.clean_up_paren(token, tokenizer))
-                    elif token.token_type == TokenType.STRING:
-                        append_commands(commands, dumps(token.string))
-                    else:
-                        append_commands(commands, token.string)
-        # End of Program
-
-        # Boxes check
-        if self.do_while_box is not None:
-            raise JMCSyntaxException(
-                "Expected 'while'", programs[-1][-1], tokenizer)
-        if self.if_else_box:
-            append_commands(commands, self.parse_if_else(tokenizer))
-
-        if commands:
-            command_strings.append(' '.join(commands))
-            commands = []
-        return command_strings
+        return FuncContent(tokenizer, programs, is_load, self).parse()
 
     def parse_class_content(self, prefix: str, class_content: str,
                             file_path_str: str, line: int, col: int, file_string: str) -> None:
