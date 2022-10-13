@@ -397,6 +397,7 @@ def handle_exception(error: Exception):
     pprint("Unexpected error causes program to crash", Colors.FAIL)
     pprint(type(error).__name__, Colors.FAIL_BOLD)
     pprint(error, Colors.FAIL)
+    pprint("NOTE: This shouldn't happen. Please contact WingedSeal.", Colors.FAIL)
     logger.critical("Program crashed")
     logger.exception("")
     press_enter("Press Enter to continue...")

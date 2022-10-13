@@ -1,4 +1,4 @@
-"""Module containing JMCFunction subclasses for custom JMC function that returns a minecraft integer"""
+"""Module containing JMCFunction subclasses for custom JMC function that returns a minecraft integer to a scoreboard variable"""
 
 from ...datapack import DataPack
 from ..utils import ArgType

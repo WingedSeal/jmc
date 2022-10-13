@@ -372,7 +372,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
             append_commands(self.commands, jmc_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, self.is_execute).call())
+                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
             return True
 
         if token.string in BOOL_FUNCTIONS:

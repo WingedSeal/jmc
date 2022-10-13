@@ -20,6 +20,16 @@ class FuncType(Enum):
 class JMCFunction:
     """
     Base function for all custom JMC function
+    - Must be decorated by `@func_property`
+    - Either call_bool (For BOOL_FUNCTION) or call (for other type) must be implemented
+
+    Function types are
+    - `FuncType.BOOL_FUNCTION`: returns a part of `/execute if` command
+    - `FuncType.EXECUTE_EXCLUDED`: cannot be used with `/execute`
+    - `FuncType.LOAD_ONCE`: can only be used on load function and used once
+    - `FuncType.LOAD_ONLY`: can only be used on load function
+    - `FuncType.VARIABLE_OPERATION`: returns a minecraft integer to a scoreboard variable
+    - `FuncType.JMC_COMMAND`: normal custom JMC function
 
     :param token: paren_round token containing arguments
     :param datapack: Datapack object
@@ -38,13 +48,35 @@ class JMCFunction:
                  'is_execute', 'var', 'args',
                  'raw_args')
     _decorated: bool = False
-    """A private attribute that will be changed by a decorator to check for missing decorator"""
+    """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
+    """Dictionary containing all parameter and it's ArgType (Set by decorator)"""
     func_type: FuncType
+    """Type of the custom JMC function (Set by decorator)"""
     name: str
+    """String for the function's name, for further use (Set by decorator)"""
     call_string: str
+    """String that will be used in .jmc to call the function (Set by decorator)"""
     defaults: dict[str, str]
+    """Defaults value of each parameter as string (Set by decorator)"""
     _ignore: set[str]
+    """Private set of parameter for parser to ignore and leave as is (Set by decorator)"""
+
+    token: Token
+    """paren_round Token object containing the arguments"""
+    datapack: DataPack
+    """Datapack object"""
+    tokenizer: Tokenizer
+    """Current Tokenizer of the token"""
+    is_execute: bool | None
+    """Whether the function is in execute command (in VARIABLE_OPERATION, JMC_COMMANDS function type)"""
+    var: str | None
+    """Minecraft scoreboard variable for VARIABLE_OPERATION function to return"""
+
+    args: dict[str, str]
+    """Dictionary containing parameter and argument given in string"""
+    raw_args: dict[str, Arg]
+    """Dictionary containing parameter and argument given as Arg object"""
 
     __subcls: dict[FuncType, dict[str, type["JMCFunction"]]
                    ] = defaultdict(dict)
@@ -57,7 +89,7 @@ class JMCFunction:
         return super().__new__(cls)
 
     def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer,
-                 is_execute: bool | None = None, var: str | None = None) -> None:
+                 *, is_execute: bool | None = None, var: str | None = None) -> None:
         self.token = token
         self.datapack = datapack
         self.tokenizer = tokenizer
@@ -70,8 +102,8 @@ class JMCFunction:
 
         args_Args = verify_args(self.arg_type,
                                 self.call_string, token, tokenizer)
-        self.args: dict[str, str] = {}
-        self.raw_args: dict[str, Arg] = {}
+        self.args = {}
+        self.raw_args = {}
 
         for key, arg in args_Args.items():
             if arg is None:
@@ -107,7 +139,7 @@ class JMCFunction:
 
     def __post__init__(self) -> None:
         """
-        This function will be called after initiation of the object
+        This function will be called after initialization of the object
         """
 
     def call(self) -> str:
@@ -121,12 +153,12 @@ class JMCFunction:
 
     def call_bool(self) -> tuple[str, bool]:
         """
-        This function will be called when user call matching JMC *boolean* function
+        This function will be called when user call matching JMC boolean(Can only be used in condition) function
 
         :raises NotImplementedError: When the subclass's call method is not implemented
-        :return: Tuple of Minecraft command as string and IF/UNLESS(boolean)
+        :return: Tuple of Minecraft command as string and boolean(True->if, False->unless)
         """
-        raise NotImplementedError("Call(Bool) function not implemented")
+        raise NotImplementedError("Call(boolean) function not implemented")
 
     @classmethod
     def get_subclasses(
@@ -143,25 +175,19 @@ class JMCFunction:
 
         return cls.__subcls[func_type]
 
-        # commands = {}
-        # for subcls in cls.__subclasses__():
-        #     if subcls.func_type == func_type:
-        #         commands[subcls.call_string] = subcls
-        # return commands
-
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
 }, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
-    :param func_type: Type of custom function
-    :param call_string: String for user to call the function
-    :param name: Name for further usage
-    :param arg_type: Dictionary of arguments(string) and type of the argument(ArgType)
-    :param defaults: Dictionary of arguments(string and default of it(string or integer)), defaults to {}
-    :param ignore: Set of arguments(string) for parser to ignore and don't parse(For futher custom parsing), defaults to set()
-    :return: A decorator
+    :param func_type: Type of the custom JMC function
+    :param call_string: String that will be used in .jmc to call the function
+    :param name: String for the function's name, for further use
+    :param arg_type: Dictionary containing all parameter and it's ArgType
+    :param defaults: Defaults value of each parameter as string, defaults to {}
+    :param ignore: Set of parameter for parser to ignore and leave as is
+    :return: A decorator for JMCFunction class
     """
     def decorator(cls: type[JMCFunction]) -> type[JMCFunction]:
         """
