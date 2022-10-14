@@ -2,7 +2,9 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 from json import JSONEncoder, dumps
 
+
 from .tokenizer import Token, TokenType, Tokenizer
+from .datapack_data import Data
 from .exception import JMCSyntaxWarning, JMCValueError
 from .log import Logger
 
@@ -191,7 +193,7 @@ class DataPack:
         self.lexer = lexer
         """Lexer object"""
 
-        self.data: dict[str, Any] = {}
+        self.data = Data()
         """Extra information that can be shared across all JMC function"""
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:

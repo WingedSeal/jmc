@@ -4,6 +4,7 @@ from json import JSONDecodeError, loads
 
 from jmc.tokenizer import TokenType
 from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError
+from ...datapack_data import Item
 from ...datapack import DataPack
 from ..utils import ArgType, PlayerType, ScoreboardPlayer
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -76,7 +77,8 @@ class RightClickSetup(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string='Item.create',
     arg_type={
-        "name": ArgType.STRING,
+        "item_id": ArgType.KEYWORD,
+        "display_name": ArgType.STRING,
         "lore": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT
     },
@@ -84,10 +86,12 @@ class RightClickSetup(JMCFunction):
 )
 class ItemCreate(JMCFunction):
     def call(self) -> str:
-        name = self.args["name"]
+        name = self.args["display_name"]
         lores = self.datapack.parse_list(
             self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
         nbt = self.args["nbt"]
+        # TODO: Parse name, lores
+        # self.datapack.data.item[self.args["item_id"]] = Item()
 
         return ""
 
