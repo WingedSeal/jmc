@@ -236,8 +236,8 @@ class DataPack:
         """
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 
-    def add_private_function(self, name: str, token: Token,
-                             tokenizer: Tokenizer) -> str:
+    def add_arrow_function(self, name: str, token: Token,
+                           tokenizer: Tokenizer) -> str:
         """
         Add private function for user (arrow function)
 
@@ -285,7 +285,7 @@ class DataPack:
     def add_raw_private_function(
             self, name: str, commands: list[str], count: str | None = None) -> str:
         """
-        Add private function for JMC
+        Add private function for JMC as is
 
         :param name: Name of the private function's group
         :param commands: List of commands(string)
@@ -308,6 +308,15 @@ class DataPack:
         """
         return self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, token.line, token.col + 1, tokenizer.file_string)
+
+    def add_tick_command(self, command: str) -> None:
+        self.ticks.append(command)
+
+    def add_load_command(self, command: str) -> None:
+        self.loads.append(command)
+
+    def add_int(self, integer: int) -> None:
+        self.ints.add(integer)
 
     def build(self) -> None:
         """

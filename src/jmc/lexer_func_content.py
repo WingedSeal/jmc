@@ -208,7 +208,7 @@ class FuncContent:
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
             if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
-                append_commands(self.commands, self.lexer.datapack.add_private_function(
+                append_commands(self.commands, self.lexer.datapack.add_arrow_function(
                     'anonymous', token, self.tokenizer))
                 return True
             else:

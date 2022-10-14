@@ -28,13 +28,12 @@ class RightClickSetup(JMCFunction):
 
         id_name = self.args["id_name"]
         self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
-        if self.call_string not in self.datapack.used_command:
-            self.datapack.used_command.add(self.call_string)
-            self.datapack.ticks.append(
+        if self.is_never_used():
+            self.datapack.add_tick_command(
                 f"""execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
                                                        [f'scoreboard players reset @s {self.obj}'], 'main')}""")
 
-        main_func = self.datapack.private_functions[self.name]['main']
+        main_func = self.get_private_function('main')
 
         main_count = self.datapack.get_count(self.name)
         main_func.append(
@@ -85,7 +84,7 @@ class PlayerOnEvent(JMCFunction):
         count = self.datapack.get_count(self.name)
         func = self.datapack.add_raw_private_function(
             self.name, [f"scoreboard players reset @s {self.args['objective']}", self.args['function']], count=count)
-        self.datapack.ticks.append(
+        self.datapack.add_tick_command(
             f"execute as @a[scores={{{self.args['objective']}=1..}}] at @s run {func}")
         return ""
 
@@ -110,14 +109,13 @@ class TriggerSetup(JMCFunction):
 
         obj = self.args["objective"]
         self.datapack.add_objective(obj, 'trigger')
-        if self.call_string not in self.datapack.used_command:
-            self.datapack.used_command.add(self.call_string)
-            self.datapack.ticks.append(
+        if self.is_never_used():
+            self.datapack.add_tick_command(
                 self.datapack.call_func(self.name, 'main'))
-            self.datapack.private_functions[self.name]['main'] = Function()
-            self.datapack.ticks.append(
+            self.make_empty_private_function('main')
+            self.datapack.add_tick_command(
                 self.datapack.call_func(self.name, 'enable'))
-            self.datapack.private_functions[self.name]['enable'] = Function()
+            self.make_empty_private_function('enable')
 
             self.datapack.add_private_json('advancements', f"{self.name}/enable", {
                 "criteria": {
@@ -130,8 +128,8 @@ class TriggerSetup(JMCFunction):
                 }
             })
 
-        main_func = self.datapack.private_functions[self.name]['main']
-        self.datapack.private_functions[self.name]['enable'].append(
+        main_func = self.get_private_function('main')
+        self.get_private_function('enable').append(
             f"scoreboard players enable @s {obj}")
 
         main_count = self.datapack.get_count(self.name)
@@ -201,13 +199,12 @@ class TimerAdd(JMCFunction):
             raise JMCSyntaxException(
                 f"'function' is provided in 'none' mode {self.call_string}", self.raw_args["function"].token, self.tokenizer)
         self.datapack.add_objective('dummy', obj)
-        if self.call_string not in self.datapack.used_command:
-            self.datapack.used_command.add(self.call_string)
-            self.datapack.ticks.append(
+        if self.is_never_used():
+            self.datapack.add_tick_command(
                 self.datapack.call_func(self.name, 'main'))
-            self.datapack.private_functions[self.name]['main'] = Function()
+            self.make_empty_private_function('main')
 
-        main_func = self.datapack.private_functions[self.name]['main']
+        main_func = self.get_private_function('main')
         main_func.append(
             f"execute as {selector} if score @s {obj} matches 1.. run scoreboard players remove @s {obj} 1")
         if mode == 'runOnce':

@@ -377,7 +377,7 @@ class Lexer:
             if_else_box[0][0], tokenizer, self.datapack)
         # Case 1: `if` only
         if len(if_else_box) == 1:
-            return_value = f"{precommand}execute {condition} run {self.datapack.add_private_function(name, if_else_box[0][1], tokenizer)}"
+            return_value = f"{precommand}execute {condition} run {self.datapack.add_arrow_function(name, if_else_box[0][1], tokenizer)}"
             return return_value
 
         # Case 2: Has `else` or `else if`

@@ -3,7 +3,7 @@ from enum import Enum, auto
 from typing import Callable
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
-from ..datapack import DataPack
+from ..datapack import DataPack, Function
 from ..exception import JMCMissingValueError
 from ..tokenizer import Token, Tokenizer
 
@@ -174,6 +174,24 @@ class JMCFunction:
                 cls.__subcls[subcls.func_type][subcls.call_string] = subcls
 
         return cls.__subcls[func_type]
+
+    def is_never_used(self) -> bool:
+        """
+        Add current function to datapack.used_command and return whether it's already there
+
+        :return: Whether this function has been called by the user before
+        """
+        is_in = self.call_string not in self.datapack.used_command
+        self.datapack.used_command.add(self.call_string)
+        return is_in
+
+    def get_private_function(self, function_name: str) -> Function:
+        return self.datapack.private_functions[self.name][function_name]
+
+    def make_empty_private_function(self, function_name: str) -> Function:
+        func = self.datapack.private_functions[
+            self.name][function_name] = Function()
+        return func
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {

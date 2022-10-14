@@ -102,7 +102,7 @@ def variable_operation(
 
             if not isinstance(scoreboard_player.value, int):
                 raise ValueError("scoreboard_player.value is not int")
-            datapack.ints.add(scoreboard_player.value)
+            datapack.add_int(scoreboard_player.value)
             return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.var_name} {operator} {scoreboard_player.value} {DataPack.int_name}"
 
         if isinstance(scoreboard_player.value, int):

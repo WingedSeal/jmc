@@ -49,7 +49,7 @@ class PlayerRejoin(JMCFunction):
     def call(self) -> str:
         self.datapack.add_objective(
             self.obj, 'custom:leave_game')
-        self.datapack.ticks.append(
+        self.datapack.add_tick_command(
             f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "main")}')
         self.datapack.add_raw_private_function(
             self.name, [
@@ -82,9 +82,9 @@ class PlayerDie(JMCFunction):
             raise JMCMissingValueError("onDeath or onRespawn",
                                        self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')
-        self.datapack.ticks.append(
+        self.datapack.add_tick_command(
             f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "on_death")}')
-        self.datapack.ticks.append(
+        self.datapack.add_tick_command(
             f'execute as @e[type=player,scores={{{self.obj}=2..}}] at @s run {self.datapack.call_func(self.name, "on_respawn")}')
         self.datapack.add_raw_private_function(
             self.name,

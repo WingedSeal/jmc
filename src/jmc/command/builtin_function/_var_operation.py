@@ -22,9 +22,8 @@ class MathSqrt(JMCFunction):
         N = '__math__.N'
         diff = '__math__.different'
         var = DataPack.var_name
-        if self.call_string not in self.datapack.used_command:
-            self.datapack.used_command.add(self.call_string)
-            self.datapack.ints.add(2)
+        if self.is_never_used():
+            self.datapack.add_int(2)
             self.datapack.add_raw_private_function(
                 self.name,
                 [
@@ -94,8 +93,7 @@ class MathRandom(JMCFunction):
         if end < start:
             raise JMCValueError(
                 f"max cannot be less than min in {self.call_string}", self.token, self.tokenizer, suggestion="Try swapping max and min")
-        if self.call_string not in self.datapack.used_command:
-            self.datapack.used_command.add(self.call_string)
+        if self.is_never_used():
             self.datapack.add_private_json('loot_tables', f"{self.name}/rng", {
                 "pools": [
                     {"rolls": {"min": 1, "max": 2147483647},
@@ -114,7 +112,7 @@ class MathRandom(JMCFunction):
                     }
                 ]
             })
-            self.datapack.loads.append(
+            self.datapack.add_load_command(
                 f"""execute unless score {seed} {var} matches -2147483648..2147483647 run {
                     self.datapack.add_raw_private_function(
                         self.name,
@@ -138,7 +136,7 @@ class MathRandom(JMCFunction):
             )
 
         mod = end - start + 1
-        self.datapack.ints.add(mod)
+        self.datapack.add_int(mod)
 
         run = [
             self.datapack.call_func(self.name, 'main'),
