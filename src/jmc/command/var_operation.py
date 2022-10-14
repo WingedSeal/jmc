@@ -31,7 +31,7 @@ def variable_operation(
 
         return f"scoreboard players get {tokens[0].string[:-4]} {DataPack.var_name}"
 
-    tokens = tokenizer.split_tokens(
+    tokens = tokenizer.split_keyword_tokens(
         tokens, ['-', '=', '+', '*', '%', '>', '<'])
     if len(tokens) == 1:
         raise JMCSyntaxException(

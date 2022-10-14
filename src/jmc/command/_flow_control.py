@@ -315,7 +315,7 @@ def for_(command: list[Token], datapack: DataPack,
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
-    _first_statement = tokenizer.split_tokens(statements[0], ['='])
+    _first_statement = tokenizer.split_keyword_tokens(statements[0], ['='])
     if not (_first_statement[0].string.startswith(
             DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
         raise JMCSyntaxException(

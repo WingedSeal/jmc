@@ -74,9 +74,9 @@ class JMCFunction:
     """Minecraft scoreboard variable for VARIABLE_OPERATION function to return"""
 
     args: dict[str, str]
-    """Dictionary containing parameter and argument given in string"""
+    """Dictionary containing parameter and parsed argument in form of string"""
     raw_args: dict[str, Arg]
-    """Dictionary containing parameter and argument given as Arg object"""
+    """Dictionary containing parameter and given argument as Arg object"""
 
     __subcls: dict[FuncType, dict[str, type["JMCFunction"]]
                    ] = defaultdict(dict)

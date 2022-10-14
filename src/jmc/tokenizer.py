@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
 from enum import Enum
+import keyword
 import re
 
 from .utils import is_connected
@@ -224,7 +225,7 @@ class Tokenizer:
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool,
               allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         """
-        Start the parsing of Tokenizer
+        Parse string
 
         :param string: String to parse
         :param line: Current line
@@ -402,7 +403,7 @@ class Tokenizer:
 
         return self.list_of_keywords
 
-    def split_token(self, token: Token, split_str: str) -> list[Token]:
+    def split_keyword_token(self, token: Token, split_str: str) -> list[Token]:
         """
         Split a keyword token into multiple tokens
 
@@ -429,7 +430,7 @@ class Tokenizer:
             col += len(string)
         return tokens
 
-    def split_tokens(
+    def split_keyword_tokens(
             self, tokens: list[Token], split_strings: list[str], max: int | None = None) -> list[Token]:
         """
         Loop through all tokens and split a keyword token that contain string inside split_strings
@@ -444,7 +445,9 @@ class Tokenizer:
                 new_tokens = []
                 for token in tokens:
                     if token.token_type == TokenType.KEYWORD:
-                        new_tokens.extend(self.split_token(token, split_str))
+                        new_tokens.extend(
+                            self.split_keyword_token(
+                                token, split_str))
                     else:
                         new_tokens.append(token)
                 tokens = new_tokens
@@ -456,7 +459,9 @@ class Tokenizer:
                 for token in tokens:
                     if token.token_type == TokenType.KEYWORD and count < max:
                         count += 1
-                        new_tokens.extend(self.split_token(token, split_str))
+                        new_tokens.extend(
+                            self.split_keyword_token(
+                                token, split_str))
                     else:
                         new_tokens.append(token)
                 tokens = new_tokens
@@ -594,7 +599,7 @@ class Tokenizer:
         if not _keywords:
             return ([], {})
         keywords = _keywords[0]
-        keywords = self.split_tokens(keywords, ['='])
+        keywords = self.split_keyword_tokens(keywords, ['='])
         keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []
         kwargs: dict[str, Token] = {}
@@ -646,17 +651,20 @@ class Tokenizer:
             arg = ""
 
         for token in keywords:
-            if token.token_type == TokenType.PAREN_SQUARE:
-                if not arg:
-                    raise JMCSyntaxException(
-                        f"Unexpected square parenthesis", token, self, display_col_length=False)
-                if is_connected(token, last_token):
-                    arg += token.string
-                    add_arg(last_token)
-                    continue
-                else:
-                    raise JMCSyntaxException(
-                        f"Unexpected square parenthesis", token, self, display_col_length=False)
+            # NOTE: As of now I'm not sure about the point of the following
+            # lines
+            # if token.token_type == TokenType.PAREN_SQUARE:
+            #     if not arg:
+            #         raise JMCSyntaxException(
+            #             f"Unexpected square parenthesis", token, self, display_col_length=False)
+            #     if is_connected(token, last_token):
+            #         arg += token.string
+            #         add_arg(last_token)
+            #         continue
+            #     else:
+            #         raise JMCSyntaxException(
+            #             f"Unexpected square parenthesis", token, self,
+            #             display_col_length=False)
 
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
@@ -734,6 +742,39 @@ class Tokenizer:
 
         return args, kwargs
 
+    def parse_list(self, token: Token) -> list[Token]:
+        """
+        Parse list
+
+        :param token: paren_curly token containing JS object
+        :return: Dictionary of key(string) and Token
+        """
+        if token.token_type != TokenType.PAREN_SQUARE:
+            raise JMCSyntaxException(
+                "Expected list/array", token, self, suggestion="Expected [")
+
+        keywords = self.parse(token.string[1:-
+                                           1], line=token.line, col=token.col +
+                              1, expect_semicolon=False)[0]
+        is_expect_comma = False  # Whether to expect comma token
+        tokens: list[Token] = []
+
+        for token_ in keywords:
+            if token_.token_type == TokenType.COMMA:
+                if not is_expect_comma:
+                    raise JMCSyntaxException(
+                        "Unexpected duplicated comma(,)", token_, self)
+                is_expect_comma = False
+                continue
+
+            if is_expect_comma:
+                raise JMCSyntaxException(
+                    "Expect comma(,)", token_, self)
+            tokens.append(token_)
+            is_expect_comma = True
+
+        return tokens
+
     def parse_js_obj(self, token: Token) -> dict[str, Token]:
         """
         Parse JavaScript Object (Not JSON)
@@ -746,7 +787,7 @@ class Tokenizer:
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
-        keywords = self.split_tokens(keywords, [':'])
+        keywords = self.split_keyword_tokens(keywords, [':'])
         kwargs: dict[str, Token] = {}
         key: str = ""
         arg: str = ""

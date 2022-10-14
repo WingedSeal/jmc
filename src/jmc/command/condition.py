@@ -68,7 +68,7 @@ def custom_condition(
     """
     if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(
             DataPack.VARIABLE_SIGN):
-        tokens = tokenizer.split_tokens(tokens, ['>', '=', '<', '!'])
+        tokens = tokenizer.split_keyword_tokens(tokens, ['>', '=', '<', '!'])
         first_token = tokens[0]
         for operator in ['===', '==',
                          '>=', '<=', '!=', '>', '<', '=']:  # sort key=len
@@ -130,7 +130,7 @@ def custom_condition(
                 raise JMCSyntaxException(
                     "Expected keyword", tokens[2], tokenizer)
 
-            match_tokens_ = tokenizer.split_token(tokens[2], '..')
+            match_tokens_ = tokenizer.split_keyword_token(tokens[2], '..')
             match_tokens = tokenizer.find_token(match_tokens_, '..')
             if len(match_tokens) != 2 or len(
                     match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
@@ -229,7 +229,7 @@ def condition_to_ast(
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
                               tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)
         tokens = tokenizer.programs[0]
-    tokens = tokenizer.split_tokens(tokens, [OR_OPERATOR])
+    tokens = tokenizer.split_keyword_tokens(tokens, [OR_OPERATOR])
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": OR_OPERATOR, "body": [
@@ -237,7 +237,7 @@ def condition_to_ast(
     else:
         tokens = list_of_tokens[0]
 
-    tokens = tokenizer.split_tokens(tokens, [AND_OPERATOR])
+    tokens = tokenizer.split_keyword_tokens(tokens, [AND_OPERATOR])
     list_of_tokens = find_operator(tokens, AND_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": AND_OPERATOR, "body": [
@@ -246,7 +246,7 @@ def condition_to_ast(
         tokens = list_of_tokens[0]
 
     # NotOperator should have a body as either dict or string and not list
-    tokens = tokenizer.split_tokens(tokens, [NOT_OPERATOR])
+    tokens = tokenizer.split_keyword_tokens(tokens, [NOT_OPERATOR])
     if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string == NOT_OPERATOR:
         return {"operator": NOT_OPERATOR, "body":
                 condition_to_ast(tokens[1:], tokenizer, datapack)}

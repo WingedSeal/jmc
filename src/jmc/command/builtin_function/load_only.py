@@ -1,9 +1,11 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 
 from json import JSONDecodeError, loads
+
+from jmc.tokenizer import TokenType
 from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError
-from ...datapack import DataPack, Function
-from ..utils import ArgType, PlayerType, ScoreboardPlayer, parse_func_map
+from ...datapack import DataPack
+from ..utils import ArgType, PlayerType, ScoreboardPlayer
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -22,8 +24,8 @@ class RightClickSetup(JMCFunction):
     obj_id = '__item_id__'
 
     def call(self) -> str:
-        func_map = parse_func_map(
-            self.raw_args["func_map"].token, self.tokenizer, self.datapack)
+        func_map = self.datapack.parse_func_map(
+            self.raw_args["func_map"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["id_name"]
@@ -72,6 +74,26 @@ class RightClickSetup(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string='Item.create',
+    arg_type={
+        "name": ArgType.STRING,
+        "lore": ArgType.LIST,
+        "nbt": ArgType.JS_OBJECT
+    },
+    name='item_create'
+)
+class ItemCreate(JMCFunction):
+    def call(self) -> str:
+        name = self.args["name"]
+        lores = self.datapack.parse_list(
+            self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
+        nbt = self.args["nbt"]
+
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string='Player.onEvent',
     arg_type={
         "objective": ArgType.KEYWORD,
@@ -103,8 +125,8 @@ class PlayerOnEvent(JMCFunction):
 )
 class TriggerSetup(JMCFunction):
     def call(self) -> str:
-        func_map = parse_func_map(
-            self.raw_args["triggers"].token, self.tokenizer, self.datapack)
+        func_map = self.datapack.parse_func_map(
+            self.raw_args["triggers"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         obj = self.args["objective"]

@@ -73,6 +73,7 @@ class ArgType(Enum):
     STRING = "string"
     KEYWORD = "keyword"
     SELECTOR = "target selector"
+    LIST = "list/array"
     FUNC = "function"
     _FUNC_CALL = "function"
     SCOREBOARD_PLAYER = "integer, variable, or objective:selector"
@@ -138,6 +139,9 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
             return ArgType.JSON
         else:
             return ArgType.JS_OBJECT
+    if token.token_type == TokenType.PAREN_SQUARE:
+        return ArgType.LIST
+
     if token.token_type == TokenType.KEYWORD:
         if token.string.startswith(
                 DataPack.VARIABLE_SIGN) or ':' in token.string:
@@ -218,32 +222,3 @@ def __eval(node):
         return OPERATORS[type(node.op)](__eval(node.operand))
     else:
         raise TypeError(node)
-
-
-def parse_func_map(token: Token, tokenizer: Tokenizer,
-                   datapack: DataPack) -> dict[int, tuple[str, bool]]:
-    """
-    Parse JMC function hashmap
-
-    :param token: paren_curly token
-    :param tokenizer: token's tokenizer
-    :param datapack: Datapack object
-    :return: Dictionary of integer key and (tuple of function string and whether it is an arrow function)
-    """
-    func_map: dict[int, tuple[str, bool]] = {}
-    for key, value in tokenizer.parse_js_obj(token).items():
-        try:
-            num = int(key)
-        except ValueError:
-            raise JMCValueError(
-                f"Expected number as key (got {key})", token, tokenizer)
-
-        if value.token_type == TokenType.KEYWORD:
-            func_map[num] = value.string, False
-        elif value.token_type == TokenType.FUNC:
-            func_map[num] = '\n'.join(
-                datapack.parse_function_token(value, tokenizer)), True
-        else:
-            raise JMCValueError(
-                f"Expected function, got {value.token_type.value}", token, tokenizer)
-    return func_map

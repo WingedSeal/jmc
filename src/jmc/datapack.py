@@ -1,8 +1,9 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 from json import JSONEncoder, dumps
-from .tokenizer import Token, Tokenizer
-from .exception import JMCSyntaxWarning
+
+from .tokenizer import Token, TokenType, Tokenizer
+from .exception import JMCSyntaxWarning, JMCValueError
 from .log import Logger
 
 if TYPE_CHECKING:
@@ -141,7 +142,7 @@ class DataPack:
     """
     __slot__ = ('PRIVATE_NAME', 'LOAD_NAME', 'TICK_NAME',
                 'VAR_NAME', 'INT_NAME', 'VARIABLE_SIGN',
-                'HEADER_DATA', '_tick_json', 'ints',
+                'data', '_tick_json', 'ints',
                 'functions', 'load_function', 'jsons',
                 'private_functions', 'private_function_count',
                 '__scoreboards', 'loads', 'ticks', 'namespace',
@@ -152,7 +153,6 @@ class DataPack:
     var_name = '__variable__'
     int_name = '__int__'
     VARIABLE_SIGN = '$'
-    HEADER_DATA: "Header|None" = None
     """Data read from header file(s)"""
 
     _tick_json = None
@@ -190,6 +190,9 @@ class DataPack:
 
         self.lexer = lexer
         """Lexer object"""
+
+        self.data: dict[str, Any] = {}
+        """Extra information that can be shared across all JMC function"""
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:
         """
@@ -342,6 +345,43 @@ class DataPack:
         self.private_functions = {}
         self.loads = []
         self.ticks = []
+
+    def parse_func_map(self, token: Token,
+                       tokenizer: Tokenizer) -> dict[int, tuple[str, bool]]:
+        """
+        Parse JMC function hashmap
+
+        :param token: paren_curly token
+        :param tokenizer: token's tokenizer
+        :param datapack: Datapack object
+        :return: Dictionary of integer key and (tuple of function string and whether it is an arrow function)
+        """
+        func_map: dict[int, tuple[str, bool]] = {}
+        for key, value in tokenizer.parse_js_obj(token).items():
+            try:
+                num = int(key)
+            except ValueError:
+                raise JMCValueError(
+                    f"Expected number as key (got {key})", token, tokenizer)
+
+            if value.token_type == TokenType.KEYWORD:
+                func_map[num] = value.string, False
+            elif value.token_type == TokenType.FUNC:
+                func_map[num] = '\n'.join(
+                    self.parse_function_token(value, tokenizer)), True
+            else:
+                raise JMCValueError(
+                    f"Expected function, got {value.token_type.value}", token, tokenizer)
+        return func_map
+
+    def parse_list(self, token: Token,
+                   tokenizer: Tokenizer, list_of: TokenType) -> list[str]:
+        token_list = tokenizer.parse_list(token)
+        for token_ in token_list:
+            if token_.token_type != list_of:
+                raise JMCValueError(
+                    f"Expected list/array of {list_of.value}, got {token_.token_type.value}", token, tokenizer)
+        return [token_.string for token_ in token_list]
 
     def __repr__(self) -> str:
         return f"""DataPack(
