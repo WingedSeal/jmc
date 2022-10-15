@@ -222,3 +222,18 @@ def __eval(node):
         return OPERATORS[type(node.op)](__eval(node.operand))
     else:
         raise TypeError(node)
+
+
+def minecraft_formatted_text(raw_text: str) -> str:
+    """
+    Parse formatted text into raw json string
+
+    :param raw_text: Text
+    :return: Raw JSON string
+
+    .. Example::
+    >>> minecraft_formatted_text("&4&lName")
+    '{"text":"Name", "color":"red", "bold":true}'
+    """
+    # TODO:: IMPLEMENT THIS
+    return raw_text

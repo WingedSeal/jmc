@@ -385,6 +385,10 @@ class DataPack:
                     f"Expected list/array of {list_of.value}, got {token_.token_type.value}", token, tokenizer)
         return [token_.string for token_ in token_list]
 
+    def token_dict_to_raw_json(self, token_dict: dict[str, Token]) -> str:
+        return '{' + ", ".join(f"{key}: {token.string_with_quotation()}" for key,
+                               token in token_dict.items())
+
     def __repr__(self) -> str:
         return f"""DataPack(
     PRIVATE_NAME = {self.private_name},

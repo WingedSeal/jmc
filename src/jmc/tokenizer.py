@@ -39,6 +39,7 @@ class Token:
     line: int
     col: int
     string: str
+    """The string representation (including parentheses, excluding quotation mark)"""
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
     #     return super().__new__(cls)
@@ -73,6 +74,9 @@ class Token:
         """
         return len(self.string) + \
             2 if self.token_type == TokenType.STRING else len(self.string)
+
+    def string_with_quotation(self) -> str:
+        return f'"{self.string}"' if self.token_type == TokenType.STRING else self.string
 
     @classmethod
     def empty(cls, string: str = "") -> "Token":

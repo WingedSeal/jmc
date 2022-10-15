@@ -3,10 +3,10 @@
 from json import JSONDecodeError, loads
 
 from jmc.tokenizer import TokenType
-from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError
+from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
 from ...datapack import DataPack
-from ..utils import ArgType, PlayerType, ScoreboardPlayer
+from ..utils import ArgType, PlayerType, ScoreboardPlayer, minecraft_formatted_text
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -78,20 +78,50 @@ class RightClickSetup(JMCFunction):
     call_string='Item.create',
     arg_type={
         "item_id": ArgType.KEYWORD,
+        "item_type": ArgType.KEYWORD,
         "display_name": ArgType.STRING,
         "lore": ArgType.LIST,
-        "nbt": ArgType.JS_OBJECT
+        "nbt": ArgType.JS_OBJECT,
+        "on_click": ArgType.FUNC
     },
-    name='item_create'
+    name='item_create',
+    defaults={
+        "on_click": ""
+    }
 )
 class ItemCreate(JMCFunction):
     def call(self) -> str:
+        item_type = self.args["item_type"]
+        on_click = self.args["on_click"]
+        if ':' not in item_type:
+            item_type = "minecraft:" + item_type
+        if on_click and item_type != "minecraft:carrot_on_a_stick":
+            raise JMCValueError(
+                f'on_click can only be used with minecraft:carrot_on_a_stick in {self.call_string}',
+                self.raw_args["on_click"].token,
+                self.tokenizer,
+                suggestion="Change item_type to minecraft:carrot_on_a_stick")
         name = self.args["display_name"]
         lores = self.datapack.parse_list(
             self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
-        nbt = self.args["nbt"]
-        # TODO: Parse name, lores
-        # self.datapack.data.item[self.args["item_id"]] = Item()
+        nbt = self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
+
+        if on_click:
+            """
+            - get count
+            - get item_id
+            - add new function call to new custom right click setup
+            - add new execute if there too with item_id
+            - add item_id to nbt
+            """
+
+        self.datapack.data.item[self.args["item_id"]] = Item(
+            item_type,
+            minecraft_formatted_text(name),
+            [minecraft_formatted_text(lore) for lore in lores],
+            self.datapack.token_dict_to_raw_json(nbt),
+            on_click=""
+        )
 
         return ""
 
