@@ -2,7 +2,7 @@
 
 import math
 from typing import Iterator
-from ...exception import JMCSyntaxException
+from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
 
@@ -46,6 +46,32 @@ class TimerSet(JMCFunction):
             return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
         else:
             return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string='Item.give',
+    arg_type={
+        "item_id": ArgType.KEYWORD,
+        "selector": ArgType.SELECTOR,
+        "amount": ArgType.INTEGER
+    },
+    name='item_give',
+    defaults={
+        "selector": "@s",
+        "amount": "1"
+    }
+)
+class ItemGive(JMCFunction):
+    def call(self) -> str:
+        if self.args["item_id"] not in self.datapack.data.item:
+            raise JMCValueError(
+                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                self.token,
+                self.tokenizer,
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+            )
+        return f'give {self.args["selector"]} {self.datapack.data.item[self.args["item_id"]]} {self.args["amount"]}'
 
 
 def __normalize_decimal(n: float):

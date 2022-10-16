@@ -6,9 +6,10 @@ JSON_TEXT_TYPE = dict[str, str | bool]
 @dataclass(slots=True, frozen=True, eq=True)
 class Item:
     item_type: str
-    name: str
-    lores: list[str]
     nbt: str
+
+    def __str__(self) -> str:
+        return self.item_type + (self.nbt if self.nbt != "" else "")
 
 
 class Data:

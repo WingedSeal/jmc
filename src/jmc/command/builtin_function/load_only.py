@@ -86,13 +86,15 @@ class RightClickSetup(JMCFunction):
     },
     name='item_create',
     defaults={
+        "nbt": "{}",
+        "lore": "[]",
         "on_click": ""
     }
 )
 class ItemCreate(JMCFunction):
     obj = "__item__rc__"
     obj_id = "__item_id__"
-    id_name = "item_create_id"
+    id_name = "__item_id__"
 
     def call(self) -> str:
         item_type = self.args["item_type"]
@@ -141,10 +143,20 @@ class ItemCreate(JMCFunction):
 
             nbt[self.id_name] = Token.empty(item_id)
 
+        if "display" in nbt:
+            raise JMCValueError(
+                "display is already inside the nbt",
+                self.token,
+                self.tokenizer)
+
+        lore_ = ",".join([repr(minecraft_formatted_text(lore))
+                         for lore in lores])
+        nbt["display"] = Token.empty(f"""{{Name:{repr(
+            minecraft_formatted_text(name)
+            )},Lore:[{lore_}]}}""")
+
         self.datapack.data.item[self.args["item_id"]] = Item(
             item_type,
-            minecraft_formatted_text(name),
-            [minecraft_formatted_text(lore) for lore in lores],
             self.datapack.token_dict_to_raw_json(nbt),
         )
 
