@@ -305,7 +305,7 @@ exit: Exit compiler
         if args[0] == 'reset':
             cls._config_reset()
         elif args[0] == 'edit':
-            cls._config_reset()
+            cls._config_edit()
         else:
             pprint("Usage: config (reset|edit)", Colors.FAIL)
             return
