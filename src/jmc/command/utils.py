@@ -1,4 +1,5 @@
 import ast
+import json
 import operator as op
 import re
 from dataclasses import dataclass
@@ -224,16 +225,214 @@ def __eval(node):
         raise TypeError(node)
 
 
-def minecraft_formatted_text(raw_text: str) -> str:
+class FormattedText:
     """
     Parse formatted text into raw json string
 
     :param raw_text: Text
+    :param token: Token
+    :param tokenizer: Tokenizer
+    :param is_default_no_italic: Whether to set italic to False by default, defaults to False
     :return: Raw JSON string
 
     .. Example::
     >>> minecraft_formatted_text("&4&lName")
     '{"text":"Name", "color":"red", "bold":true}'
     """
-    # TODO:: IMPLEMENT THIS
-    return raw_text
+    __slots__ = ('raw_text', 'current_json', 'result',
+                 'bracket_content', 'token', 'tokenizer',
+                 'current_color', 'is_default_no_italic')
+
+    SIGN = "&"
+    OPEN_BRACKET = "<"
+    CLOSE_BRACKET = ">"
+    PROPS = {
+        "1": "dark_blue",
+        "2": "dark_green",
+        "3": "dark_aqua",
+        "4": "dark_red",
+        "5": "dark_purple",
+        "6": "gold",
+        "7": "gray",
+        "8": "dark_gray",
+        "9": "blue",
+        "0": "black",
+        "a": "green",
+        "b": "aqua",
+        "c": "red",
+        "d": "light_purple",
+        "e": "yellow",
+        "f": "white",
+        "k": "obfuscated",
+        "l": "bold",
+        "m": "strikethrough",
+        "n": "underlined",
+        "o": "italic",
+        "r": "reset",
+    }
+
+    def __init__(self, raw_text: str, token: Token,
+                 tokenizer: Tokenizer, *, is_default_no_italic: bool = False) -> None:
+        self.raw_text = raw_text
+        self.token = token
+        self.tokenizer = tokenizer
+        self.is_default_no_italic = is_default_no_italic
+        self.bracket_content = ""
+        self.result: list[dict[str, str | bool]] = []
+        self.current_json: dict[str, str | bool] = {"text": ""}
+        self.current_color = ""
+        self.parse()
+
+    def push(self) -> None:
+        if not self.current_json["text"]:
+            return None
+        self.result.append(self.current_json)
+        self.current_json = {"text": ""}
+
+    def parse_bracket(self) -> None:
+        bracket_content = self.bracket_content
+        self.bracket_content = ""
+        properties = bracket_content.split(",")
+        for prop in properties:
+            value = True
+            prop = prop.strip()
+            if prop.startswith("!"):
+                value = False
+                prop = prop[1:]
+            if prop in {
+                'dark_red',
+                'red',
+                'gold',
+                'yellow',
+                'dark_green',
+                'green',
+                'aqua',
+                'dark_aqua',
+                'blue',
+                'light_purple',
+                'dark_purple',
+                'white',
+                'gray',
+                'dark_gray',
+                'black',
+                'reset',
+            }:
+                if 'color' in self.current_json:
+                    raise JMCValueError(
+                        f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+
+                self.current_json['color'] = prop
+                self.current_color = prop
+                if not value:
+                    raise JMCValueError(
+                        f'Color({prop}) cannot be false', self.token, self.tokenizer)
+                continue
+
+            if prop in {'bold', 'italic', 'underlined',
+                        'strikethrough', 'obfuscated'}:
+                self.current_json[prop] = value
+                continue
+
+            if prop.startswith('#') and len(prop) == 7:
+                if 'color' in self.current_json:
+                    raise JMCValueError(
+                        f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+
+                self.current_json['color'] = prop
+                if not value:
+                    raise JMCValueError(
+                        f'Color({prop}) cannot be false', self.token, self.tokenizer)
+                continue
+
+            raise JMCValueError(
+                f"Unknown property '{prop}'", self.token, self.tokenizer)
+
+        if 'color' not in self.current_json and self.current_color:
+            self.current_json['color'] = self.current_color
+
+    def parse_code(self, char: str) -> None:
+        prop = self.PROPS.get(char, None)
+        if prop is None:
+            JMCValueError(
+                f"Unknown code format '{char}'", self.token, self.tokenizer)
+
+        if prop in {
+            'dark_red',
+            'red',
+            'gold',
+            'yellow',
+            'dark_green',
+            'green',
+            'aqua',
+            'dark_aqua',
+            'blue',
+            'light_purple',
+            'dark_purple',
+            'white',
+            'gray',
+            'dark_gray',
+            'black',
+            'reset',
+        }:
+            if 'color' in self.current_json:
+                raise JMCValueError(
+                    f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+
+            self.current_json['color'] = prop
+            self.current_color = prop
+
+        if prop in {'bold', 'italic', 'underlined',
+                    'strikethrough', 'obfuscated'}:
+            if self.current_color:
+                self.current_json['color'] = self.current_color
+            self.current_json[prop] = True
+
+    def parse(self) -> None:
+        is_expect_color_code = False
+        is_bracket_format = False
+
+        for char in self.raw_text:
+            if is_bracket_format:
+                if char == self.CLOSE_BRACKET:
+                    is_bracket_format = False
+                    self.parse_bracket()
+                    continue
+                self.bracket_content += char
+                continue
+
+            if is_expect_color_code:
+                is_expect_color_code = False
+                if char == self.OPEN_BRACKET:
+                    is_bracket_format = True
+                    continue
+                if char == self.SIGN:
+                    if isinstance(self.current_json["text"], str):
+                        self.current_json["text"] += char
+                        continue
+                self.parse_code(char)
+                continue
+
+            if char == self.SIGN:
+                self.push()
+                is_expect_color_code = True
+                continue
+
+            if isinstance(self.current_json["text"], str):
+                self.current_json["text"] += char
+
+        self.push()
+
+        if is_expect_color_code:
+            raise JMCValueError(
+                f"Unexpected trailing '{self.SIGN}'", self.token, self.tokenizer, suggestion=f"Remove last '{self.SIGN}'")
+
+    def __str__(self) -> str:
+        if len(self.result) == 1:
+            if 'italic' not in self.result[0]:
+                self.result[0]['italic'] = False
+            return json.dumps(self.result[0])
+        return json.dumps(
+            [{"italic": False} if self.is_default_no_italic else ""] + self.result)
+
+    def __repr__(self) -> str:
+        return f"FormattedText(raw_text={repr(self.raw_text)}, result={repr(json.dumps(self.result))})"

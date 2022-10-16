@@ -6,7 +6,7 @@ from ...tokenizer import Token, TokenType
 from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
 from ...datapack import DataPack
-from ..utils import ArgType, PlayerType, ScoreboardPlayer, minecraft_formatted_text
+from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -116,27 +116,28 @@ class ItemCreate(JMCFunction):
         nbt = self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
 
         if on_click:
-            count = self.datapack.get_count(self.name)
             item_id = self.datapack.data.get_item_id()
             self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
             if self.is_never_used():
                 self.datapack.add_tick_command(
                     f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [f'scoreboard players reset @s {self.rc_obj}'], 'main')}""")
+                                                       [
+                                                        f'scoreboard players reset @s {self.rc_obj}',
+                                                        f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
+                                                        f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
+                                                        ], 'main')}""")
+                self.datapack.add_raw_private_function(self.name, [], 'found')
+
+            found_func = self.get_private_function('found')
 
             func = self.args["on_click"]
-            main_func = self.get_private_function('main')
-            main_func.append(
-                f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}")
-            main_func.append(
-                f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}")
 
             if self.raw_args["on_click"].arg_type == ArgType.ARROW_FUNC:
-                run = f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}'
+                found_func.append(
+                    f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
             else:
-                run = f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}'
-
-            self.datapack.add_raw_private_function(self.name, [run], 'found')
+                found_func.append(
+                    f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}')
 
             if self.id_name in nbt:
                 raise JMCValueError(
@@ -152,11 +153,11 @@ class ItemCreate(JMCFunction):
                 self.token,
                 self.tokenizer)
 
-        lore_ = ",".join([repr(minecraft_formatted_text(lore))
+        lore_ = ",".join([repr(str(FormattedText(lore, self.token, self.tokenizer, is_default_no_italic=True)))
                          for lore in lores])
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            minecraft_formatted_text(name)
+            str(FormattedText(name, self.token, self.tokenizer, is_default_no_italic=True))
             )},Lore:[{lore_}]}}""")
 
         self.datapack.data.item[self.args["item_id"]] = Item(
