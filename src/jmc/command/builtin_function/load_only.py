@@ -2,7 +2,7 @@
 
 from json import JSONDecodeError, loads
 
-from jmc.tokenizer import TokenType
+from ...tokenizer import Token, TokenType
 from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
 from ...datapack import DataPack
@@ -21,10 +21,10 @@ from .._flow_control import parse_switch
     name='right_click_setup'
 )
 class RightClickSetup(JMCFunction):
-    obj = '__rc__'
     obj_id = '__item_id__'
 
     def call(self) -> str:
+        self.obj = '__rc__' + self.args["id_name"][:10]
         func_map = self.datapack.parse_func_map(
             self.raw_args["func_map"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
@@ -78,7 +78,7 @@ class RightClickSetup(JMCFunction):
     call_string='Item.create',
     arg_type={
         "item_id": ArgType.KEYWORD,
-        "item_type": ArgType.KEYWORD,
+        "item_type": ArgType.STRING,
         "display_name": ArgType.STRING,
         "lore": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT,
@@ -90,6 +90,10 @@ class RightClickSetup(JMCFunction):
     }
 )
 class ItemCreate(JMCFunction):
+    obj = "__item__rc__"
+    obj_id = "__item_id__"
+    id_name = "item_create_id"
+
     def call(self) -> str:
         item_type = self.args["item_type"]
         on_click = self.args["on_click"]
@@ -107,20 +111,41 @@ class ItemCreate(JMCFunction):
         nbt = self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
 
         if on_click:
-            """
-            - get count
-            - get item_id
-            - add new function call to new custom right click setup
-            - add new execute if there too with item_id
-            - add item_id to nbt
-            """
+            count = self.datapack.get_count(self.name)
+            item_id = self.datapack.data.get_item_id()
+            self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
+            if self.is_never_used():
+                self.datapack.add_tick_command(
+                    f"""execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
+                                                       [f'scoreboard players reset @s {self.obj}'], 'main')}""")
+
+            func = self.args["on_click"]
+            main_func = self.get_private_function('main')
+            main_func.append(
+                f"execute store result score {self.obj_id} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}")
+            main_func.append(
+                f"execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, count)}")
+
+            if self.raw_args["on_click"].arg_type == ArgType.ARROW_FUNC:
+                run = f'execute if score @s {self.obj_id} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}'
+            else:
+                run = f'execute if score @s {self.obj_id} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}'
+
+            self.datapack.add_raw_private_function(self.name, [run], count)
+
+            if self.id_name in nbt:
+                raise JMCValueError(
+                    f"{self.id_name} is already inside the nbt",
+                    self.token,
+                    self.tokenizer)
+
+            nbt[self.id_name] = Token.empty(item_id)
 
         self.datapack.data.item[self.args["item_id"]] = Item(
             item_type,
             minecraft_formatted_text(name),
             [minecraft_formatted_text(lore) for lore in lores],
             self.datapack.token_dict_to_raw_json(nbt),
-            on_click=""
         )
 
         return ""
@@ -236,8 +261,6 @@ class TriggerSetup(JMCFunction):
     defaults={
         "function": ""
     }
-
-
 )
 class TimerAdd(JMCFunction):
     def call(self) -> str:

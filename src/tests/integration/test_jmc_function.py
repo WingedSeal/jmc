@@ -622,11 +622,11 @@ RightClick.setup(
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-scoreboard objectives add __rc__ used:carrot_on_a_stick
+scoreboard objectives add __rc__custom_id used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={__rc__=1..}] at @s run function TEST:__private__/right_click_setup/main
+execute as @a[scores={__rc__custom_id=1..}] at @s run function TEST:__private__/right_click_setup/main
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/main.mcfunction
-scoreboard players reset @s __rc__
+scoreboard players reset @s __rc__custom_id
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.custom_id
 execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/right_click_setup/1
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/1.mcfunction

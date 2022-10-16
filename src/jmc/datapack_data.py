@@ -9,7 +9,6 @@ class Item:
     name: str
     lores: list[str]
     nbt: str
-    on_click: str | None
 
 
 class Data:
@@ -22,11 +21,11 @@ class Data:
         self.item: dict[str, Item] = {}
         self.__item_id_count: int = 0
 
-    def get_item_id(self) -> int:
+    def get_item_id(self) -> str:
         """
         Get item id for on_click feature of Item.create
 
         :return: Item ID
         """
         self.__item_id_count += 1
-        return self.__item_id_count
+        return str(self.__item_id_count)

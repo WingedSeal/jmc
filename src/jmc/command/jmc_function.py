@@ -110,30 +110,31 @@ class JMCFunction:
                 if key not in self.defaults:
                     raise JMCMissingValueError(key, token, tokenizer)
                 self.args[key] = self.defaults[key]
+                continue
+
+            self.raw_args[key] = arg
+            if key in self._ignore:
+                pass
+            elif arg.arg_type == ArgType._FUNC_CALL:
+                self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
+            elif arg.arg_type == ArgType.ARROW_FUNC:
+                self.args[key] = '\n'.join(
+                    datapack.parse_function_token(arg.token, tokenizer))
+            elif arg.arg_type == ArgType.INTEGER:
+                self.args[key] = arg.token.string
+                # self.args[key] = str(find_scoreboard_player_type(
+                #     arg.token, tokenizer).value)
+            elif arg.arg_type == ArgType.FLOAT:
+                self.args[key] = str(float(arg.token.string))
+            elif arg.arg_type in {ArgType.SCOREBOARD_PLAYER, ArgType.SCOREBOARD}:
+                scoreboard_player = find_scoreboard_player_type(
+                    arg.token, tokenizer)
+                if isinstance(scoreboard_player.value, int):
+                    raise ValueError(
+                        "scoreboard_player.value is int for minecraft scorboard")
+                self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
             else:
-                self.raw_args[key] = arg
-                if key in self._ignore:
-                    pass
-                elif arg.arg_type == ArgType._FUNC_CALL:
-                    self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
-                elif arg.arg_type == ArgType.ARROW_FUNC:
-                    self.args[key] = '\n'.join(
-                        datapack.parse_function_token(arg.token, tokenizer))
-                elif arg.arg_type == ArgType.INTEGER:
-                    self.args[key] = arg.token.string
-                    # self.args[key] = str(find_scoreboard_player_type(
-                    #     arg.token, tokenizer).value)
-                elif arg.arg_type == ArgType.FLOAT:
-                    self.args[key] = str(float(arg.token.string))
-                elif arg.arg_type in {ArgType.SCOREBOARD_PLAYER, ArgType.SCOREBOARD}:
-                    scoreboard_player = find_scoreboard_player_type(
-                        arg.token, tokenizer)
-                    if isinstance(scoreboard_player.value, int):
-                        raise ValueError(
-                            "scoreboard_player.value is int for minecraft scorboard")
-                    self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
-                else:
-                    self.args[key] = arg.token.string
+                self.args[key] = arg.token.string
 
         self.__post__init__()
 
@@ -175,14 +176,17 @@ class JMCFunction:
 
         return cls.__subcls[func_type]
 
-    def is_never_used(self) -> bool:
+    def is_never_used(self, call_string: str | None = None) -> bool:
         """
         Add current function to datapack.used_command and return whether it's already there
 
+        :param: Any string instead of default call string for more specific check. For example, minecraft command
         :return: Whether this function has been called by the user before
         """
-        is_in = self.call_string not in self.datapack.used_command
-        self.datapack.used_command.add(self.call_string)
+        if call_string is None:
+            call_string = self.call_string
+        is_in = call_string not in self.datapack.used_command
+        self.datapack.used_command.add(call_string)
         return is_in
 
     def get_private_function(self, function_name: str) -> Function:
