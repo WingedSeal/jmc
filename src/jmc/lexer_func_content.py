@@ -186,18 +186,18 @@ class FuncContent:
                 self.commands[-1], token, DataPack.var_name, self.tokenizer)
             if not success:
                 if is_connected(token, self.command[key_pos - 1]):
-                    self.commands[-1] += self.lexer.clean_up_paren(
+                    self.commands[-1] += self.lexer.clean_up_paren_token(
                         token, self.tokenizer)
                 else:
                     append_commands(
-                        self.commands, self.lexer.clean_up_paren(token, self.tokenizer))
+                        self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             if is_connected(token, self.command[key_pos - 1]):
-                self.commands[-1] += self.lexer.clean_up_paren(
+                self.commands[-1] += self.lexer.clean_up_paren_token(
                     token, self.tokenizer)
             else:
                 append_commands(
-                    self.commands, self.lexer.clean_up_paren(token, self.tokenizer))
+                    self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type == TokenType.STRING:
             append_commands(self.commands, dumps(token.string))
         else:

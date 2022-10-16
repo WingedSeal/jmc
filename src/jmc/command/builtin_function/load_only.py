@@ -21,26 +21,26 @@ from .._flow_control import parse_switch
     name='right_click_setup'
 )
 class RightClickSetup(JMCFunction):
-    obj_id = '__item_id__'
+    tag_id_var = '__item_id__'
 
     def call(self) -> str:
-        self.obj = '__rc__' + self.args["id_name"][:10]
+        self.rc_obj = '__rc__' + self.args["id_name"][:10]
         func_map = self.datapack.parse_func_map(
             self.raw_args["func_map"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["id_name"]
-        self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
+        self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
         if self.is_never_used():
             self.datapack.add_tick_command(
-                f"""execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [f'scoreboard players reset @s {self.obj}'], 'main')}""")
+                f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
+                                                       [f'scoreboard players reset @s {self.rc_obj}'], 'main')}""")
 
         main_func = self.get_private_function('main')
 
         main_count = self.datapack.get_count(self.name)
         main_func.append(
-            f"execute store result score {self.obj_id} {DataPack.var_name} run data get entity @s SelectedItem.tag.{id_name}")
+            f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{id_name}")
 
         if is_switch:
             func_contents = []
@@ -54,19 +54,19 @@ class RightClickSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
 
             main_func.append(
-                f"""execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (self.obj_id, '@s')), func_contents, self.datapack, self.name)}""")
+                f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
+                    PlayerType.SCOREBOARD, (self.tag_id_var, '@s')), func_contents, self.datapack, self.name)}""")
         else:
             main_func.append(
-                f"execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
+                f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
             run = []
             for num, (func, is_arrow_func) in func_map.items():
                 if is_arrow_func:
                     run.append(
-                        f'execute if score @s {self.obj_id} {DataPack.var_name} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                        f'execute if score {self.tag_id_var} {DataPack.var_name} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {self.obj_id} {DataPack.var_name} matches {num} at @s run function {self.datapack.namespace}:{func}')
+                        f'execute if score {self.tag_id_var} {DataPack.var_name} matches {num} at @s run function {self.datapack.namespace}:{func}')
 
             self.datapack.add_raw_private_function(self.name, run, main_count)
 
@@ -87,13 +87,13 @@ class RightClickSetup(JMCFunction):
     name='item_create',
     defaults={
         "nbt": "{}",
-        "lore": "[]",
+        "lore": "",
         "on_click": ""
     }
 )
 class ItemCreate(JMCFunction):
-    obj = "__item__rc__"
-    obj_id = "__item_id__"
+    rc_obj = "__item__rc__"
+    tag_id_var = "__item_id__"
     id_name = "__item_id__"
 
     def call(self) -> str:
@@ -108,32 +108,35 @@ class ItemCreate(JMCFunction):
                 self.tokenizer,
                 suggestion="Change item_type to minecraft:carrot_on_a_stick")
         name = self.args["display_name"]
-        lores = self.datapack.parse_list(
-            self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
+        if self.args["lore"]:
+            lores = self.datapack.parse_list(
+                self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
+        else:
+            lores = []
         nbt = self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
 
         if on_click:
             count = self.datapack.get_count(self.name)
             item_id = self.datapack.data.get_item_id()
-            self.datapack.add_objective(self.obj, 'used:carrot_on_a_stick')
+            self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
             if self.is_never_used():
                 self.datapack.add_tick_command(
-                    f"""execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [f'scoreboard players reset @s {self.obj}'], 'main')}""")
+                    f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
+                                                       [f'scoreboard players reset @s {self.rc_obj}'], 'main')}""")
 
             func = self.args["on_click"]
             main_func = self.get_private_function('main')
             main_func.append(
-                f"execute store result score {self.obj_id} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}")
+                f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}")
             main_func.append(
-                f"execute if score {self.obj_id} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, count)}")
+                f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}")
 
             if self.raw_args["on_click"].arg_type == ArgType.ARROW_FUNC:
-                run = f'execute if score @s {self.obj_id} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}'
+                run = f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}'
             else:
-                run = f'execute if score @s {self.obj_id} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}'
+                run = f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}'
 
-            self.datapack.add_raw_private_function(self.name, [run], count)
+            self.datapack.add_raw_private_function(self.name, [run], 'found')
 
             if self.id_name in nbt:
                 raise JMCValueError(
@@ -151,6 +154,7 @@ class ItemCreate(JMCFunction):
 
         lore_ = ",".join([repr(minecraft_formatted_text(lore))
                          for lore in lores])
+
         nbt["display"] = Token.empty(f"""{{Name:{repr(
             minecraft_formatted_text(name)
             )},Lore:[{lore_}]}}""")

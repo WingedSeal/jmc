@@ -79,8 +79,9 @@ class Token:
         return f'"{self.string}"' if self.token_type == TokenType.STRING else self.string
 
     @classmethod
-    def empty(cls, string: str = "") -> "Token":
-        return cls(TokenType.KEYWORD, -1, -1, string)
+    def empty(cls, string: str = "",
+              token_type: TokenType = TokenType.KEYWORD) -> "Token":
+        return cls(token_type, -1, -1, string)
 
 
 @dataclass(frozen=True, eq=False, slots=True)

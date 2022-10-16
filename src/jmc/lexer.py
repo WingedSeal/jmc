@@ -423,8 +423,8 @@ class Lexer:
                 name, else_, tokenizer, count_alt)
         return "\n".join(output)
 
-    def clean_up_paren(self, token: Token, tokenizer: Tokenizer,
-                       is_nbt: bool = True) -> str:
+    def clean_up_paren_token(self, token: Token, tokenizer: Tokenizer,
+                             is_nbt: bool = True) -> str:
         """
         Turn a paren token into a clean string
 
@@ -449,9 +449,10 @@ class Lexer:
                 if success:
                     _string = ""
                 else:
-                    _string = self.clean_up_paren(token_, tokenizer, is_nbt)
+                    _string = self.clean_up_paren_token(
+                        token_, tokenizer, is_nbt)
             elif token_.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
-                _string = self.clean_up_paren(token_, tokenizer, is_nbt)
+                _string = self.clean_up_paren_token(token_, tokenizer, is_nbt)
             elif token_.token_type == TokenType.STRING:
                 if is_nbt:
                     _string = repr(token_.string)
