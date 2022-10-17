@@ -12,10 +12,15 @@ from sys import exit
 
 import jmc
 from jmc.exception import (
+    HeaderDuplicatedMacro,
+    HeaderFileNotFoundError,
+    HeaderSyntaxException,
     JMCDecodeJSONError,
     JMCFileNotFoundError,
+    JMCMissingValueError,
     JMCSyntaxException,
     JMCSyntaxWarning,
+    JMCValueError,
     MinecraftSyntaxWarning,
     JMCBuildError
 )
@@ -244,18 +249,24 @@ exit: Exit compiler
             pprint(
                 f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
         except (
+            HeaderFileNotFoundError,
+            HeaderDuplicatedMacro,
+            HeaderSyntaxException,
             JMCSyntaxException,
-            JMCFileNotFoundError,
-            JMCDecodeJSONError,
+            JMCValueError,
             JMCSyntaxWarning,
-            MinecraftSyntaxWarning,
-            JMCBuildError
+            JMCFileNotFoundError,
+            JMCBuildError,
+            JMCDecodeJSONError,
+            JMCMissingValueError,
+            MinecraftSyntaxWarning
         ) as error:
             logger.debug(format_exc())
             error_report(error)
         except Exception as error:
             logger.exception("Non-JMC Error occur")
-            error_report(error)
+            # error_report(error)
+            handle_exception(error)
 
         if debug_compile:
             cls._log_debug()

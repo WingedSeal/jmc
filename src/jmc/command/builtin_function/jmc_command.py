@@ -49,7 +49,7 @@ class TimerSet(JMCFunction):
 
 
 @func_property(
-    func_type=FuncType.LOAD_ONLY,
+    func_type=FuncType.JMC_COMMAND,
     call_string='Item.give',
     arg_type={
         "item_id": ArgType.KEYWORD,
@@ -72,6 +72,32 @@ class ItemGive(JMCFunction):
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
         return f'give {self.args["selector"]} {self.datapack.data.item[self.args["item_id"]]} {self.args["amount"]}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='Item.summon',
+    arg_type={
+        "item_id": ArgType.KEYWORD,
+        "pos": ArgType.STRING,
+        "count": ArgType.INTEGER,
+    },
+    name='item_summon',
+    defaults={
+        "pos": "~ ~ ~",
+        "count": "1"
+    }
+)
+class ItemSummon(JMCFunction):
+    def call(self) -> str:
+        if self.args["item_id"] not in self.datapack.data.item:
+            raise JMCValueError(
+                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                self.token,
+                self.tokenizer,
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+            )
+        return f'summon minecraft:item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["item_id"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["item_id"]].nbt}}}}}'
 
 
 def __normalize_decimal(n: float):

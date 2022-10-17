@@ -178,7 +178,12 @@ class FuncContent:
             raise JMCSyntaxException(
                 f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)
 
-        if token.string == '@s' and token.token_type == TokenType.KEYWORD and self.commands[-1] == 'as':
+        # optimize `execute as @s`
+        if (token.string == '@s' and
+            token.token_type == TokenType.KEYWORD and
+            self.commands[-1] == 'as' and
+                self.commands[-2] != 'rotated'):
+
             self.commands[-1] = 'if entity'
 
         if token.token_type == TokenType.PAREN_ROUND:
