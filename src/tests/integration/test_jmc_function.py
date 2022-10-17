@@ -700,9 +700,9 @@ Trigger.setup(help, {
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
 scoreboard objectives add help trigger
+execute as @a run function TEST:__private__/trigger_setup/enable
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 function TEST:__private__/trigger_setup/main
-function TEST:__private__/trigger_setup/enable
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/main.mcfunction
 execute as @a[scores={help=1..}] at @s run function TEST:__private__/trigger_setup/0
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/enable.mcfunction

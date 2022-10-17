@@ -211,8 +211,8 @@ class TriggerSetup(JMCFunction):
             self.datapack.add_tick_command(
                 self.datapack.call_func(self.name, 'main'))
             self.make_empty_private_function('main')
-            self.datapack.add_tick_command(
-                self.datapack.call_func(self.name, 'enable'))
+            self.datapack.add_load_command(
+                f"execute as @a run {self.datapack.call_func(self.name, 'enable')}")
             self.make_empty_private_function('enable')
 
             self.datapack.add_private_json('advancements', f"{self.name}/enable", {
@@ -261,6 +261,61 @@ class TriggerSetup(JMCFunction):
         run.extend([f"scoreboard players reset @s {obj}",
                     f"scoreboard players enable @s {obj}"])
         self.datapack.add_raw_private_function(self.name, run, main_count)
+
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string='Trigger.add',
+    arg_type={
+        "objective": ArgType.KEYWORD,
+        "function": ArgType.FUNC
+    },
+    name='trigger_add',
+)
+class TriggerAdd(JMCFunction):
+    def call(self) -> str:
+
+        obj = self.args["objective"]
+        self.datapack.add_objective(obj, 'trigger')
+        if self.is_never_used():
+            self.datapack.add_tick_command(
+                self.datapack.call_func(self.name, 'main'))
+            self.make_empty_private_function('main')
+            self.datapack.add_load_command(
+                f"execute as @a run {self.datapack.call_func(self.name, 'enable')}")
+            self.make_empty_private_function('enable')
+
+            self.datapack.add_private_json('advancements', f"{self.name}/enable", {
+                "criteria": {
+                    "requirement": {
+                        "trigger": "minecraft:tick"
+                    }
+                },
+                "rewards": {
+                    "function": f"{self.datapack.namespace}:{DataPack.private_name}/{self.name}/enable"
+                }
+            })
+
+        main_func = self.get_private_function('main')
+        self.get_private_function('enable').append(
+            f"scoreboard players enable @s {obj}")
+
+        func = self.args["function"]
+        if self.raw_args["function"].arg_type == ArgType.ARROW_FUNC:
+            run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
+                func,
+                f"scoreboard players reset @s {obj}",
+                f"scoreboard players enable @s {obj}"
+                ], obj)}"""
+        else:
+            run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
+                f"{self.datapack.namespace}:{func}",
+                f"scoreboard players reset @s {obj}",
+                f"scoreboard players enable @s {obj}"
+                ], obj)}"""
+        main_func.append(run)
 
         return ""
 
