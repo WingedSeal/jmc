@@ -104,6 +104,7 @@ class Re:
     COMMA = ","
     HASH = '#'
     SLASH = "/"
+    TWO_SLASH = SLASH * 2
 
 
 class Quote:
@@ -144,10 +145,13 @@ class Tokenizer:
                  'list_of_keywords', 'quote', 'is_escaped',
                  'paren', 'r_paren', 'paren_count',
                  'is_string', 'is_slash', 'raw_string',
-                 'file_string', 'file_path', 'programs')
+                 'file_string', 'file_path', 'programs',
+                 'is_comment')
 
     line: int
+    """Starts at 1"""
     col: int
+    """Starts at 1"""
 
     state: TokenType | None
     """Current TokenType"""
@@ -260,6 +264,7 @@ class Tokenizer:
         self.r_paren = None
         self.paren_count = 0
         self.is_string = False
+        self.is_comment = False  # For paranthesis
         # Comment
         self.is_slash = False
 
@@ -271,6 +276,7 @@ class Tokenizer:
                     "Unexpected semicolon(;)", None, self, display_col_length=False)
 
             if char == Re.NEW_LINE:
+                self.is_comment = False
                 if self.state == TokenType.STRING:
                     raise JMCSyntaxException(
                         "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)
@@ -355,7 +361,12 @@ class Tokenizer:
                         self.is_string = False
                     elif self.is_escaped:
                         self.is_escaped = False
+                elif self.is_comment:
+                    pass
                 else:
+                    if char != Re.SLASH and self.is_slash:
+                        self.is_slash = False
+
                     if char == self.r_paren and self.paren_count == 0:
                         is_end = False
                         if self.paren == Paren.L_CURLY:
@@ -377,6 +388,13 @@ class Tokenizer:
                     elif char in {Quote.SINGLE, Quote.DOUBLE}:
                         self.is_string = True
                         self.quote = char
+                    elif char == Re.HASH:
+                        self.is_comment = True
+                    elif char == Re.SLASH:
+                        if self.is_slash:
+                            self.is_comment = True
+                        else:
+                            self.is_slash = True
 
             elif self.state == TokenType.COMMENT:
                 pass
