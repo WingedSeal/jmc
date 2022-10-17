@@ -704,7 +704,7 @@ scoreboard objectives add help trigger
 function TEST:__private__/trigger_setup/main
 function TEST:__private__/trigger_setup/enable
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/main.mcfunction
-execute as @a[scores={help=1..}] run function TEST:__private__/trigger_setup/0
+execute as @a[scores={help=1..}] at @s run function TEST:__private__/trigger_setup/0
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/enable.mcfunction
 scoreboard players enable @s help
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/1.mcfunction

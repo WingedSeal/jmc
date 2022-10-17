@@ -232,7 +232,7 @@ class TriggerSetup(JMCFunction):
 
         main_count = self.datapack.get_count(self.name)
         main_func.append(
-            f"execute as @a[scores={{{obj}=1..}}] run {self.datapack.call_func(self.name, main_count)}")
+            f"execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.call_func(self.name, main_count)}")
 
         if is_switch:
             func_contents = []
@@ -253,10 +253,10 @@ class TriggerSetup(JMCFunction):
             for num, (func, is_arrow_func) in func_map.items():
                 if is_arrow_func:
                     run.append(
-                        f'execute if score @s {obj} {DataPack.var_name} matches {num} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
+                        f'execute if score @s {obj} {DataPack.var_name} matches {num} run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {obj} {DataPack.var_name} matches {num} at @s run function {self.datapack.namespace}:{func}')
+                        f'execute if score @s {obj} {DataPack.var_name} matches {num} run function {self.datapack.namespace}:{func}')
 
         run.extend([f"scoreboard players reset @s {obj}",
                     f"scoreboard players enable @s {obj}"])
