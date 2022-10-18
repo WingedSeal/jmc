@@ -1,10 +1,11 @@
 from collections import defaultdict
 from enum import Enum, auto
-from typing import Callable
+from json import JSONDecodeError, loads
+from typing import Any, Callable
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
-from ..exception import JMCMissingValueError
+from ..exception import JMCDecodeJSONError, JMCMissingValueError
 from ..tokenizer import Token, Tokenizer
 
 
@@ -190,12 +191,40 @@ class JMCFunction:
         return is_in
 
     def get_private_function(self, function_name: str) -> Function:
+        """
+        Get private function from self.datapack.private_functions
+
+        :param function_name: Name of the private function
+        :return: Function object
+        """
         return self.datapack.private_functions[self.name][function_name]
 
     def make_empty_private_function(self, function_name: str) -> Function:
+        """
+        Make private function with no content
+
+        :param function_name: Name of the function
+        :return: Function object
+        """
         func = self.datapack.private_functions[
             self.name][function_name] = Function()
         return func
+
+    def load_arg_json(self, parameter: str) -> dict[str, Any]:
+        """
+        Get JSON argument from parameter name
+
+        :param parameter: Name of the parameter of JMC function
+        :raises JMCDecodeJSONError: Invalid JSON
+        :return: JSON
+        """
+        try:
+            json = loads(self.args[parameter])
+        except JSONDecodeError as error:
+            raise JMCDecodeJSONError(
+                error, self.raw_args[parameter].token, self.tokenizer)
+
+        return json
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {

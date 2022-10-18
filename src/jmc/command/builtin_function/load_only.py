@@ -1,14 +1,51 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 
 from json import JSONDecodeError, loads
+from typing import Any
 
 from ...tokenizer import Token, TokenType
-from ...exception import JMCDecodeJSONError, JMCSyntaxException, JMCMissingValueError, JMCValueError
+from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
 from ...datapack import DataPack
 from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string='Predicate.locations',
+    arg_type={
+        "name": ArgType.STRING,
+        "predicate": ArgType.JSON,
+        "x_min": ArgType.INTEGER,
+        "x_max": ArgType.INTEGER,
+        "y_min": ArgType.INTEGER,
+        "y_max": ArgType.INTEGER,
+        "z_min": ArgType.INTEGER,
+        "z_max": ArgType.INTEGER,
+    },
+    name='predicate_locations'
+)
+class PredicateLocations(JMCFunction):
+    def call(self) -> str:
+        predicates = []
+        predicate = self.load_arg_json("predicate")
+        for x in range(int(self.args["x_min"]), int(self.args["x_max"]) + 1):
+            for y in range(int(self.args["y_min"]),
+                           int(self.args["y_max"]) + 1):
+                for z in range(int(self.args["z_min"]), int(
+                        self.args["z_max"]) + 1):
+                    predicates.append({
+                        "condition": "minecraft:location_check",
+                        "offsetX": x,
+                        "offsetY": y,
+                        "offsetZ": z,
+                        "predicate": predicate
+                    })
+
+        self.datapack.add_json("predicate", self.args["name"], predicates)
+        return ""
 
 
 @func_property(
@@ -415,11 +452,7 @@ class RecipeTable(JMCFunction):
             }
         })
 
-        try:
-            json = loads(self.args["recipe"])
-        except JSONDecodeError as error:
-            raise JMCDecodeJSONError(
-                error, self.raw_args["recipe"].token, self.tokenizer)
+        json = self.load_arg_json("recipe")
 
         if "result" not in json:
             raise JMCSyntaxException("'result' key not found in recipe",

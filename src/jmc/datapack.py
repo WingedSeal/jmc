@@ -167,7 +167,7 @@ class DataPack:
         """Dictionary of function name and a Function object"""
         self.load_function: list[list[Token]] = []
         """List of commands(list of tokens) in load function"""
-        self.jsons: dict[str, dict[str, Any]] = defaultdict(dict)
+        self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
         """Dictionary of json name and a dictionary(jsobject)"""
         self.private_functions: dict[str,
                                      dict[str, Function]] = defaultdict(dict)
@@ -231,7 +231,7 @@ class DataPack:
         return f"function {self.namespace}:{self.private_name}/{name}/{count}"
 
     def add_private_json(self, json_type: str, name: str,
-                         json: dict[str, Any]) -> None:
+                         json: dict[str, Any] | list[Any]) -> None:
         """
         Add new private json to datapack
 
@@ -240,6 +240,17 @@ class DataPack:
         :param json: Dictionary object
         """
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
+
+    def add_json(self, json_type: str, name: str,
+                 json: dict[str, Any] | list[Any]) -> None:
+        """
+        Add new private json to datapack
+
+        :param json_type: Minecraft json type, for example: tags/functions
+        :param name: Name of the json
+        :param json: Dictionary object
+        """
+        self.jsons[f"{json_type}/{name}"] = json
 
     def add_arrow_function(self, name: str, token: Token,
                            tokenizer: Tokenizer) -> str:
