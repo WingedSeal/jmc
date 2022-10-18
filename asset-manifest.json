@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/jmc/static/css/main.83b0584b.css",
-    "main.js": "/jmc/static/js/main.a2aa6476.js",
+    "main.css": "/jmc/static/css/main.7b36dcce.css",
+    "main.js": "/jmc/static/js/main.008a74bf.js",
     "static/media/background.jpg": "/jmc/static/media/background.2f910f698191ec5b6f03.jpg",
     "static/media/minecraft_wallpaper.jpg": "/jmc/static/media/minecraft_wallpaper.bcfcc2b9349acb0ef714.jpg",
     "static/media/jmc_icon.png": "/jmc/static/media/jmc_icon.91c8f873ccc4cb864414.png",
@@ -10,14 +10,17 @@
     "static/media/MinecraftBoldItalic-1y1e.otf": "/jmc/static/media/MinecraftBoldItalic-1y1e.9693305371d02954a88f.otf",
     "static/media/MinecraftBold-nMK1.otf": "/jmc/static/media/MinecraftBold-nMK1.a9b3bc2a90dd462c9c18.otf",
     "static/media/MinecraftRegular-Bmg3.otf": "/jmc/static/media/MinecraftRegular-Bmg3.82ba08919dc2add9422f.otf",
+    "static/media/python.svg": "/jmc/static/media/python.305e01105111fce9c952aef7382c1f5d.svg",
     "static/media/MinecraftTen-VGORe.ttf": "/jmc/static/media/MinecraftTen-VGORe.cd1235551b5f89f4710f.ttf",
+    "static/media/download_icon.svg": "/jmc/static/media/download_icon.e688f806b45a79f85c879f8bccb6ea10.svg",
     "static/media/menu.svg": "/jmc/static/media/menu.1bb7d0b14d4f1a7485e3b1084d7b9957.svg",
     "index.html": "/jmc/index.html",
-    "main.83b0584b.css.map": "/jmc/static/css/main.83b0584b.css.map",
-    "main.a2aa6476.js.map": "/jmc/static/js/main.a2aa6476.js.map"
+    "static/media/windows.svg": "/jmc/static/media/windows.5b6a791c75bcdc873387befc6b024437.svg",
+    "main.7b36dcce.css.map": "/jmc/static/css/main.7b36dcce.css.map",
+    "main.008a74bf.js.map": "/jmc/static/js/main.008a74bf.js.map"
   },
   "entrypoints": [
-    "static/css/main.83b0584b.css",
-    "static/js/main.a2aa6476.js"
+    "static/css/main.7b36dcce.css",
+    "static/js/main.008a74bf.js"
   ]
 }
