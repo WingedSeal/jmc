@@ -23,7 +23,7 @@ const DownwardArrow = () => {
 const Mantra = () => {
     return (
         <div className="flex flex-nowrap flex-col mx-auto ">
-            <span className="text-[#97F544] text-6xl md:text-9xl flex flex-nowrap flex-row-reverse">
+            <span className="text-[#97F544] text-5xl md:text-9xl flex flex-nowrap flex-row-reverse">
                 <img
                     src={require("../../assets/image/minecraft/sugar_cane.png")}
                     alt="minecraft:sugarcane"
@@ -31,7 +31,7 @@ const Mantra = () => {
                 />
                 Simple
             </span>
-            <span className="text-[#F3C12A] text-6xl md:text-9xl flex flex-nowrap flex-row-reverse">
+            <span className="text-[#F3C12A] text-5xl md:text-9xl flex flex-nowrap flex-row-reverse">
                 Quick
                 <img
                     src={require("../../assets/image/minecraft/powered_rail_on.png")}
@@ -39,7 +39,7 @@ const Mantra = () => {
                     className="aspect-square h-[1em] minecraft mx-3"
                 />
             </span>
-            <span className="text-[#B7B7B7] text-5xl md:text-8xl flex flex-nowrap flex-row-reverse">
+            <span className="text-[#B7B7B7] text-4xl md:text-8xl flex flex-nowrap flex-row-reverse">
                 <img
                     src={require("../../assets/image/minecraft/enchanted_book.png")}
                     alt="minecraft:enchanted_book"
@@ -51,15 +51,15 @@ const Mantra = () => {
     );
 };
 
-const JMC_Icon = () => {
+const JMCIcon = () => {
     return (
         <div className="flex flex-wrap flex-row-reverse h-1/16 mx-auto">
             <img
                 src={require("../../assets/image/jmc_icon.png")}
                 alt="JMC-icon"
-                className="max-w-[50vw] max-h-[25vh] aspect-square mx-auto"
+                className="max-w-[40vw] max-h-[25vh] aspect-square mx-auto"
             />
-            <div className="font-minecraft-ten text-white h-full flex flex-col justify-center text-center md:text-right mx-auto text-[10vw] md:text-[5vh] pr-5">
+            <div className="font-minecraft-ten text-white h-full flex flex-col justify-center text-center md:text-right mx-auto text-[10vw] md:text-[5vh] pr-0 md:pr-5">
                 <p className="whitespace-nowrap">JavaScript-like</p>
                 <p>Minecraft</p>
                 <p>Function</p>
@@ -72,7 +72,7 @@ const WhatIsJMC = () => {
     return (
         <div className="flex-col flex flex-grow">
             <p className="font-minecraft font-bold underline text-white text-[10vw] md:text-[8vh] mx-auto mb-2">
-                What is JMC
+                What is JMC?
             </p>
             <div className="flex-grow max-w-[70vw] max-h-[50vh] m-auto w-full">
                 <img
@@ -126,7 +126,7 @@ const WhyJMC = () => {
     return (
         <div className="flex-col-reverse flex flex-grow">
             <p className="font-minecraft font-bold underline text-white text-[10vw] md:text-[8vh] mx-auto my-10">
-                What is JMC
+                Why JMC?
             </p>
             <div className="flex-grow max-w-[70vw] max-h-[50vh] m-auto w-full">
                 <img
@@ -145,7 +145,9 @@ const WhyJMCDesc = () => {
                 <img
                     src={require("../../assets/image/minecraft/diamond_pickaxe.png")}
                     alt="minecraft:diamond_pickaxe"
-                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                    width="1000"
+                    height="1000"
+                    className="aspect-square max-w-[min(30vw,25vh)] minecraft mx-3 my-auto "
                 />
                 <p className="font-minecraft italic text-[#2BC7AC] my-auto mx-5 text-4xl md:text-5xl">
                     Avoid repetitive tasks
@@ -155,7 +157,9 @@ const WhyJMCDesc = () => {
                 <img
                     src={require("../../assets/image/minecraft/command_block.png")}
                     alt="minecraft:command_block"
-                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                    width="1000"
+                    height="1000"
+                    className="aspect-square max-w-[min(30vw,25vh)] minecraft mx-3 my-auto "
                 />
                 <p className="font-minecraft italic text-[#CE8F66] my-auto mx-5 text-4xl md:text-5xl">
                     Superior Syntax
@@ -166,7 +170,9 @@ const WhyJMCDesc = () => {
                 <img
                     src={require("../../assets/image/minecraft/redstone_lamp_on.png")}
                     alt="minecraft:redstone_lamp"
-                    className="aspect-square h-[25vh] minecraft mx-3 my-auto"
+                    width="1000"
+                    height="1000"
+                    className="aspect-square max-w-[min(30vw,25vh)] minecraft mx-3 my-auto "
                 />
                 <p className="font-minecraft italic text-[#F6DAB4] my-auto mx-5 text-4xl md:text-5xl">
                     Low learning curve
@@ -179,8 +185,8 @@ const WhyJMCDesc = () => {
 const Home = () => {
     return (
         <>
-            <section className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-20 px-10 pb-10">
-                <JMC_Icon />
+            <section className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10">
+                <JMCIcon />
                 <Mantra />
             </section>
             <section className="min-h-screen bg-[#002029] flex flex-wrap pt-4 md:pt-16 px-2 md:px-10">

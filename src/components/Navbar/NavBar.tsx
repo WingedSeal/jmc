@@ -45,13 +45,14 @@ const NavBar = () => {
             // window.removeEventListener("resize", handleWindowResize);
         };
     }, []);
+    const path = useLocation().pathname;
     return (
         <nav
             className={
                 "fixed top-0 flex flex-row h-[11vh] w-screen items-center transition-[transform,background-color] duration-500 z-10 " +
-                (scrollY < 1 ? "bg-transparent" : "bg-black") +
+                (scrollY < 1 && path === "/" ? "bg-transparent" : "bg-black") +
                 " " +
-                (!isScrollUp && scrollY != 0 ? "-translate-y-full" : "")
+                (!isScrollUp && scrollY !== 0 ? "-translate-y-full" : "")
             }
         >
             <Link to="/" className="h-3/4 mx-10 aspect-square">

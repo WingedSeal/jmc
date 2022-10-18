@@ -37,24 +37,28 @@
   }
 }
 
+.pop-up, .avoid-repetitive-task :hover::before, .superior-syntax :hover::before, .low-learning-curve :hover::before {
+  z-index: 100;
+  font-size: calc(min(3vw, 10vh));
+  line-height: calc(min(3vw, 10vh));
+  background-color: black;
+  padding: 0.4em;
+  color: white;
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: auto;
+  width: 70vw;
+  border: 0.1em solid white;
+  border-radius: 0.2em;
+}
+
 .avoid-repetitive-task {
   position: relative;
 }
 
 .avoid-repetitive-task :hover::before {
   content: "Notice yourself implementing the same algorithm again and again? JMC has features to implement those for you and the code will already be optimized without you having to put in any work.";
-  z-index: 100;
-  font-size: 3vw;
-  background-color: black;
-  padding: 0.4em;
-  color: white;
-  position: absolute;
-  top: 50%;
-  left: 20%;
-  width: auto;
-  width: 70vw;
-  border: 0.1em solid white;
-  border-radius: 0.2em;
 }
 
 .superior-syntax {
@@ -63,18 +67,6 @@
 
 .superior-syntax :hover::before {
   content: "Aren't you tired of creating new file for each function? In JMC, you can write everything in a single file if you want. But, you still have option to split it into multiple file. JMC also supports  inline-comment, multiline-command. And you no longer need to create tick.json or load.json";
-  z-index: 100;
-  font-size: 3vw;
-  background-color: black;
-  padding: 0.4em;
-  color: white;
-  position: absolute;
-  top: 0%;
-  left: 20%;
-  width: auto;
-  width: 70vw;
-  border: 0.1em solid white;
-  border-radius: 0.2em;
 }
 
 .low-learning-curve {
@@ -83,17 +75,5 @@
 
 .low-learning-curve :hover::before {
   content: "It takes 5-10 minutes to learn basic JMC if you already know Minecraft Datapack";
-  z-index: 100;
-  font-size: 3vw;
-  background-color: black;
-  padding: 0.4em;
-  color: white;
-  position: absolute;
-  top: -10%;
-  left: 20%;
-  width: auto;
-  width: 70vw;
-  border: 0.1em solid white;
-  border-radius: 0.2em;
 }
 /*# sourceMappingURL=Home.css.map */
