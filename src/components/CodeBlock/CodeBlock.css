@@ -1,0 +1,33 @@
+
+.color-comment {
+  color: #676E95;
+}
+
+.color-function {
+  color: #82aaff;
+}
+
+.color-keyword {
+  color: #c792ea;
+}
+
+.color-string {
+  color: #c3e88d;
+}
+
+.color-operator {
+  color: #89ddff;
+}
+
+.color-number {
+  color: #f78c6c;
+}
+
+.color-param {
+  color: #f78c6c;
+}
+
+.color-class {
+  color: #ffcb6b;
+}
+/*# sourceMappingURL=CodeBlock.css.map */

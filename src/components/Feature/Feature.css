@@ -1,0 +1,103 @@
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  background: transparent;
+  width: 0px;
+}
+
+.feature {
+  -webkit-animation: none;
+          animation: none;
+}
+
+.feature > summary {
+  border-bottom: 0 solid #cfcfcf;
+}
+
+.feature[open] {
+  -webkit-animation: sweep .5s ease-in-out;
+          animation: sweep .5s ease-in-out;
+  padding-bottom: 0.25rem;
+}
+
+.feature[open] > p {
+  text-indent: 2rem;
+  font-size: 1.125rem;
+  line-height: 1.6rem;
+}
+
+.feature[open] ul > li {
+  margin-left: 0.6rem;
+  font-size: 1.125rem;
+  line-height: 1.6rem;
+}
+
+.feature[open] > summary {
+  text-indent: 1rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 0.2rem solid #ffffff;
+  -webkit-animation: feature-glow .5s ease-in-out infinite alternate;
+          animation: feature-glow .5s ease-in-out infinite alternate;
+}
+
+@media (min-width: 768px) {
+  .feature[open] > p {
+    text-indent: 3rem;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  .feature[open] ul > li {
+    margin-left: 0.75rem;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  .feature[open] > summary {
+    text-indent: 5rem;
+    border-bottom: 0.3rem solid #ffffff;
+  }
+}
+
+@-webkit-keyframes sweep {
+  0% {
+    opacity: 0;
+    margin-left: -5vw;
+  }
+  100% {
+    opacity: 1;
+    margin-left: 0px;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    opacity: 0;
+    margin-left: -5vw;
+  }
+  100% {
+    opacity: 1;
+    margin-left: 0px;
+  }
+}
+
+@-webkit-keyframes feature-glow {
+  from {
+    text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #fff, 0 0 0.15rem #deb500, 0 0 0.2rem #deb500, 0 0 0.25rem #deb500, 0 0 0.3rem #deb500;
+  }
+  to {
+    text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #ffd000, 0 0 15rem #ffd000, 0 0 0.2rem #ffd000, 0 0 0.25rem #deb500, 0 0 0.3rem #ffd000;
+  }
+}
+
+@keyframes feature-glow {
+  from {
+    text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #fff, 0 0 0.15rem #deb500, 0 0 0.2rem #deb500, 0 0 0.25rem #deb500, 0 0 0.3rem #deb500;
+  }
+  to {
+    text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #ffd000, 0 0 15rem #ffd000, 0 0 0.2rem #ffd000, 0 0 0.25rem #deb500, 0 0 0.3rem #ffd000;
+  }
+}
+/*# sourceMappingURL=Feature.css.map */

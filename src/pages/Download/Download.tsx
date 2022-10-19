@@ -12,7 +12,7 @@ const Download = () => {
             <div className="text-teal-400 text-lg md:text-3xl mx-auto mt-2 md:mt-4 text-center">
                 Free and open-source compiler for JavaScript-like Minecraft Function
             </div>
-            <div className="flex flex-row flex-wrap justify-evenly mt-4 md:mt-6">
+            <div className="flex flex-row flex-wrap justify-evenly mt-4 md:mt-[10vh]">
                 <div className="flex flex-col flex-nowrap items-center m-8">
                     <WindowsSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
                     <a href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.exe" rel="noreferrer" className="h-16 w-44 md:h-24 md:w-72 bg-[#ffaa00] flex text-[#000000] font-bold text-lg md:text-3xl">

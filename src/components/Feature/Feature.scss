@@ -1,0 +1,96 @@
+.scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        background: transparent;
+        width: 0px;
+    }
+}
+
+.feature {
+    animation: none;
+
+    &>summary {
+        border-bottom: 0 solid #cfcfcf;
+    }
+
+    &[open] {
+        animation: sweep .5s ease-in-out;
+        padding-bottom: 0.25rem;
+
+        &>p {
+            text-indent: 2rem;
+            font-size: 1.125rem;
+            line-height: 1.6rem;
+        }
+
+        ul>li {
+            margin-left: 0.6rem;
+            font-size: 1.125rem;
+            line-height: 1.6rem;
+        }
+
+        &>summary {
+            text-indent: 1rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 0.2rem solid #ffffff;
+            animation: feature-glow .5s ease-in-out infinite alternate;
+        }
+    }
+}
+
+@media (min-width: 768px) {
+    .feature {
+
+        &[open] {
+            &>p {
+                text-indent: 3rem;
+                font-size: 1.875rem;
+                line-height: 2.25rem;
+            }
+
+            ul>li {
+                margin-left: 0.75rem;
+                font-size: 1.875rem;
+                line-height: 2.25rem;
+            }
+
+            &>summary {
+                text-indent: 5rem;
+                border-bottom: 0.3rem solid #ffffff;
+            }
+        }
+    }
+}
+
+@keyframes sweep {
+    0% {
+        opacity: 0;
+        margin-left: -5vw
+    }
+
+    100% {
+        opacity: 1;
+        margin-left: 0px
+    }
+}
+
+
+$feature-glow-color-1: #deb500;
+$feature-glow-color-2: #ffd000;
+
+@keyframes feature-glow {
+    from {
+        text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #fff, 0 0 0.15rem $feature-glow-color-1,
+            0 0 0.2rem $feature-glow-color-1, 0 0 0.25rem $feature-glow-color-1,
+            0 0 0.3rem $feature-glow-color-1;
+    }
+
+    to {
+        text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem $feature-glow-color-2,
+            0 0 15rem $feature-glow-color-2, 0 0 0.2rem $feature-glow-color-2,
+            0 0 0.25rem $feature-glow-color-1, 0 0 0.3rem $feature-glow-color-2;
+    }
+}
