@@ -1,8 +1,4 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
-
-from json import JSONDecodeError, loads
-from typing import Any
-
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
@@ -123,7 +119,7 @@ class RightClickSetup(JMCFunction):
     },
     name='item_create',
     defaults={
-        "nbt": "{}",
+        "nbt": "",
         "lore": "",
         "on_click": ""
     }
@@ -150,7 +146,8 @@ class ItemCreate(JMCFunction):
                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
-        nbt = self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args["nbt"].token) if self.args["nbt"] else {}
 
         if on_click:
             item_id = self.datapack.data.get_item_id()
