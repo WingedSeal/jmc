@@ -5,11 +5,11 @@ import { ReactComponent as PythonSvg } from "../../assets/image/python.svg";
 
 const Download = () => {
     return (<>
-        <section className="min-h-screen bg-[#002029] flex flex-wrap pt-[14vh] md:pt-[15vh] px-2 md:px-10 flex-col items-centers">
-            <div className="text-cyan-300 text-3xl md:text-6xl mx-auto">
+        <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] md:pt-[15vh] px-2 md:px-10 flex-col items-centers">
+            <div className="text-primary text-3xl md:text-6xl mx-auto">
                 Download JMC Compiler
             </div>
-            <div className="text-teal-400 text-lg md:text-3xl mx-auto mt-2 md:mt-4 text-center">
+            <div className="text-primary-contrast text-lg md:text-3xl mx-auto mt-2 md:mt-4 text-center">
                 Free and open-source compiler for JavaScript-like Minecraft Function
             </div>
             <div className="flex flex-row flex-wrap justify-evenly mt-4 md:mt-[10vh]">

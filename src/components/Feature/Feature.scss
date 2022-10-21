@@ -12,53 +12,44 @@
     animation: none;
 
     &>summary {
+        @apply text-left;
         border-bottom: 0 solid #cfcfcf;
     }
 
     &[open] {
+        @apply pb-1;
         animation: sweep .5s ease-in-out;
-        padding-bottom: 0.25rem;
 
         &>p {
-            text-indent: 2rem;
-            font-size: 1.125rem;
-            line-height: 1.6rem;
+            @apply text-base indent-8;
         }
 
         ul>li {
-            margin-left: 0.6rem;
-            font-size: 1.125rem;
-            line-height: 1.6rem;
+            @apply text-base ml-2;
         }
 
         &>summary {
-            text-indent: 1rem;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
+            @apply indent-4 pb-2 mb-2;
             border-bottom: 0.2rem solid #ffffff;
             animation: feature-glow .5s ease-in-out infinite alternate;
         }
     }
 }
 
-@media (min-width: 768px) {
+@screen md {
     .feature {
 
         &[open] {
             &>p {
-                text-indent: 3rem;
-                font-size: 1.875rem;
-                line-height: 2.25rem;
+                @apply text-3xl indent-12;
             }
 
             ul>li {
-                margin-left: 0.75rem;
-                font-size: 1.875rem;
-                line-height: 2.25rem;
+                @apply ml-3 text-3xl;
             }
 
             &>summary {
-                text-indent: 5rem;
+                @apply indent-20;
                 border-bottom: 0.3rem solid #ffffff;
             }
         }

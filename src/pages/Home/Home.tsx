@@ -189,11 +189,11 @@ const Home = () => {
                 <JMCIcon />
                 <Mantra />
             </section>
-            <section className="min-h-screen bg-[#002029] flex flex-wrap pt-4 md:pt-16 px-2 md:px-10">
+            <section className="min-h-screen bg-primary-dark flex flex-wrap pt-4 md:pt-16 px-2 md:px-10">
                 <WhatIsJMC />
                 <WhatIsJMCDesc />
             </section>
-            <section className="min-h-screen bg-[#18001A] flex flex-wrap flex-row-reverse px-2 py-4 md:px-10">
+            <section className="min-h-screen bg-secondary-dark flex flex-wrap flex-row-reverse px-2 py-4 md:px-10">
                 <WhyJMC />
                 <WhyJMCDesc />
             </section>
