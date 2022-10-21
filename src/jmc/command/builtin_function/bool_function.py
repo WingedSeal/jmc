@@ -12,13 +12,13 @@ UNLESS = False
     call_string='Timer.isOver',
     arg_type={
         "objective": ArgType.KEYWORD,
-        "target_selector": ArgType.SELECTOR
+        "selector": ArgType.SELECTOR
     },
     name='timer_is_over',
     defaults={
-        "target_selector": "@s"
+        "selector": "@s"
     }
 )
 class TimerIsOver(JMCFunction):
     def call_bool(self) -> tuple[str, bool]:
-        return f'score {self.args["target_selector"]} {self.args["objective"]} matches 1..', UNLESS
+        return f'score {self.args["selector"]} {self.args["objective"]} matches 1..', UNLESS

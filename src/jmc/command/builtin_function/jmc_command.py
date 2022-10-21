@@ -28,7 +28,7 @@ def drange(start: float | int, stop: float | int,
     call_string='Timer.set',
     arg_type={
         "objective": ArgType.KEYWORD,
-        "target_selector": ArgType.SELECTOR,
+        "selector": ArgType.SELECTOR,
         "tick": ArgType.SCOREBOARD_PLAYER
     },
     name='timer_set'
@@ -43,16 +43,16 @@ class TimerSet(JMCFunction):
 
     def call(self) -> str:
         if self.raw_args["tick"].arg_type == ArgType.INTEGER:
-            return f'scoreboard players set {self.args["target_selector"]} {self.args["objective"]} {self.args["tick"]}'
+            return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
         else:
-            return f'scoreboard players operations {self.args["target_selector"]} {self.args["objective"]} = {self.args["tick"]}'
+            return f'scoreboard players operations {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Item.give',
     arg_type={
-        "item_id": ArgType.KEYWORD,
+        "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "amount": ArgType.INTEGER
     },
@@ -64,21 +64,21 @@ class TimerSet(JMCFunction):
 )
 class ItemGive(JMCFunction):
     def call(self) -> str:
-        if self.args["item_id"] not in self.datapack.data.item:
+        if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
-                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
-        return f'give {self.args["selector"]} {self.datapack.data.item[self.args["item_id"]]} {self.args["amount"]}'
+        return f'give {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Item.summon',
     arg_type={
-        "item_id": ArgType.KEYWORD,
+        "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "count": ArgType.INTEGER,
     },
@@ -90,21 +90,21 @@ class ItemGive(JMCFunction):
 )
 class ItemSummon(JMCFunction):
     def call(self) -> str:
-        if self.args["item_id"] not in self.datapack.data.item:
+        if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
-                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
-        return f'summon minecraft:item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["item_id"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["item_id"]].nbt}}}}}'
+        return f'summon minecraft:item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}}}'
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Item.replaceBlock',
     arg_type={
-        "item_id": ArgType.KEYWORD,
+        "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "slot": ArgType.STRING,
         "count": ArgType.INTEGER
@@ -116,21 +116,21 @@ class ItemSummon(JMCFunction):
 )
 class ItemReplaceBlock(JMCFunction):
     def call(self) -> str:
-        if self.args["item_id"] not in self.datapack.data.item:
+        if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
-                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
-        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {self.datapack.data.item[self.args["item_id"]]} {self.args["count"]}'
+        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Item.replaceEntity',
     arg_type={
-        "item_id": ArgType.KEYWORD,
+        "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "slot": ArgType.STRING,
         "count": ArgType.INTEGER
@@ -142,14 +142,14 @@ class ItemReplaceBlock(JMCFunction):
 )
 class ItemReplaceEntity(JMCFunction):
     def call(self) -> str:
-        if self.args["item_id"] not in self.datapack.data.item:
+        if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
-                f'Item id: \'{self.args["item_id"]}\' is not defined.',
+                f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
-        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["item_id"]]} {self.args["count"]}'
+        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 def __normalize_decimal(n: float):
@@ -289,8 +289,8 @@ class ParticleSpiral(JMCFunction):
         "particle": ArgType.STRING,
         "radius": ArgType.FLOAT,
         "height": ArgType.FLOAT,
-        "spread_xz": ArgType.INTEGER,
-        "spread_y": ArgType.INTEGER,
+        "spreadXZ": ArgType.INTEGER,
+        "spreadY": ArgType.INTEGER,
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
@@ -325,8 +325,8 @@ class ParticleCylinder(JMCFunction):
                 self.draw(
                     float(self.args["radius"]),
                     float(self.args["height"]),
-                    int(self.args["spread_xz"]),
-                    int(self.args["spread_y"])),
+                    int(self.args["spreadXZ"]),
+                    int(self.args["spreadY"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],

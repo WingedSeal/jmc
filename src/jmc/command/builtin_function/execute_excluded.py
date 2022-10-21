@@ -51,7 +51,7 @@ def _hardcode_process(string: str, index_string: str,
     func_type=FuncType.EXECUTE_EXCLUDED,
     call_string='Hardcode.repeat',
     arg_type={
-        "index_string": ArgType.STRING,
+        "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "start": ArgType.INTEGER,
         "stop": ArgType.INTEGER,
@@ -84,7 +84,7 @@ class HardcodeRepeat(JMCFunction):
                         self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(
-                            self.raw_args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.raw_args["function"].token.string, self.args["indexString"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )
@@ -100,7 +100,7 @@ class HardcodeRepeat(JMCFunction):
     call_string='Hardcode.switch',
     arg_type={
         "switch": ArgType.SCOREBOARD,
-        "index_string": ArgType.STRING,
+        "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "count": ArgType.INTEGER
     },
@@ -124,7 +124,7 @@ class HardcodeSwitch(JMCFunction):
                         self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(
-                            self.raw_args["function"].token.string, self.args["index_string"], i, self.token, self.tokenizer
+                            self.raw_args["function"].token.string, self.args["indexString"], i, self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )

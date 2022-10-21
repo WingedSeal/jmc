@@ -11,11 +11,17 @@ from ..tokenizer import Token, Tokenizer
 
 class FuncType(Enum):
     BOOL_FUNCTION = auto()
+    """Returns a part of `/execute if` command"""
     EXECUTE_EXCLUDED = auto()
+    """Cannot be used with `/execute`"""
     JMC_COMMAND = auto()
+    """Normal custom JMC function"""
     LOAD_ONCE = auto()
+    """Can only be used on load function and used once"""
     LOAD_ONLY = auto()
+    """Can only be used on load function"""
     VARIABLE_OPERATION = auto()
+    """Returns a minecraft integer to a scoreboard variable"""
 
 
 class JMCFunction:
@@ -251,6 +257,9 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
         cls.call_string = call_string
         cls.arg_type = arg_type
         cls.defaults = defaults
+        # for default in defaults:
+        #     if default not in arg_type:
+        #         raise BaseException()
         cls._ignore = ignore
         cls.name = name
 

@@ -14,12 +14,12 @@ from .._flow_control import parse_switch
     arg_type={
         "name": ArgType.STRING,
         "predicate": ArgType.JSON,
-        "x_min": ArgType.INTEGER,
-        "x_max": ArgType.INTEGER,
-        "y_min": ArgType.INTEGER,
-        "y_max": ArgType.INTEGER,
-        "z_min": ArgType.INTEGER,
-        "z_max": ArgType.INTEGER,
+        "xMin": ArgType.INTEGER,
+        "xMax": ArgType.INTEGER,
+        "yMin": ArgType.INTEGER,
+        "yMax": ArgType.INTEGER,
+        "zMin": ArgType.INTEGER,
+        "zMax": ArgType.INTEGER,
     },
     name='predicate_locations'
 )
@@ -27,11 +27,11 @@ class PredicateLocations(JMCFunction):
     def call(self) -> str:
         predicates = []
         predicate = self.load_arg_json("predicate")
-        for x in range(int(self.args["x_min"]), int(self.args["x_max"]) + 1):
-            for y in range(int(self.args["y_min"]),
-                           int(self.args["y_max"]) + 1):
-                for z in range(int(self.args["z_min"]), int(
-                        self.args["z_max"]) + 1):
+        for x in range(int(self.args["xMin"]), int(self.args["xMax"]) + 1):
+            for y in range(int(self.args["yMin"]),
+                           int(self.args["yMax"]) + 1):
+                for z in range(int(self.args["zMin"]), int(
+                        self.args["zMax"]) + 1):
                     predicates.append({
                         "condition": "minecraft:location_check",
                         "offsetX": x,
@@ -48,8 +48,8 @@ class PredicateLocations(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string='RightClick.setup',
     arg_type={
-        "id_name": ArgType.KEYWORD,
-        "func_map": ArgType.JS_OBJECT
+        "idName": ArgType.KEYWORD,
+        "functionMap": ArgType.JS_OBJECT
     },
     name='right_click_setup'
 )
@@ -57,12 +57,12 @@ class RightClickSetup(JMCFunction):
     tag_id_var = '__item_id__'
 
     def call(self) -> str:
-        self.rc_obj = '__rc__' + self.args["id_name"][:10]
+        self.rc_obj = '__rc__' + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
-            self.raw_args["func_map"].token, self.tokenizer)
+            self.raw_args["functionMap"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
-        id_name = self.args["id_name"]
+        id_name = self.args["idName"]
         self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
         if self.is_never_used():
             self.datapack.add_tick_command(
@@ -110,18 +110,18 @@ class RightClickSetup(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string='Item.create',
     arg_type={
-        "item_id": ArgType.KEYWORD,
-        "item_type": ArgType.STRING,
-        "display_name": ArgType.STRING,
+        "itemId": ArgType.KEYWORD,
+        "itemType": ArgType.STRING,
+        "displayName": ArgType.STRING,
         "lore": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT,
-        "on_click": ArgType.FUNC
+        "onClick": ArgType.FUNC
     },
     name='item_create',
     defaults={
         "nbt": "",
         "lore": "",
-        "on_click": ""
+        "onClick": ""
     }
 )
 class ItemCreate(JMCFunction):
@@ -130,17 +130,17 @@ class ItemCreate(JMCFunction):
     id_name = "__item_id__"
 
     def call(self) -> str:
-        item_type = self.args["item_type"]
-        on_click = self.args["on_click"]
+        item_type = self.args["itemType"]
+        on_click = self.args["onClick"]
         if ':' not in item_type:
             item_type = "minecraft:" + item_type
         if on_click and item_type != "minecraft:carrot_on_a_stick":
             raise JMCValueError(
                 f'on_click can only be used with minecraft:carrot_on_a_stick in {self.call_string}',
-                self.raw_args["on_click"].token,
+                self.raw_args["onClick"].token,
                 self.tokenizer,
                 suggestion="Change item_type to minecraft:carrot_on_a_stick")
-        name = self.args["display_name"]
+        name = self.args["displayName"]
         if self.args["lore"]:
             lores = self.datapack.parse_list(
                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
@@ -164,9 +164,9 @@ class ItemCreate(JMCFunction):
 
             found_func = self.get_private_function('found')
 
-            func = self.args["on_click"]
+            func = self.args["onClick"]
 
-            if self.raw_args["on_click"].arg_type == ArgType.ARROW_FUNC:
+            if self.raw_args["onClick"].arg_type == ArgType.ARROW_FUNC:
                 found_func.append(
                     f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
             else:
@@ -194,7 +194,7 @@ class ItemCreate(JMCFunction):
             str(FormattedText(name, self.token, self.tokenizer, is_default_no_italic=True))
             )},Lore:[{lore_}]}}""")
 
-        self.datapack.data.item[self.args["item_id"]] = Item(
+        self.datapack.data.item[self.args["itemId"]] = Item(
             item_type,
             self.datapack.token_dict_to_raw_json(nbt),
         )
