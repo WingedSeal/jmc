@@ -182,7 +182,7 @@ class FuncContent:
         if (token.string == '@s' and
             token.token_type == TokenType.KEYWORD and
             self.commands[-1] == 'as' and
-                self.commands[-2] != 'rotated'):
+                self.commands[-2] not in {'rotated', 'positioned'}):
 
             self.commands[-1] = 'if entity'
 

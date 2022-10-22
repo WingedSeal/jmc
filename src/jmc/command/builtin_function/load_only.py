@@ -119,8 +119,8 @@ class RightClickSetup(JMCFunction):
     },
     name='item_create',
     defaults={
-        "nbt": "",
         "lore": "",
+        "nbt": "",
         "onClick": ""
     }
 )
