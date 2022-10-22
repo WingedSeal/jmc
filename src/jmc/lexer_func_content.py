@@ -235,6 +235,12 @@ class FuncContent:
                 return True
 
         if self.__is_jmc_function(key_pos, token):
+            if len(self.command[key_pos:]) > 2:
+                raise JMCSyntaxException(
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+            return True
+
+        if self.__is_flow_control_command(key_pos, token):
             return True
 
         if token.string in {'new', 'class' '@import'} or (
@@ -245,8 +251,12 @@ class FuncContent:
             if self.is_execute:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
-        if len(self.command[key_pos:]) == 2 and self.command[key_pos +
+        if len(self.command[key_pos:]) >= 2 and self.command[key_pos +
                                                              1].token_type == TokenType.PAREN_ROUND:
+            if len(self.command[key_pos:]) > 2:
+                raise JMCSyntaxException(
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+
             if self.command[key_pos + 1].string != '()':
                 raise JMCSyntaxException(
                     f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
@@ -359,18 +369,6 @@ class FuncContent:
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
             return True
 
-        flow_control_command = FLOW_CONTROL_COMMANDS.get(
-            token.string, None)
-        if flow_control_command is not None:
-            if self.is_execute:
-                raise JMCSyntaxException(
-                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
-            return_value = flow_control_command(
-                self.command[key_pos:], self.lexer.datapack, self.tokenizer)
-            if return_value is not None:
-                append_commands(self.commands, return_value)
-            return True
-
         jmc_command = self.get_function(token, JMC_COMMANDS)
         if jmc_command is not None:
             if len(self.command) > key_pos + 2:
@@ -384,6 +382,20 @@ class FuncContent:
             raise JMCSyntaxException(
                 f"This feature({token.string}) only works in JMC's custom condition", token, self.tokenizer)
 
+        return False
+
+    def __is_flow_control_command(self, key_pos: int, token: Token) -> bool:
+        flow_control_command = FLOW_CONTROL_COMMANDS.get(
+            token.string, None)
+        if flow_control_command is not None:
+            if self.is_execute:
+                raise JMCSyntaxException(
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+            return_value = flow_control_command(
+                self.command[key_pos:], self.lexer.datapack, self.tokenizer)
+            if return_value is not None:
+                append_commands(self.commands, return_value)
+            return True
         return False
 
     def get_function(self, token: Token,
