@@ -118,6 +118,17 @@ class Arg:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier == ArgType.KEYWORD:
+            if key_string.startswith('@'):
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SELECTOR.value}",
+                    self.token,
+                    tokenizer)
+            if ':' in key_string:
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SCOREBOARD.value}",
+                    self.token,
+                    tokenizer)
         if verifier != self.arg_type:
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
