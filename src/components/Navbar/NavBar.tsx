@@ -82,7 +82,7 @@ const NavBar = () => {
             </button>
             <ul
                 ref={mobileMenu}
-                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-4xl text-white"
+                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-3xl text-white"
                 style={{ transform: "translateX(100%)" }}
             >
                 <li className="mr-5 ml-auto mt-20">
@@ -105,7 +105,7 @@ const NavBar = () => {
                     </DropDownButton>
 
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-2xl"
                         style={{ transform: "scaleY(0)" }}
                         ref={gettingStartedBtnMobile}
                     >
@@ -145,7 +145,7 @@ const NavBar = () => {
                     </DropDownButton>
 
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-2xl"
                         style={{ transform: "scaleY(0)" }}
                         ref={documentationBtnMobile}
                     >
@@ -211,7 +211,7 @@ const NavBar = () => {
                         Examples
                     </DropDownButton>
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-3xl"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-2xl"
                         style={{ transform: "scaleY(0)" }}
                         ref={exampleBtnMobile}
                     >

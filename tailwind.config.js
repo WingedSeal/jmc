@@ -8,8 +8,10 @@ module.exports = {
         'primary': '#67e8f9', // blue
         'primary-contrast': '#2dd4bf',
         'primary-dark': '#002029',
-        'secondary-dark': '#18001A', // purple
-        'tertiary-dark': '', // gold
+        'secondary': '#f63bfc', // purple
+        'secondary-dark': '#18001A',
+        'tertiary': '#ffaa00', // gold
+        'tertiary-contrast': '#e6a500',
         'warning': '#ff6e6e'
       },
       fontFamily: {

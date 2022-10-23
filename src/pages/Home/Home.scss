@@ -7,7 +7,6 @@
 }
 
 @keyframes bouncing-arrow {
-
     0%,
     100% {
         transform: translateY(-8%);
@@ -21,44 +20,49 @@
 }
 
 .pop-up {
-    z-index: 100;
-    font-size: calc(min(3vw, 10vh));
-    line-height: calc(min(3vw, 10vh));
-    background-color: black;
-    padding: 0.4em;
-    color: white;
-    position: absolute;
+    @apply text-sm md:text-4xl bg-black px-2 py-1 md:px-4 md:py-3 text-white z-10 absolute w-[70vw] border-4 rounded-lg transition-all duration-100;
     top: 20%;
     left: 20%;
-    width: auto;
-    width: 70vw;
-    border: 0.1em solid white;
-    border-radius: 0.2em;
 }
 
 .avoid-repetitive-task {
-    position: relative;
+    @apply relative;
+
+    ::before {
+        content: "Notice yourself implementing the same algorithm again and again? JMC has features to implement those for you and the code will already be optimized without you having to put in any work.";
+        @extend .pop-up;
+        @apply scale-x-0;
+    }
 
     :hover::before {
-        content: "Notice yourself implementing the same algorithm again and again? JMC has features to implement those for you and the code will already be optimized without you having to put in any work.";
-        @extend .pop-up
+        @apply scale-x-100;
     }
 }
 
 .superior-syntax {
-    position: relative;
+    @apply relative;
+
+    ::before {
+        content: "Aren't you tired of creating new file for each function? In JMC, you can write everything in a single file if you want. But, you still have option to split it into multiple file. JMC also supports  inline-comment, multiline-command. And you no longer need to create tick.json or load.json";
+        @extend .pop-up;
+        @apply scale-x-0;
+    }
 
     :hover::before {
-        content: "Aren't you tired of creating new file for each function? In JMC, you can write everything in a single file if you want. But, you still have option to split it into multiple file. JMC also supports  inline-comment, multiline-command. And you no longer need to create tick.json or load.json";
-        @extend .pop-up
+        @apply scale-x-100;
     }
 }
 
 .low-learning-curve {
-    position: relative;
+    @apply relative;
+
+    ::before {
+        content: "It takes 5-10 minutes to learn basic JMC if you already know Minecraft Datapack";
+        @extend .pop-up;
+        @apply scale-x-0;
+    }
 
     :hover::before {
-        content: "It takes 5-10 minutes to learn basic JMC if you already know Minecraft Datapack";
-        @extend .pop-up
+        @apply scale-x-100;
     }
 }

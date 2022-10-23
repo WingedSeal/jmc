@@ -98,10 +98,8 @@ const WhatIsJMCDesc = () => {
             <div className="text-center font-minecraft text-white mt-5 flex flex-col">
                 <div>
                     <p className="text-[3vw] md:text-[1.3vw]">
-                        JMC (JavaScript-like Minecraft Function) is a custom
-                    </p>
-                    <p className="text-[3vw] md:text-[1.3vw]">
-                        language for making Minecraft Datapack.
+                        JMC (JavaScript-like Minecraft Function) is a mcfunction <br />
+                        extension language for making Minecraft Datapack.
                     </p>
                 </div>
                 <div className="mt-1 md:mt-5">
