@@ -9,11 +9,13 @@ const BuiltInFunction = () => {
             <Command name="Module.function_name" type="FunctionType" params={[
                 { key: "parameter1", type: "ParameterType", default: "default" },
                 { key: "parameter2", type: "ParameterType", default: "default" },
+                { key: "parameter3", type: "ParameterType", default: "default" }
             ]} />
             <p>Module is actually a part of the function name and bare no special meaning. If you mistype the name, JMC will assume you are calling your own custom function and throw an error saying "Custom function's parameter is not supported."</p>
             <p>Unlike JavaScript, JMC actually support named parameter, which mean you can specify which argument it is.</p>
+            <p>To use a function, just call it like this.</p>
             <CodeBlock copy_text="">
-                <CodeText type="class">Module</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">function_name</CodeText>(argument1<CodeText type="operator">,</CodeText> parameter2<CodeText type="operator">=</CodeText>argument2);
+                <CodeText type="class">Module</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">function_name</CodeText>(argument1<CodeText type="operator">,</CodeText> argument2<CodeText type="operator">,</CodeText> parameter3<CodeText type="operator">=</CodeText>argument3);
             </CodeBlock>
             <p>Parameter types are</p>
             <CodeBlock>
@@ -30,12 +32,12 @@ const BuiltInFunction = () => {
                 <CodeText type="class">Scoreboard</CodeText> <CodeText type="operator">=</CodeText> objective<CodeText type="operator">:</CodeText><CodeText type="class">TargetSelector</CodeText> <CodeText type="operator">or</CodeText> $variable<br />
                 <CodeText type="class">ScoreboardInteger</CodeText> <CodeText type="operator">=</CodeText> <CodeText type="class">integer</CodeText> <CodeText type="operator">or</CodeText> <CodeText type="class">Scoreboard</CodeText><br />
                 <CodeText type="class">Objective</CodeText> <CodeText type="operator">=</CodeText> my_objective<br />
-                <CodeText type="class">Keyword</CodeText> <CodeText type="operator">=</CodeText> any_keyword<br />
+                <CodeText type="class">Keyword</CodeText> <CodeText type="operator">=</CodeText> anyKeyword<br />
             </CodeBlock>
             <p>Function types are</p>
             <CodeBlock>
                 - <CodeText type="class">Bool</CodeText> <CodeText type="operator">:</CodeText> Used in condition such as if, while etc.<br />
-                if ( <CodeText type="class">Bool</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">example</CodeText>(argument) ) {'{'}<br />&nbsp;&nbsp;&nbsp;&nbsp;say <CodeText type="string">"Hello World"</CodeText>;<br />{'}'}<br />
+                if ( <CodeText type="class">Bool</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">example</CodeText>(argument) ) {'{'}<br />&emsp;say <CodeText type="string">"Hello World"</CodeText>;<br />{'}'}<br />
                 - <CodeText type="class">ExecuteExcluded</CodeText> <CodeText type="operator">:</CodeText> Cannot be used in execute command<br />
                 - <CodeText type="class">LoadOnly</CodeText> <CodeText type="operator">:</CodeText> Can only be used in load (Can't be used inside any function)<br />
                 - <CodeText type="class">LoadOnce</CodeText> <CodeText type="operator">:</CodeText> Can only be used in load and only once<br />
@@ -43,6 +45,22 @@ const BuiltInFunction = () => {
                 $my_var <CodeText type="operator">=</CodeText> <CodeText type="class">VariableOperation</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">example</CodeText>(argument)<br />
                 - <CodeText type="class">JMCFunction</CodeText> <CodeText type="operator">:</CodeText> Normal JMC function without restrictions<br />
             </CodeBlock>
+            <p>Example:</p>
+            <CodeBlock>
+                <CodeText type="class">Item</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">create</CodeText>(<br />
+                &emsp;veryCoolSword<CodeText type="operator">,</CodeText><br />
+                &emsp;carrot_on_a_stick<CodeText type="operator">,</CodeText><br />
+                &emsp;<CodeText type="string">{'"&<gold, bold>A very cool sword"'}</CodeText><CodeText type="operator">,</CodeText><br />
+                &emsp;[<CodeText type="string">{'"&<red>It is, indeed, very cool."'}</CodeText><CodeText type="operator">,</CodeText><br />
+                &emsp;<CodeText type="string">{'"&<red>Right click to be cool."'}</CodeText>]<CodeText type="operator">,</CodeText><br />
+                &emsp;nbt<CodeText type="operator">=</CodeText>{'{'}CustomModelData<CodeText type="operator">:</CodeText><CodeText type="number">100</CodeText>{'}'}<CodeText type="operator">,</CodeText><br />
+                &emsp;onClick<CodeText type="operator">=</CodeText>{'()=>{'}<br />
+                &emsp;&emsp;say <CodeText type="string">"I'm very cool"</CodeText>;<br />
+                &emsp;&emsp;effect give @s speed 1 255 True;<br />
+                );<br />
+                execute as @a run <CodeText type="class">Item</CodeText><CodeText type="operator">.</CodeText><CodeText type="function">give</CodeText>(veryCoolSword);
+            </CodeBlock>
+
 
         </Feature>
         <Feature id="player_on_event" summary="Player.onEvent()" keywords="scoreboard jump drop craft stats change">
@@ -80,14 +98,14 @@ const BuiltInFunction = () => {
             <p>itemId is the unique name of this item so that it can be referenced in other Item function.</p>
             <Command name="Item.create" type="LoadOnly" params={[
                 { key: "itemId", type: "Keyword" },
-                { key: "itemType", type: "String" },
+                { key: "itemType", type: "Keyword" },
                 { key: "displayName", type: "String" },
                 { key: "lore", type: "List<String>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]} />
         </Feature>
-    </section>
+    </section >
 };
 
 export default BuiltInFunction;
