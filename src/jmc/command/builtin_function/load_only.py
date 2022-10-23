@@ -111,7 +111,7 @@ class RightClickSetup(JMCFunction):
     call_string='Item.create',
     arg_type={
         "itemId": ArgType.KEYWORD,
-        "itemType": ArgType.STRING,
+        "itemType": ArgType.KEYWORD,
         "displayName": ArgType.STRING,
         "lore": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT,
@@ -132,9 +132,7 @@ class ItemCreate(JMCFunction):
     def call(self) -> str:
         item_type = self.args["itemType"]
         on_click = self.args["onClick"]
-        if ':' not in item_type:
-            item_type = "minecraft:" + item_type
-        if on_click and item_type != "minecraft:carrot_on_a_stick":
+        if on_click and item_type != "carrot_on_a_stick":
             raise JMCValueError(
                 f'on_click can only be used with minecraft:carrot_on_a_stick in {self.call_string}',
                 self.raw_args["onClick"].token,
