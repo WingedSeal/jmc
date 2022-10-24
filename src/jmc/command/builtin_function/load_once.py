@@ -78,7 +78,7 @@ class PlayerDie(JMCFunction):
     on_respawn = f'scoreboard players reset @s {obj}'
 
     def call(self) -> str:
-        if self.raw_args["onDeath"] is None and self.raw_args["onRespawn"] is None:
+        if not self.args["onDeath"] and not self.args["onRespawn"]:
             raise JMCMissingValueError("onDeath or onRespawn",
                                        self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, 'deathCount')
