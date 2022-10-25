@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import "./Home.css";
+import { setIsLoadedContext } from "../../App";
 
 const DownwardArrow = () => {
     return (
@@ -98,7 +99,8 @@ const WhatIsJMCDesc = () => {
             <div className="text-center font-minecraft text-white mt-5 flex flex-col">
                 <div>
                     <p className="text-[3vw] md:text-[1.3vw]">
-                        JMC (JavaScript-like Minecraft Function) is a mcfunction <br />
+                        JMC (JavaScript-like Minecraft Function) is a mcfunction{" "}
+                        <br />
                         extension language for making Minecraft Datapack.
                     </p>
                 </div>
@@ -181,9 +183,19 @@ const WhyJMCDesc = () => {
 };
 
 const Home = () => {
+    const setIsLoaded = useContext(setIsLoadedContext);
+    useEffect(() => {
+        setIsLoaded(false);
+    }, []);
+
     return (
         <>
-            <section className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10">
+            <section
+                className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10"
+                onLoad={() => {
+                    setIsLoaded(true);
+                }}
+            >
                 <JMCIcon />
                 <Mantra />
             </section>
