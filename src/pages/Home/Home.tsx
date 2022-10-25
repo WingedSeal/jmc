@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import LoadingScreen from "../../components/LoadingScreen";
 import "./Home.css";
-import { setIsLoadedContext } from "../../App";
 
 const DownwardArrow = () => {
     return (
@@ -183,13 +183,10 @@ const WhyJMCDesc = () => {
 };
 
 const Home = () => {
-    const setIsLoaded = useContext(setIsLoadedContext);
-    useEffect(() => {
-        setIsLoaded(false);
-    }, []);
-
+    const [isLoaded, setIsLoaded] = useState(false);
     return (
         <>
+            <LoadingScreen isLoaded={isLoaded} />
             <section
                 className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10"
                 onLoad={() => {
