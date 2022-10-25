@@ -1,9 +1,4 @@
-import React, {
-    createContext,
-    Dispatch,
-    SetStateAction,
-    useState,
-} from "react";
+import React from "react";
 import {
     HashRouter as Router,
     Route,
@@ -30,7 +25,6 @@ import BuiltInFunction from "./pages/BuiltInFunction";
 import Basics from "./pages/Basics";
 import Advanced from "./pages/Advanced";
 import Submitted from "./pages/Submitted";
-import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
     return (

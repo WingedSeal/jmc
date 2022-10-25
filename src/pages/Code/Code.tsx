@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import CodeBlock, { CodeText, Command } from "../../components/CodeBlock";
+import CodeBlock, { CodeText } from "../../components/CodeBlock";
 
 const Code = () => {
     return (
@@ -24,7 +24,7 @@ const Code = () => {
                     <br />
                     &emsp;say <CodeText type="string">"Loop"</CodeText>;{" "}
                     <CodeText type="comment">
-                        // This will run every tick.
+                        {"// This will run every tick."}
                     </CodeText>
                     <br />
                     {"}"}
