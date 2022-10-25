@@ -46,6 +46,11 @@ body {
     background-color: dimgray;
 }
 
+code {
+    font-family: Minecraft, sans-serif;
+    @apply bg-white bg-opacity-20 p-1 rounded;
+}
+
 img.minecraft {
     image-rendering: pixelated;
 }

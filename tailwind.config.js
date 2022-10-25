@@ -10,6 +10,7 @@ module.exports = {
         'primary-dark': '#002029',
         'secondary': '#f63bfc', // purple
         'secondary-dark': '#18001A',
+        'secondary-contrast': '#dd30ff',
         'tertiary': '#ffaa00', // gold
         'tertiary-contrast': '#e6a500',
         'warning': '#ff6e6e'
