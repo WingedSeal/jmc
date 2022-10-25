@@ -38,7 +38,7 @@
 }
 
 .pop-up, .avoid-repetitive-task ::before, .superior-syntax ::before, .low-learning-curve ::before {
-  @apply text-sm md:text-4xl bg-black px-2 py-1 md:px-4 md:py-3 text-white z-10 absolute w-[70vw] border-4 rounded-lg transition-all duration-100;
+  @apply text-sm md:text-2xl bg-black px-2 py-1 md:px-4 md:py-3 text-white z-10 absolute w-[70vw] border-4 rounded-lg transition-all duration-100;
   top: 20%;
   left: 20%;
 }
