@@ -31,8 +31,8 @@ const Code = () => {
                 </CodeBlock>
                 <p className="mt-6">
                     &emsp;To turn JMC file(s) into a Minecraft datapack, simply
-                    type compile in the compiler. If you would like it to
-                    compile automatically, type{" "}
+                    type <code>compile</code> in the compiler. If you would like
+                    it to compile automatically, type{" "}
                     <code>{"autocompile <second>"}</code>. Then you can use{" "}
                     <code>/reload</code> in game. And now, you are ready to go!
                 </p>
