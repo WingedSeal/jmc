@@ -185,14 +185,27 @@ const WhyJMCDesc = () => {
 const Home = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const imageLoader = new Image();
-    imageLoader.src = "../../assets/image/background.jpg";
+    imageLoader.src = require("../../assets/image/background.jpg");
     imageLoader.onload = () => {
         setIsLoaded(true);
     };
     return (
         <>
             <LoadingScreen isLoaded={isLoaded} />
-            <section className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10">
+            {/* <img
+                src={require("../../assets/image/background.jpg")}
+                alt="NONE"
+                className="hidden"
+                onLoad={() => {
+                    setIsLoaded(true);
+                }}
+            /> */}
+            <section
+                className="min-h-screen w-screen main-section flex flex-row-reverse items-center flex-wrap justify-between overflow-y-hidden overflow-hidden pt-14 px-2 pb-3 md:pt-20 md:px-10 md:pb-10"
+                onLoad={() => {
+                    setIsLoaded(true);
+                }}
+            >
                 <JMCIcon />
                 <Mantra />
             </section>
