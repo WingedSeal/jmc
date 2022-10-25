@@ -58,8 +58,8 @@ const Installation = () => {
             <img
                 src={require("../../assets/image/installation/config.png")}
                 alt="File Location Example"
-                width="1215"
-                height="299"
+                width="1428"
+                height="255"
                 className="max-w-[90vw] minecraft mx-auto my-3"
             />
         </section>
