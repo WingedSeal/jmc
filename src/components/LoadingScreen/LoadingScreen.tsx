@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./LoadingScreen.css";
 
 const LoadingCircle = () => {
@@ -31,22 +31,34 @@ interface LoadingScreenInterface {
 }
 
 const LoadingScreen: React.FC<LoadingScreenInterface> = ({ isLoaded }) => {
+    const [deleted, setDeleted] = useState(false);
+    if (isLoaded) {
+        setTimeout(() => {
+            setDeleted(true);
+        }, 300);
+    }
     return (
-        <div
-            className={
-                "transition-opacity duration-300 " +
-                (isLoaded ? "opacity-0" : "opacity-100")
-            }
-        >
-            <div className="w-screen h-screen fixed bg-gray-900 z-30 flex loading-screen">
-                <LoadingCircle />
-                <img
-                    className="aspect-square max-w-[25vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-75 rounded-lg"
-                    src={require("../../assets/image/jmc_icon192.png")}
-                    alt="JMC-icon"
-                />
-            </div>
-        </div>
+        <>
+            {deleted ? (
+                ""
+            ) : (
+                <div
+                    className={
+                        "transition-opacity duration-300 " +
+                        (isLoaded ? "opacity-0" : "opacity-100")
+                    }
+                >
+                    <div className="w-screen h-screen fixed bg-gray-900 z-30 flex loading-screen">
+                        <LoadingCircle />
+                        <img
+                            className="aspect-square max-w-[25vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-75 rounded-lg"
+                            src={require("../../assets/image/jmc_icon192.png")}
+                            alt="JMC-icon"
+                        />
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
