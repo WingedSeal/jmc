@@ -101,7 +101,7 @@ def main() -> None:
     pprint(f'Current Directory | {CWD}\n', Colors.YELLOW)
     if not (CWD / CONFIG_FILE_NAME).is_file():
         pprint(
-            f'No confile file found, generating {CONFIG_FILE_NAME}...', Colors.INFO
+            f'No config file found, generating {CONFIG_FILE_NAME}...', Colors.INFO
         )
         while True:
             config["namespace"] = get_input("Namespace: ")
