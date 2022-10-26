@@ -7,7 +7,7 @@ const MultilineCommand = () => {
             <div className="text-primary text-3xl md:text-6xl mx-auto">
                 Multiline-command
             </div>
-            <div className="text-white text-base md:text-2xl mt-4">
+            <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
                 <p>
                     &emsp;Unlike mcfunction, whitespaces in JMC doesn't effect
                     the code. You can have as many whitespaces within a command

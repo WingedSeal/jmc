@@ -11,7 +11,7 @@ const Code = () => {
             <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 Main JMC file
             </div>
-            <div className="text-white text-base md:text-2xl">
+            <div className="text-white text-base md:text-2xl max-w-[100%]">
                 <p>
                     &emsp;An empty JMC file will be automatically generated when
                     you finish configuring. The following is the basic template
@@ -52,7 +52,7 @@ const Code = () => {
             <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 JMC Header file
             </div>
-            <div className="text-white text-base md:text-2xl">
+            <div className="text-white text-base md:text-2xl max-w-[100%]">
                 <p>
                     &emsp;Once you learn the basics of JMC. You can start using
                     the header feature. Create <code>main.hjmc</code> file. And
