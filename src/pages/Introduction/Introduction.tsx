@@ -6,7 +6,7 @@ const Introduction = () => {
             <div className="text-secondary text-3xl md:text-6xl mx-auto">
                 JMC Basics
             </div>
-            <div className="text-seconday-contrast text-xl md:text-4xl mt-3 md:mt-4">
+            <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 Preprocessing
             </div>
             <div className="text-white text-base md:text-2xl">
