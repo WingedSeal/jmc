@@ -27,12 +27,14 @@ const MultilineCommand = () => {
                     &emsp;run <CodeText type="function">hello_world</CodeText>
                     ();
                     <br />
+                    <br />
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="function">hello_world</CodeText>() {"{"}
                     <br />
                     &emsp;<CodeText type="function">hi</CodeText>();
                     <br />
                     {"}"}
+                    <br />
                     <br />
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="function">hi</CodeText>()

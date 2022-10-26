@@ -25,6 +25,7 @@ import BuiltInFunction from "./pages/BuiltInFunction";
 import Basics from "./pages/Basics";
 import Advanced from "./pages/Advanced";
 import Submitted from "./pages/Submitted";
+import Function from "./pages/Function";
 
 function App() {
     return (
@@ -56,6 +57,10 @@ function App() {
                     <Route
                         path="/documentation/comment"
                         element={<Comment />}
+                    />
+                    <Route
+                        path="/documentation/function"
+                        element={<Function />}
                     />
                     <Route
                         path="/documentation/load-tick"

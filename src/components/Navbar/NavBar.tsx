@@ -145,7 +145,7 @@ const NavBar = () => {
                     </DropDownButton>
 
                     <ul
-                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-2xl"
+                        className="absolute p-2 border border-white bg-black/80 rounded-lg mt-2 transition-transform z-20 top-[100%] text-2xl leading-6 space-y-2"
                         style={{ transform: "scaleY(0)" }}
                         ref={documentationBtnMobile}
                     >
@@ -166,6 +166,12 @@ const NavBar = () => {
                             ulRefs={ulRefsMobile}
                         >
                             Comment
+                        </LinkItem>
+                        <LinkItem
+                            to="/documentation/function"
+                            ulRefs={ulRefsMobile}
+                        >
+                            Function
                         </LinkItem>
                         <LinkItem
                             to="/documentation/load-tick"
@@ -305,6 +311,9 @@ const NavBar = () => {
                         </LinkItem>
                         <LinkItem to="/documentation/comment" ulRefs={ulRefs}>
                             Comment
+                        </LinkItem>
+                        <LinkItem to="/documentation/function" ulRefs={ulRefs}>
+                            Function
                         </LinkItem>
                         <LinkItem to="/documentation/load-tick" ulRefs={ulRefs}>
                             Load/Tick
