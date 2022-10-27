@@ -155,7 +155,7 @@ const Function = () => {
                         <CodeText type="function">file_type</CodeText>
                         (folder_name.json_file_name) {"{"}{" "}
                         <CodeText type="comment">
-                            // See JSON Files page for this feature
+                            {"//"} See JSON Files page for this feature
                         </CodeText>
                         <br />
                         &emsp;&emsp;JSON_CONTENT

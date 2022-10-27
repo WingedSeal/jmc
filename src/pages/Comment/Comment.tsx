@@ -26,11 +26,11 @@ const Comment = () => {
                     &emsp;say <CodeText type="string">
                         "Hello World"
                     </CodeText>;{" "}
-                    <CodeText type="comment">// says hello world.</CodeText>
+                    <CodeText type="comment">{"//"} says hello world.</CodeText>
                     <br />
                     {"}"}
                     <br />
-                    <CodeText type="comment">// Ends of function</CodeText>
+                    <CodeText type="comment">{"//"} Ends of function</CodeText>
                 </CodeBlock>
                 <p className="text-warning">&emsp;But you cannot do this.</p>
                 <CodeBlock>
