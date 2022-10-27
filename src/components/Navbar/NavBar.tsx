@@ -45,6 +45,16 @@ const NavBar = () => {
             // window.removeEventListener("resize", handleWindowResize);
         };
     }, []);
+
+    useEffect(() => {
+        if (!isScrollUp) {
+            for (const ulRef of ulRefs) {
+                closeUlRef(ulRef);
+            }
+            console.log(isScrollUp);
+        }
+    }, [isScrollUp]);
+
     const path = useLocation().pathname;
     return (
         <nav
