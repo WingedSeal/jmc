@@ -45,8 +45,8 @@ const NavBar = () => {
             for (const ulRef of ulRefs) {
                 closeUlRef(ulRef);
             }
-            console.log(isScrollUp);
         }
+        // eslint-disable-next-line
     }, [isScrollUp]);
 
     const path = useLocation().pathname;

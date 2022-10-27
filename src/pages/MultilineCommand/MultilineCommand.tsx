@@ -20,9 +20,9 @@ const MultilineCommand = () => {
                 <CodeBlock>
                     execute
                     <br />
-                    &emsp;as @a
+                    &emsp;as <CodeText type="param">@a</CodeText>
                     <br />
-                    &emsp;at @s
+                    &emsp;at <CodeText type="param">@a</CodeText>
                     <br />
                     &emsp;run <CodeText type="function">hello_world</CodeText>
                     ();
