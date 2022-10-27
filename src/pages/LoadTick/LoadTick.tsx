@@ -42,7 +42,8 @@ const LoadTick = () => {
                     {"}"}
                     <br />
                     <CodeText type="keyword">function</CodeText>{" "}
-                    <CodeText type="function">load_function</CodeText>() {"{"}
+                    <CodeText type="function">load_function_example</CodeText>(){" "}
+                    {"{"}
                     <br />
                     &emsp;say <CodeText type="string">"Load"</CodeText>;{" "}
                     <CodeText type="comment">

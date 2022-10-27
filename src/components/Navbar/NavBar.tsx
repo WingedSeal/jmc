@@ -79,20 +79,20 @@ const NavBar = () => {
                         menu.classList.remove("open");
                         menu.style.transform = "translateX(100%)";
                         leftMenu.style.display = "none";
-                        document.body.style.overflow = "unset";
+                        document.body.style.overflowY = "unset";
                     } else {
                         // OPEN
                         menu.classList.add("open");
                         menu.style.transform = "translateX(0%)";
                         leftMenu.style.display = "block";
-                        document.body.style.overflow = "hidden";
+                        document.body.style.overflowY = "hidden";
                     }
                 }}
             >
                 <MenuSvg />
             </button>
             <div
-                className="left-0 top-0 h-screen w-[15vw] absolute z-10 md:!hidden"
+                className="left-0 top-0 h-screen w-[15vw] absolute z-10 md:!hidden cursor-pointer"
                 ref={mobileLeftMenu}
                 style={{ display: "none" }}
                 onClick={() => {

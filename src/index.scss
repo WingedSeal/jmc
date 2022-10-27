@@ -46,6 +46,12 @@ body {
     background-color: dimgray;
 }
 
+@screen md {
+    body {
+        overflow-y: auto !important;
+    }
+}
+
 code {
     font-family: Minecraft, sans-serif;
     @apply bg-white bg-opacity-20 p-1 rounded;
