@@ -11,6 +11,7 @@ const NavBar = () => {
     const documentationBtnMobile = useRef<HTMLUListElement>(null);
     const gettingStartedBtnMobile = useRef<HTMLUListElement>(null);
     const mobileMenu = useRef<HTMLUListElement>(null);
+    const mobileLeftMenu = useRef<HTMLDivElement>(null);
     const mobileMenuButton = useRef<HTMLButtonElement>(null);
     const ulRefs = [exampleBtn, documentationBtn, gettingStartedBtn];
     const ulRefsMobile = [
@@ -27,13 +28,6 @@ const NavBar = () => {
         setScrollY(window.scrollY);
         oldScrollY.current = window.scrollY;
     };
-    // const getWindowHeight = () => {
-    //     return window.innerHeight;
-    // };
-    // const [windowY, setWindowY] = useState(getWindowHeight());
-    // const handleWindowResize = () => {
-    //     setWindowY(getWindowHeight());
-    // };
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll, { passive: true });
@@ -79,20 +73,40 @@ const NavBar = () => {
                 ref={mobileMenuButton}
                 onClick={() => {
                     const menu = mobileMenu.current!;
+                    const leftMenu = mobileLeftMenu.current!;
                     if (menu.classList.contains("open")) {
+                        // CLOSE
                         menu.classList.remove("open");
                         menu.style.transform = "translateX(100%)";
+                        leftMenu.style.display = "none";
+                        document.body.style.overflow = "unset";
                     } else {
+                        // OPEN
                         menu.classList.add("open");
                         menu.style.transform = "translateX(0%)";
+                        leftMenu.style.display = "block";
+                        document.body.style.overflow = "hidden";
                     }
                 }}
             >
                 <MenuSvg />
             </button>
+            <div
+                className="left-0 top-0 h-screen w-[15vw] absolute z-10 md:!hidden"
+                ref={mobileLeftMenu}
+                style={{ display: "none" }}
+                onClick={() => {
+                    const menu = mobileMenu.current!;
+                    const leftMenu = mobileLeftMenu.current!;
+                    menu.classList.remove("open");
+                    menu.style.transform = "translateX(100%)";
+                    leftMenu.style.display = "none";
+                    document.body.style.overflow = "unset";
+                }}
+            />
             <ul
                 ref={mobileMenu}
-                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-3xl text-white"
+                className="transition-transform right-0 top-0 h-screen w-[85vw] bg-black/90 absolute z-10 overflow-y-scroll flex flex-col justify-start align-bottom text-3xl text-white md:hidden"
                 style={{ transform: "translateX(100%)" }}
             >
                 <li className="mr-5 ml-auto mt-20">
