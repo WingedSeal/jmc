@@ -7,7 +7,7 @@ const Import = () => {
             <div className="text-secondary text-3xl md:text-6xl mx-auto">
                 Import
             </div>
-            <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+            <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
                     &emsp;All importing does is practically copying the code
                     from another file to main JMC file. The file name and folder

@@ -7,14 +7,14 @@ const Comment = () => {
             <div className="text-primary text-3xl md:text-6xl mx-auto">
                 Comments
             </div>
-            <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+            <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
                     &emsp;JMC supports both traditional minecraft comment and
                     in-line comment using <code>{"//"}</code>. However,
                     traditional <code>#</code> cannot be used as in-line comment
                     due to conflict with group tag.
                 </p>
-                <p>Here's an example</p>
+                <p>&emsp;Here's an example</p>
                 <CodeBlock>
                     <CodeText type="comment">
                         # This function makes the entity says hello world.

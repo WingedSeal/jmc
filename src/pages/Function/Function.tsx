@@ -12,7 +12,7 @@ const Function = () => {
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function defining
                 </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         &emsp;Say goodbye to creating a new file for every
                         single function, introducing Function Defining. This
@@ -68,7 +68,7 @@ const Function = () => {
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function calling
                 </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         &emsp;Instead of using the <code>/function</code>{" "}
                         command, you can use parentheses to call a function. JMC
@@ -91,7 +91,7 @@ const Function = () => {
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Anonymous Function
                 </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         &emsp;The archnemesis of every coder is, indeed, naming
                         things. Why bother creating a whole new function just to
@@ -114,7 +114,7 @@ const Function = () => {
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Class (Function grouping)
                 </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-[100%]">
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         &emsp;It simply adds extra layers of directory/namespace
                         to any function/
