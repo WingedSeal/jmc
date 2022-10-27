@@ -76,23 +76,17 @@ const Variable = () => {
                     <CodeBlock>
                         <CodeText type="operator">$</CodeText>
                         {"<variable> "}
-                        <CodeText type="operator">
-                            {"<operations>"}
-                        </CodeText>{" "}
+                        <CodeText type="operator">{"<operator>"}</CodeText>{" "}
                         <CodeText type="number">{"<integer>"}</CodeText>; <br />
                         <CodeText type="operator">$</CodeText>
                         {"<variable> "}
-                        <CodeText type="operator">
-                            {"<operations>"}
-                        </CodeText>{" "}
+                        <CodeText type="operator">{"<operator>"}</CodeText>{" "}
                         <CodeText type="operator">$</CodeText>
                         {"<variable>"};
                         <br />
                         <CodeText type="operator">$</CodeText>
                         {"<variable> "}
-                        <CodeText type="operator">
-                            {"<operations>"}
-                        </CodeText>{" "}
+                        <CodeText type="operator">{"<operator>"}</CodeText>{" "}
                         objective
                         <CodeText type="operator">:</CodeText>
                         selector;
