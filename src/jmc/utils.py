@@ -81,6 +81,7 @@ def __parse_to_string(
             raise JMCSyntaxException(
                 "'=' not found in .toString argument", token, tokenizer)
         key, value, *extras = kwargs.split('=')
+        key = key.strip()
         if extras:
             raise JMCSyntaxException(
                 f"Too many '=' found in .toString argument (got {len(extras)+1})", token, tokenizer)

@@ -124,7 +124,7 @@ class Lexer:
             else:
                 if not is_load:
                     raise JMCSyntaxException(
-                        f"Command({command[1].string}) found inside non-load file", command[1], tokenizer)
+                        f"Command({command[0].string}) found inside non-load file", command[1], tokenizer)
 
                 self.datapack.load_function.append(command)
 
