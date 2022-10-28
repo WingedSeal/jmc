@@ -45,7 +45,7 @@ const Variable = () => {
                         &emsp;Perform scoreboard operations, with 6 available
                         operations.
                     </p>
-                    <ul className="ml-8 md:ml-10 list-disc">
+                    <ul className="ml-4 md:ml-6 list-disc list-inside">
                         <li>
                             <code>=</code> Assign: Set target's score to
                             source's score
@@ -119,7 +119,7 @@ const Variable = () => {
                     Incrementation
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <ul className="ml-8 md:ml-10 list-disc">
+                    <ul className="ml-4 md:ml-6 list-disc list-inside">
                         <li>
                             <code>
                                 <CodeText type="operator">$</CodeText>
@@ -187,7 +187,8 @@ const Variable = () => {
                         method.
                     </p>
                     <CodeBlock>
-                        tellraw <CodeText type="param">@a</CodeText> my_var
+                        tellraw <CodeText type="param">@a</CodeText>{" "}
+                        <CodeText type="operator">$</CodeText>my_var
                         <CodeText type="function">.toString</CodeText>
                         (color<CodeText type="operator">=</CodeText>
                         red<CodeText type="operator">,</CodeText> bold
