@@ -227,6 +227,12 @@ const NavBar = () => {
                         >
                             Built-in Function
                         </LinkItem>
+                        <LinkItem
+                            to="/documentation/header"
+                            ulRefs={ulRefsMobile}
+                        >
+                            Header
+                        </LinkItem>
                     </ul>
                 </li>
                 <li className="mr-5 ml-auto relative mt-3 flex justify-end">
@@ -362,6 +368,9 @@ const NavBar = () => {
                             ulRefs={ulRefs}
                         >
                             Built-in Function
+                        </LinkItem>
+                        <LinkItem to="/documentation/header" ulRefs={ulRefs}>
+                            Header
                         </LinkItem>
                     </ul>
                 </li>

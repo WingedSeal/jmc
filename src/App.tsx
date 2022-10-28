@@ -26,6 +26,7 @@ import Basics from "./pages/Basics";
 import Advanced from "./pages/Advanced";
 import Submitted from "./pages/Submitted";
 import Function from "./pages/Function";
+import Header from "./pages/Header";
 
 function App() {
     return (
@@ -82,6 +83,7 @@ function App() {
                         path="/documentation/built-in-function"
                         element={<BuiltInFunction />}
                     />
+                    <Route path="/documentation/header" element={<Header />} />
 
                     <Route path="/examples/basics" element={<Basics />} />
                     <Route path="/examples/advanced" element={<Advanced />} />
