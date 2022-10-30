@@ -405,15 +405,24 @@ class DataPack:
                     f"Expected list/array of {list_of.value}, got {token_.token_type.value}", token, tokenizer)
         return [token_.string for token_ in token_list]
 
-    def token_dict_to_raw_js_object(self, token_dict: dict[str, Token]) -> str:
+    def token_dict_to_raw_js_object(
+            self, token_dict: dict[str, Token], tokenizer: Tokenizer) -> str:
         """
         Turns a dictionary of key and token to a string in form of Object
 
         :param token_dict: Dictionary of string and Token
         :return: String that looks like object
         """
-        return '{' + ", ".join(f"{key}: {token.string_with_quotation()}" for key,
-                               token in token_dict.items()) + '}'
+        pairs = []
+        for key, token in token_dict.items():
+            if token.token_type == TokenType.STRING:
+                pairs.append(f"{key}:{token.add_quotation()}")
+            elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_ROUND, TokenType.PAREN_SQUARE}:
+                pairs.append(
+                    f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}")
+            else:
+                pairs.append(f"{key}:{token.string}")
+        return '{' + ",".join(pairs) + '}'
 
     def __repr__(self) -> str:
         return f"""DataPack(

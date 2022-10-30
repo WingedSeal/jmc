@@ -76,9 +76,11 @@ class Token:
         return len(self.string) + \
             2 if self.token_type == TokenType.STRING else len(self.string)
 
-    def string_with_quotation(self) -> str:
-        return f'"{self.string.replace(NEW_LINE, " ")}"' if self.token_type == TokenType.STRING else self.string.replace(
-            NEW_LINE, " ")
+    def add_quotation(self) -> str:
+        if self.token_type == TokenType.STRING:
+            return f'"{self.string}"'
+        else:
+            raise ValueError("TokenType is not STRING in Token.add_quitation")
 
     @classmethod
     def empty(cls, string: str = "",
