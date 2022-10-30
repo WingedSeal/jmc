@@ -25,7 +25,7 @@ from jmc.exception import (
     JMCBuildError
 )
 
-VERSION = 'v1.2.3'
+VERSION = 'v1.2.4'
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD / 'log'

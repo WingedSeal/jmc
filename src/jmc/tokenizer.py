@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from ast import literal_eval
 from enum import Enum
-import keyword
 import re
 
 from .utils import is_connected
@@ -11,6 +10,8 @@ from .log import Logger
 
 
 logger = Logger(__name__)
+
+NEW_LINE = "\n"
 
 
 class TokenType(Enum):
@@ -76,7 +77,8 @@ class Token:
             2 if self.token_type == TokenType.STRING else len(self.string)
 
     def string_with_quotation(self) -> str:
-        return f'"{self.string}"' if self.token_type == TokenType.STRING else self.string
+        return f'"{self.string.replace(NEW_LINE, " ")}"' if self.token_type == TokenType.STRING else self.string.replace(
+            NEW_LINE, " ")
 
     @classmethod
     def empty(cls, string: str = "",
@@ -401,12 +403,6 @@ class Tokenizer:
 
             self.is_slash = (char == Re.SLASH)
 
-        if not expect_semicolon:
-            if self.token != "":
-                self.append_token()
-            if self.keywords:
-                self.append_keywords()
-
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(
                 "String literal contains an unescaped line break", None, self, entire_line=True, display_col_length=False)
@@ -415,7 +411,7 @@ class Tokenizer:
                 raise ValueError("Tokenizer.token_pos is stil None")
             raise JMCSyntaxException(
                 "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, ""), self, display_col_length=False)
-        elif self.keywords or self.token:
+        elif expect_semicolon and (self.keywords or self.token):
             if self.token != "":
                 self.append_token()
             if allow_last_missing_semicolon:
@@ -423,6 +419,12 @@ class Tokenizer:
             else:
                 raise JMCSyntaxException(
                     "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
+
+        if not expect_semicolon:
+            if self.token != "":
+                self.append_token()
+            if self.keywords:
+                self.append_keywords()
 
         return self.list_of_keywords
 

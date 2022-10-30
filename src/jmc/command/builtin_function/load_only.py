@@ -194,7 +194,7 @@ class ItemCreate(JMCFunction):
 
         self.datapack.data.item[self.args["itemId"]] = Item(
             item_type,
-            self.datapack.token_dict_to_raw_json(nbt),
+            self.datapack.token_dict_to_raw_js_object(nbt),
         )
 
         return ""

@@ -81,11 +81,13 @@ class ItemGive(JMCFunction):
         "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "count": ArgType.INTEGER,
+        "nbt": ArgType.JS_OBJECT
     },
     name='item_summon',
     defaults={
         "pos": "~ ~ ~",
-        "count": "1"
+        "count": "1",
+        "nbt": ""
     }
 )
 class ItemSummon(JMCFunction):
@@ -97,7 +99,16 @@ class ItemSummon(JMCFunction):
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
-        return f'summon minecraft:item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}}}'
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args["nbt"].token) if self.args["nbt"] else {}
+        if "Item" in nbt:
+            raise JMCValueError(
+                f'`Item` key found inside Item.summon nbt argument.',
+                self.token,
+                self.tokenizer,
+                suggestion=f"Remove `Item` in the nbt"
+            )
+        return f'summon minecraft:item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}{","+self.datapack.token_dict_to_raw_js_object(nbt)[1:-1] if nbt else ""}}}'
 
 
 @func_property(
