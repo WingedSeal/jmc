@@ -59,7 +59,7 @@ class Token:
         for splitter in splitters:
             if splitter in string:
                 string = splitter.join(
-                    [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(":")])
+                    [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(splitter)])
 
         if string == self.string:
             return
