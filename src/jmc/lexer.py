@@ -386,7 +386,7 @@ class Lexer:
         output = [
             f"scoreboard players set {VAR} {DataPack.var_name} 0",
             f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
-            f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{VAR}/{count_alt}"]
+            f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"]
         del if_else_box[0]
 
         if if_else_box[-1][0] is None:
@@ -408,8 +408,8 @@ class Lexer:
                 count_alt = self.datapack.get_count(name)
 
                 self.datapack.add_raw_private_function(name, [
-                    f"{precommand}execute {condition} run function {self.datapack.namespace}:{DataPack.private_name}/{VAR}/{count}",
-                    f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{VAR}/{count_alt}"
+                    f"{precommand}execute {condition} run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count}",
+                    f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"
                 ], count_tmp)
 
                 self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, postcommands=[
