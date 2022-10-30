@@ -100,9 +100,9 @@ class MathRandom(JMCFunction):
                         self.name,
                         [
                             f"execute store result score {seed} {var} run data get entity @e[limit=1] UUID[0] 1",
-                            f"execute store result score {a} {var} run get entity @e[limit=1] UUID[1] 1",
+                            f"execute store result score {a} {var} run data get entity @e[limit=1] UUID[1] 1",
                             f"scoreboard players operation {a} {var} *= {a} {var}",
-                            f"execute store result score {c} {var} run get entity @e[limit=1] UUID[2] 1",
+                            f"execute store result score {c} {var} run data get entity @e[limit=1] UUID[2] 1",
                             f"scoreboard players operation {c} {var} *= {c} {var}"
                         ],
                         'setup'
