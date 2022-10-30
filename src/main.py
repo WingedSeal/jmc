@@ -11,19 +11,6 @@ from traceback import format_exc
 from sys import exit
 
 import jmc
-from jmc.exception import (
-    HeaderDuplicatedMacro,
-    HeaderFileNotFoundError,
-    HeaderSyntaxException,
-    JMCDecodeJSONError,
-    JMCFileNotFoundError,
-    JMCMissingValueError,
-    JMCSyntaxException,
-    JMCSyntaxWarning,
-    JMCValueError,
-    MinecraftSyntaxWarning,
-    JMCBuildError
-)
 
 VERSION = 'v1.2.4'
 
@@ -248,19 +235,7 @@ exit: Exit compiler
             stop_time = perf_counter()
             pprint(
                 f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
-        except (
-            HeaderFileNotFoundError,
-            HeaderDuplicatedMacro,
-            HeaderSyntaxException,
-            JMCSyntaxException,
-            JMCValueError,
-            JMCSyntaxWarning,
-            JMCFileNotFoundError,
-            JMCBuildError,
-            JMCDecodeJSONError,
-            JMCMissingValueError,
-            MinecraftSyntaxWarning
-        ) as error:
+        except jmc.EXCEPTIONS as error:
             logger.debug(format_exc())
             error_report(error)
         except Exception as error:
