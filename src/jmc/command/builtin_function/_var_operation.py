@@ -94,33 +94,15 @@ class MathRandom(JMCFunction):
             raise JMCValueError(
                 f"max cannot be less than min in {self.call_string}", self.token, self.tokenizer, suggestion="Try swapping max and min")
         if self.is_never_used():
-            self.datapack.add_private_json('loot_tables', f"{self.name}/rng", {
-                "pools": [
-                    {"rolls": {"min": 1, "max": 2147483647},
-                        "entries": [
-                            {
-                                "type": "minecraft:item",
-                                "name": "minecraft:stone",
-                                "functions": [
-                                    {
-                                        "function": "minecraft:set_count",
-                                        "count": 0
-                                    }
-                                ]
-                            }
-                    ]
-                    }
-                ]
-            })
             self.datapack.add_load_command(
                 f"""execute unless score {seed} {var} matches -2147483648..2147483647 run {
                     self.datapack.add_raw_private_function(
                         self.name,
                         [
-                            f"execute store result score {seed} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
-                            f"execute store result score {a} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
+                            f"execute store result score {seed} {var} run data get entity @e[limit=1] UUID[0] 1",
+                            f"execute store result score {a} {var} run get entity @e[limit=1] UUID[1] 1",
                             f"scoreboard players operation {a} {var} *= {a} {var}",
-                            f"execute store result score {c} {var} run loot spawn ~ ~ ~ loot {self.datapack.namespace}:{DataPack.private_name}/{self.name}/rng",
+                            f"execute store result score {c} {var} run get entity @e[limit=1] UUID[2] 1",
                             f"scoreboard players operation {c} {var} *= {c} {var}"
                         ],
                         'setup'
