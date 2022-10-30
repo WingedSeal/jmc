@@ -41,9 +41,8 @@ const FlowControls = () => {
                         {"<variable>"}
                         <br />
                         <CodeText type="operator">$</CodeText>
-                        {"<variable>"} ({" "}
-                        <CodeText type="operator">{"="}</CodeText> |{" "}
-                        <CodeText type="operator">{"=="}</CodeText> ) [
+                        {"<variable>"}{" "}
+                        <CodeText type="operator">matches</CodeText> [
                         <CodeText type="number">
                             {"<inclusive_min_integer>"}
                         </CodeText>
@@ -64,8 +63,8 @@ const FlowControls = () => {
                         <CodeText type="string">"More than 5 death!"</CodeText>;
                         <br />
                         {"}"} <CodeText type="keyword">else if</CodeText> (
-                        <CodeText type="operator">$</CodeText>deathCount
-                        <CodeText type="operator">{"=="}</CodeText>
+                        <CodeText type="operator">$</CodeText>deathCount{" "}
+                        <CodeText type="operator">matches</CodeText>{" "}
                         <CodeText type="number">2</CodeText>
                         <CodeText type="operator">..</CodeText>
                         <CodeText type="number">3</CodeText> ) {"{"}
