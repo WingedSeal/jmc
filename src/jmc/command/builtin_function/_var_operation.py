@@ -114,7 +114,7 @@ class MathRandom(JMCFunction):
             self.datapack.add_raw_private_function(
                 self.name,
                 [
-                    f"execute if score {seed} {var} matches ..0 run scoreboard players add {seed} {var} 2147483647"
+                    f"execute if score {seed} {var} matches ..0 run scoreboard players add {seed} {var} 2147483647",
                     f"scoreboard players operation {seed} {var} *= {a} {var}",
                     f"scoreboard players operation {seed} {var} += {c} {var}"
                 ],

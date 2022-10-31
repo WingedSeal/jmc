@@ -110,7 +110,8 @@ execute store result score __math__.rng.c __variable__ run data get entity @e[li
 execute if score __math__.rng.c __variable__ matches ..0 run scoreboard players operation __math__.rng.c __variable__ *= -1 __int__
 kill @e[type=area_effect_cloud,tag=__private__.math_random]
 > VIRTUAL/data/TEST/functions/__private__/math_random/main.mcfunction
-execute if score __math__.seed __variable__ matches ..0 run scoreboard players add __math__.seed __variable__ 2147483647scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
+execute if score __math__.seed __variable__ matches ..0 run scoreboard players add __math__.seed __variable__ 2147483647
+scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
 scoreboard players operation __math__.seed __variable__ += __math__.rng.c __variable__
             """)
         )
