@@ -123,9 +123,11 @@ class MathRandom(JMCFunction):
         run = [
             self.datapack.call_func(self.name, 'main'),
             f"scoreboard players operation {self.var} {var} = {seed} {var}",
-            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.int_name}",
-            f"scoreboard players add {self.var} {var} {start}"
+            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.int_name}"
         ]
+
+        if start:
+            run.append(f"scoreboard players add {self.var} {var} {start}")
 
         if self.is_execute:
             count = self.datapack.get_count(self.name)
