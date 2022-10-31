@@ -14,7 +14,7 @@ class TestVarOperation(unittest.TestCase):
 $i = Math.sqrt($x);
 $i = Math.sqrt($i);
         """).build()
-
+        self.maxDiff = None
         self.assertDictEqual(
             pack.built,
             string_to_tree_dict("""
@@ -86,6 +86,7 @@ scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
 scoreboard players set 10 __int__ 10
 scoreboard players set 6 __int__ 6
+scoreboard players set -1 __int__ -1
 scoreboard players set 2147483647 __int__ 2147483647
 execute unless score __math__.seed __variable__ matches -2147483648..2147483647 run function TEST:__private__/math_random/setup
 function TEST:__private__/math_random/main
@@ -104,10 +105,12 @@ scoreboard players add $z __variable__ 1
 summon minecraft:area_effect_cloud ~ ~ ~ {Tags:["__private__.math_random"]}
 execute store result score __math__.seed __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[0] 1
 execute store result score __math__.rng.a __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[1] 1
+execute if score __math__.rng.a __variable__ matches ..0 run scoreboard players operation __math__.rng.a __variable__ *= -1 __int__
 execute store result score __math__.rng.c __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[2] 1
+execute if score __math__.rng.c __variable__ matches ..0 run scoreboard players operation __math__.rng.c __variable__ *= -1 __int__
 kill @e[type=area_effect_cloud,tag=__private__.math_random]
 > VIRTUAL/data/TEST/functions/__private__/math_random/main.mcfunction
-scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
+execute if score __math__.seed __variable__ matches ..0 run scoreboard players add __math__.seed __variable__ 2147483647scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
 scoreboard players operation __math__.seed __variable__ += __math__.rng.c __variable__
             """)
         )

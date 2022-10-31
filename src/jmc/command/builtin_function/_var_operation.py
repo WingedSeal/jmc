@@ -94,6 +94,7 @@ class MathRandom(JMCFunction):
             raise JMCValueError(
                 f"max cannot be less than min in {self.call_string}", self.token, self.tokenizer, suggestion="Try swapping max and min")
         if self.is_never_used():
+            self.datapack.add_int(-1)
             self.datapack.add_load_command(
                 f"""execute unless score {seed} {var} matches -2147483648..2147483647 run {
                     self.datapack.add_raw_private_function(
@@ -102,7 +103,9 @@ class MathRandom(JMCFunction):
                             f'summon minecraft:area_effect_cloud ~ ~ ~ {{Tags:["{self.datapack.private_name}.{self.name}"]}}',
                             f"execute store result score {seed} {var} run data get entity @e[limit=1,type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}] UUID[0] 1",
                             f"execute store result score {a} {var} run data get entity @e[limit=1,type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}] UUID[1] 1",
+                            f"execute if score {a} {var} matches ..0 run scoreboard players operation {a} {var} *= -1 __int__",
                             f"execute store result score {c} {var} run data get entity @e[limit=1,type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}] UUID[2] 1",
+                            f"execute if score {c} {var} matches ..0 run scoreboard players operation {c} {var} *= -1 __int__",
                             f"kill @e[type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}]"
                         ],
                         'setup'
@@ -111,6 +114,7 @@ class MathRandom(JMCFunction):
             self.datapack.add_raw_private_function(
                 self.name,
                 [
+                    f"execute if score {seed} {var} matches ..0 run scoreboard players add {seed} {var} 2147483647"
                     f"scoreboard players operation {seed} {var} *= {a} {var}",
                     f"scoreboard players operation {seed} {var} += {c} {var}"
                 ],
