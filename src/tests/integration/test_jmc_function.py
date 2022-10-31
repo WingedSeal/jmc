@@ -101,11 +101,11 @@ scoreboard players operation $z __variable__ = __math__.seed __variable__
 scoreboard players operation $z __variable__ %= 10 __int__
 scoreboard players add $z __variable__ 1
 > VIRTUAL/data/TEST/functions/__private__/math_random/setup.mcfunction
-execute store result score __math__.seed __variable__ run data get entity @e[limit=1] UUID[0] 1
-execute store result score __math__.rng.a __variable__ run data get entity @e[limit=1] UUID[1] 1
-scoreboard players operation __math__.rng.a __variable__ *= __math__.rng.a __variable__
-execute store result score __math__.rng.c __variable__ run data get entity @e[limit=1] UUID[2] 1
-scoreboard players operation __math__.rng.c __variable__ *= __math__.rng.c __variable__
+summon minecraft:area_effect_cloud ~ ~ ~ {Tags:["__private__.math_random"]}
+execute store result score __math__.seed __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[0] 1
+execute store result score __math__.rng.a __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[1] 1
+execute store result score __math__.rng.c __variable__ run data get entity @e[limit=1,type=area_effect_cloud,tag=__private__.math_random] UUID[2] 1
+kill @e[type=area_effect_cloud,tag=__private__.math_random]
 > VIRTUAL/data/TEST/functions/__private__/math_random/main.mcfunction
 scoreboard players operation __math__.seed __variable__ *= __math__.rng.a __variable__
 scoreboard players operation __math__.seed __variable__ += __math__.rng.c __variable__
