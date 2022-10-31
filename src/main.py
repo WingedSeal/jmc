@@ -12,7 +12,7 @@ from sys import exit
 
 import jmc
 
-VERSION = 'v1.2.4'
+VERSION = 'v1.2.5-alpha'
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD / 'log'
