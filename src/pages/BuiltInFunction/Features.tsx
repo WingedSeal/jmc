@@ -124,7 +124,7 @@ const howTo = (
             <br />
             <CodeText type="class">Objective</CodeText>{" "}
             <CodeText type="operator">=</CodeText> my_objective{" "}
-            <CodeText type="comment">//An existing objective</CodeText>
+            <CodeText type="comment">{"//"}An existing objective</CodeText>
             <br />
             <CodeText type="class">Item</CodeText>{" "}
             <CodeText type="operator">=</CodeText> carrot_on_a_stick
@@ -636,6 +636,55 @@ const BuildinFeatures = [
             params={[
                 { key: "objective", type: "Keyword" },
                 { key: "function", type: "Function" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="predicate_location"
+        summary="Predicate.locations()"
+        keywords="offset location_check"
+    >
+        <p>Automation for making massive location check.</p>
+        <Command
+            name="Predicate.locations"
+            type="LoadOnly"
+            params={[
+                { key: "name", type: "string" },
+                { key: "predicate", type: "JSON" },
+                { key: "xMin", type: "integer" },
+                { key: "xMax", type: "integer" },
+                { key: "yMin", type: "integer" },
+                { key: "yMax", type: "integer" },
+                { key: "zMin", type: "integer" },
+                { key: "zMax", type: "integer" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="right_click_setup"
+        summary="RightClick.setup()"
+        keywords="detect carrot on a stick carrot_on_a_stick"
+    >
+        <p>
+            Setup basic carrot_on_a_stick right click detection with selected
+            item detection. You can map any id to a series of commands. When any
+            player right click with the item, the command matching the id will
+            be run.{" "}
+            <span className="text-warning">
+                While ID 0 being default which will be run if player right click
+                with *any* Carrot on a stick that doesn't have an ID.
+            </span>{" "}
+            You are allowed to setup multiple times with different id_name but
+            that isn't recommended due to optimization issue. An example of{" "}
+            <code>idName</code> is <code>my_id</code> for nbt{" "}
+            <code>{"{my_id:2}"}</code>
+        </p>
+        <Command
+            name="Trigger.setup"
+            type="LoadOnly"
+            params={[
+                { key: "idName", type: "Keyword" },
+                { key: "functionMap", type: "JSObject<integer, Function>" },
             ]}
         />
     </Feature>,
