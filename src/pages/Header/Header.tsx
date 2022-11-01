@@ -47,7 +47,7 @@ const Header = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         &emsp;Add comment to the end of every{" "}
-                        <code>.mcfunction file</code> generated.
+                        <code>.mcfunction</code> file generated.
                     </p>
                     <CodeBlock>
                         <CodeText type="operator">#</CodeText>credit{" "}
@@ -61,7 +61,7 @@ const Header = () => {
                         <CodeText type="string">WingedSeal</CodeText>
                     </CodeBlock>
                 </div>
-                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                {/* <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     <s>Mod Commands</s>
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
@@ -71,7 +71,7 @@ const Header = () => {
                         cumque nemo beatae debitis voluptatum inventore quaerat
                         harum expedita fugit, alias quasi velit consequuntur?
                     </p>
-                </div>
+                </div> */}
             </section>
         </>
     );
