@@ -203,7 +203,9 @@ const howTo = (
             <CodeText type="operator">,</CodeText>
             <br />
             &emsp;onClick<CodeText type="operator">=</CodeText>
-            {"()=>{"}
+            {"()"}
+            <CodeText type="keyword">{"=>"}</CodeText>
+            {"{"}
             <br />
             &emsp;&emsp;say <CodeText type="string">"I'm very cool"</CodeText>;
             <br />
