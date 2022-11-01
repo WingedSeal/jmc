@@ -20,8 +20,8 @@
 
 .feature[open] {
   @apply pb-1;
-  -webkit-animation: sweep .5s ease-in-out;
-          animation: sweep .5s ease-in-out;
+  -webkit-animation: sweep 0.5s ease-in-out;
+          animation: sweep 0.5s ease-in-out;
 }
 
 .feature[open] > p {
@@ -29,14 +29,14 @@
 }
 
 .feature[open] ul > li {
-  @apply text-base ml-2;
+  @apply text-base ml-4 list-disc list-inside;
 }
 
 .feature[open] > summary {
   @apply indent-4 pb-2 mb-2;
   border-bottom: 0.2rem solid #ffffff;
-  -webkit-animation: feature-glow .5s ease-in-out infinite alternate;
-          animation: feature-glow .5s ease-in-out infinite alternate;
+  -webkit-animation: feature-glow 0.5s ease-in-out infinite alternate;
+          animation: feature-glow 0.5s ease-in-out infinite alternate;
 }
 
 @screen md {
@@ -44,7 +44,7 @@
     @apply text-3xl indent-12;
   }
   .feature[open] ul > li {
-    @apply ml-3 text-3xl;
+    @apply ml-6 text-3xl;
   }
   .feature[open] > summary {
     @apply indent-20;

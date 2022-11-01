@@ -326,7 +326,6 @@ const FlowControls = () => {
                         switch case will use{" "}
                         <a
                             href="https://en.wikipedia.org/wiki/Binary_search_tree"
-                            className="underline"
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -335,7 +334,6 @@ const FlowControls = () => {
                         tree with{" "}
                         <a
                             href="https://en.wikipedia.org/wiki/Binary_search_algorithm"
-                            className="underline"
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -344,7 +342,6 @@ const FlowControls = () => {
                         to reduce{" "}
                         <a
                             href="https://en.wikipedia.org/wiki/Time_complexity"
-                            className="underline"
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -371,7 +368,6 @@ const FlowControls = () => {
                             You are required to{" "}
                             <a
                                 href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/break"
-                                className="underline"
                                 target="_blank"
                                 rel="noreferrer"
                             >

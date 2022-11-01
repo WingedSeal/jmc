@@ -37,6 +37,13 @@ const isDisplay = (summary: string, searchValue: string, keywords: string) => {
     return false;
 };
 
+const closeAll = () => {
+    const features = document.querySelectorAll(".feature");
+    features.forEach((feature) => {
+        feature.removeAttribute("open");
+    });
+};
+
 const BuiltInFunction = () => {
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
@@ -47,10 +54,7 @@ const BuiltInFunction = () => {
                     className="absolute top-0 left-0 w-12 h-full bg-tertiary z-20 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast"
                     onClick={(e) => {
                         setSearchValue(inputRef.current!.value);
-                        const features = document.querySelectorAll(".feature");
-                        features.forEach((feature) => {
-                            feature.removeAttribute("open");
-                        });
+                        closeAll();
                     }}
                 >
                     <SearchSvg className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-white text-2xl" />
@@ -65,11 +69,7 @@ const BuiltInFunction = () => {
                             setSearchValue(
                                 (event.target as HTMLInputElement).value
                             );
-                            const features =
-                                document.querySelectorAll(".feature");
-                            features.forEach((feature) => {
-                                feature.removeAttribute("open");
-                            });
+                            closeAll();
                         }
                     }}
                 />

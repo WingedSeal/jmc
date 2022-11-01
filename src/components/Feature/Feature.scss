@@ -11,44 +11,43 @@
 .feature {
     animation: none;
 
-    &>summary {
+    & > summary {
         @apply text-left;
         border-bottom: 0 solid #cfcfcf;
     }
 
     &[open] {
         @apply pb-1;
-        animation: sweep .5s ease-in-out;
+        animation: sweep 0.5s ease-in-out;
 
-        &>p {
+        & > p {
             @apply text-base indent-8;
         }
 
-        ul>li {
-            @apply text-base ml-2;
+        ul > li {
+            @apply text-base ml-4 list-disc list-inside;
         }
 
-        &>summary {
+        & > summary {
             @apply indent-4 pb-2 mb-2;
             border-bottom: 0.2rem solid #ffffff;
-            animation: feature-glow .5s ease-in-out infinite alternate;
+            animation: feature-glow 0.5s ease-in-out infinite alternate;
         }
     }
 }
 
 @screen md {
     .feature {
-
         &[open] {
-            &>p {
+            & > p {
                 @apply text-3xl indent-12;
             }
 
-            ul>li {
-                @apply ml-3 text-3xl;
+            ul > li {
+                @apply ml-6 text-3xl;
             }
 
-            &>summary {
+            & > summary {
                 @apply indent-20;
                 border-bottom: 0.3rem solid #ffffff;
             }
@@ -59,24 +58,23 @@
 @keyframes sweep {
     0% {
         opacity: 0;
-        margin-left: -5vw
+        margin-left: -5vw;
     }
 
     100% {
         opacity: 1;
-        margin-left: 0px
+        margin-left: 0px;
     }
 }
-
 
 $feature-glow-color-1: #deb500;
 $feature-glow-color-2: #ffd000;
 
 @keyframes feature-glow {
     from {
-        text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #fff, 0 0 0.15rem $feature-glow-color-1,
-            0 0 0.2rem $feature-glow-color-1, 0 0 0.25rem $feature-glow-color-1,
-            0 0 0.3rem $feature-glow-color-1;
+        text-shadow: 0 0 0.05rem #fff, 0 0 0.1rem #fff,
+            0 0 0.15rem $feature-glow-color-1, 0 0 0.2rem $feature-glow-color-1,
+            0 0 0.25rem $feature-glow-color-1, 0 0 0.3rem $feature-glow-color-1;
     }
 
     to {

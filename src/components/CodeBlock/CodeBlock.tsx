@@ -25,9 +25,9 @@ interface Text {
 
 const CodeText: React.FC<Text> = (props) => {
     return (
-        <p className={"code-text inline-block color-" + props.type}>
+        <span className={"code-text inline-block color-" + props.type}>
             {props.children}
-        </p>
+        </span>
     );
 };
 
@@ -41,6 +41,33 @@ interface Parameter {
     type: string;
     default?: string;
 }
+
+const getDefault = (param: Parameter) => {
+    if (
+        param.default === "()=>{}" &&
+        (param.type === "Function" || param.type === "ArrowFunction")
+    ) {
+        return (
+            <>
+                {"()"}
+                <CodeText type="keyword">{"=>"}</CodeText>
+                {"{}"}
+            </>
+        );
+    }
+
+    let type;
+    if (param.type === "integer" || param.type === "float") {
+        type = "number";
+    } else if (param.type === "TargetSelector") {
+        type = "param";
+    } else {
+        type = param.type;
+    }
+
+    return <CodeText type={type}>{param.default}</CodeText>;
+};
+
 const Command: React.FC<CommandInterface> = (props) => {
     const module_function = props.name.split(".");
     const module_name = module_function[0];
@@ -67,9 +94,7 @@ const Command: React.FC<CommandInterface> = (props) => {
                         <>
                             {" "}
                             <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type={param.type}>
-                                {param.default}
-                            </CodeText>
+                            {getDefault(param)}
                         </>
                     ) : (
                         ""

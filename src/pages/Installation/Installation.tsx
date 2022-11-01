@@ -17,10 +17,7 @@ const Installation = () => {
                 <div className="text-white text-base md:text-2xl">
                     <p>
                         &emsp;Download{" "}
-                        <a
-                            href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.exe"
-                            className="underline"
-                        >
+                        <a href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.exe">
                             JMC.exe
                         </a>{" "}
                         (Executable) from{" "}

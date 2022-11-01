@@ -40,10 +40,7 @@ const Code = () => {
                     JMC will warn you when you get the syntax wrong, so don't
                     worry too much. And don't forget the semicolon! To get more
                     information about the syntax and features, head to{" "}
-                    <Link
-                        to="/documentation/multiline-command"
-                        className="underline"
-                    >
+                    <Link to="/documentation/multiline-command">
                         documentation
                     </Link>{" "}
                     section.

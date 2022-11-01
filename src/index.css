@@ -57,6 +57,10 @@ code {
   @apply bg-[#292D3E] p-1 rounded text-[#eeffff];
 }
 
+a {
+  @apply underline;
+}
+
 img.minecraft {
   -ms-interpolation-mode: nearest-neighbor;
       image-rendering: -webkit-optimize-contrast;

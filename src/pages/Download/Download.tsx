@@ -20,7 +20,7 @@ const Download = () => {
                         <a
                             href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.exe"
                             rel="noreferrer"
-                            className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast"
+                            className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline"
                         >
                             <h2 className="m-auto flex">
                                 <DownloadSvg className="h-[1.5rem] mr-3" />
@@ -34,7 +34,7 @@ const Download = () => {
                             href="https://github.com/WingedSeal/jmc/releases/latest"
                             target="_blank"
                             rel="noreferrer"
-                            className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast"
+                            className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline"
                         >
                             <h2 className="m-auto flex">
                                 <DownloadSvg className="h-[1.5rem] mr-3" />

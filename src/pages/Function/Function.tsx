@@ -118,12 +118,7 @@ const Function = () => {
                     <p>
                         &emsp;It simply adds extra layers of directory/namespace
                         to any function/
-                        <Link
-                            to="/documentation/json-files"
-                            className="underline"
-                        >
-                            json
-                        </Link>{" "}
+                        <Link to="/documentation/json-files">json</Link>{" "}
                         (Doesn't affect variable) inside it.{" "}
                         <span className="text-warning">
                             {" "}

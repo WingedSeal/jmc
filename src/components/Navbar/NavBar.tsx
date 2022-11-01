@@ -418,6 +418,7 @@ const LinkItem: React.FC<LinkItemProps> = ({ to, children, ulRefs }) => {
         <div className="hover:scale-105 transition-transform duration-100 active:scale-95 select-none">
             <Link
                 to={to}
+                className="no-underline"
                 onClick={() => {
                     setTimeout(() => {
                         for (const ulRef of ulRefs) {
