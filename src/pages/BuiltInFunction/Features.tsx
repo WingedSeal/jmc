@@ -123,7 +123,8 @@ const howTo = (
             <CodeText type="class">Scoreboard</CodeText>
             <br />
             <CodeText type="class">Objective</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> my_objective
+            <CodeText type="operator">=</CodeText> my_objective{" "}
+            <CodeText type="comment">//An existing objective</CodeText>
             <br />
             <CodeText type="class">Item</CodeText>{" "}
             <CodeText type="operator">=</CodeText> carrot_on_a_stick
@@ -630,7 +631,7 @@ const BuildinFeatures = [
             <code>objective</code>
         </p>
         <Command
-            name="Trigger.setup"
+            name="Trigger.add"
             type="LoadOnly"
             params={[
                 { key: "objective", type: "Keyword" },
