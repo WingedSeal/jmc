@@ -12,7 +12,7 @@ from sys import exit
 
 import jmc
 
-VERSION = 'v1.2.5-alpha.1'
+VERSION = 'v1.2.5-alpha.2'
 
 CWD = Path(os.getcwd())
 LOG_PATH = CWD / 'log'
@@ -173,6 +173,7 @@ def main() -> None:
             "log": CMD.log,
             "autocompile": CMD.autocompile,
             "config": CMD.config,
+            "version": CMD.version
         }.get(command[0], CMD.default)(*command[1:])
 
 
@@ -194,6 +195,7 @@ log (debug|info): Create log file in output directory
 log clear: Delete every log file inside log folder except latest
 config reset: Delete the configuration file and restart the compiler
 config edit: Override configuration file and bypass error checking
+version: Check JMC's version
 help: Output this message
 exit: Exit compiler
 """, color=Colors.YELLOW)
@@ -217,6 +219,10 @@ exit: Exit compiler
     @classmethod
     def exit(cls, *args):
         exit(0)
+
+    @classmethod
+    def version(cls, *args):
+        pprint(VERSION, Colors.INFO)
 
     @classmethod
     def compile(cls, *args):
