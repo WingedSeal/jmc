@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const Function = () => {
     return (
@@ -14,14 +15,15 @@ const Function = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Say goodbye to creating a new file for every
-                        single function, introducing Function Defining. This
-                        feature allows you to define as many functions as you
-                        want in a single file. Any capital letter (which is
-                        invalid for mcfunction name) will automatically be
-                        turned into lowercase, which means it is not
-                        case-sensitive. For example, <code>deathMessage</code>{" "}
-                        is the same as <code>deathmessage</code>.
+                        <Tab />
+                        Say goodbye to creating a new file for every single
+                        function, introducing Function Defining. This feature
+                        allows you to define as many functions as you want in a
+                        single file. Any capital letter (which is invalid for
+                        mcfunction name) will automatically be turned into
+                        lowercase, which means it is not case-sensitive. For
+                        example, <code>deathMessage</code> is the same as{" "}
+                        <code>deathmessage</code>.
                     </p>
                     <CodeBlock>
                         <CodeText type="keyword">function</CodeText>{" "}
@@ -29,24 +31,25 @@ const Function = () => {
                             folder_name.function_name
                         </CodeText>
                         () {"{"} <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code example 1"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code example 2"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
                         <br />
                         {"}"}
                         <br />
                         <CodeText type="keyword">function</CodeText>{" "}
                         <CodeText type="function">function_name</CodeText>
                         () {"{"} <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code example 3"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Code example 3"</CodeText>;
                         <br />
                         {"}"}
                     </CodeBlock>
                     <p>
-                        &emsp;However, there are limitations.{" "}
+                        <Tab />
+                        However, there are limitations.{" "}
                         <span className="text-warning">
                             You are not allowed to create parameter(s) like this
                             example.
@@ -57,7 +60,8 @@ const Function = () => {
                         <CodeText type="function">invalidFunction</CodeText>(
                         <CodeText type="error">$parameter</CodeText>) {"{"}{" "}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "This will throw an error."
                         </CodeText>
@@ -70,10 +74,11 @@ const Function = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Instead of using the <code>/function</code>{" "}
-                        command, you can use parentheses to call a function. JMC
-                        will add a namespace for you automatically. Like
-                        function defining, the name is not case-sensitive.
+                        <Tab />
+                        Instead of using the <code>/function</code> command, you
+                        can use parentheses to call a function. JMC will add a
+                        namespace for you automatically. Like function defining,
+                        the name is not case-sensitive.
                     </p>
                     <CodeBlock>
                         <CodeText type="function">
@@ -93,7 +98,8 @@ const Function = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;The archnemesis of every coder is, indeed, naming
+                        <Tab />
+                        The archnemesis of every coder is, indeed, naming
                         things. Why bother creating a whole new function just to
                         run a few commands as an entity? You are allowed to run
                         multiple commands in an execute chain in JMC.
@@ -102,11 +108,11 @@ const Function = () => {
                         execute <CodeText type="operator">...</CodeText> run{" "}
                         {"{"}
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code example 1"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code example 2"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
                         <br />
                         {"}"}
                     </CodeBlock>
@@ -116,8 +122,9 @@ const Function = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;It simply adds extra layers of directory/namespace
-                        to any function/
+                        <Tab />
+                        It simply adds extra layers of directory/namespace to
+                        any function/
                         <Link to="/documentation/json-files">json</Link>{" "}
                         (Doesn't affect variable) inside it.{" "}
                         <span className="text-warning">
@@ -132,29 +139,37 @@ const Function = () => {
                         <br />
                         {"{"}
                         <br />
-                        &emsp;<CodeText type="keyword">function</CodeText>{" "}
+                        <Tab />
+                        <CodeText type="keyword">function</CodeText>{" "}
                         <CodeText type="function">
                             folder_three.function_name
                         </CodeText>
                         () {"{"}
                         <br />
-                        &emsp;&emsp;say{" "}
-                        <CodeText type="string">"Code example 1"</CodeText>;
+                        <Tab />
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
                         <br />
-                        &emsp;&emsp;say{" "}
-                        <CodeText type="string">"Code example 2"</CodeText>;
+                        <Tab />
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
                         <br />
-                        &emsp;{"}"}
+                        <Tab />
+                        {"}"}
                         <br />
-                        &emsp;<CodeText type="keyword">new</CodeText>{" "}
+                        <Tab />
+                        <CodeText type="keyword">new</CodeText>{" "}
                         <CodeText type="function">file_type</CodeText>
                         (folder_name.json_file_name) {"{"}{" "}
                         <CodeText type="comment">
                             {"//"} See JSON Files page for this feature
                         </CodeText>
                         <br />
-                        &emsp;&emsp;JSON_CONTENT
-                        <br /> &emsp;{"}"}
+                        <Tab />
+                        <Tab />
+                        JSON_CONTENT
+                        <br /> <Tab />
+                        {"}"}
                         <br />
                         {"}"}
                         <br />

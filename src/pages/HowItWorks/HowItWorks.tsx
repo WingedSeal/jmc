@@ -1,4 +1,5 @@
 import React from "react";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const HowItWorks = () => {
     return (
@@ -11,18 +12,19 @@ const HowItWorks = () => {
             </div>
             <div className="text-white text-base md:text-2xl">
                 <p>
-                    &emsp;The moment you type <code>compile</code>, the
-                    compilation process starts. After reading the configuration,
-                    the JMC compiler takes your code from the main JMC file and
-                    parses it to tokens, and follows your imports accordingly.
+                    <Tab />
+                    The moment you type <code>compile</code>, the compilation
+                    process starts. After reading the configuration, the JMC
+                    compiler takes your code from the main JMC file and parses
+                    it to tokens, and follows your imports accordingly.
                 </p>
                 <p className="mt-6">
-                    &emsp;Then it reads your header file (<code>main.hjmc</code>
-                    ) if there is one, and updates the tokens. Next, it takes
-                    care of all JMC-specific features using lexical analysis and
-                    creates a virtual datapack. Afterward, it writes that
-                    virtual datapack into the actual datapack in the output
-                    directory.
+                    <Tab />
+                    Then it reads your header file (<code>main.hjmc</code>) if
+                    there is one, and updates the tokens. Next, it takes care of
+                    all JMC-specific features using lexical analysis and creates
+                    a virtual datapack. Afterward, it writes that virtual
+                    datapack into the actual datapack in the output directory.
                 </p>
             </div>
             <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -30,7 +32,8 @@ const HowItWorks = () => {
             </div>
             <div className="text-white text-base md:text-2xl">
                 <p>
-                    &emsp;<code>jmc.txt</code> is a certificate file located at{" "}
+                    <Tab />
+                    <code>jmc.txt</code> is a certificate file located at{" "}
                     <code>./data/my_namespace/jmc.txt</code>. Its primary
                     purpose is to prevent you from accidentally overriding your
                     handmade datapack. It's for showing the compiler that this

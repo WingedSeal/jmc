@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 import LoadingScreen from "../../components/LoadingScreen";
 
 const Installation = () => {
@@ -16,7 +17,8 @@ const Installation = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl">
                     <p>
-                        &emsp;Download{" "}
+                        <Tab />
+                        Download{" "}
                         <a href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.exe">
                             JMC.exe
                         </a>{" "}
@@ -32,7 +34,8 @@ const Installation = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl">
                     <p>
-                        &emsp;In "datapacks" folder of your world file (Usually{" "}
+                        <Tab />
+                        In "datapacks" folder of your world file (Usually{" "}
                         <code>.minecraft/saves/world_name/datapacks</code>).
                         Create a new datapack folder. And put JMC.exe in that
                         folder.
@@ -53,7 +56,8 @@ const Installation = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl">
                     <p>
-                        &emsp;Run JMC.exe and it'll greet you with configuration
+                        <Tab />
+                        Run JMC.exe and it'll greet you with configuration
                         settings. Select datapack's namespace, description and
                         pack_format. You can use default for{" "}
                         <code> Main JMC file</code> and{" "}

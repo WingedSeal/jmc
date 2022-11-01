@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const MultilineCommand = () => {
     return (
@@ -9,29 +10,35 @@ const MultilineCommand = () => {
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
-                    &emsp;Unlike mcfunction, whitespaces in JMC doesn't effect
-                    the code. You can have as many whitespaces within a command
-                    as you want.
+                    <Tab />
+                    Unlike mcfunction, whitespaces in JMC doesn't effect the
+                    code. You can have as many whitespaces within a command as
+                    you want.
                 </p>
                 <p>
-                    &emsp;Whitespaces include spaces, tabs, newline(line feed),
-                    etc. This means you can write a command as follow.
+                    <Tab />
+                    Whitespaces include spaces, tabs, newline(line feed), etc.
+                    This means you can write a command as follow.
                 </p>
                 <CodeBlock>
                     execute
                     <br />
-                    &emsp;as <CodeText type="param">@a</CodeText>
+                    <Tab />
+                    as <CodeText type="param">@a</CodeText>
                     <br />
-                    &emsp;at <CodeText type="param">@a</CodeText>
+                    <Tab />
+                    at <CodeText type="param">@a</CodeText>
                     <br />
-                    &emsp;run <CodeText type="function">hello_world</CodeText>
+                    <Tab />
+                    run <CodeText type="function">hello_world</CodeText>
                     ();
                     <br />
                     <br />
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="function">hello_world</CodeText>() {"{"}
                     <br />
-                    &emsp;<CodeText type="function">hi</CodeText>();
+                    <Tab />
+                    <CodeText type="function">hi</CodeText>();
                     <br />
                     {"}"}
                     <br />
@@ -41,7 +48,8 @@ const MultilineCommand = () => {
                     <br />
                     {"{"}
                     <br />
-                    &emsp;say <CodeText type="string">"Hello World"</CodeText>;
+                    <Tab />
+                    say <CodeText type="string">"Hello World"</CodeText>;
                     <br />
                     {"}"}
                 </CodeBlock>

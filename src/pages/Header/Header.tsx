@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const Header = () => {
     return (
@@ -10,9 +11,10 @@ const Header = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Advanced configuration and preprocessing of JMC.
-                        Create a file with the same name as your main JMC file
-                        but with <code>.hjmc</code> extension. (The default is{" "}
+                        <Tab />
+                        Advanced configuration and preprocessing of JMC. Create
+                        a file with the same name as your main JMC file but with{" "}
+                        <code>.hjmc</code> extension. (The default is{" "}
                         <code>main.hjmc</code>)
                     </p>
                 </div>
@@ -21,12 +23,18 @@ const Header = () => {
                     Macros
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <p>&emsp;Replace a keyword with another keyword</p>
+                    <p>
+                        <Tab />
+                        Replace a keyword with another keyword
+                    </p>
                     <CodeBlock>
                         <CodeText type="operator">#</CodeText>define replacement
                         original_keyword
                     </CodeBlock>
-                    <p>&emsp;Example</p>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
                     <CodeBlock>
                         <CodeText type="operator">#</CodeText>define LOOP
                         __tick__
@@ -35,8 +43,8 @@ const Header = () => {
                         <CodeText type="keyword">function</CodeText>{" "}
                         <CodeText type="function">LOOP</CodeText>() {"{"}
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Run every tick"</CodeText>;
+                        <Tab />
+                        say <CodeText type="string">"Run every tick"</CodeText>;
                         <br />
                         {"}"}
                     </CodeBlock>
@@ -46,8 +54,11 @@ const Header = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Add comment to the end of every{" "}
-                        <code>.mcfunction</code> file generated.
+                        <Tab />
+                        Add comment to the end of every <code>
+                            .mcfunction
+                        </code>{" "}
+                        file generated.
                     </p>
                     <CodeBlock>
                         <CodeText type="operator">#</CodeText>credit{" "}
@@ -66,7 +77,7 @@ const Header = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Lorem ipsum dolor sit amet consectetur adipisicing
+                        <Tab/>Lorem ipsum dolor sit amet consectetur adipisicing
                         elit. Neque dolorum, quae, tenetur libero aut dicta nisi
                         cumque nemo beatae debitis voluptatum inventore quaerat
                         harum expedita fugit, alias quasi velit consequuntur?

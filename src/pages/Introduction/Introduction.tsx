@@ -1,4 +1,5 @@
 import React from "react";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const Introduction = () => {
     return (
@@ -11,17 +12,19 @@ const Introduction = () => {
             </div>
             <div className="text-white text-base md:text-2xl">
                 <p>
-                    &emsp;Sometimes, coding datapack in mcfunction has very
-                    annoying problems. To create a function, you need to create
-                    an entirely new file. There's no way to format your code,
-                    and no in-line comment. There are algorithms you need to
+                    <Tab />
+                    Sometimes, coding datapack in mcfunction has very annoying
+                    problems. To create a function, you need to create an
+                    entirely new file. There's no way to format your code, and
+                    no in-line comment. There are algorithms you need to
                     implement again and again. This is where a preprocessor can
                     help.
                 </p>
                 <p className="mt-6">
-                    &emsp;Once you start using JMC, it will take your
-                    preprocessed JMC file and save it as normal mcfunction files
-                    and the rest of the datapack.
+                    <Tab />
+                    Once you start using JMC, it will take your preprocessed JMC
+                    file and save it as normal mcfunction files and the rest of
+                    the datapack.
                 </p>
             </div>
         </section>

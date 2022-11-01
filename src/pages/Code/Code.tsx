@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const Code = () => {
     return (
@@ -13,16 +14,18 @@ const Code = () => {
             </div>
             <div className="text-white text-base md:text-2xl max-w-full">
                 <p>
-                    &emsp;An empty JMC file will be automatically generated when
-                    you finish configuring. The following is the basic template
-                    for a simple datapack.
+                    <Tab />
+                    An empty JMC file will be automatically generated when you
+                    finish configuring. The following is the basic template for
+                    a simple datapack.
                 </p>
                 <CodeBlock>
                     say <CodeText type="string">"Load"</CodeText>; <br />
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="function">__tick__</CodeText>() {"{"}
                     <br />
-                    &emsp;say <CodeText type="string">"Loop"</CodeText>;{" "}
+                    <Tab />
+                    say <CodeText type="string">"Loop"</CodeText>;{" "}
                     <CodeText type="comment">
                         {"// This will run every tick."}
                     </CodeText>
@@ -30,9 +33,10 @@ const Code = () => {
                     {"}"}
                 </CodeBlock>
                 <p className="mt-6">
-                    &emsp;To turn JMC file(s) into a Minecraft datapack, simply
-                    type <code>compile</code> in the compiler. If you would like
-                    it to compile automatically, type{" "}
+                    <Tab />
+                    To turn JMC file(s) into a Minecraft datapack, simply type{" "}
+                    <code>compile</code> in the compiler. If you would like it
+                    to compile automatically, type{" "}
                     <code>{"autocompile <second>"}</code>. Then you can use{" "}
                     <code>/reload</code> in game. And now, you are ready to go!
                 </p>
@@ -51,10 +55,11 @@ const Code = () => {
             </div>
             <div className="text-white text-base md:text-2xl max-w-full">
                 <p>
-                    &emsp;Once you learn the basics of JMC. You can start using
-                    the header feature. Create <code>main.hjmc</code> file. And
-                    then you can start configuring more advanced stuff, like
-                    adding comments to the end of every mcfunction file.
+                    <Tab />
+                    Once you learn the basics of JMC. You can start using the
+                    header feature. Create <code>main.hjmc</code> file. And then
+                    you can start configuring more advanced stuff, like adding
+                    comments to the end of every mcfunction file.
                 </p>
             </div>
             <CodeBlock>

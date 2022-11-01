@@ -112,5 +112,9 @@ const Command: React.FC<CommandInterface> = (props) => {
     );
 };
 
-export { CodeText, Command };
+const Tab: React.FC = () => {
+    return <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
+};
+
+export { CodeText, Command, Tab };
 export default CodeBlock;

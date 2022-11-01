@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const Variable = () => {
     return (
@@ -10,9 +11,10 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Variables in JMC always start with <code>$</code>.
-                        Any command starting with <code>$</code> will trigger
-                        JMC to treat it a a variable command.
+                        <Tab />
+                        Variables in JMC always start with <code>$</code>. Any
+                        command starting with <code>$</code> will trigger JMC to
+                        treat it a a variable command.
                     </p>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -20,7 +22,8 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Set a variable to an integer. Due to nature of how
+                        <Tab />
+                        Set a variable to an integer. Due to nature of how
                         minecraft scoreboard works, you can assign a variable
                         without declaring it.
                         <CodeBlock>
@@ -42,7 +45,8 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Perform scoreboard operations, with 6 available
+                        <Tab />
+                        Perform scoreboard operations, with 6 available
                         operations.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
@@ -104,7 +108,7 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp; Copy value of JMC variable into minecraft
+                        <Tab /> Copy value of JMC variable into minecraft
                         scoreboard
                     </p>
                     <CodeBlock>
@@ -155,7 +159,8 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;To use <code>/scoreboard players get</code>, for{" "}
+                        <Tab />
+                        To use <code>/scoreboard players get</code>, for{" "}
                         <code>/execute store</code>, use{" "}
                         <code>
                             <CodeText type="function">.get</CodeText>()
@@ -177,7 +182,8 @@ const Variable = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Use{" "}
+                        <Tab />
+                        Use{" "}
                         <code>
                             <CodeText type="function">.toString</CodeText>()
                         </code>{" "}

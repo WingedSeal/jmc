@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const FlowControls = () => {
     return (
@@ -13,7 +14,7 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;A condition which can be used in flow controls as{" "}
+                        <Tab />A condition which can be used in flow controls as{" "}
                         {"<condition>"}. And due to minecraft command syntax
                         which uses <code>=</code> instead of <code>==</code>,
                         JMC will treat both as the same thing.
@@ -52,14 +53,18 @@ const FlowControls = () => {
                         </CodeText>
                         ]
                     </CodeBlock>
-                    <p>&emsp;For example:</p>
+                    <p>
+                        <Tab />
+                        For example:
+                    </p>
                     <CodeBlock>
                         <CodeText type="keyword">if</CodeText> (
                         <CodeText type="operator">$</CodeText>deathCount
                         <CodeText type="operator">{">"}</CodeText>
                         <CodeText type="number">5</CodeText> ) {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">"More than 5 death!"</CodeText>;
                         <br />
                         {"}"} <CodeText type="keyword">else if</CodeText> (
@@ -69,7 +74,8 @@ const FlowControls = () => {
                         <CodeText type="operator">..</CodeText>
                         <CodeText type="number">3</CodeText> ) {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "Between 2 to 3 death!"
                         </CodeText>
@@ -84,8 +90,9 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;In <code>{"<condition>"}</code>. You are allowed
-                        to use following logic gates.
+                        <Tab />
+                        In <code>{"<condition>"}</code>. You are allowed to use
+                        following logic gates.
                         <ul className="ml-4 md:ml-6 list-disc list-inside">
                             <li>
                                 <code>()</code> Parenthesis
@@ -115,7 +122,8 @@ const FlowControls = () => {
                         <CodeText type="operator">{">"}</CodeText>
                         <CodeText type="number">5</CodeText>)) {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "I'm either a zombie with more than 5 deaths or any
                             skeleton."
@@ -130,7 +138,8 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Simulate programming languages' <code>if</code>-
+                        <Tab />
+                        Simulate programming languages' <code>if</code>-
                         <code>else</code> using temporary variable and
                         "anonymouse function". So you can write if/else in
                         JavaScript and the compiler will handle the logic and
@@ -141,7 +150,8 @@ const FlowControls = () => {
                         <CodeText type="keyword">if</CodeText> ({"<condition>"}){" "}
                         {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If {"<condition>"} is true."
                         </CodeText>
@@ -150,7 +160,8 @@ const FlowControls = () => {
                         {"}"} <CodeText type="keyword">else if</CodeText> (
                         {"<condition>"}) {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If the first {"<condition>"} is false and this one
                             is true."
@@ -159,7 +170,8 @@ const FlowControls = () => {
                         <br />
                         {"}"} <CodeText type="keyword">else</CodeText> {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If none of the {"<condition>"} is true."
                         </CodeText>
@@ -171,7 +183,8 @@ const FlowControls = () => {
                         <CodeText type="keyword">if</CodeText> ({"<condition>"}){" "}
                         {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If {"<condition>"} is true."
                         </CodeText>
@@ -179,7 +192,8 @@ const FlowControls = () => {
                         <br />
                         {"}"} <CodeText type="keyword">else</CodeText> {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If first {"<condition>"} is false."
                         </CodeText>
@@ -191,7 +205,8 @@ const FlowControls = () => {
                         <CodeText type="keyword">if</CodeText> ({"<condition>"}){" "}
                         {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "If {"<condition>"} is true."
                         </CodeText>
@@ -205,7 +220,8 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Simulate programming languages' While loop which
+                        <Tab />
+                        Simulate programming languages' While loop which
                         continue running commands inside code block until the
                         condition is no longer met using recursion. By
                         definition, it's possible that{" "}
@@ -218,7 +234,8 @@ const FlowControls = () => {
                         <CodeText type="keyword">while</CodeText> (
                         {"<condition>"}) {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "Keep running as long as the {"<condition>"} is
                             true."
@@ -233,8 +250,9 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Similar to while loop, but run the function for
-                        the first time before checking for condition. (
+                        <Tab />
+                        Similar to while loop, but run the function for the
+                        first time before checking for condition. (
                         <span className="text-warning">
                             Don't forget semicolon!
                         </span>
@@ -243,7 +261,8 @@ const FlowControls = () => {
                     <CodeBlock>
                         <CodeText type="keyword">do</CodeText> {"{"}
                         <br />
-                        &emsp;say{" "}
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">
                             "Run at least once and keep running as long as the{" "}
                             {"<condition>"} is true."
@@ -259,7 +278,8 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Simulate Javascript's for-loop. It consist of 3
+                        <Tab />
+                        Simulate Javascript's for-loop. It consist of 3
                         statements.
                     </p>
                     <ol className="ml-4 md:ml-6 list-decimal list-inside">
@@ -297,8 +317,9 @@ const FlowControls = () => {
                         <CodeText type="keyword">for</CodeText>{" "}
                         {"(<statement1>;<statement2>;<statement3>)"} {"{"}
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code Example"</CodeText>;<br />
+                        <Tab />
+                        say <CodeText type="string">"Code Example"</CodeText>;
+                        <br />
                         {"}"}
                     </CodeBlock>
                     <CodeBlock>
@@ -312,8 +333,9 @@ const FlowControls = () => {
                         <CodeText type="operator">$</CodeText>i
                         <CodeText type="operator">++</CodeText>) {"{"}
                         <br />
-                        &emsp;say{" "}
-                        <CodeText type="string">"Code Example"</CodeText>;<br />
+                        <Tab />
+                        say <CodeText type="string">"Code Example"</CodeText>;
+                        <br />
                         {"}"}
                     </CodeBlock>
                 </div>
@@ -322,8 +344,9 @@ const FlowControls = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Perfect for optimization of your code. JMC's
-                        switch case will use{" "}
+                        <Tab />
+                        Perfect for optimization of your code. JMC's switch case
+                        will use{" "}
                         <a
                             href="https://en.wikipedia.org/wiki/Binary_search_tree"
                             target="_blank"
@@ -352,7 +375,8 @@ const FlowControls = () => {
                         commands according to the value of given variable.
                     </p>
                     <p>
-                        &emsp;But performance come with cost of{" "}
+                        <Tab />
+                        But performance come with cost of{" "}
                         <span className="text-warning">restrictions</span>.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
@@ -387,25 +411,34 @@ const FlowControls = () => {
                         <CodeText type="operator">$</CodeText>
                         {"<variable>"}) {"{"}
                         <br />
-                        &emsp;<CodeText type="keyword">case</CodeText>{" "}
+                        <Tab />
+                        <CodeText type="keyword">case</CodeText>{" "}
                         <CodeText type="number">1</CodeText>
                         <CodeText type="operator">:</CodeText>
                         <br />
-                        &emsp;&emsp;say{" "}
+                        <Tab />
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">"If $variable is 1"</CodeText>;
                         <br />
-                        &emsp;<CodeText type="keyword">case</CodeText>{" "}
+                        <Tab />
+                        <CodeText type="keyword">case</CodeText>{" "}
                         <CodeText type="number">2</CodeText>
                         <CodeText type="operator">:</CodeText>
                         <br />
-                        &emsp;&emsp;say{" "}
+                        <Tab />
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">"If $variable is 2"</CodeText>;
                         <br />
-                        &emsp;<CodeText type="keyword">case</CodeText>{" "}
+                        <Tab />
+                        <CodeText type="keyword">case</CodeText>{" "}
                         <CodeText type="number">3</CodeText>
                         <CodeText type="operator">:</CodeText>
                         <br />
-                        &emsp;&emsp;say{" "}
+                        <Tab />
+                        <Tab />
+                        say{" "}
                         <CodeText type="string">"If $variable is 3"</CodeText>;
                         <br />
                         {"}"}

@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const LoadTick = () => {
     return (
@@ -9,15 +10,19 @@ const LoadTick = () => {
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
-                    &emsp;Any commands outside a function will run on reload.
-                    The function named <code>__tick__</code> will run every game
+                    <Tab />
+                    Any commands outside a function will run on reload. The
+                    function named <code>__tick__</code> will run every game
                     tick. There are 2 ways to change the name, first is to edit{" "}
                     <code>jmc.txt</code> second is to use header file to define
                     other name as <code>__tick__</code>. If you want more than 1
                     function to run on loop, simply call the function inside{" "}
                     <code>__tick__</code> function.
                 </p>
-                <p>&emsp;Here's an example</p>
+                <p>
+                    <Tab />
+                    Here's an example
+                </p>
                 <CodeBlock>
                     say <CodeText type="string">"Load"</CodeText>;{" "}
                     <CodeText type="comment">
@@ -30,12 +35,13 @@ const LoadTick = () => {
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="function">__tick__</CodeText>() {"{"}
                     <br />
-                    &emsp;say <CodeText type="string">"Loop"</CodeText>;{" "}
+                    <Tab />
+                    say <CodeText type="string">"Loop"</CodeText>;{" "}
                     <CodeText type="comment">
                         {"// This will run every tick."}
                     </CodeText>
                     <br />
-                    &emsp;
+                    <Tab />
                     <CodeText type="function">loop_function_example</CodeText>
                     ();
                     <br />
@@ -45,7 +51,8 @@ const LoadTick = () => {
                     <CodeText type="function">load_function_example</CodeText>(){" "}
                     {"{"}
                     <br />
-                    &emsp;say <CodeText type="string">"Load"</CodeText>;{" "}
+                    <Tab />
+                    say <CodeText type="string">"Load"</CodeText>;{" "}
                     <CodeText type="comment">
                         {"// This will also run on load."}
                     </CodeText>
@@ -56,7 +63,8 @@ const LoadTick = () => {
                     <CodeText type="function">loop_function_example</CodeText>(){" "}
                     {"{"}
                     <br />
-                    &emsp;say <CodeText type="string">"Loop"</CodeText>;{" "}
+                    <Tab />
+                    say <CodeText type="string">"Loop"</CodeText>;{" "}
                     <CodeText type="comment">
                         {"// This will also run every tick."}
                     </CodeText>
@@ -65,14 +73,16 @@ const LoadTick = () => {
                 </CodeBlock>
 
                 <p className="text-warning">
-                    &emsp;JMC will stop you from defining <code>__load__</code>{" "}
+                    <Tab />
+                    JMC will stop you from defining <code>__load__</code>{" "}
                     function.
                 </p>
                 <CodeBlock>
                     <CodeText type="keyword">function</CodeText>{" "}
                     <CodeText type="error">__load__</CodeText>() {"{"}
                     <br />
-                    &emsp;say{" "}
+                    <Tab />
+                    say{" "}
                     <CodeText type="string">
                         "This will throw an error"
                     </CodeText>

@@ -1,5 +1,6 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const JsonFiles = () => {
     return (
@@ -13,9 +14,10 @@ const JsonFiles = () => {
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        &emsp;Generate a formatted json file at desired
-                        directory under the type using new keyword. Example of
-                        json file types are <code>advancements</code>,{" "}
+                        <Tab />
+                        Generate a formatted json file at desired directory
+                        under the type using new keyword. Example of json file
+                        types are <code>advancements</code>,{" "}
                         <code>item_modifiers</code>, <code>loot_tables</code>,
                         etc.
                     </p>
@@ -24,7 +26,8 @@ const JsonFiles = () => {
                         <CodeText type="class">file_type</CodeText>
                         (folder_name.file_name) {"{"}
                         <br />
-                        &emsp;JSON content
+                        <Tab />
+                        JSON content
                         <br />
                         {"}"}
                     </CodeBlock>
@@ -34,34 +37,44 @@ const JsonFiles = () => {
                         <CodeText type="class">advancements</CodeText>
                         (my_folder.first_join) {"{"}
                         <br />
-                        &emsp;<CodeText type="string">"criteria"</CodeText>
+                        <Tab />
+                        <CodeText type="string">"criteria"</CodeText>
                         <CodeText type="operator">:</CodeText> {"{"}
                         <br />
-                        &emsp;&emsp;
+                        <Tab />
+                        <Tab />
                         <CodeText type="string">"requirement"</CodeText>
                         <CodeText type="operator">:</CodeText> {"{"}
                         <br />
-                        &emsp;&emsp;&emsp;
+                        <Tab />
+                        <Tab />
+                        <Tab />
                         <CodeText type="string">"trigger"</CodeText>
                         <CodeText type="operator">:</CodeText>{" "}
                         <CodeText type="string">"minecraft:tick"</CodeText>
                         <br />
-                        &emsp;&emsp;{"}"}
+                        <Tab />
+                        <Tab />
+                        {"}"}
                         <br />
-                        &emsp;{"}"}
+                        <Tab />
+                        {"}"}
                         <CodeText type="operator">,</CodeText>
                         <br />
-                        &emsp;<CodeText type="string">"rewards"</CodeText>
+                        <Tab />
+                        <CodeText type="string">"rewards"</CodeText>
                         <CodeText type="operator">:</CodeText> {"{"}
                         <br />
-                        &emsp;&emsp;
+                        <Tab />
+                        <Tab />
                         <CodeText type="string">"function"</CodeText>
                         <CodeText type="operator">:</CodeText>{" "}
                         <CodeText type="string">
                             "namespace:mydatapack/rejoin/first_join"
                         </CodeText>
                         <br />
-                        &emsp;{"}"}
+                        <Tab />
+                        {"}"}
                         <br />
                         {"}"}
                     </CodeBlock>

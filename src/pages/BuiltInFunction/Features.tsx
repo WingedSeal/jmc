@@ -1,5 +1,6 @@
 import Feature from "../../components/Feature";
 import CodeBlock, { CodeText, Command } from "../../components/CodeBlock";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const howTo = (
     <Feature
@@ -143,7 +144,8 @@ const howTo = (
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">example</CodeText>(argument) ) {"{"}
             <br />
-            &emsp;say <CodeText type="string">"Hello World"</CodeText>;
+            <Tab />
+            say <CodeText type="string">"Hello World"</CodeText>;
             <br />
             {"}"}
             <br />- <CodeText type="class">ExecuteExcluded</CodeText>{" "}
@@ -173,43 +175,51 @@ const howTo = (
             <CodeText type="class">Item</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">create</CodeText>(<br />
-            &emsp;veryCoolSword<CodeText type="operator">,</CodeText>
+            <Tab />
+            veryCoolSword<CodeText type="operator">,</CodeText>
             <br />
-            &emsp;carrot_on_a_stick
+            <Tab />
+            carrot_on_a_stick
             <CodeText type="operator">,</CodeText>
             <br />
-            &emsp;
+            <Tab />
             <CodeText type="string">
                 {'"&<gold, bold>A very cool sword"'}
             </CodeText>
             <CodeText type="operator">,</CodeText>
             <br />
-            &emsp;[
+            <Tab />[
             <CodeText type="string">
                 {'"&<red>It is, indeed, very cool."'}
             </CodeText>
             <CodeText type="operator">,</CodeText>
             <br />
-            &emsp;
+            <Tab />
             <CodeText type="string">
                 {'"&<red>Right click to be cool."'}
             </CodeText>
             ]<CodeText type="operator">,</CodeText>
             <br />
-            &emsp;nbt<CodeText type="operator">=</CodeText>
+            <Tab />
+            nbt<CodeText type="operator">=</CodeText>
             {"{"}CustomModelData<CodeText type="operator">:</CodeText>
             <CodeText type="number">100</CodeText>
             {"}"}
             <CodeText type="operator">,</CodeText>
             <br />
-            &emsp;onClick<CodeText type="operator">=</CodeText>
+            <Tab />
+            onClick<CodeText type="operator">=</CodeText>
             {"()"}
             <CodeText type="keyword">{"=>"}</CodeText>
             {"{"}
             <br />
-            &emsp;&emsp;say <CodeText type="string">"I'm very cool"</CodeText>;
+            <Tab />
+            <Tab />
+            say <CodeText type="string">"I'm very cool"</CodeText>;
             <br />
-            &emsp;&emsp;effect give @s speed 1 255 True;
+            <Tab />
+            <Tab />
+            effect give @s speed 1 255 True;
             <br />
             );
             <br />
