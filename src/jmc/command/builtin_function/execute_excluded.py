@@ -62,7 +62,6 @@ def _hardcode_process(string: str, index_string: str,
         "function"
     },
     defaults={
-        "start": "0",
         "step": "1"
     }
 )
