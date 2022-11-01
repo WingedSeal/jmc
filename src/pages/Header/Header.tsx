@@ -72,6 +72,23 @@ const Header = () => {
                         <CodeText type="string">WingedSeal</CodeText>
                     </CodeBlock>
                 </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Include
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Add other header file
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#</CodeText>include{" "}
+                        <CodeText type="string">"header_name"</CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="operator">#</CodeText>include{" "}
+                        <CodeText type="string">{"<header_name>"}</CodeText>
+                    </CodeBlock>
+                </div>
                 {/* <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     <s>Mod Commands</s>
                 </div>
