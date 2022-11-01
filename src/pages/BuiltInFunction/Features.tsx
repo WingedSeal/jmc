@@ -700,6 +700,69 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature id="particle_line" summary="Particle.circle()" keywords="">
+        <p>Make circle shaped particles</p>
+        <Command
+            name="Particle.circle"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "radius", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="particle_spiral" summary="Particle.spiral()" keywords="">
+        <p>Make spiral shaped particles</p>
+        <Command
+            name="Particle.spiral"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "radius", type: "float" },
+                { key: "height", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="particle_cylinder" summary="Particle.cylinder()" keywords="">
+        <p>Make cylinder shaped particles</p>
+        <Command
+            name="Particle.cylinder"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "radius", type: "float" },
+                { key: "height", type: "float" },
+                { key: "spreadXZ", type: "integer" },
+                { key: "spreadY", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="particle_line" summary="Particle.line()" keywords="">
+        <p>Make line shaped particles</p>
+        <Command
+            name="Particle.line"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "distance", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+        />
+    </Feature>,
 ];
 
 export default BuildinFeatures;
