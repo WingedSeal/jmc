@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from ..tokenizer import TokenType, Tokenizer, Token
-from ..exception import JMCSyntaxException
+from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
 from .utils import find_scoreboard_player_type, PlayerType
 from .jmc_function import JMCFunction, FuncType
@@ -169,6 +169,13 @@ def custom_condition(
             *matched_function(tokens[1], datapack, tokenizer).call_bool())
     # End
     conditions: list[str] = []
+    if tokens[0].string not in {"block", "blocks",
+                                "data", "entity", "predicate", "score"}:
+        raise JMCValueError(
+            f"Unrecoginized condition '{tokens[0].string}'",
+            tokens[0],
+            tokenizer,
+            suggestion="Consider using 'block' or 'blocks' or 'data' or 'entity' or 'predicate' or 'score'.")
     for token in tokens:
         if token.token_type == TokenType.PAREN_SQUARE:
             if not conditions:
