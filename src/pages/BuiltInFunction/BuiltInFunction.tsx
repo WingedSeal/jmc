@@ -49,9 +49,10 @@ const BuiltInFunction = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     return (
         <section className="bg-secondary-dark min-h-screen w-screen flex flex-col px-2 md:px-10 pt-[17vh]">
+            {/* Begin search bar */}
             <div className="relative h-12 mx-8 mb-8">
                 <div
-                    className="absolute top-0 left-0 w-12 h-full bg-tertiary z-20 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast"
+                    className="absolute top-0 left-0 w-12 h-full bg-tertiary z-20 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast transition-all active:scale-105"
                     onClick={(e) => {
                         setSearchValue(inputRef.current!.value);
                         closeAll();
@@ -84,6 +85,7 @@ const BuiltInFunction = () => {
                     <ClearSvg className="fill-gray-200 h-full" />
                 </div>
             </div>
+            {/* End search bar */}
             {BuildinFeatures.filter((BuildinFeature) =>
                 isDisplay(
                     BuildinFeature.props.summary,
