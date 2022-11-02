@@ -295,12 +295,18 @@ class FormattedText:
         self.parse()
 
     def push(self) -> None:
+        """
+        Append current_json to result and reset it
+        """
         if not self.current_json["text"]:
             return None
         self.result.append(self.current_json)
         self.current_json = {"text": ""}
 
     def parse_bracket(self) -> None:
+        """
+        Parse self.bracket_content and reset it
+        """
         bracket_content = self.bracket_content
         self.bracket_content = ""
         properties = bracket_content.split(",")
@@ -362,6 +368,11 @@ class FormattedText:
             self.current_json['color'] = self.current_color
 
     def parse_code(self, char: str) -> None:
+        """
+        Parse color code
+
+        :param char: A character in color code
+        """
         prop = self.PROPS.get(char, None)
         if prop is None:
             JMCValueError(
@@ -399,6 +410,9 @@ class FormattedText:
             self.current_json[prop] = True
 
     def parse(self) -> None:
+        """
+        Parse raw_text
+        """
         is_expect_color_code = False
         is_bracket_format = False
 
