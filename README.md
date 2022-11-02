@@ -25,6 +25,12 @@ JMC allows you to write minecraft functions in a better language (.jmc) which is
 
 Everything you need to know about JMC can be found at https://wingedseal.github.io/jmc/
 
+## Installation
+
+In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/datapacks`). Create a new datapack folder. And put JMC.exe in that folder then run it.
+ 
+![Installation](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/installation/file_location.png?raw=true)
+
 ## Build
 
 If you would like to build the executable yourself.
