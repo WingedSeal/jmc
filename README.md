@@ -1,13 +1,14 @@
-# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://choosealicense.com/licenses/mit/) ![release](https://badgen.net/badge/release/v1.2.5-alpha.1/blue/) ![build-passing](https://badgen.net/badge/build/passing/green/)
+# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://choosealicense.com/licenses/mit/) [![release](https://badgen.net/badge/release/v1.2.5-alpha.1/blue/)](https://github.com/WingedSeal/jmc/releases/latest) [![build-passing](https://badgen.net/badge/build/passing/green/)](https://wingedseal.github.io/jmc/#/)
 
 ## (JavaScript-like Minecraft Function)
 
 JMC (JavaScript-like Minecraft Function) is a mcfunction extension language for making Minecraft Datapack.
 
-![JMC-icon](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/jmc_icon.png?raw=true)
+![JMC-icon](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/jmc_icon192.png?raw=true)
 
-Documentation: https://wingedseal.github.io/jmc/
-Trailer: https://www.youtube.com/watch?v=cFgvCScpirw&ab_channel=WingedSeal
+**Documentation:** https://wingedseal.github.io/jmc/
+
+**Trailer:** https://www.youtube.com/watch?v=cFgvCScpirw&ab_channel=WingedSeal
 
 ---
 
