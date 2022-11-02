@@ -730,7 +730,7 @@ Timer.add(help_cd, runOnce, @a, ()=>{
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-scoreboard objectives add dummy help_cd
+scoreboard objectives add help_cd dummy
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 function TEST:__private__/timer_add/main
 > VIRTUAL/data/TEST/functions/__private__/timer_add/main.mcfunction
