@@ -1,17 +1,22 @@
 ---
 name: Typo report
-about: 'Report simple mistyped. '
+about: "Report simple typo."
 title: "[TYPO]"
-labels: ''
-assignees: ''
-
+labels: ""
+assignees: ""
 ---
 
 ## Where
+
 [describe the location]
 
 ## From
+
 [original]
 
 ## To
+
 [correct version]
+
+**Screenshots**
+If applicable, add screenshots here.

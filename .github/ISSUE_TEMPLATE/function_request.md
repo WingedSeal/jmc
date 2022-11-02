@@ -1,20 +1,22 @@
 ---
 name: Built-in function request
-about: You can suggest built-in function, I may or may not implement it, or I might
-  implement Part of it
+about:
+    You can suggest built-in function, I may or may not implement it, or I might
+    implement Part of it
 title: "[FUNCTION_REQUEST] "
-labels: ''
-assignees: ''
-
+labels: ""
+assignees: ""
 ---
 
 ## functionName([parameter], [parameter], [parameter],.....)
+
 [function description (what does it do)]
 
 ## parameters:
-- [parameter]: [description (includes type such as integer string etc.)]
-- [parameter]: [description (includes type such as integer string etc.)]
-- [parameter]: [description (includes type such as integer string etc.)]
+
+-   [parameter]: [description (includes type such as integer string etc.)]
+-   [parameter]: [description (includes type such as integer string etc.)]
+-   [parameter]: [description (includes type such as integer string etc.)]
 
 ```elixir
 [compiled mcfunction]
@@ -23,16 +25,19 @@ assignees: ''
 **Example:**
 
 ```javascript
-[example]
+[example];
 ```
 
-*Output:*
+_Output:_
 
 `[file_name].mcfunction`
+
 ```elixir
 [output example]
 ```
+
 `[file_name].mcfunction`
+
 ```elixir
 [output example]
 ```
