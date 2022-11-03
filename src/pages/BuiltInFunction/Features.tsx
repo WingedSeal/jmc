@@ -701,7 +701,10 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature id="particle_line" summary="Particle.circle()" keywords="">
-        <p>Make circle shaped particles</p>
+        <p>
+            Make circle shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
         <Command
             name="Particle.circle"
             type="JMCFunction"
@@ -716,7 +719,10 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature id="particle_spiral" summary="Particle.spiral()" keywords="">
-        <p>Make spiral shaped particles</p>
+        <p>
+            Make spiral shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
         <Command
             name="Particle.spiral"
             type="JMCFunction"
@@ -732,7 +738,10 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature id="particle_cylinder" summary="Particle.cylinder()" keywords="">
-        <p>Make cylinder shaped particles</p>
+        <p>
+            Make cylinder shaped particles. The higher the spread number, the
+            less distance between particle becomes.
+        </p>
         <Command
             name="Particle.cylinder"
             type="JMCFunction"
@@ -749,7 +758,10 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature id="particle_line" summary="Particle.line()" keywords="">
-        <p>Make line shaped particles</p>
+        <p>
+            Make line shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
         <Command
             name="Particle.line"
             type="JMCFunction"
