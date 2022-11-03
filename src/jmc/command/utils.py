@@ -197,7 +197,7 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
-                f"{feature_name} got unexpected keyword argument '{key}'", token, tokenizer)
+                f"{feature_name} got unexpected keyword argument '{key}'", kwarg, tokenizer)
         arg_type = find_arg_type(kwarg, tokenizer)
         result[key] = Arg(kwarg, arg_type).verify(params[key], tokenizer, key)
     return result

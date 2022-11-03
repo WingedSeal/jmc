@@ -195,6 +195,12 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
     return commands
 
 
+def _check_spread(instance: JMCFunction, key: str = "spread"):
+    if instance.args[key] == 0:
+        raise JMCValueError(
+            f"'{key}' is zero", instance.raw_args[key].token, instance.tokenizer)
+
+
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Particle.circle',
@@ -226,6 +232,7 @@ class ParticleCircle(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -277,6 +284,8 @@ class ParticleSpiral(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -330,6 +339,9 @@ class ParticleCylinder(JMCFunction):
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
+        _check_spread(self, "spreadXZ")
+        _check_spread(self, "spreadY")
+
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
@@ -373,6 +385,8 @@ class ParticleLine(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,
