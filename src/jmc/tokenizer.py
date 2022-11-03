@@ -449,7 +449,7 @@ class Tokenizer:
                 strings.append(string)
             strings.append(split_str)
         strings = strings[:-1]
-        tokens = []
+        tokens: list[Token] = []
         col = token.col
         for string in strings:
             tokens.append(Token(
