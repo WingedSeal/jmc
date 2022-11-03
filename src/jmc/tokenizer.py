@@ -695,7 +695,7 @@ class Tokenizer:
 
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
-                    f"Expected comma(,)", token, self, display_col_length=False)
+                    f"Expected comma(,)", last_token, self)
 
             if arrow_func_state > 0:
                 if arrow_func_state == 1:
