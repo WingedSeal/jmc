@@ -14,7 +14,7 @@ setup(
     name="jmcfunction",
     version=version,
     author="WingedSeal",
-    author_email="<firm09719@gmail.com>",
+    author_email="firm09719@gmail.com",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
     long_description=README,
@@ -35,5 +35,16 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
-    ]
+    ],
+    entry_points={
+        "console_scripts": [
+            "jmc=jmc.__main__:main",
+        ]
+    },
+    python_requires=">=3.9",
+    project_urls={
+        "Documentation": "https://wingedseal.github.io/jmc/",
+        "Repository": "https://github.com/WingedSeal/jmc",
+    },
+    license="MIT License"
 )
