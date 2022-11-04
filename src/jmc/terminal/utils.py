@@ -80,3 +80,7 @@ def handle_exception(error: Exception, event: Event, is_ok: bool):
     logger.critical("Program crashed")
     logger.exception("")
     press_enter("Press Enter to continue...")
+
+
+class RestartException(BaseException):
+    """Raise to restart the program without telling error to user"""

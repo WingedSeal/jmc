@@ -1,21 +1,25 @@
 from datetime import datetime
+from json import dump
 import sys
+import threading
 from time import perf_counter
 from traceback import format_exc
 
-from .terminal.utils import error_report, handle_exception
+from .terminal.utils import RestartException, error_report, get_input, handle_exception, press_enter
 from .terminal import pprint, Colors, GlobalData, add_command
 from .compile import compile, Logger, EXCEPTIONS, get_debug_log
 
 global_data = GlobalData()
 logger = Logger(__name__)
 
+NEW_LINE = "\n"
+
 
 @add_command("help [<command>]")
 def help(command: str = "") -> None:
     """Output this message or get help for a command"""
     if not command:
-        avaliable_commands = "\n".join(f"{usage}: {func.__doc__}" for _,
+        avaliable_commands = "\n".join(f" - {usage}: {func.__doc__}" for _,
                                        (func, usage) in global_data.commands.items())
         pprint(f"""Avaliable commands:
 
@@ -23,18 +27,24 @@ def help(command: str = "") -> None:
 """, color=Colors.YELLOW)
         return
 
+    if command not in global_data.commands:
+        raise TypeError(f"Unrecognized command '{command}'")
+    func, usage = global_data.commands[command]
+    pprint(f"{usage}: {func.__doc__}", Colors.INFO)
+
 
 @add_command("exit")
 def exit():
+    """Exit JMC compiler"""
     sys.exit(0)
 
 
 @add_command("compile [debug]", "compile")
 def compile_(debug: str = ""):
+    """Compile main JMC file"""
     if debug:
         if debug != 'debug':
-            pprint("Did you mean: 'compile debug'")
-            return
+            raise TypeError(f"Unrecognized argument '{debug}'")
         pprint("DEBUG MODE", Colors.INFO)
     debug_compile = bool(debug)
 
@@ -50,7 +60,6 @@ def compile_(debug: str = ""):
         error_report(error)
     except Exception as error:
         logger.exception("Non-JMC Error occur")
-        # error_report(error)
         handle_exception(error, global_data.EVENT, is_ok=False)
 
     if debug_compile:
@@ -76,3 +85,111 @@ def __log_info():
         file.write(info_log)
     with (global_data.LOG_PATH / "latest.log").open('w+') as file:
         file.write(info_log)
+
+
+def __log_clear():
+    logger.info("Clearing logs")
+    if not global_data.LOG_PATH.is_dir():
+        logger.debug("Log folder not found")
+        return
+
+    for path in global_data.LOG_PATH.iterdir():
+        if not path.is_file():
+            continue
+        if path.suffix != '.log':
+            continue
+        if path.name == 'latest.log':
+            continue
+        path.unlink()
+
+
+@add_command("log debug|info|clear")
+def log(mode: str):
+    """
+debug|info: Create log file in output directory
+clear: Delete every log file inside log folder except latest"""
+    if mode not in {"debug", "info", "clear"}:
+        raise TypeError(f"Unrecognized mode '{mode}'")
+
+    if mode == "debug":
+        __log_debug()
+    elif mode == "info":
+        __log_info()
+    elif mode == "clear":
+        __log_clear()
+
+
+@add_command("version")
+def version():
+    """Get JMC's version info"""
+    pprint(global_data.VERSION, Colors.INFO)
+
+
+def __config_reset():
+    (global_data.cwd / global_data.CONFIG_FILE_NAME).unlink(missing_ok=True)
+    pprint("Resetting configurations", Colors.PURPLE)
+    print('\n' * 5)
+    raise RestartException()
+
+
+def __config_edit():
+    config = global_data.config.toJSON()
+    pprint(f"""Edit configurations (Bypass error checking)
+Type `cancel` to cancel
+{NEW_LINE.join([f"- {key}" for key in config])}""", Colors.PURPLE)
+    key = get_input("Configuration: ")
+    if key not in config:
+        if key.lower() == 'cancel':
+            return
+        pprint("Invalid Key", Colors.FAIL)
+        __config_edit()
+    else:
+        pprint(f"Current {key}: {config[key]}", Colors.YELLOW)
+        config[key] = get_input("New Value: ")
+        with (global_data.cwd / global_data.CONFIG_FILE_NAME).open('w') as file:
+            dump(config, file, indent=2)
+
+        global_data.config.load_config()
+
+
+@add_command("config edit|reset")
+def config(mode):
+    """
+reset: Delete the configuration file and restart the compiler
+edit: Override configuration file and bypass error checking"""
+    if mode == 'reset':
+        __config_reset()
+    elif mode == 'edit':
+        __config_edit()
+    else:
+        raise TypeError(f"Unrecognized mode '{mode}'")
+
+
+def __background():
+    while not global_data.EVENT.is_set():
+        logger.debug("Auto compiling")
+        compile_()
+        global_data.EVENT.wait(global_data.interval)
+
+
+@add_command("autocompile <interval (second)>")
+def autocompile(interval: str):
+    try:
+        global_data.interval = int(interval)
+    except ValueError:
+        raise TypeError("Invalid integer for interval")
+    if global_data.interval == 0:
+        pprint("Interaval cannot be 0 seconds", Colors.FAIL)
+        return
+
+    thread = threading.Thread(
+        target=__background,
+        daemon=True
+    )
+    global_data.EVENT.clear()
+    thread.start()
+
+    press_enter("Press Enter to stop...\n")
+    pprint("Stopping...", Colors.INFO)
+    global_data.EVENT.set()
+    thread.join()

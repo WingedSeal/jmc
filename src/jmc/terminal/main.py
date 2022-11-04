@@ -5,7 +5,7 @@ from ..compile import Logger
 
 logger = Logger(__name__)
 
-global_data: GlobalData = GlobalData()
+global_data = GlobalData()
 
 
 def unknown_command(*args, **kwargs) -> None:

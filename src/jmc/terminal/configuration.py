@@ -196,6 +196,7 @@ class GlobalData(SingleTon):
         self.commands: dict[str, tuple[Callable[..., Any], str]] = {}
         """Dictionary of command_name and tuple of function and its usage(string)"""
         self.EVENT = threading.Event()
+        self.interval = -1
 
     def add_command(self, func: Callable[..., Any], usage: str) -> None:
         command = func.__name__

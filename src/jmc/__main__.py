@@ -1,9 +1,9 @@
 import atexit
 from .compile import Logger
-from .terminal.utils import handle_exception
+from .terminal.utils import RestartException, handle_exception
 from .terminal import GlobalData, Colors, handle_exception, start
 
-VERSION = 'v1.2.5-alpha.2'
+VERSION = 'v1.2.5-alpha.3'
 CONFIG_FILE_NAME = 'jmc_config.json'
 GlobalData().init(VERSION, CONFIG_FILE_NAME)
 
@@ -21,6 +21,8 @@ def main():
             start()
         except Exception as error:
             handle_exception(error, global_data.EVENT, is_ok=True)
+        except RestartException:
+            pass
 
 
 if __name__ == '__main__':
