@@ -3,7 +3,7 @@ sys.path.append('./src')  # noqa
 import unittest
 
 import random
-from jmc import tokenizer, JMCSyntaxException, JMCSyntaxWarning
+from jmc.compile import tokenizer, JMCSyntaxException, JMCSyntaxWarning
 
 
 class Tokenizer(tokenizer.Tokenizer):

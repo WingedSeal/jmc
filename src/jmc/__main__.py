@@ -10,7 +10,7 @@ from getpass import getpass
 from traceback import format_exc
 from sys import exit
 
-import jmc
+import compile
 
 VERSION = 'v1.2.5-alpha.2'
 
@@ -20,7 +20,7 @@ CONFIG_FILE_NAME = 'jmc_config.json'
 NEW_LINE = '\n'
 config = {}
 
-logger = jmc.Logger(__name__)
+logger = compile.Logger(__name__)
 
 
 class Colors(Enum):
@@ -237,11 +237,11 @@ exit: Exit compiler
         pprint("Compiling...", Colors.INFO)
         try:
             start_time = perf_counter()
-            jmc.compile(config, debug=True)
+            compile.compile(config, debug=True)
             stop_time = perf_counter()
             pprint(
                 f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
-        except jmc.EXCEPTIONS as error:
+        except compile.EXCEPTIONS as error:
             logger.debug(format_exc())
             error_report(error)
         except Exception as error:
@@ -362,7 +362,7 @@ Type `cancel` to cancel
     def _log_debug(cls):
         logger.info("Requesting debug log")
         LOG_PATH.mkdir(exist_ok=True)
-        debug_log = jmc.get_debug_log()
+        debug_log = compile.get_debug_log()
         with (LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
             file.write(debug_log)
         with (LOG_PATH / "latest.log").open('w+') as file:
@@ -372,7 +372,7 @@ Type `cancel` to cancel
     def _log_info(cls):
         logger.info("Requesting info log")
         LOG_PATH.mkdir(exist_ok=True)
-        info_log = jmc.get_info_log()
+        info_log = compile.get_info_log()
         with (LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
             file.write(info_log)
         with (LOG_PATH / "latest.log").open('w+') as file:

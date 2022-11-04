@@ -3,9 +3,9 @@ sys.path.append('./src')  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.test_compile import JMCPack
+from jmc.compile.test_compile import JMCPack
 
-from jmc.exception import JMCFileNotFoundError, JMCSyntaxException
+from jmc.compile.exception import JMCFileNotFoundError, JMCSyntaxException
 
 
 class TestFunction(unittest.TestCase):
