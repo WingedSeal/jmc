@@ -5,5 +5,5 @@ cd dist
 if [ -f JMC.bin ]; then
    rm JMC.bin
 fi
-mv main.bin JMC.bin
+mv __main__.bin JMC.bin
 cd ..
