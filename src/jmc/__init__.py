@@ -1,2 +1,1 @@
-# WHY ISNT THIS WORKING
-"""For making folder the library"""
+from .__main__ import VERSION
