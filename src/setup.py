@@ -1,10 +1,10 @@
 """Setup file for pypi"""
 from pathlib import Path
 from setuptools import setup, find_packages
-from src.jmc import VERSION
+from jmc import VERSION
 
 
-with (Path(__file__).parent / 'README.md').open(encoding="utf-8") as file:
+with (Path(__file__).parents[1] / 'README.md').open(encoding="utf-8") as file:
     README = "\n" + file.read()
 
 DESCRIPTION = 'Compiler for JMC (JavaScript-like Minecraft Function), a mcfunction extension language for making Minecraft Datapack.'
@@ -38,7 +38,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "jmc=src.jmc.__main__:main",
+            "jmc=jmc.__main__:main",
         ]
     },
     python_requires=">=3.9",
