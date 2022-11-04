@@ -5,7 +5,7 @@ from traceback import format_exc
 
 from .terminal.utils import error_report, handle_exception
 from .terminal import pprint, Colors, GlobalData, add_command
-from .compile import compile, Logger, EXCEPTIONS
+from .compile import compile, Logger, EXCEPTIONS, get_debug_log
 
 global_data = GlobalData()
 logger = Logger(__name__)
@@ -29,8 +29,8 @@ def exit():
     sys.exit(0)
 
 
-@add_command("compile [debug]")
-def compile_(cls, debug: str = ""):
+@add_command("compile [debug]", "compile")
+def compile_(debug: str = ""):
     if debug:
         if debug != 'debug':
             pprint("Did you mean: 'compile debug'")
@@ -61,7 +61,7 @@ def compile_(cls, debug: str = ""):
 def __log_debug():
     logger.info("Requesting debug log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
-    debug_log = compile.get_debug_log()
+    debug_log = get_debug_log()
     with (global_data.LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
         file.write(debug_log)
     with (global_data.LOG_PATH / "latest.log").open('w+') as file:

@@ -23,7 +23,7 @@ def compile(config: "Configuration", debug: bool = False) -> None:
     :param config: Configuration dictionary
     :param debug: Whether to debug into log, defaults to False
     """
-    logger.info("Configuration:\n" + dumps(config, indent=2))
+    logger.info("Configuration:\n" + dumps(config.toJSON(), indent=2))
     Header.clear()
     read_cert(config)
     read_header(config)
