@@ -1,4 +1,7 @@
 from json import dumps
+from pathlib import Path
+
+from ..terminal.configuration import Configuration, GlobalData
 from .log import Logger
 from .header import Header
 from .compile import read_cert, read_header, build
@@ -34,13 +37,14 @@ VAR=__variable__
 INT=__int__"""
         self.jmc_file = ""
         self.header_file = None
-        self.config = {
-            "namespace": namespace,
-            "description": "__THIS_IS_FOR_TESTING__",
-            "pack_format": "10",
-            "target": __file__,
-            "output": output
-        }
+        self.config = Configuration(
+            GlobalData(),
+            namespace=namespace,
+            description="__THIS_IS_FOR_TESTING__",
+            pack_format="10",
+            target=Path(__file__),
+            output=Path(output)
+        )
 
     def set_cert(self, file_content: str) -> "JMCPack":
         self.cert = file_content

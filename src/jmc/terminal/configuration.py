@@ -19,11 +19,11 @@ class Configuration:
     SingleTon storing all configuration data.
     """
     global_data: "GlobalData"
-    namespace: str | None = None
-    description: str | None = None
-    pack_format: str | None = None
-    target: Path | None = None
-    output: Path | None = None
+    namespace: str = ""
+    description: str = ""
+    pack_format: str = ""
+    target: Path = Path()
+    output: Path = Path()
 
     @property
     def target_str(self):
@@ -43,8 +43,8 @@ class Configuration:
 
         :return: JSON
         """
-        if self.target is None or self.output is None:
-            raise ValueError("toJSON used on empty config")
+        # if not self.target or not self.output:
+        #     raise ValueError("toJSON used on empty config")
         return {
             "namespace": self.namespace,
             "description": self.description,
@@ -187,12 +187,7 @@ class GlobalData(SingleTon):
         'EVENT',
         'commands')
 
-    def init(self, version: str | None = None,
-             config_file_name: str | None = None, ) -> None:
-        if version is None or config_file_name is None:
-            if not self.VERSION:
-                raise ValueError("GlobalData not initialized")
-            return
+    def init(self, version: str, config_file_name: str) -> None:
         self.config = Configuration(self)
         self.cwd: Path = Path(os.getcwd())
         self.VERSION: str = version
@@ -210,7 +205,7 @@ class GlobalData(SingleTon):
 
 
 def add_command(
-        usage: str) -> Callable[[Callable[..., None]], Callable[..., None]]:
+        usage: str, rename: str = "") -> Callable[[Callable[..., None]], Callable[..., None]]:
     """
     Decorator factory to add terminal command
 
@@ -224,6 +219,8 @@ def add_command(
         :param func: Function for decorator
         :return: Wrapper function
         """
+        if rename:
+            func.__name__ = rename
         GlobalData().add_command(func, usage)
 
         @functools.wraps(func)

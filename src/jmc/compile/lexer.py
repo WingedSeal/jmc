@@ -1,5 +1,6 @@
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
+from typing import TYPE_CHECKING
 
 
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
@@ -10,6 +11,8 @@ from .utils import search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
+if TYPE_CHECKING:
+    from ..terminal import Configuration
 
 logger = Logger(__name__)
 
@@ -47,16 +50,16 @@ class Lexer:
     do_while_box: Token | None = None
     """paren_curly token for code block of `do` in `do while`"""
 
-    def __init__(self, config: dict[str, str],
+    def __init__(self, config: "Configuration",
                  _test_file: str | None = None) -> None:
         logger.debug("Initializing Lexer")
         self.if_else_box: list[tuple[Token | None, Token]] = []
         """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
         self.config = config
         """JMC configuration"""
-        self.datapack = DataPack(config["namespace"], self)
+        self.datapack = DataPack(config.namespace, self)
         """Datapack object"""
-        self.parse_file(Path(self.config["target"]), _test_file, is_load=True)
+        self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
         logger.debug(f"Load Function")
         self.datapack.functions[self.datapack.load_name] = Function(
