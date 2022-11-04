@@ -38,7 +38,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "jmc=jmc.__main__:main",
+            "jmc=src.jmc.__main__:main",
         ]
     },
     python_requires=">=3.9",
