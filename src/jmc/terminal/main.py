@@ -16,14 +16,15 @@ def handle_command(given_command: str) -> None:
     if not given_command:
         return
     command_name, *arguments = given_command.split()
-    command_func = global_data.commands.get(command_name, unknown_command)
+    command_func, usage = global_data.commands.get(
+        command_name, (unknown_command, ""))
     try:
         command_func(*arguments)
     except TypeError as error:
         msg: str = error.args[0]
         msg = msg.replace("()", "").replace("positional argument", "argument")
         pprint(msg, Colors.FAIL)
-        pprint(f"Usage: {command_func.usage}", Colors.FAIL)
+        pprint(f"Usage: {usage}", Colors.FAIL)
 
 
 def start() -> None:

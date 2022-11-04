@@ -194,18 +194,19 @@ class GlobalData(SingleTon):
                 raise ValueError("GlobalData not initialized")
             return
         self.config = Configuration(self)
-        self.cwd = Path(os.getcwd())
-        self.VERSION = version
-        self.CONFIG_FILE_NAME = config_file_name
+        self.cwd: Path = Path(os.getcwd())
+        self.VERSION: str = version
+        self.CONFIG_FILE_NAME: str = config_file_name
         self.LOG_PATH = self.cwd / 'log'
-        self.commands: dict[str, Callable[..., Any]] = {}
+        self.commands: dict[str, tuple[Callable[..., Any], str]] = {}
+        """Dictionary of command_name and tuple of function and its usage(string)"""
         self.EVENT = threading.Event()
 
-    def add_command(self, func: Callable[..., Any]) -> None:
+    def add_command(self, func: Callable[..., Any], usage: str) -> None:
         command = func.__name__
         if command in self.commands:
             raise ValueError("Duplicated terminal command")
-        self.commands[command] = func
+        self.commands[command] = (func, usage)
 
 
 def add_command(
@@ -223,8 +224,7 @@ def add_command(
         :param func: Function for decorator
         :return: Wrapper function
         """
-        func.usage = usage
-        GlobalData().add_command(func)
+        GlobalData().add_command(func, usage)
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
