@@ -32,6 +32,10 @@ const howTo = (
             ]}
         />
         <p>
+            Default means that you do not need to provide the argument and JMC
+            wil automatically fallback to that value
+        </p>
+        <p>
             Module is actually a part of the function name and bare no special
             meaning. If you mistype the name, JMC will assume you are calling
             your own custom function and throw an error saying "Custom
@@ -62,7 +66,8 @@ const howTo = (
             <br />
             <CodeText type="class">float</CodeText>{" "}
             <CodeText type="operator">=</CodeText>{" "}
-            <CodeText type="number">9.99</CodeText>
+            <CodeText type="number">9.99</CodeText>{" "}
+            <CodeText type="comment">{"//"} Also known as decimal</CodeText>
             <br />
             <CodeText type="class">JSON</CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"{"}
@@ -96,10 +101,16 @@ const howTo = (
             <CodeText type="class">ArrowFunction</CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"()"}
             <CodeText type="keyword">{"=>"}</CodeText>
-            {"{"}say <CodeText type="string">"Hello World"</CodeText>;{"}"}
+            {"{"}say <CodeText type="string">"Hello World"</CodeText>;{"}"}{" "}
+            <CodeText type="comment">
+                {"//"} Unnamed function that's meant to be used once
+            </CodeText>
             <br />
             <CodeText type="class">FunctionName</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> my_function
+            <CodeText type="operator">=</CodeText> my_function{" "}
+            <CodeText type="comment">
+                {"//"} Function that's already defined elsewhere
+            </CodeText>
             <br />
             <CodeText type="class">Function</CodeText>{" "}
             <CodeText type="operator">=</CodeText>{" "}
@@ -125,10 +136,11 @@ const howTo = (
             <br />
             <CodeText type="class">Objective</CodeText>{" "}
             <CodeText type="operator">=</CodeText> my_objective{" "}
-            <CodeText type="comment">{"//"}An existing objective</CodeText>
+            <CodeText type="comment">{"//"} An existing objective</CodeText>
             <br />
             <CodeText type="class">Item</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> carrot_on_a_stick
+            <CodeText type="operator">=</CodeText> carrot_on_a_stick{" "}
+            <CodeText type="comment">{"//"} A minecraft item's id</CodeText>
             <br />
             <CodeText type="class">Keyword</CodeText>{" "}
             <CodeText type="operator">=</CodeText> anyKeyword
@@ -171,22 +183,37 @@ const howTo = (
             <br />
         </CodeBlock>
         <p>Example:</p>
+        <Command
+            name="Item.create"
+            type="LoadOnly"
+            params={[
+                { key: "itemId", type: "Keyword" },
+                { key: "itemType", type: "Item" },
+                { key: "displayName", type: "string" },
+                { key: "lore", type: "List<string>", default: "[]" },
+                { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "onClick", type: "Function", default: "()=>{}" },
+            ]}
+        />
         <CodeBlock>
             <CodeText type="class">Item</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">create</CodeText>(<br />
             <Tab />
-            veryCoolSword<CodeText type="operator">,</CodeText>
+            veryCoolSword<CodeText type="operator">,</CodeText>{" "}
+            <CodeText type="comment">{"// Keyword"}</CodeText>
             <br />
             <Tab />
             carrot_on_a_stick
-            <CodeText type="operator">,</CodeText>
+            <CodeText type="operator">,</CodeText>{" "}
+            <CodeText type="comment">{"// Item"}</CodeText>
             <br />
             <Tab />
             <CodeText type="string">
                 {'"&<gold, bold>A very cool sword"'}
             </CodeText>
-            <CodeText type="operator">,</CodeText>
+            <CodeText type="operator">,</CodeText>{" "}
+            <CodeText type="comment">{"// string"}</CodeText>
             <br />
             <Tab />[
             <CodeText type="string">
@@ -198,14 +225,16 @@ const howTo = (
             <CodeText type="string">
                 {'"&<red>Right click to be cool."'}
             </CodeText>
-            ]<CodeText type="operator">,</CodeText>
+            ]<CodeText type="operator">,</CodeText>{" "}
+            <CodeText type="comment">{"// List<string>"}</CodeText>
             <br />
             <Tab />
             nbt<CodeText type="operator">=</CodeText>
             {"{"}CustomModelData<CodeText type="operator">:</CodeText>
             <CodeText type="number">100</CodeText>
             {"}"}
-            <CodeText type="operator">,</CodeText>
+            <CodeText type="operator">,</CodeText>{" "}
+            <CodeText type="comment">{"// JSObject"}</CodeText>
             <br />
             <Tab />
             onClick<CodeText type="operator">=</CodeText>
@@ -222,7 +251,8 @@ const howTo = (
             effect give @s speed 1 255 True;
             <br />
             <Tab />
-            {"}"}
+            {"} "}
+            <CodeText type="comment">{"// ArrowFunction"}</CodeText>
             <br />
             );
             <br />
@@ -323,8 +353,8 @@ const BuildinFeatures = [
             params={[
                 { key: "itemId", type: "Keyword" },
                 { key: "itemType", type: "Item" },
-                { key: "displayName", type: "String" },
-                { key: "lore", type: "List<String>", default: "[]" },
+                { key: "displayName", type: "string" },
+                { key: "lore", type: "List<string>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
