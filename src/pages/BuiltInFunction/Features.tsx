@@ -221,6 +221,9 @@ const howTo = (
             <Tab />
             effect give @s speed 1 255 True;
             <br />
+            <Tab />
+            {"}"}
+            <br />
             );
             <br />
             execute as @a run <CodeText type="class">Item</CodeText>
