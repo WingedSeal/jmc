@@ -27,13 +27,17 @@ Everything you need to know about JMC can be found at https://wingedseal.github.
 
 ## Installation
 
-- *Executable*
+- **Executable**
+- 
 In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/datapacks`). Create a new datapack folder. And put JMC.exe in that folder then run it.
  
 ![Installation](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/installation/file_location.png?raw=true)
 
-- *Python 3.10+*
-`pip install jmcfunction`
+- **Python 3.10+**
+
+```
+pip install jmcfunction
+```
 
 ## Build
 
