@@ -22,7 +22,11 @@ def handle_command(given_command: str) -> None:
         command_func(*arguments)
     except TypeError as error:
         msg: str = error.args[0]
-        msg = msg.replace("()", "").replace("positional argument", "argument")
+        msg = msg.replace(
+            "()",
+            " command").replace(
+            "positional argument",
+            "argument")
         pprint(msg, Colors.FAIL)
         pprint(f"Usage: {usage}", Colors.FAIL)
 

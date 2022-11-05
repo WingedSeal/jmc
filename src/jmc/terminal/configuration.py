@@ -220,6 +220,8 @@ def add_command(
         :param func: Function for decorator
         :return: Wrapper function
         """
+        logger.debug(
+            f"Terminal command added: {func.__name__}{' as'+rename if rename else ''}")
         if rename:
             func.__name__ = rename
         GlobalData().add_command(func, usage)

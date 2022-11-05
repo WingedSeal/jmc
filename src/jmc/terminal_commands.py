@@ -1,5 +1,7 @@
 from datetime import datetime
 from json import dump
+import os
+from pathlib import Path
 import sys
 import threading
 from time import perf_counter
@@ -174,6 +176,7 @@ def __background():
 
 @add_command("autocompile <interval (second)>")
 def autocompile(interval: str):
+    """Start automatically compiling with certain interval (Press Enter to stop)"""
     try:
         global_data.interval = int(interval)
     except ValueError:
@@ -193,3 +196,16 @@ def autocompile(interval: str):
     pprint("Stopping...", Colors.INFO)
     global_data.EVENT.set()
     thread.join()
+
+
+@add_command("cd <path>")
+def cd(path: str):
+    """Change current directory"""
+    try:
+        os.chdir(path)
+    except ValueError:
+        pprint("Invalid path", Colors.FAIL)
+        return
+    global_data.cwd = Path(os.getcwd())
+    global_data.LOG_PATH = global_data.cwd / 'log'
+    raise RestartException
