@@ -180,7 +180,7 @@ class Tokenizer:
     """Type of left parenthesis"""
     r_paren: str | None
     """Type of matching right parenthesis"""
-    paren_count: int | None
+    paren_count: int
     """Count of left parenthesis / Count of current layer"""
     is_string: bool
     """Whether the current character is in string (For paren TokenType)"""
@@ -235,6 +235,161 @@ class Tokenizer:
             raise JMCSyntaxWarning(
                 "Unnecessary semicolon(;)", None, self)
 
+    def __parse_none(self, char: str) -> bool:
+        if char in {Quote.SINGLE, Quote.DOUBLE}:
+            self.state = TokenType.STRING
+            self.token_pos = Pos(self.line, self.col)
+            self.quote = char
+            self.token += char
+        elif re.match(Re.WHITESPACE, char):
+            return True
+        elif char == Re.SEMICOLON:
+            self.append_keywords()
+        elif char in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
+            self.state = TokenType.PAREN
+            self.token += char
+            self.token_pos = Pos(self.line, self.col)
+            self.paren = char
+            self.r_paren = PAREN_PAIR[char]
+            self.paren_count = 0
+        elif char in {Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE}:
+            raise JMCSyntaxException(
+                "Unexpected bracket", None, self, display_col_length=False)
+        elif char == Re.HASH and self.col == 1:
+            self.state = TokenType.COMMENT
+        elif char == Re.COMMA:
+            self.token += char
+            self.token_pos = Pos(self.line, self.col)
+            self.state = TokenType.COMMA
+            self.append_token()
+        else:
+            self.state = TokenType.KEYWORD
+            self.token_pos = Pos(self.line, self.col)
+            self.token += char
+        return False
+
+    def __parse_keyword(self, char: str) -> bool:
+        if char in {
+            Quote.SINGLE,
+            Quote.DOUBLE,
+            Paren.L_CURLY,
+            Paren.L_ROUND,
+            Paren.L_SQUARE,
+            Re.SEMICOLON,
+            Re.COMMA
+        } or re.match(Re.WHITESPACE, char):
+            self.append_token()
+            return False
+        else:
+            self.token += char
+            return True
+
+    def __parse_newline(self, char: str):
+        self.is_comment = False
+        if self.state == TokenType.STRING:
+            raise JMCSyntaxException(
+                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)
+        elif self.state == TokenType.COMMENT:
+            self.state = None
+        elif self.state == TokenType.KEYWORD:
+            self.append_token()
+        elif self.state == TokenType.PAREN:
+            self.token += char
+        self.line += 1
+        self.col = 0
+
+    def __parse_string(self, char: str):
+        self.token += char
+        if char == Re.BACKSLASH and not self.is_escaped:
+            self.is_escaped = True
+        elif char == self.quote and not self.is_escaped:
+            self.token = literal_eval(self.token)
+            self.append_token()
+        elif self.is_escaped:
+            self.is_escaped = False
+
+    def __parse_paren(self, char: str, expect_semicolon: bool) -> bool:
+        self.token += char
+        if self.is_string:
+            if char == Re.BACKSLASH and not self.is_escaped:
+                self.is_escaped = True
+            elif char == self.quote and not self.is_escaped:
+                self.is_string = False
+            elif self.is_escaped:
+                self.is_escaped = False
+            return False
+        if self.is_comment:
+            return False
+        if char != Re.SLASH and self.is_slash:
+            self.is_slash = False
+
+        if char == self.r_paren and self.paren_count == 0:
+            is_end = False
+            if self.paren == Paren.L_CURLY:
+                self.state = TokenType.PAREN_CURLY
+                is_end = True
+            elif self.paren == Paren.L_ROUND:
+                self.state = TokenType.PAREN_ROUND
+            elif self.paren == Paren.L_SQUARE:
+                self.state = TokenType.PAREN_SQUARE
+            self.append_token()
+            if is_end and expect_semicolon:
+                self.append_keywords()
+            return True
+
+        if char == self.paren:
+            self.paren_count += 1
+        elif char == self.r_paren:
+            self.paren_count -= 1
+        elif char in {Quote.SINGLE, Quote.DOUBLE}:
+            self.is_string = True
+            self.quote = char
+        elif char == Re.HASH:
+            self.is_comment = True
+        elif char == Re.SLASH:
+            if self.is_slash:
+                self.is_comment = True
+            else:
+                self.is_slash = True
+        return False
+
+    def __parse_chars(self, string: str, expect_semicolon: bool):
+        for char in string:
+            self.col += 1
+            if not expect_semicolon and char == Re.SEMICOLON and self.state in {
+                    TokenType.KEYWORD, None}:
+                raise JMCSyntaxException(
+                    "Unexpected semicolon(;)", None, self, display_col_length=False)
+
+            if char == Re.NEW_LINE:
+                self.__parse_newline(char)
+                continue
+
+            if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN:
+                self.state = TokenType.COMMENT
+                self.token = self.token[:-1]
+                continue
+
+            if self.state == TokenType.KEYWORD:
+                if self.__parse_keyword(char):
+                    continue
+
+            if self.state is None:
+                if self.__parse_none(char):
+                    continue
+
+            elif self.state == TokenType.STRING:
+                self.__parse_string(char)
+
+            elif self.state == TokenType.PAREN:
+                if self.__parse_paren(char, expect_semicolon):
+                    continue
+
+            elif self.state == TokenType.COMMENT:
+                pass
+
+            self.is_slash = (char == Re.SLASH)
+
     def parse(self, string: str, line: int, col: int, expect_semicolon: bool,
               allow_last_missing_semicolon: bool = False) -> list[list[Token]]:
         """
@@ -272,138 +427,7 @@ class Tokenizer:
         # Comment
         self.is_slash = False
 
-        for char in string:
-            self.col += 1
-            if not expect_semicolon and char == Re.SEMICOLON and self.state in {
-                    TokenType.KEYWORD, None}:
-                raise JMCSyntaxException(
-                    "Unexpected semicolon(;)", None, self, display_col_length=False)
-
-            if char == Re.NEW_LINE:
-                self.is_comment = False
-                if self.state == TokenType.STRING:
-                    raise JMCSyntaxException(
-                        "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)
-                elif self.state == TokenType.COMMENT:
-                    self.state = None
-                elif self.state == TokenType.KEYWORD:
-                    self.append_token()
-                elif self.state == TokenType.PAREN:
-                    self.token += char
-                self.line += 1
-                self.col = 0
-                continue
-
-            if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN:
-                self.state = TokenType.COMMENT
-                self.token = self.token[:-1]
-                continue
-
-            if self.state == TokenType.KEYWORD:
-                if char in {
-                    Quote.SINGLE,
-                    Quote.DOUBLE,
-                    Paren.L_CURLY,
-                    Paren.L_ROUND,
-                    Paren.L_SQUARE,
-                    Re.SEMICOLON,
-                    Re.COMMA
-                } or re.match(Re.WHITESPACE, char):
-                    self.append_token()
-                else:
-                    self.token += char
-                    continue
-
-            if self.state is None:
-                if char in {Quote.SINGLE, Quote.DOUBLE}:
-                    self.state = TokenType.STRING
-                    self.token_pos = Pos(self.line, self.col)
-                    self.quote = char
-                    self.token += char
-                elif re.match(Re.WHITESPACE, char):
-                    continue
-                elif char == Re.SEMICOLON:
-                    self.append_keywords()
-                elif char in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
-                    self.state = TokenType.PAREN
-                    self.token += char
-                    self.token_pos = Pos(self.line, self.col)
-                    self.paren = char
-                    self.r_paren = PAREN_PAIR[char]
-                    self.paren_count = 0
-                elif char in {Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE}:
-                    raise JMCSyntaxException(
-                        "Unexpected bracket", None, self, display_col_length=False)
-                elif char == Re.HASH and self.col == 1:
-                    self.state = TokenType.COMMENT
-                elif char == Re.COMMA:
-                    self.token += char
-                    self.token_pos = Pos(self.line, self.col)
-                    self.state = TokenType.COMMA
-                    self.append_token()
-                else:
-                    self.state = TokenType.KEYWORD
-                    self.token_pos = Pos(self.line, self.col)
-                    self.token += char
-
-            elif self.state == TokenType.STRING:
-                self.token += char
-                if char == Re.BACKSLASH and not self.is_escaped:
-                    self.is_escaped = True
-                elif char == self.quote and not self.is_escaped:
-                    self.token = literal_eval(self.token)
-                    self.append_token()
-                elif self.is_escaped:
-                    self.is_escaped = False
-
-            elif self.state == TokenType.PAREN:
-                self.token += char
-                if self.is_string:
-                    if char == Re.BACKSLASH and not self.is_escaped:
-                        self.is_escaped = True
-                    elif char == self.quote and not self.is_escaped:
-                        self.is_string = False
-                    elif self.is_escaped:
-                        self.is_escaped = False
-                elif self.is_comment:
-                    pass
-                else:
-                    if char != Re.SLASH and self.is_slash:
-                        self.is_slash = False
-
-                    if char == self.r_paren and self.paren_count == 0:
-                        is_end = False
-                        if self.paren == Paren.L_CURLY:
-                            self.state = TokenType.PAREN_CURLY
-                            is_end = True
-                        elif self.paren == Paren.L_ROUND:
-                            self.state = TokenType.PAREN_ROUND
-                        elif self.paren == Paren.L_SQUARE:
-                            self.state = TokenType.PAREN_SQUARE
-                        self.append_token()
-                        if is_end and expect_semicolon:
-                            self.append_keywords()
-                        continue
-
-                    if char == self.paren:
-                        self.paren_count += 1
-                    elif char == self.r_paren:
-                        self.paren_count -= 1
-                    elif char in {Quote.SINGLE, Quote.DOUBLE}:
-                        self.is_string = True
-                        self.quote = char
-                    elif char == Re.HASH:
-                        self.is_comment = True
-                    elif char == Re.SLASH:
-                        if self.is_slash:
-                            self.is_comment = True
-                        else:
-                            self.is_slash = True
-
-            elif self.state == TokenType.COMMENT:
-                pass
-
-            self.is_slash = (char == Re.SLASH)
+        self.__parse_chars(string, expect_semicolon)
 
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(

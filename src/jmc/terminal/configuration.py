@@ -8,7 +8,7 @@ from typing import Any, Callable
 from .utils import Colors, get_input, pprint
 from ..compile.utils import SingleTon
 from ..compile import Logger
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 logger = Logger(__name__)
 
