@@ -23,6 +23,8 @@ def main():
             handle_exception(error, global_data.EVENT, is_ok=True)
         except RestartException:
             pass
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == '__main__':
