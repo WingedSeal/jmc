@@ -215,7 +215,7 @@ def build(datapack: DataPack, config: "Configuration",
     """
     output: dict[str, Any] = {}
 
-    logger.debug("Building")
+    logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
     output_folder = Path(config.output)
     namespace_folder = output_folder / 'data' / config.namespace

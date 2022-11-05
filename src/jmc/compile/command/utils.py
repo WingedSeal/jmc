@@ -130,8 +130,11 @@ class Arg:
                     self.token,
                     tokenizer)
         if verifier != self.arg_type:
+            suggestion = None
+            if verifier == ArgType.STRING:
+                suggestion = f"Did you mean: ' \"{self.token.string}\" '"
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer, suggestion=suggestion)
         return self
 
 
@@ -197,7 +200,8 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
-                f"{feature_name} got unexpected keyword argument '{key}'", kwarg, tokenizer)
+                f"{feature_name} got unexpected keyword argument '{key}'", kwarg, tokenizer,
+                suggestion=f"""Available arguments are\n{', '.join(f"'{param}'" for param in params)}""")
         arg_type = find_arg_type(kwarg, tokenizer)
         result[key] = Arg(kwarg, arg_type).verify(params[key], tokenizer, key)
     return result

@@ -732,7 +732,7 @@ class Tokenizer:
                         arg = ""
                     else:
                         raise JMCSyntaxException(
-                            "Unexpected token", token, self)
+                            "Unexpected token", token, self, suggestion=f"Expected '=' (got '{token.string}')")
                 elif key:
                     arg = token.string
                     if token.string == '=':
