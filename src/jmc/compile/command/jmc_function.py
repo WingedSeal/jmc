@@ -3,6 +3,8 @@ from enum import Enum, auto
 from json import JSONDecodeError, loads
 from typing import Any, Callable
 
+from jmc.compile.utils import convention_jmc_to_mc
+
 from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError
@@ -123,7 +125,8 @@ class JMCFunction:
             if key in self._ignore:
                 pass
             elif arg.arg_type == ArgType._FUNC_CALL:
-                self.args[key] = f"function {datapack.namespace}:{arg.token.string.lower().replace('.', '/')}"
+                self.args[
+                    key] = f"function {datapack.namespace}:{convention_jmc_to_mc(arg.token, self.tokenizer)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = '\n'.join(
                     datapack.parse_function_token(arg.token, tokenizer))

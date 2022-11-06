@@ -6,7 +6,7 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .exception import JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
-from .utils import is_number, is_connected, search_to_string
+from .utils import convention_jmc_to_mc, is_number, is_connected, search_to_string
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS
 from .command import (FLOW_CONTROL_COMMANDS,
@@ -261,7 +261,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
             append_commands(self.commands,
-                            f"function {self.lexer.datapack.namespace}:{token.string.lower().replace('.','/')}")
+                            f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True
 
         if token.string not in VANILLA_COMMANDS:

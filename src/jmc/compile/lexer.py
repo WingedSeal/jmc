@@ -7,7 +7,7 @@ from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxExcept
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
-from .utils import search_to_string
+from .utils import convention_jmc_to_mc, search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -132,7 +132,7 @@ class Lexer:
             else:
                 if not is_load:
                     raise JMCSyntaxException(
-                        f"Command({command[0].string}) found inside non-load file", command[1], tokenizer)
+                        f"Command({command[0].string}) found inside non-load file (Not main JMC file)", command[1], tokenizer, suggestion="Consider putting it in a new function")
 
                 self.datapack.load_function.append(command)
 
@@ -164,7 +164,7 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
 
-        func_path = prefix + command[1].string.lower().replace('.', '/')
+        func_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
         if func_path.startswith(DataPack.private_name + '/'):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
@@ -227,14 +227,16 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer)
 
-        json_type = command[1].string.replace('.', '/')
+        json_type = convention_jmc_to_mc(
+            command[1], tokenizer, is_make_lower=False)
         if json_type not in JSON_FILE_TYPES:
             raise MinecraftSyntaxWarning(
                 f"Unrecognized JSON file's type({json_type})", command[2], tokenizer
             )
 
         json_path = json_type + '/' + prefix + \
-            command[2].string[1:-1].replace('.', '/')
+            convention_jmc_to_mc(
+                command[2], tokenizer, is_make_lower=False, substr=(1, -1))
         if not json_path.islower():
             raise MinecraftSyntaxWarning(
                 f"Uppercase letter found in JSON file's path({json_path})", command[
@@ -287,7 +289,7 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer)
 
-        class_path = prefix + command[1].string.lower().replace('.', '/')
+        class_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
         class_content = command[2].string[1:-1]
         self.parse_class_content(class_path + '/',
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)

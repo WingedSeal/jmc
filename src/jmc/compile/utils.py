@@ -186,3 +186,27 @@ kwargs={dumps(kwargs, indent=2, cls=JSONUniversalEncoder)}
 """)
         return return_value
     return wrapper
+
+
+def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
+                         is_make_lower: bool = True, substr: tuple[int, int] | None = None) -> str:
+    """
+    Turns JMC function/predicate name syntax to vanilla's syntax
+
+    .. example::
+    >>> convention_jmc_to_mc(Token.empty("hello.World"))
+    "hello_world"
+
+    :param token: keyword token
+    :param tokenizer: token's tokenizer
+    """
+    string = token.string
+    if substr is not None:
+        string = string[substr[0]:substr[1]]
+    if string.startswith("."):
+        raise JMCSyntaxException("Name started with '.'", token, tokenizer)
+    if string.endswith("."):
+        raise JMCSyntaxException("Name ended with '.'", token, tokenizer)
+    if is_make_lower:
+        string = string.lower()
+    return string.replace('.', '/')
