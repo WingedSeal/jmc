@@ -2,11 +2,11 @@
 echo =====================================
 echo ^> Code Cyclomatic Complexity (radon)
 echo =====================================
-radon cc src/jmc src/main.py --min C -s --total-average
+radon cc src/jmc --min C -s --total-average
 echo =====================================
 echo ^> Code Maintainability Index (radon) 
 echo =====================================
-radon mi src/jmc src/main.py --min B -s
+radon mi src/jmc --min B -s
 echo ==================================
 echo ^> Unit/Integration Tests (python)
 echo ==================================

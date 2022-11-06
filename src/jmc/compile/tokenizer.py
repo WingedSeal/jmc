@@ -436,7 +436,7 @@ class Tokenizer:
             if self.token_pos is None:
                 raise ValueError("Tokenizer.token_pos is stil None")
             raise JMCSyntaxException(
-                "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, ""), self, display_col_length=False)
+                "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, self.paren if self.paren is not None else ''), self)
         elif expect_semicolon and (self.keywords or self.token):
             if self.token != "":
                 self.append_token()
@@ -672,7 +672,7 @@ class Tokenizer:
             expecting_comma = False
             if kwargs:
                 raise JMCSyntaxException(
-                    "Positional argument follows keyword argument", token, self, display_col_length=False)
+                    "Positional argument follows keyword argument", token, self, display_col_length=False, suggestion='Try rearranging arguments')
 
             args.append(Token(string=arg, line=token.line,
                               col=token.col, token_type=token.token_type))
@@ -702,20 +702,18 @@ class Tokenizer:
             arg = ""
 
         for token in keywords:
-            # NOTE: As of now I'm not sure about the point of the following
-            # lines
-            # if token.token_type == TokenType.PAREN_SQUARE:
-            #     if not arg:
-            #         raise JMCSyntaxException(
-            #             f"Unexpected square parenthesis", token, self, display_col_length=False)
-            #     if is_connected(token, last_token):
-            #         arg += token.string
-            #         add_arg(last_token)
-            #         continue
-            #     else:
-            #         raise JMCSyntaxException(
-            #             f"Unexpected square parenthesis", token, self,
-            #             display_col_length=False)
+            if token.token_type == TokenType.PAREN_SQUARE:
+                if not arg:
+                    raise JMCSyntaxException(
+                        f"Unexpected square parenthesis", token, self, display_col_length=False)
+                if is_connected(token, last_token):
+                    arg += token.string
+                    add_arg(last_token)
+                    continue
+                else:
+                    raise JMCSyntaxException(
+                        f"Unexpected square parenthesis", token, self,
+                        display_col_length=False)
 
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
@@ -912,7 +910,7 @@ class Tokenizer:
                         arg = ""
                     else:
                         raise JMCSyntaxException(
-                            "Unexpected token", token, self)
+                            "Unexpected token", token, self, suggestion=": should be followed by something (value)")
                 elif key:
                     arg = token.string
                     if token.string == ':':

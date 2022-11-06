@@ -16,6 +16,7 @@ class JMCPack:
     Class representation of folder structure containing entire JMC files
 
     - Used for testing to prevent having to write and read files
+
     :param namespace: Namespace of the virtual datapack, defaults to "TEST"
     :param output: virtual directory for output, defaults to "VIRTUAL"
     """
