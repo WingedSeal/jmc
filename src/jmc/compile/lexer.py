@@ -97,6 +97,11 @@ class Lexer:
         for command in tokenizer.programs:
             if command[0].string == 'function' and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str)
+            elif command[0].string == 'function' and len(command) != 2:
+                raise JMCSyntaxException(
+                    f"'function' expect 1(Vanilla syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
+                    command[0],
+                    tokenizer)
             elif command[0].string == 'new':
                 self.parse_new(tokenizer, command, file_path_str)
             elif command[0].string == 'class':
