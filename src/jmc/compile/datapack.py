@@ -323,7 +323,7 @@ class DataPack:
         :return: List of minecraft commands(string)
         """
         return self.lexer.parse_func_content(
-            token.string[1:-1], tokenizer.file_path, token.line, token.col + 1, tokenizer.file_string)
+            token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
     def add_tick_command(self, command: str) -> None:
         self.ticks.append(command)

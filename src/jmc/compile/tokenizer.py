@@ -50,6 +50,10 @@ class Token:
         Edit string and _length according to macros(`#define something`) defined
         """
         header = Header()
+        if self.token_type == TokenType.PAREN_CURLY:
+            if not self.string.startswith('{') or not self.string.endswith('}'):
+                raise ValueError("paren_curly Token created but string doesn't start and end with the parenthesis")
+
         if self.token_type != TokenType.KEYWORD:
             return
 
