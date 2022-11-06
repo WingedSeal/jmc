@@ -42,7 +42,7 @@ scoreboard players operation __math__.x_n __variable__ += __math__.x __variable_
 scoreboard players operation __math__.x_n __variable__ /= 2 __int__
 scoreboard players operation __math__.different __variable__ = __math__.x __variable__
 scoreboard players operation __math__.different __variable__ -= __math__.x_n __variable__
-execute unless score __math__.different __variable__ 0..1 run function TEST:__private__/math_sqrt/newton_raphson
+execute unless score __math__.different __variable__ matches 0..1 run function TEST:__private__/math_sqrt/newton_raphson
 > VIRTUAL/data/TEST/functions/__private__/math_sqrt/main.mcfunction
 scoreboard players set __math__.x_n __variable__ 1225
 function TEST:__private__/math_sqrt/newton_raphson
