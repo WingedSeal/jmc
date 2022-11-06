@@ -344,7 +344,7 @@ class Tokenizer:
         elif char in {Quote.SINGLE, Quote.DOUBLE}:
             self.is_string = True
             self.quote = char
-        elif char == Re.HASH:
+        elif char == Re.HASH and self.col == 1:
             self.is_comment = True
         elif char == Re.SLASH:
             if self.is_slash:
