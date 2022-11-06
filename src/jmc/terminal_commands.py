@@ -9,7 +9,7 @@ from traceback import format_exc
 
 from .terminal.utils import RestartException, error_report, get_input, handle_exception, press_enter
 from .terminal import pprint, Colors, GlobalData, add_command
-from .compile import compile, Logger, EXCEPTIONS, get_debug_log
+from .compile import compile, Logger, EXCEPTIONS, get_debug_log, get_info_log
 
 global_data = GlobalData()
 logger = Logger(__name__)
@@ -82,7 +82,7 @@ def __log_debug():
 def __log_info():
     logger.info("Requesting info log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
-    info_log = compile.get_info_log()
+    info_log = get_info_log()
     with (global_data.LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
         file.write(info_log)
     with (global_data.LOG_PATH / "latest.log").open('w+') as file:
