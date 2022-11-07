@@ -3,7 +3,7 @@ import re
 from json import JSONEncoder, dumps
 from typing import TYPE_CHECKING, Any
 
-from .exception import JMCSyntaxException
+from .exception import JMCSyntaxException, MinecraftSyntaxWarning
 
 if TYPE_CHECKING:
     from .tokenizer import Token, Tokenizer
@@ -209,4 +209,8 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
         raise JMCSyntaxException("Name ended with '.'", token, tokenizer)
     if is_make_lower:
         string = string.lower()
+    if re.match('^[a-z0-9_\\.]+$', string) is None:
+        raise MinecraftSyntaxWarning(
+            f"Invalid character detected in '{string}'", token, tokenizer
+        )
     return string.replace('.', '/')
