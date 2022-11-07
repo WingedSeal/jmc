@@ -79,6 +79,10 @@ def custom_condition(
                 raise JMCSyntaxException(
                     f"Duplicated operator({operator}) in condition", list_of_tokens[2][-1], tokenizer)
 
+            if len(list_of_tokens[0]) > 1:
+                raise JMCSyntaxException(
+                    f"Unexpected token ('{list_of_tokens[0][1].string}') after variable ('{list_of_tokens[0][0].string}') in condition", list_of_tokens[0][1], tokenizer, suggestion="Expected operator")
+
             if len(list_of_tokens[1]) > 1:
                 raise JMCSyntaxException(
                     "Unexpected token in condition", list_of_tokens[1][-1], tokenizer)
