@@ -60,6 +60,10 @@ def variable_operation(
             if operator == '--':
                 return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.var_name} 1"
 
+        if not list_of_tokens[1]:
+            raise JMCSyntaxException(
+                f"Expected token after an operator('{operator}')", tokens[-1], tokenizer, suggestion="Expected integer or variable or target selector")
+
         if operator == '=' and list_of_tokens[1][0].token_type == TokenType.KEYWORD and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
             if len(list_of_tokens[1]) == 1:
                 raise JMCSyntaxException(
