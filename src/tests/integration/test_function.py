@@ -97,8 +97,8 @@ say Hello World 2
     def test_class(self):
         pack = JMCPack().set_jmc_file("""
 class foo {
-    function bar() {
-        say "bar";
+    function bar() {//COMMENT_TEST
+        say "bar"; //COMMENT_TEST
     }
     new advancements(bar) {
         "criteria": {

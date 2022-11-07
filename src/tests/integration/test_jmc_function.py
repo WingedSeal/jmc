@@ -12,7 +12,7 @@ class TestVarOperation(unittest.TestCase):
     def test_MathSqrt(self):
         pack = JMCPack().set_jmc_file("""
 $i = Math.sqrt($x);
-$i = Math.sqrt($i);
+$i = Math.sqrt($i);//COMMENT_TEST
         """).build()
         self.maxDiff = None
         self.assertDictEqual(
@@ -57,7 +57,7 @@ execute if score __main__.x_n_sq __variable__ > __math__.N __variable__ run scor
 
         with self.assertRaises(JMCMissingValueError):
             JMCPack().set_jmc_file("""
-$x = Math.sqrt();
+$x = Math.sqrt();//COMMENT_TEST
         """).build()
 
         with self.assertRaises(JMCValueError):

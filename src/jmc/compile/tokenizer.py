@@ -51,8 +51,10 @@ class Token:
         """
         header = Header()
         if self.token_type == TokenType.PAREN_CURLY:
-            if not self.string.startswith('{') or not self.string.endswith('}'):
-                raise ValueError("paren_curly Token created but string doesn't start and end with the parenthesis")
+            if not self.string.startswith(
+                    '{') or not self.string.endswith('}'):
+                raise ValueError(
+                    "paren_curly Token created but string doesn't start and end with the parenthesis")
 
         if self.token_type != TokenType.KEYWORD:
             return
@@ -370,12 +372,16 @@ class Tokenizer:
                 continue
 
             if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN:
-                self.state = TokenType.COMMENT
                 self.token = self.token[:-1]
+                if self.token:
+                    self.append_token()
+                self.state = TokenType.COMMENT
                 continue
 
             if self.state == TokenType.KEYWORD:
+
                 if self.__parse_keyword(char):
+                    self.is_slash = (char == Re.SLASH)
                     continue
 
             if self.state is None:
@@ -432,6 +438,9 @@ class Tokenizer:
         self.is_slash = False
 
         self.__parse_chars(string, expect_semicolon)
+
+        # if self.state == TokenType.COMMENT:
+        #     self.state = None
 
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(
