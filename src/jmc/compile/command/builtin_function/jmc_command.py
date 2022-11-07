@@ -196,7 +196,7 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
 
 
 def _check_spread(instance: JMCFunction, key: str = "spread"):
-    if instance.args[key] == 0:
+    if instance.args[key] == "0":
         raise JMCValueError(
             f"'{key}' is zero", instance.raw_args[key].token, instance.tokenizer)
 
