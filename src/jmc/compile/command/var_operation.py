@@ -47,6 +47,10 @@ def variable_operation(
             raise JMCSyntaxException(
                 f"Duplicated operator({operator})", list_of_tokens[2][-1], tokenizer)
 
+        if len(list_of_tokens[0]) > 1:
+            raise JMCSyntaxException(
+                f"Unexpected token ('{list_of_tokens[0][1].string}') after variable ('{list_of_tokens[0][0].string}')", list_of_tokens[0][1], tokenizer, suggestion="Expected operator")
+
         if operator in {'++', '--'}:
             if list_of_tokens[1]:
                 raise JMCSyntaxException(
