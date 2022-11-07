@@ -449,20 +449,24 @@ class RecipeTable(JMCFunction):
 
         json = self.load_arg_json("recipe")
 
-        if "result" not in json:
-            raise JMCSyntaxException("'result' key not found in recipe",
-                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
-        if "item" not in json["result"]:
-            raise JMCSyntaxException("'item' key not found in 'result' in recipe",
-                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
-        if "count" not in json["result"]:
-            raise JMCSyntaxException("'count' key not found in 'result' in recipe",
-                                     self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+        # raise JMCSyntaxException("'result' key not found in recipe",
+        # self.raw_args["recipe"].token, self.tokenizer,
+        # display_col_length=True, suggestion="recipe json maybe invalid")
+        if "result" in json:
+            if "item" not in json["result"]:
+                raise JMCSyntaxException("'item' key not found in 'result' in recipe",
+                                         self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
+            if "count" not in json["result"]:
+                raise JMCSyntaxException("'count' key not found in 'result' in recipe",
+                                         self.raw_args["recipe"].token, self.tokenizer, display_col_length=True, suggestion="recipe json maybe invalid")
 
-        result_item = json["result"]["item"]
-        json["result"]["item"] = base_item
-        result_count = json["result"]["count"]
-        json["result"]["count"] = 1
+            result_item = json["result"]["item"]
+            json["result"]["item"] = base_item
+            result_count = json["result"]["count"]
+            json["result"]["count"] = 1
+            result_command = f"give @s {result_item} {result_count}"
+        else:
+            result_command = ""
 
         self.datapack.add_private_json(
             'recipes', f'{self.name}/{count}', json)
@@ -470,7 +474,7 @@ class RecipeTable(JMCFunction):
             self.name,
             [
                 f"clear @s {base_item} 1",
-                f"give @s {result_item} {result_count}",
+                result_command,
                 f"recipe take @s {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
                 f"advancement revoke @s only {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
                 self.args["onCraft"]
