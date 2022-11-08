@@ -230,32 +230,32 @@ Hardcode.switch($var, "index", ()=>{
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-function TEST:__private__/hard_code_switch/0
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/0.mcfunction
-execute if score $var __variable__ matches 1..2 run function TEST:__private__/hard_code_switch/1
-execute if score $var __variable__ matches 3..5 run function TEST:__private__/hard_code_switch/2
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/1.mcfunction
-execute if score $var __variable__ matches 1 run function TEST:__private__/hard_code_switch/3
-execute if score $var __variable__ matches 2 run function TEST:__private__/hard_code_switch/4
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/3.mcfunction
+function TEST:__private__/hardcode_switch/0
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/0.mcfunction
+execute if score $var __variable__ matches 1..2 run function TEST:__private__/hardcode_switch/1
+execute if score $var __variable__ matches 3..5 run function TEST:__private__/hardcode_switch/2
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/1.mcfunction
+execute if score $var __variable__ matches 1 run function TEST:__private__/hardcode_switch/3
+execute if score $var __variable__ matches 2 run function TEST:__private__/hardcode_switch/4
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/3.mcfunction
 tellraw @s "1"
 tellraw @s "1"
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/4.mcfunction
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/4.mcfunction
 tellraw @s "2"
 tellraw @s "4"
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/2.mcfunction
-execute if score $var __variable__ matches 3 run function TEST:__private__/hard_code_switch/5
-execute if score $var __variable__ matches 4..5 run function TEST:__private__/hard_code_switch/6
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/5.mcfunction
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/2.mcfunction
+execute if score $var __variable__ matches 3 run function TEST:__private__/hardcode_switch/5
+execute if score $var __variable__ matches 4..5 run function TEST:__private__/hardcode_switch/6
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/5.mcfunction
 tellraw @s "3"
 tellraw @s "9"
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/6.mcfunction
-execute if score $var __variable__ matches 4 run function TEST:__private__/hard_code_switch/7
-execute if score $var __variable__ matches 5 run function TEST:__private__/hard_code_switch/8
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/7.mcfunction
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/6.mcfunction
+execute if score $var __variable__ matches 4 run function TEST:__private__/hardcode_switch/7
+execute if score $var __variable__ matches 5 run function TEST:__private__/hardcode_switch/8
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/7.mcfunction
 tellraw @s "4"
 tellraw @s "16"
-> VIRTUAL/data/TEST/functions/__private__/hard_code_switch/8.mcfunction
+> VIRTUAL/data/TEST/functions/__private__/hardcode_switch/8.mcfunction
 tellraw @s "5"
 tellraw @s "25"
             """)

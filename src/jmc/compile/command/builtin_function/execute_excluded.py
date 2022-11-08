@@ -103,7 +103,7 @@ class HardcodeRepeat(JMCFunction):
         "function": ArgType.ARROW_FUNC,
         "count": ArgType.INTEGER
     },
-    name='hard_code_switch',
+    name='hardcode_switch',
     ignore={
         "function",
         "switch"
@@ -133,3 +133,123 @@ class HardcodeSwitch(JMCFunction):
 
         return parse_switch(scoreboard_player, func_contents,
                             self.datapack, self.name)
+
+
+@func_property(
+    func_type=FuncType.EXECUTE_EXCLUDED,
+    call_string='Raycast.simple',
+    arg_type={
+        "onHit": ArgType.FUNC,
+        "onStep": ArgType.FUNC,
+        "interval": ArgType.FLOAT,
+        "maxIter": ArgType.INTEGER,
+        "boxSize": ArgType.FLOAT,
+        "target": ArgType.SELECTOR,
+        "stopAtEntity": ArgType.KEYWORD,
+        "stopAtBlock": ArgType.KEYWORD
+    },
+    name='raycast_simple',
+    defaults={
+        "onStep": "",
+        "interval": "0.1",
+        "maxIter": "1000",
+        "boxSize": "0.001",
+        "target": "@e",
+        "stopAtEntity": "true",
+        "stopAtBlock": "true",
+    }
+)
+class RaycastSimple(JMCFunction):
+    caster_tag = '__self__'
+    current_iter = '__current_iter_raycast__'
+    is_continue = '__is_continue_raycast__'
+
+    def call(self) -> str:
+        box_size = float(self.args["boxSize"])
+        dx = "0" if box_size < 1 else str(box_size - 1)
+
+        if self.args["target"].endswith(']'):
+            target = f'{self.args["target"][:-1]},dx={dx},tag=!{self.caster_tag}]'
+        else:
+            target = f'{self.args["target"]}[dx={dx},tag=!{self.caster_tag}]'
+
+        count = self.datapack.get_count(f"{self.name}/loop")
+        raycast_loop = self.datapack.call_func(f"{self.name}/loop", count)
+
+        is_stop_entity = self.check_bool("stopAtEntity")
+        is_stop_block = self.check_bool("stopAtBlock")
+
+        if is_stop_block:
+            self.datapack.add_private_json("tags/block", f"{self.name}/default_raycast_pass", {
+                "values": [
+                    "minecraft:air",
+                    "minecraft:void_air",
+                    "minecraft:cave_air",
+                    "minecraft:water",
+                    "minecraft:lava",
+                    "minecraft:grass",
+                    "#minecraft:small_flowers",
+                    "#minecraft:tall_flowers",
+                    "#minecraft:small_dripleaf_placeable",
+                    "minecraft:fern",
+                    "minecraft:fire",
+                    "minecraft:tall_grass",
+                    "minecraft:large_fern",
+                    "minecraft:vine",
+                    "minecraft:twisting_vines",
+                    "minecraft:twisting_vines_plant",
+                    "minecraft:weeping_vines",
+                    "minecraft:weeping_vines_plant",
+                    "#minecraft:crops",
+                    "#minecraft:saplings",
+                    "#minecraft:signs",
+                    "minecraft:attached_melon_stem",
+                    "minecraft:attached_pumpkin_stem",
+                    "minecraft:nether_wart",
+                    "minecraft:sweet_berry_bush",
+                    "minecraft:cocoa",
+                    "minecraft:sugar_cane",
+                    "minecraft:seagrass",
+                    "minecraft:tall_seagrass",
+                    "minecraft:redstone_wire",
+                    "minecraft:rail",
+                    "minecraft:powered_rail",
+                    "minecraft:activator_rail",
+                    "minecraft:detector_rail",
+                    "minecraft:torch",
+                    "minecraft:soul_torch",
+                    "minecraft:redstone_torch",
+                    "minecraft:glow_lichen"
+                ]
+            })
+
+        if is_stop_entity:
+            collide = self.datapack.add_raw_private_function(
+                f"{self.name}/collide", [
+                    f"scoreboard players reset {self.is_continue} {self.datapack.var_name}",
+                    self.args["onHit"]
+                ])
+        else:
+            collide = self.args["onHit"]
+
+        if box_size <= 0.001:
+            check_colide = f"execute as {target} positioned ~-{1-box_size} ~-{1-box_size} ~-{1-box_size} if entity @s[dx=0] positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} run {collide}"
+        elif box_size < 1:
+            check_colide = f"execute positioned ~-{(1-box_size/2)} ~-{(1-box_size/2)} ~-{(1-box_size/2)} as {target} positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} if entity @s[dx=0] positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"
+        else:
+            check_colide = f"execute positioned ~-{box_size/2} ~-{box_size/2} ~-{box_size/2} as {target} positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"
+
+        self.datapack.add_raw_private_function(
+            f"{self.name}/loop",
+            [
+                check_colide,
+                f"scoreboard players add {self.current_iter} {self.datapack.var_name} 1",
+                f"execute if score {self.current_iter} {self.datapack.var_name} matches ..{self.args['maxIter']} run scoreboard players reset {self.is_continue} {self.datapack.var_name}",
+                self.args["onStep"],
+                (f"execute if block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players reset {self.is_continue} {self.datapack.var_name}" if is_stop_block else ""),
+                f"execute if score {self.is_continue} {self.datapack.var_name} matches 1 positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"
+            ],
+            count=count)
+        return f"""tag @s add {self.caster_tag}
+scoreboard players set {self.current_iter} {self.datapack.var_name} 0
+execute anchored eyes positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"""

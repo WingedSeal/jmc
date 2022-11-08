@@ -7,7 +7,7 @@ from jmc.compile.utils import convention_jmc_to_mc
 
 from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
-from ..exception import JMCDecodeJSONError, JMCMissingValueError
+from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, Tokenizer
 
 
@@ -234,6 +234,14 @@ class JMCFunction:
                 error, self.raw_args[parameter].token, self.tokenizer)
 
         return json
+
+    def check_bool(self, parameter: str) -> bool:
+        if self.args[parameter] not in {"true", "false"}:
+            raise JMCValueError(
+                f"'{parameter}' only accepts true or false in {self.call_string}",
+                self.raw_args[parameter].token,
+                self.tokenizer)
+        return self.args[parameter] == "true"
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
