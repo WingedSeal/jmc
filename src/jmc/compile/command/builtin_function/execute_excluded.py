@@ -80,7 +80,7 @@ class HardcodeRepeat(JMCFunction):
                 commands.extend(self.datapack.parse_function_token(
                     Token(
                         TokenType.PAREN_CURLY,
-                        self.raw_args["function"].token.line + 1,
+                        self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(
                             self.raw_args["function"].token.string, self.args["indexString"], i, self.token, self.tokenizer
