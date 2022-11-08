@@ -747,7 +747,7 @@ class Tokenizer:
                 elif arrow_func_state == 2:
                     if token.token_type == TokenType.PAREN_CURLY:
                         new_token = Token(
-                            string=token.string[1:-1], line=token.line, col=token.col + 1, token_type=TokenType.FUNC)
+                            string=token.string, line=token.line, col=token.col + 1, token_type=TokenType.FUNC)
                         arg = new_token.string
                         if key:
                             add_kwarg(new_token)
