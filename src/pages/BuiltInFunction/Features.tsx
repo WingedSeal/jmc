@@ -69,6 +69,10 @@ const howTo = (
             <CodeText type="number">9.99</CodeText>{" "}
             <CodeText type="comment">{"//"} Also known as decimal</CodeText>
             <br />
+            <CodeText type="class">boolean</CodeText>{" "}
+            <CodeText type="operator">=</CodeText>{" "}
+            <CodeText type="operator">true or false</CodeText>
+            <br />
             <CodeText type="class">JSON</CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"{"}
             <CodeText type="string">"key1"</CodeText>
@@ -805,6 +809,55 @@ const BuildinFeatures = [
                 { key: "speed", type: "integer", default: "1" },
                 { key: "count", type: "integer", default: "1" },
                 { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="raycast_simple"
+        summary="Raycast.simple()"
+        keywords="gun shoot"
+    >
+        <p>Cast simple raycast</p>
+        <ul>
+            <li>
+                <code>interval</code> is distance between checks.
+            </li>
+            <li>
+                <code>maxIter</code> is maximum number of iteration.
+            </li>
+            <li>
+                <code>boxSize</code> is the size of entity detection cube.
+            </li>
+            <li>
+                <code>target</code> is acceptable target for collution.
+            </li>
+            <li>
+                <code>stopAtEntity</code> is wheter to stop the raycast when
+                colliding with the entity.
+            </li>
+            <li>
+                <code>stopAtBlock</code> is wheter to stop the raycast when
+                colliding with a block.
+            </li>
+            <li>
+                <code>runAtEnd</code> is wheter to run <code>onHit</code>{" "}
+                function even if doesn't collide with entity. (It'll run as the
+                caster in this case.)
+            </li>
+        </ul>
+        <Command
+            name="Raycast.simple"
+            type="ExecuteExcluded"
+            params={[
+                { key: "onHit", type: "Function" },
+                { key: "onStep", type: "Function", default: "()=>{}" },
+                { key: "interval", type: "float", default: "0.1" },
+                { key: "maxIter", type: "integer", default: "1000" },
+                { key: "boxSize", type: "float", default: "0.001" },
+                { key: "target", type: "TargetSelector", default: "@e" },
+                { key: "stopAtEntity", type: "boolean", default: "true" },
+                { key: "stopAtBlock", type: "boolean", default: "true" },
+                { key: "runAtEnd", type: "boolean", default: "false" },
             ]}
         />
     </Feature>,

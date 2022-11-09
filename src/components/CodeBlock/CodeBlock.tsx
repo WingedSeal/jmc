@@ -35,6 +35,7 @@ interface CommandInterface {
     name: string;
     type: string;
     params: Array<Parameter>;
+    newline?: boolean;
 }
 interface Parameter {
     key: string;
@@ -85,8 +86,9 @@ const Command: React.FC<CommandInterface> = (props) => {
             <CodeText type="class">{module_name}</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">{function_name}</CodeText>(
+            {props.newline && <br />}
             {props.params.map((param, index) => (
-                <>
+                <span key={index}>
                     {param.key}
                     <CodeText type="operator">:</CodeText>{" "}
                     <CodeText type="class">{param.type}</CodeText>
@@ -100,16 +102,29 @@ const Command: React.FC<CommandInterface> = (props) => {
                         ""
                     )}
                     {index !== len - 1 ? (
-                        <CodeText type="operator">,&nbsp;</CodeText>
+                        props.newline ? (
+                            <>
+                                <CodeText type="operator">,</CodeText>
+                                <br />
+                                <Tab />
+                            </>
+                        ) : (
+                            <CodeText type="operator">,&nbsp;</CodeText>
+                        )
                     ) : (
                         ""
                     )}
-                </>
+                </span>
             ))}
-            ) <CodeText type="operator">{"->"}</CodeText>{" "}
+            {props.newline && <br />}){" "}
+            <CodeText type="operator">{"->"}</CodeText>{" "}
             <CodeText type="class">{props.type}</CodeText>
         </CodeBlock>
     );
+};
+
+Command.defaultProps = {
+    newline: false,
 };
 
 const Tab: React.FC = () => {

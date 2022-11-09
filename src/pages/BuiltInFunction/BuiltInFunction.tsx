@@ -86,12 +86,13 @@ const BuiltInFunction = () => {
                 </div>
             </div>
             {/* End search bar */}
-            {BuildinFeatures.filter((BuildinFeature) =>
-                isDisplay(
-                    BuildinFeature.props.summary,
-                    searchValue,
-                    BuildinFeature.props.keywords
-                )
+            {BuildinFeatures.map(
+                (BuildinFeature, i) =>
+                    isDisplay(
+                        BuildinFeature.props.summary,
+                        searchValue,
+                        BuildinFeature.props.keywords
+                    ) && <div key={i}>{BuildinFeature}</div>
             )}
         </section>
     );
