@@ -730,7 +730,7 @@ class Tokenizer:
 
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
-                    f"Expected comma(,)", last_token, self)
+                    f"Expected comma(,)", last_token, self, col_length=True)
 
             if arrow_func_state > 0:
                 if arrow_func_state == 1:

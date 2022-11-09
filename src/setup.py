@@ -10,6 +10,9 @@ with (Path(__file__).parents[1] / 'README.md').open(encoding="utf-8") as file:
 DESCRIPTION = 'Compiler for JMC (JavaScript-like Minecraft Function), a mcfunction extension language for making Minecraft Datapack.'
 version = VERSION.replace("-alpha.", "a").replace("-beta.", "b")[1:]
 
+if VERSION not in README:
+    raise ValueError("README file's version has not been updated")
+
 setup(
     name="jmcfunction",
     version=version,

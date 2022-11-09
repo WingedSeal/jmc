@@ -146,7 +146,8 @@ class HardcodeSwitch(JMCFunction):
         "boxSize": ArgType.FLOAT,
         "target": ArgType.SELECTOR,
         "stopAtEntity": ArgType.KEYWORD,
-        "stopAtBlock": ArgType.KEYWORD
+        "stopAtBlock": ArgType.KEYWORD,
+        "runAtEnd": ArgType.KEYWORD
     },
     name='raycast_simple',
     defaults={
@@ -157,6 +158,7 @@ class HardcodeSwitch(JMCFunction):
         "target": "@e",
         "stopAtEntity": "true",
         "stopAtBlock": "true",
+        "runAtEnd": "false"
     }
 )
 class RaycastSimple(JMCFunction):
@@ -178,9 +180,10 @@ class RaycastSimple(JMCFunction):
 
         is_stop_entity = self.check_bool("stopAtEntity")
         is_stop_block = self.check_bool("stopAtBlock")
+        is_run_end = self.check_bool("runAtEnd")
 
         if is_stop_block:
-            self.datapack.add_private_json("tags/block", f"{self.name}/default_raycast_pass", {
+            self.datapack.add_private_json("tags/blocks", f"{self.name}/default_raycast_pass", {
                 "values": [
                     "minecraft:air",
                     "minecraft:void_air",
@@ -244,12 +247,14 @@ class RaycastSimple(JMCFunction):
             [
                 check_colide,
                 f"scoreboard players add {self.current_iter} {self.datapack.var_name} 1",
-                f"execute if score {self.current_iter} {self.datapack.var_name} matches ..{self.args['maxIter']} run scoreboard players reset {self.is_continue} {self.datapack.var_name}",
+                f"execute if score {self.current_iter} {self.datapack.var_name} matches {self.args['maxIter']}.. run scoreboard players reset {self.is_continue} {self.datapack.var_name}",
                 self.args["onStep"],
-                (f"execute if block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players reset {self.is_continue} {self.datapack.var_name}" if is_stop_block else ""),
+                (f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players reset {self.is_continue} {self.datapack.var_name}" if is_stop_block else ""),
+                (f"execute unless score {self.is_continue} {self.datapack.var_name} matches 1 run {collide}" if is_run_end else ""),
                 f"execute if score {self.is_continue} {self.datapack.var_name} matches 1 positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"
             ],
             count=count)
         return f"""tag @s add {self.caster_tag}
 scoreboard players set {self.current_iter} {self.datapack.var_name} 0
+scoreboard players set {self.is_continue} {self.datapack.var_name} 1
 execute anchored eyes positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"""
