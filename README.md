@@ -1,4 +1,4 @@
-# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://github.com/WingedSeal/jmc/blob/main/LICENSE) [![release](https://badgen.net/badge/release/v1.2.5/blue/)](https://github.com/WingedSeal/jmc/releases/latest) [![build-passing](https://badgen.net/badge/build/passing/green/)](https://wingedseal.github.io/jmc/#/) [![discord-invite](https://badgen.net/badge/discord/Official-Server/blue/?icon=discord)](https://discord.gg/PNWKpwdzD3)
+# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://github.com/WingedSeal/jmc/blob/main/LICENSE) [![release](https://badgen.net/badge/release/v1.2.6/blue/)](https://github.com/WingedSeal/jmc/releases/latest) [![build-passing](https://badgen.net/badge/build/passing/green/)](https://wingedseal.github.io/jmc/#/) [![discord-invite](https://badgen.net/badge/discord/Official-Server/blue/?icon=discord)](https://discord.gg/PNWKpwdzD3)
 
 ## (JavaScript-like Minecraft Function)
 
@@ -27,13 +27,13 @@ Everything you need to know about JMC can be found at https://wingedseal.github.
 
 ## Installation
 
-- **Executable**
+-   **Executable**
 
 In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/datapacks`). Create a new datapack folder. And put JMC.exe in that folder then run it.
- 
+
 ![Installation](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/installation/file_location.png?raw=true)
 
-- **Python 3.10+**
+-   **Python 3.10+**
 
 ```
 pip install jmcfunction
