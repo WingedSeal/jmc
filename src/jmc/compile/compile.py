@@ -260,6 +260,11 @@ def build(datapack: DataPack, config: "Configuration",
                     file.write(content)
 
     for json_path, json in datapack.jsons.items():
+        # if json_path.startswith("minecraft/"):
+        #     path = namespace_folder / (json_path + '.json')
+        # else:
+        #     # len("minecraft/") = 10
+        #     path = output_folder / 'data' / 'minecraft' / (json_path[10:] + '.json')
         path = namespace_folder / (json_path + '.json')
         if json:
             if _is_virtual:

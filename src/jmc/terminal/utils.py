@@ -68,6 +68,8 @@ def handle_exception(error: Exception, event: Event, is_ok: bool):
     Tell user when unexpected crash happens and reset
 
     :param error: Exception
+    :param event: Event object to stop compiling
+    :param is_ok: Whether to tell user this error is normal
     """
     event.set()
     pprint("Unexpected error causes program to crash", Colors.FAIL)
