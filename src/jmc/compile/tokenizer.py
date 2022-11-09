@@ -365,7 +365,7 @@ class Tokenizer:
             if not expect_semicolon and char == Re.SEMICOLON and self.state in {
                     TokenType.KEYWORD, None}:
                 raise JMCSyntaxException(
-                    "Unexpected semicolon(;)", None, self, display_col_length=False)
+                    "Unexpected semicolon(;)", None, self)
 
             if char == Re.NEW_LINE:
                 self.__parse_newline(char)

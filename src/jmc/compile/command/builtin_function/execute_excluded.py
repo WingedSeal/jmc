@@ -141,6 +141,7 @@ class HardcodeSwitch(JMCFunction):
     arg_type={
         "onHit": ArgType.FUNC,
         "onStep": ArgType.FUNC,
+        "onBeforeStep": ArgType.FUNC,
         "interval": ArgType.FLOAT,
         "maxIter": ArgType.INTEGER,
         "boxSize": ArgType.FLOAT,
@@ -148,11 +149,14 @@ class HardcodeSwitch(JMCFunction):
         "stopAtEntity": ArgType.KEYWORD,
         "stopAtBlock": ArgType.KEYWORD,
         "runAtEnd": ArgType.KEYWORD,
-        "selfTag": ArgType.KEYWORD
+        "casterTag": ArgType.KEYWORD,
+        "modifyExecuteBeforeStep": ArgType.STRING,
+        "modifyExecuteAfterStep": ArgType.STRING
     },
     name='raycast_simple',
     defaults={
         "onStep": "",
+        "onBeforeStep": "",
         "interval": "0.1",
         "maxIter": "1000",
         "boxSize": "0.001",
@@ -160,15 +164,16 @@ class HardcodeSwitch(JMCFunction):
         "stopAtEntity": "true",
         "stopAtBlock": "true",
         "runAtEnd": "false",
-        "selfTag": "__self__"
+        "casterTag": "__self__",
+        "modifyExecuteBeforeStep": "",
+        "modifyExecuteAfterStep": ""
     }
 )
 class RaycastSimple(JMCFunction):
     current_iter = '__current_iter_raycast__'
-    is_continue = '__is_continue_raycast__'
 
     def call(self) -> str:
-        caster_tag = self.args["selfTag"]
+        caster_tag = self.args["casterTag"]
         box_size = float(self.args["boxSize"])
         dx = "0" if box_size < 1 else str(box_size - 1)
 
@@ -231,7 +236,7 @@ class RaycastSimple(JMCFunction):
         if is_stop_entity:
             collide = self.datapack.add_raw_private_function(
                 f"{self.name}/collide", [
-                    f"scoreboard players set {self.is_continue} {self.datapack.var_name} 0",
+                    f"scoreboard players set {self.current_iter} {self.datapack.var_name} -1",
                     self.args["onHit"]
                 ])
         else:
@@ -244,19 +249,24 @@ class RaycastSimple(JMCFunction):
         else:
             check_colide = f"execute positioned ~-{box_size/2} ~-{box_size/2} ~-{box_size/2} as {target} positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"
 
+        loop_commands = [
+            check_colide,
+            f"scoreboard players remove {self.current_iter} {self.datapack.var_name} 1"
+        ]
+        if is_stop_block:
+            loop_commands.append(
+                f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {self.current_iter} {self.datapack.var_name} -1")
+        if is_run_end:
+            loop_commands.append(
+                f"execute unless score {self.current_iter} {self.datapack.var_name} matches -1 run {collide}")
+        loop_commands.append(
+            f"execute if score {self.current_iter} {self.datapack.var_name} matches 1.. {self.args['modifyExecuteBeforeStep']} positioned ^ ^ ^{self.args['interval']}  {self.args['modifyExecuteAfterStep']} run {raycast_loop}")
+
         self.datapack.add_raw_private_function(
             f"{self.name}/loop",
-            [
-                check_colide,
-                f"scoreboard players add {self.current_iter} {self.datapack.var_name} 1",
-                f"execute if score {self.current_iter} {self.datapack.var_name} matches {self.args['maxIter']}.. run scoreboard players set {self.is_continue} {self.datapack.var_name} 0",
-                self.args["onStep"],
-                (f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {self.is_continue} {self.datapack.var_name} 0" if is_stop_block else ""),
-                (f"execute unless score {self.is_continue} {self.datapack.var_name} matches 1 run {collide}" if is_run_end else ""),
-                f"execute if score {self.is_continue} {self.datapack.var_name} matches 1 positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"
-            ],
+            loop_commands,
             count=count)
         return f"""tag @s add {caster_tag}
-scoreboard players set {self.current_iter} {self.datapack.var_name} 0
-scoreboard players set {self.is_continue} {self.datapack.var_name} 1
-execute anchored eyes positioned ^ ^ ^{self.args['interval']} run {raycast_loop}"""
+scoreboard players set {self.current_iter} {self.datapack.var_name} {self.args["maxIter"]}
+execute anchored eyes positioned ^ ^ ^{self.args['interval']} run {raycast_loop}
+tag @s remove {caster_tag}"""
