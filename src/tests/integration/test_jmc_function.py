@@ -508,7 +508,7 @@ scoreboard objectives add __rejoin__ custom:leave_game
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__rejoin__=1..}] at @s run function TEST:__private__/player_rejoin/main
 > VIRTUAL/data/TEST/functions/__private__/player_rejoin/main.mcfunction
-scoreboard players reset @s __rejoin__
+scoreboard players set @s __rejoin__ 0
 tellraw @s "Welcome!"
             """)
         )
@@ -549,7 +549,7 @@ execute as @e[type=player,scores={__die__=2..}] at @s run function TEST:__privat
 scoreboard players set @s __die__ 2
 tellraw @s "You died"
 > VIRTUAL/data/TEST/functions/__private__/player_die/on_respawn.mcfunction
-scoreboard players reset @s __die__
+scoreboard players set @s __die__ 0
 tellraw @s "Welcome back to live"
 say I'm back
             """)
@@ -604,7 +604,7 @@ scoreboard objectives add __rc__custom_id used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__rc__custom_id=1..}] at @s run function TEST:__private__/right_click_setup/main
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/main.mcfunction
-scoreboard players reset @s __rc__custom_id
+scoreboard players set @s __rc__custom_id 0
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.custom_id
 execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/right_click_setup/1
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/1.mcfunction
@@ -645,7 +645,7 @@ scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={my_objective=1..}] at @s run function TEST:__private__/player_on_event/0
 > VIRTUAL/data/TEST/functions/__private__/player_on_event/0.mcfunction
-scoreboard players reset @s my_objective
+scoreboard players set @s my_objective 0
 say Hello World
             """)
         )
@@ -689,7 +689,7 @@ scoreboard players enable @s help
 tellraw @s {"text":"Cool help commands","color":"gold"}
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/0.mcfunction
 function TEST:__private__/trigger_setup/1
-scoreboard players reset @s help
+scoreboard players set @s help 0
 scoreboard players enable @s help
 > VIRTUAL/data/TEST/advancements/__private__/trigger_setup/enable.json
 {
@@ -737,7 +737,7 @@ function TEST:__private__/timer_add/main
 execute as @a if score @s help_cd matches 1.. run scoreboard players remove @s help_cd 1
 execute as @a if score @s help_cd matches 0 run function TEST:__private__/timer_add/0
 > VIRTUAL/data/TEST/functions/__private__/timer_add/0.mcfunction
-scoreboard players reset @s help_cd
+scoreboard players set @s help_cd 0
 tellraw @s "Your help command is ready!"
             """)
         )

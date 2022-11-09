@@ -44,7 +44,7 @@ class PlayerFirstJoin(JMCFunction):
 )
 class PlayerRejoin(JMCFunction):
     obj = '__rejoin__'
-    reset = f'scoreboard players reset @s {obj}'
+    reset = f'scoreboard players set @s {obj} 0'
 
     def call(self) -> str:
         self.datapack.add_objective(
@@ -75,7 +75,7 @@ class PlayerRejoin(JMCFunction):
 class PlayerDie(JMCFunction):
     obj = '__die__'
     on_death = f'scoreboard players set @s {obj} 2'
-    on_respawn = f'scoreboard players reset @s {obj}'
+    on_respawn = f'scoreboard players set @s {obj} 0'
 
     def call(self) -> str:
         if not self.args["onDeath"] and not self.args["onRespawn"]:

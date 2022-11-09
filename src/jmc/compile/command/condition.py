@@ -341,7 +341,7 @@ def ast_to_strings(ast: AST_TYPE) -> tuple[str, str]:
             if conditions_and_count[1] > current_count:
                 current_count += 1
                 precommands.append(
-                    f"scoreboard players reset {VAR}{current_count} {DataPack.var_name}")
+                    f"scoreboard players set {VAR}{current_count} {DataPack.var_name} 0")
                 precommands.append(
                     f"execute {merge_condition(conditions_and_count[0])} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
                 continue

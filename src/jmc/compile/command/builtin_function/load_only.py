@@ -67,7 +67,7 @@ class RightClickSetup(JMCFunction):
         if self.is_never_used():
             self.datapack.add_tick_command(
                 f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [f'scoreboard players reset @s {self.rc_obj}'], 'main')}""")
+                                                       [f'scoreboard players set @s {self.rc_obj} 0'], 'main')}""")
 
         main_func = self.get_private_function('main')
 
@@ -154,7 +154,7 @@ class ItemCreate(JMCFunction):
                 self.datapack.add_tick_command(
                     f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
                                                        [
-                                                        f'scoreboard players reset @s {self.rc_obj}',
+                                                        f'scoreboard players set @s {self.rc_obj} 0',
                                                         f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
                                                         f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
                                                         ], 'main')}""")
@@ -213,7 +213,7 @@ class PlayerOnEvent(JMCFunction):
     def call(self) -> str:
         count = self.datapack.get_count(self.name)
         func = self.datapack.add_raw_private_function(
-            self.name, [f"scoreboard players reset @s {self.args['objective']}", self.args['function']], count=count)
+            self.name, [f"scoreboard players set @s {self.args['objective']} 0", self.args['function']], count=count)
         self.datapack.add_tick_command(
             f"execute as @a[scores={{{self.args['objective']}=1..}}] at @s run {func}")
         return ""
@@ -290,7 +290,7 @@ class TriggerSetup(JMCFunction):
                     run.append(
                         f'execute if score @s {obj} {DataPack.var_name} matches {num} run function {self.datapack.namespace}:{func}')
 
-        run.extend([f"scoreboard players reset @s {obj}",
+        run.extend([f"scoreboard players set @s {obj} 0",
                     f"scoreboard players enable @s {obj}"])
         self.datapack.add_raw_private_function(self.name, run, main_count)
 
@@ -338,13 +338,13 @@ class TriggerAdd(JMCFunction):
         if self.raw_args["function"].arg_type == ArgType.ARROW_FUNC:
             run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
                 func,
-                f"scoreboard players reset @s {obj}",
+                f"scoreboard players set @s {obj} 0",
                 f"scoreboard players enable @s {obj}"
                 ], obj)}"""
         else:
             run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
                 f"{self.datapack.namespace}:{func}",
-                f"scoreboard players reset @s {obj}",
+                f"scoreboard players set @s {obj} 0",
                 f"scoreboard players enable @s {obj}"
                 ], obj)}"""
         main_func.append(run)
@@ -396,7 +396,7 @@ class TimerAdd(JMCFunction):
                 f"""execute as {selector} if score @s {obj} matches 0 run {self.datapack.add_raw_private_function(
                     self.name,
                     [
-                        f"scoreboard players reset @s {obj}",
+                        f"scoreboard players set @s {obj} 0",
                         self.args["function"]
                     ],
                     count

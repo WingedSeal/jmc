@@ -197,7 +197,7 @@ if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-scoreboard players reset __logic__0 __variable__
+scoreboard players set __logic__0 __variable__ 0
 execute unless entity @s[type=skeleton] run scoreboard players set __logic__0 __variable__ 1
 execute unless score __logic__0 __variable__ matches 1 if entity @s[type=zombie] if score $deathCount __variable__ matches 6.. run scoreboard players set __logic__0 __variable__ 1
 execute if score __logic__0 __variable__ matches 1 run say Hello World
