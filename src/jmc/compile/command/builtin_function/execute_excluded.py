@@ -273,14 +273,15 @@ class RaycastSimple(JMCFunction):
 
         loop_commands = [
             check_colide,
-            f"scoreboard players remove {current_iter} {self.datapack.var_name} 1"
+            f"execute if score {current_iter} {self.datapack.var_name} matches 1.. run scoreboard players remove {current_iter} {self.datapack.var_name} 1"
         ]
         if is_stop_block:
             loop_commands.append(
-                f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {current_iter} {self.datapack.var_name} -1")
+                f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {current_iter} {self.datapack.var_name} 0")
         if is_run_end:
             loop_commands.append(
-                f"execute unless score {current_iter} {self.datapack.var_name} matches -1 run {collide}")
+                f"execute if score {current_iter} {self.datapack.var_name} matches 0 run {collide}")
+        loop_commands.append(self.args["onStep"])
 
         if "overideRecursion" in self.raw_args:
             if not self.args["overideString"]:
