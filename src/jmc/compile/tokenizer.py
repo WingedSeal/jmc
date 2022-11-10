@@ -149,6 +149,7 @@ class Tokenizer:
     :param col: Current column, defaults to 1
     :param file_string: Entire string read from current file, defaults to None
     :param expect_semicolon: Whether to expect semicolon at the end, defaults to True
+    :param allow_semicolon: Whether to allow semicolon at the 2nd char(For minecraft array `[I;int, ...]`), defaults to False
     """
     __slots__ = ('line', 'col', 'state',
                  'token', 'token_pos', 'keywords',
@@ -156,7 +157,7 @@ class Tokenizer:
                  'paren', 'r_paren', 'paren_count',
                  'is_string', 'is_slash', 'raw_string',
                  'file_string', 'file_path', 'programs',
-                 'is_comment')
+                 'is_comment', 'allow_semicolon')
 
     line: int
     """Starts at 1"""
@@ -195,9 +196,14 @@ class Tokenizer:
     is_slash: bool
     """Whether there's a slash infront of the current character"""
 
+    # Special Case
+    allow_semicolon: bool
+    """Whether to allow semicolon at the next char(For minecraft array `[I;int, ...]`)"""
+
     def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1,
-                 file_string: str | None = None, expect_semicolon: bool = True) -> None:
+                 file_string: str | None = None, expect_semicolon: bool = True, allow_semicolon: bool = False) -> None:
         logger.debug("Initializing Tokenizer")
+        self.allow_semicolon = allow_semicolon
         self.raw_string = raw_string
         if file_string is None:
             self.file_string = raw_string
@@ -281,11 +287,18 @@ class Tokenizer:
             Paren.L_CURLY,
             Paren.L_ROUND,
             Paren.L_SQUARE,
-            Re.SEMICOLON,
             Re.COMMA
         } or re.match(Re.WHITESPACE, char):
             self.append_token()
             return False
+        elif char == Re.SEMICOLON:
+            if self.allow_semicolon:
+                self.allow_semicolon = False
+                self.token += char
+                return True
+            else:
+                self.append_token()
+                return False
         else:
             self.token += char
             return True
@@ -360,12 +373,18 @@ class Tokenizer:
         return False
 
     def __parse_chars(self, string: str, expect_semicolon: bool):
-        for char in string:
+        if self.allow_semicolon and string[0] not in {'I', 'B', 'L'}:
+            self.allow_semicolon = False
+        for index, char in enumerate(string):
             self.col += 1
-            if not expect_semicolon and char == Re.SEMICOLON and self.state in {
-                    TokenType.KEYWORD, None}:
-                raise JMCSyntaxException(
-                    "Unexpected semicolon(;)", None, self)
+            if char == Re.SEMICOLON:
+                if self.allow_semicolon and self.state == TokenType.KEYWORD and index == 1:
+                    pass
+
+                elif not expect_semicolon and self.state in {
+                        TokenType.KEYWORD, None}:
+                    raise JMCSyntaxException(
+                        "Unexpected semicolon(;)", None, self)
 
             if char == Re.NEW_LINE:
                 self.__parse_newline(char)

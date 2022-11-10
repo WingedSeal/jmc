@@ -448,7 +448,7 @@ class Lexer:
         open = token.string[0]
         close = token.string[-1]
         tokenizer = Tokenizer(token.string[1:-1], tokenizer.file_path, token.line,
-                              token.col + 1, tokenizer.file_string, expect_semicolon=False)
+                              token.col + 1, tokenizer.file_string, expect_semicolon=False, allow_semicolon=token.token_type == TokenType.PAREN_SQUARE)
         string = ""
         if open == '{' and tokenizer.programs[0][0].token_type == TokenType.STRING:
             is_nbt = False
