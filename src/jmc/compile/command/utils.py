@@ -113,7 +113,7 @@ class Arg:
         if verifier == ArgType.FUNC:
             if self.arg_type == ArgType.ARROW_FUNC:
                 return self
-            if self.arg_type == ArgType.KEYWORD:
+            if self.arg_type in {ArgType.KEYWORD, ArgType.SCOREBOARD}:
                 self.arg_type = ArgType._FUNC_CALL
                 return self
             raise JMCValueError(

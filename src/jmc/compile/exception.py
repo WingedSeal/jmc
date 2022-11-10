@@ -1,6 +1,6 @@
 from json import JSONDecodeError
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 from .log import Logger
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ def log(self: object, args: tuple):
 
 
 def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_length: bool,
-              display_col_length: bool, entire_line: bool, suggestion: str | None) -> str:
+              display_col_length: bool, entire_line: bool, suggestion: str | None, overide_file_str: Callable[[str], str] = lambda string: string) -> str:
     """
     Generate error message
 
@@ -63,9 +63,9 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
         else:
             display_col += length
     if entire_line:
-        msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{tokenizer.file_string.split(NEW_LINE)[display_line-1]} <-"
+        msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])} <-"
     else:
-        msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[display_line-1][:display_col-1]} <-"
+        msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])[:display_col-1]} <-"
     if suggestion is not None:
         msg += '\n' + suggestion
     return msg
@@ -103,10 +103,23 @@ class JMCSyntaxException(SyntaxError):
 
     def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False,
                  display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
+        self.message = message
+        self.token = token
+        self.tokenizer = tokenizer
+        self.col_length = col_length
+        self.display_col_length = display_col_length
+        self.entire_line = entire_line
+        self.suggestion = suggestion
         msg = error_msg(message, token, tokenizer, col_length,
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))
         super().__init__(msg)
+
+    def reinit(self, overide_file_str: Callable[[str], str]):
+        self.msg = error_msg(self.message, self.token, self.tokenizer, self.col_length,
+                             self.display_col_length, self.entire_line, self.suggestion, overide_file_str)
+        logger.warning(f"Overiding file string")
+        log(self, (self.msg, ))
 
 
 class JMCValueError(ValueError):

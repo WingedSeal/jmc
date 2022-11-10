@@ -125,8 +125,11 @@ class JMCFunction:
             if key in self._ignore:
                 pass
             elif arg.arg_type == ArgType._FUNC_CALL:
-                self.args[
-                    key] = f"function {datapack.namespace}:{convention_jmc_to_mc(arg.token, self.tokenizer)}"
+                if ':' in arg.token.string:
+                    self.args[key] = f"function {arg.token.string}"
+                else:
+                    self.args[
+                        key] = f"function {datapack.namespace}:{convention_jmc_to_mc(arg.token, self.tokenizer)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = '\n'.join(
                     datapack.parse_function_token(arg.token, tokenizer))

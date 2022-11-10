@@ -1,7 +1,7 @@
 """Module containing JMCFunction subclasses for custom JMC function that cannot be used with `/execute`"""
 
 from ...tokenizer import Token, Tokenizer, TokenType
-from ...exception import JMCSyntaxException
+from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property
 from ..utils import ArgType, eval_expr, find_scoreboard_player_type
 from .._flow_control import parse_switch
@@ -88,7 +88,10 @@ class HardcodeRepeat(JMCFunction):
                     ), self.tokenizer)
                 )
             except JMCSyntaxException as error:
-                error.msg = 'WARNING: This error happens inside Hardcode.repeat, if you use Hardcode.calc the error position might not be accurate\n\n' + error.msg
+                error.reinit(lambda string: _hardcode_process(
+                    string, self.args["indexString"], i, self.token, self.tokenizer
+                ))
+                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
                 raise error
 
         return "\n".join(commands)
@@ -128,7 +131,10 @@ class HardcodeSwitch(JMCFunction):
                     ), self.tokenizer)
                 )
             except JMCSyntaxException as error:
-                error.msg = 'WARNING: This error happens inside Hardcode.switch, if you use Hardcode.calc the error position might not be accurate\n\n' + error.msg
+                error.reinit(lambda string: _hardcode_process(
+                    string, self.args["indexString"], i, self.token, self.tokenizer
+                ))
+                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
                 raise error
 
         return parse_switch(scoreboard_player, func_contents,
@@ -143,15 +149,19 @@ class HardcodeSwitch(JMCFunction):
         "onStep": ArgType.FUNC,
         "onBeforeStep": ArgType.FUNC,
         "interval": ArgType.FLOAT,
-        "maxIter": ArgType.INTEGER,
+        "maxIter": ArgType.SCOREBOARD_PLAYER,
         "boxSize": ArgType.FLOAT,
         "target": ArgType.SELECTOR,
+        "startAtEye": ArgType.KEYWORD,
         "stopAtEntity": ArgType.KEYWORD,
         "stopAtBlock": ArgType.KEYWORD,
         "runAtEnd": ArgType.KEYWORD,
         "casterTag": ArgType.KEYWORD,
+        "removeCasterTag": ArgType.KEYWORD,
         "modifyExecuteBeforeStep": ArgType.STRING,
-        "modifyExecuteAfterStep": ArgType.STRING
+        "modifyExecuteAfterStep": ArgType.STRING,
+        "overideString": ArgType.STRING,
+        "overideRecursion": ArgType.ARROW_FUNC
     },
     name='raycast_simple',
     defaults={
@@ -161,18 +171,27 @@ class HardcodeSwitch(JMCFunction):
         "maxIter": "1000",
         "boxSize": "0.001",
         "target": "@e",
+        "startAtEye": "true",
         "stopAtEntity": "true",
         "stopAtBlock": "true",
         "runAtEnd": "false",
         "casterTag": "__self__",
+        "removeCasterTag": "true",
         "modifyExecuteBeforeStep": "",
-        "modifyExecuteAfterStep": ""
+        "modifyExecuteAfterStep": "",
+        "overideString": "",
+        "overideRecursion": ""
+    },
+    ignore={
+        "overideRecursion"
     }
 )
 class RaycastSimple(JMCFunction):
     current_iter = '__current_iter_raycast__'
 
     def call(self) -> str:
+        current_iter = self.current_iter + \
+            self.datapack.get_count(f"{self.name}/current_iter")
         caster_tag = self.args["casterTag"]
         box_size = float(self.args["boxSize"])
         dx = "0" if box_size < 1 else str(box_size - 1)
@@ -183,11 +202,14 @@ class RaycastSimple(JMCFunction):
             target = f'{self.args["target"]}[dx={dx},tag=!{caster_tag}]'
 
         count = self.datapack.get_count(f"{self.name}/loop")
-        raycast_loop = self.datapack.call_func(f"{self.name}/loop", count)
+        raycast_loop = self.datapack.call_func(
+            f"{self.name}/loop", count)[9:]  # len("function ") = 9
 
         is_stop_entity = self.check_bool("stopAtEntity")
         is_stop_block = self.check_bool("stopAtBlock")
         is_run_end = self.check_bool("runAtEnd")
+        is_remove_tag = self.check_bool("removeCasterTag")
+        is_start_eye = self.check_bool("startAtEye")
 
         if is_stop_block:
             self.datapack.add_private_json("tags/blocks", f"{self.name}/default_raycast_pass", {
@@ -236,7 +258,7 @@ class RaycastSimple(JMCFunction):
         if is_stop_entity:
             collide = self.datapack.add_raw_private_function(
                 f"{self.name}/collide", [
-                    f"scoreboard players set {self.current_iter} {self.datapack.var_name} -1",
+                    f"scoreboard players set {current_iter} {self.datapack.var_name} -1",
                     self.args["onHit"]
                 ])
         else:
@@ -251,22 +273,60 @@ class RaycastSimple(JMCFunction):
 
         loop_commands = [
             check_colide,
-            f"scoreboard players remove {self.current_iter} {self.datapack.var_name} 1"
+            f"scoreboard players remove {current_iter} {self.datapack.var_name} 1"
         ]
         if is_stop_block:
             loop_commands.append(
-                f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {self.current_iter} {self.datapack.var_name} -1")
+                f"execute unless block ~ ~ ~ #{self.datapack.namespace}:{self.datapack.private_name}/{self.name}/default_raycast_pass run scoreboard players set {current_iter} {self.datapack.var_name} -1")
         if is_run_end:
             loop_commands.append(
-                f"execute unless score {self.current_iter} {self.datapack.var_name} matches -1 run {collide}")
-        loop_commands.append(
-            f"execute if score {self.current_iter} {self.datapack.var_name} matches 1.. {self.args['modifyExecuteBeforeStep']} positioned ^ ^ ^{self.args['interval']}  {self.args['modifyExecuteAfterStep']} run {raycast_loop}")
+                f"execute unless score {current_iter} {self.datapack.var_name} matches -1 run {collide}")
+
+        if "overideRecursion" in self.raw_args:
+            if not self.args["overideString"]:
+                raise JMCValueError(
+                    "'overideString' missing for overideRecursion",
+                    self.raw_args["overideString"].token,
+                    self.tokenizer)
+            try:
+                recursion_commands = self.datapack.parse_function_token(
+                    Token(
+                        TokenType.PAREN_CURLY,
+                        self.raw_args["overideRecursion"].token.line,
+                        self.raw_args["overideRecursion"].token.col,
+                        self.raw_args["overideRecursion"].token.string.replace(
+                            self.args["overideString"], raycast_loop),
+                    ), self.tokenizer)
+            except JMCSyntaxException as error:
+                error.reinit(
+                    lambda string: string.replace(
+                        self.args["overideString"],
+                        raycast_loop))
+                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
+                raise error
+        else:
+            modifyExecuteBeforeStep = self.args['modifyExecuteBeforeStep'] + \
+                ' ' if self.args['modifyExecuteBeforeStep'] else ''
+            modifyExecuteAfterStep = self.args['modifyExecuteAfterStep'] + \
+                ' ' if self.args['modifyExecuteAfterStep'] else ''
+            recursion_commands = [
+                f"execute if score {current_iter} {self.datapack.var_name} matches 1.. {modifyExecuteBeforeStep}positioned ^ ^ ^{self.args['interval']} {modifyExecuteAfterStep}run function {raycast_loop}"]
+
+        loop_commands.extend(recursion_commands)
 
         self.datapack.add_raw_private_function(
             f"{self.name}/loop",
             loop_commands,
             count=count)
-        return f"""tag @s add {caster_tag}
-scoreboard players set {self.current_iter} {self.datapack.var_name} {self.args["maxIter"]}
-execute anchored eyes positioned ^ ^ ^{self.args['interval']} run {raycast_loop}
-tag @s remove {caster_tag}"""
+
+        if "maxIter" not in self.raw_args or self.raw_args["maxIter"].arg_type == ArgType.INTEGER:
+            set_iter_command = f"scoreboard players set {current_iter} {self.datapack.var_name} {self.args['maxIter']}"
+        else:
+            set_iter_command = f"scoreboard players operation {current_iter} {self.datapack.var_name} = {self.args['maxIter']}"
+
+        return_command = f"""tag @s add {caster_tag}
+{set_iter_command}
+{f"execute anchored eyes positioned ^ ^ ^{self.args['interval']} run " if is_start_eye else ""}function {raycast_loop}"""
+        if is_remove_tag:
+            return_command += f"\ntag @s remove {caster_tag}"
+        return return_command
