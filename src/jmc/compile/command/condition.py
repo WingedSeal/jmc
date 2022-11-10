@@ -313,9 +313,16 @@ def ast_to_commands(
 
     elif ast["operator"] == NOT_OPERATOR:
         body = ast["body"]
-        if not isinstance(ast["body"], Condition):
-            raise ValueError('ast["body"] is noy Condition')
-        conditions, precommand = ast_to_commands(ast["body"])
+        if isinstance(ast["body"], Condition):
+            conditions, precommand = ast_to_commands(ast["body"])
+        elif isinstance(ast["body"], dict):
+            if ast["body"]["operator"] == OR_OPERATOR:
+                ast["body"]["operator"] = AND_OPERATOR
+            elif ast["body"]["operator"] == AND_OPERATOR:
+                ast["body"]["operator"] = OR_OPERATOR
+            conditions, precommand = ast_to_commands(ast["body"])
+        else:
+            raise ValueError('ast["body"] is a list or str')
         for condition in conditions:
             condition.reverse()
         return conditions, precommand
