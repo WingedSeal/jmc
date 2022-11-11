@@ -362,6 +362,7 @@ const BuildinFeatures = [
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
+            newline
         />
     </Feature>,
     <Feature id="item_give" summary="Item.give()" keywords="gave">
@@ -514,6 +515,7 @@ const BuildinFeatures = [
                 { key: "selector", type: "TargetSelector" },
                 { key: "function", type: "Function", default: "()=>{}" },
             ]}
+            newline
         />
     </Feature>,
     <Feature id="timer_set" summary="Timer.set()" keywords="scoreboard">
@@ -589,6 +591,7 @@ const BuildinFeatures = [
                 { key: "stop", type: "integer" },
                 { key: "step", type: "integer", default: "1" },
             ]}
+            newline
         />
         <p>
             To do more complex task, you can use{" "}
@@ -625,6 +628,7 @@ const BuildinFeatures = [
                 { key: "function", type: "ArrowFunction" },
                 { key: "count", type: "integer" },
             ]}
+            newline
         />
         <p>
             To do more complex task, you can use{" "}
@@ -707,6 +711,7 @@ const BuildinFeatures = [
                 { key: "zMin", type: "integer" },
                 { key: "zMax", type: "integer" },
             ]}
+            newline
         />
     </Feature>,
     <Feature
@@ -753,6 +758,7 @@ const BuildinFeatures = [
                 { key: "count", type: "integer", default: "1" },
                 { key: "mode", type: "Keyword", default: "normal" },
             ]}
+            newline
         />
     </Feature>,
     <Feature id="particle_spiral" summary="Particle.spiral()" keywords="">
@@ -772,6 +778,7 @@ const BuildinFeatures = [
                 { key: "count", type: "integer", default: "1" },
                 { key: "mode", type: "Keyword", default: "normal" },
             ]}
+            newline
         />
     </Feature>,
     <Feature id="particle_cylinder" summary="Particle.cylinder()" keywords="">
@@ -792,6 +799,7 @@ const BuildinFeatures = [
                 { key: "count", type: "integer", default: "1" },
                 { key: "mode", type: "Keyword", default: "normal" },
             ]}
+            newline
         />
     </Feature>,
     <Feature id="particle_line" summary="Particle.line()" keywords="">
@@ -810,6 +818,7 @@ const BuildinFeatures = [
                 { key: "count", type: "integer", default: "1" },
                 { key: "mode", type: "Keyword", default: "normal" },
             ]}
+            newline
         />
     </Feature>,
     <Feature
@@ -844,6 +853,31 @@ const BuildinFeatures = [
                 function even if doesn't collide with entity. (It'll run as the
                 caster in this case.)
             </li>
+            <li>
+                <code>modifyExecuteBeforeStep</code> is part of execute command
+                that come before positioning forward. Example:{" "}
+                <code>"rotated ~ ~5"</code>
+            </li>
+            <li>
+                <code>modifyExecuteAfterStep</code> is part of execute command
+                that come after positioning forward.
+            </li>
+            <li>
+                <code>overideString</code> is string that'll be replaced with
+                the recursion function's name (In vanilla syntax).{" "}
+                <span className="text-warning">
+                    Must be used with <code>overideRecursion</code>. Do not use
+                    unless it's necessary
+                </span>
+            </li>
+            <li>
+                <code>overideRecursion</code> is function that'll overide the
+                recursion line entirely.{" "}
+                <span className="text-warning">
+                    Must be used with <code>overideString</code>. Do not use
+                    unless it's necessary
+                </span>
+            </li>
         </ul>
         <Command
             name="Raycast.simple"
@@ -851,14 +885,35 @@ const BuildinFeatures = [
             params={[
                 { key: "onHit", type: "Function" },
                 { key: "onStep", type: "Function", default: "()=>{}" },
+                { key: "onBeforeStep", type: "Function", default: "()=>{}" },
                 { key: "interval", type: "float", default: "0.1" },
                 { key: "maxIter", type: "integer", default: "1000" },
                 { key: "boxSize", type: "float", default: "0.001" },
                 { key: "target", type: "TargetSelector", default: "@e" },
+                { key: "startAtEye", type: "boolean", default: "true" },
                 { key: "stopAtEntity", type: "boolean", default: "true" },
                 { key: "stopAtBlock", type: "boolean", default: "true" },
                 { key: "runAtEnd", type: "boolean", default: "false" },
+                { key: "casterTag", type: "Keyword", default: "__self__" },
+                { key: "removeCasterTag", type: "boolean", default: "true" },
+                {
+                    key: "modifyExecuteBeforeStep",
+                    type: "string",
+                    default: '""',
+                },
+                {
+                    key: "modifyExecuteAfterStep",
+                    type: "string",
+                    default: '""',
+                },
+                { key: "overideString", type: "string", default: '""' },
+                {
+                    key: "overideRecursion",
+                    type: "ArrowFunction",
+                    default: "()=>{}",
+                },
             ]}
+            newline
         />
     </Feature>,
 ];

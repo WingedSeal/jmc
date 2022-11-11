@@ -62,6 +62,8 @@ const getDefault = (param: Parameter) => {
         type = "number";
     } else if (param.type === "TargetSelector") {
         type = "param";
+    } else if (param.type === "boolean") {
+        type = "operator";
     } else {
         type = param.type;
     }
@@ -86,7 +88,12 @@ const Command: React.FC<CommandInterface> = (props) => {
             <CodeText type="class">{module_name}</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">{function_name}</CodeText>(
-            {props.newline && <br />}
+            {props.newline && (
+                <>
+                    <br />
+                    <Tab />
+                </>
+            )}
             {props.params.map((param, index) => (
                 <span key={index}>
                     {param.key}
