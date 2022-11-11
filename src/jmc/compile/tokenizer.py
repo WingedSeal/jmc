@@ -318,7 +318,7 @@ class Tokenizer:
         self.is_comment = False
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(
-                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)
+                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False, suggestion="Both quotation mark should be in the same line")
         elif self.state == TokenType.COMMENT:
             self.state = None
         elif self.state == TokenType.KEYWORD:
