@@ -280,7 +280,7 @@ class Tokenizer:
             self.token += char
         return False
 
-    def __parse_keyword(self, char: str) -> bool:
+    def __parse_keyword(self, char: str, expect_semicolon: bool) -> bool:
         if char in {
             Quote.SINGLE,
             Quote.DOUBLE,
@@ -292,13 +292,20 @@ class Tokenizer:
             self.append_token()
             return False
         elif char == Re.SEMICOLON:
-            if self.allow_semicolon:
-                self.allow_semicolon = False
+            if expect_semicolon:
+                self.append_token()
+                return False
+            if not self.allow_semicolon:
+                raise JMCSyntaxException(
+                    "Unexpected semicolon(;)", None, self)
+
+            self.allow_semicolon = False
+            if self.token in {'I', 'B', 'L'}:
                 self.token += char
                 return True
             else:
-                self.append_token()
-                return False
+                raise JMCSyntaxException(
+                    "Unexpected semicolon(;)", None, self)
         else:
             self.token += char
             return True
@@ -373,18 +380,11 @@ class Tokenizer:
         return False
 
     def __parse_chars(self, string: str, expect_semicolon: bool):
-        if self.allow_semicolon and string[0] not in {'I', 'B', 'L'}:
-            self.allow_semicolon = False
-        for index, char in enumerate(string):
+        for char in string:
             self.col += 1
-            if char == Re.SEMICOLON:
-                if self.allow_semicolon and self.state == TokenType.KEYWORD and index == 1:
-                    pass
-
-                elif not expect_semicolon and self.state in {
-                        TokenType.KEYWORD, None}:
-                    raise JMCSyntaxException(
-                        "Unexpected semicolon(;)", None, self)
+            if char == Re.SEMICOLON and self.state is None and not expect_semicolon:
+                raise JMCSyntaxException(
+                    "Unexpected semicolon(;)", None, self)
 
             if char == Re.NEW_LINE:
                 self.__parse_newline(char)
@@ -399,7 +399,7 @@ class Tokenizer:
 
             if self.state == TokenType.KEYWORD:
 
-                if self.__parse_keyword(char):
+                if self.__parse_keyword(char, expect_semicolon):
                     self.is_slash = (char == Re.SLASH)
                     continue
 
