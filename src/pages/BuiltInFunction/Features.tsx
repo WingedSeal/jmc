@@ -841,6 +841,10 @@ const BuildinFeatures = [
                 <code>target</code> is acceptable target for collution.
             </li>
             <li>
+                <code>startAtEye</code> is wheter to start at the entity's eyes.
+                If set to false it'll use the current position of the command.
+            </li>
+            <li>
                 <code>stopAtEntity</code> is wheter to stop the raycast when
                 colliding with the entity.
             </li>
