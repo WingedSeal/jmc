@@ -2,6 +2,8 @@ import React from "react";
 import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.svg";
 import { ReactComponent as WindowsSvg } from "../../assets/image/windows.svg";
 import { ReactComponent as PythonSvg } from "../../assets/image/python.svg";
+import { ReactComponent as LinuxSvg } from "../../assets/image/linux.svg";
+import CodeBlock from "../../components/CodeBlock";
 
 const Download = () => {
     return (
@@ -29,18 +31,24 @@ const Download = () => {
                         </a>
                     </div>
                     <div className="flex flex-col flex-nowrap items-center m-8">
-                        <PythonSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
+                        <LinuxSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
                         <a
-                            href="https://github.com/WingedSeal/jmc/releases/latest"
+                            href="https://github.com/WingedSeal/jmc/releases/download/JMC.bin"
                             target="_blank"
                             rel="noreferrer"
                             className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline"
                         >
                             <h2 className="m-auto flex">
                                 <DownloadSvg className="h-[1.5rem] mr-3" />
-                                Python
+                                Linux
                             </h2>
                         </a>
+                    </div>
+                    <div className="flex flex-col flex-nowrap items-center m-8">
+                        <PythonSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
+                        <div className="m-auto p-2 flex bg-[#292D3E] text-[#eeffff] h-16 w-44 md:h-24 md:w-72 rounded-md text-sm md:text-lg">
+                            <p className="m-auto">pip install jmcfunction</p>
+                        </div>
                     </div>
                 </div>
             </section>
