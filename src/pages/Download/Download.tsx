@@ -33,7 +33,7 @@ const Download = () => {
                     <div className="flex flex-col flex-nowrap items-center m-8">
                         <LinuxSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
                         <a
-                            href="https://github.com/WingedSeal/jmc/releases/download/JMC.bin"
+                            href="https://github.com/WingedSeal/jmc/releases/latest/download/JMC.bin"
                             target="_blank"
                             rel="noreferrer"
                             className="h-16 w-44 md:h-24 md:w-72 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline"
