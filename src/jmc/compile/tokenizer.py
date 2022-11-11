@@ -79,14 +79,18 @@ class Token:
 
         :return: Length of the string
         """
-        return len(self.string) + \
-            2 if self.token_type == TokenType.STRING else len(self.string)
+        return len(repr(self.string)) if self.token_type == TokenType.STRING else len(
+            self.string)
 
     def add_quotation(self) -> str:
         if self.token_type == TokenType.STRING:
-            return f'"{self.string}"'
+            return repr(self.string)
         else:
             raise ValueError("TokenType is not STRING in Token.add_quitation")
+
+    def get_full_string(self) -> str:
+        return repr(
+            self.string) if self.token_type == TokenType.STRING else self.string
 
     @classmethod
     def empty(cls, string: str = "",

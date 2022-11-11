@@ -311,7 +311,7 @@ class FuncContent:
 
         if '\n' in self.command[key_pos + 1].string:
             raise JMCSyntaxException(
-                "Newline found in say command", self.command[key_pos + 1], self.tokenizer)
+                "Newline found in say command", self.command[key_pos + 1], self.tokenizer, suggestion=r"Use '\\n' instead of '\n'")
         append_commands(
             self.commands, f"say {self.command[key_pos+1].string}")
 

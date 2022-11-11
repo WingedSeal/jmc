@@ -41,7 +41,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
         col = tokenizer.col
         line = tokenizer.line
     else:
-        string = token.string
+        string = token.get_full_string()
         length = token.length
         col = token.col
         line = token.line
