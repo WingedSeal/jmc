@@ -169,7 +169,7 @@ class HardcodeSwitch(JMCFunction):
         "onBeforeStep": "",
         "interval": "0.1",
         "maxIter": "1000",
-        "boxSize": "0.001",
+        "boxSize": "0.1",
         "target": "@e",
         "startAtEye": "true",
         "stopAtEntity": "true",
@@ -264,7 +264,7 @@ class RaycastSimple(JMCFunction):
         else:
             collide = self.args["onHit"]
 
-        if box_size <= 0.001:
+        if box_size <= 0.01:
             check_colide = f"execute as {target} positioned ~-{1-box_size} ~-{1-box_size} ~-{1-box_size} if entity @s[dx=0] positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} run {collide}"
         elif box_size < 1:
             check_colide = f"execute positioned ~-{(1-box_size/2)} ~-{(1-box_size/2)} ~-{(1-box_size/2)} as {target} positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} if entity @s[dx=0] positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"

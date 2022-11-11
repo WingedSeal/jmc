@@ -790,7 +790,7 @@ class Tokenizer:
                         arg = ""
                     else:
                         raise JMCSyntaxException(
-                            "Unexpected token", token, self, suggestion=f"Expected '=' (got '{token.string}')")
+                            "Unexpected keyword", token, self, suggestion=f"Expected '=' (got '{token.string}')")
                 elif key:
                     arg = token.string
                     if token.string == '=':
@@ -806,6 +806,9 @@ class Tokenizer:
                 if arg:
                     add_arg(last_token)
             elif token.token_type in {TokenType.PAREN_ROUND, TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
+                if token.token_type == TokenType.PAREN_ROUND and arg:
+                    raise JMCSyntaxException(
+                        "Unexpected round parenthesis", token, self, display_col_length=False, suggestion=f"Expected '=' or ','")
                 if token.string == "()":
                     arrow_func_state = 1
                 else:
