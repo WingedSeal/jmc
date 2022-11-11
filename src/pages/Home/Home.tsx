@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import LoadingScreen from "../../components/LoadingScreen";
 import "./Home.css";
+import { ReactComponent as DiscordSvg } from "../../assets/image/discord.svg";
+import { ReactComponent as GithubSvg } from "../../assets/image/github.svg";
+import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.svg";
+import { Link } from "react-router-dom";
 
 const DownwardArrow = () => {
     return (
@@ -211,6 +215,41 @@ const Home = () => {
             <section className="min-h-screen bg-secondary-dark flex flex-wrap flex-row-reverse px-2 py-4 md:px-10">
                 <WhyJMC />
                 <WhyJMCDesc />
+            </section>
+            <section className="min-h-screen bg-primary-dark flex flex-wrap pt-4 md:pt-16 px-2 md:px-10 flex-col items-centers">
+                <div className="flex flex-row flex-wrap justify-evenly mt-4 md:mt-[10vh]">
+                    <div className="flex flex-col flex-nowrap items-center m-8">
+                        <DiscordSvg className="mb-4 md:mb-8 h-[min(30vh,30vw)]" />
+                        <a
+                            href="https://discord.gg/PNWKpwdzD3"
+                            target="blank"
+                            rel="noreferrer"
+                            className="h-16 w-64 md:h-24 md:w-96 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline rounded-3xl"
+                        >
+                            <h2 className="m-auto flex">Discord Server</h2>
+                        </a>
+                    </div>
+                    <div className="flex flex-col flex-nowrap items-center m-8">
+                        <GithubSvg className="mb-4 md:mb-8 h-[min(30vh,30vw)] fill-white" />
+                        <a
+                            href="https://github.com/WingedSeal/jmc"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="h-16 w-64 md:h-24 md:w-96 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline rounded-3xl"
+                        >
+                            <h2 className="m-auto flex">GitHub Repository</h2>
+                        </a>
+                    </div>
+                    <div className="flex flex-col flex-nowrap items-center m-8">
+                        <DownloadSvg className="mb-4 md:mb-8 h-[min(30vh,30vw)] fill-primary" />
+                        <Link
+                            to="/download"
+                            className="h-16 w-64 md:h-24 md:w-96 bg-tertiary flex text-black font-bold text-lg md:text-3xl hover:bg-tertiary-contrast no-underline rounded-3xl"
+                        >
+                            <h2 className="m-auto flex">Download Now</h2>
+                        </Link>
+                    </div>
+                </div>
             </section>
         </>
     );
