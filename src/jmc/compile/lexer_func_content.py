@@ -37,7 +37,8 @@ FIRST_ARGUMENTS = {
     *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
     *FLOW_CONTROL_COMMANDS,
-    *EXECUTE_EXCLUDED_COMMANDS
+    *EXECUTE_EXCLUDED_COMMANDS,
+    *VANILLA_COMMANDS
 } - {'give', 'if'}
 """Set of all vanilla commands and JMC custom syntax
 - `if` is excluded since it can be used in execute
