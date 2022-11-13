@@ -808,6 +808,114 @@ tellraw @s "Wow! You crafted a special diamond"
             """)
         )
 
+    def test_ItemCreate(self):
+        pack = JMCPack().set_jmc_file("""
+Item.create(
+    veryCoolSword,
+    carrot_on_a_stick,
+    "&<gold, bold>A very cool sword",
+    ["&<red>It is, indeed, very cool.",
+    "&<red>Right click to be cool."],
+    nbt={CustomModelData:100},
+    onClick=()=>{
+        say "I'm very cool";
+        effect give @s speed 1 255 True;
+    }
+);
+execute as @a run Item.give(veryCoolSword);
+        """).build()
+
+        pack2 = JMCPack().set_jmc_file("""
+Item.create(
+    veryCoolSword,
+    carrot_on_a_stick,
+    "&<gold, bold>A very cool sword",
+    lore=["&<red>It is, indeed, very cool.",
+    "&<red>Right click to be cool."],
+    nbt={CustomModelData:100},
+    onClick=()=>{
+        say "I'm very cool";
+        effect give @s speed 1 255 True;
+    }
+);
+execute as @a run Item.give(veryCoolSword);
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            pack2.built
+        )
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/tick.json
+{
+  "values": [
+    "TEST:__tick__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard objectives add __item__rc__ used:carrot_on_a_stick
+execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text": "A very cool sword", "color": "gold", "bold": true, "italic": false}',Lore:['{"text": "It is, indeed, very cool.", "color": "red", "italic": false}','{"text": "Right click to be cool.", "color": "red", "italic": false}']}} 1
+> VIRTUAL/data/TEST/functions/__tick__.mcfunction
+execute as @a[scores={__item__rc__=1..}] at @s run function TEST:__private__/item_create/main
+> VIRTUAL/data/TEST/functions/__private__/item_create/main.mcfunction
+scoreboard players set @s __item__rc__ 0
+execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.__item_id__
+execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/item_create/found
+> VIRTUAL/data/TEST/functions/__private__/item_create/found.mcfunction
+execute if score __item_id__ __variable__ matches 1 at @s run function TEST:__private__/item_create/0
+> VIRTUAL/data/TEST/functions/__private__/item_create/0.mcfunction
+say I'm very cool
+effect give @s speed 1 255 True
+            """)
+        )
+
+    def test_ItemGive(self):
+        with self.assertRaises(JMCValueError):
+            JMCPack().set_jmc_file("""
+execute as @a run Item.give(veryCoolSword);
+        """).build()
+
+
+class TestParenthesis(unittest.TestCase):
+
+    def test_selector(self):
+        pack = JMCPack().set_jmc_file(r"""
+Timer.set(test, @a[tag=test], 1);
+    """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+scoreboard players set @a[tag=test] test 1
+            """)
+        )
+
+    def test_square_paren_in_nonselector(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+Timer.set(test[raise=error], @a[tag=test], 1);
+            """).build()
+
 
 if __name__ == '__main__':
     unittest.main()

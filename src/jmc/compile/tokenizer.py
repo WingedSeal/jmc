@@ -738,18 +738,15 @@ class Tokenizer:
             arg = ""
 
         for token in keywords:
-            if token.token_type == TokenType.PAREN_SQUARE:
-                if not arg:
-                    raise JMCSyntaxException(
-                        f"Unexpected square parenthesis", token, self, display_col_length=False)
-                if is_connected(token, last_token):
+            if token.token_type == TokenType.PAREN_SQUARE and arg and is_connected(
+                    token, last_token):
+                if arg.startswith('@') and arg[1] in {'p', 'a', 'r', 's', 'e'}:
                     arg += token.string
                     add_arg(last_token)
                     continue
-                else:
-                    raise JMCSyntaxException(
-                        f"Unexpected square parenthesis", token, self,
-                        display_col_length=False)
+                raise JMCSyntaxException(
+                    f"Unexpected square parenthesis", token, self,
+                    display_col_length=False)
 
             if expecting_comma and token.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
