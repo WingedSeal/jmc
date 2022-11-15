@@ -3,7 +3,7 @@
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property
-from ..utils import ArgType, eval_expr, find_scoreboard_player_type
+from ..utils import ArgType, NumberType, eval_expr, find_scoreboard_player_type
 from .._flow_control import parse_switch
 
 
@@ -111,6 +111,9 @@ class HardcodeRepeat(JMCFunction):
         "function",
         "switch"
     },
+    number_type={
+        "count": NumberType.POSITIVE
+    }
 )
 class HardcodeSwitch(JMCFunction):
     def call(self) -> str:
@@ -184,6 +187,11 @@ class HardcodeSwitch(JMCFunction):
     },
     ignore={
         "overideRecursion"
+    },
+    number_type={
+        "interval": NumberType.POSITIVE,
+        "maxIter": NumberType.POSITIVE,
+        "boxSize": NumberType.ZERO_POSITIVE
     }
 )
 class RaycastSimple(JMCFunction):
@@ -264,7 +272,9 @@ class RaycastSimple(JMCFunction):
         else:
             collide = self.args["onHit"]
 
-        if box_size <= 0.01:
+        if box_size == 0:
+            check_colide = f"execute as {target} positioned ~-1 ~-1 ~-1 if entity @s[dx=0] run {collide}"
+        elif box_size <= 0.01:
             check_colide = f"execute as {target} positioned ~-{1-box_size} ~-{1-box_size} ~-{1-box_size} if entity @s[dx=0] positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} run {collide}"
         elif box_size < 1:
             check_colide = f"execute positioned ~-{(1-box_size/2)} ~-{(1-box_size/2)} ~-{(1-box_size/2)} as {target} positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} if entity @s[dx=0] positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"

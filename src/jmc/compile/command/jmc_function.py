@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from jmc.compile.utils import convention_jmc_to_mc
 
-from .utils import ArgType, find_scoreboard_player_type, verify_args, Arg
+from .utils import ArgType, NumberType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, Tokenizer
@@ -55,7 +55,7 @@ class JMCFunction:
                  'call_string', 'defaults', '_ignore',
                  'token', 'datapack', 'tokenizer',
                  'is_execute', 'var', 'args',
-                 'raw_args')
+                 'raw_args', 'number_type')
     _decorated: bool = False
     """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -68,6 +68,8 @@ class JMCFunction:
     """String that will be used in .jmc to call the function (Set by decorator)"""
     defaults: dict[str, str]
     """Defaults value of each parameter as string (Set by decorator)"""
+    number_type: dict[str, NumberType]
+    """Dictionary containing some number parameter that need to be specific (Set by decorator)"""
     _ignore: set[str]
     """Private set of parameter for parser to ignore and leave as is (Set by decorator)"""
 
@@ -148,6 +150,31 @@ class JMCFunction:
                 self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
             else:
                 self.args[key] = arg.token.string
+
+        for parameter, number_type in self.number_type.items():
+            if self.arg_type[parameter] not in {
+                    ArgType.INTEGER, ArgType.FLOAT}:
+                raise ValueError(f"{parameter} paremeter is not number")
+
+            if number_type == NumberType.POSITIVE:
+                if float(self.args[parameter]) <= 0:
+                    raise JMCValueError(
+                        f"{parameter} can only be {number_type.value}",
+                        self.raw_args[parameter].token,
+                        tokenizer)
+            elif number_type == NumberType.ZERO_POSITIVE:
+                if float(self.args[parameter]) < 0:
+                    raise JMCValueError(
+                        f"{parameter} can only be {number_type.value}",
+                        self.raw_args[parameter].token,
+                        tokenizer)
+
+            elif number_type == NumberType.NON_ZERO:
+                if float(self.args[parameter]) == 0:
+                    raise JMCValueError(
+                        f"{parameter} can only be {number_type.value}",
+                        self.raw_args[parameter].token,
+                        tokenizer)
 
         self.__post__init__()
 
@@ -248,7 +275,7 @@ class JMCFunction:
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
-}, ignore: set[str] = set()) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+}, ignore: set[str] = set(), number_type: dict[str, NumberType] = {}) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -257,7 +284,8 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
     :param name: String for the function's name, for further use
     :param arg_type: Dictionary containing all parameter and it's ArgType
     :param defaults: Defaults value of each parameter as string, defaults to {}
-    :param ignore: Set of parameter for parser to ignore and leave as is
+    :param ignore: Set of parameter for parser to ignore and leave as is, defaults to set()
+    :param number_type: Dictionary containing some number parameter that need to be specific, defaults to {}
     :return: A decorator for JMCFunction class
     """
     def decorator(cls: type[JMCFunction]) -> type[JMCFunction]:
@@ -271,6 +299,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
         cls.call_string = call_string
         cls.arg_type = arg_type
         cls.defaults = defaults
+        cls.number_type = number_type
         # for default in defaults:
         #     if default not in arg_type:
         #         raise BaseException()

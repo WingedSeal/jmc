@@ -3,7 +3,7 @@
 import math
 from typing import Iterator
 from ...exception import JMCSyntaxException, JMCValueError
-from ..utils import ArgType
+from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
@@ -60,6 +60,9 @@ class TimerSet(JMCFunction):
     defaults={
         "selector": "@s",
         "amount": "1"
+    },
+    number_type={
+        "amount": NumberType.ZERO_POSITIVE
     }
 )
 class ItemGive(JMCFunction):
@@ -88,6 +91,9 @@ class ItemGive(JMCFunction):
         "pos": "~ ~ ~",
         "count": "1",
         "nbt": ""
+    },
+    number_type={
+        "count": NumberType.POSITIVE
     }
 )
 class ItemSummon(JMCFunction):
@@ -123,6 +129,9 @@ class ItemSummon(JMCFunction):
     name='item_replace_block',
     defaults={
         "count": "1"
+    },
+    number_type={
+        "count": NumberType.POSITIVE
     }
 )
 class ItemReplaceBlock(JMCFunction):
@@ -149,6 +158,9 @@ class ItemReplaceBlock(JMCFunction):
     name='item_replace_entity',
     defaults={
         "count": "1"
+    },
+    number_type={
+        "count": NumberType.POSITIVE
     }
 )
 class ItemReplaceEntity(JMCFunction):
@@ -195,12 +207,6 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
     return commands
 
 
-def _check_spread(instance: JMCFunction, key: str = "spread"):
-    if instance.args[key] == "0":
-        raise JMCValueError(
-            f"'{key}' is zero", instance.raw_args[key].token, instance.tokenizer)
-
-
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string='Particle.circle',
@@ -217,6 +223,12 @@ def _check_spread(instance: JMCFunction, key: str = "spread"):
         "speed": "1",
         "count": "1",
         "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
     }
 )
 class ParticleCircle(JMCFunction):
@@ -232,7 +244,6 @@ class ParticleCircle(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
-        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -265,6 +276,12 @@ class ParticleCircle(JMCFunction):
         "speed": "1",
         "count": "1",
         "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "height": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
     }
 )
 class ParticleSpiral(JMCFunction):
@@ -284,8 +301,6 @@ class ParticleSpiral(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
-
-        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -320,6 +335,14 @@ class ParticleSpiral(JMCFunction):
         "speed": "1",
         "count": "1",
         "mode": "normal",
+    },
+    number_type={
+        "spreadXZ": NumberType.POSITIVE,
+        "spreadY": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "height": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
     }
 )
 class ParticleCylinder(JMCFunction):
@@ -338,9 +361,6 @@ class ParticleCylinder(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
-
-        _check_spread(self, "spreadXZ")
-        _check_spread(self, "spreadY")
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -374,6 +394,12 @@ class ParticleCylinder(JMCFunction):
         "speed": "1",
         "count": "1",
         "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "distance": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
     }
 )
 class ParticleLine(JMCFunction):
@@ -385,8 +411,6 @@ class ParticleLine(JMCFunction):
         if self.args['mode'] not in {'force', 'normal'}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
-
-        _check_spread(self)
 
         return self.datapack.add_raw_private_function(
             self.name,

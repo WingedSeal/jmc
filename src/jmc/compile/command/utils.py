@@ -64,6 +64,12 @@ def find_scoreboard_player_type(
         player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
 
+class NumberType(Enum):
+    POSITIVE = "more than zero"
+    ZERO_POSITIVE = "more than or equal to zero"
+    NON_ZERO = "non-zero"
+
+
 class ArgType(Enum):
     ARROW_FUNC = "arrow(anonymous) function"
     JS_OBJECT = "JavaScript object (dictionary)"

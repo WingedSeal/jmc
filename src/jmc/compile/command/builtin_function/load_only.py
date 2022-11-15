@@ -3,7 +3,7 @@ from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import Item
 from ...datapack import DataPack
-from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText
+from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
