@@ -808,6 +808,33 @@ tellraw @s "Wow! You crafted a special diamond"
             """)
         )
 
+    def test_empty_list(self):
+        pack = JMCPack().set_jmc_file(r"""
+Item.create(
+    block,
+    polar_bear_spawn_egg,
+    "&6Block",
+    [],
+    nbt={EntityTag:{id:"minecraft:pig"}}
+);
+Item.give(block, @a);
+        """).build()
+
+        self.assertDictEqual(pack.built,
+                             string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text": "Block", "color": "gold", "italic": false}',Lore:[]}} 1
+                            """)
+                             )
+
     def test_ItemCreate(self):
         pack = JMCPack().set_jmc_file("""
 Item.create(
