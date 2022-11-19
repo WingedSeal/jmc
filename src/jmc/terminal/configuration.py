@@ -26,13 +26,13 @@ class Configuration:
     output: Path = Path()
 
     @property
-    def target_str(self):
+    def target_str(self) -> str:
         if self.target is None:
             raise ValueError("Configuration not initialized")
         return self.target.absolute().as_posix()
 
     @property
-    def output_str(self):
+    def output_str(self) -> str:
         if self.output is None:
             raise ValueError("Configuration not initialized")
         return self.output.absolute().as_posix()

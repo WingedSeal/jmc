@@ -142,9 +142,7 @@ class DataPack:
     :param namespace: Datapack's namespace
     :param lexer: Lexer object
     """
-    __slot__ = ('PRIVATE_NAME', 'LOAD_NAME', 'TICK_NAME',
-                'VAR_NAME', 'INT_NAME', 'VARIABLE_SIGN',
-                'data', '_tick_json', 'ints',
+    __slot__ = ('data', 'ints',
                 'functions', 'load_function', 'jsons',
                 'private_functions', 'private_function_count',
                 '__scoreboards', 'loads', 'ticks', 'namespace',
@@ -156,8 +154,6 @@ class DataPack:
     int_name = '__int__'
     VARIABLE_SIGN = '$'
     """Data read from header file(s)"""
-
-    _tick_json = None
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")

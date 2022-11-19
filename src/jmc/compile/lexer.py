@@ -26,7 +26,6 @@ JSON_FILE_TYPES = [
     "predicates",
     "recipes",
     "structures",
-    "tags",
     "worldgen/biome",
     "worldgen/configured_carver",
     "worldgen/configured_feature",
@@ -229,7 +228,8 @@ class Lexer:
 
         json_type = convention_jmc_to_mc(
             command[1], tokenizer, is_make_lower=False)
-        if json_type not in JSON_FILE_TYPES:
+        if json_type not in JSON_FILE_TYPES and not json_type.startswith(
+                "tags/"):
             raise MinecraftSyntaxWarning(
                 f"Unrecognized JSON file's type({json_type})", command[2], tokenizer
             )

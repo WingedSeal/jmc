@@ -156,7 +156,7 @@ class Tokenizer:
     :param allow_semicolon: Whether to allow semicolon at the 2nd char(For minecraft array `[I;int, ...]`), defaults to False
     """
     __slots__ = ('line', 'col', 'state',
-                 'token', 'token_pos', 'keywords',
+                 'token_str', 'token_pos', 'keywords',
                  'list_of_keywords', 'quote', 'is_escaped',
                  'paren', 'r_paren', 'paren_count',
                  'is_string', 'is_slash', 'raw_string',
@@ -170,7 +170,7 @@ class Tokenizer:
 
     state: TokenType | None
     """Current TokenType"""
-    token: str
+    token_str: str
     """Current string for token"""
     token_pos: Pos | None
     """Position for creating token"""
@@ -231,9 +231,9 @@ class Tokenizer:
             Token(self.state,
                   self.token_pos.line,
                   self.token_pos.col,
-                  self.token)
+                  self.token_str)
         )
-        self.token = ""
+        self.token_str = ""
         self.token_pos = None
         self.state = None
 
@@ -256,14 +256,14 @@ class Tokenizer:
             self.state = TokenType.STRING
             self.token_pos = Pos(self.line, self.col)
             self.quote = char
-            self.token += char
+            self.token_str += char
         elif re.match(Re.WHITESPACE, char):
             return True
         elif char == Re.SEMICOLON:
             self.append_keywords()
         elif char in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
             self.state = TokenType.PAREN
-            self.token += char
+            self.token_str += char
             self.token_pos = Pos(self.line, self.col)
             self.paren = char
             self.r_paren = PAREN_PAIR[char]
@@ -274,14 +274,14 @@ class Tokenizer:
         elif char == Re.HASH and self.col == 1:
             self.state = TokenType.COMMENT
         elif char == Re.COMMA:
-            self.token += char
+            self.token_str += char
             self.token_pos = Pos(self.line, self.col)
             self.state = TokenType.COMMA
             self.append_token()
         else:
             self.state = TokenType.KEYWORD
             self.token_pos = Pos(self.line, self.col)
-            self.token += char
+            self.token_str += char
         return False
 
     def __parse_keyword(self, char: str, expect_semicolon: bool) -> bool:
@@ -304,14 +304,14 @@ class Tokenizer:
                     "Unexpected semicolon(;)", None, self)
 
             self.allow_semicolon = False
-            if self.token in {'I', 'B', 'L'}:
-                self.token += char
+            if self.token_str in {'I', 'B', 'L'}:
+                self.token_str += char
                 return True
             else:
                 raise JMCSyntaxException(
                     "Unexpected semicolon(;)", None, self)
         else:
-            self.token += char
+            self.token_str += char
             return True
 
     def __parse_newline(self, char: str):
@@ -324,22 +324,22 @@ class Tokenizer:
         elif self.state == TokenType.KEYWORD:
             self.append_token()
         elif self.state == TokenType.PAREN:
-            self.token += char
+            self.token_str += char
         self.line += 1
         self.col = 0
 
     def __parse_string(self, char: str):
-        self.token += char
+        self.token_str += char
         if char == Re.BACKSLASH and not self.is_escaped:
             self.is_escaped = True
         elif char == self.quote and not self.is_escaped:
-            self.token = literal_eval(self.token)
+            self.token_str = literal_eval(self.token_str)
             self.append_token()
         elif self.is_escaped:
             self.is_escaped = False
 
     def __parse_paren(self, char: str, expect_semicolon: bool) -> bool:
-        self.token += char
+        self.token_str += char
         if self.is_string:
             if char == Re.BACKSLASH and not self.is_escaped:
                 self.is_escaped = True
@@ -395,8 +395,8 @@ class Tokenizer:
                 continue
 
             if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN:
-                self.token = self.token[:-1]
-                if self.token:
+                self.token_str = self.token_str[:-1]
+                if self.token_str:
                     self.append_token()
                 self.state = TokenType.COMMENT
                 continue
@@ -446,7 +446,7 @@ class Tokenizer:
         self.col = col - 1
         self.keywords = []
         self.state = None
-        self.token = ""
+        self.token_str = ""
         self.token_pos = None
         # String
         self.quote = None
@@ -473,8 +473,8 @@ class Tokenizer:
                 raise ValueError("Tokenizer.token_pos is stil None")
             raise JMCSyntaxException(
                 "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, self.paren if self.paren is not None else ''), self)
-        elif expect_semicolon and (self.keywords or self.token):
-            if self.token != "":
+        elif expect_semicolon and (self.keywords or self.token_str):
+            if self.token_str != "":
                 self.append_token()
             if allow_last_missing_semicolon:
                 self.append_keywords()
@@ -483,7 +483,7 @@ class Tokenizer:
                     "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
 
         if not expect_semicolon:
-            if self.token != "":
+            if self.token_str != "":
                 self.append_token()
             if self.keywords:
                 self.append_keywords()
