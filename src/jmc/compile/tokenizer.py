@@ -83,18 +83,27 @@ class Token:
             self.string)
 
     def add_quotation(self) -> str:
+        """Get self.string including quotation mark (Raise error when the token_type is not TokenType.STRING)"""
         if self.token_type == TokenType.STRING:
             return repr(self.string)
         else:
             raise ValueError("TokenType is not STRING in Token.add_quitation")
 
     def get_full_string(self) -> str:
+        """Get self.string including quotation mark"""
         return repr(
             self.string) if self.token_type == TokenType.STRING else self.string
 
     @classmethod
     def empty(cls, string: str = "",
               token_type: TokenType = TokenType.KEYWORD) -> "Token":
+        """
+        Create an empty token
+
+        :param string: New token's string, defaults to ""
+        :param token_type: New token's TokenType, defaults to TokenType.KEYWORD
+        :return: New token
+        """
         return cls(token_type, -1, -1, string)
 
 

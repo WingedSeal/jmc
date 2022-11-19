@@ -156,12 +156,12 @@ class FuncContent:
 
         for key_pos, token in enumerate(self.command):
             if not self.is_expect_command:
-                self._not_expect_command(key_pos, token)
+                self.__not_expect_command(key_pos, token)
                 continue
-            if self._expect_command(key_pos, token):
+            if self.__expect_command(key_pos, token):
                 break
 
-    def _not_expect_command(self, key_pos: int, token: Token) -> None:
+    def __not_expect_command(self, key_pos: int, token: Token) -> None:
         if token.string == 'run' and token.token_type == TokenType.KEYWORD:
             if not self.is_execute:
                 raise MinecraftSyntaxWarning(
@@ -209,7 +209,7 @@ class FuncContent:
         else:
             append_commands(self.commands, token.string)
 
-    def _expect_command(self, key_pos: int, token: Token) -> bool:
+    def __expect_command(self, key_pos: int, token: Token) -> bool:
         self.is_expect_command = False
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
