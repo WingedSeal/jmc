@@ -838,6 +838,9 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected list/array", token, self, suggestion="Expected [")
 
+        if token.string == '[]':
+            return []
+
         keywords = self.parse(token.string[1:-
                                            1], line=token.line, col=token.col +
                               1, expect_semicolon=False)[0]
