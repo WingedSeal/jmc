@@ -71,6 +71,15 @@ say "Hello World"
 say "Hello World";
             """).build()
 
+    def test_first_arg_exception(self):
+        JMCPack().set_jmc_file("""
+scoreboard objectives add my_obj trigger;
+            """).build()
+
+        JMCPack().set_jmc_file("""
+execute as @p run effect give @s speed;
+            """).build()
+
 
 if __name__ == '__main__':
     unittest.main()

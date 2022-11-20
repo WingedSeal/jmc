@@ -39,15 +39,24 @@ FIRST_ARGUMENTS = {
     *FLOW_CONTROL_COMMANDS,
     *EXECUTE_EXCLUDED_COMMANDS,
     *VANILLA_COMMANDS
-} - {'give', 'if'}
+}
 """Set of all vanilla commands and JMC custom syntax
 - `if` is excluded since it can be used in execute
 - `give` is exluced since it can also be arguments (`/effect give`)"""
 
-ALLOW_NUMBER_AFTER = [
+FIRST_ARGUMENTS_EXCEPTION = {
+    "give": "effect",
+    "if": "execute",
+    "schedule": "function",
+    "trigger": "scoreboard"
+}
+"""Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (that command)"""
+
+
+ALLOW_NUMBER_AFTER_CURLY_PAREN = {
     'give',
     'clear'
-]
+}
 """List of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
 
@@ -153,15 +162,20 @@ class FuncContent:
     def parse_commands(self) -> None:
         self.is_expect_command = True
         self.is_execute = (self.command[0].string == 'execute')
+        command_pos = None
 
         for key_pos, token in enumerate(self.command):
             if not self.is_expect_command:
-                self.__not_expect_command(key_pos, token)
+                if command_pos is None:
+                    raise ValueError("Unknown command_pos")
+                self.__not_expect_command(key_pos, token, command_pos)
                 continue
+            command_pos = key_pos
             if self.__expect_command(key_pos, token):
                 break
 
-    def __not_expect_command(self, key_pos: int, token: Token) -> None:
+    def __not_expect_command(
+            self, key_pos: int, token: Token, command_pos: int) -> None:
         if token.string == 'run' and token.token_type == TokenType.KEYWORD:
             if not self.is_execute:
                 raise MinecraftSyntaxWarning(
@@ -172,8 +186,9 @@ class FuncContent:
             token.token_type == TokenType.KEYWORD and
             token.string in FIRST_ARGUMENTS and
             not (
-                token.string == 'function' and
-                self.commands[-1] == 'schedule'
+                token.string in FIRST_ARGUMENTS_EXCEPTION
+                and
+                self.commands[command_pos] == FIRST_ARGUMENTS_EXCEPTION[token.string]
             )
         ):
             raise JMCSyntaxException(
@@ -282,14 +297,14 @@ class FuncContent:
                 "Expected command, got number", token, self.tokenizer, display_col_length=False)
 
         if not self.command_strings[-1].startswith('execute'):
-            for _cmd in ALLOW_NUMBER_AFTER:
+            for _cmd in ALLOW_NUMBER_AFTER_CURLY_PAREN:
                 if self.command_strings[-1].startswith(_cmd):
                     self.command_strings[-1] += ' ' + token.string
                     return
             raise JMCSyntaxException(
                 "Unexpected number", token, self.tokenizer, display_col_length=False)
 
-        for _cmd in ALLOW_NUMBER_AFTER:
+        for _cmd in ALLOW_NUMBER_AFTER_CURLY_PAREN:
             if _cmd in self.command_strings[-1]:
                 self.command_strings[-1] += ' ' + token.string
                 return
