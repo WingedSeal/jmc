@@ -6,36 +6,36 @@ JMC (JavaScript-like Minecraft Function) is a mcfunction extension language for 
 
 ![JMC-icon](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/jmc_icon192.png?raw=true)
 
-**Documentation:** https://wingedseal.github.io/jmc/
+**Documentation:** <https://wingedseal.github.io/jmc/>
 
-**Trailer:** https://www.youtube.com/watch?v=cFgvCScpirw&ab_channel=WingedSeal
+**Trailer:** <https://www.youtube.com/watch?v=cFgvCScpirw&ab_channel=WingedSeal>
 
 ---
 
 ## Why use JMC?
 
--   Avoid repetitive tasks
--   Superior Syntax
--   Low learning curve
--   Many more features
+- Avoid repetitive tasks
+- Superior Syntax
+- Low learning curve
+- Many more features
 
 JMC allows you to write minecraft functions in a better language (.jmc) which is more readable and easier to write.
 
 ## Documentation
 
-Everything you need to know about JMC can be found at https://wingedseal.github.io/jmc/
+Everything you need to know about JMC can be found at <https://wingedseal.github.io/jmc/>
 
 ## Installation
 
--   **Executable**
+- **Executable**
 
 In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/datapacks`). Create a new datapack folder. And put JMC.exe in that folder then run it.
 
 ![Installation](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/installation/file_location.png?raw=true)
 
--   **Python 3.10+**
+- **Python 3.10+**
 
-```
+```bash
 pip install jmcfunction
 ```
 

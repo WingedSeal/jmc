@@ -13,7 +13,7 @@ logger = Logger(__name__)
 
 
 def main():
-    atexit.register(lambda: print(Colors.EXIT.value, end=""))
+    atexit.register(lambda: print(Colors.EXIT.value))
     logger.info("Starting session")
     global_data = GlobalData()
     while True:
