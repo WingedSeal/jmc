@@ -299,10 +299,23 @@ class FormattedText:
         self.tokenizer = tokenizer
         self.is_default_no_italic = is_default_no_italic
         self.bracket_content = ""
-        self.result: list[dict[str, str | bool]] = []
+        self.result: list[dict[
+            str,
+            str | bool | dict[
+                str, str | bool
+            ]
+        ]] = []
         self.current_json: dict[str, str | bool] = {"text": ""}
         self.current_color = ""
         self.parse()
+
+    def add_key(self, key: str, value: str | bool |
+                dict[str, str | bool]) -> None:
+        if self.result:
+            self.result[0][key] = value
+            return
+
+        self.result.append({key: value})
 
     def push(self) -> None:
         """
@@ -466,6 +479,9 @@ class FormattedText:
             if 'italic' not in self.result[0]:
                 self.result[0]['italic'] = False
             return json.dumps(self.result[0])
+
+        if not self.result:
+            return ''
         return json.dumps(
             [{"italic": False} if self.is_default_no_italic else ""] + self.result)
 

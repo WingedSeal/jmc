@@ -202,6 +202,92 @@ class ItemCreate(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string='Item.createSign',
+    arg_type={
+        "itemId": ArgType.KEYWORD,
+        "variant": ArgType.KEYWORD,
+        "displayName": ArgType.STRING,
+        "lore": ArgType.LIST,
+        "texts": ArgType.LIST,
+        "nbt": ArgType.JS_OBJECT,
+        "onClick": ArgType.FUNC
+    },
+    name='item_create_sign',
+    defaults={
+        "lore": "",
+        "texts": "",
+        "nbt": "",
+        "onClick": ""
+    }
+)
+class ItemCreateSign(JMCFunction):
+    _variants = {'oak', 'spruce', 'birch', 'jungle',
+                 'acacia', 'dark_oak', 'crimson', 'warped'}
+
+    def call(self) -> str:
+        variant = self.args["variant"]
+
+        if variant not in self._variants:
+            raise JMCValueError(
+                f"Unrecognized wood variant for sign ({variant})",
+                self.raw_args["variant"].token,
+                self.tokenizer,
+                suggestion=f"Available variants are {' '.join(repr(i) for i in self._variants)}")
+
+        on_click = self.args["onClick"]
+        name = self.args["displayName"]
+        if self.args["lore"]:
+            lores = self.datapack.parse_list(
+                self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
+        else:
+            lores = []
+
+        if self.args["texts"]:
+            texts = self.datapack.parse_list(
+                self.raw_args["texts"].token, self.tokenizer, TokenType.STRING)
+        else:
+            texts = []
+
+        if len(texts) > 4:
+            raise JMCValueError(
+                f"Sign may only have 4 lines of text (got {len(texts)})",
+                self.raw_args["texts"].token,
+                self.tokenizer)
+        texts.extend([''] * (4 - len(texts)))
+
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args["nbt"].token) if self.args["nbt"] else {}
+
+        if "display" in nbt:
+            raise JMCValueError(
+                "display is already inside the nbt",
+                self.token,
+                self.tokenizer)
+
+        lore_ = ",".join(repr(str(FormattedText(lore, self.token, self.tokenizer, is_default_no_italic=True)))
+                         for lore in lores)
+        formatted_texts_ = [FormattedText(text, self.token, self.tokenizer)
+                            for text in texts]
+        if on_click:
+            formatted_texts_[0].add_key(
+                "clickEvent", {
+                    "action": "run_command", "value": on_click})
+        texts_ = [repr(str(text)) for text in formatted_texts_]
+
+        nbt["display"] = Token.empty(f"""{{Name:{repr(
+            str(FormattedText(name, self.token, self.tokenizer, is_default_no_italic=True))
+            )},Lore:[{lore_}]}},BlockEntityTag:{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")
+
+        self.datapack.data.item[self.args["itemId"]] = Item(
+            variant + '_sign',
+            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+        )
+
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string='Player.onEvent',
     arg_type={
         "objective": ArgType.KEYWORD,
@@ -413,7 +499,7 @@ class TimerAdd(JMCFunction):
         return ""
 
 
-@ func_property(
+@func_property(
     func_type=FuncType.LOAD_ONLY,
     call_string='Recipe.table',
     arg_type={

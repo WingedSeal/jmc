@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
 
-JSON_TEXT_TYPE = dict[str, str | bool]
-
 
 @dataclass(slots=True, frozen=True, eq=True)
 class Item:
