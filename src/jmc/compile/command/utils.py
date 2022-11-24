@@ -323,7 +323,7 @@ class FormattedText:
         """
         if not self.current_json["text"]:
             return None
-        self.result.append(self.current_json)  # type: ignore # TODO: FIX LATER
+        self.result.append(self.current_json)  # type: ignore
         self.current_json = {"text": ""}
 
     def parse_bracket(self) -> None:

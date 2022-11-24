@@ -99,7 +99,7 @@ class MathRandom(JMCFunction):
                     self.datapack.add_raw_private_function(
                         self.name,
                         [
-                            f'summon minecraft:area_effect_cloud ~ ~ ~ {{Tags:["{self.datapack.private_name}.{self.name}"]}}',
+                            f'summon area_effect_cloud ~ ~ ~ {{Tags:["{self.datapack.private_name}.{self.name}"]}}',
                             f"execute store result score {seed} {var} run data get entity @e[limit=1,type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}] UUID[0] 1",
                             f"kill @e[type=area_effect_cloud,tag={self.datapack.private_name}.{self.name}]",
                             f"scoreboard players set {a} {var} 656891",
