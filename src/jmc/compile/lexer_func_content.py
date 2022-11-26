@@ -47,7 +47,7 @@ FIRST_ARGUMENTS = {
 FIRST_ARGUMENTS_EXCEPTION = {
     "give": "effect",
     "if": "execute",
-    "schedule": "function",
+    "function": "schedule",
     "trigger": "scoreboard"
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (that command)"""
