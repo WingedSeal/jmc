@@ -21,10 +21,10 @@ JSON_FILE_TYPES = [
     "advancements",
     "dimension",
     "dimension_type",
-    "functions",
     "loot_tables",
     "predicates",
     "recipes",
+    "item_modifiers",
     "structures",
     "worldgen/biome",
     "worldgen/configured_carver",
@@ -58,11 +58,17 @@ class Lexer:
         """JMC configuration"""
         self.datapack = DataPack(config.namespace, self)
         """Datapack object"""
+        self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
         logger.debug(f"Load Function")
-        self.datapack.functions[self.datapack.load_name] = Function(
-            self.parse_load_func_content(programs=self.datapack.load_function))
+        self.parse_current_load()
+
+    def parse_current_load(self):
+        if self.datapack.load_function:
+            self.datapack.functions[self.datapack.load_name].extend(
+                self.parse_load_func_content(programs=self.datapack.load_function))
+            self.datapack.load_function = []
 
     def parse_file(self, file_path: Path, _test_file: str | None = None,
                    is_load=False) -> None:
@@ -96,6 +102,7 @@ class Lexer:
         for command in tokenizer.programs:
             if command[0].string == 'function' and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str)
+                self.parse_current_load()
             elif command[0].string == 'function' and len(command) != 2:
                 raise JMCSyntaxException(
                     f"'function' expect 1(Vanilla syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
