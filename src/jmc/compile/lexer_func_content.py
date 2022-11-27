@@ -45,10 +45,10 @@ FIRST_ARGUMENTS = {
 - `give` is exluced since it can also be arguments (`/effect give`)"""
 
 FIRST_ARGUMENTS_EXCEPTION = {
-    "give": "effect",
-    "if": "execute",
-    "function": "schedule",
-    "trigger": "scoreboard"
+    "give": {"effect", "recipe"},
+    "if": {"execute"},
+    "function": {"schedule"},
+    "trigger": {"scoreboard"}
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (that command)"""
 
@@ -188,7 +188,7 @@ class FuncContent:
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
-                self.commands[command_pos] == FIRST_ARGUMENTS_EXCEPTION[token.string]
+                self.commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
             )
         ):
             raise JMCSyntaxException(
