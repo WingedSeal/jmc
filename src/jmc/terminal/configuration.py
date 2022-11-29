@@ -3,7 +3,7 @@ from json import JSONDecodeError, dump, load
 import os
 from pathlib import Path
 import threading
-from typing import Any, Callable
+from typing import Any, Callable, Protocol, Union
 
 from .utils import Colors, get_input, pprint
 from ..compile.utils import SingleTon
@@ -11,6 +11,14 @@ from ..compile import Logger
 from dataclasses import dataclass
 
 logger = Logger(__name__)
+
+
+class TerminalCommand(Protocol):
+    __name__: str
+
+    def __call__(self, *args: str) -> None:
+        ...
+# TerminalCommand = Callable[..., None]
 
 
 @dataclass(slots=True)
@@ -193,12 +201,12 @@ class GlobalData(SingleTon):
         self.VERSION: str = version
         self.CONFIG_FILE_NAME: str = config_file_name
         self.LOG_PATH = self.cwd / 'log'
-        self.commands: dict[str, tuple[Callable[..., Any], str]] = {}
+        self.commands: dict[str, tuple[TerminalCommand, str]] = {}
         """Dictionary of command_name and tuple of function and its usage(string)"""
         self.EVENT = threading.Event()
         self.interval = -1
 
-    def add_command(self, func: Callable[..., Any], usage: str) -> None:
+    def add_command(self, func: TerminalCommand, usage: str) -> None:
         command = func.__name__
         if command in self.commands:
             raise ValueError("Duplicated terminal command")
@@ -206,14 +214,14 @@ class GlobalData(SingleTon):
 
 
 def add_command(
-        usage: str, rename: str = "") -> Callable[[Callable[..., None]], Callable[..., None]]:
+        usage: str, rename: str = ""):
     """
     Decorator factory to add terminal command
 
     :param func: Function for decorator
     :return: Wrapper function
     """
-    def decorator(func: Callable[..., None]) -> Callable[..., None]:
+    def decorator(func: TerminalCommand) -> TerminalCommand:
         """
         Decorator to add terminal command
 
@@ -227,7 +235,7 @@ def add_command(
         GlobalData().add_command(func, usage)
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            func(*args, **kwargs)
-        return wrapper
+        def wrapper(*args: str) -> None:
+            func(*args)
+        return wrapper  # TODO: Fix mypy's error
     return decorator

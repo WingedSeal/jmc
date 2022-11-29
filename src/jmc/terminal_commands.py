@@ -17,8 +17,8 @@ logger = Logger(__name__)
 NEW_LINE = "\n"
 
 
-@add_command("help [<command>]")
-def help(command: str = "") -> None:
+@add_command("help [<command>]", rename="help")
+def help_(command: str = "") -> None:
     """Output this message or get help for a command"""
     if not command:
         avaliable_commands = "\n".join(f" - {usage}: {func.__doc__}" for _,
@@ -36,13 +36,13 @@ def help(command: str = "") -> None:
 
 
 @add_command("exit")
-def exit():
+def exit() -> None:
     """Exit JMC compiler"""
     sys.exit(0)
 
 
 @add_command("compile [debug]", "compile")
-def compile_(debug: str = ""):
+def compile_(debug: str = "") -> None:
     """Compile main JMC file"""
     if debug:
         if debug != 'debug':
@@ -69,7 +69,7 @@ def compile_(debug: str = ""):
         __log_info()
 
 
-def __log_debug():
+def __log_debug() -> None:
     logger.info("Requesting debug log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     debug_log = get_debug_log()
@@ -79,7 +79,7 @@ def __log_debug():
         file.write(debug_log)
 
 
-def __log_info():
+def __log_info() -> None:
     logger.info("Requesting info log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     info_log = get_info_log()
@@ -89,7 +89,7 @@ def __log_info():
         file.write(info_log)
 
 
-def __log_clear():
+def __log_clear() -> None:
     logger.info("Clearing logs")
     if not global_data.LOG_PATH.is_dir():
         logger.debug("Log folder not found")
@@ -106,7 +106,7 @@ def __log_clear():
 
 
 @add_command("log debug|info|clear")
-def log(mode: str):
+def log(mode: str) -> None:
     """
 debug|info: Create log file in output directory
 clear: Delete every log file inside log folder except latest"""
@@ -122,19 +122,19 @@ clear: Delete every log file inside log folder except latest"""
 
 
 @add_command("version")
-def version():
+def version() -> None:
     """Get JMC's version info"""
     pprint(global_data.VERSION, Colors.INFO)
 
 
-def __config_reset():
+def __config_reset() -> None:
     (global_data.cwd / global_data.CONFIG_FILE_NAME).unlink(missing_ok=True)
     pprint("Resetting configurations", Colors.PURPLE)
     print('\n' * 5)
     raise RestartException()
 
 
-def __config_edit():
+def __config_edit() -> None:
     config = global_data.config.toJSON()
     pprint(f"""Edit configurations (Bypass error checking)
 Type `cancel` to cancel
@@ -155,7 +155,7 @@ Type `cancel` to cancel
 
 
 @add_command("config edit|reset")
-def config(mode):
+def config(mode: str) -> None:
     """
 reset: Delete the configuration file and restart the compiler
 edit: Override configuration file and bypass error checking"""
@@ -167,7 +167,7 @@ edit: Override configuration file and bypass error checking"""
         raise TypeError(f"Unrecognized mode '{mode}'")
 
 
-def __background():
+def __background() -> None:
     while not global_data.EVENT.is_set():
         logger.debug("Auto compiling")
         compile_()
@@ -175,7 +175,7 @@ def __background():
 
 
 @add_command("autocompile <interval (second)>")
-def autocompile(interval: str):
+def autocompile(interval: str) -> None:
     """Start automatically compiling with certain interval (Press Enter to stop)"""
     try:
         global_data.interval = int(interval)
@@ -199,7 +199,7 @@ def autocompile(interval: str):
 
 
 @add_command("cd <path>")
-def cd(path: str):
+def cd(path: str) -> None:
     """Change current directory"""
     try:
         os.chdir(path)
