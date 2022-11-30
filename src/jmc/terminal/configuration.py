@@ -220,14 +220,14 @@ def add_command(
     Decorator factory to add terminal command
 
     :param func: Function for decorator
-    :return: Wrapper function
+    :return: decorator function
     """
     def decorator(func: TerminalCommand) -> TerminalCommand:
         """
         Decorator to add terminal command
 
         :param func: Function for decorator
-        :return: Wrapper function
+        :return: the same function
         """
         logger.debug(
             f"Terminal command added: {func.__name__}{' as'+rename if rename else ''}")
@@ -235,8 +235,5 @@ def add_command(
             func.__name__ = rename
         GlobalData().add_command(func, usage)
 
-        @functools.wraps(func)
-        def wrapper(*args: str) -> None:
-            func(*args)
-        return wrapper  # TODO: Fix mypy's error
+        return func
     return decorator
