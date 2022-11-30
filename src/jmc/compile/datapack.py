@@ -112,27 +112,13 @@ class Function:
 
     def __split(self, strings: list[str]) -> list[str]:
         """
-        Loop through every line in each string of command(s) and make a new list with every element having only 1 line of command while optimizing every command
+        Loop through every line in each string of command(s) and make a new list with every element having only 1 line of command
 
         :param strings: minecraft commands(strings),each string can have multiple lines
         :return: minecraft commands(strings),each string can have only a single line
         """
-        return [self.optimize(
-            str_) for string in strings for str_ in string.split('\n') if str_]
-
-    def optimize(self, string: str) -> str:
-        """
-        Optimize minecraft command by remove redundancy
-
-        :param string: A minecraft command
-        :return: An optimized minecraft command
-
-        .. todo:: Finish optimization
-        """
-        if string.startswith('execute'):
-            if string.startswith('execute run '):
-                string = string[12:]  # len('execute run ') = 11
-        return string
+        return [
+            line for string in strings for line in string.split('\n') if line]
 
 
 class DataPack:

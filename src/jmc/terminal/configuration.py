@@ -14,6 +14,7 @@ logger = Logger(__name__)
 
 
 class TerminalCommand(Protocol):
+    """Protocal for a function(callable) representing a jmc terminal command"""
     __name__: str
 
     def __call__(self, *args: str) -> None:

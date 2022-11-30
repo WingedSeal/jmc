@@ -63,19 +63,11 @@ ALLOW_NUMBER_AFTER_CURLY_PAREN = {
 
 def append_commands(commands: list[str], string: str) -> None:
     """
-    Append a new argument to a comand(list of minecraft arguments) while optimizing it
+    Append a new argument to a comand(list of minecraft arguments)
 
     :param commands: Entire command(list of minecraft arguments) to add to
     :param string: A new argument to add
     """
-    if string.startswith('execute') and commands and commands[-1] == 'run':
-        if string == 'execute':
-            del commands[-1]
-            return
-        else:
-            del commands[-1]
-            commands.append(string[8:])  # len("execute ") = 8
-            return
     commands.append(string)
     return
 
@@ -142,7 +134,7 @@ class FuncContent:
                 self.command_strings.append(' '.join(self.commands))
                 self.commands = []
 
-            self.parse_commands()
+            self.__parse_commands()
         # End of Program
 
         # Boxes check
@@ -160,7 +152,8 @@ class FuncContent:
             self.commands = []
         return self.command_strings
 
-    def parse_commands(self) -> None:
+    def __parse_commands(self) -> None:
+        """Parse command in self.commands"""
         self.is_expect_command = True
         self.is_execute = (self.command[0].string == 'execute')
         command_pos = None
@@ -175,8 +168,56 @@ class FuncContent:
             if self.__expect_command(key_pos, token):
                 break
 
+    def __optimize(self, token: Token) -> bool:
+        """
+        Optimize minecraft command by removing redundancy
+        :param token: Current token
+        :return: Whether to cancel appending this token
+        """
+        if token.token_type != TokenType.KEYWORD:
+            return False
+        if not self.commands:
+            return False
+
+        # `execute as @s`
+        if (
+            token.string == '@s' and
+            self.commands[-1] == 'as' and
+            self.commands[-2] not in {'rotated', 'positioned'}
+        ):
+
+            self.commands[-1] = 'if entity'
+            return False
+
+        # `execute run`
+        if (
+            token.string == 'run'
+            and self.commands[-1] == 'execute'
+        ):
+            del self.commands[-1]
+            return True
+
+        # `run execute`
+        if (
+            token.string == 'execute'
+            and self.commands[-1] == 'run'
+            and self.commands[0] == 'execute'
+        ):
+            del self.commands[-1]
+            return True
+
+        return False
+
     def __not_expect_command(
             self, key_pos: int, token: Token, command_pos: int) -> None:
+        """
+        Called when expecting an argument of command
+
+        :param key_pos: Current index in self.command
+        :param token: token
+        :param key_pos: Index of latest command in self.command
+        :return: Whether to break out of the loop
+        """
         if token.string == 'run' and token.token_type == TokenType.KEYWORD:
             if not self.is_execute:
                 raise MinecraftSyntaxWarning(
@@ -195,13 +236,8 @@ class FuncContent:
             raise JMCSyntaxException(
                 f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)
 
-        # optimize `execute as @s`
-        if (token.string == '@s' and
-            token.token_type == TokenType.KEYWORD and
-            self.commands[-1] == 'as' and
-                self.commands[-2] not in {'rotated', 'positioned'}):
-
-            self.commands[-1] = 'if entity'
+        if self.__optimize(token):
+            return
 
         if token.token_type == TokenType.PAREN_ROUND:
             self.commands[-1], success = search_to_string(
@@ -226,7 +262,15 @@ class FuncContent:
             append_commands(self.commands, token.string)
 
     def __expect_command(self, key_pos: int, token: Token) -> bool:
+        """
+        Called when expecting a command
+
+        :param key_pos: Current index in self.command
+        :param token: token
+        :return: Whether to break out of the loop
+        """
         self.is_expect_command = False
+
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
             if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
@@ -285,6 +329,8 @@ class FuncContent:
             raise JMCSyntaxException(
                 f"Unrecognized command ({token.string})", token, self.tokenizer)
 
+        if self.__optimize(token):
+            return False
         append_commands(self.commands, token.string)
         return False
 
