@@ -1,7 +1,8 @@
+"""Main module"""
 import atexit
 from .compile import Logger
 from .terminal.utils import RestartException, handle_exception
-from .terminal import GlobalData, Colors, handle_exception, start
+from .terminal import GlobalData, Colors, start
 
 VERSION = 'v1.2.7'
 CONFIG_FILE_NAME = 'jmc_config.json'
@@ -13,6 +14,7 @@ logger = Logger(__name__)
 
 
 def main():
+    """Main function"""
     atexit.register(lambda: print(Colors.EXIT.value))
     logger.info("Starting session")
     global_data = GlobalData()

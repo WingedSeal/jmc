@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(slots=True, frozen=True, eq=True)
@@ -14,11 +14,12 @@ class Data:
     """
     Data shared across all JMC function in the datapack
     """
-    __slots__ = 'item', '__item_id_count'
+    __slots__ = 'item', '__item_id_count', 'condition_count'
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
         self.__item_id_count: int = 0
+        self.condition_count: int = 0
 
     def get_item_id(self) -> str:
         """

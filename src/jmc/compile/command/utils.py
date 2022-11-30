@@ -1,3 +1,4 @@
+"""Untility for commands"""
 import ast
 import json
 import operator as op
@@ -38,7 +39,7 @@ def find_scoreboard_player_type(
     """
     if token.token_type != TokenType.KEYWORD:
         raise JMCSyntaxException(
-            f"Expected keyword", token, tokenizer)
+            "Expected keyword", token, tokenizer)
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
         return ScoreboardPlayer(player_type=PlayerType.VARIABLE, value=(
@@ -52,10 +53,9 @@ def find_scoreboard_player_type(
     if len(splits) == 1:
         if allow_integer:
             raise JMCSyntaxException(
-                f"Expected integer, variable, or objective:selector", token, tokenizer)
-        else:
-            raise JMCSyntaxException(
-                f"Expected variable or objective:selector", token, tokenizer)
+                "Expected integer, variable, or objective:selector", token, tokenizer)
+        raise JMCSyntaxException(
+            "Expected variable or objective:selector", token, tokenizer)
     if len(splits) > 2:
         raise JMCSyntaxException(
             "Scoreboard's player cannot contain more than 1 colon(:)", token, tokenizer)
@@ -158,8 +158,7 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
     if token.token_type == TokenType.PAREN_CURLY:
         if re.match(r'^{\s*"', token.string) is not None:
             return ArgType.JSON
-        else:
-            return ArgType.JS_OBJECT
+        return ArgType.JS_OBJECT
     if token.token_type == TokenType.PAREN_SQUARE:
         return ArgType.LIST
 
@@ -238,12 +237,12 @@ def __eval(node):
     """
     if isinstance(node, ast.Num):  # <number>
         return node.n
-    elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
+    if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return OPERATORS[type(node.op)](__eval(node.left), __eval(node.right))
-    elif isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
+    if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return OPERATORS[type(node.op)](__eval(node.operand))
-    else:
-        raise TypeError(node)
+
+    raise TypeError(node)
 
 
 class FormattedText:
@@ -322,7 +321,7 @@ class FormattedText:
         Append current_json to result and reset it
         """
         if not self.current_json["text"]:
-            return None
+            return
         self.result.append(self.current_json)  # type: ignore
         self.current_json = {"text": ""}
 

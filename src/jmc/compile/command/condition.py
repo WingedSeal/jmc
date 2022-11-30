@@ -20,7 +20,6 @@ UNLESS = False
 
 VAR = '__logic__'
 BOOL_FUNCTIONS = JMCFunction.get_subclasses(FuncType.BOOL_FUNCTION)
-count = 0
 
 
 @dataclass(eq=False, repr=True, slots=True)
@@ -69,12 +68,12 @@ def custom_condition(
             DataPack.VARIABLE_SIGN):
         tokens = tokenizer.split_keyword_tokens(tokens, ['>', '=', '<', '!'])
         first_token = tokens[0]
-        for operator in ['===', '==',
-                         '>=', '<=', '!=', '>', '<', '=']:  # sort key=len
+        for operator in ('===', '==',
+                         '>=', '<=', '!=', '>', '<', '='):  # sort key=len
             list_of_tokens = tokenizer.find_tokens(tokens, operator)
             if len(list_of_tokens) == 1:
                 continue
-            elif len(list_of_tokens) > 2:
+            if len(list_of_tokens) > 2:
                 raise JMCSyntaxException(
                     f"Duplicated operator({operator}) in condition", list_of_tokens[2][-1], tokenizer)
 
@@ -234,7 +233,7 @@ def condition_to_ast(
     if len(tokens) == 1 and tokens[0].token_type == TokenType.PAREN_ROUND:
         if tokens[0].string == '()':
             raise JMCSyntaxException(
-                f"Empty round parenthesis () inside condition", tokens[0], tokenizer)
+                "Empty round parenthesis () inside condition", tokens[0], tokenizer)
 
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
                               tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)
@@ -244,19 +243,15 @@ def condition_to_ast(
     if len(list_of_tokens) > 1:
         return {"operator": OR_OPERATOR, "body": [
             condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
-    else:
-        tokens = list_of_tokens[0]
 
-    tokens = tokenizer.split_keyword_tokens(tokens, [AND_OPERATOR])
+    tokens = tokenizer.split_keyword_tokens(list_of_tokens[0], [AND_OPERATOR])
     list_of_tokens = find_operator(tokens, AND_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": AND_OPERATOR, "body": [
             condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
-    else:
-        tokens = list_of_tokens[0]
 
     # NotOperator should have a body as either dict or string and not list
-    tokens = tokenizer.split_keyword_tokens(tokens, [NOT_OPERATOR])
+    tokens = tokenizer.split_keyword_tokens(list_of_tokens[0], [NOT_OPERATOR])
     if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string == NOT_OPERATOR:
         return {"operator": NOT_OPERATOR, "body":
                 condition_to_ast(tokens[1:], tokenizer, datapack)}
@@ -265,7 +260,7 @@ def condition_to_ast(
 
 
 def ast_to_commands(
-        ast: AST_TYPE) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
+        ast: AST_TYPE, datapack: DataPack) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
     """
     Parse abstract syntax tree into list of conditions and list of commands that need to come before for it to works
 
@@ -279,7 +274,6 @@ def ast_to_commands(
         ) that need to come before (can be None)
     )
     """
-    global count
     if isinstance(ast, Condition):
         return [ast], None
 
@@ -289,20 +283,20 @@ def ast_to_commands(
         for body in ast["body"]:  # type: ignore
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
-            _conditions, precommand = ast_to_commands(body)  # noqa
+            _conditions, precommand = ast_to_commands(body, datapack)  # noqa
             conditions.extend(_conditions)
             if precommand is not None:
                 precommand_and.extend(precommand)
         return conditions, (precommand_and if precommand_and else None)
 
     elif ast["operator"] == OR_OPERATOR:
-        _count = count
-        count += 1
+        _count = datapack.data.condition_count
+        datapack.data.condition_count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
         for body in ast["body"]:  # type: ignore
             if isinstance(body, str):
                 raise ValueError('ast["body"] is string')
-            conditions, precommand = ast_to_commands(body)
+            conditions, precommand = ast_to_commands(body, datapack)
             if precommand is not None:
                 precommand_or.extend(precommand)
             precommand_or.append((conditions, _count))
@@ -313,13 +307,13 @@ def ast_to_commands(
     elif ast["operator"] == NOT_OPERATOR:
         body = ast["body"]
         if isinstance(ast["body"], Condition):
-            conditions, precommand = ast_to_commands(ast["body"])
+            conditions, precommand = ast_to_commands(ast["body"], datapack)
         elif isinstance(ast["body"], dict):
             if ast["body"]["operator"] == OR_OPERATOR:
                 ast["body"]["operator"] = AND_OPERATOR
             elif ast["body"]["operator"] == AND_OPERATOR:
                 ast["body"]["operator"] = OR_OPERATOR
-            conditions, precommand = ast_to_commands(ast["body"])
+            conditions, precommand = ast_to_commands(ast["body"], datapack)
         else:
             raise ValueError('ast["body"] is a list or str')
         for condition in conditions:
@@ -329,7 +323,7 @@ def ast_to_commands(
     raise ValueError("Invalid AST")
 
 
-def ast_to_strings(ast: AST_TYPE) -> tuple[str, str]:
+def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
     """
     Turns AST into tuple of full `execute if command` a multiple line string representing precommands
 
@@ -337,7 +331,7 @@ def ast_to_strings(ast: AST_TYPE) -> tuple[str, str]:
     :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
 
-    conditions, precommand_conditions = ast_to_commands(ast)
+    conditions, precommand_conditions = ast_to_commands(ast, datapack)
     if precommand_conditions is None:
         precommand = ""
     else:
@@ -380,12 +374,11 @@ def parse_condition(condition_token: Token |
     :param datapack: Datapack object
     :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
-    global count
-    count = 0
+    datapack.data.condition_count = 0
     tokens = condition_token if isinstance(
         condition_token, list) else [condition_token]
 
     ast = condition_to_ast(tokens, tokenizer, datapack)
-    condition, precommand = ast_to_strings(ast)
+    condition, precommand = ast_to_strings(ast, datapack)
     precommand = precommand + '\n' if precommand else ""
     return condition, precommand

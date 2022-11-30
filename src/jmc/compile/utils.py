@@ -1,3 +1,4 @@
+"""Utility for compiling"""
 import functools
 import re
 from json import JSONEncoder, dumps
@@ -9,11 +10,11 @@ if TYPE_CHECKING:
     from .tokenizer import Token, Tokenizer
 
 
-class __SingleTonMeta(type):
+class SingleTonMeta(type):
     """
     Metaclass for singleton
     """
-    _instances: dict["__SingleTonMeta", Any] = {}
+    _instances: dict["SingleTonMeta", Any] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -21,7 +22,7 @@ class __SingleTonMeta(type):
         return cls._instances[cls]
 
 
-class SingleTon(metaclass=__SingleTonMeta):
+class SingleTon(metaclass=SingleTonMeta):
     """
     Super class for a singleton class
 
@@ -91,7 +92,7 @@ def __parse_to_string(
                 f"Too many '=' found in .toString argument (got {len(extras)+1})", token, tokenizer)
         if value in {'""', "''"}:
             raise JMCSyntaxException(
-                ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion=f"Do not use empty string as argument")
+                ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion="Do not use empty string as argument")
         if value[0] in {'"', "'"}:
             raise JMCSyntaxException(
                 ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion=f"Use '{value[1:-1]}' instead of '{value}'")
@@ -108,10 +109,10 @@ def __parse_to_string(
             json[key] = value == 'true'
         elif key in {'clickEvent', 'hoverEvent'}:
             raise JMCSyntaxException(
-                f"clickEvent and hoverEvent are not supported in .toString", token, tokenizer, suggestion="Use vanila JSON instead")
+                "clickEvent and hoverEvent are not supported in .toString", token, tokenizer, suggestion="Use vanila JSON instead")
         elif key == 'text':
             raise JMCSyntaxException(
-                f"'text' key is incompatible with 'score' in .toString", token, tokenizer)
+                "'text' key is incompatible with 'score' in .toString", token, tokenizer)
         else:
             raise JMCSyntaxException(
                 f"Unrecognized key in .toString (got {key})", token, tokenizer, suggestion="Avaliable keys are 'font', 'color', 'bold', 'italic', 'underlined', 'strikethrough', 'obfuscated'")
@@ -119,24 +120,24 @@ def __parse_to_string(
 
 
 def __search_to_string(match: re.Match, token: "Token",
-                       VAR_NAME: str, tokenizer: "Tokenizer") -> str:
+                       var_name: str, tokenizer: "Tokenizer") -> str:
     """
     Function for regex.subn
 
     :param match: Match object
     :param token: Token to search for `toString`
-    :param VAR_NAME: `DataPack.VARNAME`
+    :param var_name: `DataPack.VARNAME`
     :param tokenizer: token's tokenizer
     :return: JSON formatted string
     """
     var: str = match.group(1)
     properties = __parse_to_string(token, tokenizer)
-    properties["score"] = {"name": var, "objective": VAR_NAME}
+    properties["score"] = {"name": var, "objective": var_name}
     return dumps(properties)
 
 
 def search_to_string(last_str: str, token: "Token",
-                     VAR_NAME: str, tokenizer: "Tokenizer") -> tuple[str, bool]:
+                     var_name: str, tokenizer: "Tokenizer") -> tuple[str, bool]:
     """
     Find `toString` in a last_str
 
@@ -147,7 +148,7 @@ def search_to_string(last_str: str, token: "Token",
     :return: Tuple of New string and Whether `toString` is found
     """
     new_str, count = re.subn(
-        r'(\$[A-z0-9\-\.\_]+)\.toString$', lambda match: __search_to_string(match, token, VAR_NAME, tokenizer), last_str)
+        r'(\$[A-z0-9\-\.\_]+)\.toString$', lambda match: __search_to_string(match, token, var_name, tokenizer), last_str)
     if count:
         return new_str, True
     return last_str, False

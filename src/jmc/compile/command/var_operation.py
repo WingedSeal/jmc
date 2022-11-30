@@ -1,3 +1,4 @@
+"""Module handling variable operation"""
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -37,8 +38,8 @@ def variable_operation(
         raise JMCSyntaxException(
             "Expected operator after variable", tokens[0], tokenizer, col_length=True)
 
-    for operator in ['*=', '+=', '-=', '*=', '/=', '%=',
-                     '++', '--', '><', "->", '>', '<', '=']:  # sort key=len
+    for operator in ('*=', '+=', '-=', '*=', '/=', '%=',
+                     '++', '--', '><', "->", '>', '<', '='):  # sort key=len
         list_of_tokens = tokenizer.find_tokens(tokens, operator)
         if len(list_of_tokens) == 1:
             continue

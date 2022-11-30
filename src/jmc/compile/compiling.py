@@ -1,3 +1,4 @@
+"""Module responsibile for all compiling in jmc"""
 from json import JSONDecodeError, dump, dumps, loads
 from shutil import rmtree
 from pathlib import Path
@@ -16,7 +17,7 @@ logger = Logger(__name__)
 JMC_CERT_FILE_NAME = 'jmc.txt'
 
 
-def compile(config: "Configuration", debug: bool = False) -> None:
+def compile_jmc(config: "Configuration", debug: bool = False) -> None:
     """
     Compile the files and build the datapack
 
@@ -102,16 +103,16 @@ def read_header(config: "Configuration",
         header.add_file_read(header_file)
         logger.info("Header file found.")
         if _test_file is None:
-            with header_file.open('r') as file:
+            with header_file.open('r', encoding="utf-8") as file:
                 header_str = file.read()
         else:
             header_str = _test_file
         logger.info(f"Parsing {header_file}")
         parse_header(header_str, header_file.as_posix(), parent_target)
         return True
-    else:
-        logger.info("Header file not found.")
-        return False
+
+    logger.info("Header file not found.")
+    return False
 
 
 def read_cert(config: "Configuration", _test_file: str | None = None):
@@ -173,12 +174,12 @@ def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
             json: dict[str, Any] = loads(content)
             json["values"] = [
                 value for value in json["values"] if not value.startswith(config.namespace + ':')]
-        except JSONDecodeError:
+        except JSONDecodeError as error:
             raise JMCBuildError(
-                f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.")
-        except KeyError:
+                f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.") from error
+        except KeyError as error:
             raise JMCBuildError(
-                f'"values" key not found in {path.resolve().as_posix()}. Deleting the file to reset.')
+                f'"values" key not found in {path.resolve().as_posix()}. Deleting the file to reset.') from error
     else:
         json = {"values": []}
     return json

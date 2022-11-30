@@ -1,10 +1,11 @@
+"""Module for testing compilation"""
 from json import dumps
 from pathlib import Path
 
 from ..terminal.configuration import Configuration, GlobalData
 from .log import Logger
 from .header import Header
-from .compile import read_cert, read_header, build
+from .compiling import read_cert, read_header, build
 from .lexer import Lexer
 
 
@@ -48,18 +49,40 @@ INT=__int__"""
         )
 
     def set_cert(self, file_content: str) -> "JMCPack":
+        """
+        Set certificate(jmc.txt)
+
+        :param file_content: File's content
+        :return: Self
+        """
         self.cert = file_content
         return self
 
     def set_jmc_file(self, file_content: str) -> "JMCPack":
+        """
+        Set main jmc file
+
+        :param file_content: File's content
+        :return: Self
+        """
         self.jmc_file = file_content
         return self
 
     def set_header_file(self, file_content: str) -> "JMCPack":
+        """
+        Set main header file
+
+        :param file_content: File's content
+        :return: Self
+        """
         self.header_file = file_content
         return self
 
     def build(self) -> "JMCPack":
+        """
+        Build datapack
+        :return: Self
+        """
         logger.info("Building from JMCPack")
         Header.clear()
         read_cert(self.config, _test_file=self.cert)

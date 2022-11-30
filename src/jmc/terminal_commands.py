@@ -1,3 +1,4 @@
+"""Contain all function representation of jmc terminal command"""
 from datetime import datetime
 from json import dump
 import os
@@ -9,7 +10,7 @@ from traceback import format_exc
 
 from .terminal.utils import RestartException, error_report, get_input, handle_exception, press_enter
 from .terminal import pprint, Colors, GlobalData, add_command
-from .compile import compile, Logger, EXCEPTIONS, get_debug_log, get_info_log
+from .compile import compile_jmc, Logger, EXCEPTIONS, get_debug_log, get_info_log
 
 global_data = GlobalData()
 logger = Logger(__name__)
@@ -35,8 +36,8 @@ def help_(command: str = "") -> None:
     pprint(f"{usage}: {func.__doc__}", Colors.INFO)
 
 
-@add_command("exit")
-def exit() -> None:
+@add_command("exit", rename="exit")
+def exit_() -> None:
     """Exit JMC compiler"""
     sys.exit(0)
 
@@ -53,7 +54,7 @@ def compile_(debug: str = "") -> None:
     pprint("Compiling...", Colors.INFO)
     try:
         start_time = perf_counter()
-        compile(global_data.config, debug=True)
+        compile_jmc(global_data.config, debug=True)
         stop_time = perf_counter()
         pprint(
             f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
@@ -135,21 +136,21 @@ def __config_reset() -> None:
 
 
 def __config_edit() -> None:
-    config = global_data.config.toJSON()
+    config_json = global_data.config.toJSON()
     pprint(f"""Edit configurations (Bypass error checking)
 Type `cancel` to cancel
-{NEW_LINE.join([f"- {key}" for key in config])}""", Colors.PURPLE)
+{NEW_LINE.join([f"- {key}" for key in config_json])}""", Colors.PURPLE)
     key = get_input("Configuration: ")
-    if key not in config:
+    if key not in config_json:
         if key.lower() == 'cancel':
             return
         pprint("Invalid Key", Colors.FAIL)
         __config_edit()
     else:
-        pprint(f"Current {key}: {config[key]}", Colors.YELLOW)
-        config[key] = get_input("New Value: ")
+        pprint(f"Current {key}: {config_json[key]}", Colors.YELLOW)
+        config_json[key] = get_input("New Value: ")
         with (global_data.cwd / global_data.CONFIG_FILE_NAME).open('w') as file:
-            dump(config, file, indent=2)
+            dump(config_json, file, indent=2)
 
         global_data.config.load_config()
 
@@ -179,8 +180,8 @@ def autocompile(interval: str) -> None:
     """Start automatically compiling with certain interval (Press Enter to stop)"""
     try:
         global_data.interval = int(interval)
-    except ValueError:
-        raise TypeError("Invalid integer for interval")
+    except ValueError as error:
+        raise TypeError("Invalid integer for interval") from error
     if global_data.interval == 0:
         pprint("Interaval cannot be 0 seconds", Colors.FAIL)
         return
@@ -198,8 +199,8 @@ def autocompile(interval: str) -> None:
     thread.join()
 
 
-@add_command("cd <path>")
-def cd(path: str) -> None:
+@add_command("cd <path>", rename="cd")
+def chdir(path: str) -> None:
     """Change current directory"""
     try:
         os.chdir(path)

@@ -19,3 +19,4 @@ echo =================================
 echo ^> Code Style(PEP8) (pycodestyle)
 echo =================================
 pycodestyle ./src --ignore=E501,W50
+@REM pylint src/jmc --disable=C0301,W1201,W1203

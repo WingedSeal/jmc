@@ -261,11 +261,18 @@ class JMCFunction:
             json = loads(self.args[parameter])
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
-                error, self.raw_args[parameter].token, self.tokenizer)
+                error, self.raw_args[parameter].token, self.tokenizer) from error
 
         return json
 
     def check_bool(self, parameter: str) -> bool:
+        """
+        Check if argument is true or false
+
+        :param parameter: String parameter
+        :raises JMCValueError: Argument is invalid
+        :return: Whether argument is true
+        """
         if self.args[parameter] not in {"true", "false"}:
             raise JMCValueError(
                 f"'{parameter}' only accepts true or false in {self.call_string}",

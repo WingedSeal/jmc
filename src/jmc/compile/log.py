@@ -1,3 +1,4 @@
+"""Module handling logging"""
 from io import StringIO
 import logging
 

@@ -1,3 +1,4 @@
+"""Module containing vanilla commands"""
 COMMANDS = {
     # OP Level 0-2
     "advancement",

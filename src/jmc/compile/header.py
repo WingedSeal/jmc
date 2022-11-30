@@ -1,3 +1,4 @@
+"""Module handling jmc's header"""
 from pathlib import Path
 
 from .utils import SingleTon

@@ -13,7 +13,6 @@ from .command import (FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       JMCFunction,
                       FuncType,
-                      JMCFunction,
                       )
 
 if TYPE_CHECKING:
@@ -69,7 +68,6 @@ def append_commands(commands: list[str], string: str) -> None:
     :param string: A new argument to add
     """
     commands.append(string)
-    return
 
 
 class FuncContent:
@@ -106,16 +104,16 @@ class FuncContent:
             if self.command[0].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
                     "Expected keyword", self.command[0], self.tokenizer)
-            elif self.command[0].string == 'new':
+            if self.command[0].string == 'new':
                 raise JMCSyntaxException(
                     "'new' keyword found in function", self.command[0], self.tokenizer)
-            elif self.command[0].string == 'class':
+            if self.command[0].string == 'class':
                 raise JMCSyntaxException(
                     "'class' keyword found in function", self.command[0], self.tokenizer)
-            elif self.command[0].string == 'function' and len(self.command) == 4:
+            if self.command[0].string == 'function' and len(self.command) == 4:
                 raise JMCSyntaxException(
                     "Function declaration found in function", self.command[0], self.tokenizer)
-            elif self.command[0].string == '@import':
+            if self.command[0].string == '@import':
                 raise JMCSyntaxException(
                     "Importing found in function", self.command[0], self.tokenizer)
 
@@ -277,9 +275,8 @@ class FuncContent:
                 append_commands(self.commands, self.lexer.datapack.add_arrow_function(
                     'anonymous', token, self.tokenizer))
                 return True
-            else:
-                raise JMCSyntaxException(
-                    "Expected keyword", token, self.tokenizer)
+            raise JMCSyntaxException(
+                "Expected keyword", token, self.tokenizer)
 
         # End Handle Errors
 
@@ -304,7 +301,7 @@ class FuncContent:
         if self.__is_flow_control_command(key_pos, token):
             return True
 
-        if token.string in {'new', 'class' '@import'} or (
+        if token.string in {'new', 'class', '@import'} or (
             token.string == 'function'
             and
             len(self.command) > key_pos + 2
@@ -386,10 +383,9 @@ class FuncContent:
                             f"execute store result score {token.string} {DataPack.var_name}")
             return False
 
-        else:
-            append_commands(self.commands, variable_operation(
-                self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute))
-            return True
+        append_commands(self.commands, variable_operation(
+            self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute))
+        return True
 
     def __is_jmc_function(self, key_pos: int, token: Token) -> bool:
         load_once_command = self.get_function(token, LOAD_ONCE_COMMANDS)
@@ -463,4 +459,9 @@ class FuncContent:
 
     def get_function(self, token: Token,
                      command_functions: dict[str, type["JMCFunction"]]) -> type["JMCFunction"] | None:
+        """
+        Get jmc function (class)
+
+        :return: The JMCFunction's subclass
+        """
         return command_functions.get(token.string, None)

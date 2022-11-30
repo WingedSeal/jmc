@@ -14,7 +14,7 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
     index = calc_pos
     if len(string) < calc_pos + 14 or string[calc_pos + 13] != '(':
         raise JMCSyntaxException(
-            f"Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
+            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
     for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
         index += 1
         if char == '(':
@@ -33,7 +33,7 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
 
     if count != 0:
         raise JMCSyntaxException(
-            f"Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
+            "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
 
     return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
 
@@ -316,12 +316,12 @@ class RaycastSimple(JMCFunction):
                 error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
                 raise error
         else:
-            modifyExecuteBeforeStep = self.args['modifyExecuteBeforeStep'] + \
+            modify_execute_before_step = self.args['modifyExecuteBeforeStep'] + \
                 ' ' if self.args['modifyExecuteBeforeStep'] else ''
-            modifyExecuteAfterStep = self.args['modifyExecuteAfterStep'] + \
+            modify_execute_after_step = self.args['modifyExecuteAfterStep'] + \
                 ' ' if self.args['modifyExecuteAfterStep'] else ''
             recursion_commands = [
-                f"execute if score {current_iter} {self.datapack.var_name} matches 1.. {modifyExecuteBeforeStep}positioned ^ ^ ^{self.args['interval']} {modifyExecuteAfterStep}run function {raycast_loop}"]
+                f"execute if score {current_iter} {self.datapack.var_name} matches 1.. {modify_execute_before_step}positioned ^ ^ ^{self.args['interval']} {modify_execute_after_step}run function {raycast_loop}"]
 
         loop_commands.extend(recursion_commands)
 

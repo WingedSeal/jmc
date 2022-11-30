@@ -44,8 +44,7 @@ class TimerSet(JMCFunction):
     def call(self) -> str:
         if self.raw_args["tick"].arg_type == ArgType.INTEGER:
             return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
-        else:
-            return f'scoreboard players operations {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
+        return f'scoreboard players operations {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
 
 
 @func_property(
@@ -188,7 +187,7 @@ def __normalize_decimal(n: float):
 
 
 def points_to_commands(points: list[tuple[float, float, float]], particle: str,
-                       speed: str, count: str, mode: str, notation: str = "~") -> list[str]:
+                       speed: str, count: str, mode: str, notation: str = "^") -> list[str]:
     """
     Parse list of points(x,y,z position) into particle commands
 
@@ -203,7 +202,7 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
     commands = []
     for x_pos, y_pos, z_pos in points:
         commands.append(
-            f'particle {particle} ^{__normalize_decimal(x_pos)} ^{__normalize_decimal(y_pos)} ^{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}')
+            f'particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}')
     return commands
 
 

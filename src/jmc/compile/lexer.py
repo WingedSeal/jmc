@@ -61,10 +61,11 @@ class Lexer:
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
-        logger.debug(f"Load Function")
+        logger.debug("Load Function")
         self.parse_current_load()
 
     def parse_current_load(self):
+        """Parse current load function that's in self.datapack.load_function and clear it"""
         if self.datapack.load_function:
             self.datapack.functions[self.datapack.load_name].extend(
                 self.parse_load_func_content(programs=self.datapack.load_function))
@@ -90,9 +91,9 @@ class Lexer:
             try:
                 with file_path.open('r') as file:
                     raw_string = file.read()
-            except FileNotFoundError:
+            except FileNotFoundError as error:
                 raise JMCFileNotFoundError(
-                    f"JMC file not found: {file_path.resolve().as_posix()}")
+                    f"JMC file not found: {file_path.resolve().as_posix()}") from error
         else:
             raw_string = _test_file
         tokenizer = Tokenizer(raw_string, file_path_str)
@@ -109,7 +110,7 @@ class Lexer:
                     command[0],
                     tokenizer)
             elif command[0].string == 'new':
-                self.parse_new(tokenizer, command, file_path_str)
+                self.parse_new(tokenizer, command)
             elif command[0].string == 'class':
                 self.parse_class(tokenizer, command, file_path_str)
             elif command[0].string == '@import':
@@ -131,9 +132,9 @@ class Lexer:
                             (file_path.parent /
                              (command[1].string + '.jmc')).resolve()
                         )
-                except Exception:
+                except Exception as error:
                     raise JMCSyntaxException(
-                        f"Unexpected invalid path ({command[1].string})", command[1], tokenizer)
+                        f"Unexpected invalid path ({command[1].string})", command[1], tokenizer) from error
                 self.parse_file(file_path=new_path)
             else:
                 if not is_load:
@@ -163,10 +164,10 @@ class Lexer:
         if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(function's name)", command[1], tokenizer)
-        elif command[2].string != '()':
+        if command[2].string != '()':
             raise JMCSyntaxException(
-                f"Expected (", command[2], tokenizer, display_col_length=False)
-        elif command[3].token_type != TokenType.PAREN_CURLY:
+                "Expected (", command[2], tokenizer, display_col_length=False)
+        if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
 
@@ -179,23 +180,23 @@ class Lexer:
         if func_path in self.datapack.functions:
             raise JMCSyntaxException(
                 f"Duplicate function declaration({func_path})", command[1], tokenizer, display_col_length=False)
-        elif func_path == self.datapack.load_name:
+        if func_path == self.datapack.load_name:
             raise JMCSyntaxException(
                 "Load function is defined", command[1], tokenizer, display_col_length=False)
-        elif func_path == self.datapack.private_name:
+        if func_path == self.datapack.private_name:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.functions[func_path] = Function(self.parse_func_content(
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 
     def parse_new(self, tokenizer: Tokenizer,
-                  command: list[Token], file_path_str: str, prefix: str = ''):
+                  command: list[Token], prefix: str = ''):
         """
         Parse a new json definition in form of list of token
 
         :param tokenizer: Tokenizer
         :param command: List of token inside a new json definition
-        :param file_path_str: File path to current JMC function as string
+        # :param file_path_str: File path to current JMC function as string
         :param prefix: Prefix of json(for Class feature), defaults to ''
         :raises JMCSyntaxException: JSON file's type is not given
         :raises JMCSyntaxException: JSON file's type is not a keyword token
@@ -262,7 +263,7 @@ class Lexer:
         try:
             json: dict[str, str] = loads(json_content)
         except JSONDecodeError as error:
-            raise JMCDecodeJSONError(error, command[3], tokenizer)
+            raise JMCDecodeJSONError(error, command[3], tokenizer) from error
         if not json:
             raise JMCSyntaxException(
                 "JSON content cannot be empty", command[3], tokenizer)
@@ -326,6 +327,16 @@ class Lexer:
     def parse_func_content(self,
                            func_content: str, file_path_str: str,
                            line: int, col: int, file_string: str) -> list[str]:
+        """
+        Parse function's content
+
+        :param func_content: String containing function's content
+        :param file_path_str: File path to current JMC function as string
+        :param line: Current line in current JMC function
+        :param col: Current column in current JMC function
+        :param file_string: Content of current JMC function
+        :return: List of commands(string)
+        """
         tokenizer = Tokenizer(func_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         programs = tokenizer.programs
@@ -364,7 +375,7 @@ class Lexer:
             if command[0].string == 'function' and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
             elif command[0].string == 'new':
-                self.parse_new(tokenizer, command, file_path_str, prefix)
+                self.parse_new(tokenizer, command, prefix)
             elif command[0].string == 'class':
                 self.parse_class(tokenizer, command, file_path_str, prefix)
             elif command[0].string == '@import':
@@ -452,12 +463,12 @@ class Lexer:
         """
         if len(token.string) == 2:
             return token.string
-        open = token.string[0]
+        open_ = token.string[0]
         close = token.string[-1]
         tokenizer = Tokenizer(token.string[1:-1], tokenizer.file_path, token.line,
                               token.col + 1, tokenizer.file_string, expect_semicolon=False, allow_semicolon=token.token_type == TokenType.PAREN_SQUARE)
         string = ""
-        if open == '{' and tokenizer.programs[0][0].token_type == TokenType.STRING:
+        if open_ == '{' and tokenizer.programs[0][0].token_type == TokenType.STRING:
             is_nbt = False
         for token_ in tokenizer.programs[0]:
             if token_.token_type == TokenType.PAREN_ROUND:
@@ -479,4 +490,4 @@ class Lexer:
                 _string = token_.string
             string += _string
 
-        return open + string + close
+        return open_ + string + close

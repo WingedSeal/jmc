@@ -1,3 +1,4 @@
+"""Module handling datapack"""
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 from json import JSONEncoder, dumps
@@ -35,7 +36,7 @@ class Function:
 
     :param commands: List of minecraft commands(string), defaults to empty list
     """
-    __slots__ = 'commands'
+    __slots__ = ('commands', )
     commands: list[str]
 
     def __init__(self, commands: list[str] | None = None) -> None:
@@ -251,10 +252,10 @@ class DataPack:
         commands = self.parse_function_token(token, tokenizer)
         if len(commands) == 1 and NEW_LINE not in commands[0]:
             return commands[0]
-        else:
-            count = self.get_count(name)
-            self.private_functions[name][count] = Function(commands)
-            return self.call_func(name, count)
+
+        count = self.get_count(name)
+        self.private_functions[name][count] = Function(commands)
+        return self.call_func(name, count)
 
     def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str,
                                     precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
@@ -308,12 +309,27 @@ class DataPack:
             token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
     def add_tick_command(self, command: str) -> None:
+        """
+        Add command to self.ticks
+
+        :param command: Minecraft command string
+        """
         self.ticks.append(command)
 
     def add_load_command(self, command: str) -> None:
+        """
+        Add command to self.loads
+
+        :param command: Minecraft command string
+        """
         self.loads.append(command)
 
     def add_int(self, integer: int) -> None:
+        """
+        Add command to self.ints
+
+        :param command: Minecraft command string
+        """
         self.ints.add(integer)
 
     def build(self) -> None:
@@ -355,9 +371,9 @@ class DataPack:
         for key, value in tokenizer.parse_js_obj(token).items():
             try:
                 num = int(key)
-            except ValueError:
+            except ValueError as error:
                 raise JMCValueError(
-                    f"Expected number as key (got {key})", token, tokenizer)
+                    f"Expected number as key (got {key})", token, tokenizer) from error
 
             if value.token_type == TokenType.KEYWORD:
                 func_map[num] = value.string, False
