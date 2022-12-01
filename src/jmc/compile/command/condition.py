@@ -38,10 +38,9 @@ class Condition:
         return f"{'if' if self.if_unless else 'unless'} {self.string}"
 
 
-AST_TYPE = Union[dict[str,  # type: ignore
+AST_TYPE = dict[str,  # type: ignore
                       Union[str, list["AST_TYPE"], "AST_TYPE"]  # type: ignore
-                      ],
-                 Condition]
+                ] | Condition
 
 
 def merge_condition(conditions: list[Condition]) -> str:
@@ -280,10 +279,13 @@ def ast_to_commands(
     if ast["operator"] == AND_OPERATOR:
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
-        for body in ast["body"]:  # type: ignore
-            if isinstance(body, str):
+        if isinstance(ast["body"], Condition):
+            raise ValueError(
+                'ast["body"] is a Condition instead of list in AND')
+        for and_body in ast["body"]:
+            if isinstance(and_body, str):
                 raise ValueError('ast["body"] is string')
-            _conditions, precommand = ast_to_commands(body, datapack)  # noqa
+            _conditions, precommand = ast_to_commands(and_body, datapack)  # noqa
             conditions.extend(_conditions)
             if precommand is not None:
                 precommand_and.extend(precommand)
@@ -293,10 +295,13 @@ def ast_to_commands(
         _count = datapack.data.condition_count
         datapack.data.condition_count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
-        for body in ast["body"]:  # type: ignore
-            if isinstance(body, str):
+        if isinstance(ast["body"], Condition):
+            raise ValueError(
+                'ast["body"] is a Condition instead of list in OR')
+        for or_body in ast["body"]:
+            if isinstance(or_body, str):
                 raise ValueError('ast["body"] is string')
-            conditions, precommand = ast_to_commands(body, datapack)
+            conditions, precommand = ast_to_commands(or_body, datapack)
             if precommand is not None:
                 precommand_or.extend(precommand)
             precommand_or.append((conditions, _count))
@@ -305,7 +310,6 @@ def ast_to_commands(
             f"score {VAR}{_count} {DataPack.var_name} matches 1", IF)], precommand_or
 
     elif ast["operator"] == NOT_OPERATOR:
-        body = ast["body"]
         if isinstance(ast["body"], Condition):
             conditions, precommand = ast_to_commands(ast["body"], datapack)
         elif isinstance(ast["body"], dict):
