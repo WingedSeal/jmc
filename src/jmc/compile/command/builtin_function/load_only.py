@@ -272,6 +272,9 @@ class ItemCreateSign(JMCFunction):
             formatted_texts_[0].add_key(
                 "clickEvent", {
                     "action": "run_command", "value": on_click})
+            if not formatted_texts_[0]:
+                formatted_texts_[0].add_key("text", "")
+
         texts_ = [repr(str(text)) for text in formatted_texts_]
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(

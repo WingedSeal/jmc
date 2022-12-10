@@ -473,6 +473,9 @@ class FormattedText:
             raise JMCValueError(
                 f"Unexpected trailing '{self.SIGN}'", self.token, self.tokenizer, suggestion=f"Remove last '{self.SIGN}'")
 
+    def __bool__(self) -> bool:
+        return bool(self.result) and ("text" in self.result[0])
+
     def __str__(self) -> str:
         if len(self.result) == 1:
             if 'italic' not in self.result[0]:
