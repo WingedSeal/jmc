@@ -152,9 +152,11 @@ class Lexer:
                         f"Unexpected invalid path ({command[1].string})", command[1], tokenizer) from error
                 self.parse_file(file_path=new_path)
             else:
-                if not is_load:
-                    raise JMCSyntaxException(
-                        f"Command({command[0].string}) found inside non-load file (Not main JMC file)", command[1], tokenizer, suggestion="Consider putting it in a new function")
+                # if not is_load:
+                #     raise JMCSyntaxException(
+                # f"Command({command[0].string}) found inside non-load file
+                # (Not main JMC file)", command[1], tokenizer,
+                # suggestion="Consider putting it in a new function")
 
                 self.datapack.load_function.append(command)
 
