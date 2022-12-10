@@ -123,6 +123,21 @@ class Lexer:
                 if len(command) > 2:
                     raise JMCSyntaxException(
                         "Unexpected token", command[1], tokenizer, display_col_length=False)
+                if command[1].string.endswith(
+                        "/*") or command[1].string.endswith("\\*"):
+                    try:
+                        folder = Path(command[1].string[:-2])
+                    except Exception as error:
+                        raise JMCSyntaxException(
+                            f"Unexpected invalid path ({command[1].string})", command[1], tokenizer) from error
+                    if not folder.is_dir():
+                        raise JMCFileNotFoundError(
+                            f"Directory(folder) not found: {folder.resolve().as_posix()}")
+
+                    new_paths = folder.glob("*.jmc")
+                    for new_path in new_paths:
+                        self.parse_file(file_path=new_path)
+                    return
                 try:
                     new_path = Path(
                         (file_path.parent / command[1].string).resolve()
