@@ -174,6 +174,19 @@ class ItemReplaceEntity(JMCFunction):
         return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='JMC.put',
+    arg_type={
+        "command": ArgType.STRING,
+    },
+    name='jmc_put',
+)
+class JMCPut(JMCFunction):
+    def call(self) -> str:
+        return self.args["command"]
+
+
 def __normalize_decimal(n: float):
     """
     Parse float into string
