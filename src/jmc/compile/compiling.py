@@ -191,7 +191,11 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
             "INT", old_cert_config["INT"])
         cert_config = get_cert()
         if _test_file is None:
-            rmtree(namespace_folder, Header().statics)
+            statics = Header().statics
+            if statics:
+                rmtree(namespace_folder, statics)
+            else:
+                shutil.rmtree(namespace_folder)
             if minecraft_folder.is_dir():
                 shutil.rmtree(minecraft_folder)
     else:
