@@ -121,9 +121,11 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
     Read Certificate(JMC.txt)
 
     :param config: JMC configuration
+    :param _test_file: Used for testing purposes
     :raises JMCBuildError: Can't find JMC.txt
     """
     namespace_folder = Path(config.output) / 'data' / config.namespace
+    minecraft_folder = Path(config.output) / 'data' / 'minecraft'
     cert_file = namespace_folder / JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
     if namespace_folder.is_dir() or _test_file is not None:
@@ -152,6 +154,7 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
         cert_config = get_cert()
         if _test_file is None:
             rmtree(namespace_folder.resolve().as_posix())
+            rmtree(minecraft_folder.resolve().as_posix())
     else:
         cert_config = old_cert_config
     if _test_file is None:
@@ -216,6 +219,7 @@ def build(datapack: DataPack, config: "Configuration",
     :returns: Dictionary of file path and file content if _is_virtual is True
     """
     output: dict[str, Any] = {}
+    header = Header()
 
     logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
@@ -251,7 +255,12 @@ def build(datapack: DataPack, config: "Configuration",
                 dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
-        path = namespace_folder / 'functions' / (func_path + '.mcfunction')
+        if header.is_override_minecraft and func_path.startswith("minecraft/"):
+            # len("minecraft/") = 10
+            path = output_folder / 'data' / 'minecraft' / 'functions' / \
+                (func_path[10:] + '.mcfunction')
+        else:
+            path = namespace_folder / 'functions' / (func_path + '.mcfunction')
         content = post_process(func.content)
         if content:
             if _is_virtual:
@@ -262,12 +271,12 @@ def build(datapack: DataPack, config: "Configuration",
                     file.write(content)
 
     for json_path, json in datapack.jsons.items():
-        # if json_path.startswith("minecraft/"):
-        #     path = namespace_folder / (json_path + '.json')
-        # else:
-        #     # len("minecraft/") = 10
-        #     path = output_folder / 'data' / 'minecraft' / (json_path[10:] + '.json')
-        path = namespace_folder / (json_path + '.json')
+        if header.is_override_minecraft and json_path.startswith("minecraft/"):
+            # len("minecraft/") = 10
+            path = output_folder / 'data' / \
+                'minecraft' / (json_path[10:] + '.json')
+        else:
+            path = namespace_folder / (json_path + '.json')
         if json:
             if _is_virtual:
                 output[path.as_posix()] = dumps(json, indent=2)
