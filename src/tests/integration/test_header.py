@@ -53,9 +53,9 @@ function myFunc() {
     say "My function";
 }
         """).set_header_file("""
-#credit JMC by WingedSeal
+#credit "JMC by WingedSeal"
 #credit
-#credit Made by WingedSeal
+#credit "Made by WingedSeal"
         """).build()
 
         self.maxDiff = None

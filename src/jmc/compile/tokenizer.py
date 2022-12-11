@@ -56,6 +56,9 @@ class Token:
                 raise ValueError(
                     "paren_curly Token created but string doesn't start and end with the parenthesis")
 
+        if not header.is_enable_macro:
+            return
+
         if self.token_type != TokenType.KEYWORD:
             return
 
@@ -171,6 +174,9 @@ class Tokenizer:
                  'is_string', 'is_slash', 'raw_string',
                  'file_string', 'file_path', 'programs',
                  'is_comment', 'allow_semicolon')
+
+    programs: list[list[Token]]
+    """List of lines(list of tokens)"""
 
     line: int
     """Starts at 1"""

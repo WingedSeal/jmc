@@ -4,7 +4,8 @@ from shutil import rmtree
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from .header import parse_header, Header
+from .header import Header
+from .header_parse import parse_header
 from .lexer import Lexer
 from .log import Logger
 from .datapack import DataPack
