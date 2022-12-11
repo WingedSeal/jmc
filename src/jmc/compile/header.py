@@ -16,7 +16,9 @@ class Header(SingleTon):
         'macros',
         'credits',
         'is_enable_macro',
-        'commands')
+        'commands',
+        'statics'
+    )
 
     file_read: set[str]
     """Set of files that was already read (to prevent reading the same file multiple times"""
@@ -30,6 +32,8 @@ class Header(SingleTon):
     """Whether to allow jmc to take control over minecraft namespace"""  # TODO: WORK ON THIS
     commands: set[str]
     """List of extra command(first arguments) to allow"""
+    statics: set[Path]
+    """All path that JMC will not remove"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -49,6 +53,7 @@ class Header(SingleTon):
         obj.is_enable_macro = True
         obj.is_override_minecraft = False
         obj.commands = set()
+        obj.statics = set()
 
     def add_file_read(self, path: Path) -> None:
         """

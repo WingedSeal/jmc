@@ -95,8 +95,11 @@ class HeaderDuplicatedMacro(ValueError):
 class HeaderSyntaxException(SyntaxError):
     """Invalid syntax for header"""
 
-    def __init__(self, message: str, file_name: str, line: int, line_str: str):
+    def __init__(self, message: str, file_name: str, line: int,
+                 line_str: str, suggestion: str | None = None):
         msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
+        if suggestion is not None:
+            msg += '\n' + suggestion
         log(self, (message, ))
         super().__init__(msg)
 

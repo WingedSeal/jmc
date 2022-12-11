@@ -1,6 +1,5 @@
 """Module responsibile for all compiling in jmc"""
 from json import JSONDecodeError, dump, dumps, loads
-from shutil import rmtree
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -10,6 +9,8 @@ from .lexer import Lexer
 from .log import Logger
 from .datapack import DataPack
 from .exception import JMCBuildError
+
+import shutil
 
 if TYPE_CHECKING:
     from ..terminal import Configuration
@@ -27,8 +28,8 @@ def compile_jmc(config: "Configuration", debug: bool = False) -> None:
     """
     logger.info("Configuration:\n" + dumps(config.toJSON(), indent=2))
     Header.clear()
-    read_cert(config)
     read_header(config)
+    read_cert(config)
     logger.info("Parsing")
     lexer = Lexer(config)
     if debug:
@@ -69,7 +70,7 @@ def make_cert(cert_config: dict[str, str], path: Path) -> None:
     :param cert_config: Certificate configuration
     :param path: Path to write `cert_config` to
     """
-    path.parent.mkdir(parents=True, exist_ok=False)
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w+') as file:
         file.write(cert_config_to_string(cert_config))
 
@@ -99,7 +100,8 @@ def read_header(config: "Configuration",
     """
     header = Header()
     header_file = Path(config.target_str[:-len(".jmc")] + ".hjmc")
-    parent_target = Path(config.target_str).parent
+    parent_target = config.target.parent
+    namespace_path = config.output / 'data' / config.namespace
     if header_file.is_file() or _test_file is not None:
         header.add_file_read(header_file)
         logger.info("Header file found.")
@@ -109,11 +111,47 @@ def read_header(config: "Configuration",
         else:
             header_str = _test_file
         logger.info(f"Parsing {header_file}")
-        parse_header(header_str, header_file.as_posix(), parent_target)
+        parse_header(
+            header_str,
+            header_file.as_posix(),
+            parent_target,
+            namespace_path)
         return True
 
     logger.info("Header file not found.")
     return False
+
+
+def rmtree(path: Path, directory_exceptions: set[Path]) -> None:
+    """
+    Remove all files and folders inside directory
+
+    :param path: Directory Path
+    :param directory_exceptions: Set of directories that'll be excluded from deletion
+    """
+    files: list[Path] = []
+    folders: list[Path] = []
+
+    exception_paths: set[Path] = set()
+    for directory_exception in directory_exceptions:
+        exception_paths.add(directory_exception)
+        for exception_path in directory_exception.glob('**/*'):
+            exception_paths.add(exception_path)
+
+    for path_ in path.glob('**/*'):
+        if path_.is_file():
+            files.append(path_)
+        else:
+            folders.append(path_)
+
+    for file in files:
+        if file in exception_paths:
+            continue
+        file.unlink()
+    for folder in folders:
+        if folder in exception_paths:
+            continue
+        folder.rmdir()
 
 
 def read_cert(config: "Configuration", _test_file: str | None = None):
@@ -153,8 +191,9 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
             "INT", old_cert_config["INT"])
         cert_config = get_cert()
         if _test_file is None:
-            rmtree(namespace_folder.resolve().as_posix())
-            rmtree(minecraft_folder.resolve().as_posix())
+            rmtree(namespace_folder, Header().statics)
+            if minecraft_folder.is_dir():
+                shutil.rmtree(minecraft_folder)
     else:
         cert_config = old_cert_config
     if _test_file is None:
