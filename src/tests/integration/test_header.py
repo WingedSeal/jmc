@@ -5,7 +5,7 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.compile.test_compile import JMCPack
 
-from jmc.compile.exception import HeaderSyntaxException
+from jmc.compile.exception import HeaderSyntaxException, JMCSyntaxException
 
 
 class TestHeader(unittest.TestCase):
@@ -58,7 +58,6 @@ function myFunc() {
 #credit "Made by WingedSeal"
         """).build()
 
-        self.maxDiff = None
         self.assertDictEqual(
             pack.built,
             string_to_tree_dict("""
@@ -86,6 +85,17 @@ say Hello World
 # Made by WingedSeal
             """)
         )
+
+    def test_command(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCPack().set_jmc_file("""
+test "TEST";
+        """).build()
+        JMCPack().set_jmc_file("""
+test "TEST";
+        """).set_header_file("""
+#command test
+        """).build()
 
 
 if __name__ == '__main__':

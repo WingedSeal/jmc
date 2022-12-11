@@ -11,7 +11,12 @@ class Header(SingleTon):
     """
     A SingleTon class containing all information from header
     """
-    __slots__ = ('file_read', 'macros', 'credits', 'is_enable_macro')
+    __slots__ = (
+        'file_read',
+        'macros',
+        'credits',
+        'is_enable_macro',
+        'commands')
 
     file_read: set[str]
     """Set of files that was already read (to prevent reading the same file multiple times"""
@@ -21,6 +26,10 @@ class Header(SingleTon):
     """Dictionary of string to replace and what to replace it with"""
     is_enable_macro: bool
     """Whether to enable macro at the time of creating a token"""
+    is_override_minecraft: bool
+    """Whether to allow jmc to take control over minecraft namespace"""  # TODO: WORK ON THIS
+    commands: set[str]
+    """List of extra command(first arguments) to allow"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -38,6 +47,8 @@ class Header(SingleTon):
         obj.macros = {}
         obj.credits = []
         obj.is_enable_macro = True
+        obj.is_override_minecraft = False
+        obj.commands = set()
 
     def add_file_read(self, path: Path) -> None:
         """

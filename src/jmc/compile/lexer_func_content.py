@@ -2,6 +2,7 @@
 from typing import TYPE_CHECKING
 from json import dumps
 
+
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .exception import JMCSyntaxException, MinecraftSyntaxWarning
@@ -9,6 +10,7 @@ from .log import Logger
 from .utils import convention_jmc_to_mc, is_number, is_connected, search_to_string
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS
+from .header import Header
 from .command import (FLOW_CONTROL_COMMANDS,
                       variable_operation,
                       JMCFunction,
@@ -224,7 +226,7 @@ class FuncContent:
 
         if (
             token.token_type == TokenType.KEYWORD and
-            token.string in FIRST_ARGUMENTS and
+            (token.string in FIRST_ARGUMENTS or token.string in Header().commands) and
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
@@ -322,7 +324,7 @@ class FuncContent:
                             f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True
 
-        if token.string not in VANILLA_COMMANDS:
+        if token.string not in VANILLA_COMMANDS and token.string not in Header().commands:
             raise JMCSyntaxException(
                 f"Unrecognized command ({token.string})", token, self.tokenizer)
 

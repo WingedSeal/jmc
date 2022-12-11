@@ -77,7 +77,19 @@ def __parse_header(header_str: str, file_name: str,
                 header.credits.append(arg_tokens[0].string)
             else:
                 header.credits.append("")
-
+        elif directive_token.string == "override_minecraft":
+            if arg_tokens:
+                raise HeaderSyntaxException(
+                    f"Expected 0 arguments after '#override_minecraft' (got {len(arg_tokens)})", file_name, line, line_str)
+            header.is_override_minecraft = True
+        elif directive_token.string == "command":
+            if not arg_tokens or len(arg_tokens) != 1:
+                raise HeaderSyntaxException(
+                    f"Expected 1 arguments after '#command' (got {len(arg_tokens)})", file_name, line, line_str)
+            if arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    f"Expected keyword after '#command' (got {arg_tokens[0].token_type})", file_name, line, line_str)
+            header.commands.add(arg_tokens[0].string)
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{directive_token.string}'", file_name, line, line_str)
