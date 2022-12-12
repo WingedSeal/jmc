@@ -29,7 +29,7 @@ class Header(SingleTon):
     is_enable_macro: bool
     """Whether to enable macro at the time of creating a token"""
     is_override_minecraft: bool
-    """Whether to allow jmc to take control over minecraft namespace"""  # TODO: WORK ON THIS
+    """Whether to allow jmc to take control over minecraft namespace"""
     commands: set[str]
     """List of extra command(first arguments) to allow"""
     statics: set[Path]
