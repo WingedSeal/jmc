@@ -237,13 +237,13 @@ class Lexer:
                 "Expected keyword(JSON file's type)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected JSON file's path in bracket", command[1], tokenizer, col_length=True)
+                "Expected round parenthesis(JSON file's path)", command[1], tokenizer, col_length=True)
         if command[2].string == '()':
             raise JMCSyntaxException(
-                "Expected JSON file's path in bracket", command[2], tokenizer)
+                "Expected JSON file's path in the bracket", command[1], tokenizer)
         if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected (", command[2], tokenizer)
+                "Expected (", command[1], tokenizer)
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, col_length=True)
