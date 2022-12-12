@@ -194,15 +194,19 @@ class Lexer:
                 f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
         logger.debug(f"Function: {func_path}")
         func_content = command[3].string[1:-1]
-        if func_path in self.datapack.functions:
-            raise JMCSyntaxException(
-                f"Duplicate function declaration({func_path})", command[1], tokenizer, display_col_length=False)
         if func_path == self.datapack.load_name:
             raise JMCSyntaxException(
-                "Load function is defined", command[1], tokenizer, display_col_length=False)
+                "Load function is defined", command[1], tokenizer)
+        if func_path in self.datapack.functions:
+            old_function_token, old_function_tokenizer = self.datapack.defined_function_pos[
+                func_path]
+            raise JMCSyntaxException(
+                f"Duplicate function declaration({func_path})", command[1], tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
         if func_path == self.datapack.private_name:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
+        self.datapack.defined_function_pos[func_path] = (command[1], tokenizer)
         self.datapack.functions[func_path] = Function(self.parse_func_content(
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 

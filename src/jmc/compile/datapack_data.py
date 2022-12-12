@@ -18,8 +18,8 @@ class Data:
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
-        self.__item_id_count: int = 0
-        self.condition_count: int = 0
+        self.__item_id_count = 0
+        self.condition_count = 0
 
     def get_item_id(self) -> str:
         """
