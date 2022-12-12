@@ -133,7 +133,7 @@ class DataPack:
                 'functions', 'load_function', 'jsons',
                 'private_functions', 'private_function_count',
                 '__scoreboards', 'loads', 'ticks', 'namespace',
-                'used_command', 'lexer', 'defined_function_pos')
+                'used_command', 'lexer', 'defined_file_pos')
     private_name = '__private__'
     load_name = '__load__'
     tick_name = '__tick__'
@@ -179,8 +179,8 @@ class DataPack:
         self.data = Data()
         """Extra information that can be shared across all JMC function"""
 
-        self.defined_function_pos: dict[str, tuple[Token, Tokenizer]] = {}
-        """Dictionary of mcfunction path and it's first defined position in form of strings"""
+        self.defined_file_pos: dict[str, tuple[Token, Tokenizer]] = {}
+        """Dictionary of mcfunction or json path and it's first defined position in form of strings"""
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:
         """

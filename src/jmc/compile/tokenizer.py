@@ -489,7 +489,7 @@ class Tokenizer:
             if self.token_pos is None:
                 raise ValueError("Tokenizer.token_pos is stil None")
             raise JMCSyntaxException(
-                "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, self.paren if self.paren is not None else ''), self)
+                "Bracket was never closed", Token(TokenType.KEYWORD, self.token_pos.line, self.token_pos.col, self.paren if self.paren is not None else ''), self, suggestion="This can be the result of unclosed string as well")
         if expect_semicolon and (self.keywords or self.token_str):
             if self.token_str != "":
                 self.append_token()

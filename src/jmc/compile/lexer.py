@@ -198,7 +198,7 @@ class Lexer:
             raise JMCSyntaxException(
                 "Load function is defined", command[1], tokenizer)
         if func_path in self.datapack.functions:
-            old_function_token, old_function_tokenizer = self.datapack.defined_function_pos[
+            old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
                 func_path]
             raise JMCSyntaxException(
                 f"Duplicate function declaration({func_path})", command[1], tokenizer,
@@ -206,7 +206,7 @@ class Lexer:
         if func_path == self.datapack.private_name:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
-        self.datapack.defined_function_pos[func_path] = (command[1], tokenizer)
+        self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         self.datapack.functions[func_path] = Function(self.parse_func_content(
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
 
@@ -278,8 +278,11 @@ class Lexer:
         logger.debug(f"JSON: {json_type}({json_path})")
         json_content = command[3].string
         if json_path in self.datapack.jsons:
+            old_json_token, old_json_tokenizer = self.datapack.defined_file_pos[
+                json_path]
             raise JMCSyntaxException(
-                f"Duplicate JSON({json_path})", command[2], tokenizer)
+                f"Duplicate JSON({json_path})", command[2], tokenizer,
+                suggestion=f"This json was already defined at line {old_json_token.line} col {old_json_token.col} in {old_json_tokenizer.file_path}")
 
         try:
             json: dict[str, str] = loads(json_content)
@@ -288,6 +291,7 @@ class Lexer:
         if not json:
             raise JMCSyntaxException(
                 "JSON content cannot be empty", command[3], tokenizer)
+        self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer,
