@@ -180,7 +180,7 @@ class DataPack:
         """Extra information that can be shared across all JMC function"""
 
         self.defined_file_pos: dict[str, tuple[Token, Tokenizer]] = {}
-        """Dictionary of mcfunction or json path and it's first defined position in form of strings"""
+        """Dictionary of mcfunction or json path and it's first defined token and tokenizer"""
 
     def add_objective(self, objective: str, criteria: str = 'dummy') -> None:
         """
@@ -440,7 +440,6 @@ class DataPack:
     private_functions = {dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
     loads = {dumps(self.loads, indent=2)}
     tick = {dumps(self.ticks, indent=2)}
-
 )"""
 
 # {dumps({key:list(value) for key, value in self.functions.items()}, indent=2)}

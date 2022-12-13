@@ -46,7 +46,7 @@ FIRST_ARGUMENTS = {
 - `give` is exluced since it can also be arguments (`/effect give`)"""
 
 FIRST_ARGUMENTS_EXCEPTION = {
-    "give": {"effect", "recipe"},
+    "give": {"effect", "recipe", "give"},
     "clear": {"effect"},
     "if": {"execute"},
     "function": {"schedule"},
