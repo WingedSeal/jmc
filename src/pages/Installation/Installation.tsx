@@ -122,8 +122,9 @@ const Installation = () => {
                 <div className="text-white text-base md:text-2xl">
                     <p>
                         <Tab />
-                        Type <code>python3 -m pip install jmcfunction</code> and
-                        press Enter
+                        Type <code>pip install jmcfunction --pre</code> and
+                        press Enter (<code>--pre</code> will download latest
+                        pre-release version)
                     </p>
                 </div>
                 <img
