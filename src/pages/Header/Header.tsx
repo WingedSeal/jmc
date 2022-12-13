@@ -17,6 +17,10 @@ const Header = () => {
                         <code>.hjmc</code> extension. (The default is{" "}
                         <code>main.hjmc</code>)
                     </p>
+                    <p>
+                        <Tab />
+                        Semicolon is not required in <code>.hjmc</code> file.
+                    </p>
                 </div>
 
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -28,7 +32,7 @@ const Header = () => {
                         Replace a keyword with another keyword
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#</CodeText>define replacement
+                        <CodeText type="operator">#define</CodeText> replacement
                         original_keyword
                     </CodeBlock>
                     <p>
@@ -36,7 +40,7 @@ const Header = () => {
                         Example
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#</CodeText>define LOOP
+                        <CodeText type="operator">#define</CodeText> LOOP
                         __tick__
                     </CodeBlock>
                     <CodeBlock>
@@ -61,14 +65,14 @@ const Header = () => {
                         file generated.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#</CodeText>credit{" "}
+                        <CodeText type="operator">#credit</CodeText>{" "}
                         <CodeText type="string">
                             This datapack is made by
                         </CodeText>
                         <br />
-                        <CodeText type="operator">#</CodeText>credit
+                        <CodeText type="operator">#credit</CodeText>
                         <br />
-                        <CodeText type="operator">#</CodeText>credit{" "}
+                        <CodeText type="operator">#credit</CodeText>{" "}
                         <CodeText type="string">WingedSeal</CodeText>
                     </CodeBlock>
                 </div>
@@ -81,25 +85,74 @@ const Header = () => {
                         Add other header file
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#</CodeText>include{" "}
+                        <CodeText type="operator">#include</CodeText>{" "}
                         <CodeText type="string">"header_name"</CodeText>
                     </CodeBlock>
-                    <CodeBlock>
-                        <CodeText type="operator">#</CodeText>include{" "}
-                        <CodeText type="string">{"<header_name>"}</CodeText>
-                    </CodeBlock>
                 </div>
-                {/* <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    <s>Mod Commands</s>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Mod/New Commands
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
-                        <Tab/>Lorem ipsum dolor sit amet consectetur adipisicing
-                        elit. Neque dolorum, quae, tenetur libero aut dicta nisi
-                        cumque nemo beatae debitis voluptatum inventore quaerat
-                        harum expedita fugit, alias quasi velit consequuntur?
+                        <Tab />
+                        Make JMC recognize non-vanilla or new command so that it
+                        doesn't throw an error when using your mod's command
                     </p>
-                </div> */}
+                    <CodeBlock>
+                        <CodeText type="operator">#command</CodeText>{" "}
+                        my_mod_command
+                    </CodeBlock>
+                </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Override minecraft namespace
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Grant JMC the authority to fully control minecraft
+                        namespace of the datapack. This will result in JMC
+                        deleting minecraft namespace before it compiles. You'll
+                        be able to edit it directly from jmc using{" "}
+                        <code>minecraft</code> as a folder.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#override_minecraft</CodeText>
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#override_minecraft</CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="keyword">new</CodeText>{" "}
+                        <CodeText type="class">tags.functions</CodeText>
+                        (minecraft.my_functions_tag) {"{"}
+                        <br />
+                        <Tab />
+                        <CodeText type="string">"values"</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText> []
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Static folder
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Make the compiler ignore a folder(in output) when
+                        compiling resulting in that folder not getting deleted.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#static</CodeText>{" "}
+                        <CodeText type="string">
+                            "folder_path_from_namespace_folder"
+                        </CodeText>
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );

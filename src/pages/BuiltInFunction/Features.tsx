@@ -348,8 +348,8 @@ const BuildinFeatures = [
         <p>Create a custom item and save it for further use.</p>
         <p>onClick can only be used with "carrot_on_a_stick" itemType.</p>
         <p>
-            itemId is the unique name of this item so that it can be referenced
-            in other Item function.
+            <code>itemId</code> is the unique name of this item so that it can
+            be referenced in other Item function.
         </p>
         <Command
             name="Item.create"
@@ -359,6 +359,35 @@ const BuildinFeatures = [
                 { key: "itemType", type: "Item" },
                 { key: "displayName", type: "string" },
                 { key: "lore", type: "List<string>", default: "[]" },
+                { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "onClick", type: "Function", default: "()=>{}" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
+        id="item_create_sign"
+        summary="Item.createSign()"
+        keywords="new sign"
+    >
+        <p>Create a custom sign and save it for further use.</p>
+        <p>
+            <code>variant</code> is wood variant of the sign such as oak,
+            spruce, etc.
+        </p>
+        <p>
+            <code>itemId</code> is the unique name of this item so that it can
+            be referenced in other Item function.
+        </p>
+        <Command
+            name="Item.create"
+            type="LoadOnly"
+            params={[
+                { key: "itemId", type: "Keyword" },
+                { key: "variant", type: "Keyword" },
+                { key: "displayName", type: "string" },
+                { key: "lore", type: "List<string>", default: "[]" },
+                { key: "texts", type: "List<string>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
@@ -918,6 +947,17 @@ const BuildinFeatures = [
                 },
             ]}
             newline
+        />
+    </Feature>,
+    <Feature id="jmc_put" summary="JMC.put()" keywords="">
+        <p>
+            Ignore any parsing and output the command directly. Mainly used for
+            bypass compiler failures.
+        </p>
+        <Command
+            name="JMC.put"
+            type="JMCFunction"
+            params={[{ key: "command", type: "string" }]}
         />
     </Feature>,
 ];

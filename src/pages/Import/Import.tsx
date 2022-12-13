@@ -48,6 +48,15 @@ const Import = () => {
                     <Tab />
                     file_name.jmc
                 </CodeBlock>
+                <p>
+                    <Tab />
+                    You can also import every <code>.jmc</code> file in a folder
+                    using wildcard import (asterisk)
+                </p>
+                <CodeBlock>
+                    <CodeText type="operator">@import</CodeText>{" "}
+                    <CodeText type="string">"folder_name/*"</CodeText>;
+                </CodeBlock>
             </div>
         </section>
     );
