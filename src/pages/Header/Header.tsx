@@ -136,6 +136,22 @@ const Header = () => {
                         <br />
                         {"}"}
                     </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        <CodeText type="function">
+                            minecraft.my_function
+                        </CodeText>
+                        () {"{"}
+                        <br />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">
+                            "This will be in minecraft namespace"
+                        </CodeText>
+                        ;
+                        <br />
+                        {"}"}
+                    </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Static folder
