@@ -67,13 +67,13 @@ const Header = () => {
                     <CodeBlock>
                         <CodeText type="operator">#credit</CodeText>{" "}
                         <CodeText type="string">
-                            This datapack is made by
+                            "This datapack is made by"
                         </CodeText>
                         <br />
                         <CodeText type="operator">#credit</CodeText>
                         <br />
                         <CodeText type="operator">#credit</CodeText>{" "}
-                        <CodeText type="string">WingedSeal</CodeText>
+                        <CodeText type="string">"WingedSeal"</CodeText>
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
