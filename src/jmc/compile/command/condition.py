@@ -49,7 +49,7 @@ def merge_condition(conditions: list[Condition]) -> tuple[str, list[str]]:
     Merge all condition into a single string for minecraft execute if
 
     :param conditions: List of conditions
-    :return: Minecraft arguments after `execute if`
+    :return: A tuple of (Minecraft arguments after `execute if`) and (List of precommands in strings)
     """
     precommands: list[str] = []
     for condition in conditions:

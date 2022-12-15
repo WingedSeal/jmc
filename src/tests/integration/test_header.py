@@ -97,6 +97,108 @@ test "TEST";
 #command test
         """).build()
 
+    def test_override_minecraft_json(self):
+        pack = JMCPack().set_jmc_file("""
+new tags.functions(minecraft.custom) {
+  "values": []
+}
+        """).set_header_file("""
+#override_minecraft
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/tags/functions/custom.json
+{
+  "values": []
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+            """)
+        )
+
+        pack2 = JMCPack().set_jmc_file("""
+new tags.functions(minecraft.custom) {
+  "values": []
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack2 .built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/tags/functions/minecraft/custom.json
+{
+  "values": []
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+            """)
+        )
+
+    def test_override_minecraft_mcfunction(self):
+        pack = JMCPack().set_jmc_file("""
+function minecraft.custom() {
+  say "custom";
+}
+        """).set_header_file("""
+#override_minecraft
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/minecraft/functions/custom.mcfunction
+say custom
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+            """)
+        )
+
+        pack2 = JMCPack().set_jmc_file("""
+function minecraft.custom() {
+  say "custom";
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack2.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/minecraft/custom.mcfunction
+say custom
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard objectives add __int__ dummy
+            """)
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

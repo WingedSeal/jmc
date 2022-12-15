@@ -3,6 +3,7 @@ from json import loads, JSONDecodeError, dumps
 from typing import TYPE_CHECKING
 
 
+from .header import Header
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
@@ -183,7 +184,7 @@ class Lexer:
                 "Expected keyword(function's name)", command[1], tokenizer)
         if command[2].string != '()':
             raise JMCSyntaxException(
-                "Expected (", command[2], tokenizer, display_col_length=False)
+                "Expected empty round parenthesis", command[2], tokenizer)
         if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
@@ -257,15 +258,22 @@ class Lexer:
 
         json_type = convention_jmc_to_mc(
             command[1], tokenizer, is_make_lower=False)
+
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
             raise MinecraftSyntaxWarning(
                 f"Unrecognized JSON file's type({json_type})", command[2], tokenizer
             )
 
-        json_path = json_type + '/' + prefix + \
-            convention_jmc_to_mc(
-                command[2], tokenizer, is_make_lower=False, substr=(1, -1))
+        json_name = prefix + convention_jmc_to_mc(
+            command[2], tokenizer, is_make_lower=False, substr=(1, -1))
+
+        if Header().is_override_minecraft and json_name.startswith('minecraft/'):
+            # len('minecraft/') = 10
+            json_path = 'minecraft/' + json_type + '/' + json_name[10:]
+        else:
+            json_path = json_type + '/' + json_name
+
         if not json_path.islower():
             raise MinecraftSyntaxWarning(
                 f"Uppercase letter found in JSON file's path({json_path})", command[
