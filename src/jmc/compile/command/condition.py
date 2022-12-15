@@ -1,6 +1,6 @@
 """Module for parsing conditions (statements that return boolean), called from command/_flow_control.py and lexer.py"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Union
 
 from ..tokenizer import TokenType, Tokenizer, Token
@@ -30,6 +30,7 @@ class Condition:
     string: str
     if_unless: bool
     """`True` means 'if', `False` means 'unless'"""
+    pre_command: list[str] = field(default_factory=list)
 
     def reverse(self) -> None:
         self.if_unless = not self.if_unless
@@ -267,7 +268,7 @@ def ast_to_commands(
     :raises ValueError: Invalid AST
     :return: A tuple of (
         A chain of conditions(List of Condition)
-
+        and
         Commands(
             List of Condition and n (`__logic__n` for minecraft function name)
         ) that need to come before (can be None)

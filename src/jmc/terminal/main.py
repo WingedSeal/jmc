@@ -34,13 +34,17 @@ def handle_command(given_command: str) -> None:
 def start() -> None:
     os.system("")
     logger.info(f"Build-version: {global_data.VERSION}")
-    pprint(' JMC Compiler\n', Colors.HEADER)
+    pprint(f' JMC Compiler {global_data.VERSION}\n', Colors.HEADER)
     pprint(f'Current Directory | {global_data.cwd}\n', Colors.YELLOW)
     if not global_data.config.is_file_exist():
-        global_data.config.ask_config()
-        global_data.config.save_config()
+        global_data.config.ask_and_save()
     else:
         global_data.config.load_config()
-    pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
+    if global_data.config:
+        pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
+    else:
+        pprint(
+            "To setup workspace, type `config`. For help, type `help`",
+            Colors.INFO)
     while True:
         handle_command(get_input())

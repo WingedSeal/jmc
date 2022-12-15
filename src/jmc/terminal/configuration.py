@@ -33,6 +33,7 @@ class Configuration:
     pack_format: str = ""
     target: Path = Path()
     output: Path = Path()
+    is_configed: bool = False
 
     @property
     def target_str(self) -> str:
@@ -74,6 +75,7 @@ class Configuration:
             self.pack_format = json["pack_format"]
             self.target = Path(json["target"])
             self.output = Path(json["output"])
+            self.is_configed = True
         except JSONDecodeError as error:
             pprint(
                 f"Invalid JSON syntax in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
@@ -89,8 +91,22 @@ class Configuration:
         """
         Save configuration to file
         """
+        pprint(
+            f"Your configuration has been saved to {self.global_data.CONFIG_FILE_NAME}", Colors.INFO
+        )
         with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open('w') as file:
             dump(self.toJSON(), file, indent=2)
+
+    def ask_and_save(self):
+        """
+        Ask for configuration from user(tell user that configuration is not set), and if user successfully finish the configuration, save it
+        """
+        pprint(
+            f"No config file found, generating {self.global_data.CONFIG_FILE_NAME}...", Colors.INFO
+        )
+        self.ask_config()
+        if self.is_configed:
+            self.save_config()
 
     def ask_config(self):
         """
@@ -98,15 +114,15 @@ class Configuration:
         """
         # Namespace
         while True:
-            namespace = get_input("Namespace: ")
+            namespace = get_input("Namespace(Leave blank to cancel): ")
             if " " in namespace or "\t" in namespace:
                 pprint("Invalid Namespace: Space detected.", Colors.FAIL)
                 continue
             if namespace == "":
                 pprint(
-                    "Invalid Namespace: Namespace need to have 1 or more character.", Colors.FAIL
+                    f"Configuration canceled.{' Using backup configuration.' if self.is_configed else ''}", Colors.FAIL
                 )
-                continue
+                return
             if not namespace.islower():
                 pprint(
                     "Invalid Namespace: Uppercase character detected.",
@@ -114,6 +130,7 @@ class Configuration:
                 continue
             break
         self.namespace = namespace
+        self.is_configed = True
 
         # Description
         self.description = get_input("Description: ")
@@ -171,6 +188,9 @@ class Configuration:
                 continue
             break
         self.output = output
+
+    def __bool__(self) -> bool:
+        return self.is_configed
 
     @staticmethod
     def is_file_exist() -> bool:

@@ -22,7 +22,7 @@ NEW_LINE = "\n"
 def help_(command: str = "") -> None:
     """Output this message or get help for a command"""
     if not command:
-        avaliable_commands = "\n".join(f" - {usage}: {func.__doc__}" for _,
+        avaliable_commands = "\n".join(f"- {usage}: {func.__doc__}" for _,
                                        (func, usage) in global_data.commands.items())
         pprint(f"""Avaliable commands:
 
@@ -33,7 +33,7 @@ def help_(command: str = "") -> None:
     if command not in global_data.commands:
         raise TypeError(f"Unrecognized command '{command}'")
     func, usage = global_data.commands[command]
-    pprint(f"{usage}: {func.__doc__}", Colors.INFO)
+    pprint(f"{usage}: {func.__doc__}", Colors.YELLOW)
 
 
 @add_command("exit", rename="exit")
@@ -52,6 +52,9 @@ def compile_(debug: str = "") -> None:
     debug_compile = bool(debug)
 
     pprint("Compiling...", Colors.INFO)
+    if not global_data.config:
+        global_data.config.ask_and_save()
+        return
     try:
         start_time = perf_counter()
         compile_jmc(global_data.config, debug=True)
@@ -109,8 +112,8 @@ def __log_clear() -> None:
 @add_command("log debug|info|clear")
 def log(mode: str) -> None:
     """
-debug|info: Create log file in output directory
-clear: Delete every log file inside log folder except latest"""
+  - debug|info: Create log file in output directory
+  - clear: Delete every log file inside log folder except latest"""
     if mode not in {"debug", "info", "clear"}:
         raise TypeError(f"Unrecognized mode '{mode}'")
 
@@ -155,11 +158,19 @@ Type `cancel` to cancel
         global_data.config.load_config()
 
 
-@add_command("config edit|reset")
-def config(mode: str) -> None:
-    """
-reset: Delete the configuration file and restart the compiler
-edit: Override configuration file and bypass error checking"""
+@add_command("config [edit|reset]")
+def config(mode: str = "") -> None:
+    """Setup workspace's configuration
+  - reset: Delete the configuration file and restart the compiler
+  - edit: Override configuration file and bypass error checking"""
+    if not mode:
+        if not global_data.config:
+            global_data.config.ask_and_save()
+            return
+        else:
+            pprint(
+                "Configuration file is already generated. To reset, use `cofig reset`",
+                Colors.FAIL)
     if mode == 'reset':
         __config_reset()
     elif mode == 'edit':
@@ -184,6 +195,10 @@ def autocompile(interval: str) -> None:
         raise TypeError("Invalid integer for interval") from error
     if global_data.interval == 0:
         pprint("Interaval cannot be 0 seconds", Colors.FAIL)
+        return
+
+    if not global_data.config:
+        global_data.config.ask_and_save()
         return
 
     thread = threading.Thread(
