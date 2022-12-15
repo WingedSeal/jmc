@@ -30,7 +30,7 @@ class Condition:
     string: str
     if_unless: bool
     """`True` means 'if', `False` means 'unless'"""
-    pre_command: list[str] = field(default_factory=list)
+    pre_commands: list[str] = field(default_factory=list)
 
     def reverse(self) -> None:
         self.if_unless = not self.if_unless
@@ -44,14 +44,17 @@ AST_TYPE = dict[str,  # type: ignore
                 ] | Condition
 
 
-def merge_condition(conditions: list[Condition]) -> str:
+def merge_condition(conditions: list[Condition]) -> tuple[str, list[str]]:
     """
     Merge all condition into a single string for minecraft execute if
 
     :param conditions: List of conditions
     :return: Minecraft arguments after `execute if`
     """
-    return ' '.join(str(condition) for condition in conditions)
+    precommands: list[str] = []
+    for condition in conditions:
+        precommands.extend(condition.pre_commands)
+    return (' '.join(str(condition) for condition in conditions), precommands)
 
 
 def custom_condition(
@@ -340,22 +343,29 @@ def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
     if precommand_conditions is None:
         precommand = ""
     else:
-        precommands = []
+        precommands: list[str] = []
         current_count = -1
         for conditions_and_count in precommand_conditions:
             if conditions_and_count[1] > current_count:
                 current_count += 1
                 precommands.append(
                     f"scoreboard players set {VAR}{current_count} {DataPack.var_name} 0")
+                merged_condition, merged_condition_pre_command = merge_condition(
+                    conditions_and_count[0])
+                precommands.extend(merged_condition_pre_command)
                 precommands.append(
-                    f"execute {merge_condition(conditions_and_count[0])} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
+                    f"execute {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
                 continue
 
+            merged_condition, merged_condition_pre_command = merge_condition(
+                conditions_and_count[0])
+            precommands.extend(merged_condition_pre_command)
             precommands.append(
-                f"execute unless score {VAR}{current_count} {DataPack.var_name} matches 1 {merge_condition(conditions_and_count[0])} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
+                f"execute unless score {VAR}{current_count} {DataPack.var_name} matches 1 {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
         precommand = '\n'.join(precommands)
 
-    condition_string = merge_condition(conditions)
+    condition_string, precommands_ = merge_condition(conditions)
+    precommand += '\n'.join(precommands_)
     return condition_string, precommand
 
 

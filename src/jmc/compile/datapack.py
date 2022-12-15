@@ -139,6 +139,7 @@ class DataPack:
     tick_name = '__tick__'
     var_name = '__variable__'
     int_name = '__int__'
+    storage_name = '__storage__'
     VARIABLE_SIGN = '$'
     """Data read from header file(s)"""
 

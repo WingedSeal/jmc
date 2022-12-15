@@ -86,7 +86,8 @@ def get_cert() -> dict[str, str]:
         "TICK": DataPack.tick_name,
         "PRIVATE": DataPack.private_name,
         "VAR": DataPack.var_name,
-        "INT": DataPack.int_name
+        "INT": DataPack.int_name,
+        "STORAGE": DataPack.storage_name
     }
 
 
@@ -189,6 +190,8 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
             "VAR", old_cert_config["VAR"])
         DataPack.int_name = cert_config.get(
             "INT", old_cert_config["INT"])
+        DataPack.storage_name = cert_config.get(
+            "STORAGE", old_cert_config["STORAGE"])
         cert_config = get_cert()
         if _test_file is None:
             statics = Header().statics

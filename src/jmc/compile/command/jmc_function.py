@@ -192,12 +192,12 @@ class JMCFunction:
         """
         raise NotImplementedError("Call function not implemented")
 
-    def call_bool(self) -> tuple[str, bool]:
+    def call_bool(self) -> tuple[str, bool, list[str]]:
         """
         This function will be called when user call matching JMC boolean(Can only be used in condition) function
 
         :raises NotImplementedError: When the subclass's call method is not implemented
-        :return: Tuple of Minecraft command as string and boolean(True->if, False->unless)
+        :return: Tuple of Minecraft command as string and boolean(True->if, False->unless) and list of precommands
         """
         raise NotImplementedError("Call(boolean) function not implemented")
 
