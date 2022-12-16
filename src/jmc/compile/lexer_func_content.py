@@ -61,7 +61,7 @@ ALLOW_NUMBER_AFTER_CURLY_PAREN = {
     'give',
     'clear'
 }
-"""List of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
+"""Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
 
 def append_commands(commands: list[str], string: str) -> None:

@@ -42,5 +42,5 @@ class StringIsEqual(JMCFunction):
         bool_result = self.datapack.data.get_current_bool_result()
         return f'score {bool_result} {self.datapack.var_name} matches 0', IF, [
             f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from storage {self.datapack.namespace}:{self.args['storage']} {self.args['path']}",
-            f"execute store result score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set value {self.args['string']}"
+            f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set value {self.args['string']}"
         ]
