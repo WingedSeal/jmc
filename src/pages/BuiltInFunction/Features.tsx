@@ -122,9 +122,9 @@ const BuildinFeatures = [
             params={[
                 { key: "itemId", type: "Keyword" },
                 { key: "variant", type: "Keyword" },
-                { key: "displayName", type: "string" },
-                { key: "lore", type: "List<string>", default: "[]" },
-                { key: "texts", type: "List<string>", default: "[]" },
+                { key: "displayName", type: "FormattedString" },
+                { key: "lore", type: "List<FormattedString>", default: "[]" },
+                { key: "texts", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
