@@ -825,6 +825,9 @@ class Tokenizer:
                 if token_.string == "()":
                     arrow_func_state = 1
                 else:
+                    if arg:
+                        raise JMCSyntaxException(
+                            "Unexpected parenthesis", token_, self, display_col_length=False, suggestion=f"Probably missing comma (,)")
                     arg = token_.string
                     if key:
                         add_kwarg(token_)
