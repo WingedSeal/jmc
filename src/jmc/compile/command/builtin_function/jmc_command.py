@@ -201,6 +201,48 @@ class TextTellraw(JMCFunction):
         return f'tellraw {self.args["selector"]} {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
 
 
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='Text.title',
+    arg_type={
+        "selector": ArgType.SELECTOR,
+        "message": ArgType.STRING,
+    },
+    name='text_title',
+)
+class TextTitle(JMCFunction):
+    def call(self) -> str:
+        return f'title {self.args["selector"]} title {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='Text.subtitle',
+    arg_type={
+        "selector": ArgType.SELECTOR,
+        "message": ArgType.STRING,
+    },
+    name='text_subtitle',
+)
+class TextSubtitle(JMCFunction):
+    def call(self) -> str:
+        return f'title {self.args["selector"]} subtitle {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='Text.actionbar',
+    arg_type={
+        "selector": ArgType.SELECTOR,
+        "message": ArgType.STRING,
+    },
+    name='text_actionbar',
+)
+class TextActionbar(JMCFunction):
+    def call(self) -> str:
+        return f'title {self.args["selector"]} actionbar {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+
+
 def __normalize_decimal(n: float):
     """
     Parse float into string
