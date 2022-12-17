@@ -271,7 +271,8 @@ class FormattedText:
     """
     __slots__ = ('raw_text', 'current_json', 'result',
                  'bracket_content', 'token', 'tokenizer',
-                 'current_color', 'is_default_no_italic', 'datapack')
+                 'current_color', 'is_default_no_italic', 'datapack',
+                 'is_allow_score_selector')
 
     SIGN = "&"
     OPEN_BRACKET = "<"
@@ -302,12 +303,13 @@ class FormattedText:
     }
 
     def __init__(self, raw_text: str, token: Token,
-                 tokenizer: Tokenizer, datapack: DataPack, *, is_default_no_italic: bool = False) -> None:
+                 tokenizer: Tokenizer, datapack: DataPack, *, is_default_no_italic: bool = False, is_allow_score_selector: bool = True) -> None:
         self.raw_text = raw_text
         self.token = token
         self.tokenizer = tokenizer
         self.datapack = datapack
         self.is_default_no_italic = is_default_no_italic
+        self.is_allow_score_selector = is_allow_score_selector
         self.bracket_content = ""
         self.result: list[SIMPLE_JSON_TYPE] = []
         self.current_json: SIMPLE_JSON_TYPE = {"text": ""}
@@ -438,6 +440,13 @@ class FormattedText:
             self.current_json['color'] = self.current_color
 
         if 'score' in self.current_json or 'selector' in self.current_json:
+            if not self.is_allow_score_selector:
+                if 'score' in self.current_json:
+                    raise JMCValueError(
+                        f"score is not allowed in this context in formatted text", self.token, self.tokenizer)
+                else:
+                    raise JMCValueError(
+                        f"selector is not allowed in this context in formatted text", self.token, self.tokenizer)
             del self.current_json['text']
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}

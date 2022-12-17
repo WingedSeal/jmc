@@ -185,11 +185,11 @@ class ItemCreate(JMCFunction):
                 self.token,
                 self.tokenizer)
 
-        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True)))
+        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
                          for lore in lores])
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack ,is_default_no_italic=True))
+            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack ,is_default_no_italic=True, is_allow_score_selector=False))
             )},Lore:[{lore_}]}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(
@@ -264,7 +264,7 @@ class ItemCreateSign(JMCFunction):
                 self.token,
                 self.tokenizer)
 
-        lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True)))
+        lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
                          for lore in lores)
         formatted_texts_ = [FormattedText(text, self.raw_args["texts"].token, self.tokenizer, self.datapack)
                             for text in texts]
@@ -278,7 +278,7 @@ class ItemCreateSign(JMCFunction):
         texts_ = [repr(str(text)) for text in formatted_texts_]
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack, is_default_no_italic=True))
+            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
             )},Lore:[{lore_}]}},BlockEntityTag:{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(
