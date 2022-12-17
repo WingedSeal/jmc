@@ -534,13 +534,19 @@ class FormattedText:
         return bool(self.result) and ("text" in self.result[0])
 
     def __str__(self) -> str:
+        if not self.result:
+            return ''
+
         if len(self.result) == 1:
             if self.is_default_no_italic and 'italic' not in self.result[0]:
                 self.result[0]['italic'] = False
             return json.dumps(self.result[0])
 
-        if not self.result:
-            return ''
+        if self.is_default_no_italic and (
+                'italic' not in self.result[0] or not self.result[0]['italic']):
+            self.result[0]['italic'] = False
+            return json.dumps(self.result)
+
         return json.dumps(
             [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result)
 
