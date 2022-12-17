@@ -398,6 +398,9 @@ class FormattedText:
                         f'score used twice in formatted text', self.token, self.tokenizer)
                 self.current_json['score'] = {
                     "name": prop, "objective": self.datapack.var_name}
+                if not value:
+                    raise JMCValueError(
+                        f'Score cannot be false', self.token, self.tokenizer)
                 continue
 
             if prop.count(':') == 1:
@@ -410,6 +413,9 @@ class FormattedText:
                 objective, name = prop.split(':')
                 self.current_json['score'] = {
                     "name": objective, "objective": name}
+                if not value:
+                    raise JMCValueError(
+                        f'Score cannot be false', self.token, self.tokenizer)
                 continue
 
             if prop.startswith('@'):
@@ -420,6 +426,9 @@ class FormattedText:
                     raise JMCValueError(
                         f'selector used with selector in formatted text', self.token, self.tokenizer)
                 self.current_json['selector'] = prop
+                if not value:
+                    raise JMCValueError(
+                        f'Selector cannot be false', self.token, self.tokenizer)
                 continue
 
             raise JMCValueError(
