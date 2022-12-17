@@ -196,6 +196,54 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature id="text_tellraw" summary="Text.tellraw()" keywords="formatted">
+        <p>Use formatted text on tellraw</p>
+        <Command
+            name="Text.tellraw"
+            type="JMCFunction"
+            params={[
+                { key: "selector", type: "TargetSelector" },
+                { key: "message", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="text_title" summary="Text.title()" keywords="formatted">
+        <p>Use formatted text on title</p>
+        <Command
+            name="Text.title"
+            type="JMCFunction"
+            params={[
+                { key: "selector", type: "TargetSelector" },
+                { key: "message", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="text_subtitle" summary="Text.subtitle()" keywords="formatted">
+        <p>Use formatted text on subtitle</p>
+        <Command
+            name="Text.subtitle"
+            type="JMCFunction"
+            params={[
+                { key: "selector", type: "TargetSelector" },
+                { key: "message", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_actionbar"
+        summary="Text.actionbar()"
+        keywords="formatted"
+    >
+        <p>Use formatted text on actionbar</p>
+        <Command
+            name="Text.actionbar"
+            type="JMCFunction"
+            params={[
+                { key: "selector", type: "TargetSelector" },
+                { key: "message", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
     <Feature id="math_sqrt" summary="Math.sqrt()" keywords="square root">
         <p>
             Use{" "}
