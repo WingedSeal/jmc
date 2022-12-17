@@ -3,7 +3,7 @@
 import math
 from typing import Iterator
 from ...exception import JMCSyntaxException, JMCValueError
-from ..utils import ArgType, NumberType
+from ..utils import ArgType, FormattedText, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
@@ -185,6 +185,20 @@ class ItemReplaceEntity(JMCFunction):
 class JMCPut(JMCFunction):
     def call(self) -> str:
         return self.args["command"]
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string='Text.tellraw',
+    arg_type={
+        "selector": ArgType.SELECTOR,
+        "message": ArgType.STRING,
+    },
+    name='text_tellraw',
+)
+class TextTellraw(JMCFunction):
+    def call(self) -> str:
+        return f'tellraw {self.args["selector"]} {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
 
 
 def __normalize_decimal(n: float):
