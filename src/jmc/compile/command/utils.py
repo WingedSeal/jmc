@@ -439,8 +439,14 @@ class FormattedText:
 
         if 'score' in self.current_json or 'selector' in self.current_json:
             del self.current_json['text']
+
+            tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
+            for prop_, value_ in self.current_json.items():
+                if prop_ in {'bold', 'italic', 'underlined',
+                             'strikethrough', 'obfuscated', 'color'}:
+                    tmp_json[prop_] = value_
             self.result.append(self.current_json)
-            self.current_json = {"text": ""}
+            self.current_json = tmp_json
 
     def __parse_code(self, char: str) -> None:
         """
