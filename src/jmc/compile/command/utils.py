@@ -493,18 +493,19 @@ class FormattedText:
 
             if is_expect_color_code:
                 is_expect_color_code = False
-                if char == self.OPEN_BRACKET:
-                    is_bracket_format = True
-                    continue
                 if char == self.SIGN:
                     if isinstance(self.current_json["text"], str):
                         self.current_json["text"] += char
                         continue
+                if char == self.OPEN_BRACKET:
+                    self.__push()
+                    is_bracket_format = True
+                    continue
+                self.__push()
                 self.__parse_code(char)
                 continue
 
             if char == self.SIGN:
-                self.__push()
                 is_expect_color_code = True
                 continue
 
