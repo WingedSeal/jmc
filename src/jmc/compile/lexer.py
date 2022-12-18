@@ -107,9 +107,9 @@ class Lexer:
                 self.parse_current_load()
             elif command[0].string == 'function' and len(command) != 2:
                 raise JMCSyntaxException(
-                    f"'function' expect 1(Vanilla syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
+                    f"'function' expect 1(Minecraft syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
                     command[0],
-                    tokenizer)
+                    tokenizer, suggestion="Probably caused by missing function body ('{')")
             elif command[0].string == 'new':
                 self.parse_new(tokenizer, command)
             elif command[0].string == 'class':

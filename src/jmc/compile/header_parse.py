@@ -37,8 +37,18 @@ def __parse_header(header_str: str, file_name: str,
             if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
                 raise HeaderSyntaxException(
                     "Expected keyword after '#define'", file_name, line, line_str)
+
+            if len(
+                    arg_tokens) > 1 and arg_tokens[1].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    f"Expected keyword after the first keyword in '#define' (got {arg_tokens[1].token_type})", file_name, line, line_str)
+
+            if len(arg_tokens) > 2:
+                raise HeaderSyntaxException(
+                    f"Expected 1-2 arguments after '#define' (got {len(arg_tokens)})", file_name, line, line_str)
             key = arg_tokens[0].string
-            value = " ".join(token_.string for token_ in arg_tokens[1:])
+            # value = " ".join(token_.string for token_ in arg_tokens[1:])
+            value = arg_tokens[1].string if len(arg_tokens) == 2 else ""
             logger.debug(f'Define "{key}" as "{value}"')
             if key in header.macros:
                 raise HeaderDuplicatedMacro(

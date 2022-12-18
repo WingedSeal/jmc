@@ -98,7 +98,7 @@ def __parse_to_string(
                 ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion=f"Use '{value[1:-1]}' instead of '{value}'")
         if value[0] in {'{', '(', '['}:
             raise JMCSyntaxException(
-                "Brackets are not supported in .toString", token, tokenizer, suggestion="clickEvent and hoverEvent are not supported, use vanila JSON instead.")
+                "Brackets are not supported in .toString", token, tokenizer, suggestion="clickEvent and hoverEvent are not supported, use normal minecraft JSON instead.")
 
         if key in {'font', 'color'}:
             json[key] = value
@@ -109,7 +109,7 @@ def __parse_to_string(
             json[key] = value == 'true'
         elif key in {'clickEvent', 'hoverEvent'}:
             raise JMCSyntaxException(
-                "clickEvent and hoverEvent are not supported in .toString", token, tokenizer, suggestion="Use vanila JSON instead")
+                "clickEvent and hoverEvent are not supported in .toString", token, tokenizer, suggestion="Use normal minecraft JSON instead")
         elif key == 'text':
             raise JMCSyntaxException(
                 "'text' key is incompatible with 'score' in .toString", token, tokenizer)
