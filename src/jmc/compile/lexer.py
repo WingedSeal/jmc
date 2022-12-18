@@ -135,10 +135,10 @@ class Lexer:
                         raise JMCFileNotFoundError(
                             f"Directory(folder) not found: {folder.resolve().as_posix()}")
 
-                    new_paths = folder.glob("*.jmc")
+                    new_paths = folder.glob("**/*.jmc")
                     for new_path in new_paths:
                         self.parse_file(file_path=new_path)
-                    return
+                    continue
                 try:
                     new_path = Path(
                         (file_path.parent / command[1].string).resolve()

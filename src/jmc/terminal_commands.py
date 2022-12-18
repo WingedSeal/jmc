@@ -219,7 +219,7 @@ def chdir(path: str) -> None:
     """Change current directory"""
     try:
         os.chdir(path)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         pprint("Invalid path", Colors.FAIL)
         return
     global_data.cwd = Path(os.getcwd())
