@@ -136,12 +136,54 @@ class Configuration:
         self.description = get_input("Description: ")
 
         # Pack Format
+        def version_tuple(v):
+            return tuple(map(int, (v.split("."))))  
+        versions = [["1.19", 10], ["1.18.2", 9], ["1.18", 8], ["1.17", 7], ["1.16.2", 6], ["1.15", 5], ["1.13", 4], ["0", 0]]
+
         while True:
-            pack_format = get_input("Pack Format: ")
-            if not pack_format.isdigit():
-                pprint(
-                    "Invalid Pack Format: Non integer detected.",
-                    Colors.FAIL)
+            input_version = get_input("Minecraft Version or Pack Format: ")
+            inputException = False
+    
+            # see if input can't be a version number
+            if "." not in str(input_version):
+                # see if input can be an integer
+                try:
+                    int(input_version)
+                except:
+                    pprint(
+                        "Invalid Pack Format: Non integer detected.", Colors.FAIL)
+                    inputException = True
+                else:
+                    # we accept input as a pack format number
+                    pack_format = input_version
+                    break
+            if inputException == True:
+                continue
+        
+            # validate that there are only numbers except for dots in our input version
+            input_version_split = input_version.split(".")
+            for validate_integer in range(len(input_version_split)):
+                if not input_version_split[validate_integer].isnumeric():
+                    pprint(
+                        "Invalid Pack Format: Non integer detected.", Colors.FAIL)
+                    inputException = True
+                    break
+            if inputException == True:
+                continue
+            
+            # find the pack format that corresponds to our input version
+            for version in range(len(versions)):
+                if version+1 == len(versions):
+                    # input version is below lowest known
+                    pprint(
+                        "Invalid Pack Format: Unsupported version.", Colors.FAIL)
+                    inputException = True
+                    break
+                if version_tuple(input_version) >= version_tuple(versions[version][0]):
+                    # success
+                    pack_format = versions[version][1]
+                    break   
+            if inputException == True:
                 continue
             break
         self.pack_format = pack_format
