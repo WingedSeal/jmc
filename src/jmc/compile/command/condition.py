@@ -151,7 +151,7 @@ def custom_condition(
 
         else:
             raise JMCSyntaxException(
-                f"Expected operator or 'matches' (got {tokens[1].token_type})", tokens[1], tokenizer)
+                f"Expected operator or 'matches' (got {tokens[1].token_type.value})", tokens[1], tokenizer)
 
     matched_function = BOOL_FUNCTIONS.get(
         tokens[0].string, None)

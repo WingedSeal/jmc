@@ -1,10 +1,11 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from ast import literal_eval
 from enum import Enum
 import re
 
 from .utils import is_connected
-from .header import Header
+from .header import MacroFactory, Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
@@ -42,6 +43,7 @@ class Token:
     line: int
     col: int
     string: str
+    _macro_length: int = 0
     """The string representation (including parentheses, excluding quotation mark)"""
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
@@ -51,31 +53,11 @@ class Token:
         """
         Edit string and _length according to macros(`#define something`) defined
         """
-        header = Header()
         if self.token_type == TokenType.PAREN_CURLY:
             if not self.string.startswith(
                     '{') or not self.string.endswith('}'):
                 raise ValueError(
                     "paren_curly Token created but string doesn't start and end with the parenthesis")
-
-        if not header.is_enable_macro:
-            return
-
-        if self.token_type != TokenType.KEYWORD:
-            return
-
-        string = header.macros.get(self.string, self.string)
-
-        splitters = {":", "."}
-        for splitter in splitters:
-            if splitter in string:
-                string = splitter.join(
-                    [header.macros[keyword] if keyword in header.macros else keyword for keyword in string.split(splitter)])
-
-        if string == self.string:
-            return
-
-        object.__setattr__(self, "string", string)
 
     @property
     def length(self) -> int:
@@ -84,8 +66,11 @@ class Token:
 
         :return: Length of the string
         """
-        return len(repr(self.string)) if self.token_type == TokenType.STRING else len(
-            self.string)
+        if not self._macro_length:
+            return len(repr(self.string)) if self.token_type == TokenType.STRING else len(
+                self.string)
+        else:
+            return self._macro_length
 
     def add_quotation(self) -> str:
         """Get self.string including quotation mark (Raise error when the token_type is not TokenType.STRING)"""
@@ -177,7 +162,7 @@ class Tokenizer:
                  'paren', 'r_paren', 'paren_count',
                  'is_string', 'is_slash', 'raw_string',
                  'file_string', 'file_path', 'programs',
-                 'is_comment', 'allow_semicolon')
+                 'is_comment', 'allow_semicolon', 'macro_factory')
 
     programs: list[list[Token]]
     """List of lines(list of tokens)"""
@@ -224,10 +209,13 @@ class Tokenizer:
     # Special Case
     allow_semicolon: bool
     """Whether to allow semicolon at the next char(For minecraft array `[I;int, ...]`)"""
+    macro_factory: tuple[str, MacroFactory, int, Pos] | None
+    """Tuple of (Macro's name and MacroFactory and argument count and the position)"""
 
     def __init__(self, raw_string: str, file_path_str: str, line: int = 1, col: int = 1,
                  file_string: str | None = None, expect_semicolon: bool = True, allow_semicolon: bool = False) -> None:
         logger.debug("Initializing Tokenizer")
+        self.macro_factory = None
         self.allow_semicolon = allow_semicolon
         self.raw_string = raw_string
         if file_string is None:
@@ -242,18 +230,51 @@ class Tokenizer:
         """
         Append the current token into self.keywords
         """
+        header = Header()
         if self.state is None:
             raise ValueError(
                 "Tokenizer.append_token() called but Tokenizer.state is still None")
         if self.token_pos is None:
             raise ValueError(
                 "Tokenizer.token_pos() called but Tokenizer.token_pos is still None")
-        self.keywords.append(
-            Token(self.state,
-                  self.token_pos.line,
-                  self.token_pos.col,
-                  self.token_str)
-        )
+        new_token = Token(self.state,
+                          self.token_pos.line,
+                          self.token_pos.col,
+                          self.token_str)
+        if new_token.token_type == TokenType.KEYWORD and new_token.string in header.macros:
+            macro_factory, arg_count = header.macros[new_token.string]
+            if arg_count == 0:
+                self.keywords.extend(
+                    macro_factory(
+                        [],
+                        self.token_pos.line,
+                        self.token_pos.col)
+                )
+            else:
+                self.macro_factory = new_token.string, macro_factory, arg_count, self.token_pos
+        elif self.macro_factory:
+            if new_token.token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxWarning(
+                    f"Expect round bracket after macro factory({self.macro_factory[0]})", new_token, self, display_col_length=False)
+            name, macro_factory, arg_count, token_pos = self.macro_factory
+            self.macro_factory = None
+            args, kwargs = deepcopy(self).parse_func_args(new_token)
+            if kwargs:
+                raise JMCSyntaxWarning(
+                    f"Macro factory does not support keyword argument ({list(kwargs.keys())[0]}=)", new_token, self)
+            if len(args) != arg_count:
+                raise JMCSyntaxWarning(
+                    f"This Macro factory ({name}) expect {arg_count} arguments (got {len(args)})", new_token, self)
+            self.keywords.extend(
+                macro_factory(
+                    args,
+                    token_pos.line,
+                    token_pos.col
+                )
+            )
+        else:
+            self.keywords.append(new_token)
+
         self.token_str = ""
         self.token_pos = None
         self.state = None
@@ -281,6 +302,9 @@ class Tokenizer:
         elif re.match(Re.WHITESPACE, char):
             return True
         elif char == Re.SEMICOLON:
+            if self.macro_factory:
+                raise JMCSyntaxWarning(
+                    f"Expect round bracket after macro factory({self.macro_factory[0]})", None, self)
             self.append_keywords()
         elif char in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
             self.state = TokenType.PAREN
@@ -354,7 +378,7 @@ class Tokenizer:
         self.is_comment = False
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(
-                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False, suggestion="Both quotation mark should be in the same line")
+                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False, suggestion="Consider changing '\\n' to '\\\\n'")
         if self.state == TokenType.COMMENT:
             self.state = None
         elif self.state == TokenType.KEYWORD or self.state == TokenType.OPERATOR:
@@ -496,9 +520,6 @@ class Tokenizer:
         self.is_slash = False
 
         self.__parse_chars(string, expect_semicolon)
-
-        # if self.state == TokenType.COMMENT:
-        #     self.state = None
 
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(

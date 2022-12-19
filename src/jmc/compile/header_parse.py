@@ -1,10 +1,55 @@
 from pathlib import Path
-from .header import Header
-from .tokenizer import TokenType, Tokenizer
+from typing import Callable
+
+from .utils import is_connected
+from .header import Header, MacroFactory
+from .tokenizer import Token, TokenType, Tokenizer
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCFileNotFoundError
 from .log import Logger
 
 logger = Logger(__name__)
+
+
+def __empty_macro_factory(
+        argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+    return []
+
+
+def __copy_macro_token(token: Token, line: int, col: int,
+                       length: int) -> Token:
+    return Token(token.token_type, line=line, col=col,
+                 string=token.string, _macro_length=length)
+
+
+def __create_macro_factory(
+        replaced_tokens: list[Token], parameters_token: Token | None, key: str, tokenizer: Tokenizer, error: HeaderSyntaxException) -> tuple[MacroFactory, int]:
+    if not replaced_tokens:
+        return __empty_macro_factory, 0
+
+    # Parsing parameters_token
+    if parameters_token is None:
+        parameter_tokens = []
+    else:
+        parameter_tokens, invalid_kwargs = tokenizer.parse_func_args(
+            parameters_token)
+        if invalid_kwargs:
+            raise error
+
+    # Creating template
+    template_tokens: list[Token | int] = []
+    for token in replaced_tokens:
+        for index, parameter_token in enumerate(parameter_tokens):
+            if token.token_type == parameter_token.token_type and token.string == parameter_token.string:
+                template_tokens.append(index)
+                break
+        else:
+            template_tokens.append(token)
+
+    def macro_factory(
+            argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+        return [__copy_macro_token(token_or_int, line, col, len(key)) if isinstance(
+            token_or_int, Token) else __copy_macro_token(argument_tokens[token_or_int], line, col, len(key)) for token_or_int in template_tokens]
+    return macro_factory, len(parameter_tokens)
 
 
 def __parse_header(header_str: str, file_name: str,
@@ -24,13 +69,14 @@ def __parse_header(header_str: str, file_name: str,
             raise HeaderSyntaxException(
                 "Expected directive after '#'", file_name, line, line_str)
 
-        directive_and_args = Tokenizer(
-            line_str[1:], file_name, line, expect_semicolon=False).programs[0]
+        tokenizer = Tokenizer(
+            line_str[1:], file_name, line=line, col=2, expect_semicolon=False, file_string=header_str)
+        directive_and_args = tokenizer.programs[0]
         directive_token = directive_and_args[0]
         arg_tokens = directive_and_args[1:]
         if directive_token.token_type != TokenType.KEYWORD:
             raise HeaderSyntaxException(
-                f"Expected directive(keyword) after '#' (got {directive_token.token_type})", file_name, line, line_str)
+                f"Expected directive(keyword) after '#' (got {directive_token.token_type.value})", file_name, line, line_str)
 
         # #define
         if directive_token.string == "define":
@@ -38,23 +84,28 @@ def __parse_header(header_str: str, file_name: str,
                 raise HeaderSyntaxException(
                     "Expected keyword after '#define'", file_name, line, line_str)
 
-            if len(
-                    arg_tokens) > 1 and arg_tokens[1].token_type != TokenType.KEYWORD:
-                raise HeaderSyntaxException(
-                    f"Expected keyword after the first keyword in '#define' (got {arg_tokens[1].token_type})", file_name, line, line_str)
-
-            if len(arg_tokens) > 2:
-                raise HeaderSyntaxException(
-                    f"Expected 1-2 arguments after '#define' (got {len(arg_tokens)})", file_name, line, line_str)
             key = arg_tokens[0].string
-            # value = " ".join(token_.string for token_ in arg_tokens[1:])
-            value = arg_tokens[1].string if len(arg_tokens) == 2 else ""
-            logger.debug(f'Define "{key}" as "{value}"')
             if key in header.macros:
                 raise HeaderDuplicatedMacro(
                     f"'{key}' macro is already defined", file_name, line, line_str)
-            header.macros[key] = value
-        # #include
+
+            if len(arg_tokens) == 1:
+                #  #define KEYWORD
+                header.macros[key] = (__empty_macro_factory, 0)
+
+            elif arg_tokens[1].token_type == TokenType.PAREN_ROUND and is_connected(
+                    arg_tokens[1], arg_tokens[0]):
+                #  #define KEYWORD(arg1, arg2)
+                header.macros[key] = __create_macro_factory(
+                    arg_tokens[2:], arg_tokens[1], key, tokenizer, HeaderSyntaxException(
+                        "Invalid marcro argument syntax", file_name, line, line_str))
+            else:
+                #  #define KEYWORD TOKEN
+                header.macros[key] = __create_macro_factory(
+                    arg_tokens[1:], None, key, tokenizer, HeaderSyntaxException(
+                        "Invalid marcro argument syntax", file_name, line, line_str))
+
+                # #include
         elif directive_token.string == "include":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.STRING:
                 raise HeaderSyntaxException(
@@ -108,7 +159,7 @@ def __parse_header(header_str: str, file_name: str,
                     f"Expected 1 arguments after '#command' (got {len(arg_tokens)})", file_name, line, line_str)
             if arg_tokens[0].token_type != TokenType.KEYWORD:
                 raise HeaderSyntaxException(
-                    f"Expected keyword after '#command' (got {arg_tokens[0].token_type})", file_name, line, line_str)
+                    f"Expected keyword after '#command' (got {arg_tokens[0].token_type.value})", file_name, line, line_str)
             header.commands.add(arg_tokens[0].string)
 
         # #static

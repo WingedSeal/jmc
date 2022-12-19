@@ -52,7 +52,8 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "function": {"schedule"},
     "trigger": {"scoreboard"},
     "bossbar": {"execute"},
-    "title": {"title"}
+    "title": {"title"},
+    "item": {"summon"}
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)"""
 
@@ -107,7 +108,7 @@ class FuncContent:
             self.command = command
             if self.command[0].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
-                    "Expected keyword", self.command[0], self.tokenizer)
+                    f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
             if self.command[0].string == 'new':
                 raise JMCSyntaxException(
                     "'new' keyword found in function", self.command[0], self.tokenizer)
@@ -233,7 +234,8 @@ class FuncContent:
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
                 self.commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
-            )
+            ) and
+            not is_connected(token, self.command[key_pos - 1])
         ):
             raise JMCSyntaxException(
                 f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)
@@ -260,7 +262,7 @@ class FuncContent:
                     self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type == TokenType.STRING:
             append_commands(self.commands, dumps(token.string))
-        elif token.token_type == TokenType.OPERATOR and is_connected(token, self.command[key_pos - 1]):
+        elif token.token_type in {TokenType.OPERATOR, TokenType.KEYWORD} and is_connected(token, self.command[key_pos - 1]):
             self.commands[-1] += token.string
         else:
             append_commands(self.commands, token.string)

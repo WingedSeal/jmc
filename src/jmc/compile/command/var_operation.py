@@ -38,7 +38,7 @@ def variable_operation(
 
     if tokens[1].token_type != TokenType.OPERATOR:
         raise JMCSyntaxException(
-            f"Expected operator or 'matches' (got {tokens[1].token_type})", tokens[1], tokenizer)
+            f"Expected operator or 'matches' (got {tokens[1].token_type.value})", tokens[1], tokenizer)
 
     operator = tokens[1].string
 
@@ -56,7 +56,7 @@ def variable_operation(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer, suggestion="Expected integer or variable or target selector")
         if tokens[2].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
-                f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type})", tokens[2], tokenizer, suggestion="Expected integer or variable or target selector")
+                f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type.value})", tokens[2], tokenizer, suggestion="Expected integer or variable or target selector")
 
         if operator == '=' and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in VAR_OPERATION_COMMANDS:
             if len(tokens) == 3:
