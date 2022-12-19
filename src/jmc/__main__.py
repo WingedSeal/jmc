@@ -4,7 +4,7 @@ from .compile import Logger
 from .terminal.utils import RestartException, handle_exception
 from .terminal import GlobalData, Colors, start
 
-VERSION = 'v1.2.9-alpha.2'
+VERSION = 'v1.2.9-alpha.3'
 CONFIG_FILE_NAME = 'jmc_config.json'
 GlobalData().init(VERSION, CONFIG_FILE_NAME)
 
