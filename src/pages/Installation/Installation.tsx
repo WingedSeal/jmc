@@ -145,8 +145,9 @@ const Installation = () => {
                         <Tab />
                         In "datapacks" folder of your world file (Usually{" "}
                         <code>.minecraft/saves/world_name/datapacks</code>).
-                        Type <code>cmd</code> in the path and press Enter to
-                        open Command Prompt.
+                        Create a new datapack folder and double click it. Type{" "}
+                        <code>cmd</code> in the path and press Enter to open
+                        Command Prompt.
                     </p>
                 </div>
                 <img
