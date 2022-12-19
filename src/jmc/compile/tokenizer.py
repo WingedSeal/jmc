@@ -16,6 +16,8 @@ NEW_LINE = "\n"
 
 class TokenType(Enum):
     KEYWORD = "Keyword"
+    OPERATOR = "Operator"
+    """`+ - * / > < = % : ! | &`"""
     PAREN = "Parentheses"
     PAREN_ROUND = "RoundParentheses"
     PAREN_SQUARE = "SquareParentheses"
@@ -153,6 +155,8 @@ PAREN_PAIR = {
     Paren.L_ROUND: Paren.R_ROUND,
 }
 """Dictionary of left bracket(string) and right bracket(string)"""
+
+OPERATORS = {'+', '-', '*', '/', '>', '<', '=', '%', ':', '!', '|', '&'}
 
 
 class Tokenizer:
@@ -295,13 +299,18 @@ class Tokenizer:
             self.token_pos = Pos(self.line, self.col)
             self.state = TokenType.COMMA
             self.append_token()
+        elif char in OPERATORS:
+            self.state = TokenType.OPERATOR
+            self.token_pos = Pos(self.line, self.col)
+            self.token_str += char
         else:
             self.state = TokenType.KEYWORD
             self.token_pos = Pos(self.line, self.col)
             self.token_str += char
         return False
 
-    def __parse_keyword(self, char: str, expect_semicolon: bool) -> bool:
+    def __parse_keyword_and_operator(
+            self, char: str, expect_semicolon: bool) -> bool:
         if char in {
             Quote.SINGLE,
             Quote.DOUBLE,
@@ -312,6 +321,16 @@ class Tokenizer:
         } or re.match(Re.WHITESPACE, char):
             self.append_token()
             return False
+
+        if self.state == TokenType.KEYWORD and char in OPERATORS:
+            self.append_token()
+            self.token_pos = Pos(self.line, self.col)
+            self.state = TokenType.OPERATOR
+        elif self.state == TokenType.OPERATOR and char not in OPERATORS and char != Re.SEMICOLON:
+            self.append_token()
+            self.token_pos = Pos(self.line, self.col)
+            self.state = TokenType.KEYWORD
+
         if char == Re.SEMICOLON:
             if expect_semicolon:
                 self.append_token()
@@ -338,7 +357,7 @@ class Tokenizer:
                 "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False, suggestion="Both quotation mark should be in the same line")
         if self.state == TokenType.COMMENT:
             self.state = None
-        elif self.state == TokenType.KEYWORD:
+        elif self.state == TokenType.KEYWORD or self.state == TokenType.OPERATOR:
             self.append_token()
         elif self.state == TokenType.PAREN:
             self.token_str += char
@@ -418,9 +437,8 @@ class Tokenizer:
                 self.state = TokenType.COMMENT
                 continue
 
-            if self.state == TokenType.KEYWORD:
-
-                if self.__parse_keyword(char, expect_semicolon):
+            if self.state == TokenType.KEYWORD or self.state == TokenType.OPERATOR:
+                if self.__parse_keyword_and_operator(char, expect_semicolon):
                     self.is_slash = (char == Re.SLASH)
                     continue
 
@@ -534,42 +552,43 @@ class Tokenizer:
             col += len(string)
         return tokens
 
-    def split_keyword_tokens(
-            self, tokens: list[Token], split_strings: list[str], max_: int | None = None) -> list[Token]:
-        """
-        Loop through all tokens and split a keyword token that contain string inside split_strings
+    # def search_and_split_tokens(
+    #         self, tokens: list[Token], split_strings: list[str], max_: int | None = None) -> list[Token]:
+    #     """
+    # Loop through all tokens and split a keyword token that contain string
+    # inside split_strings
 
-        :param tokens: List of all tokens to split
-        :param split_strings: The string for splitting token
-        :param max_: Maximum amount of split that will happen, defaults to None(No maximum)
-        :return: List of tokens
-        """
-        if max_ is None:
-            for split_str in split_strings:
-                new_tokens = []
-                for token in tokens:
-                    if token.token_type == TokenType.KEYWORD:
-                        new_tokens.extend(
-                            self.split_keyword_token(
-                                token, split_str))
-                    else:
-                        new_tokens.append(token)
-                tokens = new_tokens
-            return tokens
+    #     :param tokens: List of all tokens to split
+    #     :param split_strings: The string for splitting token
+    #     :param max_: Maximum amount of split that will happen, defaults to None(No maximum)
+    #     :return: List of tokens
+    #     """
+    #     if max_ is None:
+    #         for split_str in split_strings:
+    #             new_tokens = []
+    #             for token in tokens:
+    #                 if token.token_type == TokenType.KEYWORD:
+    #                     new_tokens.extend(
+    #                         self.split_keyword_token(
+    #                             token, split_str))
+    #                 else:
+    #                     new_tokens.append(token)
+    #             tokens = new_tokens
+    #         return tokens
 
-        count = 0
-        for split_str in split_strings:
-            new_tokens = []
-            for token in tokens:
-                if token.token_type == TokenType.KEYWORD and count < max_:
-                    count += 1
-                    new_tokens.extend(
-                        self.split_keyword_token(
-                            token, split_str))
-                else:
-                    new_tokens.append(token)
-            tokens = new_tokens
-        return tokens
+    #     count = 0
+    #     for split_str in split_strings:
+    #         new_tokens = []
+    #         for token in tokens:
+    #             if token.token_type == TokenType.KEYWORD and count < max_:
+    #                 count += 1
+    #                 new_tokens.extend(
+    #                     self.split_keyword_token(
+    #                         token, split_str))
+    #             else:
+    #                 new_tokens.append(token)
+    #         tokens = new_tokens
+    #     return tokens
 
     def find_token(self, tokens: list[Token],
                    string: str) -> list[list[Token]]:
@@ -703,8 +722,6 @@ class Tokenizer:
         if not _keywords:
             return ([], {})
         keywords = _keywords[0]
-        keywords = self.split_keyword_tokens(keywords, ['='])
-        keywords = self.merge_tokens(keywords, '=>')
         args: list[Token] = []
         kwargs: dict[str, Token] = {}
         key: str = ""
@@ -769,7 +786,7 @@ class Tokenizer:
 
             if arrow_func_state > 0:
                 if arrow_func_state == 1:
-                    if token_.string == "=>" and token_.token_type == TokenType.KEYWORD:
+                    if token_.string == "=>" and token_.token_type == TokenType.OPERATOR:
                         arrow_func_state = 2
                         last_token = token_
                         continue
@@ -796,7 +813,7 @@ class Tokenizer:
                         raise JMCSyntaxException(
                             "Expected {", token_, self, display_col_length=False)
 
-            if token_.token_type == TokenType.KEYWORD:
+            if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
                 if arg:
                     if token_.string == '=':
                         key = arg
@@ -894,7 +911,6 @@ class Tokenizer:
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
         keywords = self.parse(
             token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
-        keywords = self.split_keyword_tokens(keywords, [':'])
         kwargs: dict[str, Token] = {}
         key: str = ""
         arg: str = ""
@@ -935,7 +951,7 @@ class Tokenizer:
 
             if arrow_func_state > 0:
                 if arrow_func_state == 1:
-                    if token_.string == "=>" and token_.token_type == TokenType.KEYWORD:
+                    if token_.string == "=>" and token_.token_type == TokenType.OPERATOR:
                         arrow_func_state = 2
                         last_token = token_
                         continue
@@ -960,7 +976,7 @@ class Tokenizer:
                     raise JMCSyntaxException(
                         "Expected {", token_, self, display_col_length=False)
 
-            if token_.token_type == TokenType.KEYWORD:
+            if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
                 if arg:
                     if token_.string == ':':
                         key = arg

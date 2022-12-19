@@ -76,7 +76,7 @@ def append_commands(commands: list[str], string: str) -> None:
 
 class FuncContent:
     """
-    A class representation of a row function for parsing content inside the function
+    A class representation of a raw function for parsing content inside the function
 
     :param tokenizer: Tokenizer
     :param programs: List of commands(List of arguments(Token))
@@ -260,6 +260,8 @@ class FuncContent:
                     self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type == TokenType.STRING:
             append_commands(self.commands, dumps(token.string))
+        elif token.token_type == TokenType.OPERATOR and is_connected(token, self.command[key_pos - 1]):
+            self.commands[-1] += token.string
         else:
             append_commands(self.commands, token.string)
 

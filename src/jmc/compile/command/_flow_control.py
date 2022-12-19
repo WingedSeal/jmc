@@ -221,37 +221,23 @@ def switch(command: list[Token], datapack: DataPack,
             if len(tokens) == 1:
                 raise JMCSyntaxException(
                     "Expected case number", tokens[0], tokenizer, col_length=True)
+            count_str = tokens[1].string
+            if not count_str.isalnum():
+                raise JMCSyntaxException(
+                    "Expected case number", tokens[1], tokenizer)
 
-            if tokens[1].string.endswith(":"):
-                count_str = tokens[1].string[:-1]
-                if not count_str.isalnum():
-                    raise JMCSyntaxException(
-                        "Expected case number", tokens[1], tokenizer)
+            count = int(count_str)
+            if count != case_count:
+                raise JMCSyntaxException(
+                    f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
+            if len(tokens) < 3:
+                raise JMCSyntaxException(
+                    "Expected colon (:)", tokens[1], tokenizer, col_length=True)
+            if tokens[2].token_type != TokenType.OPERATOR or tokens[2].string != ':':
+                raise JMCSyntaxException(
+                    "Expected colon (:)", tokens[2], tokenizer)
 
-                count = int(count_str)
-                if count != case_count:
-                    raise JMCSyntaxException(
-                        f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
-
-                tokens = tokens[2:]
-            else:
-                count_str = tokens[1].string
-                if not count_str.isalnum():
-                    raise JMCSyntaxException(
-                        "Expected case number", tokens[1], tokenizer)
-
-                count = int(count_str)
-                if count != case_count:
-                    raise JMCSyntaxException(
-                        f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
-                if len(tokens) < 3:
-                    raise JMCSyntaxException(
-                        "Expected colon (:)", tokens[1], tokenizer, col_length=True)
-                if tokens[2].token_type != TokenType.KEYWORD or tokens[2].string != ':':
-                    raise JMCSyntaxException(
-                        "Expected colon (:)", tokens[2], tokenizer)
-
-                tokens = tokens[3:]
+            tokens = tokens[3:]
             case_count += 1
         # End If case
         if tokens[0].string == 'break' and tokens[0].token_type == TokenType.KEYWORD and len(
@@ -315,7 +301,7 @@ def for_(command: list[Token], datapack: DataPack,
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
-    _first_statement = tokenizer.split_keyword_tokens(statements[0], ['='])
+    _first_statement = statements[0]
     if not (_first_statement[0].string.startswith(
             DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
         raise JMCSyntaxException(
@@ -324,7 +310,7 @@ def for_(command: list[Token], datapack: DataPack,
     first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
 
     if not (_first_statement[1].string ==
-            '=' and _first_statement[1].token_type == TokenType.KEYWORD):
+            '=' and _first_statement[1].token_type == TokenType.OPERATOR):
         raise JMCSyntaxException(
             "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 

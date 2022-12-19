@@ -32,92 +32,102 @@ def variable_operation(
 
         return f"scoreboard players get {tokens[0].string[:-4]} {DataPack.var_name}"
 
-    tokens = tokenizer.split_keyword_tokens(
-        tokens, ['-', '=', '+', '*', '%', '>', '<'])
     if len(tokens) == 1:
         raise JMCSyntaxException(
             "Expected operator after variable", tokens[0], tokenizer, col_length=True)
 
-    for operator in ('*=', '+=', '-=', '*=', '/=', '%=',
-                     '++', '--', '><', "->", '>', '<', '='):  # sort key=len
-        list_of_tokens = tokenizer.find_tokens(tokens, operator)
-        if len(list_of_tokens) == 1:
-            continue
+    if tokens[1].token_type != TokenType.OPERATOR:
+        raise JMCSyntaxException(
+            f"Expected operator or 'matches' (got {tokens[1].token_type})", tokens[1], tokenizer)
 
-        if len(list_of_tokens) > 2:
+    operator = tokens[1].string
+
+    if operator in {'++', '--'}:
+        if len(tokens) > 2:
             raise JMCSyntaxException(
-                f"Duplicated operator({operator})", list_of_tokens[2][-1], tokenizer)
-
-        if len(list_of_tokens[0]) > 1:
+                f"Unexpected token ('{tokens[2].string}') after '{tokens[1].string}'", tokens[2], tokenizer)
+        if operator == '++':
+            return f"scoreboard players add {tokens[0].string} {DataPack.var_name} 1"
+        if operator == '--':
+            return f"scoreboard players remove {tokens[0].string} {DataPack.var_name} 1"
+    elif operator in {'*=', '+=', '-=', '*=', '/=', '%=', '++', '--', '><', "->", '>', '<', '='}:
+        if len(tokens) == 2:
             raise JMCSyntaxException(
-                f"Unexpected token ('{list_of_tokens[0][1].string}') after variable ('{list_of_tokens[0][0].string}')", list_of_tokens[0][1], tokenizer, suggestion="Expected operator")
-
-        if operator in {'++', '--'}:
-            if list_of_tokens[1]:
-                raise JMCSyntaxException(
-                    f"Unexpected token after '{operator}'", list_of_tokens[1][0], tokenizer)
-            if len(list_of_tokens[0]) > 1:
-                raise JMCSyntaxException(
-                    f"Unexpected token before '{operator}'", list_of_tokens[0][1], tokenizer)
-
-            if operator == '++':
-                return f"scoreboard players add {list_of_tokens[0][0].string} {DataPack.var_name} 1"
-            if operator == '--':
-                return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.var_name} 1"
-
-        if not list_of_tokens[1]:
+                f"Expected keyword after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer, suggestion="Expected integer or variable or target selector")
+        if tokens[2].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
-                f"Expected token after an operator('{operator}')", tokens[-1], tokenizer, suggestion="Expected integer or variable or target selector")
+                f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type})", tokens[2], tokenizer, suggestion="Expected integer or variable or target selector")
 
-        if operator == '=' and list_of_tokens[1][0].token_type == TokenType.KEYWORD and list_of_tokens[1][0].string in VAR_OPERATION_COMMANDS:
-            if len(list_of_tokens[1]) == 1:
+        if operator == '=' and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in VAR_OPERATION_COMMANDS:
+            if len(tokens) == 3:
                 raise JMCSyntaxException(
-                    "Expected (", list_of_tokens[1][0], tokenizer, col_length=True)
+                    "Expected round bracket '(' after variable operation function", tokens[2], tokenizer, col_length=True)
 
-            if list_of_tokens[1][1].token_type != TokenType.PAREN_ROUND:
+            if tokens[3].token_type != TokenType.PAREN_ROUND:
                 raise JMCSyntaxException(
-                    "Expected (", list_of_tokens[1][1], tokenizer)
+                    f"Expected round bracket '(' (got {tokens[3].string})", tokens[3], tokenizer, col_length=True)
 
-            if len(list_of_tokens[1]) > 2:
+            if len(tokens) > 4:
                 raise JMCSyntaxException(
-                    "Unexpected token", list_of_tokens[1][2], tokenizer)
+                    f"Unexpected token", tokens[4], tokenizer)
 
-            return VAR_OPERATION_COMMANDS[list_of_tokens[1][0].string](
-                list_of_tokens[1][1], datapack, tokenizer, var=list_of_tokens[0][0].string, is_execute=is_execute).call()
+            return VAR_OPERATION_COMMANDS[tokens[2].string](
+                tokens[3], datapack, tokenizer, var=tokens[0].string, is_execute=is_execute).call()
 
-        if len(list_of_tokens[1]) > 1:
-            raise JMCSyntaxException(
-                f"Unexpected token ({list_of_tokens[1][1].string})", list_of_tokens[1][1], tokenizer)
+        left_token = tokens[0]
+        right_token = tokens[2]
+        # left_token.string operator right_token.string
+
+        if len(tokens) > 3:
+            if (  # If rvar is obj:selector
+                len(tokens) == 5
+                and
+                tokens[3].token_type == TokenType.OPERATOR
+                and
+                tokens[3].string == ':'
+                and
+                tokens[4].token_type == TokenType.KEYWORD
+            ):
+                right_token = Token(
+                    TokenType.KEYWORD,
+                    tokens[2].line,
+                    tokens[2].col,
+                    tokens[2].string +
+                    ':' +
+                    tokens[4].string)
+            else:
+                raise JMCSyntaxException(
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}')", tokens[3], tokenizer)
 
         scoreboard_player = find_scoreboard_player_type(
-            list_of_tokens[1][0], tokenizer, allow_integer=False)
+            right_token, tokenizer, allow_integer=False)
 
         if operator == '->':
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 raise JMCSyntaxException(
-                    "Cannot copy score into integer", list_of_tokens[1][0], tokenizer)
+                    "Cannot copy score into integer", right_token, tokenizer)
             if isinstance(scoreboard_player.value, int):
                 raise ValueError("scoreboard_player.value is int")
 
-            return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {list_of_tokens[0][0].string} {DataPack.var_name}"
+            return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {left_token.string} {DataPack.var_name}"
 
         if scoreboard_player.player_type == PlayerType.INTEGER:
             if operator == '+=':
-                return f"scoreboard players add {list_of_tokens[0][0].string} {DataPack.var_name} {scoreboard_player.value}"
+                return f"scoreboard players add {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
             if operator == '-=':
-                return f"scoreboard players remove {list_of_tokens[0][0].string} {DataPack.var_name} {scoreboard_player.value}"
+                return f"scoreboard players remove {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
             if operator == '=':
-                return f"scoreboard players set {list_of_tokens[0][0].string} {DataPack.var_name} {scoreboard_player.value}"
+                return f"scoreboard players set {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
 
             if not isinstance(scoreboard_player.value, int):
                 raise ValueError("scoreboard_player.value is not int")
             datapack.add_int(scoreboard_player.value)
-            return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.var_name} {operator} {scoreboard_player.value} {DataPack.int_name}"
+            return f"scoreboard players operation {left_token.string} {DataPack.var_name} {operator} {scoreboard_player.value} {DataPack.int_name}"
 
         if isinstance(scoreboard_player.value, int):
             raise ValueError("scoreboard_player.value is int")
 
-        return f"scoreboard players operation {list_of_tokens[0][0].string} {DataPack.var_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+        return f"scoreboard players operation {left_token.string} {DataPack.var_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
 
     raise JMCSyntaxException(
-        "No operator found in variable operation", tokens[0], tokenizer)
+        f"Unrecognized operator ({operator})", tokens[1], tokenizer)

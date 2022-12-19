@@ -69,28 +69,22 @@ def custom_condition(
     """
     if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(
             DataPack.VARIABLE_SIGN):
-        tokens = tokenizer.split_keyword_tokens(tokens, ['>', '=', '<', '!'])
-        first_token = tokens[0]
-        for operator in ('===', '==',
-                         '>=', '<=', '!=', '>', '<', '='):  # sort key=len
-            list_of_tokens = tokenizer.find_tokens(tokens, operator)
-            if len(list_of_tokens) == 1:
-                continue
-            if len(list_of_tokens) > 2:
-                raise JMCSyntaxException(
-                    f"Duplicated operator({operator}) in condition", list_of_tokens[2][-1], tokenizer)
+        if len(tokens) == 1:
+            raise JMCSyntaxException(
+                "Operator not found in custom condition", tokens[0], tokenizer)
+        if len(tokens) == 2:
+            raise JMCSyntaxException(
+                f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
+        if len(tokens) > 3:
+            raise JMCSyntaxException(
+                f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
 
-            if len(list_of_tokens[0]) > 1:
-                raise JMCSyntaxException(
-                    f"Unexpected token ('{list_of_tokens[0][1].string}') after variable ('{list_of_tokens[0][0].string}') in condition", list_of_tokens[0][1], tokenizer, suggestion="Expected operator")
+        first_token, operator_token, second_token = tokens
+        scoreboard_player = find_scoreboard_player_type(
+            second_token, tokenizer)
 
-            if len(list_of_tokens[1]) > 1:
-                raise JMCSyntaxException(
-                    "Unexpected token in condition", list_of_tokens[1][-1], tokenizer)
-
-            second_token = list_of_tokens[1][0]
-            scoreboard_player = find_scoreboard_player_type(
-                second_token, tokenizer)
+        if operator_token.token_type == TokenType.OPERATOR:
+            operator = operator_token.string
 
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 if not isinstance(scoreboard_player.value, int):
@@ -111,6 +105,9 @@ def custom_condition(
                 if operator == '<':
                     return Condition(
                         f'{compared} ..{scoreboard_player.value-1}', IF)
+                raise JMCSyntaxException(
+                    f"Unrecognized operator ({operator})", operator_token, tokenizer)
+
             else:
                 if operator == '!=':
                     if isinstance(scoreboard_player.value, int):
@@ -125,16 +122,8 @@ def custom_condition(
                     raise ValueError("scoreboard_player.value is int")
                 return Condition(
                     f'score {first_token.string} {DataPack.var_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
-            break
 
-        if tokens[1].token_type == TokenType.KEYWORD and tokens[1].string == 'matches':
-            if len(tokens) > 3:
-                raise JMCSyntaxException(
-                    "Unexpected token in condition", tokens[3], tokenizer)
-            if tokens[2].token_type != TokenType.KEYWORD:
-                raise JMCSyntaxException(
-                    "Expected keyword", tokens[2], tokenizer)
-
+        elif operator_token.token_type == TokenType.KEYWORD and operator_token.string == "matches":
             match_tokens_ = tokenizer.split_keyword_token(tokens[2], '..')
             match_tokens = tokenizer.find_token(match_tokens_, '..')
             if len(match_tokens) != 2 or len(
@@ -160,8 +149,9 @@ def custom_condition(
             return Condition(
                 f'score {first_token.string} {DataPack.var_name} matches {tokens[2].string}', IF)
 
-        raise JMCSyntaxException(
-            "Operator not found in custom condition", tokens[0], tokenizer)
+        else:
+            raise JMCSyntaxException(
+                f"Expected operator or 'matches' (got {tokens[1].token_type})", tokens[1], tokenizer)
 
     matched_function = BOOL_FUNCTIONS.get(
         tokens[0].string, None)
@@ -173,6 +163,7 @@ def custom_condition(
         return Condition(
             *matched_function(tokens[1], datapack, tokenizer).call_bool())
     # End
+
     conditions: list[str] = []
     if tokens[0].string not in {"block", "blocks",
                                 "data", "entity", "predicate", "score"}:
@@ -204,16 +195,16 @@ def find_operator(_tokens: list[Token], operator: str,
     """
     list_of_tokens: list[list[Token]] = []
     tokens: list[Token] = []
-    if _tokens[0].token_type == TokenType.KEYWORD and _tokens[0].string == operator:
+    if _tokens[0].token_type == TokenType.OPERATOR and _tokens[0].string == operator:
         raise JMCSyntaxException(
             f"Unexpected operator ({operator})", _tokens[0], tokenizer)
 
-    elif _tokens[-1].token_type == TokenType.KEYWORD and _tokens[-1].string == operator:
+    elif _tokens[-1].token_type == TokenType.OPERATOR and _tokens[-1].string == operator:
         raise JMCSyntaxException(
             f"Unexpected operator ({operator})", _tokens[-1], tokenizer)
 
     for token in _tokens:
-        if token.token_type == TokenType.KEYWORD and token.string == operator:
+        if token.token_type == TokenType.OPERATOR and token.string == operator:
             list_of_tokens.append(tokens)
             tokens = []
         else:
@@ -241,21 +232,18 @@ def condition_to_ast(
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
                               tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)
         tokens = tokenizer.programs[0]
-    tokens = tokenizer.split_keyword_tokens(tokens, [OR_OPERATOR])
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": OR_OPERATOR, "body": [
             condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
 
-    tokens = tokenizer.split_keyword_tokens(list_of_tokens[0], [AND_OPERATOR])
     list_of_tokens = find_operator(tokens, AND_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {"operator": AND_OPERATOR, "body": [
             condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
 
     # NotOperator should have a body as either dict or string and not list
-    tokens = tokenizer.split_keyword_tokens(list_of_tokens[0], [NOT_OPERATOR])
-    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string == NOT_OPERATOR:
+    if tokens[0].token_type == TokenType.OPERATOR and tokens[0].string == NOT_OPERATOR:
         return {"operator": NOT_OPERATOR, "body":
                 condition_to_ast(tokens[1:], tokenizer, datapack)}
 
