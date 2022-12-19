@@ -517,6 +517,8 @@ class Lexer:
             elif token_.token_type == TokenType.STRING:
                 if is_nbt:
                     _string = repr(token_.string)
+                    if '"' not in _string:
+                        _string = f'"{_string[1:-1]}"'
                 else:
                     _string = dumps(token_.string)
             else:
