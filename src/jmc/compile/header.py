@@ -11,17 +11,16 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 
-class MacroFactory(Protocol):
-    """A function that takes in tuple of tokens(macro's argument) and current line and col then return list of tokens"""
-    __name__: str
+# class MacroFactory(Protocol):
+#     """A function that takes in tuple of tokens(macro's argument) and current line and col then return list of tokens"""
+#     __name__: str
 
-    def __call__(
-            self, argument_tokens: list["Token"], line: int, col: int) -> list["Token"]:
-        ...
+#     def __call__(
+#             self, argument_tokens: list["Token"], line: int, col: int) -> list["Token"]:
+#         ...
 
 
-# MARCO_FACTORY_TYPE = Callable[[tuple["Token", ...], int, int], list["Token"]]
-"""A function that takes in tuple of tokens(macro's argument) and current line and col then return list of tokens"""
+MacroFactory = Callable[[list["Token"], int, int], list["Token"]]
 
 
 class Header(SingleTon):

@@ -66,11 +66,11 @@ class Token:
 
         :return: Length of the string
         """
-        if not self._macro_length:
-            return len(repr(self.string)) if self.token_type == TokenType.STRING else len(
-                self.string)
-        else:
-            return self._macro_length
+        # if not self._macro_length:
+        return len(repr(self.string)) if self.token_type == TokenType.STRING else len(
+            self.string)
+        # else:
+        #     return self._macro_length
 
     def add_quotation(self) -> str:
         """Get self.string including quotation mark (Raise error when the token_type is not TokenType.STRING)"""

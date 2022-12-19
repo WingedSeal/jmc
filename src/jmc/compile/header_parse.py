@@ -16,8 +16,10 @@ def __empty_macro_factory(
 
 
 def __copy_macro_token(token: Token, line: int, col: int,
-                       length: int) -> Token:
-    return Token(token.token_type, line=line, col=col,
+                       length: int, replaced_token_col: int, token_col: int | None = None) -> Token:
+    if token_col is None:
+        token_col = token.col
+    return Token(token.token_type, line=line, col=col + token_col - replaced_token_col,
                  string=token.string, _macro_length=length)
 
 
@@ -28,7 +30,7 @@ def __create_macro_factory(
 
     # Parsing parameters_token
     if parameters_token is None:
-        parameter_tokens = []
+        parameter_tokens: list[Token] = []
     else:
         parameter_tokens, invalid_kwargs = tokenizer.parse_func_args(
             parameters_token)
@@ -36,19 +38,44 @@ def __create_macro_factory(
             raise error
 
     # Creating template
-    template_tokens: list[Token | int] = []
+    template_tokens: list[Token | tuple[int, Token]] = []
+    replaced_token_col = replaced_tokens[0].col
     for token in replaced_tokens:
         for index, parameter_token in enumerate(parameter_tokens):
             if token.token_type == parameter_token.token_type and token.string == parameter_token.string:
-                template_tokens.append(index)
+                template_tokens.append((index, token))
                 break
         else:
             template_tokens.append(token)
 
     def macro_factory(
             argument_tokens: list[Token], line: int, col: int) -> list[Token]:
-        return [__copy_macro_token(token_or_int, line, col, len(key)) if isinstance(
-            token_or_int, Token) else __copy_macro_token(argument_tokens[token_or_int], line, col, len(key)) for token_or_int in template_tokens]
+
+        return_list: list[Token] = []
+        extra_col = 0
+        for token_or_int in template_tokens:
+            if isinstance(token_or_int, Token):
+                return_list.append(
+                    __copy_macro_token(
+                        token_or_int, line, col +
+                        extra_col, len(key), replaced_token_col
+                    )
+                )
+            else:
+                return_list.append(
+                    __copy_macro_token(
+                        argument_tokens[token_or_int[0]],
+                        line,
+                        col,
+                        len(key),
+                        replaced_token_col,
+                        token_or_int[1].col
+                    )
+                )
+                extra_col += argument_tokens[token_or_int[0]
+                                             ].length - token_or_int[1].length
+
+        return return_list
     return macro_factory, len(parameter_tokens)
 
 
