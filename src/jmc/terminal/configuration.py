@@ -19,7 +19,69 @@ class TerminalCommand(Protocol):
 
     def __call__(self, *args: str) -> None:
         ...
-# TerminalCommand = Callable[..., None]
+
+
+@dataclass(slots=True, frozen=True, order=True, eq=True)
+class MinecraftVersion:
+    major: int
+    minor: int
+    patch: int = 0
+
+    def __str__(self) -> str:
+        return f'{self.major}.{self.minor}.{self.patch}'
+
+
+PACK_VERSION = {
+    MinecraftVersion(1, 19): "10",
+    MinecraftVersion(1, 18, 2): "9",
+    MinecraftVersion(1, 18): "8",
+    MinecraftVersion(1, 17): "7",
+    MinecraftVersion(1, 16, 2): "6",
+    MinecraftVersion(1, 15): "5",
+    MinecraftVersion(1, 13): "4"
+}
+"""Dictionary of MinecraftVersion and it's coresponding pack_format"""
+
+
+def get_pack_format(string: str) -> str:
+    """
+    Convert string of pack_format or minecraft's version
+    - Return empty string if input is invalid
+
+    :param string: Input string
+    :return: pack_format if valid, else empty string
+    """
+    if '.' not in string:
+        if not string.isdigit():
+            pprint(
+                "Invalid Pack Format: Non integer detected.",
+                Colors.FAIL)
+            return ""
+        return string
+
+    string_split = string.split('.')
+    if not 2 <= len(string_split) <= 3:
+        pprint(
+            f"Invalid Minecraft version: Expect 1-2 dot (got {len(string_split)}).",
+            Colors.FAIL)
+        return ""
+
+    try:
+        current_version = MinecraftVersion(*(int(x) for x in string_split))
+    except ValueError:
+        pprint(
+            f"Invalid Minecraft version: Non integer detected.",
+            Colors.FAIL)
+        return ""
+
+    for minecraft_version, pack_format in PACK_VERSION.items():
+        if current_version > minecraft_version:
+            return pack_format
+
+    pprint(
+        f"Invalid Minecraft version: Version {current_version} does not support datapack.",
+        Colors.FAIL)
+    return ""
 
 
 @dataclass(slots=True)
@@ -137,11 +199,9 @@ class Configuration:
 
         # Pack Format
         while True:
-            pack_format = get_input("Pack Format: ")
-            if not pack_format.isdigit():
-                pprint(
-                    "Invalid Pack Format: Non integer detected.",
-                    Colors.FAIL)
+            pack_format = get_pack_format(
+                get_input("Pack Format or Minecraft version: "))
+            if not pack_format:
                 continue
             break
         self.pack_format = pack_format
