@@ -411,7 +411,7 @@ class Tokenizer:
                 self.__parse_newline(char)
                 continue
 
-            if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN:
+            if char == Re.SLASH and self.is_slash and self.state != TokenType.PAREN and self.state != TokenType.STRING:
                 self.token_str = self.token_str[:-1]
                 if self.token_str:
                     self.append_token()
