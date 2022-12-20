@@ -93,6 +93,9 @@ def custom_condition(
                 if operator in {'===', '==', '='}:
                     return Condition(
                         f'{compared} {scoreboard_player.value}', IF)
+                if operator in {'!=', '!=='}:
+                    return Condition(
+                        f'{compared} {scoreboard_player.value}', UNLESS)
                 if operator == '>=':
                     return Condition(
                         f'{compared} {scoreboard_player.value}..', IF)
