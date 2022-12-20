@@ -103,8 +103,8 @@ class Lexer:
 
         for command in tokenizer.programs:
             if command[0].string == 'function' and len(command) == 4:
-                self.parse_func(tokenizer, command, file_path_str)
                 self.parse_current_load()
+                self.parse_func(tokenizer, command, file_path_str)
             elif command[0].string == 'function' and len(command) != 2:
                 raise JMCSyntaxException(
                     f"'function' expect 1(Minecraft syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
@@ -113,8 +113,10 @@ class Lexer:
             elif command[0].string == 'new':
                 self.parse_new(tokenizer, command)
             elif command[0].string == 'class':
+                self.parse_current_load()
                 self.parse_class(tokenizer, command, file_path_str)
             elif command[0].string == '@import':
+                self.parse_current_load()
                 if len(command) < 2:
                     raise JMCSyntaxException(
                         "Expected string after '@import'", command[0], tokenizer, col_length=True)
