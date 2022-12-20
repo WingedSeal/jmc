@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Union
 
+
+from ...compile.utils import is_connected
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
@@ -175,14 +177,23 @@ def custom_condition(
             tokens[0],
             tokenizer,
             suggestion="Consider using 'block' or 'blocks' or 'data' or 'entity' or 'predicate' or 'score'.")
+
+    last_token = tokens[0]
     for token in tokens:
         if token.token_type == TokenType.PAREN_SQUARE:
             if not conditions:
                 raise JMCSyntaxException(
                     "Unexpected square parenthesis []", token, tokenizer)
             conditions[-1] += token.string
+        elif token.token_type == TokenType.KEYWORD and is_connected(
+                token, last_token) and last_token.string.endswith(':'):
+            conditions[-1] += token.string
+        elif token.token_type == TokenType.OPERATOR and is_connected(
+                token, last_token):
+            conditions[-1] += token.string
         else:
             conditions.append(token.string)
+        last_token = token
     return Condition(' '.join(conditions), IF)
 
 

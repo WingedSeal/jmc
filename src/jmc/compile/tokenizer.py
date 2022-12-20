@@ -761,7 +761,7 @@ class Tokenizer:
             expecting_comma = False
             if kwargs:
                 raise JMCSyntaxException(
-                    "Positional argument follows keyword argument", token, self, display_col_length=False, suggestion='Try rearranging arguments')
+                    "Positional argument follows keyword argument", token, self, suggestion='Try rearranging arguments')
 
             args.append(Token(string=arg, line=token.line,
                               col=token.col, token_type=token.token_type))
@@ -790,16 +790,32 @@ class Tokenizer:
             key = ""
             arg = ""
 
+        token_before_last = Token.empty()
         for token_ in keywords:
             if token_.token_type == TokenType.PAREN_SQUARE and arg and is_connected(
                     token_, last_token):
                 if arg.startswith('@') and arg[1] in {'p', 'a', 'r', 's', 'e'}:
                     arg += token_.string
                     add_arg(last_token)
+                    last_token = token_
                     continue
                 raise JMCSyntaxException(
                     "Unexpected square parenthesis", token_, self,
                     display_col_length=False)
+
+            if token_.token_type == TokenType.KEYWORD and is_connected(
+                    token_, last_token) and arg.endswith(":"):
+                arg += token_.string
+                add_arg(token_before_last)
+                last_token = token_
+                continue
+
+            if token_.token_type == TokenType.OPERATOR and is_connected(
+                    token_, last_token) and token_.string == ':':
+                arg += token_.string
+                token_before_last = last_token
+                last_token = token_
+                continue
 
             if expecting_comma and token_.token_type != TokenType.COMMA:
                 raise JMCSyntaxException(
@@ -847,15 +863,17 @@ class Tokenizer:
                     if token_.string == '=':
                         raise JMCSyntaxException(
                             "Duplicated equal-sign(=)", token_, self)
-                    add_kwarg(token_)
+                    last_token = token_
                 else:
                     arg = token_.string
 
             elif token_.token_type == TokenType.COMMA:
                 arrow_func_state = 0
-                expecting_comma = False
+                if key and arg:
+                    add_kwarg(last_token)
                 if arg:
                     add_arg(last_token)
+                expecting_comma = False
             elif token_.token_type in {TokenType.PAREN_ROUND, TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
                 if token_.token_type == TokenType.PAREN_ROUND and arg:
                     raise JMCSyntaxException(
@@ -879,9 +897,10 @@ class Tokenizer:
                     add_kwarg(token_)
             last_token = token_
 
+        if key and arg:
+            add_kwarg(last_token)
         if arg:
             add_arg(last_token)
-
         return args, kwargs
 
     def parse_list(self, token: Token) -> list[Token]:
