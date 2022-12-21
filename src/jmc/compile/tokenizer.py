@@ -851,19 +851,19 @@ class Tokenizer:
                             "Expected {", token_, self, display_col_length=False)
 
             if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
-                if arg:
+                if key:
+                    arg = token_.string
+                    if token_.string == '=':
+                        raise JMCSyntaxException(
+                            "Duplicated equal-sign(=)", token_, self)
+                    last_token = token_
+                elif arg:
                     if token_.string == '=':
                         key = arg
                         arg = ""
                     else:
                         raise JMCSyntaxException(
                             "Unexpected keyword", token_, self, suggestion=f"Expected '=' (got '{token_.string}')")
-                elif key:
-                    arg = token_.string
-                    if token_.string == '=':
-                        raise JMCSyntaxException(
-                            "Duplicated equal-sign(=)", token_, self)
-                    last_token = token_
                 else:
                     arg = token_.string
 

@@ -175,7 +175,7 @@ class ItemCreate(JMCFunction):
                     f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {self.datapack.add_raw_private_function(self.name, [func])}')
             else:
                 found_func.append(
-                    f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run function {self.datapack.namespace}:{func}')
+                    f'execute if score {self.tag_id_var} {DataPack.var_name} matches {item_id} at @s run {func}')
 
             if self.id_name in nbt:
                 raise JMCValueError(
@@ -383,7 +383,7 @@ class TriggerSetup(JMCFunction):
                         f'execute if score @s {obj} {DataPack.var_name} matches {num} run {self.datapack.add_raw_private_function(self.name, [func])}')
                 else:
                     run.append(
-                        f'execute if score @s {obj} {DataPack.var_name} matches {num} run function {self.datapack.namespace}:{func}')
+                        f'execute if score @s {obj} {DataPack.var_name} matches {num} run {func}')
 
         run.extend([f"scoreboard players set @s {obj} 0",
                     f"scoreboard players enable @s {obj}"])
@@ -430,15 +430,8 @@ class TriggerAdd(JMCFunction):
             f"scoreboard players enable @s {obj}")
 
         func = self.args["function"]
-        if self.raw_args["function"].arg_type == ArgType.ARROW_FUNC:
-            run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
+        run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
                 func,
-                f"scoreboard players set @s {obj} 0",
-                f"scoreboard players enable @s {obj}"
-                ], obj)}"""
-        else:
-            run = f"""execute as @a[scores={{{obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name, [
-                f"{self.datapack.namespace}:{func}",
                 f"scoreboard players set @s {obj} 0",
                 f"scoreboard players enable @s {obj}"
                 ], obj)}"""
