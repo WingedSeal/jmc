@@ -198,9 +198,17 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
             if statics:
                 rmtree(namespace_folder, statics)
             else:
-                shutil.rmtree(namespace_folder)
+                try:
+                    shutil.rmtree(namespace_folder)
+                except OSError as error:
+                    raise JMCBuildError(
+                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
             if minecraft_folder.is_dir():
-                shutil.rmtree(minecraft_folder)
+                try:
+                    shutil.rmtree(minecraft_folder)
+                except OSError as error:
+                    raise JMCBuildError(
+                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
     else:
         cert_config = old_cert_config
     if _test_file is None:
