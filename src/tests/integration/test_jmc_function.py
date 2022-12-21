@@ -891,12 +891,12 @@ execute as @a run Item.give(veryCoolSword);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-scoreboard objectives add __item__rc__ used:carrot_on_a_stick
+scoreboard objectives add __item_rc_carrot used:carrot_on_a_stick
 execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text": "A very cool sword", "color": "gold", "bold": true, "italic": false}',Lore:['{"text": "It is, indeed, very cool.", "color": "red", "italic": false}','{"text": "Right click to be cool.", "color": "red", "italic": false}']}} 1
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={__item__rc__=1..}] at @s run function TEST:__private__/item_create/main
+execute as @a[scores={__item_rc_carrot=1..}] at @s run function TEST:__private__/item_create/main
 > VIRTUAL/data/TEST/functions/__private__/item_create/main.mcfunction
-scoreboard players set @s __item__rc__ 0
+scoreboard players set @s __item_rc_carrot 0
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.__item_id__
 execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/item_create/found
 > VIRTUAL/data/TEST/functions/__private__/item_create/found.mcfunction

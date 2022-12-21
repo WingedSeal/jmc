@@ -125,19 +125,23 @@ class RightClickSetup(JMCFunction):
     }
 )
 class ItemCreate(JMCFunction):
-    rc_obj = "__item__rc__"
+    rc_obj = {
+        "carrot_on_a_stick": "__item_rc_carrot",
+        "warped_fungus_on_a_stick": "__item_rc_warped"
+    }
     tag_id_var = "__item_id__"
     id_name = "__item_id__"
 
     def call(self) -> str:
         item_type = self.args["itemType"]
         on_click = self.args["onClick"]
-        if on_click and item_type != "carrot_on_a_stick":
+        if on_click and item_type not in {
+                "carrot_on_a_stick", "warped_fungus_on_a_stick"}:
             raise JMCValueError(
-                f'on_click can only be used with minecraft:carrot_on_a_stick in {self.call_string}',
+                f'on_click can only be used with carrot_on_a_stick or warped_fungus_on_a_stick or in {self.call_string}',
                 self.raw_args["onClick"].token,
                 self.tokenizer,
-                suggestion="Change item_type to minecraft:carrot_on_a_stick")
+                suggestion="Change item_type to carrot_on_a_stick or warped_fungus_on_a_stick")
         name = self.args["displayName"]
         if self.args["lore"]:
             lores = self.datapack.parse_list(
@@ -148,13 +152,15 @@ class ItemCreate(JMCFunction):
             self.raw_args["nbt"].token) if self.args["nbt"] else {}
 
         if on_click:
+            rc_obj = self.rc_obj[self.args["itemType"]]
             item_id = self.datapack.data.get_item_id()
-            self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
+            self.datapack.add_objective(
+                rc_obj, 'used:' + self.args["itemType"])
             if self.is_never_used():
                 self.datapack.add_tick_command(
-                    f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
+                    f"""execute as @a[scores={{{rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
                                                        [
-                                                        f'scoreboard players set @s {self.rc_obj} 0',
+                                                        f'scoreboard players set @s {rc_obj} 0',
                                                         f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
                                                         f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
                                                         ], 'main')}""")
