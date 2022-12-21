@@ -445,5 +445,3 @@ class DataPack:
     loads = {dumps(self.loads, indent=2)}
     tick = {dumps(self.ticks, indent=2)}
 )"""
-
-# {dumps({key:list(value) for key, value in self.functions.items()}, indent=2)}

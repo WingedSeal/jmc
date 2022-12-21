@@ -133,7 +133,7 @@ def __search_to_string(match: re.Match, token: "Token",
     var: str = match.group(1)
     properties = __parse_to_string(token, tokenizer)
     properties["score"] = {"name": var, "objective": var_name}
-    return dumps(properties)
+    return dumps(properties, separators=(',', ':'))
 
 
 def search_to_string(last_str: str, token: "Token",

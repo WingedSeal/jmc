@@ -831,7 +831,7 @@ Item.give(block, @a);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text": "Block", "color": "gold", "italic": false}',Lore:[]}} 1
+give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}',Lore:[]}} 1
                             """)
                              )
 
@@ -892,7 +892,7 @@ execute as @a run Item.give(veryCoolSword);
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
 scoreboard objectives add __item_rc_carrot used:carrot_on_a_stick
-execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text": "A very cool sword", "color": "gold", "bold": true, "italic": false}',Lore:['{"text": "It is, indeed, very cool.", "color": "red", "italic": false}','{"text": "Right click to be cool.", "color": "red", "italic": false}']}} 1
+execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text":"A very cool sword","color":"gold","bold":true,"italic":false}',Lore:['{"text":"It is, indeed, very cool.","color":"red","italic":false}','{"text":"Right click to be cool.","color":"red","italic":false}']}} 1
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__item_rc_carrot=1..}] at @s run function TEST:__private__/item_create/main
 > VIRTUAL/data/TEST/functions/__private__/item_create/main.mcfunction

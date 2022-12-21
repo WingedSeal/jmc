@@ -563,7 +563,7 @@ class FormattedText:
             return json.dumps(self.result, separators=(',', ':'))
 
         return json.dumps(
-            [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result)
+            [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result, separators=(',', ':'))
 
     def __repr__(self) -> str:
         return f"FormattedText(raw_text={repr(self.raw_text)}, result={repr(json.dumps(self.result))})"
