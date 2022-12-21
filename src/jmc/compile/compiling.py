@@ -237,7 +237,7 @@ def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
                 f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.") from error
         except KeyError as error:
             raise JMCBuildError(
-                f'"values" key not found in {path.resolve().as_posix()}. Deleting the file to reset.') from error
+                f'"values" key not found in {path.resolve().as_posix()}. Delete the file to reset.') from error
     else:
         json = {"values": []}
     return json

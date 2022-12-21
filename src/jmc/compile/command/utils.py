@@ -555,12 +555,12 @@ class FormattedText:
         if len(self.result) == 1:
             if self.is_default_no_italic and 'italic' not in self.result[0]:
                 self.result[0]['italic'] = False
-            return json.dumps(self.result[0])
+            return json.dumps(self.result[0], separators=(',', ':'))
 
         if self.is_default_no_italic and (
                 'italic' not in self.result[0] or not self.result[0]['italic']):
             self.result[0]['italic'] = False
-            return json.dumps(self.result)
+            return json.dumps(self.result, separators=(',', ':'))
 
         return json.dumps(
             [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result)

@@ -403,8 +403,11 @@ class DataPack:
         token_list = tokenizer.parse_list(token)
         for token_ in token_list:
             if token_.token_type != list_of:
+                token_type = token_.token_type.value
+                if token_.token_type == TokenType.PAREN_SQUARE:
+                    token_type = "list"
                 raise JMCValueError(
-                    f"Expected list/array of {list_of.value}, got {token_.token_type.value}", token, tokenizer)
+                    f"Expected list/array of {list_of.value}, got list/array of {token_type}", token, tokenizer)
         return [token_.string for token_ in token_list]
 
     def token_dict_to_raw_js_object(

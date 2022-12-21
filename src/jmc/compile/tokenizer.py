@@ -949,8 +949,11 @@ class Tokenizer:
         if token.token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
-        keywords = self.parse(
-            token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
+        if token.string == '{}':
+            keywords: list[Token] = []
+        else:
+            keywords = self.parse(
+                token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
         kwargs: dict[str, Token] = {}
         key: str = ""
         arg: str = ""
