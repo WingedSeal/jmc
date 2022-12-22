@@ -39,7 +39,10 @@ FIRST_ARGUMENTS = {
     *JMC_COMMANDS,
     *FLOW_CONTROL_COMMANDS,
     *EXECUTE_EXCLUDED_COMMANDS,
-    *VANILLA_COMMANDS
+    *VANILLA_COMMANDS,
+    "class",
+    "@import",
+    "new"
 }
 """Set of all vanilla commands and JMC custom syntax
 - `if` is excluded since it can be used in execute

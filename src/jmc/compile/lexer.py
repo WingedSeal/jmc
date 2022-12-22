@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
 from typing import TYPE_CHECKING
@@ -106,7 +107,7 @@ class Lexer:
             raw_string = _test_file
         tokenizer = Tokenizer(raw_string, file_path_str)
         if is_load:
-            self.load_tokenizer = tokenizer
+            self.load_tokenizer = deepcopy(tokenizer)
 
         for command in tokenizer.programs:
             if command[0].string == 'function' and len(command) == 4:
@@ -118,6 +119,7 @@ class Lexer:
                     command[0],
                     tokenizer, suggestion="Probably caused by missing function body ('{')")
             elif command[0].string == 'new':
+                self.parse_current_load()
                 self.parse_new(tokenizer, command)
             elif command[0].string == 'class':
                 self.parse_current_load()
