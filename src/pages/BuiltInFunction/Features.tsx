@@ -706,7 +706,7 @@ const BuildinFeatures = [
                 { key: "onBeforeStep", type: "Function", default: "()=>{}" },
                 { key: "interval", type: "float", default: "0.1" },
                 { key: "maxIter", type: "integer", default: "1000" },
-                { key: "boxSize", type: "float", default: "0.001" },
+                { key: "boxSize", type: "float", default: "0.1" },
                 { key: "target", type: "TargetSelector", default: "@e" },
                 { key: "startAtEye", type: "boolean", default: "true" },
                 { key: "stopAtEntity", type: "boolean", default: "true" },
