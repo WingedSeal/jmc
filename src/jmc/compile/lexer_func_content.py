@@ -61,9 +61,10 @@ FIRST_ARGUMENTS_EXCEPTION = {
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)"""
 
 
-ALLOW_NUMBER_AFTER_CURLY_PAREN = {
+ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
     'give',
-    'clear'
+    'clear',
+    'setblock'
 }
 """Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
@@ -334,6 +335,23 @@ class FuncContent:
             return True
 
         if token.string not in VANILLA_COMMANDS and token.string not in Header().commands:
+            if not self.command_strings:
+                raise JMCSyntaxException(
+                    f"Unrecognized command ({token.string})", token, self.tokenizer)
+
+            if not self.command_strings[-1].startswith('execute'):
+                for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+                    if self.command_strings[-1].startswith(_cmd):
+                        self.command_strings[-1] += ' ' + token.string
+                        return True
+                raise JMCSyntaxException(
+                    f"Unrecognized command ({token.string})", token, self.tokenizer)
+
+            for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+                if _cmd in self.command_strings[-1]:
+                    self.command_strings[-1] += ' ' + token.string
+                    return True
+
             raise JMCSyntaxException(
                 f"Unrecognized command ({token.string})", token, self.tokenizer)
 
@@ -352,14 +370,14 @@ class FuncContent:
                 "Expected command, got number", token, self.tokenizer, display_col_length=False)
 
         if not self.command_strings[-1].startswith('execute'):
-            for _cmd in ALLOW_NUMBER_AFTER_CURLY_PAREN:
+            for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
                 if self.command_strings[-1].startswith(_cmd):
                     self.command_strings[-1] += ' ' + token.string
                     return
             raise JMCSyntaxException(
                 "Unexpected number", token, self.tokenizer, display_col_length=False)
 
-        for _cmd in ALLOW_NUMBER_AFTER_CURLY_PAREN:
+        for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
             if _cmd in self.command_strings[-1]:
                 self.command_strings[-1] += ' ' + token.string
                 return
