@@ -319,7 +319,9 @@ class FuncContent:
         if token.string in {'new', 'class', '@import'} or (
             token.string == 'function'
             and
-            len(self.command) > key_pos + 2
+            len(self.command) == key_pos + 4
+            and self.command[key_pos + 2].token_type == TokenType.PAREN_ROUND
+            and self.command[key_pos + 3].token_type == TokenType.PAREN_CURLY
         ):
             if self.is_execute:
                 raise JMCSyntaxException(
