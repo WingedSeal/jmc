@@ -450,8 +450,12 @@ class Lexer:
             if_else_box[0][0], tokenizer, self.datapack)
         # Case 1: `if` only
         if len(if_else_box) == 1:
-            return_value = f"{precommand}execute {condition} run {self.datapack.add_arrow_function(name, if_else_box[0][1], tokenizer)}"
-            return return_value
+            arrow_func = self.datapack.add_arrow_function(
+                name, if_else_box[0][1], tokenizer)
+            if arrow_func.startswith('execute '):
+                # len('execute ') = 8
+                return f"{precommand}execute {condition} {arrow_func[8:]}"
+            return f"{precommand}execute {condition} run {arrow_func}"
 
         # Case 2: Has `else` or `else if`
         count = self.datapack.get_count(name)
