@@ -863,7 +863,7 @@ class Tokenizer:
                         arg = ""
                     else:
                         raise JMCSyntaxException(
-                            "Unexpected keyword", token_, self, suggestion=f"Expected '=' (got '{token_.string}')")
+                            "Unexpected keyword", token_, self, suggestion=f"Expected '=' or ',' (got {token_.token_type.value})")
                 else:
                     arg = token_.string
 

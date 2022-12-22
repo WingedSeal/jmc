@@ -63,10 +63,17 @@ class Lexer:
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
         logger.debug("Load Function")
-        self.parse_current_load()
 
-    def parse_current_load(self):
+    def parse_current_load(self, file_path_str: str |
+                           None = None, raw_str: str | None = None):
         """Parse current load function that's in self.datapack.load_function and clear it"""
+        if (file_path_str is None) != (raw_str is None):
+            raise ValueError("Only 1 of file_path_str or raw_str is given")
+
+        if file_path_str is not None and raw_str is not None:
+            self.load_tokenizer.file_path = file_path_str
+            self.load_tokenizer.raw_string = raw_str
+            self.load_tokenizer.file_string = raw_str
         if self.datapack.load_function:
             self.datapack.functions[self.datapack.load_name].extend(
                 self.parse_load_func_content(programs=self.datapack.load_function))
@@ -116,7 +123,7 @@ class Lexer:
                 self.parse_current_load()
                 self.parse_class(tokenizer, command, file_path_str)
             elif command[0].string == '@import':
-                self.parse_current_load()
+                self.parse_current_load(file_path_str, raw_string)
                 if len(command) < 2:
                     raise JMCSyntaxException(
                         "Expected string after '@import'", command[0], tokenizer, col_length=True)
@@ -162,6 +169,7 @@ class Lexer:
                 # suggestion="Consider putting it in a new function")
 
                 self.datapack.load_function.append(command)
+        self.parse_current_load(file_path_str, raw_string)
 
     def parse_func(self, tokenizer: Tokenizer,
                    command: list[Token], file_path_str: str, prefix: str = '') -> None:
