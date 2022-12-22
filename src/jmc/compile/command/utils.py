@@ -545,6 +545,11 @@ class FormattedText:
             raise JMCValueError(
                 f"Unexpected trailing '{self.SIGN}'", self.token, self.tokenizer, suggestion=f"Remove last '{self.SIGN}'")
 
+    @classmethod
+    def empty(cls, tokenizer: Tokenizer,
+              datapack: DataPack) -> "FormattedText":
+        return cls('', Token.empty(), tokenizer, datapack)
+
     def __bool__(self) -> bool:
         return bool(self.result) and ("text" in self.result[0])
 

@@ -272,7 +272,7 @@ class ItemCreateSign(JMCFunction):
 
         lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
                          for lore in lores)
-        formatted_texts_ = [FormattedText(text, self.raw_args["texts"].token, self.tokenizer, self.datapack)
+        formatted_texts_ = [FormattedText(text, self.raw_args["texts"].token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text in texts]
         if on_click:
             formatted_texts_[0].add_key(
