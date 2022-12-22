@@ -3,8 +3,7 @@ from enum import Enum, auto
 from json import JSONDecodeError, loads
 from typing import Any, Callable
 
-from jmc.compile.utils import convention_jmc_to_mc
-
+from ...compile.utils import convention_jmc_to_mc, is_float
 from .utils import ArgType, NumberType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
@@ -152,8 +151,13 @@ class JMCFunction:
                 self.args[key] = arg.token.string
 
         for parameter, number_type in self.number_type.items():
-            if self.arg_type[parameter] not in {
+            if self.arg_type[parameter] == ArgType.SCOREBOARD_PLAYER:
+                if not is_float(self.args[parameter]):
+                    continue
+
+            elif self.arg_type[parameter] not in {
                     ArgType.INTEGER, ArgType.FLOAT}:
+                print(self.arg_type[parameter])
                 raise ValueError(f"{parameter} paremeter is not number")
 
             if number_type == NumberType.POSITIVE:
