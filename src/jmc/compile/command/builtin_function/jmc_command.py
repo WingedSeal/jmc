@@ -44,7 +44,7 @@ class TimerSet(JMCFunction):
     def call(self) -> str:
         if self.raw_args["tick"].arg_type == ArgType.INTEGER:
             return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
-        return f'scoreboard players operations {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
+        return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
 
 
 @func_property(

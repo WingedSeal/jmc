@@ -281,7 +281,7 @@ Timer.set(my_objective, @s, 5);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
-scoreboard players operations @a my_objective = $i __variable__
+scoreboard players operation @a my_objective = $i __variable__
 scoreboard players set @s my_objective 5
             """)
         )
