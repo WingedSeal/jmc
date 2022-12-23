@@ -157,7 +157,6 @@ class JMCFunction:
 
             elif self.arg_type[parameter] not in {
                     ArgType.INTEGER, ArgType.FLOAT}:
-                print(self.arg_type[parameter])
                 raise ValueError(f"{parameter} paremeter is not number")
 
             if number_type == NumberType.POSITIVE:
