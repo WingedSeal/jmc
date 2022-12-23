@@ -71,6 +71,7 @@ def custom_condition(
     """
     if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(
             DataPack.VARIABLE_SIGN):
+
         if len(tokens) == 1:
             raise JMCSyntaxException(
                 "Operator not found in custom condition", tokens[0], tokenizer)
@@ -82,10 +83,9 @@ def custom_condition(
                 f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
 
         first_token, operator_token, second_token = tokens
-        scoreboard_player = find_scoreboard_player_type(
-            second_token, tokenizer)
-
         if operator_token.token_type == TokenType.OPERATOR:
+            scoreboard_player = find_scoreboard_player_type(
+                second_token, tokenizer)
             operator = operator_token.string
 
             if scoreboard_player.player_type == PlayerType.INTEGER:
