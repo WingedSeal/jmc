@@ -476,12 +476,16 @@ class TimerAdd(JMCFunction):
             self.make_empty_private_function('main')
 
         main_func = self.get_private_function('main')
+        if_selector = f"as {selector} if score @s" if selector.startswith(
+            '@') else f"if score {selector}"
+        unless_selector = f"as {selector} unless score @s" if selector.startswith(
+            '@') else f"unless score {selector}"
         main_func.append(
-            f"execute as {selector} if score @s {obj} matches 0.. run scoreboard players remove @s {obj} 1")
+            f"execute {if_selector} {obj} matches 0.. run scoreboard players remove @s {obj} 1")
         if mode == 'runOnce':
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute as {selector} if score @s {obj} matches 0 at @s run {self.datapack.add_raw_private_function(
+                f"""execute {if_selector} {obj} matches 0 at @s run {self.datapack.add_raw_private_function(
                     self.name,
                     [
                         f"scoreboard players set @s {obj} 0",
@@ -492,7 +496,7 @@ class TimerAdd(JMCFunction):
         elif mode == 'runTick':
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute as {selector} unless score @s {obj} matches 1.. at @s run {self.datapack.add_raw_private_function(
+                f"""execute {unless_selector} {obj} matches 1.. at @s run {self.datapack.add_raw_private_function(
                     self.name,
                     [self.args["function"]],
                     count
