@@ -735,7 +735,7 @@ scoreboard objectives add help_cd dummy
 function TEST:__private__/timer_add/main
 > VIRTUAL/data/TEST/functions/__private__/timer_add/main.mcfunction
 execute as @a if score @s help_cd matches 0.. run scoreboard players remove @s help_cd 1
-execute as @a if score @s help_cd matches 0 run function TEST:__private__/timer_add/0
+execute as @a if score @s help_cd matches 0 at @s run function TEST:__private__/timer_add/0
 > VIRTUAL/data/TEST/functions/__private__/timer_add/0.mcfunction
 scoreboard players set @s help_cd 0
 tellraw @s "Your help command is ready!"
