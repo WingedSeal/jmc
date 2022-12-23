@@ -110,14 +110,30 @@ class Lexer:
             self.load_tokenizer = deepcopy(tokenizer)
 
         for command in tokenizer.programs:
-            if command[0].string == 'function' and len(command) == 4:
+            if (
+                command[0].string == 'function'
+                and
+                len(command) == 4
+            ):
                 self.parse_current_load()
                 self.parse_func(tokenizer, command, file_path_str)
-            elif command[0].string == 'function' and len(command) != 2:
+            elif (
+                command[0].string == 'function'
+                and
+                (
+                    len(command) < 2
+                    or
+                    any(token_.token_type !=
+                        TokenType.KEYWORD for token_ in command[1::2])
+                    or
+                    any(token_.token_type !=
+                        TokenType.OPERATOR for token_ in command[2::2])
+                )
+            ):
                 raise JMCSyntaxException(
-                    f"'function' expect 1(Minecraft syntax) or 3(JMC syntax) arguments (got {len(command)-1})",
+                    "'function' expect Minecraft syntax('namespace:folder/function') or JMC syntax('function name() {}')",
                     command[0],
-                    tokenizer, suggestion="Probably caused by missing function body ('{')")
+                    tokenizer)
             elif command[0].string == 'new':
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
