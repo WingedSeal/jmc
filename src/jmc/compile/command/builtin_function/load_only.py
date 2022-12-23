@@ -477,7 +477,7 @@ class TimerAdd(JMCFunction):
 
         main_func = self.get_private_function('main')
         main_func.append(
-            f"execute as {selector} if score @s {obj} matches 1.. run scoreboard players remove @s {obj} 1")
+            f"execute as {selector} if score @s {obj} matches 0.. run scoreboard players remove @s {obj} 1")
         if mode == 'runOnce':
             count = self.datapack.get_count(self.name)
             main_func.append(
