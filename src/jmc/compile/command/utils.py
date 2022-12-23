@@ -124,6 +124,14 @@ class Arg:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier == ArgType.SELECTOR:
+            if self.arg_type == ArgType.SELECTOR:
+                return self
+            if self.arg_type == ArgType.KEYWORD:
+                self.arg_type = ArgType.SELECTOR
+                return self
+            raise JMCValueError(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier == ArgType.KEYWORD:
             if key_string.startswith('@'):
                 raise JMCValueError(
