@@ -476,19 +476,25 @@ class TimerAdd(JMCFunction):
             self.make_empty_private_function('main')
 
         main_func = self.get_private_function('main')
-        if_selector = f"as {selector} if score @s" if selector.startswith(
-            '@') else f"if score {selector}"
-        unless_selector = f"as {selector} unless score @s" if selector.startswith(
-            '@') else f"unless score {selector}"
+        if selector.startswith('@'):
+            if_selector = f"as {selector} if score @s"
+            unless_selector = f"as {selector} unless score @s"
+            at_s = "@s"
+            at_at_s = "at @s "
+        else:
+            if_selector = f"if score {selector}"
+            unless_selector = f"unless score {selector}"
+            at_s = selector
+            at_at_s = ""
         main_func.append(
-            f"execute {if_selector} {obj} matches 0.. run scoreboard players remove @s {obj} 1")
+            f"execute {if_selector} {obj} matches 0.. run scoreboard players remove {at_s} {obj} 1")
         if mode == 'runOnce':
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute {if_selector} {obj} matches 0 at @s run {self.datapack.add_raw_private_function(
+                f"""execute {if_selector} {obj} matches 0 {at_at_s}run {self.datapack.add_raw_private_function(
                     self.name,
                     [
-                        f"scoreboard players set @s {obj} 0",
+                        f"scoreboard players set {at_s} {obj} 0",
                         self.args["function"]
                     ],
                     count
@@ -496,7 +502,7 @@ class TimerAdd(JMCFunction):
         elif mode == 'runTick':
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute {unless_selector} {obj} matches 1.. at @s run {self.datapack.add_raw_private_function(
+                f"""execute {unless_selector} {obj} matches 1.. {at_at_s}run {self.datapack.add_raw_private_function(
                     self.name,
                     [self.args["function"]],
                     count
