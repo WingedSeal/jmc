@@ -1,5 +1,5 @@
 import sys  # noqa
-sys.path.append('./src')  # noqa
+sys.path.append("./src")  # noqa
 import unittest
 
 from tests.utils import string_to_tree_dict
@@ -48,7 +48,7 @@ class TestJMCutils(unittest.TestCase):
         self.assertEqual(
             new_str, '{"score":{"name":"$TEST","objective":"VAR_NAME"}}')
         new_str, found = search_to_string("$TEST.toString", Token(
-            TokenType.PAREN_ROUND, line=-1, col=-1, string='(color=red)'), "VAR_NAME", EMPTY_TOKENIZER)
+            TokenType.PAREN_ROUND, line=-1, col=-1, string="(color=red)"), "VAR_NAME", EMPTY_TOKENIZER)
         self.assertTrue(found)
         self.assertEqual(
             new_str, '{"color":"red","score":{"name":"$TEST","objective":"VAR_NAME"}}')
@@ -121,5 +121,5 @@ FILE_CONTENT_1_1
         """)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

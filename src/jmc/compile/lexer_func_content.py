@@ -62,9 +62,9 @@ FIRST_ARGUMENTS_EXCEPTION = {
 
 
 ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
-    'give',
-    'clear',
-    'setblock'
+    "give",
+    "clear",
+    "setblock"
 }
 """Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
@@ -76,7 +76,7 @@ def append_commands(commands: list[str], string: str) -> None:
     :param commands: Entire command(list of minecraft arguments) to add to
     :param string: A new argument to add
     """
-    if commands and commands[-1] == 'run' and string.startswith('execute '):
+    if commands and commands[-1] == "run" and string.startswith("execute "):
         commands[-1] = string[8:]  # len('execute ') = 8
     else:
         commands.append(string)
@@ -90,7 +90,7 @@ class FuncContent:
     :param programs: List of commands(List of arguments(Token))
     :param is_load: Whether the function is a load function
     """
-    __slots__ = 'tokenizer', 'programs', 'is_load', 'command_strings', 'commands', 'command', 'is_expect_command', 'is_execute', 'lexer'
+    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "commands", "command", "is_expect_command", "is_execute", "lexer"
 
     command: list[Token]
     is_expect_command: bool
@@ -116,32 +116,32 @@ class FuncContent:
             if self.command[0].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
                     f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
-            if self.command[0].string == 'new':
+            if self.command[0].string == "new":
                 raise JMCSyntaxException(
                     "'new' keyword found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == 'class':
+            if self.command[0].string == "class":
                 raise JMCSyntaxException(
                     "'class' keyword found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == 'function' and len(self.command) == 4:
+            if self.command[0].string == "function" and len(self.command) == 4:
                 raise JMCSyntaxException(
                     "Function declaration found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == '@import':
+            if self.command[0].string == "@import":
                 raise JMCSyntaxException(
                     "Importing found in function", self.command[0], self.tokenizer)
 
             # Boxes check
             if self.lexer.do_while_box is not None:
-                if self.command[0].string != 'while':
+                if self.command[0].string != "while":
                     raise JMCSyntaxException(
                         "Expected 'while'", self.command[0], self.tokenizer)
             if self.lexer.if_else_box:
-                if self.command[0].string != 'else':
+                if self.command[0].string != "else":
                     append_commands(
                         self.commands, self.lexer.parse_if_else(
                             self.tokenizer))
 
             if self.commands:
-                self.command_strings.append(' '.join(self.commands))
+                self.command_strings.append(" ".join(self.commands))
                 self.commands = []
 
             self.__parse_commands()
@@ -158,14 +158,14 @@ class FuncContent:
                     self.tokenizer))
 
         if self.commands:
-            self.command_strings.append(' '.join(self.commands))
+            self.command_strings.append(" ".join(self.commands))
             self.commands = []
         return self.command_strings
 
     def __parse_commands(self) -> None:
         """Parse command in self.commands"""
         self.is_expect_command = True
-        self.is_execute = (self.command[0].string == 'execute')
+        self.is_execute = (self.command[0].string == "execute")
         command_pos = None
 
         for key_pos, token in enumerate(self.command):
@@ -191,27 +191,27 @@ class FuncContent:
 
         # `execute as @s`
         if (
-            token.string == '@s' and
-            self.commands[-1] == 'as' and
-            self.commands[-2] not in {'rotated', 'positioned'}
+            token.string == "@s" and
+            self.commands[-1] == "as" and
+            self.commands[-2] not in {"rotated", "positioned"}
         ):
 
-            self.commands[-1] = 'if entity'
+            self.commands[-1] = "if entity"
             return False
 
         # `execute run`
         if (
-            token.string == 'run'
-            and self.commands[-1] == 'execute'
+            token.string == "run"
+            and self.commands[-1] == "execute"
         ):
             del self.commands[-1]
             return True
 
         # `run execute`
         if (
-            token.string == 'execute'
-            and self.commands[-1] == 'run'
-            and self.commands[0] == 'execute'
+            token.string == "execute"
+            and self.commands[-1] == "run"
+            and self.commands[0] == "execute"
         ):
             del self.commands[-1]
             return True
@@ -228,7 +228,7 @@ class FuncContent:
         :param key_pos: Index of latest command in self.command
         :return: Whether to break out of the loop
         """
-        if token.string == 'run' and token.token_type == TokenType.KEYWORD:
+        if token.string == "run" and token.token_type == TokenType.KEYWORD:
             if not self.is_execute:
                 raise MinecraftSyntaxWarning(
                     "'run' keyword found outside 'execute' command", token, self.tokenizer)
@@ -288,7 +288,7 @@ class FuncContent:
         if token.token_type != TokenType.KEYWORD:
             if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
                 append_commands(self.commands, self.lexer.datapack.add_arrow_function(
-                    'anonymous', token, self.tokenizer))
+                    "anonymous", token, self.tokenizer))
                 return True
             raise JMCSyntaxException(
                 "Expected keyword", token, self.tokenizer)
@@ -299,7 +299,7 @@ class FuncContent:
             self.__is_number(key_pos, token)
             return True
 
-        if token.string == 'say':
+        if token.string == "say":
             self.__is_say(key_pos, token)
             return True
 
@@ -316,8 +316,8 @@ class FuncContent:
         if self.__is_flow_control_command(key_pos, token):
             return True
 
-        if token.string in {'new', 'class', '@import'} or (
-            token.string == 'function'
+        if token.string in {"new", "class", "@import"} or (
+            token.string == "function"
             and
             len(self.command) == key_pos + 4
             and self.command[key_pos + 2].token_type == TokenType.PAREN_ROUND
@@ -332,7 +332,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
 
-            if self.command[key_pos + 1].string != '()':
+            if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
                     f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
             append_commands(self.commands,
@@ -344,17 +344,17 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
 
-            if not self.command_strings[-1].startswith('execute'):
+            if not self.command_strings[-1].startswith("execute"):
                 for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
                     if self.command_strings[-1].startswith(_cmd):
-                        self.command_strings[-1] += ' ' + token.string
+                        self.command_strings[-1] += " " + token.string
                         return True
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
 
             for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
                 if _cmd in self.command_strings[-1]:
-                    self.command_strings[-1] += ' ' + token.string
+                    self.command_strings[-1] += " " + token.string
                     return True
 
             raise JMCSyntaxException(
@@ -374,17 +374,17 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Expected command, got number", token, self.tokenizer, display_col_length=False)
 
-        if not self.command_strings[-1].startswith('execute'):
+        if not self.command_strings[-1].startswith("execute"):
             for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
                 if self.command_strings[-1].startswith(_cmd):
-                    self.command_strings[-1] += ' ' + token.string
+                    self.command_strings[-1] += " " + token.string
                     return
             raise JMCSyntaxException(
                 "Unexpected number", token, self.tokenizer, display_col_length=False)
 
         for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
             if _cmd in self.command_strings[-1]:
-                self.command_strings[-1] += ' ' + token.string
+                self.command_strings[-1] += " " + token.string
                 return
 
         raise JMCSyntaxException(
@@ -403,7 +403,7 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
 
-        if '\n' in self.command[key_pos + 1].string:
+        if "\n" in self.command[key_pos + 1].string:
             raise JMCSyntaxException(
                 "Newline found in say command", self.command[key_pos + 1], self.tokenizer, suggestion=r"Use '\\n' instead of '\n'")
         append_commands(
@@ -411,7 +411,7 @@ class FuncContent:
 
     def __is_startswith_varsign(self, key_pos: int, token: Token) -> bool:
         if len(
-                self.command) > key_pos + 1 and self.command[key_pos + 1].string == 'run' and self.command[key_pos + 1].token_type == TokenType.KEYWORD:
+                self.command) > key_pos + 1 and self.command[key_pos + 1].string == "run" and self.command[key_pos + 1].token_type == TokenType.KEYWORD:
             self.is_execute = True
             append_commands(self.commands,
                             f"execute store result score {token.string} {DataPack.var_name}")

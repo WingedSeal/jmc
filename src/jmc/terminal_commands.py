@@ -46,7 +46,7 @@ def exit_() -> None:
 def compile_(debug: str = "") -> None:
     """Compile main JMC file"""
     if debug:
-        if debug != 'debug':
+        if debug != "debug":
             raise TypeError(f"Unrecognized argument '{debug}'")
         pprint("DEBUG MODE", Colors.INFO)
     debug_compile = bool(debug)
@@ -77,9 +77,9 @@ def __log_debug() -> None:
     logger.info("Requesting debug log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     debug_log = get_debug_log()
-    with (global_data.LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+    with (global_data.LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open("w+") as file:
         file.write(debug_log)
-    with (global_data.LOG_PATH / "latest.log").open('w+') as file:
+    with (global_data.LOG_PATH / "latest.log").open("w+") as file:
         file.write(debug_log)
 
 
@@ -87,9 +87,9 @@ def __log_info() -> None:
     logger.info("Requesting info log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     info_log = get_info_log()
-    with (global_data.LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open('w+') as file:
+    with (global_data.LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open("w+") as file:
         file.write(info_log)
-    with (global_data.LOG_PATH / "latest.log").open('w+') as file:
+    with (global_data.LOG_PATH / "latest.log").open("w+") as file:
         file.write(info_log)
 
 
@@ -102,9 +102,9 @@ def __log_clear() -> None:
     for path in global_data.LOG_PATH.iterdir():
         if not path.is_file():
             continue
-        if path.suffix != '.log':
+        if path.suffix != ".log":
             continue
-        if path.name == 'latest.log':
+        if path.name == "latest.log":
             continue
         path.unlink()
 
@@ -134,7 +134,7 @@ def version() -> None:
 def __config_reset() -> None:
     (global_data.cwd / global_data.CONFIG_FILE_NAME).unlink(missing_ok=True)
     pprint("Resetting configurations", Colors.PURPLE)
-    print('\n' * 5)
+    print("\n" * 5)
     raise RestartException()
 
 
@@ -145,14 +145,14 @@ Type `cancel` to cancel
 {NEW_LINE.join([f"- {key}" for key in config_json])}""", Colors.PURPLE)
     key = get_input("Configuration: ")
     if key not in config_json:
-        if key.lower() == 'cancel':
+        if key.lower() == "cancel":
             return
         pprint("Invalid Key", Colors.FAIL)
         __config_edit()
     else:
         pprint(f"Current {key}: {config_json[key]}", Colors.YELLOW)
         config_json[key] = get_input("New Value: ")
-        with (global_data.cwd / global_data.CONFIG_FILE_NAME).open('w') as file:
+        with (global_data.cwd / global_data.CONFIG_FILE_NAME).open("w") as file:
             dump(config_json, file, indent=2)
 
         global_data.config.load_config()
@@ -171,9 +171,9 @@ def config(mode: str = "") -> None:
             pprint(
                 "Configuration file is already generated. To reset, use `cofig reset`",
                 Colors.FAIL)
-    if mode == 'reset':
+    if mode == "reset":
         __config_reset()
-    elif mode == 'edit':
+    elif mode == "edit":
         __config_edit()
     else:
         raise TypeError(f"Unrecognized mode '{mode}'")
@@ -223,5 +223,5 @@ def chdir(path: str) -> None:
         pprint("Invalid path", Colors.FAIL)
         return
     global_data.cwd = Path(os.getcwd())
-    global_data.LOG_PATH = global_data.cwd / 'log'
+    global_data.LOG_PATH = global_data.cwd / "log"
     raise RestartException

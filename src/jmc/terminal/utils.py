@@ -7,16 +7,16 @@ logger = Logger(__name__)
 
 
 class Colors(Enum):
-    HEADER = '\033[1;33;40m'
-    YELLOW = '\033[33;40m'
-    INFO = '\033[94;40m'
-    INPUT = '\033[96;40m'
-    PURPLE = '\033[35;40m'
-    FAIL = '\033[91;40m'
-    FAIL_BOLD = '\033[1;91;40m'
-    ENDC = '\033[0;0;40m'
-    EXIT = '\033[0;0;0m'
-    NONE = '\033[0;37;40m'
+    HEADER = "\033[1;33;40m"
+    YELLOW = "\033[33;40m"
+    INFO = "\033[94;40m"
+    INPUT = "\033[96;40m"
+    PURPLE = "\033[35;40m"
+    FAIL = "\033[91;40m"
+    FAIL_BOLD = "\033[1;91;40m"
+    ENDC = "\033[0;0;40m"
+    EXIT = "\033[0;0;0m"
+    NONE = "\033[0;37;40m"
 
 
 def pprint(values, color: Colors = Colors.NONE):

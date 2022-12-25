@@ -17,7 +17,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
     {"FILE_NAME_1":"FILE_CONTENT_1_1\\nFILE_CONTENT_1_2",
     "FILE_NAME_2":"FILE_CONTENT_2_1\\nFILE_CONTENT_2_2"}
     """
-    lines = string.split('\n')
+    lines = string.split("\n")
     if lines[0] and not lines[0].isspace():
         raise ValueError(
             "String given is doesn't start with empty lines")
@@ -56,7 +56,7 @@ def string_to_tree_dict(string: str) -> dict[str, str]:
         if value is None:
             value = line
         else:
-            value += '\n' + line
+            value += "\n" + line
 
     if value is None:
         raise ValueError(

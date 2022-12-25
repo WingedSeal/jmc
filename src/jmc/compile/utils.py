@@ -78,14 +78,14 @@ def __parse_to_string(
     :return: Dictionary of key(key) and value(string or boolean)
     """
     json: dict[str, str | bool | dict[str, str]] = {}
-    if token.string == '()':
+    if token.string == "()":
         return json
 
-    for kwargs in token.string[1:-1].split(','):
-        if '=' not in kwargs:
+    for kwargs in token.string[1:-1].split(","):
+        if "=" not in kwargs:
             raise JMCSyntaxException(
                 "'=' not found in .toString argument", token, tokenizer)
-        key, value, *extras = kwargs.split('=')
+        key, value, *extras = kwargs.split("=")
         key = key.strip()
         if extras:
             raise JMCSyntaxException(
@@ -96,21 +96,21 @@ def __parse_to_string(
         if value[0] in {'"', "'"}:
             raise JMCSyntaxException(
                 ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion=f"Use '{value[1:-1]}' instead of '{value}'")
-        if value[0] in {'{', '(', '['}:
+        if value[0] in {"{", "(", "["}:
             raise JMCSyntaxException(
                 "Brackets are not supported in .toString", token, tokenizer, suggestion="clickEvent and hoverEvent are not supported, use normal minecraft JSON instead.")
 
-        if key in {'font', 'color'}:
+        if key in {"font", "color"}:
             json[key] = value
-        elif key in {'bold', 'italic', 'underlined', 'strikethrough', 'obfuscated'}:
-            if value not in {'true', 'false'}:
+        elif key in {"bold", "italic", "underlined", "strikethrough", "obfuscated"}:
+            if value not in {"true", "false"}:
                 raise JMCSyntaxException(
                     f"value of {key} .toString must be either 'true' or 'false'", token, tokenizer)
-            json[key] = value == 'true'
-        elif key in {'clickEvent', 'hoverEvent'}:
+            json[key] = value == "true"
+        elif key in {"clickEvent", "hoverEvent"}:
             raise JMCSyntaxException(
                 "clickEvent and hoverEvent are not supported in .toString", token, tokenizer, suggestion="Use normal minecraft JSON instead")
-        elif key == 'text':
+        elif key == "text":
             raise JMCSyntaxException(
                 "'text' key is incompatible with 'score' in .toString", token, tokenizer)
         else:
@@ -133,7 +133,7 @@ def __search_to_string(match: re.Match, token: "Token",
     var: str = match.group(1)
     properties = __parse_to_string(token, tokenizer)
     properties["score"] = {"name": var, "objective": var_name}
-    return dumps(properties, separators=(',', ':'))
+    return dumps(properties, separators=(",", ":"))
 
 
 def search_to_string(last_str: str, token: "Token",
@@ -148,7 +148,7 @@ def search_to_string(last_str: str, token: "Token",
     :return: Tuple of New string and Whether `toString` is found
     """
     new_str, count = re.subn(
-        r'(\$[A-z0-9\-\.\_]+)\.toString$', lambda match: __search_to_string(match, token, var_name, tokenizer), last_str)
+        r"(\$[A-z0-9\-\.\_]+)\.toString$", lambda match: __search_to_string(match, token, var_name, tokenizer), last_str)
     if count:
         return new_str, True
     return last_str, False
@@ -214,4 +214,4 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
         raise MinecraftSyntaxWarning(
             f"Invalid character detected in '{string}'", token, tokenizer
         )
-    return string.replace('.', '/')
+    return string.replace(".", "/")

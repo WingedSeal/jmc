@@ -10,7 +10,7 @@ from .._flow_control import parse_switch
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Predicate.locations',
+    call_string="Predicate.locations",
     arg_type={
         "name": ArgType.STRING,
         "predicate": ArgType.JSON,
@@ -21,7 +21,7 @@ from .._flow_control import parse_switch
         "zMin": ArgType.INTEGER,
         "zMax": ArgType.INTEGER,
     },
-    name='predicate_locations'
+    name="predicate_locations"
 )
 class PredicateLocations(JMCFunction):
     def call(self) -> str:
@@ -46,30 +46,30 @@ class PredicateLocations(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='RightClick.setup',
+    call_string="RightClick.setup",
     arg_type={
         "idName": ArgType.KEYWORD,
         "functionMap": ArgType.JS_OBJECT
     },
-    name='right_click_setup'
+    name="right_click_setup"
 )
 class RightClickSetup(JMCFunction):
-    tag_id_var = '__item_id__'
+    tag_id_var = "__item_id__"
 
     def call(self) -> str:
-        self.rc_obj = '__rc__' + self.args["idName"][:10]
+        self.rc_obj = "__rc__" + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
             self.raw_args["functionMap"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["idName"]
-        self.datapack.add_objective(self.rc_obj, 'used:carrot_on_a_stick')
+        self.datapack.add_objective(self.rc_obj, "used:carrot_on_a_stick")
         if self.is_never_used():
             self.datapack.add_tick_command(
                 f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
                                                        [f'scoreboard players set @s {self.rc_obj} 0'], 'main')}""")
 
-        main_func = self.get_private_function('main')
+        main_func = self.get_private_function("main")
 
         main_count = self.datapack.get_count(self.name)
         main_func.append(
@@ -88,7 +88,7 @@ class RightClickSetup(JMCFunction):
 
             main_func.append(
                 f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (self.tag_id_var, '@s')), func_contents, self.datapack, self.name)}""")
+                    PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, self.name)}""")
         else:
             main_func.append(
                 f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
@@ -108,7 +108,7 @@ class RightClickSetup(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Item.create',
+    call_string="Item.create",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "itemType": ArgType.KEYWORD,
@@ -117,7 +117,7 @@ class RightClickSetup(JMCFunction):
         "nbt": ArgType.JS_OBJECT,
         "onClick": ArgType.FUNC
     },
-    name='item_create',
+    name="item_create",
     defaults={
         "lore": "",
         "nbt": "",
@@ -155,7 +155,7 @@ class ItemCreate(JMCFunction):
             rc_obj = self.rc_obj[self.args["itemType"]]
             item_id = self.datapack.data.get_item_id()
             self.datapack.add_objective(
-                rc_obj, 'used:' + self.args["itemType"])
+                rc_obj, "used:" + self.args["itemType"])
             if self.is_never_used():
                 self.datapack.add_tick_command(
                     f"""execute as @a[scores={{{rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
@@ -163,10 +163,10 @@ class ItemCreate(JMCFunction):
                                                         f'scoreboard players set @s {rc_obj} 0',
                                                         f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
                                                         f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
-                                                        ], 'main')}""")
-                self.datapack.add_raw_private_function(self.name, [], 'found')
+                                                        ], "main")}""")
+                self.datapack.add_raw_private_function(self.name, [], "found")
 
-            found_func = self.get_private_function('found')
+            found_func = self.get_private_function("found")
 
             func = self.args["onClick"]
 
@@ -208,7 +208,7 @@ class ItemCreate(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Item.createSign',
+    call_string="Item.createSign",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "variant": ArgType.KEYWORD,
@@ -218,7 +218,7 @@ class ItemCreate(JMCFunction):
         "nbt": ArgType.JS_OBJECT,
         "onClick": ArgType.FUNC
     },
-    name='item_create_sign',
+    name="item_create_sign",
     defaults={
         "lore": "",
         "texts": "",
@@ -227,8 +227,8 @@ class ItemCreate(JMCFunction):
     }
 )
 class ItemCreateSign(JMCFunction):
-    _variants = {'oak', 'spruce', 'birch', 'jungle',
-                 'acacia', 'dark_oak', 'crimson', 'warped'}
+    _variants = {"oak", "spruce", "birch", "jungle",
+                 "acacia", "dark_oak", "crimson", "warped"}
 
     def call(self) -> str:
         variant = self.args["variant"]
@@ -288,7 +288,7 @@ class ItemCreateSign(JMCFunction):
             )},Lore:[{lore_}]}},BlockEntityTag:{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(
-            variant + '_sign',
+            variant + "_sign",
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
         )
 
@@ -297,12 +297,12 @@ class ItemCreateSign(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Player.onEvent',
+    call_string="Player.onEvent",
     arg_type={
         "objective": ArgType.KEYWORD,
         "function": ArgType.FUNC,
     },
-    name='player_on_event'
+    name="player_on_event"
 )
 class PlayerOnEvent(JMCFunction):
     def call(self) -> str:
@@ -316,12 +316,12 @@ class PlayerOnEvent(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Trigger.setup',
+    call_string="Trigger.setup",
     arg_type={
         "objective": ArgType.KEYWORD,
         "triggers": ArgType.JS_OBJECT
     },
-    name='trigger_setup',
+    name="trigger_setup",
     ignore={
         "triggers"
     }
@@ -333,16 +333,16 @@ class TriggerSetup(JMCFunction):
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         obj = self.args["objective"]
-        self.datapack.add_objective(obj, 'trigger')
+        self.datapack.add_objective(obj, "trigger")
         if self.is_never_used():
             self.datapack.add_tick_command(
-                self.datapack.call_func(self.name, 'main'))
-            self.make_empty_private_function('main')
+                self.datapack.call_func(self.name, "main"))
+            self.make_empty_private_function("main")
             self.datapack.add_load_command(
                 f"execute as @a run {self.datapack.call_func(self.name, 'enable')}")
-            self.make_empty_private_function('enable')
+            self.make_empty_private_function("enable")
 
-            self.datapack.add_private_json('advancements', f"{self.name}/enable", {
+            self.datapack.add_private_json("advancements", f"{self.name}/enable", {
                 "criteria": {
                     "requirement": {
                         "trigger": "minecraft:tick"
@@ -353,8 +353,8 @@ class TriggerSetup(JMCFunction):
                 }
             })
 
-        main_func = self.get_private_function('main')
-        self.get_private_function('enable').append(
+        main_func = self.get_private_function("main")
+        self.get_private_function("enable").append(
             f"scoreboard players enable @s {obj}")
 
         main_count = self.datapack.get_count(self.name)
@@ -373,7 +373,7 @@ class TriggerSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
             run = [
                 parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (obj, '@s')), func_contents, self.datapack, self.name),
+                    PlayerType.SCOREBOARD, (obj, "@s")), func_contents, self.datapack, self.name),
             ]
         else:
             run = []
@@ -394,27 +394,27 @@ class TriggerSetup(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Trigger.add',
+    call_string="Trigger.add",
     arg_type={
         "objective": ArgType.KEYWORD,
         "function": ArgType.FUNC
     },
-    name='trigger_add',
+    name="trigger_add",
 )
 class TriggerAdd(JMCFunction):
     def call(self) -> str:
 
         obj = self.args["objective"]
-        self.datapack.add_objective(obj, 'trigger')
+        self.datapack.add_objective(obj, "trigger")
         if self.is_never_used():
             self.datapack.add_tick_command(
-                self.datapack.call_func(self.name, 'main'))
-            self.make_empty_private_function('main')
+                self.datapack.call_func(self.name, "main"))
+            self.make_empty_private_function("main")
             self.datapack.add_load_command(
                 f"execute as @a run {self.datapack.call_func(self.name, 'enable')}")
-            self.make_empty_private_function('enable')
+            self.make_empty_private_function("enable")
 
-            self.datapack.add_private_json('advancements', f"{self.name}/enable", {
+            self.datapack.add_private_json("advancements", f"{self.name}/enable", {
                 "criteria": {
                     "requirement": {
                         "trigger": "minecraft:tick"
@@ -425,8 +425,8 @@ class TriggerAdd(JMCFunction):
                 }
             })
 
-        main_func = self.get_private_function('main')
-        self.get_private_function('enable').append(
+        main_func = self.get_private_function("main")
+        self.get_private_function("enable").append(
             f"scoreboard players enable @s {obj}")
 
         func = self.args["function"]
@@ -442,14 +442,14 @@ class TriggerAdd(JMCFunction):
 
 @ func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Timer.add',
+    call_string="Timer.add",
     arg_type={
         "objective": ArgType.KEYWORD,
         "mode": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "function": ArgType.FUNC
     },
-    name='timer_add',
+    name="timer_add",
     defaults={
         "function": ""
     }
@@ -459,24 +459,24 @@ class TimerAdd(JMCFunction):
         mode = self.args["mode"]
         obj = self.args["objective"]
         selector = self.args["selector"]
-        if mode not in {'runOnce', 'runTick', 'none'}:
+        if mode not in {"runOnce", "runTick", "none"}:
             raise JMCSyntaxException(
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
-        if mode in {'runOnce',
-                    'runTick'} and self.raw_args["function"] is None:
+        if mode in {"runOnce",
+                    "runTick"} and self.raw_args["function"] is None:
             raise JMCMissingValueError("function", self.token, self.tokenizer)
-        if mode == 'none' and self.raw_args["function"] is not None:
+        if mode == "none" and self.raw_args["function"] is not None:
             raise JMCSyntaxException(
                 f"'function' is provided in 'none' mode {self.call_string}", self.raw_args["function"].token, self.tokenizer)
         self.datapack.add_objective(obj)
         if self.is_never_used():
             self.datapack.add_tick_command(
-                self.datapack.call_func(self.name, 'main'))
-            self.make_empty_private_function('main')
+                self.datapack.call_func(self.name, "main"))
+            self.make_empty_private_function("main")
 
-        main_func = self.get_private_function('main')
-        if selector.startswith('@'):
+        main_func = self.get_private_function("main")
+        if selector.startswith("@"):
             if_selector = f"as {selector} if score @s"
             unless_selector = f"as {selector} unless score @s"
             at_s = "@s"
@@ -488,7 +488,7 @@ class TimerAdd(JMCFunction):
             at_at_s = ""
         main_func.append(
             f"execute {if_selector} {obj} matches 0.. run scoreboard players remove {at_s} {obj} 1")
-        if mode == 'runOnce':
+        if mode == "runOnce":
             count = self.datapack.get_count(self.name)
             main_func.append(
                 f"""execute {if_selector} {obj} matches 0 {at_at_s}run {self.datapack.add_raw_private_function(
@@ -499,7 +499,7 @@ class TimerAdd(JMCFunction):
                     ],
                     count
                 )}""")
-        elif mode == 'runTick':
+        elif mode == "runTick":
             count = self.datapack.get_count(self.name)
             main_func.append(
                 f"""execute {unless_selector} {obj} matches 1.. {at_at_s}run {self.datapack.add_raw_private_function(
@@ -513,13 +513,13 @@ class TimerAdd(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string='Recipe.table',
+    call_string="Recipe.table",
     arg_type={
         "recipe": ArgType.JSON,
         "baseItem": ArgType.KEYWORD,
         "onCraft": ArgType.FUNC
     },
-    name='recipe_table',
+    name="recipe_table",
     defaults={
         "baseItem": "minecraft:knowledge_book",
         "onCraft": ""
@@ -529,7 +529,7 @@ class RecipeTable(JMCFunction):
     def call(self) -> str:
         base_item = self.args["baseItem"]
         if not base_item.startswith("minecraft:"):
-            base_item = 'minecraft:' + base_item
+            base_item = "minecraft:" + base_item
         count = self.datapack.get_count(self.name)
         self.datapack.add_private_json('advancements', f'{self.name}/{count}', {
             "criteria": {
@@ -567,7 +567,7 @@ class RecipeTable(JMCFunction):
             result_command = ""
 
         self.datapack.add_private_json(
-            'recipes', f'{self.name}/{count}', json)
+            "recipes", f"{self.name}/{count}", json)
         self.datapack.add_raw_private_function(
             self.name,
             [

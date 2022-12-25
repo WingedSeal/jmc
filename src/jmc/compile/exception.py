@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from .tokenizer import Token, Tokenizer
 
 logger = Logger(__name__)
-NEW_LINE = '\n'
+NEW_LINE = "\n"
 
 
 def log(self: object, args: tuple):
@@ -51,16 +51,16 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     display_col = col
 
     if col_length:
-        if '\n' in string:
-            line += string.count('\n')
-            col = length - string.rfind('\n')
+        if "\n" in string:
+            line += string.count("\n")
+            col = length - string.rfind("\n")
         else:
             col += length
 
     if display_col_length:
-        if '\n' in string:
-            display_line += string.count('\n')
-            display_col = length - string.rfind('\n')
+        if "\n" in string:
+            display_line += string.count("\n")
+            display_col = length - string.rfind("\n")
         else:
             display_col += length
     else:
@@ -70,7 +70,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     else:
         msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])[:display_col-1]} <-"
     if suggestion is not None:
-        msg += '\n' + suggestion
+        msg += "\n" + suggestion
     return msg
 
 
@@ -99,7 +99,7 @@ class HeaderSyntaxException(SyntaxError):
                  line_str: str, suggestion: str | None = None):
         msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
         if suggestion is not None:
-            msg += '\n' + suggestion
+            msg += "\n" + suggestion
         log(self, (message, ))
         super().__init__(msg)
 

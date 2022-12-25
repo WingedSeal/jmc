@@ -1,5 +1,5 @@
 import sys  # noqa
-sys.path.append('./src')  # noqa
+sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
@@ -61,5 +61,5 @@ new advancements(myDatapack.firstJoin) {
             """).build()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

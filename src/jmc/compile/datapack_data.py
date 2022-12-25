@@ -14,7 +14,7 @@ class Data:
     """
     Data shared across all JMC function in the datapack
     """
-    __slots__ = 'item', '__item_id_count', 'condition_count', '__bool_result_count'
+    __slots__ = "item", "__item_id_count", "condition_count", "__bool_result_count"
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}

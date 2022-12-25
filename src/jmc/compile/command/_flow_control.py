@@ -35,7 +35,7 @@ def else_(command: list[Token], datapack: DataPack,
         raise JMCSyntaxException(
             "Expected 'if' or {", command[0], tokenizer, col_length=True)
 
-    if command[1].token_type == TokenType.KEYWORD and command[1].string == 'if':
+    if command[1].token_type == TokenType.KEYWORD and command[1].string == "if":
         if len(command) < 3:
             raise JMCSyntaxException(
                 "Expected (", command[1], tokenizer, col_length=True)
@@ -62,7 +62,7 @@ def else_(command: list[Token], datapack: DataPack,
         "Expected 'if' or {", command[1], tokenizer, display_col_length=False)
 
 
-WHILE_NAME = 'while_loop'
+WHILE_NAME = "while_loop"
 
 
 def while_(command: list[Token], datapack: "DataPack",
@@ -122,7 +122,7 @@ def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
     datapack.lexer.do_while_box = command[1]
 
 
-SWITCH_CASE_NAME = 'switch_case'
+SWITCH_CASE_NAME = "switch_case"
 
 
 def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
@@ -200,7 +200,7 @@ def switch(command: list[Token], datapack: DataPack,
     if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[2], tokenizer, display_col_length=False)
-    if command[2].string == '{}':
+    if command[2].string == "{}":
         raise JMCSyntaxException(
             "Switch content cannot be empty", command[2], tokenizer)
 
@@ -210,12 +210,12 @@ def switch(command: list[Token], datapack: DataPack,
     case_count = 1
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
-    if list_of_tokens[0][0].string != 'case' or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
+    if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
         raise JMCSyntaxException(
             "Expected 'case'", list_of_tokens[0][0], tokenizer)
 
     for tokens in list_of_tokens:
-        if tokens[0].string == 'case' and tokens[0].token_type == TokenType.KEYWORD:
+        if tokens[0].string == "case" and tokens[0].token_type == TokenType.KEYWORD:
             cases_content.append(current_case_content)
             current_case_content = []
             if len(tokens) == 1:
@@ -233,14 +233,14 @@ def switch(command: list[Token], datapack: DataPack,
             if len(tokens) < 3:
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[1], tokenizer, col_length=True)
-            if tokens[2].token_type != TokenType.OPERATOR or tokens[2].string != ':':
+            if tokens[2].token_type != TokenType.OPERATOR or tokens[2].string != ":":
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[2], tokenizer)
 
             tokens = tokens[3:]
             case_count += 1
         # End If case
-        if tokens[0].string == 'break' and tokens[0].token_type == TokenType.KEYWORD and len(
+        if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
                 tokens) == 1:
             continue
         current_case_content.append(tokens)
@@ -270,7 +270,7 @@ def switch(command: list[Token], datapack: DataPack,
     return parse_switch(scoreboard_player, func_contents, datapack)
 
 
-FOR_NAME = 'for_loop'
+FOR_NAME = "for_loop"
 
 
 def for_(command: list[Token], datapack: DataPack,
@@ -287,7 +287,7 @@ def for_(command: list[Token], datapack: DataPack,
     if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
             "Expected {", command[2], tokenizer, display_col_length=False)
-    if command[2].string == '{}':
+    if command[2].string == "{}":
         raise JMCSyntaxException(
             "For loop content cannot be empty", command[2], tokenizer)
     statements = tokenizer.parse(command[1].string[1:-1], command[1].line,
@@ -297,7 +297,7 @@ def for_(command: list[Token], datapack: DataPack,
             f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)
 
     if statements[0][0].string in {
-            'let', 'var'} and statements[0][0].token_type == TokenType.KEYWORD:
+            "let", "var"} and statements[0][0].token_type == TokenType.KEYWORD:
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
@@ -310,7 +310,7 @@ def for_(command: list[Token], datapack: DataPack,
     first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
 
     if not (_first_statement[1].string ==
-            '=' and _first_statement[1].token_type == TokenType.OPERATOR):
+            "=" and _first_statement[1].token_type == TokenType.OPERATOR):
         raise JMCSyntaxException(
             "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 
@@ -331,7 +331,7 @@ def for_(command: list[Token], datapack: DataPack,
         ]
     )
 
-    return '\n'.join([
+    return "\n".join([
         *first_statement,
         call_func
     ])

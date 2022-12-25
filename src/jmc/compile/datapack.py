@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 
-NEW_LINE = '\n'
+NEW_LINE = "\n"
 
 
 class FunctionEncoder(JSONEncoder):
@@ -36,7 +36,7 @@ class Function:
 
     :param commands: List of minecraft commands(string), defaults to empty list
     """
-    __slots__ = ('commands', )
+    __slots__ = ("commands", )
     commands: list[str]
 
     def __init__(self, commands: list[str] | None = None) -> None:
@@ -91,7 +91,7 @@ class Function:
 
         :return: Commands of the function in form of a single string
         """
-        return '\n'.join(self.commands)
+        return "\n".join(self.commands)
 
     @property
     def length(self) -> int:
@@ -119,7 +119,7 @@ class Function:
         :return: minecraft commands(strings),each string can have only a single line
         """
         return [
-            line for string in strings for line in string.split('\n') if line]
+            line for string in strings for line in string.split("\n") if line]
 
 
 class DataPack:
@@ -129,18 +129,18 @@ class DataPack:
     :param namespace: Datapack's namespace
     :param lexer: Lexer object
     """
-    __slot__ = ('data', 'ints',
-                'functions', 'load_function', 'jsons',
-                'private_functions', 'private_function_count',
-                '__scoreboards', 'loads', 'ticks', 'namespace',
-                'used_command', 'lexer', 'defined_file_pos')
-    private_name = '__private__'
-    load_name = '__load__'
-    tick_name = '__tick__'
-    var_name = '__variable__'
-    int_name = '__int__'
-    storage_name = '__storage__'
-    VARIABLE_SIGN = '$'
+    __slot__ = ("data", "ints",
+                "functions", "load_function", "jsons",
+                "private_functions", "private_function_count",
+                "__scoreboards", "loads", "ticks", "namespace",
+                "used_command", "lexer", "defined_file_pos")
+    private_name = "__private__"
+    load_name = "__load__"
+    tick_name = "__tick__"
+    var_name = "__variable__"
+    int_name = "__int__"
+    storage_name = "__storage__"
+    VARIABLE_SIGN = "$"
     """Data read from header file(s)"""
 
     def __init__(self, namespace: str, lexer: "Lexer") -> None:
@@ -159,8 +159,8 @@ class DataPack:
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
         self.__scoreboards: dict[str, str] = {
-            self.var_name: 'dummy',
-            self.int_name: 'dummy'
+            self.var_name: "dummy",
+            self.int_name: "dummy"
         }
         """Minecraft scoreboards that are going to be created"""
 
@@ -183,7 +183,7 @@ class DataPack:
         self.defined_file_pos: dict[str, tuple[Token, Tokenizer]] = {}
         """Dictionary of mcfunction or json path and it's first defined token and tokenizer"""
 
-    def add_objective(self, objective: str, criteria: str = 'dummy') -> None:
+    def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """
         Add minecraft scoreboard objective
 
@@ -250,7 +250,7 @@ class DataPack:
         :raises JMCSyntaxWarning: If the string in curly bracket is empty
         :return: Minecraft function call string
         """
-        if token.string == '{}':
+        if token.string == "{}":
             raise JMCSyntaxWarning("Empty function", token, tokenizer)
 
         commands = self.parse_function_token(token, tokenizer)
@@ -382,7 +382,7 @@ class DataPack:
             if value.token_type == TokenType.KEYWORD:
                 func_map[num] = value.string, False
             elif value.token_type == TokenType.FUNC:
-                func_map[num] = '\n'.join(
+                func_map[num] = "\n".join(
                     self.parse_function_token(value, tokenizer)), True
             else:
                 raise JMCValueError(
@@ -427,7 +427,7 @@ class DataPack:
                     f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}")
             else:
                 pairs.append(f"{key}:{token.string}")
-        return '{' + ",".join(pairs) + '}'
+        return "{" + ",".join(pairs) + "}"
 
     def __repr__(self) -> str:
         return f"""DataPack(

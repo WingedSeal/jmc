@@ -8,19 +8,19 @@ from ...exception import JMCValueError
 
 @func_property(
     func_type=FuncType.VARIABLE_OPERATION,
-    call_string='Math.sqrt',
+    call_string="Math.sqrt",
     arg_type={
         "n": ArgType.SCOREBOARD
     },
-    name='math_sqrt'
+    name="math_sqrt"
 )
 class MathSqrt(JMCFunction):
     def call(self) -> str:
-        x = '__math__.x'
-        x_n = '__math__.x_n'
-        x_n_sq = '__main__.x_n_sq'
-        N = '__math__.N'
-        diff = '__math__.different'
+        x = "__math__.x"
+        x_n = "__math__.x_n"
+        x_n_sq = "__main__.x_n_sq"
+        N = "__math__.N"
+        diff = "__math__.different"
         var = DataPack.var_name
         if self.is_never_used():
             self.datapack.add_int(2)
@@ -36,13 +36,13 @@ class MathSqrt(JMCFunction):
                     f"scoreboard players operation {diff} {var} -= {x_n} {var}",
                     f"execute unless score {diff} {var} matches 0..1 run {self.datapack.call_func(self.name, 'newton_raphson')}",
                 ],
-                'newton_raphson'
+                "newton_raphson"
             )
             self.datapack.add_raw_private_function(
                 self.name,
                 [
                     f"scoreboard players set {x_n} {var} 1225",
-                    self.datapack.call_func(self.name, 'newton_raphson'),
+                    self.datapack.call_func(self.name, "newton_raphson"),
                     f"scoreboard players operation {x_n_sq} {var} = {x_n} {var}",
                     f"scoreboard players operation {x_n_sq} {var} *= {x_n} {var}",
                     f"scoreboard players operation {x_n} {var} /= 2 {DataPack.int_name}",
@@ -50,12 +50,12 @@ class MathSqrt(JMCFunction):
                     f"scoreboard players operation {diff} {var} -= {x_n} {var}",
                     f"execute if score {x_n_sq} {var} > {N} {var} run scoreboard players remove {x_n} {var} 1",
                 ],
-                'main'
+                "main"
             )
 
         run = [
             f"scoreboard players operation {N} {var} = {self.args['n']}",
-            self.datapack.call_func(self.name, 'main'),
+            self.datapack.call_func(self.name, "main"),
             f"scoreboard players operation {self.var} {var} = {x_n} {var}"
         ]
 
@@ -66,17 +66,17 @@ class MathSqrt(JMCFunction):
                 run,
                 count
             )
-        return '\n'.join(run)
+        return "\n".join(run)
 
 
 @func_property(
     func_type=FuncType.VARIABLE_OPERATION,
-    call_string='Math.random',
+    call_string="Math.random",
     arg_type={
         "min": ArgType.SCOREBOARD_PLAYER,
         "max": ArgType.SCOREBOARD_PLAYER
     },
-    name='math_random',
+    name="math_random",
     defaults={
         "min": "1",
         "max": "2147483647"
@@ -84,9 +84,9 @@ class MathSqrt(JMCFunction):
 )
 class MathRandom(JMCFunction):
     def call(self) -> str:
-        seed = '__math__.seed'
-        a = '__math__.rng.a'
-        c = '__math__.rng.c'
+        seed = "__math__.seed"
+        a = "__math__.rng.a"
+        c = "__math__.rng.c"
         var = DataPack.var_name
         start = int(self.args["min"])
         end = int(self.args["max"])
@@ -105,7 +105,7 @@ class MathRandom(JMCFunction):
                             f"scoreboard players set {a} {var} 656891",
                             f"scoreboard players set {c} {var} 875773"
                         ],
-                        'setup'
+                        "setup"
                     )
                 }""")
             self.datapack.add_raw_private_function(
@@ -115,14 +115,14 @@ class MathRandom(JMCFunction):
                     f"scoreboard players operation {seed} {var} *= {a} {var}",
                     f"scoreboard players operation {seed} {var} += {c} {var}"
                 ],
-                'main'
+                "main"
             )
 
         mod = end - start + 1
         self.datapack.add_int(mod)
 
         run = [
-            self.datapack.call_func(self.name, 'main'),
+            self.datapack.call_func(self.name, "main"),
             f"scoreboard players operation {self.var} {var} = {seed} {var}",
             f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.int_name}"
         ]
@@ -137,4 +137,4 @@ class MathRandom(JMCFunction):
                 run,
                 count
             )
-        return '\n'.join(run)
+        return "\n".join(run)

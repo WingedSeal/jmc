@@ -51,7 +51,7 @@ def get_pack_format(string: str) -> str:
     :param string: Input string
     :return: pack_format if valid, else empty string
     """
-    if '.' not in string:
+    if "." not in string:
         if not string.isdigit():
             pprint(
                 "Invalid Pack Format: Non integer detected.",
@@ -59,7 +59,7 @@ def get_pack_format(string: str) -> str:
             return ""
         return string
 
-    string_split = string.split('.')
+    string_split = string.split(".")
     if not 2 <= len(string_split) <= 3:
         pprint(
             f"Invalid Minecraft version: Expect 1-2 dot (got {len(string_split)}).",
@@ -130,7 +130,7 @@ class Configuration:
         Read configuration file
         """
         try:
-            with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open('r') as file:
+            with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("r") as file:
                 json = load(file)
             self.namespace = json["namespace"]
             self.description = json["description"]
@@ -156,7 +156,7 @@ class Configuration:
         pprint(
             f"Your configuration has been saved to {self.global_data.CONFIG_FILE_NAME}", Colors.INFO
         )
-        with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open('w') as file:
+        with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("w") as file:
             dump(self.toJSON(), file, indent=2)
 
     def ask_and_save(self):
@@ -213,7 +213,7 @@ class Configuration:
             )
             if target_str == "":
                 target = (
-                    self.global_data.cwd / 'main.jmc'
+                    self.global_data.cwd / "main.jmc"
                 ).resolve()
                 break
             if not target_str.endswith(".jmc"):
@@ -268,20 +268,20 @@ class GlobalData(SingleTon):
     SingleTon storing all data shared across all modules.
     """
     __slots__ = (
-        'config',
-        'cwd',
-        'VERSION',
-        'CONFIG_FILE_NAME',
-        'LOG_PATH',
-        'EVENT',
-        'commands')
+        "config",
+        "cwd",
+        "VERSION",
+        "CONFIG_FILE_NAME",
+        "LOG_PATH",
+        "EVENT",
+        "commands")
 
     def init(self, version: str, config_file_name: str) -> None:
         self.config = Configuration(self)
         self.cwd: Path = Path(os.getcwd())
         self.VERSION: str = version
         self.CONFIG_FILE_NAME: str = config_file_name
-        self.LOG_PATH = self.cwd / 'log'
+        self.LOG_PATH = self.cwd / "log"
         self.commands: dict[str, tuple[TerminalCommand, str]] = {}
         """Dictionary of command_name and tuple of function and its usage(string)"""
         self.EVENT = threading.Event()

@@ -50,11 +50,11 @@ class JMCFunction:
     :raises JMCValueError: Missing required positional argument
     :raises NotImplementedError: Call function not implemented
     """
-    __slots__ = ('arg_type', 'func_type', 'name',
-                 'call_string', 'defaults', '_ignore',
-                 'token', 'datapack', 'tokenizer',
-                 'is_execute', 'var', 'args',
-                 'raw_args', 'number_type')
+    __slots__ = ("arg_type", "func_type", "name",
+                 "call_string", "defaults", "_ignore",
+                 "token", "datapack", "tokenizer",
+                 "is_execute", "var", "args",
+                 "raw_args", "number_type")
     _decorated: bool = False
     """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -126,13 +126,13 @@ class JMCFunction:
             if key in self._ignore:
                 pass
             elif arg.arg_type == ArgType._FUNC_CALL:
-                if ':' in arg.token.string:
+                if ":" in arg.token.string:
                     self.args[key] = f"function {arg.token.string}"
                 else:
                     self.args[
                         key] = f"function {datapack.namespace}:{convention_jmc_to_mc(arg.token, self.tokenizer)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
-                self.args[key] = '\n'.join(
+                self.args[key] = "\n".join(
                     datapack.parse_function_token(arg.token, tokenizer))
             elif arg.arg_type == ArgType.INTEGER:
                 self.args[key] = arg.token.string

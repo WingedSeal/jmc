@@ -25,13 +25,13 @@ def drange(start: float | int, stop: float | int,
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Timer.set',
+    call_string="Timer.set",
     arg_type={
         "objective": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "tick": ArgType.SCOREBOARD_PLAYER
     },
-    name='timer_set'
+    name="timer_set"
 )
 class TimerSet(JMCFunction):
     """
@@ -49,13 +49,13 @@ class TimerSet(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Item.give',
+    call_string="Item.give",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "amount": ArgType.INTEGER
     },
-    name='item_give',
+    name="item_give",
     defaults={
         "selector": "@s",
         "amount": "1"
@@ -78,14 +78,14 @@ class ItemGive(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Item.summon',
+    call_string="Item.summon",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "count": ArgType.INTEGER,
         "nbt": ArgType.JS_OBJECT
     },
-    name='item_summon',
+    name="item_summon",
     defaults={
         "pos": "~ ~ ~",
         "count": "1",
@@ -118,14 +118,14 @@ class ItemSummon(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Item.replaceBlock',
+    call_string="Item.replaceBlock",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "slot": ArgType.STRING,
         "count": ArgType.INTEGER
     },
-    name='item_replace_block',
+    name="item_replace_block",
     defaults={
         "count": "1"
     },
@@ -147,14 +147,14 @@ class ItemReplaceBlock(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Item.replaceEntity',
+    call_string="Item.replaceEntity",
     arg_type={
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "slot": ArgType.STRING,
         "count": ArgType.INTEGER
     },
-    name='item_replace_entity',
+    name="item_replace_entity",
     defaults={
         "count": "1"
     },
@@ -176,11 +176,11 @@ class ItemReplaceEntity(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='JMC.put',
+    call_string="JMC.put",
     arg_type={
         "command": ArgType.STRING,
     },
-    name='jmc_put',
+    name="jmc_put",
 )
 class JMCPut(JMCFunction):
     def call(self) -> str:
@@ -189,12 +189,12 @@ class JMCPut(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Text.tellraw',
+    call_string="Text.tellraw",
     arg_type={
         "selector": ArgType.SELECTOR,
         "message": ArgType.STRING,
     },
-    name='text_tellraw',
+    name="text_tellraw",
 )
 class TextTellraw(JMCFunction):
     def call(self) -> str:
@@ -203,12 +203,12 @@ class TextTellraw(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Text.title',
+    call_string="Text.title",
     arg_type={
         "selector": ArgType.SELECTOR,
         "message": ArgType.STRING,
     },
-    name='text_title',
+    name="text_title",
 )
 class TextTitle(JMCFunction):
     def call(self) -> str:
@@ -217,12 +217,12 @@ class TextTitle(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Text.subtitle',
+    call_string="Text.subtitle",
     arg_type={
         "selector": ArgType.SELECTOR,
         "message": ArgType.STRING,
     },
-    name='text_subtitle',
+    name="text_subtitle",
 )
 class TextSubtitle(JMCFunction):
     def call(self) -> str:
@@ -231,12 +231,12 @@ class TextSubtitle(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Text.actionbar',
+    call_string="Text.actionbar",
     arg_type={
         "selector": ArgType.SELECTOR,
         "message": ArgType.STRING,
     },
-    name='text_actionbar',
+    name="text_actionbar",
 )
 class TextActionbar(JMCFunction):
     def call(self) -> str:
@@ -251,7 +251,7 @@ def __normalize_decimal(n: float):
     """
     if n == 0:
         return ""
-    stripped = f'{n:.10f}'  # .rstrip('0').rstrip('.')
+    stripped = f"{n:.10f}"  # .rstrip('0').rstrip('.')
     return stripped
 
 
@@ -271,13 +271,13 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
     commands = []
     for x_pos, y_pos, z_pos in points:
         commands.append(
-            f'particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}')
+            f"particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}")
     return commands
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Particle.circle',
+    call_string="Particle.circle",
     arg_type={
         "particle": ArgType.STRING,
         "radius": ArgType.FLOAT,
@@ -286,7 +286,7 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
     },
-    name='particle_circle',
+    name="particle_circle",
     defaults={
         "speed": "1",
         "count": "1",
@@ -309,7 +309,7 @@ class ParticleCircle(JMCFunction):
         return points
 
     def call(self) -> str:
-        if self.args['mode'] not in {'force', 'normal'}:
+        if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
@@ -329,7 +329,7 @@ class ParticleCircle(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Particle.spiral',
+    call_string="Particle.spiral",
     arg_type={
         "particle": ArgType.STRING,
         "radius": ArgType.FLOAT,
@@ -339,7 +339,7 @@ class ParticleCircle(JMCFunction):
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
     },
-    name='particle_spiral',
+    name="particle_spiral",
     defaults={
         "speed": "1",
         "count": "1",
@@ -366,7 +366,7 @@ class ParticleSpiral(JMCFunction):
         return points
 
     def call(self) -> str:
-        if self.args['mode'] not in {'force', 'normal'}:
+        if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
@@ -387,7 +387,7 @@ class ParticleSpiral(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Particle.cylinder',
+    call_string="Particle.cylinder",
     arg_type={
         "particle": ArgType.STRING,
         "radius": ArgType.FLOAT,
@@ -398,7 +398,7 @@ class ParticleSpiral(JMCFunction):
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
     },
-    name='particle_cylinder',
+    name="particle_cylinder",
     defaults={
         "speed": "1",
         "count": "1",
@@ -426,7 +426,7 @@ class ParticleCylinder(JMCFunction):
         return points
 
     def call(self) -> str:
-        if self.args['mode'] not in {'force', 'normal'}:
+        if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 
@@ -448,7 +448,7 @@ class ParticleCylinder(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string='Particle.line',
+    call_string="Particle.line",
     arg_type={
         "particle": ArgType.STRING,
         "distance": ArgType.FLOAT,
@@ -457,7 +457,7 @@ class ParticleCylinder(JMCFunction):
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
     },
-    name='particle_line',
+    name="particle_line",
     defaults={
         "speed": "1",
         "count": "1",
@@ -476,7 +476,7 @@ class ParticleLine(JMCFunction):
         return [(0, 0, n) for n in drange(1, distance + 1, distance / spread)]
 
     def call(self) -> str:
-        if self.args['mode'] not in {'force', 'normal'}:
+        if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
                 f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
 

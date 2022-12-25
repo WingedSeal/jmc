@@ -28,12 +28,12 @@ class Header(SingleTon):
     A SingleTon class containing all information from header
     """
     __slots__ = (
-        'file_read',
-        'macros',
-        'credits',
-        'is_enable_macro',
-        'commands',
-        'statics'
+        "file_read",
+        "macros",
+        "credits",
+        "is_enable_macro",
+        "commands",
+        "statics"
     )
 
     file_read: set[str]

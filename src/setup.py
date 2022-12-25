@@ -4,13 +4,13 @@ from setuptools import setup, find_packages
 from jmc import VERSION
 
 
-with (Path(__file__).parents[1] / 'README.md').open(encoding="utf-8") as file:
+with (Path(__file__).parents[1] / "README.md").open(encoding="utf-8") as file:
     README = "\n" + file.read()
 
-DESCRIPTION = 'Compiler for JMC (JavaScript-like Minecraft Function), a mcfunction extension language for making Minecraft Datapack.'
+DESCRIPTION = "Compiler for JMC (JavaScript-like Minecraft Function), a mcfunction extension language for making Minecraft Datapack."
 version = VERSION.replace("-alpha.", "a").replace("-beta.", "b")[1:]
 
-if ('/' + VERSION + '/') not in README:
+if ("/" + VERSION + "/") not in README:
     raise ValueError("README file's version has not been updated")
 
 setup(
@@ -24,11 +24,11 @@ setup(
     packages=find_packages(),
     install_requires=[],
     keywords=[
-        'python',
-        'minecraft',
-        'mcfunction',
-        'datapack',
-        'compiler'],
+        "python",
+        "minecraft",
+        "mcfunction",
+        "datapack",
+        "compiler"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

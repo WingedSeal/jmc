@@ -12,18 +12,18 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
     count = 0
     expression = ''
     index = calc_pos
-    if len(string) < calc_pos + 14 or string[calc_pos + 13] != '(':
+    if len(string) < calc_pos + 14 or string[calc_pos + 13] != "(":
         raise JMCSyntaxException(
             "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
     for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
         index += 1
-        if char == '(':
+        if char == "(":
             count += 1
-        elif char == ')':
+        elif char == ")":
             count -= 1
 
-        if char not in {'0', '1', '2', '3', '4', '5', '6', '7',
-                        '8', '9', '+', '-', '*', '/', ' ', '\t', '\n', '(', ')'}:
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
+                        "8", "9", "+", "-", "*", "/", " ", "\t", "\n", "(", ")"}:
             raise JMCSyntaxException(
                 f"Invalid charater({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 
@@ -41,7 +41,7 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
 def _hardcode_process(string: str, index_string: str,
                       i: int, token: Token, tokenizer: Tokenizer) -> str:
     string = string.replace(index_string, str(i))
-    calc_pos = string.find('Hardcode.calc')
+    calc_pos = string.find("Hardcode.calc")
     if calc_pos != -1:
         string = _hardcode_parse(calc_pos, string, token, tokenizer)
     return string
@@ -49,7 +49,7 @@ def _hardcode_process(string: str, index_string: str,
 
 @func_property(
     func_type=FuncType.EXECUTE_EXCLUDED,
-    call_string='Hardcode.repeat',
+    call_string="Hardcode.repeat",
     arg_type={
         "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
@@ -57,7 +57,7 @@ def _hardcode_process(string: str, index_string: str,
         "stop": ArgType.INTEGER,
         "step": ArgType.INTEGER
     },
-    name='hardcode_repeat',
+    name="hardcode_repeat",
     ignore={
         "function"
     },
@@ -91,7 +91,7 @@ class HardcodeRepeat(JMCFunction):
                 error.reinit(lambda string: _hardcode_process(
                     string, self.args["indexString"], i, self.token, self.tokenizer
                 ))
-                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
+                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return "\n".join(commands)
@@ -99,14 +99,14 @@ class HardcodeRepeat(JMCFunction):
 
 @func_property(
     func_type=FuncType.EXECUTE_EXCLUDED,
-    call_string='Hardcode.switch',
+    call_string="Hardcode.switch",
     arg_type={
         "switch": ArgType.SCOREBOARD,
         "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "count": ArgType.INTEGER
     },
-    name='hardcode_switch',
+    name="hardcode_switch",
     ignore={
         "function",
         "switch"
@@ -137,7 +137,7 @@ class HardcodeSwitch(JMCFunction):
                 error.reinit(lambda string: _hardcode_process(
                     string, self.args["indexString"], i, self.token, self.tokenizer
                 ))
-                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
+                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return parse_switch(scoreboard_player, func_contents,
@@ -146,7 +146,7 @@ class HardcodeSwitch(JMCFunction):
 
 @func_property(
     func_type=FuncType.EXECUTE_EXCLUDED,
-    call_string='Raycast.simple',
+    call_string="Raycast.simple",
     arg_type={
         "onHit": ArgType.FUNC,
         "onStep": ArgType.FUNC,
@@ -166,7 +166,7 @@ class HardcodeSwitch(JMCFunction):
         "overideString": ArgType.STRING,
         "overideRecursion": ArgType.ARROW_FUNC
     },
-    name='raycast_simple',
+    name="raycast_simple",
     defaults={
         "onStep": "",
         "onBeforeStep": "",
@@ -195,7 +195,7 @@ class HardcodeSwitch(JMCFunction):
     }
 )
 class RaycastSimple(JMCFunction):
-    current_iter = '__current_iter_raycast__'
+    current_iter = "__current_iter_raycast__"
 
     def call(self) -> str:
         current_iter = self.current_iter + \
@@ -204,7 +204,7 @@ class RaycastSimple(JMCFunction):
         box_size = float(self.args["boxSize"])
         dx = "0" if box_size < 1 else str(box_size - 1)
 
-        if self.args["target"].endswith(']'):
+        if self.args["target"].endswith("]"):
             target = f'{self.args["target"][:-1]},dx={dx},tag=!{caster_tag}]'
         else:
             target = f'{self.args["target"]}[dx={dx},tag=!{caster_tag}]'
@@ -313,13 +313,13 @@ class RaycastSimple(JMCFunction):
                     lambda string: string.replace(
                         self.args["overideString"],
                         raycast_loop))
-                error.msg = f'WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n' + error.msg
+                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
         else:
-            modify_execute_before_step = self.args['modifyExecuteBeforeStep'] + \
-                ' ' if self.args['modifyExecuteBeforeStep'] else ''
-            modify_execute_after_step = self.args['modifyExecuteAfterStep'] + \
-                ' ' if self.args['modifyExecuteAfterStep'] else ''
+            modify_execute_before_step = self.args["modifyExecuteBeforeStep"] + \
+                " " if self.args["modifyExecuteBeforeStep"] else ""
+            modify_execute_after_step = self.args["modifyExecuteAfterStep"] + \
+                " " if self.args["modifyExecuteAfterStep"] else ""
             recursion_commands = [
                 f"execute if score {current_iter} {self.datapack.var_name} matches 1.. {modify_execute_before_step}positioned ^ ^ ^{self.args['interval']} {modify_execute_after_step}run function {raycast_loop}"]
 

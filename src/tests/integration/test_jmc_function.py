@@ -1,5 +1,5 @@
 import sys  # noqa
-sys.path.append('./src')  # noqa
+sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
@@ -944,5 +944,5 @@ Timer.set(test[raise=error], @a[tag=test], 1);
             """).build()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

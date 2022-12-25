@@ -1,5 +1,5 @@
 import sys  # noqa
-sys.path.append('./src')  # noqa
+sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
@@ -81,5 +81,5 @@ execute as @p run effect give @s speed;
             """).build()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

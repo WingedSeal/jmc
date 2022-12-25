@@ -34,8 +34,8 @@ def handle_command(given_command: str) -> None:
 def start() -> None:
     os.system("")
     logger.info(f"Build-version: {global_data.VERSION}")
-    pprint(f' JMC Compiler {global_data.VERSION}\n', Colors.HEADER)
-    pprint(f'Current Directory | {global_data.cwd}\n', Colors.YELLOW)
+    pprint(f" JMC Compiler {global_data.VERSION}\n", Colors.HEADER)
+    pprint(f"Current Directory | {global_data.cwd}\n", Colors.YELLOW)
     if not global_data.config.is_file_exist():
         global_data.config.ask_and_save()
     else:

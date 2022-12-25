@@ -1,5 +1,5 @@
 import sys  # noqa
-sys.path.append('./src')  # noqa
+sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
@@ -200,5 +200,5 @@ scoreboard objectives add __int__ dummy
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

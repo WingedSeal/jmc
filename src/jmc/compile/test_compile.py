@@ -21,8 +21,8 @@ class JMCPack:
     :param namespace: Namespace of the virtual datapack, defaults to "TEST"
     :param output: virtual directory for output, defaults to "VIRTUAL"
     """
-    __slots__ = ('cert', 'jmc_file', 'header_file',
-                 '__built', 'config')
+    __slots__ = ("cert", "jmc_file", "header_file",
+                 "__built", "config")
     cert: str
     jmc_file: str
     header_file: str | None

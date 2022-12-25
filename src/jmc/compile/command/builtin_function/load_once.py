@@ -8,18 +8,18 @@ from ..jmc_function import JMCFunction, FuncType, func_property
 
 @func_property(
     func_type=FuncType.LOAD_ONCE,
-    call_string='Player.firstJoin',
+    call_string="Player.firstJoin",
     arg_type={
         "function": ArgType.FUNC
     },
-    name='player_first_join'
+    name="player_first_join"
 )
 class PlayerFirstJoin(JMCFunction):
     def call(self) -> str:
         self.datapack.add_raw_private_function(
             self.name,
             [self.args["function"]],
-            'main'
+            "main"
         )
         self.datapack.add_private_json("advancements", self.name, {
             "criteria": {
@@ -36,19 +36,19 @@ class PlayerFirstJoin(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONCE,
-    call_string='Player.rejoin',
+    call_string="Player.rejoin",
     arg_type={
         "function": ArgType.FUNC
     },
-    name='player_rejoin'
+    name="player_rejoin"
 )
 class PlayerRejoin(JMCFunction):
-    obj = '__rejoin__'
-    reset = f'scoreboard players set @s {obj} 0'
+    obj = "__rejoin__"
+    reset = f"scoreboard players set @s {obj} 0"
 
     def call(self) -> str:
         self.datapack.add_objective(
-            self.obj, 'custom:leave_game')
+            self.obj, "custom:leave_game")
         self.datapack.add_tick_command(
             f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "main")}')
         self.datapack.add_raw_private_function(
@@ -61,27 +61,27 @@ class PlayerRejoin(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONCE,
-    call_string='Player.die',
+    call_string="Player.die",
     arg_type={
         "onDeath": ArgType.FUNC,
         "onRespawn": ArgType.FUNC
     },
-    name='player_die',
+    name="player_die",
     defaults={
         "onDeath": "",
         "onRespawn": ""
     }
 )
 class PlayerDie(JMCFunction):
-    obj = '__die__'
-    on_death = f'scoreboard players set @s {obj} 2'
-    on_respawn = f'scoreboard players set @s {obj} 0'
+    obj = "__die__"
+    on_death = f"scoreboard players set @s {obj} 2"
+    on_respawn = f"scoreboard players set @s {obj} 0"
 
     def call(self) -> str:
         if not self.args["onDeath"] and not self.args["onRespawn"]:
             raise JMCMissingValueError("onDeath or onRespawn",
                                        self.token, self.tokenizer)
-        self.datapack.add_objective(self.obj, 'deathCount')
+        self.datapack.add_objective(self.obj, "deathCount")
         self.datapack.add_tick_command(
             f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "on_death")}')
         self.datapack.add_tick_command(

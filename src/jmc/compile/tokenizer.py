@@ -55,7 +55,7 @@ class Token:
         """
         if self.token_type == TokenType.PAREN_CURLY:
             if not self.string.startswith(
-                    '{') or not self.string.endswith('}'):
+                    "{") or not self.string.endswith("}"):
                 raise ValueError(
                     "paren_curly Token created but string doesn't start and end with the parenthesis")
 
@@ -109,13 +109,13 @@ class Pos:
 
 
 class Re:
-    NEW_LINE = '\n'
-    BACKSLASH = '\\'
-    WHITESPACE = r'\s+'
-    KEYWORD = r'[a-zA-Z0-9_\.\/\^\~]'
-    SEMICOLON = ';'
+    NEW_LINE = "\n"
+    BACKSLASH = "\\"
+    WHITESPACE = r"\s+"
+    KEYWORD = r"[a-zA-Z0-9_\.\/\^\~]"
+    SEMICOLON = ";"
     COMMA = ","
-    HASH = '#'
+    HASH = "#"
     SLASH = "/"
     TWO_SLASH = SLASH * 2
 
@@ -126,12 +126,12 @@ class Quote:
 
 
 class Paren:
-    L_ROUND = '('
-    R_ROUND = ')'
-    L_SQUARE = '['
-    R_SQUARE = ']'
-    L_CURLY = '{'
-    R_CURLY = '}'
+    L_ROUND = "("
+    R_ROUND = ")"
+    L_SQUARE = "["
+    R_SQUARE = "]"
+    L_CURLY = "{"
+    R_CURLY = "}"
 
 
 PAREN_PAIR = {
@@ -141,7 +141,7 @@ PAREN_PAIR = {
 }
 """Dictionary of left bracket(string) and right bracket(string)"""
 
-OPERATORS = {'+', '-', '*', '/', '>', '<', '=', '%', ':', '!', '|', '&'}
+OPERATORS = {"+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&"}
 
 
 class Tokenizer:
@@ -156,13 +156,13 @@ class Tokenizer:
     :param expect_semicolon: Whether to expect semicolon at the end, defaults to True
     :param allow_semicolon: Whether to allow semicolon at the 2nd char(For minecraft array `[I;int, ...]`), defaults to False
     """
-    __slots__ = ('line', 'col', 'state',
-                 'token_str', 'token_pos', 'keywords',
-                 'list_of_keywords', 'quote', 'is_escaped',
-                 'paren', 'r_paren', 'paren_count',
-                 'is_string', 'is_slash', 'raw_string',
-                 'file_string', 'file_path', 'programs',
-                 'is_comment', 'allow_semicolon', 'macro_factory')
+    __slots__ = ("line", "col", "state",
+                 "token_str", "token_pos", "keywords",
+                 "list_of_keywords", "quote", "is_escaped",
+                 "paren", "r_paren", "paren_count",
+                 "is_string", "is_slash", "raw_string",
+                 "file_string", "file_path", "programs",
+                 "is_comment", "allow_semicolon", "macro_factory")
 
     programs: list[list[Token]]
     """List of lines(list of tokens)"""
@@ -364,7 +364,7 @@ class Tokenizer:
                     "Unexpected semicolon(;)", None, self)
 
             self.allow_semicolon = False
-            if self.token_str in {'I', 'B', 'L'}:
+            if self.token_str in {"I", "B", "L"}:
                 self.token_str += char
                 return True
 
@@ -761,7 +761,7 @@ class Tokenizer:
             expecting_comma = False
             if kwargs:
                 raise JMCSyntaxException(
-                    "Positional argument follows keyword argument", token, self, suggestion='Try rearranging arguments')
+                    "Positional argument follows keyword argument", token, self, suggestion="Try rearranging arguments")
 
             args.append(Token(string=arg, line=token.line,
                               col=token.col, token_type=token.token_type))
@@ -794,7 +794,7 @@ class Tokenizer:
         for token_ in keywords:
             if token_.token_type == TokenType.PAREN_SQUARE and arg and is_connected(
                     token_, last_token):
-                if arg.startswith('@') and arg[1] in {'p', 'a', 'r', 's', 'e'}:
+                if arg.startswith("@") and arg[1] in {"p", "a", "r", "s", "e"}:
                     arg += token_.string
                     add_arg(last_token)
                     last_token = token_
@@ -811,7 +811,7 @@ class Tokenizer:
                 continue
 
             if token_.token_type == TokenType.OPERATOR and is_connected(
-                    token_, last_token) and token_.string == ':':
+                    token_, last_token) and token_.string == ":":
                 arg += token_.string
                 token_before_last = last_token
                 last_token = token_
@@ -853,11 +853,11 @@ class Tokenizer:
             if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
                 if key:
                     arg = token_.string
-                    if token_.string == '=':
+                    if token_.string == "=":
                         raise JMCSyntaxException(
                             "Duplicated equal-sign(=)", token_, self)
                 elif arg:
-                    if token_.string == '=':
+                    if token_.string == "=":
                         key = arg
                         arg = ""
                     elif last_token.token_type == TokenType.OPERATOR and is_connected(
@@ -916,7 +916,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected list/array", token, self, suggestion="Expected [")
 
-        if token.string == '[]':
+        if token.string == "[]":
             return []
 
         keywords = self.parse(token.string[1:-
@@ -951,7 +951,7 @@ class Tokenizer:
         if token.token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
-        if token.string == '{}':
+        if token.string == "{}":
             keywords: list[Token] = []
         else:
             keywords = self.parse(
@@ -1023,7 +1023,7 @@ class Tokenizer:
 
             if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
                 if arg:
-                    if token_.string == ':':
+                    if token_.string == ":":
                         key = arg
                         arg = ""
                     else:
@@ -1031,7 +1031,7 @@ class Tokenizer:
                             "Unexpected token", token_, self, suggestion=": should be followed by something (value)")
                 elif key:
                     arg = token_.string
-                    if token_.string == ':':
+                    if token_.string == ":":
                         raise JMCSyntaxException(
                             "Duplicated colon(:)", token_, self)
                     add_kwarg(token_)

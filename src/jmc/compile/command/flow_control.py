@@ -17,10 +17,10 @@ FLOW_CONTROL_COMMANDS: dict[str, Callable[
         DataPack,
         Tokenizer,
     ], str | None]] = {
-    'while': while_,
-    'do': do,
-    'if': if_,
-    'else': else_,
-    'switch': switch,
-    'for': for_,
+    "while": while_,
+    "do": do,
+    "if": if_,
+    "else": else_,
+    "switch": switch,
+    "for": for_,
 }

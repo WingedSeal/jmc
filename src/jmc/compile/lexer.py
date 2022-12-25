@@ -95,7 +95,7 @@ class Lexer:
         file_path_str = file_path.resolve().as_posix()
         if _test_file is None:
             try:
-                with file_path.open('r') as file:
+                with file_path.open("r") as file:
                     raw_string = file.read()
             except FileNotFoundError as error:
                 raise JMCFileNotFoundError(
@@ -110,14 +110,14 @@ class Lexer:
 
         for command in tokenizer.programs:
             if (
-                command[0].string == 'function'
+                command[0].string == "function"
                 and
                 len(command) == 4
             ):
                 self.parse_current_load()
                 self.parse_func(tokenizer, command, file_path_str)
             elif (
-                command[0].string == 'function'
+                command[0].string == "function"
                 and
                 (
                     len(command) < 2
@@ -133,13 +133,13 @@ class Lexer:
                     "'function' expect Minecraft syntax('namespace:folder/function') or JMC syntax('function name() {}')",
                     command[0],
                     tokenizer)
-            elif command[0].string == 'new':
+            elif command[0].string == "new":
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
-            elif command[0].string == 'class':
+            elif command[0].string == "class":
                 self.parse_current_load()
                 self.parse_class(tokenizer, command, file_path_str)
-            elif command[0].string == '@import':
+            elif command[0].string == "@import":
                 self.parse_current_load()
                 if len(command) < 2:
                     raise JMCSyntaxException(
@@ -169,10 +169,10 @@ class Lexer:
                     new_path = Path(
                         (file_path.parent / command[1].string).resolve()
                     )
-                    if new_path.suffix != '.jmc':
+                    if new_path.suffix != ".jmc":
                         new_path = Path(
                             (file_path.parent /
-                             (command[1].string + '.jmc')).resolve()
+                             (command[1].string + ".jmc")).resolve()
                         )
                 except Exception as error:
                     raise JMCSyntaxException(
@@ -211,7 +211,7 @@ class Lexer:
         if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(function's name)", command[1], tokenizer)
-        if command[2].string != '()':
+        if command[2].string != "()":
             raise JMCSyntaxException(
                 "Expected empty round parenthesis", command[2], tokenizer)
         if command[3].token_type != TokenType.PAREN_CURLY:
@@ -219,7 +219,7 @@ class Lexer:
                 "Expected {", command[3], tokenizer, display_col_length=False)
 
         func_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
-        if func_path.startswith(DataPack.private_name + '/'):
+        if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
         logger.debug(f"Function: {func_path}")
@@ -272,7 +272,7 @@ class Lexer:
         if len(command) < 3:
             raise JMCSyntaxException(
                 "Expected round parenthesis(JSON file's path)", command[1], tokenizer, col_length=True)
-        if command[2].string == '()':
+        if command[2].string == "()":
             raise JMCSyntaxException(
                 "Expected JSON file's path in the bracket", command[1], tokenizer)
         if command[2].token_type != TokenType.PAREN_ROUND:
@@ -297,18 +297,18 @@ class Lexer:
         json_name = prefix + convention_jmc_to_mc(
             command[2], tokenizer, is_make_lower=False, substr=(1, -1))
 
-        if Header().is_override_minecraft and json_name.startswith('minecraft/'):
+        if Header().is_override_minecraft and json_name.startswith("minecraft/"):
             # len('minecraft/') = 10
-            json_path = 'minecraft/' + json_type + '/' + json_name[10:]
+            json_path = "minecraft/" + json_type + "/" + json_name[10:]
         else:
-            json_path = json_type + '/' + json_name
+            json_path = json_type + "/" + json_name
 
         if not json_path.islower():
             raise MinecraftSyntaxWarning(
                 f"Uppercase letter found in JSON file's path({json_path})", command[
                     2], tokenizer
             )
-        if json_path.startswith(DataPack.private_name + '/'):
+        if json_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"JSON({json_path}) may override private function of JMC", command[2], tokenizer, suggestion=f"Please avoid starting JSON's path with {DataPack.private_name}")
 
@@ -361,7 +361,7 @@ class Lexer:
 
         class_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
         class_content = command[2].string[1:-1]
-        self.parse_class_content(class_path + '/',
+        self.parse_class_content(class_path + "/",
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)
 
     def parse_load_func_content(
@@ -434,13 +434,13 @@ class Lexer:
         tokenizer = Tokenizer(class_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         for command in tokenizer.programs:
-            if command[0].string == 'function' and len(command) == 4:
+            if command[0].string == "function" and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
-            elif command[0].string == 'new':
+            elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
-            elif command[0].string == 'class':
+            elif command[0].string == "class":
                 self.parse_class(tokenizer, command, file_path_str, prefix)
-            elif command[0].string == '@import':
+            elif command[0].string == "@import":
                 raise JMCSyntaxException(
                     "Importing is not supported in class", command[0], tokenizer)
             else:
@@ -448,7 +448,7 @@ class Lexer:
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer,
-                      name: str = 'if_else') -> str:
+                      name: str = "if_else") -> str:
         """
         Parse if-else chain using if_else_box attribute
 
@@ -469,7 +469,7 @@ class Lexer:
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
                 name, if_else_box[0][1], tokenizer)
-            if arrow_func.startswith('execute '):
+            if arrow_func.startswith("execute "):
                 # len('execute ') = 8
                 return f"{precommand}execute {condition} {arrow_func[8:]}"
             return f"{precommand}execute {condition} run {arrow_func}"
@@ -534,7 +534,7 @@ class Lexer:
         tokenizer = Tokenizer(token.string[1:-1], tokenizer.file_path, token.line,
                               token.col + 1, tokenizer.file_string, expect_semicolon=False, allow_semicolon=token.token_type == TokenType.PAREN_SQUARE)
         string = ""
-        if open_ == '{' and tokenizer.programs[0][0].token_type == TokenType.STRING:
+        if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
             is_nbt = False
         for token_ in tokenizer.programs[0]:
             if token_.token_type == TokenType.PAREN_ROUND:

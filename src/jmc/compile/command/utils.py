@@ -49,7 +49,7 @@ def find_scoreboard_player_type(
         return ScoreboardPlayer(
             player_type=PlayerType.INTEGER, value=int(token.string))
 
-    splits = token.string.split(':')
+    splits = token.string.split(":")
     if len(splits) == 1:
         if allow_integer:
             raise JMCSyntaxException(
@@ -88,7 +88,7 @@ class ArgType(Enum):
 
 
 class Arg:
-    __slots__ = ('token', 'arg_type')
+    __slots__ = ("token", "arg_type")
 
     def __init__(self, token: Token, arg_type: ArgType) -> None:
         self.token = token
@@ -133,12 +133,12 @@ class Arg:
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier == ArgType.KEYWORD:
-            if key_string.startswith('@'):
+            if key_string.startswith("@"):
                 raise JMCValueError(
                     f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SELECTOR.value}",
                     self.token,
                     tokenizer)
-            if ':' in key_string:
+            if ":" in key_string:
                 raise JMCValueError(
                     f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SCOREBOARD.value}",
                     self.token,
@@ -172,13 +172,13 @@ def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
 
     if token.token_type == TokenType.KEYWORD:
         if token.string.startswith(
-                DataPack.VARIABLE_SIGN) or ':' in token.string:
+                DataPack.VARIABLE_SIGN) or ":" in token.string:
             return ArgType.SCOREBOARD
         if is_number(token.string):
             return ArgType.INTEGER
         if is_float(token.string):
             return ArgType.FLOAT
-        if token.string.startswith('@'):
+        if token.string.startswith("@"):
             return ArgType.SELECTOR
         return ArgType.KEYWORD
     if token.token_type == TokenType.STRING:
@@ -227,7 +227,7 @@ def eval_expr(expr: str) -> str:
     :param expr: Expression string
     :return: String representation of result number
     """
-    return str(__eval(ast.parse(expr, mode='eval').body))
+    return str(__eval(ast.parse(expr, mode="eval").body))
 
 
 OPERATORS: dict[type, Callable[..., Any]] = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
@@ -277,10 +277,10 @@ class FormattedText:
     >>> str(FormattedText("&<red,bold>Name", token, tokenizer, is_default_no_italic=True))
     '{"text":"Name", "color":"red", "bold":true, "italic":false}'
     """
-    __slots__ = ('raw_text', 'current_json', 'result',
-                 'bracket_content', 'token', 'tokenizer',
-                 'current_color', 'is_default_no_italic', 'datapack',
-                 'is_allow_score_selector')
+    __slots__ = ("raw_text", "current_json", "result",
+                 "bracket_content", "token", "tokenizer",
+                 "current_color", "is_default_no_italic", "datapack",
+                 "is_allow_score_selector")
 
     SIGN = "&"
     OPEN_BRACKET = "<"
@@ -355,112 +355,112 @@ class FormattedText:
                 value = False
                 prop = prop[1:]
             if prop in {
-                'dark_red',
-                'red',
-                'gold',
-                'yellow',
-                'dark_green',
-                'green',
-                'aqua',
-                'dark_aqua',
-                'blue',
-                'light_purple',
-                'dark_purple',
-                'white',
-                'gray',
-                'dark_gray',
-                'black',
-                'reset',
+                "dark_red",
+                "red",
+                "gold",
+                "yellow",
+                "dark_green",
+                "green",
+                "aqua",
+                "dark_aqua",
+                "blue",
+                "light_purple",
+                "dark_purple",
+                "white",
+                "gray",
+                "dark_gray",
+                "black",
+                "reset",
             }:
-                if 'color' in self.current_json:
+                if "color" in self.current_json:
                     raise JMCValueError(
-                        f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+                        f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
 
-                self.current_json['color'] = prop
+                self.current_json["color"] = prop
                 self.current_color = prop
                 if not value:
                     raise JMCValueError(
-                        f'Color({prop}) cannot be false', self.token, self.tokenizer)
+                        f"Color({prop}) cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop in {'bold', 'italic', 'underlined',
-                        'strikethrough', 'obfuscated'}:
+            if prop in {"bold", "italic", "underlined",
+                        "strikethrough", "obfuscated"}:
                 self.current_json[prop] = value
                 continue
 
-            if prop.startswith('#') and len(prop) == 7:
-                if 'color' in self.current_json:
+            if prop.startswith("#") and len(prop) == 7:
+                if "color" in self.current_json:
                     raise JMCValueError(
-                        f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+                        f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
 
-                self.current_json['color'] = prop
+                self.current_json["color"] = prop
                 if not value:
                     raise JMCValueError(
-                        f'Color({prop}) cannot be false', self.token, self.tokenizer)
+                        f"Color({prop}) cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop.startswith('$'):
-                if 'selector' in self.current_json:
+            if prop.startswith("$"):
+                if "selector" in self.current_json:
                     raise JMCValueError(
-                        f'selector used with score in formatted text', self.token, self.tokenizer)
-                if 'score' in self.current_json:
+                        f"selector used with score in formatted text", self.token, self.tokenizer)
+                if "score" in self.current_json:
                     raise JMCValueError(
-                        f'score used twice in formatted text', self.token, self.tokenizer)
-                self.current_json['score'] = {
+                        f"score used twice in formatted text", self.token, self.tokenizer)
+                self.current_json["score"] = {
                     "name": prop, "objective": self.datapack.var_name}
                 if not value:
                     raise JMCValueError(
-                        f'Score cannot be false', self.token, self.tokenizer)
+                        f"Score cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop.count(':') == 1:
-                if 'selector' in self.current_json:
+            if prop.count(":") == 1:
+                if "selector" in self.current_json:
                     raise JMCValueError(
-                        f'selector used with score in formatted text', self.token, self.tokenizer)
-                if 'score' in self.current_json:
+                        f"selector used with score in formatted text", self.token, self.tokenizer)
+                if "score" in self.current_json:
                     raise JMCValueError(
-                        f'score used twice in formatted text', self.token, self.tokenizer)
-                objective, name = prop.split(':')
-                self.current_json['score'] = {
+                        f"score used twice in formatted text", self.token, self.tokenizer)
+                objective, name = prop.split(":")
+                self.current_json["score"] = {
                     "name": objective, "objective": name}
                 if not value:
                     raise JMCValueError(
-                        f'Score cannot be false', self.token, self.tokenizer)
+                        f"Score cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop.startswith('@'):
-                if 'score' in self.current_json:
+            if prop.startswith("@"):
+                if "score" in self.current_json:
                     raise JMCValueError(
-                        f'score used with selector in formatted text', self.token, self.tokenizer)
-                if 'selector' in self.current_json:
+                        f"score used with selector in formatted text", self.token, self.tokenizer)
+                if "selector" in self.current_json:
                     raise JMCValueError(
-                        f'selector used with selector in formatted text', self.token, self.tokenizer)
-                self.current_json['selector'] = prop
+                        f"selector used with selector in formatted text", self.token, self.tokenizer)
+                self.current_json["selector"] = prop
                 if not value:
                     raise JMCValueError(
-                        f'Selector cannot be false', self.token, self.tokenizer)
+                        f"Selector cannot be false", self.token, self.tokenizer)
                 continue
 
             raise JMCValueError(
                 f"Unknown property '{prop}'", self.token, self.tokenizer)
 
-        if 'color' not in self.current_json and self.current_color:
-            self.current_json['color'] = self.current_color
+        if "color" not in self.current_json and self.current_color:
+            self.current_json["color"] = self.current_color
 
-        if 'score' in self.current_json or 'selector' in self.current_json:
+        if "score" in self.current_json or "selector" in self.current_json:
             if not self.is_allow_score_selector:
-                if 'score' in self.current_json:
+                if "score" in self.current_json:
                     raise JMCValueError(
                         f"score is not allowed in this context in formatted text", self.token, self.tokenizer)
                 else:
                     raise JMCValueError(
                         f"selector is not allowed in this context in formatted text", self.token, self.tokenizer)
-            del self.current_json['text']
+            del self.current_json["text"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
             for prop_, value_ in self.current_json.items():
-                if prop_ in {'bold', 'italic', 'underlined',
-                             'strikethrough', 'obfuscated', 'color'}:
+                if prop_ in {"bold", "italic", "underlined",
+                             "strikethrough", "obfuscated", "color"}:
                     tmp_json[prop_] = value_
             self.result.append(self.current_json)
             self.current_json = tmp_json
@@ -477,34 +477,34 @@ class FormattedText:
                 f"Unknown code format '{char}'", self.token, self.tokenizer)
 
         if prop in {
-            'dark_red',
-            'red',
-            'gold',
-            'yellow',
-            'dark_green',
-            'green',
-            'aqua',
-            'dark_aqua',
-            'blue',
-            'light_purple',
-            'dark_purple',
-            'white',
-            'gray',
-            'dark_gray',
-            'black',
-            'reset',
+            "dark_red",
+            "red",
+            "gold",
+            "yellow",
+            "dark_green",
+            "green",
+            "aqua",
+            "dark_aqua",
+            "blue",
+            "light_purple",
+            "dark_purple",
+            "white",
+            "gray",
+            "dark_gray",
+            "black",
+            "reset",
         }:
-            if 'color' in self.current_json:
+            if "color" in self.current_json:
                 raise JMCValueError(
-                    f'color({prop}) used twice in formatted text', self.token, self.tokenizer)
+                    f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
 
-            self.current_json['color'] = prop
+            self.current_json["color"] = prop
             self.current_color = prop
 
-        if prop in {'bold', 'italic', 'underlined',
-                    'strikethrough', 'obfuscated'}:
+        if prop in {"bold", "italic", "underlined",
+                    "strikethrough", "obfuscated"}:
             if self.current_color:
-                self.current_json['color'] = self.current_color
+                self.current_json["color"] = self.current_color
             self.current_json[prop] = True
 
     def __parse(self) -> None:
@@ -566,17 +566,17 @@ class FormattedText:
             return ''
 
         if len(self.result) == 1:
-            if self.is_default_no_italic and 'italic' not in self.result[0]:
-                self.result[0]['italic'] = False
-            return json.dumps(self.result[0], separators=(',', ':'))
+            if self.is_default_no_italic and "italic" not in self.result[0]:
+                self.result[0]["italic"] = False
+            return json.dumps(self.result[0], separators=(",", ":"))
 
         if self.is_default_no_italic and (
-                'italic' not in self.result[0] or not self.result[0]['italic']):
-            self.result[0]['italic'] = False
-            return json.dumps(self.result, separators=(',', ':'))
+                "italic" not in self.result[0] or not self.result[0]["italic"]):
+            self.result[0]["italic"] = False
+            return json.dumps(self.result, separators=(",", ":"))
 
         return json.dumps(
-            [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result, separators=(',', ':'))
+            [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result, separators=(",", ":"))
 
     def __repr__(self) -> str:
         return f"FormattedText(raw_text={repr(self.raw_text)}, result={repr(json.dumps(self.result))})"
