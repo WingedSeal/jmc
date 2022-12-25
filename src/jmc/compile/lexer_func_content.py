@@ -303,6 +303,10 @@ class FuncContent:
             self.__is_say(key_pos, token)
             return True
 
+        if token.string == "schedule":
+            if self.__is_schedule(key_pos, token):
+                return True
+
         if token.string.startswith(DataPack.VARIABLE_SIGN):
             if self.__is_startswith_varsign(key_pos, token):
                 return True
@@ -334,7 +338,7 @@ class FuncContent:
 
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
-                    f"Custom function({token.string})'s parameter is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
+                    f"Custom function({token.string})'s argument is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
             append_commands(self.commands,
                             f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True
@@ -408,6 +412,73 @@ class FuncContent:
                 "Newline found in say command", self.command[key_pos + 1], self.tokenizer, suggestion=r"Use '\\n' instead of '\n'")
         append_commands(
             self.commands, f"say {self.command[key_pos+1].string}")
+
+    def __is_schedule(self, key_pos: int, token: Token) -> bool:
+        if len(self.command) < key_pos + 3:
+            return False
+        if (
+            self.command[key_pos + 2].token_type == TokenType.PAREN_CURLY
+        ):
+            # `schedule 1t {say "command";}`
+            append_commands(self.commands, "schedule")
+            append_commands(self.commands, self.lexer.datapack.add_arrow_function(
+                "anonymous", self.command[key_pos + 2], self.tokenizer, force_create_func=True))
+            append_commands(self.commands, self.command[key_pos + 1].string)
+            return True
+        if len(self.command) < key_pos + 4:
+            return False
+        if (
+            self.command[key_pos + 2].token_type == TokenType.KEYWORD
+            and
+            self.command[key_pos + 3].token_type == TokenType.PAREN_ROUND
+        ):
+            # `schedule function myFunc() 1t append;`
+            if self.command[key_pos + 1].string not in {"function", "clear"}:
+                raise JMCSyntaxException(
+                    "Expected 'function' or 'clear' after 'schedule'", self.command[key_pos + 1], self.tokenizer)
+            if self.command[key_pos + 3].string != "()":
+                raise JMCSyntaxException(
+                    f"'schedule' does not support argument is not supported.\nExpected empty bracket", self.command[key_pos + 3], self.tokenizer)
+            append_commands(self.commands, "schedule")
+            append_commands(self.commands, self.command[key_pos + 1].string)
+            append_commands(
+                self.commands,
+                f"{self.lexer.datapack.namespace}:{convention_jmc_to_mc(self.command[key_pos + 2], self.tokenizer)}")
+            if self.command[key_pos + 1].string == "clear":
+                if len(self.command) > key_pos + 4:
+                    raise JMCSyntaxException(
+                        "Unexpected token in schedule clear", self.command[key_pos + 3], self.tokenizer)
+                return True
+            if len(self.command) < key_pos + 5:
+                raise JMCSyntaxException(
+                    f"Expected time in schedule call", self.command[key_pos + 4], self.tokenizer)
+            append_commands(self.commands, self.command[key_pos + 4].string)
+            if len(self.command) == key_pos + 6:
+                if self.command[key_pos +
+                                5].string not in {"append", "replace"}:
+                    raise JMCSyntaxException(
+                        f"Expected 'append' or 'replace' (got {self.command[key_pos + 5]}", self.command[key_pos + 5], self.tokenizer)
+                append_commands(self.commands,
+                                self.command[key_pos + 5].string)
+            if len(self.command) > key_pos + 6:
+                raise JMCSyntaxException(
+                    "Unexpected token in schedule", self.command[key_pos + 5], self.tokenizer)
+            return True
+        if (
+            self.command[key_pos + 3].token_type == TokenType.PAREN_CURLY
+        ):
+            # `schedule 1t append {say "command";}`
+            if self.command[key_pos +
+                            2].string not in {"append", "replace"}:
+                raise JMCSyntaxException(
+                    f"Expected 'append' or 'replace' (got {self.command[key_pos + 2]}", self.command[key_pos + 2], self.tokenizer)
+            append_commands(self.commands, "schedule")
+            append_commands(self.commands, self.lexer.datapack.add_arrow_function(
+                "anonymous", self.command[key_pos + 3], self.tokenizer, force_create_func=True))
+            append_commands(self.commands, self.command[key_pos + 1].string)
+            append_commands(self.commands, self.command[key_pos + 2].string)
+            return True
+        return False
 
     def __is_startswith_varsign(self, key_pos: int, token: Token) -> bool:
         if len(

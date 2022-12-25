@@ -240,7 +240,7 @@ class DataPack:
         self.jsons[f"{json_type}/{name}"] = json
 
     def add_arrow_function(self, name: str, token: Token,
-                           tokenizer: Tokenizer) -> str:
+                           tokenizer: Tokenizer, force_create_func: bool = False) -> str:
         """
         Add private function for user (arrow function)
 
@@ -254,7 +254,8 @@ class DataPack:
             raise JMCSyntaxWarning("Empty function", token, tokenizer)
 
         commands = self.parse_function_token(token, tokenizer)
-        if len(commands) == 1 and NEW_LINE not in commands[0]:
+        if not force_create_func and len(
+                commands) == 1 and NEW_LINE not in commands[0]:
             return commands[0]
 
         count = self.get_count(name)
