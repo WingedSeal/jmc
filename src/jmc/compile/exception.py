@@ -65,10 +65,15 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
             display_col += length
     else:
         display_col += 1
-    if entire_line:
-        msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])} <-"
-    else:
-        msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])[:display_col-1]} <-"
+    try:
+        if entire_line:
+            msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])} <-"
+        else:
+            msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])[:display_col-1]} <-"
+    except IndexError as error:
+        logger.critical(
+            f"Error happens at wrong file: {tokenizer.file_path=}, {line=}, {col=}")
+        raise error
     if suggestion is not None:
         msg += "\n" + suggestion
     return msg
