@@ -66,6 +66,8 @@ class Lexer:
         logger.debug("Load Function")
 
     def __update_load(self, file_path_str: str, raw_str: str):
+        if file_path_str == self.load_tokenizer.file_path:
+            return
         self.load_tokenizer.file_path = file_path_str
         self.load_tokenizer.raw_string = raw_str
         self.load_tokenizer.file_string = raw_str
@@ -164,6 +166,7 @@ class Lexer:
                     new_paths = folder.glob("**/*.jmc")
                     for new_path in new_paths:
                         self.parse_file(file_path=new_path)
+                        self.__update_load(file_path_str, raw_string)
                     continue
                 try:
                     new_path = Path(
@@ -178,6 +181,7 @@ class Lexer:
                     raise JMCSyntaxException(
                         f"Unexpected invalid path ({command[1].string})", command[1], tokenizer) from error
                 self.parse_file(file_path=new_path)
+                self.__update_load(file_path_str, raw_string)
             else:
                 # if not is_load:
                 #     raise JMCSyntaxException(
@@ -187,7 +191,6 @@ class Lexer:
 
                 self.datapack.load_function.append(command)
 
-        self.__update_load(file_path_str, raw_string)
         self.parse_current_load()
 
     def parse_func(self, tokenizer: Tokenizer,
