@@ -39,8 +39,8 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
 
 
 def _hardcode_process(string: str, index_string: str,
-                      i: int, token: Token, tokenizer: Tokenizer) -> str:
-    string = string.replace(index_string, str(i))
+                      i: str, token: Token, tokenizer: Tokenizer) -> str:
+    string = string.replace(index_string, i)
     calc_pos = string.find("Hardcode.calc")
     if calc_pos != -1:
         string = _hardcode_parse(calc_pos, string, token, tokenizer)
@@ -76,6 +76,48 @@ class HardcodeRepeat(JMCFunction):
 
         commands: list[str] = []
         for i in range(start, stop, step):
+            try:
+                commands.extend(self.datapack.parse_function_token(
+                    Token(
+                        TokenType.PAREN_CURLY,
+                        self.raw_args["function"].token.line,
+                        self.raw_args["function"].token.col,
+                        _hardcode_process(
+                            self.raw_args["function"].token.string, self.args["indexString"], str(
+                                i), self.token, self.tokenizer
+                        )
+                    ), self.tokenizer)
+                )
+            except JMCSyntaxException as error:
+                error.reinit(lambda string: _hardcode_process(
+                    string, self.args["indexString"], str(
+                        i), self.token, self.tokenizer
+                ))
+                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                raise error
+
+        return "\n".join(commands)
+
+
+@func_property(
+    func_type=FuncType.EXECUTE_EXCLUDED,
+    call_string="Hardcode.repeatList",
+    arg_type={
+        "indexString": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "strings": ArgType.LIST
+    },
+    name="hardcode_repeat_list",
+    ignore={
+        "function"
+    }
+)
+class HardcodeRepeatList(JMCFunction):
+    def call(self) -> str:
+        strings = self.datapack.parse_list(
+            self.raw_args["strings"].token, self.tokenizer, TokenType.STRING)
+        commands: list[str] = []
+        for i in strings:
             try:
                 commands.extend(self.datapack.parse_function_token(
                     Token(
@@ -129,13 +171,15 @@ class HardcodeSwitch(JMCFunction):
                         self.raw_args["function"].token.line,
                         self.raw_args["function"].token.col,
                         _hardcode_process(
-                            self.raw_args["function"].token.string, self.args["indexString"], i, self.token, self.tokenizer
+                            self.raw_args["function"].token.string, self.args["indexString"], str(
+                                i), self.token, self.tokenizer
                         )
                     ), self.tokenizer)
                 )
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_process(
-                    string, self.args["indexString"], i, self.token, self.tokenizer
+                    string, self.args["indexString"], str(
+                        i), self.token, self.tokenizer
                 ))
                 error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
