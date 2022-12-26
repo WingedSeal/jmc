@@ -32,7 +32,6 @@ new advancements(my_datapack.first_join) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/advancements/my_datapack/first_join.json
 {
   "criteria": {

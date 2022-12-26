@@ -27,7 +27,6 @@ TEST_DEFINE "Hello World";
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )
@@ -76,7 +75,6 @@ say My function
 # Made by WingedSeal
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
 
 
@@ -121,7 +119,6 @@ new tags.functions(minecraft.custom) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 
@@ -146,7 +143,6 @@ new tags.functions(minecraft.custom) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 
@@ -172,7 +168,6 @@ function minecraft.custom() {
 say custom
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 
@@ -195,7 +190,6 @@ function minecraft.custom() {
 say custom
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 

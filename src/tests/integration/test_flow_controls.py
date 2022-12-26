@@ -26,7 +26,6 @@ if (entity condition) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute if entity condition run say Hello World
             """)
         )
@@ -51,7 +50,6 @@ if (entity condition) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set __if_else__ __variable__ 0
 execute if entity condition run function TEST:__private__/if_else/0
 execute if score __if_else__ __variable__ matches 0 run function TEST:__private__/if_else/1
@@ -83,7 +81,6 @@ if (entity condition) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set __if_else__ __variable__ 0
 execute if entity condition run function TEST:__private__/if_else/0
 execute if score __if_else__ __variable__ matches 0 run function TEST:__private__/if_else/1
@@ -119,7 +116,6 @@ while (entity condition) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute if entity condition run function TEST:__private__/while_loop/0
 > VIRTUAL/data/TEST/functions/__private__/while_loop/0.mcfunction
 say Hello World
@@ -145,7 +141,6 @@ do {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/while_loop/0
 > VIRTUAL/data/TEST/functions/__private__/while_loop/0.mcfunction
 say Hello World
@@ -173,7 +168,6 @@ if ($i==1) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute if score $i __variable__ matches 1 run say Hello World
             """)
         )
@@ -196,7 +190,6 @@ if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set __logic__0 __variable__ 0
 execute unless entity @s[type=skeleton] run scoreboard players set __logic__0 __variable__ 1
 execute unless score __logic__0 __variable__ matches 1 if entity @s[type=zombie] if score $deathCount __variable__ matches 6.. run scoreboard players set __logic__0 __variable__ 1
@@ -224,7 +217,6 @@ for ($i=0;$i<10;$i++) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set $i __variable__ 0
 execute if score $i __variable__ matches ..9 run function TEST:__private__/for_loop/0
 > VIRTUAL/data/TEST/functions/__private__/for_loop/0.mcfunction
@@ -271,7 +263,6 @@ scoreboard players operation $job_id __variable__ = @s job_id
 function TEST:__private__/switch_case/0
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/functions/__private__/switch_case/0.mcfunction
 execute if score $job_id __variable__ matches 1..3 run function TEST:__private__/switch_case/1
 execute if score $job_id __variable__ matches 4..6 run function TEST:__private__/switch_case/2

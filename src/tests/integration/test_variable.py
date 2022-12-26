@@ -26,7 +26,6 @@ $y += 0;
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players add $x __variable__ 0
 scoreboard players add $y __variable__ 0
             """)
@@ -58,7 +57,6 @@ $z->obj:var3;
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players operation $x __variable__ = var1 obj
 scoreboard players set $y __variable__ 1
 scoreboard players operation $z __variable__ = $x __variable__
@@ -116,7 +114,6 @@ $x--;
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players add $x __variable__ 1
 scoreboard players add $x __variable__ 1
 scoreboard players remove $x __variable__ 1
@@ -139,7 +136,6 @@ execute store result score @s obj run $x.get();
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute store result score @s obj run scoreboard players get $x __variable__
             """)
         )

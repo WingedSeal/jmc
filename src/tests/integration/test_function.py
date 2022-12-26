@@ -29,7 +29,6 @@ function customFunction() {
 say Hello World
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 
@@ -62,7 +61,6 @@ customFunction();
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:customfunction
             """)
         )
@@ -86,7 +84,6 @@ execute as @a run {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute as @a run function TEST:__private__/anonymous/0
 > VIRTUAL/data/TEST/functions/__private__/anonymous/0.mcfunction
 say Hello World 1
@@ -123,7 +120,6 @@ class foo {
 say bar
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/advancements/foo/bar.json
 {
   "criteria": {
@@ -185,7 +181,6 @@ say "Hello World 2"; // This is also a jmc comment
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World 1
 say Hello World 2
             """)
@@ -217,7 +212,6 @@ function __tick__() {
 say Hello World
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 

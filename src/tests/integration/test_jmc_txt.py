@@ -29,7 +29,6 @@ INT=__int__
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )
@@ -66,7 +65,6 @@ INT=__int__
 say Hello World
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
             """)
         )
 
@@ -95,7 +93,6 @@ INT=__int__
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute as @a run function TEST:JMC/anonymous/0
 > VIRTUAL/data/TEST/functions/JMC/anonymous/0.mcfunction
 say Hello World 1
@@ -125,7 +122,6 @@ INT=__int__
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add var dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set $i var 1
             """)
         )
@@ -180,7 +176,6 @@ INT=__int__=init
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )
@@ -208,7 +203,6 @@ UNKNOWN=__test__
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )
@@ -234,7 +228,6 @@ VAR=__variable__
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 say Hello World
             """)
         )

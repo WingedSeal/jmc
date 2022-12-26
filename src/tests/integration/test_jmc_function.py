@@ -138,7 +138,6 @@ if (Timer.isOver(my_objective)) {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 execute unless score @s my_objective matches 1.. run say Timer is over
             """)
         )
@@ -174,7 +173,6 @@ Hardcode.repeat("index", ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 tellraw @a "Hello World: 1"
 tellraw @a "Hello World: 2"
 tellraw @a "Hello World: 3"
@@ -201,7 +199,6 @@ Hardcode.repeat("index", ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 tellraw @a "1^2=1"
 tellraw @a "2^2=4"
 tellraw @a "3^2=9"
@@ -229,7 +226,6 @@ Hardcode.switch($var, "index", ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/hardcode_switch/0
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/0.mcfunction
 execute if score $var __variable__ matches 1..2 run function TEST:__private__/hardcode_switch/1
@@ -280,7 +276,6 @@ Timer.set(my_objective, @s, 5);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players operation @a my_objective = $i __variable__
 scoreboard players set @s my_objective 5
             """)
@@ -302,7 +297,6 @@ Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2.0, spread=10);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/particle_circle/0
 > VIRTUAL/data/TEST/functions/__private__/particle_circle/0.mcfunction
 particle dust 1.0 1.0 1.0 0.7 ^2.0000000000 ^ ^ 0 0 0 1 1 normal
@@ -340,7 +334,6 @@ Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1.0, spread=10);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/particle_spiral/0
 > VIRTUAL/data/TEST/functions/__private__/particle_spiral/0.mcfunction
 particle dust 1.0 1.0 1.0 0.7 ^1.0000000000 ^ ^ 0 0 0 1 1 normal
@@ -372,7 +365,6 @@ Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1, spread=10);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/particle_spiral/0
 > VIRTUAL/data/TEST/functions/__private__/particle_spiral/0.mcfunction
 particle dust 1.0 1.0 1.0 0.7 ^1.0000000000 ^ ^ 0 0 0 1 1 normal
@@ -404,7 +396,6 @@ Particle.line("dust 1.0 1.0 1.0 0.7", distance=10.5, spread=10);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 function TEST:__private__/particle_line/0
 > VIRTUAL/data/TEST/functions/__private__/particle_line/0.mcfunction
 particle dust 1.0 1.0 1.0 0.7 ^ ^ ^1.0000000000 0 0 0 1 1 normal
@@ -462,7 +453,6 @@ Player.firstJoin(()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/functions/__private__/player_first_join/main.mcfunction
 tellraw @s "Welcome!"
 > VIRTUAL/data/TEST/advancements/__private__/player_first_join.json
@@ -503,7 +493,6 @@ Player.rejoin(()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add __rejoin__ custom:leave_game
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__rejoin__=1..}] at @s run function TEST:__private__/player_rejoin/main
@@ -540,7 +529,6 @@ Player.die(onDeath=()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add __die__ deathCount
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__die__=1..}] at @s run function TEST:__private__/player_die/on_death
@@ -599,7 +587,6 @@ RightClick.setup(
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add __rc__custom_id used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={__rc__custom_id=1..}] at @s run function TEST:__private__/right_click_setup/main
@@ -641,7 +628,6 @@ Player.onEvent("used:carrot_on_a_stick", ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add on_event0 used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 execute as @a[scores={on_event0=1..}] at @s run function TEST:__private__/player_on_event/0
@@ -677,7 +663,6 @@ Trigger.setup(help, {
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add help trigger
 execute as @a run function TEST:__private__/trigger_setup/enable
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
@@ -730,7 +715,6 @@ Timer.add(help_cd, runOnce, @a, ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add help_cd dummy
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 function TEST:__private__/timer_add/main
@@ -772,7 +756,6 @@ Recipe.table({
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 > VIRTUAL/data/TEST/functions/__private__/recipe_table/0.mcfunction
 clear @s minecraft:barrier 1
 give @s minecraft:diamond{test:1b} 5
@@ -831,7 +814,6 @@ Item.give(block, @a);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}',Lore:[]}} 1
                             """)
                              )
@@ -891,7 +873,6 @@ execute as @a run Item.give(veryCoolSword);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard objectives add __item_rc_carrot used:carrot_on_a_stick
 execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text":"A very cool sword","color":"gold","bold":true,"italic":false}',Lore:['{"text":"It is, indeed, very cool.","color":"red","italic":false}','{"text":"Right click to be cool.","color":"red","italic":false}']}} 1
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
@@ -933,7 +914,6 @@ Timer.set(test, @a[tag=test], 1);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add __int__ dummy
 scoreboard players set @a[tag=test] test 1
             """)
         )

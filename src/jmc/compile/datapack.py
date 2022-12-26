@@ -159,8 +159,7 @@ class DataPack:
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
         self.__scoreboards: dict[str, str] = {
-            self.var_name: "dummy",
-            self.int_name: "dummy"
+            self.var_name: "dummy"
         }
         """Minecraft scoreboards that are going to be created"""
 
@@ -342,6 +341,8 @@ class DataPack:
         Finializing DataPack for building (NO file writing)
         """
         logger.debug("Finializing DataPack")
+        if self.ints:
+            self.add_objective(self.int_name)
         self.loads[0:0] = [
             *[f"scoreboard objectives add {objective} {criteria}" for objective,
                 criteria in self.__scoreboards.items()],
