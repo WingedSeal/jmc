@@ -2,6 +2,7 @@
 
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
+from ...exception import JMCValueError
 
 IF = True
 UNLESS = False
@@ -29,7 +30,8 @@ class TimerIsOver(JMCFunction):
     func_type=FuncType.BOOL_FUNCTION,
     call_string="String.isEqual",
     arg_type={
-        "storage": ArgType.KEYWORD,
+        "type": ArgType.KEYWORD,
+        "source": ArgType.KEYWORD,
         "path": ArgType.KEYWORD,
         "string": ArgType.STRING
     },
@@ -40,7 +42,16 @@ class StringIsEqual(JMCFunction):
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
+        source = self.args["source"]
+        if self.args["type"] not in {"storage", "block", "entity"}:
+            raise JMCValueError(
+                f"'type' parameter expect 'storage' or 'block' or 'entity' (got {self.args['type']})",
+                self.raw_args["type"].token,
+                self.tokenizer)
+        if self.args["type"] == "storage" and ":" not in self.args["source"]:
+            source = f"{self.datapack.namespace}:{source}"
+
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
-            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from storage {self.datapack.namespace}:{self.args['storage']} {self.args['path']}",
+            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {self.args['type']} {source} {self.args['path']}",
             f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set value {self.args['string']}"
         ]
