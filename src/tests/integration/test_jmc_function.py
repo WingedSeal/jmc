@@ -619,7 +619,7 @@ say 2
 
     def test_PlayerOnEvent(self):
         pack = JMCPack().set_jmc_file("""
-Player.onEvent(my_objective, ()=>{
+Player.onEvent("used:carrot_on_a_stick", ()=>{
     say "Hello World";
 });
         """).build()
@@ -642,10 +642,11 @@ Player.onEvent(my_objective, ()=>{
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __int__ dummy
+scoreboard objectives add on_event0 used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={my_objective=1..}] at @s run function TEST:__private__/player_on_event/0
+execute as @a[scores={on_event0=1..}] at @s run function TEST:__private__/player_on_event/0
 > VIRTUAL/data/TEST/functions/__private__/player_on_event/0.mcfunction
-scoreboard players set @s my_objective 0
+scoreboard players set @s on_event0 0
 say Hello World
             """)
         )

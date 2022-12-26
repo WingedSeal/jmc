@@ -299,18 +299,22 @@ class ItemCreateSign(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string="Player.onEvent",
     arg_type={
-        "objective": ArgType.KEYWORD,
+        "criteria": ArgType.STRING,
         "function": ArgType.FUNC,
     },
     name="player_on_event"
 )
 class PlayerOnEvent(JMCFunction):
     def call(self) -> str:
+        objective = f"on_event{self.datapack.get_count('on_event')}"
+        self.datapack.add_load_command(
+            f"scoreboard objectives add {objective} {self.args['criteria']}"
+        )
         count = self.datapack.get_count(self.name)
         func = self.datapack.add_raw_private_function(
-            self.name, [f"scoreboard players set @s {self.args['objective']} 0", self.args['function']], count=count)
+            self.name, [f"scoreboard players set @s {objective} 0", self.args['function']], count=count)
         self.datapack.add_tick_command(
-            f"execute as @a[scores={{{self.args['objective']}=1..}}] at @s run {func}")
+            f"execute as @a[scores={{{objective}=1..}}] at @s run {func}")
         return ""
 
 
