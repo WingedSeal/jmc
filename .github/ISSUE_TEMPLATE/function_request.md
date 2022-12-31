@@ -12,11 +12,11 @@ assignees: ""
 
 [function description (what does it do)]
 
-## parameters:
+## parameters
 
--   [parameter]: [description (includes type such as integer string etc.)]
--   [parameter]: [description (includes type such as integer string etc.)]
--   [parameter]: [description (includes type such as integer string etc.)]
+- [parameter]: [description (includes type such as integer string etc.)]
+- [parameter]: [description (includes type such as integer string etc.)]
+- [parameter]: [description (includes type such as integer string etc.)]
 
 ```elixir
 [compiled mcfunction]

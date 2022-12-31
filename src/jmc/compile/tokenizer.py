@@ -615,14 +615,16 @@ class Tokenizer:
             token.string for token in tokens))
 
     def __parse_func_arg(
-            self, tokens: list[Token], is_kwargs: bool) -> list[Token]:
+            self, tokens: list[Token], is_kwargs: bool, is_nbt: bool = False) -> list[Token]:
         """
         Parse an argument in function arguments (Used in parse_func_args)
 
         :param tokens: List of tokens
-        :param kwargs: Kwargs to check if it should throw an error
+        :param is_kwargs: Boolean of Kwargs to check if it should throw an error
+        :param is_nbt: Whether it is an NBT/JSobject (If false, it's a function argument)
         :return: Tokens to be pushed to 'args' or 'kwargs'
         """
+        where = "function argument" if is_nbt else "JSObject/NBT"
         if tokens[0].token_type in {TokenType.KEYWORD, TokenType.OPERATOR} and len(
                 tokens) != 1:
             return tokens
@@ -644,12 +646,12 @@ class Tokenizer:
                     string=token_.string, line=token_.line, col=token_.col + 1, token_type=TokenType.FUNC)]
 
             raise JMCSyntaxException(
-                f"Unexpected {tokens[1].token_type.value} after {tokens[0].token_type.value} in function arguments",
+                f"Unexpected {tokens[1].token_type.value} after {tokens[0].token_type.value} in {where}",
                 tokens[1],
                 self)
-        if tokens[0].string == "=":
+        if tokens[0].string == (":" if is_nbt else "="):
             raise JMCSyntaxException(
-                "Empty key in function arguments", tokens[0], self)
+                f"Empty key in {where}", tokens[0], self)
         if is_kwargs:
             raise JMCSyntaxException(
                 "Positional argument follows keyword argument", tokens[0], self, suggestion="Try rearranging arguments")
@@ -747,128 +749,58 @@ class Tokenizer:
 
         return tokens
 
+    def parse_nbt(self, token: Token) -> dict[str, str]:
+        return {}
+
     def parse_js_obj(self, token: Token) -> dict[str, Token]:
         """
         Parse JavaScript Object (Not JSON)
 
         :param token: paren_curly token containing JS object
         :return: Dictionary of key(string) and Token
-        """  # FIXME: REWORK THIS
+        """
         if token.token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {")
-        if token.string == "{}":
-            keywords: list[Token] = []
-        else:
-            keywords = self.parse(
-                token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)[0]
-        kwargs: dict[str, Token] = {}
-        key: str = ""
-        arg: str = ""
-        arrow_func_state = 0
-        # 0: None
-        # 1: ()
-        # 2: =>
-        expecting_comma = False
-
-        def add_kwarg(token: Token) -> None:
-            nonlocal key
-            nonlocal arg
-            nonlocal kwargs
-            nonlocal expecting_comma
-            expecting_comma = True
-            if key[0] in {Paren.L_CURLY, Paren.L_ROUND, Paren.L_SQUARE}:
-                raise JMCSyntaxException(
-                    f"Invalid key({key})", last_token, self, display_col_length=False)
-
-            if key == "":
-                raise JMCSyntaxException(
-                    "Empty key", token, self, display_col_length=False)
-
-            if key in kwargs:
-                raise JMCSyntaxException(
-                    f"Duplicated key({key})", token, self, display_col_length=False)
-
-            kwargs[key] = Token(string=arg, line=token.line,
-                                col=token.col, token_type=token.token_type)
-            key = ""
-            arg = ""
-
-        last_token = Token.empty()
-        for token_ in keywords:
-            if expecting_comma and token_.token_type != TokenType.COMMA:
-                raise JMCSyntaxException(
-                    "Expected comma(,)", token_, self, display_col_length=False)
-
-            if arrow_func_state > 0:
-                if arrow_func_state == 1:
-                    if token_.string == "=>" and token_.token_type == TokenType.OPERATOR:
-                        arrow_func_state = 2
-                        last_token = token_
-                        continue
-
-                    arg = last_token.string
-                    if key:
-                        add_kwarg(last_token)
-                    arrow_func_state = 0
-                    continue
-
-                if arrow_func_state == 2:
-                    if token_.token_type == TokenType.PAREN_CURLY:
-                        new_token = Token(
-                            string=token_.string[1:-1], line=token_.line, col=token_.col + 1, token_type=TokenType.FUNC)
-                        arg = new_token.string
-                        if key:
-                            add_kwarg(new_token)
-                        last_token = new_token
-                        arrow_func_state = 0
-                        continue
-
-                    raise JMCSyntaxException(
-                        "Expected {", token_, self, display_col_length=False)
-
-            if token_.token_type == TokenType.KEYWORD or token_.token_type == TokenType.OPERATOR:
-                if arg:
-                    if token_.string == ":":
-                        key = arg
-                        arg = ""
-                    else:
-                        raise JMCSyntaxException(
-                            "Unexpected token", token_, self, suggestion=": should be followed by something (value)")
-                elif key:
-                    arg = token_.string
-                    if token_.string == ":":
-                        raise JMCSyntaxException(
-                            "Duplicated colon(:)", token_, self)
-                    add_kwarg(token_)
-                else:
-                    arg = token_.string
-
-            elif token_.token_type == TokenType.COMMA:
-                arrow_func_state = 0
-                expecting_comma = False
-                if arg:
-                    raise JMCSyntaxException(
-                        "Unexpected colon(:)", token_, self)
-            elif token_.token_type in {TokenType.PAREN_ROUND, TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
-                if token_.string == "()":
-                    arrow_func_state = 1
-                else:
-                    arg = token_.string
-                    if key:
-                        add_kwarg(token_)
-
-            elif token_.token_type == TokenType.STRING:
-                if arg:
-                    raise JMCSyntaxException(
-                        "Unexpected token", token_, self)
-                arg = token_.string
-                if key:
-                    add_kwarg(token_)
-            last_token = token_
-
-        if arg:
+        _keywords = self.parse(
+            token.string[1:-1], line=token.line, col=token.col + 1, expect_semicolon=False)
+        if not _keywords:
+            return {}
+        keywords = _keywords[0]
+        js_obj: dict[str, Token] = {}
+        comma_separated_tokens = self.find_token(keywords, ",")
+        if not comma_separated_tokens[-1]:
             raise JMCSyntaxException(
-                "Unexpected colon(:)", last_token, self)
+                "Unexpected comma at the end of JSObject/NBT",
+                keywords[-1],
+                self)
+        comma_token_index = 0
+        for comma_separated_token in comma_separated_tokens:
+            # List of tokens between commas
+            if not comma_separated_token:
+                raise JMCSyntaxException(
+                    "Unexpected comma in JSObject/NBT",
+                    keywords[comma_token_index],
+                    self)
+            comma_token_index += len(comma_separated_token) + 1
 
-        return kwargs
+            if len(
+                    comma_separated_token) == 1 or comma_separated_token[1].string != ":":
+                raise JMCSyntaxException(
+                    "Expected 'key:value' in JSObject/NBT", comma_separated_token[0], self)
+
+            if len(comma_separated_token) == 2:
+                raise JMCSyntaxException(
+                    f"Expected value after ':' in JSObject/NBT",
+                    comma_separated_token[1],
+                    self)
+            key = comma_separated_token[0].string
+            value = self.__parse_func_arg(
+                comma_separated_token[2:], False, is_nbt=True)
+            if key in js_obj:
+                raise JMCSyntaxException(
+                    f"Duplicated key({key})", comma_separated_token[0], self)
+            js_obj[key] = self.merge_tokens(value)
+            continue
+
+        return js_obj
