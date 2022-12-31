@@ -422,7 +422,7 @@ class FormattedText:
                         f"score used twice in formatted text", self.token, self.tokenizer)
                 objective, name = prop.split(":")
                 self.current_json["score"] = {
-                    "name": objective, "objective": name}
+                    "name": name, "objective": objective}
                 if not value:
                     raise JMCValueError(
                         f"Score cannot be false", self.token, self.tokenizer)
