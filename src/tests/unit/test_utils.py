@@ -80,9 +80,9 @@ class TestCommandUtils(unittest.TestCase):
 
     def test_find_arg_type(self):
         self.assertEqual(find_arg_type(
-            Token.empty("5"), EMPTY_TOKENIZER), ArgType.INTEGER)
+            [Token.empty("5")], EMPTY_TOKENIZER), ArgType.INTEGER)
         self.assertEqual(find_arg_type(
-            Token.empty("@a"), EMPTY_TOKENIZER), ArgType.SELECTOR)
+            [Token.empty("@a")], EMPTY_TOKENIZER), ArgType.SELECTOR)
 
     def test_eval_expr(self):
         self.assertEqual(eval_expr("10+10"), "20")

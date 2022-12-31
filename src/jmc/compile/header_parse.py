@@ -4,7 +4,7 @@ from typing import Callable
 from .utils import is_connected
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
-from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCFileNotFoundError
+from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
 from .log import Logger
 
 logger = Logger(__name__)
@@ -29,11 +29,18 @@ def __create_macro_factory(
         return __empty_macro_factory, 0
 
     # Parsing parameters_token
-    if parameters_token is None:
-        parameter_tokens: list[Token] = []
-    else:
-        parameter_tokens, invalid_kwargs = tokenizer.parse_func_args(
+    parameter_tokens: list[Token] = []
+    if parameters_token is not None:
+        parameter_tokens_, invalid_kwargs = tokenizer.parse_func_args(
             parameters_token)
+        for parameter_token_ in parameter_tokens_:
+            if parameter_token_[0].token_type != TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    f"Macro factory arguments can only have a keyword token (got {parameter_token_[0].token_type})", parameter_token_[0], tokenizer)
+            if len(parameter_token_) > 1:
+                raise JMCSyntaxException(
+                    f"Macro factory arguments can only have 1 token each (got {len(parameter_token_)})", parameter_token_[1], tokenizer)
+            parameter_tokens.append(parameter_token_[0])
         if invalid_kwargs:
             raise error
 

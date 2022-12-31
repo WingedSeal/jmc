@@ -918,11 +918,11 @@ scoreboard players set @a[tag=test] test 1
             """)
         )
 
-    def test_square_paren_in_nonselector(self):
-        with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
-Timer.set(test[raise=error], @a[tag=test], 1);
-            """).build()
+#     def test_square_paren_in_nonselector(self):
+#         with self.assertRaises(JMCSyntaxException):
+#             JMCPack().set_jmc_file("""
+# Timer.set(test[raise=error], @a[tag=test], 1);
+#             """).build()
 
 
 if __name__ == "__main__":

@@ -152,40 +152,101 @@ class Arg:
         return self
 
 
-def find_arg_type(token: Token, tokenizer: Tokenizer) -> ArgType:
+def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
     """
     Find type of the argument in form of token and return the ArgType
 
-    :param token: any token representing argument
+    :param tokens: List of tokens representing an argument
     :param tokenizer: Tokenizer
     :raises JMCValueError: Cannot find ArgType.FUNC type
     :return: Argument's type of the token
     """
-    if token.token_type == TokenType.FUNC:
-        return ArgType.ARROW_FUNC
-    if token.token_type == TokenType.PAREN_CURLY:
-        if re.match(r'^{\s*"', token.string) is not None:
-            return ArgType.JSON
-        return ArgType.JS_OBJECT
-    if token.token_type == TokenType.PAREN_SQUARE:
-        return ArgType.LIST
+    if not tokens:
+        raise ValueError("Trying to find type of empty argument")
+    if len(tokens) == 1:
+        if tokens[0].token_type == TokenType.PAREN_CURLY:
+            if re.match(r'^{\s*"', tokens[0].string) is not None:
+                return ArgType.JSON
+            return ArgType.JS_OBJECT
+        if tokens[0].token_type == TokenType.PAREN_SQUARE:
+            return ArgType.LIST
+        if tokens[0].token_type == TokenType.FUNC:
+            return ArgType.ARROW_FUNC
+        if tokens[0].token_type == TokenType.STRING:
+            return ArgType.STRING
 
-    if token.token_type == TokenType.KEYWORD:
-        if token.string.startswith(
-                DataPack.VARIABLE_SIGN) or ":" in token.string:
-            return ArgType.SCOREBOARD
-        if is_number(token.string):
+    if is_number(tokens[0].string):
+        if len(tokens) > 1:
+            raise JMCSyntaxException(
+                f"Unexpected {tokens[1].token_type.value} after integer in function argument",
+                tokens[1],
+                tokenizer)
+        return ArgType.INTEGER
+    if is_float(tokens[0].string):
+        if len(tokens) > 1:
+            raise JMCSyntaxException(
+                f"Unexpected {tokens[1].token_type.value} after float/decimal in function argument",
+                tokens[1],
+                tokenizer)
+        return ArgType.FLOAT
+
+    if tokens[0].string in {'-', '+'} and len(tokens) > 1:
+        if is_number(tokens[1].string):
+            if len(tokens) > 2:
+                raise JMCSyntaxException(
+                    f"Unexpected {tokens[2].token_type.value} after integer in function argument",
+                    tokens[2],
+                    tokenizer)
             return ArgType.INTEGER
-        if is_float(token.string):
+        if is_float(tokens[1].string):
+            if len(tokens) > 1:
+                raise JMCSyntaxException(
+                    f"Unexpected {tokens[2].token_type.value} after float/decimal in function argument",
+                    tokens[2],
+                    tokenizer)
             return ArgType.FLOAT
-        if token.string.startswith("@"):
+
+    if (
+        len(tokens) == 3
+        and
+        tokens[0].string.startswith(
+            DataPack.VARIABLE_SIGN)
+        and
+        tokens[1].string == ':'
+    ):
+        return ArgType.SCOREBOARD
+    if tokens[0].string.startswith("@"):
+        if len(tokens) == 1:
             return ArgType.SELECTOR
+        if tokens[1].token_type == TokenType.PAREN_SQUARE:
+            if len(tokens) > 2:
+                raise JMCSyntaxException(
+                    f"Unexpected token after target selector",
+                    tokens[2],
+                    tokenizer,
+                    suggestion="This could be a result from missing comma")
+            return ArgType.SELECTOR
+        raise JMCSyntaxException(
+            f"Expected '[' or nothing after target selector type (got {tokens[1].token_type})",
+            tokens[1],
+            tokenizer)
+
+    if tokens[0].token_type == TokenType.KEYWORD:
+        if len(tokens) == 1:
+            if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+                return ArgType.SCOREBOARD
+            return ArgType.KEYWORD
+        for index, token in enumerate(tokens[1:]):
+            if token.token_type == tokens[index].token_type == TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    f"2 keywords are next to each other in function argument",
+                    token,
+                    tokenizer,
+                    suggestion="This could be a result from missing comma")
         return ArgType.KEYWORD
-    if token.token_type == TokenType.STRING:
-        return ArgType.STRING
 
     raise JMCValueError(
-        "Unknown argument type", token, tokenizer)
+        "Unknown argument type", tokens[-1], tokenizer)
 
 
 def verify_args(params: dict[str, ArgType], feature_name: str,
@@ -209,14 +270,26 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
             f"{feature_name} takes {len(key_list)} positional arguments, got {len(args)}", token, tokenizer)
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
-        result[key] = Arg(arg, arg_type).verify(params[key], tokenizer, key)
+        arg_token = tokenizer.merge_tokens(arg)
+        result[key] = Arg(
+            arg_token,
+            arg_type).verify(
+            params[key],
+            tokenizer,
+            key)
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
-                f"{feature_name} got unexpected keyword argument '{key}'", kwarg, tokenizer,
+                f"{feature_name} got unexpected keyword argument '{key}'", kwarg[-1], tokenizer,
                 suggestion=f"""Available arguments are\n{', '.join(f"'{param}'" for param in params)}""")
         arg_type = find_arg_type(kwarg, tokenizer)
-        result[key] = Arg(kwarg, arg_type).verify(params[key], tokenizer, key)
+        kwarg_token = tokenizer.merge_tokens(kwarg)
+        result[key] = Arg(
+            kwarg_token,
+            arg_type).verify(
+            params[key],
+            tokenizer,
+            key)
     return result
 
 
@@ -399,7 +472,7 @@ class FormattedText:
                         f"Color({prop}) cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop.startswith("$"):
+            if prop.startswith(DataPack.VARIABLE_SIGN):
                 if "selector" in self.current_json:
                     raise JMCValueError(
                         f"selector used with score in formatted text", self.token, self.tokenizer)
