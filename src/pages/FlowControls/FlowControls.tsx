@@ -372,7 +372,8 @@ const FlowControls = () => {
                         </a>{" "}
                         of searching for function dedicated to a value of
                         variable to <code>O(logn)</code>. Switch Case will run
-                        commands according to the value of given variable.
+                        commands according to the value of given
+                        variable/objective:selector.
                     </p>
                     <p>
                         <Tab />

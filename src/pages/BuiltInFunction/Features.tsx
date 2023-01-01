@@ -13,12 +13,14 @@ const BuildinFeatures = [
     >
         <p>
             Run commands on positive change of scoreboard and reset the score.
+            (Example of <code>Criteria</code> is{" "}
+            <code>used.carrot_on_a_stick</code>)
         </p>
         <Command
             name="Player.onEvent"
             type="LoadOnly"
             params={[
-                { key: "objective", type: "Objective" },
+                { key: "criteria", type: "Criteria" },
                 { key: "function", type: "Function" },
             ]}
         />
@@ -426,6 +428,24 @@ const BuildinFeatures = [
         </CodeBlock>
     </Feature>,
     <Feature
+        id="hardcode_repeat_list"
+        summary="Hardcode.repeatList()"
+        keywords="copy paste list"
+    >
+        Does the same thing as <code>Hardcode.repeat</code> but use list to loop
+        through instead of numbers
+        <Command
+            name="Hardcode.repeatList"
+            type="ExecuteExcluded"
+            params={[
+                { key: "indexString", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "strings", type: "List" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
         id="hardcode_switch"
         summary="Hardcode.switch()"
         keywords="copy paste switch case"
@@ -743,6 +763,45 @@ const BuildinFeatures = [
             name="JMC.put"
             type="JMCFunction"
             params={[{ key: "command", type: "string" }]}
+        />
+    </Feature>,
+    <Feature
+        id="string_is_equal"
+        summary="String.isEqual()"
+        keywords="compare nbt"
+    >
+        <p>Whether the value inside NBT path is equal to the string.</p>
+        <Command
+            name="String.isEqual"
+            type="Boolean"
+            params={[
+                { key: "type", type: "keyword" },
+                { key: "source", type: "STRING" },
+                { key: "path", type: "KEYWORD" },
+                { key: "string", type: "STRING" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="object_is_equal"
+        summary="Object.isEqual()"
+        keywords="compare nbt"
+    >
+        <p>
+            Whether the value inside NBT path is equal to the value inside
+            another NBT path.
+        </p>
+        <Command
+            name="Object.isEqual"
+            type="Boolean"
+            params={[
+                { key: "type1", type: "keyword" },
+                { key: "source1", type: "STRING" },
+                { key: "path1", type: "KEYWORD" },
+                { key: "type2", type: "keyword" },
+                { key: "source2", type: "STRING" },
+                { key: "path2", type: "KEYWORD" },
+            ]}
         />
     </Feature>,
 ];
