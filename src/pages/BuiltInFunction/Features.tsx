@@ -347,14 +347,14 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature id="timer_is_over" summary="Timer.isOver()" keywords="scoreboard">
-        <p>
-            Whether the timer of the entity running it(<code>@s</code>) is over
-            or not.
-        </p>
+        <p>Whether the timer of the selector is over or not.</p>
         <Command
             name="Timer.isOver"
             type="Boolean"
-            params={[{ key: "objective", type: "Objective" }]}
+            params={[
+                { key: "objective", type: "Objective" },
+                { key: "selector", type: "TargetSelector", default: "@s" },
+            ]}
         />
     </Feature>,
     <Feature
