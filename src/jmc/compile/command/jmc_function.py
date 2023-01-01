@@ -4,7 +4,7 @@ from json import JSONDecodeError, loads
 from typing import Any, Callable
 
 from ...compile.utils import convention_jmc_to_mc, is_float
-from .utils import ArgType, NumberType, find_scoreboard_player_type, verify_args, Arg
+from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, Tokenizer
@@ -219,7 +219,8 @@ class JMCFunction:
 
         return cls.__subcls[func_type]
 
-    def is_never_used(self, call_string: str | None = None) -> bool:
+    def is_never_used(self, call_string: str | None = None,
+                      parameters: list[str] | None = None) -> bool:
         """
         Add current function to datapack.used_command and return whether it's already there
 
@@ -229,6 +230,8 @@ class JMCFunction:
         if call_string is None:
             call_string = self.call_string
         is_in = call_string not in self.datapack.used_command
+        if parameters is not None:
+            call_string = call_string + '/' + '/'.join(parameters)
         self.datapack.used_command.add(call_string)
         return is_in
 
@@ -240,6 +243,26 @@ class JMCFunction:
         :return: Function object
         """
         return self.datapack.private_functions[self.name][function_name]
+
+    def format_text(self, parameter: str, is_default_no_italic: bool = False,
+                    is_allow_score_selector: bool = True) -> str:
+        """
+        Get FormattedText string from an argument
+
+        :param parameter: Parameter
+        :param is_default_no_italic: Whether to set italic to False by default, defaults to False
+        :param is_allow_score_selector: Whether to allow score selector in the string, defaults to True
+        :return: Raw json string
+        """
+        return str(
+            FormattedText(
+                self.args[parameter],
+                self.raw_args[parameter].token,
+                self.tokenizer,
+                self.datapack,
+                is_default_no_italic=is_default_no_italic,
+                is_allow_score_selector=is_allow_score_selector)
+        )
 
     def make_empty_private_function(self, function_name: str) -> Function:
         """

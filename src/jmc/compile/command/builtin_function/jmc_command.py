@@ -198,7 +198,7 @@ class JMCPut(JMCFunction):
 )
 class TextTellraw(JMCFunction):
     def call(self) -> str:
-        return f'tellraw {self.args["selector"]} {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+        return f'tellraw {self.args["selector"]} {self.format_text("message")}'
 
 
 @func_property(
@@ -212,7 +212,7 @@ class TextTellraw(JMCFunction):
 )
 class TextTitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} title {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+        return f'title {self.args["selector"]} title {self.format_text("message")}'
 
 
 @func_property(
@@ -226,7 +226,7 @@ class TextTitle(JMCFunction):
 )
 class TextSubtitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} subtitle {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+        return f'title {self.args["selector"]} subtitle {self.format_text("message")}'
 
 
 @func_property(
@@ -240,7 +240,7 @@ class TextSubtitle(JMCFunction):
 )
 class TextActionbar(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} actionbar {str(FormattedText(self.args["message"], self.raw_args["message"].token, self.tokenizer, self.datapack))}'
+        return f'title {self.args["selector"]} actionbar {self.format_text("message")}'
 
 
 def __normalize_decimal(n: float):
@@ -492,3 +492,83 @@ class ParticleLine(JMCFunction):
                 self.args["mode"]
             ),
         )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Scoreboard.add",
+    arg_type={
+        "objective": ArgType.KEYWORD,
+        "criteria": ArgType.KEYWORD,
+        "displayName": ArgType.STRING,
+    },
+    name="scoreboard_add",
+    defaults={
+        "criteria": "dummy",
+        "displayName": ""
+    }
+)
+class ScoreboardAdd(JMCFunction):
+    def call(self) -> str:
+        command = f'scoreboard objectives add {self.args["objective"]} {self.args["criteria"]}'
+        if self.args["objective"] in self.datapack.data.scoreboards:
+            scoreboard = self.datapack.data.scoreboards[self.args["objective"]]
+            raise JMCValueError(
+                f"Objective {self.args['objective']} was already defined as {scoreboard[1]}",
+                self.raw_args["objective"].token,
+                self.tokenizer, suggestion=f"It was defined at line {scoreboard[2].line} col {scoreboard[2].col}")
+        self.datapack.data.scoreboards[self.args["objective"]] = (
+            self.args["criteria"], self.args["displayName"], self.raw_args["objective"].token)
+        if self.args["displayName"]:
+            command += ' ' + self.format_text("displayName")
+        return command
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Team.add",
+    arg_type={
+        "team": ArgType.KEYWORD,
+        "displayName": ArgType.STRING
+    },
+    name="team_add",
+    defaults={
+        "displayName": ""
+    }
+)
+class TeamAdd(JMCFunction):
+    def call(self) -> str:
+        command = f'team add {self.args["team"]}'
+        if self.args["team"] in self.datapack.data.teams:
+            team = self.datapack.data.teams[self.args["team"]]
+            raise JMCValueError(
+                f"Team {self.args['team']} was already defined",
+                self.raw_args["team"].token,
+                self.tokenizer, suggestion=f"It was defined at line {team[1].line} col {team[1].col}")
+        self.datapack.data.teams[self.args["team"]] = (
+            self.args["displayName"], self.raw_args["team"].token)
+        if self.args["displayName"]:
+            command += ' ' + self.format_text("displayName")
+        return command
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Bossbar.add",
+    arg_type={
+        "id": ArgType.KEYWORD,
+        "name": ArgType.STRING
+    },
+    name="bossbar_add"
+)
+class BossbarAdd(JMCFunction):
+    def call(self) -> str:
+        if self.args["id"] in self.datapack.data.bossbars:
+            bossbar = self.datapack.data.bossbars[self.args["id"]]
+            raise JMCValueError(
+                f"Bossbar {self.args['id']} was already defined",
+                self.raw_args["id"].token,
+                self.tokenizer, suggestion=f"It was defined at line {bossbar[1].line} col {bossbar[1].col}")
+        self.datapack.data.bossbars[self.args["id"]] = (
+            self.args["name"], self.raw_args["id"].token)
+        return f'bossbar add {self.args["id"]} {self.format_text("name")}'

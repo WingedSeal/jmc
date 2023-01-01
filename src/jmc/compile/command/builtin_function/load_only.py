@@ -142,7 +142,6 @@ class ItemCreate(JMCFunction):
                 self.raw_args["onClick"].token,
                 self.tokenizer,
                 suggestion="Change item_type to carrot_on_a_stick or warped_fungus_on_a_stick")
-        name = self.args["displayName"]
         if self.args["lore"]:
             lores = self.datapack.parse_list(
                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
@@ -194,8 +193,15 @@ class ItemCreate(JMCFunction):
         lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
                          for lore in lores])
 
+        self.format_text(
+            "displayName",
+            is_default_no_italic=True,
+            is_allow_score_selector=False)
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack ,is_default_no_italic=True, is_allow_score_selector=False))
+            self.format_text(
+            "displayName",
+            is_default_no_italic=True,
+            is_allow_score_selector=False)
             )},Lore:[{lore_}]}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(

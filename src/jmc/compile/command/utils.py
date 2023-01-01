@@ -342,6 +342,7 @@ class FormattedText:
     :param token: Token (only used for error)
     :param tokenizer: Tokenizer
     :param is_default_no_italic: Whether to set italic to False by default, defaults to False
+    :param is_allow_score_selector: Whether to allow score selector in the string, defaults to True
     :return: Raw JSON string
 
     .. example::
