@@ -432,8 +432,10 @@ const BuildinFeatures = [
         summary="Hardcode.repeatList()"
         keywords="copy paste list"
     >
-        Does the same thing as <code>Hardcode.repeat</code> but use list to loop
-        through instead of numbers
+        <p>
+            Does the same thing as <code>Hardcode.repeat</code> but use list to
+            loop through instead of numbers
+        </p>
         <Command
             name="Hardcode.repeatList"
             type="ExecuteExcluded"
