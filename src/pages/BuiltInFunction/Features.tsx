@@ -777,10 +777,10 @@ const BuildinFeatures = [
             name="String.isEqual"
             type="Boolean"
             params={[
-                { key: "type", type: "keyword" },
-                { key: "source", type: "STRING" },
-                { key: "path", type: "KEYWORD" },
-                { key: "string", type: "STRING" },
+                { key: "type", type: "Keyword" },
+                { key: "source", type: "string" },
+                { key: "path", type: "Keyword" },
+                { key: "string", type: "string" },
             ]}
         />
     </Feature>,
@@ -797,12 +797,12 @@ const BuildinFeatures = [
             name="Object.isEqual"
             type="Boolean"
             params={[
-                { key: "type1", type: "keyword" },
-                { key: "source1", type: "STRING" },
-                { key: "path1", type: "KEYWORD" },
-                { key: "type2", type: "keyword" },
-                { key: "source2", type: "STRING" },
-                { key: "path2", type: "KEYWORD" },
+                { key: "type1", type: "Keyword" },
+                { key: "source1", type: "string" },
+                { key: "path1", type: "Keyword" },
+                { key: "type2", type: "Keyword" },
+                { key: "source2", type: "string" },
+                { key: "path2", type: "Keyword" },
             ]}
         />
     </Feature>,
