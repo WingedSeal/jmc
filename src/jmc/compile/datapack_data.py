@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -6,7 +7,7 @@ if TYPE_CHECKING:
     from ..compile.tokenizer import Token
 
 
-@dataclass(slots=True, frozen=False, eq=True)
+@dataclass(slots=True, frozen=True, eq=True)
 class Item:
     item_type: str
     nbt: str
@@ -18,13 +19,9 @@ class Item:
 @dataclass(slots=True, frozen=False, eq=True)
 class TemplateItem:
     char_id: str
-    item: Item | None = None
+    items: list[Item] | None = None
+    variable: tuple[str, str] | None = None
     interactive_id: int | None = None
-
-    def set_nbt(self) -> None:
-        if self.item is None:
-            raise ValueError
-        self.item.nbt = f"{{{self.item.nbt[1:-1]}}},"
 
 
 class GUIMode(Enum):
@@ -33,40 +30,56 @@ class GUIMode(Enum):
 
 
 class GUI:
-    __slots__ = ("mode", "size", "template", "is_ready")
+    __slots__ = ("mode", "size", "template", "item_types", "template_map")
     mode: GUIMode
     size: tuple[int, int]
     """Row x Column"""
     template: list[TemplateItem]
-    is_ready: bool
+    item_types: set[str]
+    template_map: dict[str, list[TemplateItem]]
     DEFAULT_ITEM = Item(
         "gray_stained_glass_pane",
         nbt="""{display: {Name:'""'}}""")
 
     def __init__(self, mode: GUIMode, template: list[str]) -> None:
-        self.is_ready = False
+        self.template_map = defaultdict(list)
         self.mode = mode
         self.size = (len(template), len(template[0]))
-        self.template = [TemplateItem(char)
+        self.template = [TemplateItem(char, [self.DEFAULT_ITEM])
                          for row in template for char in row]
+        index = 0
+        for row in template:
+            for char in row:
+                template_item = TemplateItem(char, [self.DEFAULT_ITEM])
+                self.template.append(template_item)
+                self.template_map[char].append(template_item)
+                index += 1
 
-    def set_item(self, slot: str, item: Item,
+    def set_item(self, slot: str, items: list[Item],
                  interactive_id: None = None) -> None:
-        for template_item in self.template:
-            if slot == template_item.char_id:
-                if template_item.item is not None:
-                    raise ValueError
-                template_item.item = item
-                template_item.interactive_id = interactive_id
-
-    def set_to_default(self) -> None:
-        self.is_ready = True
-        for template_item in self.template:
-            if template_item.item is not None:
-                template_item.item = self.DEFAULT_ITEM
+        for item in items:
+            self.item_types.add(item.item_type)
+        for template_item in self.template_map[slot]:
+            if template_item.items is not None:
+                raise ValueError
+            template_item.items = items
+            template_item.interactive_id = interactive_id
 
     def get_reset_commands(self) -> list[str]:
-        return []
+        commands: list[str] = []
+        for index, template_item in enumerate(self.template):
+            if template_item.items is None:
+                continue
+            if len(template_item.items) == 1:
+                commands.append(
+                    f"item replace block ~ ~ ~ container.{index} with {template_item.items[0]} 1")
+                continue
+            if template_item.variable is None:
+                raise ValueError("template_item.variable is None")
+
+            commands.extend(
+                f"execute if score {template_item.variable[1]} {template_item.variable[0]} matches {matched_index} run item replace block ~ ~ ~ container.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
+        return commands
 
 
 class Data:
