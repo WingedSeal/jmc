@@ -2,6 +2,8 @@
 
 import math
 from typing import Iterator
+
+from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType, FormattedText, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -572,3 +574,30 @@ class BossbarAdd(JMCFunction):
         self.datapack.data.bossbars[self.args["id"]] = (
             self.args["name"], self.raw_args["id"].token)
         return f'bossbar add {self.args["id"]} {self.format_text("name")}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="GUI.run",
+    arg_type={
+        "name": ArgType.KEYWORD,
+    },
+    name="gui_run"
+)
+class GUIRun(JMCFunction):
+
+    def call(self) -> str:
+        name = convention_jmc_to_mc(
+            self.raw_args["name"].token, self.tokenizer)
+        if name not in self.datapack.data.guis:
+            raise JMCValueError(
+                f"GUI Template '{name}' was never defined",
+                self.raw_args["name"].token,
+                self.tokenizer)
+        gui = self.datapack.data.guis[name]
+        if not gui.is_created:
+            raise JMCValueError(
+                f"GUI Template '{name}' was never created",
+                self.raw_args["name"].token,
+                self.tokenizer, suggestion="Use GUI.create BEFORE running")
+        return self.datapack.call_func(f"gui/{name}", "run")

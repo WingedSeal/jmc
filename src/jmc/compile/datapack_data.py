@@ -1,5 +1,5 @@
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -19,60 +19,82 @@ class Item:
 @dataclass(slots=True, frozen=False, eq=True)
 class TemplateItem:
     char_id: str
-    items: list[Item] | None = None
-    variable: tuple[str, str] | None = None
-    interactive_id: int | None = None
+    items: list[Item] | Item | None = None
+    variable: str | None = None
+    interactive_id: str | None = None
+    on_click: str = ""
+    container_changed: list[str] = field(default_factory=list)
+    """Commands to run when the container changes"""
+
+
+@dataclass(slots=True, frozen=True)
+class GUIModeDetail:
+    get: str
+    container: str
 
 
 class GUIMode(Enum):
-    ENTITY = "entity @s"
-    BLOCK = "block ~ ~ ~"
+    ENTITY = "container"
+    BLOCK = "container"
+    ENDERCHEST = "enderchest"
 
 
 class GUI:
-    __slots__ = ("mode", "size", "template", "item_types", "template_map")
+    __slots__ = (
+        "mode",
+        "size",
+        "name",
+        "template",
+        "item_types",
+        "template_map",
+        "is_created",
+        "default_item")
     mode: GUIMode
     size: tuple[int, int]
     """Row x Column"""
     template: list[TemplateItem]
+    interactions: list[str]
+    """List of minecraft commands that'll be mapped to its index as interaction_id"""
     item_types: set[str]
     template_map: dict[str, list[TemplateItem]]
-    DEFAULT_ITEM = Item(
-        "gray_stained_glass_pane",
-        nbt="""{display: {Name:'""'}}""")
+    is_created: bool
+    default_item: Item
 
-    def __init__(self, mode: GUIMode, template: list[str]) -> None:
+    def __init__(self, name: str, mode: GUIMode, template: list[str]) -> None:
+        self.default_item = Item(
+            "gray_stained_glass_pane",
+            nbt="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(name))
+        self.name = name
+        self.is_created = False
         self.template_map = defaultdict(list)
         self.mode = mode
         self.size = (len(template), len(template[0]))
-        self.template = [TemplateItem(char, [self.DEFAULT_ITEM])
-                         for row in template for char in row]
+        self.template = []
+        self.item_types = {"gray_stained_glass_pane"}
         index = 0
         for row in template:
             for char in row:
-                template_item = TemplateItem(char, [self.DEFAULT_ITEM])
+                template_item = TemplateItem(char, self.default_item)
                 self.template.append(template_item)
                 self.template_map[char].append(template_item)
                 index += 1
 
-    def set_item(self, slot: str, items: list[Item],
-                 interactive_id: None = None) -> None:
-        for item in items:
-            self.item_types.add(item.item_type)
-        for template_item in self.template_map[slot]:
-            if template_item.items is not None:
-                raise ValueError
-            template_item.items = items
-            template_item.interactive_id = interactive_id
+    @property
+    def length(self) -> int:
+        empty = 0
+        for template_item in self.template:
+            if template_item.items is None:
+                empty += 1
+        return self.size[0] * self.size[1] - empty
 
     def get_reset_commands(self) -> list[str]:
         commands: list[str] = []
         for index, template_item in enumerate(self.template):
             if template_item.items is None:
                 continue
-            if len(template_item.items) == 1:
+            if isinstance(template_item.items, Item):
                 commands.append(
-                    f"item replace block ~ ~ ~ container.{index} with {template_item.items[0]} 1")
+                    f"item replace block ~ ~ ~ container.{index} with {template_item.items} 1")
                 continue
             if template_item.variable is None:
                 raise ValueError("template_item.variable is None")
@@ -93,7 +115,8 @@ class Data:
         "__bool_result_count",
         "scoreboards",
         "teams",
-        "bossbars")
+        "bossbars",
+        "guis")
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
@@ -103,6 +126,7 @@ class Data:
         self.scoreboards: dict[str, tuple[str, str, "Token"]] = {}
         self.teams: dict[str, tuple[str, "Token"]] = {}
         self.bossbars: dict[str, tuple[str, "Token"]] = {}
+        self.guis: dict[str, GUI] = {}
 
     def get_item_id(self) -> str:
         """

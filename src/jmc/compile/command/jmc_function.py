@@ -1,13 +1,14 @@
 from collections import defaultdict
 from enum import Enum, auto
 from json import JSONDecodeError, loads
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from ...compile.utils import convention_jmc_to_mc, is_float
+from ...compile.datapack_data import Item
 from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
-from ..tokenizer import Token, Tokenizer
+from ..tokenizer import Token, TokenType, Tokenizer
 
 
 class FuncType(Enum):
@@ -186,6 +187,53 @@ class JMCFunction:
         This function will be called after initialization of the object
         """
 
+    def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
+                    lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
+        if modify_nbt is None:
+            modify_nbt = {}
+
+        item_type = self.args[item_type_param]
+        if item_type.startswith("minecraft:"):
+            item_type = item_type[10:]
+        if self.args[lore_param]:
+            lores = self.datapack.parse_list(
+                self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
+        else:
+            lores = []
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args[nbt_param].token) if self.args[nbt_param] else {}
+
+        for key, value_token in modify_nbt.items():
+            if key in nbt:
+                raise JMCValueError(
+                    f"{key} is already inside the nbt",
+                    value_token,
+                    self.tokenizer)
+
+            nbt[key] = value_token
+
+        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                         for lore in lores])
+
+        if self.args[display_name_param]:
+            if "display" in nbt:
+                raise JMCValueError(
+                    "display is already inside the nbt",
+                    self.token,
+                    self.tokenizer)
+
+            nbt["display"] = Token.empty(f"""{{Name:{repr(
+                self.format_text(
+                display_name_param,
+                is_default_no_italic=True,
+                is_allow_score_selector=False)
+                )},Lore:[{lore_}]}}""")
+
+        return Item(
+            item_type,
+            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+        )
+
     def call(self) -> str:
         """
         This function will be called when user call matching JMC custom function
@@ -222,18 +270,19 @@ class JMCFunction:
     def is_never_used(self, call_string: str | None = None,
                       parameters: list[str] | None = None) -> bool:
         """
-        Add current function to datapack.used_command and return whether it's already there
+        Add current function to datapack.used_command and return whether it's not already there
 
-        :param: Any string instead of default call string for more specific check. For example, minecraft command
-        :return: Whether this function has been called by the user before
+        :param call_string: Any string instead of default call string for more specific check. For example, minecraft command
+        :param parameters: Details of call_string
+        :return: Whether this function has never been called by the user before
         """
         if call_string is None:
             call_string = self.call_string
-        is_in = call_string not in self.datapack.used_command
+        is_not_in = call_string not in self.datapack.used_command
         if parameters is not None:
             call_string = call_string + '/' + '/'.join(parameters)
         self.datapack.used_command.add(call_string)
-        return is_in
+        return is_not_in
 
     def get_private_function(self, function_name: str) -> Function:
         """
