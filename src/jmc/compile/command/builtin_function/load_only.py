@@ -876,7 +876,7 @@ class GUICreate(JMCFunction):
                     # If there's no clicker
                     "execute unless score $is_click %s matches 1 as @e[type=item,nbt={Item:{tag:{__gui__:{name:%s}}}},limit=1] run %s" % (
                         GUI_OBJ_NAME, repr(name), copy_item_owner),
-                    f"execute unless score $is_click {GUI_OBJ_NAME} matches 1 as @a run {compare_player_uuid}",
+                    f"execute unless score $is_click {GUI_OBJ_NAME} matches 1 as @a[distance=..8] run {compare_player_uuid}",
                     # Summon dummy item
                     'execute if score $is_item %s matches 1 run summon item ~ ~256 ~ {Item: {id:"minecraft:stone",Count:1b},Tags:["__gui__.%s.dropped_item"]}' % (
                         GUI_OBJ_NAME, name),
