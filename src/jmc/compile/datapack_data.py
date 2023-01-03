@@ -94,13 +94,13 @@ class GUI:
                 continue
             if isinstance(template_item.items, Item):
                 commands.append(
-                    f"item replace block ~ ~ ~ container.{index} with {template_item.items} 1")
+                    f"item replace block ~ ~ ~ {self.mode.value}.{index} with {template_item.items} 1")
                 continue
             if template_item.variable is None:
                 raise ValueError("template_item.variable is None")
 
             commands.extend(
-                f"execute if score {template_item.variable[1]} {template_item.variable[0]} matches {matched_index} run item replace block ~ ~ ~ container.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
+                f"execute if score {template_item.variable[1]} {template_item.variable[0]} matches {matched_index} run item replace block ~ ~ ~ {self.mode.value}.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
         return commands
 
 
