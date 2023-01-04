@@ -71,7 +71,7 @@ class ItemGive(JMCFunction):
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
-                self.token,
+                self.raw_args["itemId"].token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
@@ -102,7 +102,7 @@ class ItemSummon(JMCFunction):
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
-                self.token,
+                self.raw_args["itemId"].token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
@@ -140,7 +140,7 @@ class ItemReplaceBlock(JMCFunction):
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
-                self.token,
+                self.raw_args["itemId"].token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
@@ -169,7 +169,7 @@ class ItemReplaceEntity(JMCFunction):
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
-                self.token,
+                self.raw_args["itemId"].token,
                 self.tokenizer,
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )

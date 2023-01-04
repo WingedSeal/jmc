@@ -285,6 +285,25 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
+    def add_private_function(self, name: str, command: str,
+                             count: str | None = None) -> str:
+        """
+        Add private function but don't create new function unless it's neccessary
+
+        :param name: Name of the private function's group
+        :param command: Multiline minecraft command
+        :param count: Name of the function (usually as count), defaults to current count + 1
+        :return: Minecraft function call string / The command itself
+        """
+
+        if "\n" not in command:
+            return command
+
+        if count is None:
+            count = self.get_count(name)
+        self.private_functions[name][count] = Function([command])
+        return self.call_func(name, count)
+
     def add_raw_private_function(
             self, name: str, commands: list[str], count: str | None = None) -> str:
         """

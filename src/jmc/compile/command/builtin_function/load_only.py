@@ -263,6 +263,7 @@ class ItemCreateSign(JMCFunction):
         self.datapack.data.item[self.args["itemId"]] = Item(
             variant + "_sign",
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt
         )
 
         return ""
@@ -578,10 +579,11 @@ GUI_OBJ_NAME = "__gui__"
     name="gui_template"
 )
 class GUITemplate(JMCFunction):
-    MODE_MAP: dict[str, tuple[GUIMode, str]] = {
-        "entity": (GUIMode.ENTITY, "entity @s"),
-        "block": (GUIMode.BLOCK, "block ~ ~ ~"),
-        "enderchest": (GUIMode.ENDERCHEST, "entity @s")
+    MODE_MAP: dict[str, GUIMode] = {
+        "entity": GUIMode.ENTITY,
+        "block": GUIMode.BLOCK,
+        "enderchest": GUIMode.ENDERCHEST,
+        "player": GUIMode.PLAYER
     }
 
     def call(self) -> str:
@@ -601,19 +603,22 @@ class GUITemplate(JMCFunction):
                 f"GUI Template '{name}' was already defined",
                 self.raw_args["name"].token,
                 self.tokenizer)
-        mode = self.MODE_MAP[mode_str][0]
+        mode = self.MODE_MAP[mode_str]
         self.datapack.data.guis[name] = GUI(
             name, mode, template)
+        if self.is_never_used():
+            self.datapack.add_load_command(
+                "data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI set value {}")
         self.datapack.add_raw_private_function(f"gui/{name}", [
             f"""execute if entity @p[distance=..8] run {
                 self.datapack.add_raw_private_function(f"gui/{name}", [
-                    f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI set from {self.MODE_MAP[mode_str][1]}",
-                    f"execute store result score __gui__.item_count {self.datapack.var_name} if data block ~ ~ ~ Items[].tag.__gui__",
+                    f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items set from {mode.value[1]} {mode.value[2]}",
+                    f"execute store result score __gui__.item_count {self.datapack.var_name} if data storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items[].tag.__gui__",
                     f'execute if score __gui__.item_count {self.datapack.var_name} matches 0 run {self.datapack.call_func(f"gui/{name}", "reset")}'
                 ], "active")
                 }""",
-            "execute if block ~ ~-1 ~ hopper run data merge block ~ ~-1 ~ {TransferCooldown:20d}" if mode in {
-                GUIMode.BLOCK, GUIMode.ENDERCHEST} else ""
+            "execute if block ~ ~-1 ~ hopper run data merge block ~ ~-1 ~ {TransferCooldown:20d}" if mode ==
+            GUIMode.BLOCK else ""
         ], "run")
         self.datapack.add_raw_private_function(
             f"gui/{name}", [
@@ -622,89 +627,119 @@ class GUITemplate(JMCFunction):
         return ""
 
 
-# TODO: Work on GUI.registers, change how nbt is store in item, make GUI.register support Item.create
-# @func_property(
-#     func_type=FuncType.LOAD_ONLY,
-#     call_string="GUI.registers",
-#     arg_type={
-#         "name": ArgType.KEYWORD,
-#         "id": ArgType.STRING,
-#         "items": ArgType.LIST,
-#         "variable": ArgType.SCOREBOARD,
-#         "onClick": ArgType.FUNC
-#     },
-#     name="gui_registers"
-# )
-# class GUIRegisters(JMCFunction):
-#     def call(self) -> str:
-#         name = convention_jmc_to_mc(
-#             self.raw_args["name"].token, self.tokenizer)
-#         if name not in self.datapack.data.guis:
-#             raise JMCValueError(
-#                 f"GUI Template '{name}' was never defined",
-#                 self.raw_args["name"].token,
-#                 self.tokenizer)
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="GUI.registers",
+    arg_type={
+        "name": ArgType.KEYWORD,
+        "id": ArgType.STRING,
+        "items": ArgType.LIST,
+        "variable": ArgType.SCOREBOARD,
+        "onClick": ArgType.FUNC,
+        "onClickAsGUI": ArgType.FUNC
+    },
+    name="gui_registers",
+    defaults={
+        "onClick": "",
+        "onClickAsGUI": ""
+    },
+    ignore={
+        "onClickAsGUI"
+    }
+)
+class GUIRegisters(JMCFunction):
+    def call(self) -> str:
+        name = convention_jmc_to_mc(
+            self.raw_args["name"].token, self.tokenizer)
+        if name not in self.datapack.data.guis:
+            raise JMCValueError(
+                f"GUI Template '{name}' was never defined",
+                self.raw_args["name"].token,
+                self.tokenizer)
 
-#         if len(self.args["id"]) != 1:
-#             raise JMCValueError(
-#                 f"'id' expected 1 charater (got {len(self.args['id'])})",
-#                 self.raw_args["id"].token,
-#                 self.tokenizer)
+        if len(self.args["id"]) != 1:
+            raise JMCValueError(
+                f"'id' expected 1 charater (got {len(self.args['id'])})",
+                self.raw_args["id"].token,
+                self.tokenizer)
 
-#         gui = self.datapack.data.guis[name]
-#         slot = self.args["id"]
+        item_strings = self.datapack.parse_list(self.raw_args["items"].token,
+                                                self.tokenizer, TokenType.KEYWORD)
 
-# items = self.datapack.parse_list(self.raw_args["items"].token,
-# self.tokenizer, self.)
+        items: list[Item] = []
 
-#         if self.args["onClick"]:
-#             interactive_id = self.datapack.get_count(
-#                 f"{self.name}/{name}")
+        if self.args["onClick"]:
+            on_click = self.datapack.add_private_function(
+                f"gui/{name}/on_click", self.args["onClick"])
+            interactive_id = self.datapack.get_count(
+                f"{self.name}/{name}")
+            for item_str in item_strings:
+                if item_str not in self.datapack.data.item:
+                    raise JMCValueError(
+                        f'Item id: \'{item_str}\' is not defined.',
+                        self.raw_args["items"].token,
+                        self.tokenizer,
+                        suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                    )
+                items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
+                    "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}))
 
-#             self.set_item(
-#                 name,
-#                 self.args["id"],
-#                 self.create_item(
-#                     item_type_param="item",
-#                     modify_nbt={"__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}),
-#                 self.raw_args["id"].token,
-#                 interactive_id,
-#                 self.args["onClick"])
+            self.set_items(
+                name,
+                self.args["id"],
+                items,
+                self.raw_args["id"].token,
+                interactive_id,
+                on_click)
+        else:
+            for item_str in item_strings:
+                if item_str not in self.datapack.data.item:
+                    raise JMCValueError(
+                        f'Item id: \'{item_str}\' is not defined.',
+                        self.raw_args["items"].token,
+                        self.tokenizer,
+                        suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                    )
+                items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
+                    "__gui__": Token.empty(f"{{name:{repr(name)}}}")}))
+            self.set_items(
+                name,
+                self.args["id"],
+                items,
+                self.raw_args["id"].token)
 
-#         else:
-#             self.set_item(
-#                 name,
-#                 self.args["id"],
-#                 self.create_item(
-#                     item_type_param="item",
-#                     modify_nbt={"__gui__": Token.empty(f"{{name:{repr(name)}}}")}),
-#                 self.raw_args["id"].token)
+        return ""
 
-#         return ""
+    def set_items(self, name: str, slot: str, items: list[Item], token: Token,
+                  interactive_id: str | None = None, on_click: str = "") -> None:
+        gui = self.datapack.data.guis[name]
+        for item in items:
+            if item.item_type == "air":
+                raise JMCValueError(
+                    f"Item cannot be air",
+                    token,
+                    self.tokenizer)
+            gui.item_types.add(item.item_type)
 
-#     def set_item(self, name: str, slot: str, items: list[Item], token: Token,
-#                  interactive_id: str | None = None, on_click: str = "") -> None:
-#         gui = self.datapack.data.guis[name]
-#         if item.item_type != "air":
-#             gui.item_types.add(item.item_type)
-#         for template_item in gui.template_map[slot]:
-#             if template_item.items is not gui.default_item:
-#                 raise JMCValueError(
-#                     f"This id ({slot}) was already registered in {name} template",
-#                     token,
-#                     self.tokenizer)
-#             if template_item.variable is not None:
-#                 raise JMCValueError(
-#                     f"This id ({slot}) was already registered as registers in {name} template",
-#                     self.raw_args["id"].token,
-#                     self.tokenizer)
-#             template_item.items = items
-#             template_item.interactive_id = interactive_id
-#             template_item.on_click = on_click
-#             template_item.variable = self.args["variable"]
-#             if self.args["onClickAsGUI"]:
-#                 template_item.container_changed = self.datapack.parse_function_token(
-#                     self.raw_args["onClickAsGUI"].token, self.tokenizer)
+        for template_item in gui.template_map[slot]:
+            if template_item.items is not gui.default_item:
+                raise JMCValueError(
+                    f"This id ({slot}) was already registered in {name} template",
+                    token,
+                    self.tokenizer)
+            if template_item.variable is not None:
+                raise JMCValueError(
+                    f"This id ({slot}) was already registered as registers in {name} template",
+                    self.raw_args["id"].token,
+                    self.tokenizer)
+            template_item.items = items
+            template_item.interactive_id = interactive_id
+            template_item.on_click = on_click
+            template_item.variable = self.args["variable"]
+            if self.args["onClickAsGUI"]:
+                template_item.container_changed = self.datapack.parse_function_token(
+                    self.raw_args["onClickAsGUI"].token, self.tokenizer)
+
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
@@ -747,6 +782,8 @@ class GUIRegister(JMCFunction):
                 self.raw_args["id"].token,
                 self.tokenizer)
         if self.args["onClick"]:
+            on_click = self.datapack.add_private_function(
+                f"gui/{name}/on_click", self.args["onClick"])
             interactive_id = self.datapack.get_count(
                 f"{self.name}/{name}")
 
@@ -758,7 +795,7 @@ class GUIRegister(JMCFunction):
                     modify_nbt={"__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}),
                 self.raw_args["id"].token,
                 interactive_id,
-                self.args["onClick"])
+                on_click)
 
         else:
             self.set_item(
@@ -853,20 +890,23 @@ class GUICreate(JMCFunction):
         gui.is_created = True
 
         self.datapack.private_functions[f"gui/{name}"]["active"].append(
-            f'execute unless score __gui__.item_count {self.datapack.var_name} matches {gui.length} run {self.datapack.call_func(f"gui/{name}", "container_changed")}')
+            f'execute unless score __gui__.item_count {self.datapack.var_name} matches 0 unless score __gui__.item_count {self.datapack.var_name} matches {gui.length} run {self.datapack.call_func(f"gui/{name}", "container_changed")}')
         self.datapack.add_private_json(
             "tags/items", f"gui/{name}", {"values": list(gui.item_types)})
         item_tags = f"#{self.datapack.namespace}:{self.datapack.private_name}/gui/{name}"
 
+        reset_commands = gui.get_reset_commands()
+        reset_commands.append("kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{name:%s}}}}]" % repr(
+            name),)
         reset = self.datapack.add_raw_private_function(
-            f"gui/{name}", gui.get_reset_commands(), "reset")
+            f"gui/{name}", reset_commands, "reset")
 
         for index, template_item in enumerate(gui.template):
             if template_item.items is None:
                 continue
             on_change = self.datapack.add_raw_private_function(
                 f"gui/{name}/container_changed", [
-                    f"execute store result score $is_item {GUI_OBJ_NAME} if data block ~ ~ ~ Items[{{Slot:{index}b}}]",
+                    f"execute store result score $is_item {GUI_OBJ_NAME} if data storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items[{{Slot:{index}b}}]",
                     # Find player with gui item
                     f'execute as @a[distance=..10] store result score @s {GUI_OBJ_NAME} run clear @s {item_tags}{{__gui__:{{name:{repr(name)}}}}}',
                     # Tag player with gui item as clicker

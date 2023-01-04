@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 class Item:
     item_type: str
     nbt: str
+    raw_nbt: dict[str, "Token"]
 
     def __str__(self) -> str:
         return self.item_type + (self.nbt if self.nbt != "" else "")
@@ -34,9 +35,10 @@ class GUIModeDetail:
 
 
 class GUIMode(Enum):
-    ENTITY = "container"
-    BLOCK = "container"
-    ENDERCHEST = "enderchest"
+    ENTITY = ("container", "entity @s", "Items")
+    BLOCK = ("container", "block ~ ~ ~", "Items")
+    ENDERCHEST = ("enderchest", "entity @s", "EnderItems")
+    PLAYER = ("container", "entity @s", "Inventory")
 
 
 class GUI:
@@ -63,7 +65,8 @@ class GUI:
     def __init__(self, name: str, mode: GUIMode, template: list[str]) -> None:
         self.default_item = Item(
             "gray_stained_glass_pane",
-            nbt="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(name))
+            nbt="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(name),
+            raw_nbt={})
         self.name = name
         self.is_created = False
         self.template_map = defaultdict(list)
@@ -94,13 +97,13 @@ class GUI:
                 continue
             if isinstance(template_item.items, Item):
                 commands.append(
-                    f"item replace block ~ ~ ~ {self.mode.value}.{index} with {template_item.items} 1")
+                    f"item replace {self.mode.value[1]} {self.mode.value[0]}.{index} with {template_item.items} 1")
                 continue
             if template_item.variable is None:
                 raise ValueError("template_item.variable is None")
 
             commands.extend(
-                f"execute if score {template_item.variable[1]} {template_item.variable[0]} matches {matched_index} run item replace block ~ ~ ~ {self.mode.value}.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
+                f"execute if score {template_item.variable} matches {matched_index} run item replace {self.mode.value[1]} {self.mode.value[0]}.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
         return commands
 
 

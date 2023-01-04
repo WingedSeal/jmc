@@ -187,6 +187,26 @@ class JMCFunction:
         This function will be called after initialization of the object
         """
 
+    def create_new_item(
+            self, item: "Item", modify_nbt: dict[str, Token] | None = None) -> "Item":
+        item_type = item.item_type
+        nbt = item.raw_nbt
+        if modify_nbt is None:
+            modify_nbt = {}
+        for key, value_token in modify_nbt.items():
+            if key in nbt:
+                raise JMCValueError(
+                    f"{key} is already inside the nbt",
+                    value_token,
+                    self.tokenizer)
+
+            nbt[key] = value_token
+        return Item(
+            item_type,
+            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt
+        )
+
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
                     lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
         if modify_nbt is None:
@@ -232,6 +252,7 @@ class JMCFunction:
         return Item(
             item_type,
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt
         )
 
     def call(self) -> str:

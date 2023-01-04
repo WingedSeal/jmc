@@ -97,7 +97,7 @@ def variable_operation(
                     tokens[4].string)
             else:
                 raise JMCSyntaxException(
-                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}')", tokens[3], tokenizer)
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
 
         scoreboard_player = find_scoreboard_player_type(
             right_token, tokenizer, allow_integer=False)
