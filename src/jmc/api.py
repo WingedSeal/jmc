@@ -3,12 +3,13 @@
 from dataclasses import dataclass as __dataclass
 from pathlib import Path
 
-from .datapack import DataPack
-from .lexer import Lexer
+from .compile.datapack import DataPack
+from .compile.lexer import Lexer
 
-from ..terminal.configuration import Configuration, GlobalData
-from .header import Header
-from .compiling import read_cert, read_header, build
+from .compile import EXCEPTIONS
+from .terminal.configuration import Configuration, GlobalData
+from .compile.header import Header
+from .compile.compiling import read_cert, read_header, build
 
 
 @__dataclass(frozen=True, slots=True)
@@ -27,6 +28,12 @@ class Core:
 
 
 class PyJMC:
+    __slots__ = ("files",
+                 "resource_locations",
+                 "namespace",
+                 "config",
+                 "core",
+                 "pack_mcmeta")
     files: dict[Path, str]
     """Dictionary of path to the file and its content"""
     resource_locations: list[Resource]
@@ -37,6 +44,8 @@ class PyJMC:
     """Configuration of the JMC workspace"""
     core: Core
     """Inner working of JMC"""
+    pack_mcmeta: dict[str, dict[str, int | str]]
+    """Content of pack.mcmeta file"""
 
     def __init__(self, namespace: str, description: str,
                  pack_format: str, target: str) -> None:
@@ -50,6 +59,10 @@ class PyJMC:
         )
 
         self.__build()
+        self.pack_mcmeta = {"pack": {
+            "pack_format": int(self.config.pack_format),
+            "description": self.config.description
+        }}
 
     def __build(self) -> None:
         """

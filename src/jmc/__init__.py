@@ -23,5 +23,4 @@ SOFTWARE.
 """
 from .config import VERSION
 from .compile.test_compile import JMCTestPack
-from .compile.api import PyJMC
-from .compile import api
+from .api import PyJMC
