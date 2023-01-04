@@ -109,6 +109,17 @@ class Arg:
         if verifier == ArgType.SCOREBOARD_PLAYER:
             if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
+                    ":") == 1:
+                return self
+            raise JMCValueError(
+                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+        if verifier == ArgType.SCOREBOARD:
+            if self.arg_type == ArgType.SCOREBOARD:
+                return self
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
+                    ":") == 1:
+                return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
         if verifier == ArgType.FLOAT:

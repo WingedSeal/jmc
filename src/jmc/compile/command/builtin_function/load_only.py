@@ -642,9 +642,6 @@ class GUITemplate(JMCFunction):
     defaults={
         "onClick": "",
         "onClickAsGUI": ""
-    },
-    ignore={
-        "onClickAsGUI"
     }
 )
 class GUIRegisters(JMCFunction):
@@ -737,8 +734,7 @@ class GUIRegisters(JMCFunction):
             template_item.on_click = on_click
             template_item.variable = self.args["variable"]
             if self.args["onClickAsGUI"]:
-                template_item.container_changed = self.datapack.parse_function_token(
-                    self.raw_args["onClickAsGUI"].token, self.tokenizer)
+                template_item.container_changed = [self.args["onClickAsGUI"]]
 
 
 @func_property(
@@ -761,9 +757,6 @@ class GUIRegisters(JMCFunction):
         "nbt": "",
         "onClick": "",
         "onClickAsGUI": ""
-    },
-    ignore={
-        "onClickAsGUI"
     }
 )
 class GUIRegister(JMCFunction):
@@ -828,8 +821,7 @@ class GUIRegister(JMCFunction):
             template_item.interactive_id = interactive_id
             template_item.on_click = on_click
             if self.args["onClickAsGUI"]:
-                template_item.container_changed = self.datapack.parse_function_token(
-                    self.raw_args["onClickAsGUI"].token, self.tokenizer)
+                template_item.container_changed = [self.args["onClickAsGUI"]]
 
 
 @func_property(
