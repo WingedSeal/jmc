@@ -582,8 +582,7 @@ class GUITemplate(JMCFunction):
     MODE_MAP: dict[str, GUIMode] = {
         "entity": GUIMode.ENTITY,
         "block": GUIMode.BLOCK,
-        "enderchest": GUIMode.ENDERCHEST,
-        "player": GUIMode.PLAYER
+        "enderchest": GUIMode.ENDERCHEST
     }
 
     def call(self) -> str:
@@ -608,7 +607,7 @@ class GUITemplate(JMCFunction):
             name, mode, template)
         if self.is_never_used():
             self.datapack.add_load_command(
-                "data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI set value {}")
+                f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI set value {{}}")
         self.datapack.add_raw_private_function(f"gui/{name}", [
             f"""execute if entity @p[distance=..8] run {
                 self.datapack.add_raw_private_function(f"gui/{name}", [
@@ -624,6 +623,7 @@ class GUITemplate(JMCFunction):
             f"gui/{name}", [
                 f"scoreboard players reset * {GUI_OBJ_NAME}"
             ], "container_changed")
+
         return ""
 
 
