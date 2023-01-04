@@ -119,6 +119,7 @@ class Arg:
                 return self
             if self.arg_type == ArgType.KEYWORD and self.token.string.count(
                     ":") == 1:
+                self.arg_type = ArgType.SCOREBOARD
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
