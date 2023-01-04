@@ -12,7 +12,7 @@ from .lexer import Lexer
 logger = Logger(__name__)
 
 
-class JMCPack:
+class JMCTestPack:
     """
     Class representation of folder structure containing entire JMC files
 
@@ -48,7 +48,7 @@ INT=__int__"""
             output=Path(output)
         )
 
-    def set_cert(self, file_content: str) -> "JMCPack":
+    def set_cert(self, file_content: str) -> "JMCTestPack":
         """
         Set certificate(jmc.txt)
 
@@ -58,7 +58,7 @@ INT=__int__"""
         self.cert = file_content
         return self
 
-    def set_jmc_file(self, file_content: str) -> "JMCPack":
+    def set_jmc_file(self, file_content: str) -> "JMCTestPack":
         """
         Set main jmc file
 
@@ -68,7 +68,7 @@ INT=__int__"""
         self.jmc_file = file_content
         return self
 
-    def set_header_file(self, file_content: str) -> "JMCPack":
+    def set_header_file(self, file_content: str) -> "JMCTestPack":
         """
         Set main header file
 
@@ -78,7 +78,7 @@ INT=__int__"""
         self.header_file = file_content
         return self
 
-    def build(self) -> "JMCPack":
+    def build(self) -> "JMCTestPack":
         """
         Build datapack
         :return: Self
@@ -88,7 +88,15 @@ INT=__int__"""
         read_cert(self.config, _test_file=self.cert)
         read_header(self.config, _test_file=self.header_file)
         lexer = Lexer(self.config, _test_file=self.jmc_file)
-        self.__built = build(lexer.datapack, self.config, _is_virtual=True)
+        built = build(
+            lexer.datapack,
+            self.config,
+            _is_virtual=True)
+        if built is None:
+            raise ValueError
+        self.__built = {
+            path.as_posix(): content for path,
+            content in built.items()}
         return self
 
     @property

@@ -3,14 +3,14 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 from jmc.compile.exception import MinecraftSyntaxWarning
 
 
 class TestNew(unittest.TestCase):
     def test_new(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 new advancements(my_datapack.first_join) {
     "criteria": {
         "requirement": {
@@ -48,7 +48,7 @@ scoreboard objectives add __variable__ dummy
 
     def test_uppercase(self):
         with self.assertRaises(MinecraftSyntaxWarning):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 new advancements(myDatapack.firstJoin) {
     "criteria": {
         "requirement": {

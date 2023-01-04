@@ -3,14 +3,14 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 from jmc.compile.exception import HeaderSyntaxException, JMCSyntaxException
 
 
 class TestHeader(unittest.TestCase):
     def test_define(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 TEST_DEFINE "Hello World";
         """).set_header_file("""
 #define TEST_DEFINE say
@@ -33,20 +33,20 @@ say Hello World
 
     def test_syntax_error(self):
         with self.assertRaises(HeaderSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 
         """).set_header_file("""
 Hello World
         """).build()
         with self.assertRaises(HeaderSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 
         """).set_header_file("""
 #Unknown
         """).build()
 
     def test_credit(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 say "Hello World";
 function myFunc() {
     say "My function";
@@ -86,17 +86,17 @@ say Hello World
 
     def test_command(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 test "TEST";
         """).build()
-        JMCPack().set_jmc_file("""
+        JMCTestPack().set_jmc_file("""
 test "TEST";
         """).set_header_file("""
 #command test
         """).build()
 
     def test_override_minecraft_json(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 new tags.functions(minecraft.custom) {
   "values": []
 }
@@ -122,7 +122,7 @@ scoreboard objectives add __variable__ dummy
             """)
         )
 
-        pack2 = JMCPack().set_jmc_file("""
+        pack2 = JMCTestPack().set_jmc_file("""
 new tags.functions(minecraft.custom) {
   "values": []
 }
@@ -147,7 +147,7 @@ scoreboard objectives add __variable__ dummy
         )
 
     def test_override_minecraft_mcfunction(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 function minecraft.custom() {
   say "custom";
 }
@@ -171,7 +171,7 @@ scoreboard objectives add __variable__ dummy
             """)
         )
 
-        pack2 = JMCPack().set_jmc_file("""
+        pack2 = JMCTestPack().set_jmc_file("""
 function minecraft.custom() {
   say "custom";
 }

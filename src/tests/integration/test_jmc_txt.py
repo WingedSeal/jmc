@@ -3,12 +3,12 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 
 class TestJMCtxt(unittest.TestCase):
     def test_load(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 say "Hello World";
         """).set_cert("""
 LOAD=load
@@ -34,7 +34,7 @@ say Hello World
         )
 
     def test_tick(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 function loop() {
     say "Hello World";
 }
@@ -69,7 +69,7 @@ scoreboard objectives add __variable__ dummy
         )
 
     def test_private(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 execute as @a run {
     say "Hello World 1";
     say "Hello World 2";
@@ -101,7 +101,7 @@ say Hello World 2
         )
 
     def test_var(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $i = 1;
         """).set_cert("""
 LOAD=__load__
@@ -127,7 +127,7 @@ scoreboard players set $i var 1
         )
 
     def test_int(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $i *= 2;
         """).set_cert("""
 LOAD=__load__
@@ -155,7 +155,7 @@ scoreboard players operation $i __var__ *= 2 int
         )
 
     def test_syntax_error(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 say "Hello World";
         """).set_cert("""
 LOAD=load
@@ -181,7 +181,7 @@ say Hello World
         )
 
     def test_unknown_key(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 say "Hello World";
         """).set_cert("""
 LOAD=load
@@ -208,7 +208,7 @@ say Hello World
         )
 
     def test_missing_key(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 say "Hello World";
         """).set_cert("""
 LOAD=load

@@ -3,13 +3,13 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 
 class TestIfElse(unittest.TestCase):
 
     def test_if(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if (entity condition) {
     say "Hello World";
 }
@@ -31,7 +31,7 @@ execute if entity condition run say Hello World
         )
 
     def test_if_else(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if (entity condition) {
     say "TRUE";
 } else {
@@ -62,7 +62,7 @@ say FALSE
         )
 
     def test_if_elif(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if (entity condition) {
     say "CONDITION1";
 } else if (entity condition2) {
@@ -99,7 +99,7 @@ scoreboard players set __if_else__ __variable__ 1
 class TestDoWhile(unittest.TestCase):
 
     def test_while(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 while (entity condition) {
     say "Hello World";
 }
@@ -124,7 +124,7 @@ execute if entity condition run function TEST:__private__/while_loop/0
         )
 
     def test_do_while(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 do {
     say "Hello World";
 } while (entity condition);
@@ -151,7 +151,7 @@ execute if entity condition run function TEST:__private__/while_loop/0
 
 class TestCondition(unittest.TestCase):
     def test_eq(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if ($i==1) {
     say "Hello World";
 }
@@ -173,7 +173,7 @@ execute if score $i __variable__ matches 1 run say Hello World
         )
 
     def test_logic_gate(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
     say "Hello World";
 }
@@ -200,7 +200,7 @@ execute if score __logic__0 __variable__ matches 1 run say Hello World
 
 class TestFor(unittest.TestCase):
     def test_for(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 for ($i=0;$i<10;$i++) {
     say "Hello World";
 }
@@ -229,7 +229,7 @@ execute if score $i __variable__ matches ..9 run function TEST:__private__/for_l
 
 class TestSwitchCase(unittest.TestCase):
     def test_switch_case(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 function askJob() {
     scoreboard players operation $job_id __variable__ = @s job_id;
     switch($job_id) {

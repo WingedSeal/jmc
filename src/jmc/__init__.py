@@ -22,4 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .__main__ import VERSION
-from .compile.test_compile import JMCPack
+from .compile.test_compile import JMCTestPack
+from .compile.api import PyJMC
+from .compile import api

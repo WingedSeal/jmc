@@ -263,7 +263,7 @@ def post_process(string: str) -> str:
 
 
 def build(datapack: DataPack, config: "Configuration",
-          _is_virtual: bool = False) -> dict[str, str] | None:
+          _is_virtual: bool = False) -> dict[Path, str] | None:
     """
     Build and write files for minecraft datapack
 
@@ -272,7 +272,7 @@ def build(datapack: DataPack, config: "Configuration",
     :param _is_virtual: Whether to make a dictionary of output result instead of writing to files
     :returns: Dictionary of file path and file content if _is_virtual is True
     """
-    output: dict[str, Any] = {}
+    output: dict[Path, str] = {}
     header = Header()
 
     logger.debug(f"Building (_is_virtual={_is_virtual})")
@@ -294,7 +294,7 @@ def build(datapack: DataPack, config: "Configuration",
 
     load_json["values"].append(f'{config.namespace}:{DataPack.load_name}')
     if _is_virtual:
-        output[load_tag.as_posix()] = dumps(load_json, indent=2)
+        output[load_tag] = dumps(load_json, indent=2)
     else:
         with load_tag.open("w+") as file:
             dump(load_json, file, indent=2)
@@ -303,7 +303,7 @@ def build(datapack: DataPack, config: "Configuration",
         tick_json["values"].append(
             f"{config.namespace}:{DataPack.tick_name}")
         if _is_virtual:
-            output[tick_tag.as_posix()] = dumps(tick_json, indent=2)
+            output[tick_tag] = dumps(tick_json, indent=2)
         else:
             with tick_tag.open("w+") as file:
                 dump(tick_json, file, indent=2)
@@ -318,7 +318,7 @@ def build(datapack: DataPack, config: "Configuration",
         content = post_process(func.content)
         if content:
             if _is_virtual:
-                output[path.as_posix()] = content
+                output[path] = content
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 with path.open("w+") as file:
@@ -333,7 +333,7 @@ def build(datapack: DataPack, config: "Configuration",
             path = namespace_folder / (json_path + ".json")
         if json:
             if _is_virtual:
-                output[path.as_posix()] = dumps(json, indent=2)
+                output[path] = dumps(json, indent=2)
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 with path.open("w+") as file:

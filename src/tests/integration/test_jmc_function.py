@@ -3,14 +3,14 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 from jmc.compile.exception import JMCMissingValueError, JMCSyntaxException, JMCValueError
 
 
 class TestVarOperation(unittest.TestCase):
     def test_MathSqrt(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $i = Math.sqrt($x);
 $i = Math.sqrt($i);//COMMENT_TEST
         """).build()
@@ -56,17 +56,17 @@ execute if score __main__.x_n_sq __variable__ > __math__.N __variable__ run scor
         )
 
         with self.assertRaises(JMCMissingValueError):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 $x = Math.sqrt();//COMMENT_TEST
         """).build()
 
         with self.assertRaises(JMCValueError):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 $x = Math.sqrt(10);
         """).build()
 
     def test_MathRandom(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $x = Math.random();
 $y = Math.random(min=5, max=10);
 $z = Math.random(max=10);
@@ -114,14 +114,14 @@ scoreboard players operation __math__.seed __variable__ += __math__.rng.c __vari
         )
 
         with self.assertRaises(JMCValueError):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 $x = Math.random(min=100,max=1);
         """).build()
 
 
 class TestBoolFunction(unittest.TestCase):
     def test_TimerIsOver(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 if (Timer.isOver(my_objective)) {
     say "Timer is over";
 }
@@ -146,17 +146,17 @@ execute unless score @s my_objective matches 1.. run say Timer is over
 class TestExecuteExcluded(unittest.TestCase):
     def test_error_execute(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 execute as @a run Hardcode.repeat();
             """).build()
 
         with self.assertRaises(JMCMissingValueError):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 Hardcode.repeat();
             """).build()
 
     def test_HardcodeRepeat(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.repeat("index", ()=>{
     tellraw @a "Hello World: index";
 }, start=1, stop=6, step=1);
@@ -182,7 +182,7 @@ tellraw @a "Hello World: 5"
         )
 
     def test_HardcodeCalc(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.repeat("index", ()=>{
     tellraw @a "index^2=Hardcode.calc(index**2)";
 }, start=1, stop=6, step=1);
@@ -208,7 +208,7 @@ tellraw @a "5^2=25"
         )
 
     def test_HardcodeSwitch(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.switch($var, "index", ()=>{
     tellraw @s "index";
     tellraw @s "Hardcode.calc(index**2)";
@@ -260,7 +260,7 @@ tellraw @s "25"
 
 class TestJMCCommand(unittest.TestCase):
     def test_TimerSet(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Timer.set(my_objective, @a, $i);
 Timer.set(my_objective, @s, 5);
         """).build()
@@ -282,7 +282,7 @@ scoreboard players set @s my_objective 5
         )
 
     def test_ParticleCircle(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2.0, spread=10);
         """).build()
 
@@ -319,7 +319,7 @@ particle dust 1.0 1.0 1.0 0.7 ^-2.0000000000 ^ ^0.0000000000 0 0 0 1 1 normal
         )
 
     def test_ParticleSpiral(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1.0, spread=10);
         """).build()
 
@@ -350,7 +350,7 @@ particle dust 1.0 1.0 1.0 0.7 ^0.8090169944 ^0.9000000000 ^-0.5877852523 0 0 0 1
         )
 
     def test_ParticleCylinder(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1, spread=10);
         """).build()
 
@@ -381,7 +381,7 @@ particle dust 1.0 1.0 1.0 0.7 ^0.8090169944 ^0.9000000000 ^-0.5877852523 0 0 0 1
         )
 
     def test_ParticleLine(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Particle.line("dust 1.0 1.0 1.0 0.7", distance=10.5, spread=10);
         """).build()
 
@@ -415,7 +415,7 @@ particle dust 1.0 1.0 1.0 0.7 ^ ^ ^10.4500000000 0 0 0 1 1 normal
 class TestLoadOnce(unittest.TestCase):
     def test_error_load_twice(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
 });
@@ -426,7 +426,7 @@ Player.firstJoin(()=>{
 
     def test_error_no_load(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 function test() {
     Player.firstJoin(()=>{
         tellraw @s "Welcome!";
@@ -436,7 +436,7 @@ function test() {
             """).build()
 
     def test_PlayerFirstJoin(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
 });
@@ -470,7 +470,7 @@ tellraw @s "Welcome!"
         )
 
     def test_PlayerRejoin(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Player.rejoin(()=>{
     tellraw @s "Welcome!";
 });
@@ -503,7 +503,7 @@ tellraw @s "Welcome!"
         )
 
     def test_PlayerDie(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Player.die(onDeath=()=>{
     tellraw @s "You died";
 },onRespawn=()=>{
@@ -547,7 +547,7 @@ say I'm back
 class TestLoadOnly(unittest.TestCase):
     def test_error_no_load(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 function notLoad() {
     Timer.add(help_cd, runOnce, @a, ()=>{
         tellraw @s "Your help command is ready!";
@@ -556,7 +556,7 @@ function notLoad() {
             """).build()
 
     def test_RightClickSetup(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 RightClick.setup(
     custom_id,
     {
@@ -605,7 +605,7 @@ say 2
         )
 
     def test_PlayerOnEvent(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Player.onEvent("used:carrot_on_a_stick", ()=>{
     say "Hello World";
 });
@@ -638,7 +638,7 @@ say Hello World
         )
 
     def test_TriggerSetup(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Trigger.setup(help, {
     1: ()=>{
         tellraw @s {"text":"Cool help commands", "color":"gold"}
@@ -692,7 +692,7 @@ scoreboard players enable @s help
         )
 
     def test_TimerAdd(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Timer.add(help_cd, runOnce, @a, ()=>{
     tellraw @s "Your help command is ready!";
 });
@@ -728,7 +728,7 @@ tellraw @s "Your help command is ready!"
         )
 
     def test_RecipeTable(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Recipe.table({
     "type": "minecraft:crafting_shapeless",
     "ingredients": [
@@ -793,7 +793,7 @@ tellraw @s "Wow! You crafted a special diamond"
         )
 
     def test_empty_list(self):
-        pack = JMCPack().set_jmc_file(r"""
+        pack = JMCTestPack().set_jmc_file(r"""
 Item.create(
     block,
     polar_bear_spawn_egg,
@@ -819,7 +819,7 @@ give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"tex
                              )
 
     def test_ItemCreate(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 Item.create(
     veryCoolSword,
     carrot_on_a_stick,
@@ -835,7 +835,7 @@ Item.create(
 execute as @a run Item.give(veryCoolSword);
         """).build()
 
-        pack2 = JMCPack().set_jmc_file("""
+        pack2 = JMCTestPack().set_jmc_file("""
 Item.create(
     veryCoolSword,
     carrot_on_a_stick,
@@ -891,7 +891,7 @@ effect give @s speed 1 255 True
 
     def test_ItemGive(self):
         with self.assertRaises(JMCValueError):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 execute as @a run Item.give(veryCoolSword);
         """).build()
 
@@ -899,7 +899,7 @@ execute as @a run Item.give(veryCoolSword);
 class TestParenthesis(unittest.TestCase):
 
     def test_selector(self):
-        pack = JMCPack().set_jmc_file(r"""
+        pack = JMCTestPack().set_jmc_file(r"""
 Timer.set(test, @a[tag=test], 1);
     """).build()
 

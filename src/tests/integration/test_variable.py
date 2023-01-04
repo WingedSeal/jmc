@@ -3,14 +3,14 @@ sys.path.append("./src")  # noqa
 
 import unittest
 from tests.utils import string_to_tree_dict
-from jmc.compile.test_compile import JMCPack
+from jmc.compile.test_compile import JMCTestPack
 
 from jmc.compile.exception import JMCSyntaxException
 
 
 class TestVariable(unittest.TestCase):
     def test_declaration(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $x += 0;
 $y += 0;
         """).build()
@@ -33,12 +33,12 @@ scoreboard players add $y __variable__ 0
 
     def test_no_op_error(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 $x;
         """).build()
 
     def test_assignment(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $x = obj:var1;
 $y = 1;
 $z = $x;
@@ -66,7 +66,7 @@ scoreboard players operation var3 obj = $z __variable__
         )
 
     def test_operations(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $x += 1;
 $x *= 2;
 $x /= 3;
@@ -97,7 +97,7 @@ scoreboard players operation $x __variable__ -= $y __variable__
         )
 
     def test_increment(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 $x ++;
 $x++;
 $x--;
@@ -121,7 +121,7 @@ scoreboard players remove $x __variable__ 1
         )
 
     def test_get(self):
-        pack = JMCPack().set_jmc_file("""
+        pack = JMCTestPack().set_jmc_file("""
 execute store result score @s obj run $x.get();
         """).build()
 
@@ -141,7 +141,7 @@ execute store result score @s obj run scoreboard players get $x __variable__
         )
 
         with self.assertRaises(JMCSyntaxException):
-            JMCPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file("""
 $x.get(key=value);
         """).build()
 
