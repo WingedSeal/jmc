@@ -185,7 +185,7 @@ def custom_condition(
                 raise JMCSyntaxException(
                     "Unexpected square parenthesis []", token, tokenizer)
             conditions[-1] += token.string
-        elif token.token_type in {TokenType.KEYWORD, TokenType.OPERATOR} and is_connected(
+        elif is_connected(
                 token, last_token):
             conditions[-1] += token.string
         else:
