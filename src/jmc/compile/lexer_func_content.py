@@ -61,12 +61,12 @@ FIRST_ARGUMENTS_EXCEPTION = {
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)"""
 
 
-ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
-    "give",
-    "clear",
-    "setblock"
-}
-"""Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
+# ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
+#     "give",
+#     "clear",
+#     "setblock"
+# }
+# """Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
 
 
 def append_commands(commands: list[str], string: str) -> None:
@@ -348,18 +348,18 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
 
-            if not self.command_strings[-1].startswith("execute"):
-                for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-                    if self.command_strings[-1].startswith(_cmd):
-                        self.command_strings[-1] += " " + token.string
-                        return True
-                raise JMCSyntaxException(
-                    f"Unrecognized command ({token.string})", token, self.tokenizer)
+            # if not self.command_strings[-1].startswith("execute"):
+            #     # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+            #     #     if self.command_strings[-1].startswith(_cmd):
+            #     #         self.command_strings[-1] += " " + token.string
+            #     #         return True
+            #     raise JMCSyntaxException(
+            # f"Unrecognized command ({token.string})", token, self.tokenizer)
 
-            for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-                if _cmd in self.command_strings[-1]:
-                    self.command_strings[-1] += " " + token.string
-                    return True
+            # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+            #     if _cmd in self.command_strings[-1]:
+            #         self.command_strings[-1] += " " + token.string
+            #         return True
 
             raise JMCSyntaxException(
                 f"Unrecognized command ({token.string})", token, self.tokenizer)
@@ -378,18 +378,18 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Expected command, got number", token, self.tokenizer, display_col_length=False)
 
-        if not self.command_strings[-1].startswith("execute"):
-            for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-                if self.command_strings[-1].startswith(_cmd):
-                    self.command_strings[-1] += " " + token.string
-                    return
-            raise JMCSyntaxException(
-                "Unexpected number", token, self.tokenizer, display_col_length=False)
+        # if not self.command_strings[-1].startswith("execute"):
+        #     for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+        #         if self.command_strings[-1].startswith(_cmd):
+        #             self.command_strings[-1] += " " + token.string
+        #             return
+        #     raise JMCSyntaxException(
+        #         "Unexpected number", token, self.tokenizer, display_col_length=False)
 
-        for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-            if _cmd in self.command_strings[-1]:
-                self.command_strings[-1] += " " + token.string
-                return
+        # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
+        #     if _cmd in self.command_strings[-1]:
+        #         self.command_strings[-1] += " " + token.string
+        #         return
 
         raise JMCSyntaxException(
             "Unexpected number", token, self.tokenizer, display_col_length=False)

@@ -61,10 +61,10 @@ class TestTokenizer(unittest.TestCase):
 
     def test_paren(self):
         with self.assertRaises(JMCSyntaxException):
-            Tokenizer("{{}")
+            Tokenizer("{{};")
         with self.assertRaises(JMCSyntaxException):
-            Tokenizer("{}{}}")
-        Tokenizer("{'}'}")
+            Tokenizer("{}{}};")
+        Tokenizer("{'}'};")
 
         self.assertListEqual(
             [token.string for token in Tokenizer(
@@ -81,7 +81,14 @@ class TestTokenizer(unittest.TestCase):
             [token.string for token in Tokenizer(
                 "HELLO {} WORLD;").programs[0]],
             [
-                "HELLO", "{}"
+                "HELLO", "{}", "WORLD"
+            ]
+        )
+        self.assertListEqual(
+            [token.string for token in Tokenizer(
+                "if {} WORLD;").programs[0]],
+            [
+                "if", "{}"
             ]
         )
 
@@ -89,11 +96,11 @@ class TestTokenizer(unittest.TestCase):
         with self.assertRaises(JMCSyntaxWarning):
             Tokenizer("keyword;;")
         with self.assertRaises(JMCSyntaxWarning):
-            Tokenizer("{};")
+            Tokenizer("{};;")
 
     def test_newline(self):
         self.assertEqual(Tokenizer(
-            "{A\nB}").programs[0][0].string,
+            "{A\nB};").programs[0][0].string,
             "{A\nB}")
 
         self.assertListEqual(

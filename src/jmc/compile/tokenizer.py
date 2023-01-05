@@ -14,6 +14,19 @@ logger = Logger(__name__)
 
 NEW_LINE = "\n"
 
+TERMINATE_LINE = {
+    "function",
+    "class",
+    "new",
+    "schedule",
+    "if",
+    "else",
+    "do",
+    "while",
+    "for",
+    "switch"
+}
+
 
 class TokenType(Enum):
     KEYWORD = "Keyword"
@@ -423,16 +436,20 @@ class Tokenizer:
             self.is_slash = False
 
         if char == self.r_paren and self.paren_count == 0:
-            is_end = False
+            is_paren = False
             if self.paren == Paren.L_CURLY:
                 self.state = TokenType.PAREN_CURLY
-                is_end = True
+                is_paren = True
             elif self.paren == Paren.L_ROUND:
                 self.state = TokenType.PAREN_ROUND
             elif self.paren == Paren.L_SQUARE:
                 self.state = TokenType.PAREN_SQUARE
             self.append_token()
-            if is_end and expect_semicolon:
+            if is_paren and expect_semicolon and (
+                self.keywords[0].string in TERMINATE_LINE or (
+                    self.keywords[0].string == "execute" and self.keywords[-2].string == "run"
+                )
+            ):
                 self.append_keywords()
             return True
 

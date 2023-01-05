@@ -641,7 +641,7 @@ say Hello World
         pack = JMCTestPack().set_jmc_file("""
 Trigger.setup(help, {
     1: ()=>{
-        tellraw @s {"text":"Cool help commands", "color":"gold"}
+        tellraw @s {"text":"Cool help commands", "color":"gold"};
     }
 });
         """).build()
