@@ -625,6 +625,12 @@ class Tokenizer:
         return result
 
     def merge_tokens(self, tokens: list[Token]) -> Token:
+        """
+        Merge multiple token together
+
+        :param tokens: List of tokens to merge
+        :return: A token with the same token type as the first token (Unless it's an operator, then the type will be keyword)
+        """
         token_type = tokens[0].token_type
         if token_type == TokenType.OPERATOR:
             token_type = TokenType.KEYWORD

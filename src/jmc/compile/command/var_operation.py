@@ -54,6 +54,10 @@ def variable_operation(
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer, suggestion="Expected integer or variable or target selector")
+        if tokens[2].token_type == TokenType.OPERATOR and len(
+                tokens) > 3 and tokens[3].token_type == TokenType.KEYWORD:
+            tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+            del tokens[3]
         if tokens[2].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type.value})", tokens[2], tokenizer, suggestion="Expected integer or variable or target selector")
@@ -97,7 +101,7 @@ def variable_operation(
                     tokens[4].string)
             else:
                 raise JMCSyntaxException(
-                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
+                    f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
 
         scoreboard_player = find_scoreboard_player_type(
             right_token, tokenizer, allow_integer=False)
