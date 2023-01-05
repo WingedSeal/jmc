@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2022 WingedSeal
+Copyright (c) 2023 WingedSeal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .config import VERSION
 from .compile.test_compile import JMCTestPack
-from .api import PyJMC
+from .api import PyJMC, VERSION

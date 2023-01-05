@@ -1,26 +1,25 @@
-
-"""Module for testing compilation"""
-from dataclasses import dataclass as __dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
-from .compile.datapack import DataPack
-from .compile.lexer import Lexer
+from ..compile.datapack import DataPack
+from ..compile.lexer import Lexer
 
-from .compile import EXCEPTIONS
-from .terminal.configuration import Configuration, GlobalData
-from .compile.header import Header
-from .compile.compiling import read_cert, read_header, build
+from ..terminal.configuration import Configuration, GlobalData
+from ..compile.header import Header
+from ..compile.compiling import read_cert, read_header, build
 
 
-@__dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class Resource:
+    """Resource location's data"""
     type: str
     location: str
     content: str
 
 
-@__dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class Core:
+    """Inner working of JMC"""
     datapack: DataPack
     lexer: Lexer
     global_data: GlobalData
@@ -28,6 +27,7 @@ class Core:
 
 
 class PyJMC:
+    """Class representing JMC pack"""
     __slots__ = ("files",
                  "resource_locations",
                  "namespace",
