@@ -149,6 +149,10 @@ const howTo = (
             <CodeText type="operator">=</CodeText> my_objective{" "}
             <CodeText type="comment">{"//"} An existing objective</CodeText>
             <br />
+            <CodeText type="class">criteria</CodeText>{" "}
+            <CodeText type="operator">=</CodeText> used.carrot_on_a_stick{" "}
+            <CodeText type="comment">{"//"} An scoreboard criteria</CodeText>
+            <br />
             <CodeText type="class">Item</CodeText>{" "}
             <CodeText type="operator">=</CodeText> carrot_on_a_stick{" "}
             <CodeText type="comment">{"//"} A minecraft item's id</CodeText>

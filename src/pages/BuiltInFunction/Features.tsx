@@ -2,6 +2,7 @@ import Feature from "../../components/Feature";
 import CodeBlock, { CodeText, Command } from "../../components/CodeBlock";
 import howTo from "./HowTo";
 import formattedText from "./FormattedText";
+import { Tab } from "../../components/CodeBlock/CodeBlock";
 
 const BuildinFeatures = [
     howTo,
@@ -13,14 +14,12 @@ const BuildinFeatures = [
     >
         <p>
             Run commands on positive change of scoreboard and reset the score.
-            (Example of <code>Criteria</code> is{" "}
-            <code>used.carrot_on_a_stick</code>)
         </p>
         <Command
             name="Player.onEvent"
             type="LoadOnly"
             params={[
-                { key: "criteria", type: "Criteria" },
+                { key: "criteria", type: "criteria" },
                 { key: "function", type: "Function" },
             ]}
         />
@@ -804,6 +803,97 @@ const BuildinFeatures = [
                 { key: "source2", type: "string" },
                 { key: "path2", type: "Keyword" },
             ]}
+        />
+    </Feature>,
+    <Feature id="gui_template" summary="GUI.template()" keywords="create">
+        <p>
+            Create template for GUI that can be configured with{" "}
+            <code>GUI.register</code> and <code>GUI.registers</code> then create
+            the GUI with <code>GUI.create</code> and used with{" "}
+            <code>GUI.run</code>. GUI module doesn't work on Player's inventory.
+        </p>
+        <p>
+            Available modes are <code>entity</code>, <code>block</code> and{" "}
+            <code>enderchest</code>
+        </p>
+        <p>Example of template is</p>
+        <CodeBlock>
+            [<br />
+            <Tab />
+            <CodeText type="string">"---------"</CodeText>,<br />
+            <Tab />
+            <CodeText type="string">"---A-B---"</CodeText>,<br />
+            <Tab />
+            <CodeText type="string">"---------"</CodeText>
+            <br />]
+        </CodeBlock>
+        <Command
+            name="GUI.template"
+            type="LoadOnly"
+            params={[
+                { key: "name", type: "Keyword" },
+                { key: "template", type: "List<string>" },
+                { key: "mode", type: "Keyword" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="gui_register" summary="GUI.register()" keywords="map">
+        <p>Map an item to an id(chatacter) in template</p>
+        <Command
+            name="GUI.register"
+            type="LoadOnly"
+            params={[
+                { key: "name", type: "Keyword" },
+                { key: "id", type: "string" },
+                { key: "item", type: "Item" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+                { key: "lore", type: "List<FormattedString>", default: "[]" },
+                { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "onClick", type: "Function", default: "()=>{}" },
+                { key: "onClickAsGUI", type: "Function", default: "()=>{}" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature id="gui_registers" summary="GUI.registers()" keywords="map">
+        <p>
+            Map multiple items created from <code>Item.create</code> to an
+            id(chatacter) in template depending on variable
+        </p>
+        <Command
+            name="GUI.registers"
+            type="LoadOnly"
+            params={[
+                { key: "name", type: "Keyword" },
+                { key: "id", type: "string" },
+                { key: "items", type: "List<Keyword>" },
+                { key: "variable", type: "Scoreboard" },
+                { key: "onClick", type: "Function", default: "()=>{}" },
+                { key: "onClickAsGUI", type: "Function", default: "()=>{}" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature id="gui_create" summary="GUI.create()" keywords="template">
+        <p>
+            Create a GUI that's been configured from <code>GUI.template</code>,{" "}
+            <code>GUI.register</code> and <code>GUI.registers</code>
+        </p>
+        <Command
+            name="GUI.create"
+            type="LoadOnly"
+            params={[{ key: "name", type: "Keyword" }]}
+        />
+    </Feature>,
+    <Feature id="gui_run" summary="GUI.run()" keywords="">
+        <p>
+            Run a GUI, on entity/block. This function must be run every tick, as
+            the entity at the entity/at the block containing that GUI.
+        </p>
+        <Command
+            name="GUI.run"
+            type="JMCFunction"
+            params={[{ key: "name", type: "Keyword" }]}
         />
     </Feature>,
 ];
