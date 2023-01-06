@@ -91,6 +91,15 @@ const Function = () => {
                         <br />
                         <CodeText type="function">function_name</CodeText>
                         ();
+                        <br />
+                        schedule function{" "}
+                        <CodeText type="function">function_name</CodeText>
+                        ()
+                        {" <time> [append|replace];"}
+                        <br />
+                        schedule clear{" "}
+                        <CodeText type="function">function_name</CodeText>
+                        ();
                     </CodeBlock>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -107,6 +116,33 @@ const Function = () => {
                     <CodeBlock>
                         execute <CodeText type="operator">...</CodeText> run{" "}
                         {"{"}
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        You can also do the same with schedule command. Note
+                        that the function will lose its context such as the
+                        entity running it like normal schedule command.
+                    </p>
+                    <CodeBlock>
+                        schedule <CodeText type="operator">...</CodeText> {"{"}
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
+                        <br />
+                        {"}"} <br />
+                        schedule <CodeText type="operator">...</CodeText>{" "}
+                        replace {"{"}
                         <br />
                         <Tab />
                         say <CodeText type="string">"Code example 1"</CodeText>;
