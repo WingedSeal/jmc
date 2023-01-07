@@ -238,6 +238,7 @@ class FuncContent:
         if (
             token.token_type == TokenType.KEYWORD and
             (token.string in FIRST_ARGUMENTS or token.string in Header().commands) and
+            len(self.commands) > command_pos and
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
