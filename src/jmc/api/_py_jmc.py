@@ -6,7 +6,7 @@ from ..compile.lexer import Lexer
 
 from ..terminal.configuration import Configuration, GlobalData
 from ..compile.header import Header
-from ..compile.compiling import read_cert, read_header, build
+from ..compile.compiling import cert_config_to_string, read_cert, read_header, build
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,13 +27,22 @@ class Core:
 
 
 class PyJMC:
-    """Class representing JMC pack"""
+    """
+    Class representing JMC pack
+
+    :param namespace: Datapack namespace
+    :param description: Datapack description
+    :param pack_format: pack_format
+    :param target: Path of main jmc file
+    :param jmc_txt: jmc.txt content, defaults to { "LOAD": "__load__", "TICK": "__tick__", "PRIVATE": "__private__", "VAR": "__variable__", "INT": "__int__", "STORAGE": "__storage__" }
+    """
     __slots__ = ("files",
                  "resource_locations",
                  "namespace",
                  "config",
                  "core",
-                 "pack_mcmeta")
+                 "pack_mcmeta",
+                 "__cert_file")
     files: dict[Path, str]
     """Dictionary of path to the file and its content"""
     resource_locations: list[Resource]
@@ -46,9 +55,17 @@ class PyJMC:
     """Inner working of JMC"""
     pack_mcmeta: dict[str, dict[str, int | str]]
     """Content of pack.mcmeta file"""
+    __cert_file: str
 
     def __init__(self, namespace: str, description: str,
-                 pack_format: str, target: str) -> None:
+                 pack_format: str, target: str, jmc_txt: dict[str, str] = {
+                     "LOAD": "__load__",
+                     "TICK": "__tick__",
+                     "PRIVATE": "__private__",
+                     "VAR": "__variable__",
+                     "INT": "__int__",
+                     "STORAGE": "__storage__"
+                 }) -> None:
         self.config = Configuration(
             GlobalData(),
             namespace=namespace,
@@ -59,6 +76,7 @@ class PyJMC:
         )
 
         self.__build()
+        self.__cert_file = cert_config_to_string(jmc_txt)
         self.pack_mcmeta = {"pack": {
             "pack_format": int(self.config.pack_format),
             "description": self.config.description
@@ -70,7 +88,7 @@ class PyJMC:
         :return: Self
         """
         Header.clear()
-        read_cert(self.config)
+        read_cert(self.config, _test_file=self.__cert_file)
         read_header(self.config)
         lexer = Lexer(self.config)
         datapack = lexer.datapack
