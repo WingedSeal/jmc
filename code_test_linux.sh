@@ -3,7 +3,7 @@
 echo "====================================="
 echo "> Code Cyclomatic Complexity (radon)"
 echo "====================================="
-radon cc src/jmc --min C -s --total-average
+radon cc src/jmc --min C -s --total-average | grep 'Average complexity:'
 echo "====================================="
 echo "> Code Maintainability Index (radon) "
 echo "====================================="
