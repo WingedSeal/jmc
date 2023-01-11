@@ -1,5 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function"""
 
+import json
 import math
 from typing import Iterator
 
@@ -601,3 +602,95 @@ class GUIRun(JMCFunction):
                 self.raw_args["name"].token,
                 self.tokenizer, suggestion="Use GUI.create BEFORE running")
         return self.datapack.call_func(f"gui/{name}", "run")
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Advancement.revoke",
+    name="advancement_revoke",
+    arg_type= {
+        "target": ArgType.SELECTOR,
+        "selection": ArgType.STRING,
+        "advancement": ArgType.STRING,
+    },
+    defaults={
+        "advancement": ""
+    }
+)
+class AdvancementRevoke(JMCFunction):
+    def call(self) -> str:
+        advancement = self.args["advancement"]
+        target = self.args["target"]
+        selection = self.args["selection"]
+        with open("./jmc_config.json",'r') as f:
+            namespace = json.load(f)["namespace"]
+
+        if (not(selection in ["everything","from","only","through","until"])):
+            raise JMCValueError(
+                f"'{selection}' is not an valid argument",
+                self.raw_args["selection"].token,
+                self.tokenizer,
+                suggestion="valid arguments are: everything,from,only,through,until"
+            )
+            
+        if (selection == "everything" and advancement != ""):
+            raise JMCValueError(
+                f"Extra argument: 'advancement'",
+                None,
+                self.tokenizer
+            )
+
+        elif (advancement == ""):
+            raise JMCValueError(
+                f"Missing argument 'advancement'",
+                None,
+                self.tokenizer
+            )
+        
+        resource_location = f"{namespace}:{advancement}" if (selection != "everything") else ""
+        return f"advancement revoke {target} {selection} {resource_location}"
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Advancement.grant",
+    name="advancement_grant",
+    arg_type= {
+        "target": ArgType.SELECTOR,
+        "selection": ArgType.STRING,
+        "advancement": ArgType.STRING,
+    },
+    defaults={
+        "advancement": ""
+    }
+)
+class AdvancementGrant(JMCFunction):
+    def call(self) -> str:
+        advancement = self.args["advancement"]
+        target = self.args["target"]
+        selection = self.args["selection"]
+        with open("./jmc_config.json",'r') as f:
+            namespace = json.load(f)["namespace"]
+
+        if (not(selection in ["everything","from","only","through","until"])):
+            raise JMCValueError(
+                f"Invalid argument '{selection}'",
+                self.raw_args["selection"].token,
+                self.tokenizer,
+                suggestion="valid arguments are: everything,from,only,through,until"
+            )
+            
+        if (selection == "everything" and advancement != ""):
+            raise JMCValueError(
+                f"Extra argument: 'advancement'",
+                None,
+                self.tokenizer
+            )
+
+        elif (advancement == ""):
+            raise JMCValueError(
+                f"Missing argument 'advancement'",
+                None,
+                self.tokenizer
+            )
+        
+        resource_location = f"{namespace}:{advancement}" if (selection != "everything") else ""
+        return f"advancement grant {target} {selection} {resource_location}"
