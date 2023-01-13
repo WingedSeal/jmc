@@ -1,14 +1,13 @@
 """Module containing JMCFunction subclasses for custom JMC function"""
 
-import json
 import math
 from typing import Iterator
 
 from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError, JMCFileNotFoundError
-from ..utils import ArgType, FormattedText, NumberType
+from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
-from ....compile.datapack import DataPack
+from ...datapack_data import MinecraftAdvancements
 
 
 def drange(start: float | int, stop: float | int,
@@ -610,9 +609,9 @@ class GUIRun(JMCFunction):
     name="advancement_revoke",
     arg_type= {
         "target": ArgType.SELECTOR,
-        "selection": ArgType.STRING,
-        "advancement": ArgType.STRING,
-        "namespace": ArgType.STRING
+        "type": ArgType.KEYWORD,
+        "advancement": ArgType.KEYWORD,
+        "namespace": ArgType.KEYWORD
     },
     defaults={
         "advancement": "",
@@ -623,126 +622,42 @@ class AdvancementRevoke(JMCFunction):
     def call(self) -> str:
         advancement = self.args["advancement"]
         target = self.args["target"]
-        selection = self.args["selection"]
+        type = self.args["type"]
         namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
-        minecraft_advancements = [
-            'minecraft/advancement/adventure/root',
-            'minecraft/advancement/adventure/voluntary_exile',
-            'minecraft/advancement/adventure/kill_a_mob',
-            'minecraft/advancement/adventure/trade',
-            'minecraft/advancement/adventure/honey_block_slide',
-            'minecraft/advancement/adventure/ol_betsy',
-            'minecraft/advancement/adventure/sleep_in_bed',
-            'minecraft/advancement/adventure/hero_of_the_village',
-            'minecraft/advancement/adventure/throw_trident',
-            'minecraft/advancement/adventure/shoot_arrow',
-            'minecraft/advancement/adventure/kill_all_mobs',
-            'minecraft/advancement/adventure/totem_of_undying',
-            'minecraft/advancement/adventure/summon_iron_golem',
-            'minecraft/advancement/adventure/two_birds_one_arrow',
-            'minecraft/advancement/adventure/whos_the_pillager_now',
-            'minecraft/advancement/adventure/arbalistic',
-            'minecraft/advancement/adventure/adventuring_time',
-            'minecraft/advancement/adventure/very_very_frightening',
-            'minecraft/advancement/adventure/sniper_duel',
-            'minecraft/advancement/adventure/bullseye',
-            'minecraft/advancement/end/root',
-            'minecraft/advancement/end/kill_dragon',
-            'minecraft/advancement/end/dragon_egg',
-            'minecraft/advancement/end/enter_end_gateway',
-            'minecraft/advancement/end/respawn_dragon',
-            'minecraft/advancement/end/dragon_breath',
-            'minecraft/advancement/end/find_end_city',
-            'minecraft/advancement/end/elytra',
-            'minecraft/advancement/end/levitate',
-            'minecraft/advancement/husbandry/root',
-            'minecraft/advancement/husbandry/safely_harvest_honey',
-            'minecraft/advancement/husbandry/breed_an_animal',
-            'minecraft/advancement/husbandry/tame_an_animal',
-            'minecraft/advancement/husbandry/fishy_business',
-            'minecraft/advancement/husbandry/silk_touch_nest',
-            'minecraft/advancement/husbandry/plant_seed',
-            'minecraft/advancement/husbandry/breed_all_animals',
-            'minecraft/advancement/husbandry/complete_catalogue',
-            'minecraft/advancement/husbandry/tactical_fishing',
-            'minecraft/advancement/husbandry/balanced_diet',
-            'minecraft/advancement/husbandry/break_diamond_hoe',
-            'minecraft/advancement/husbandry/obtain_netherite_hoe',
-            'minecraft/advancement/nether/root',
-            'minecraft/advancement/nether/fast_travel',
-            'minecraft/advancement/nether/find_fortress',
-            'minecraft/advancement/nether/return_to_sender',
-            'minecraft/advancement/nether/obtain_blaze_rod',
-            'minecraft/advancement/nether/get_wither_skull',
-            'minecraft/advancement/nether/uneasy_alliance',
-            'minecraft/advancement/nether/brew_potion',
-            'minecraft/advancement/nether/summon_wither',
-            'minecraft/advancement/nether/all_potions',
-            'minecraft/advancement/nether/create_beacon',
-            'minecraft/advancement/nether/all_effects',
-            'minecraft/advancement/nether/create_full_beacon',
-            'minecraft/advancement/nether/find_bastion',
-            'minecraft/advancement/nether/obtain_ancient_debris',
-            'minecraft/advancement/nether/obtain_crying_obsidian',
-            'minecraft/advancement/nether/distract_piglin',
-            'minecraft/advancement/nether/ride_strider',
-            'minecraft/advancement/nether/loot_bastion',
-            'minecraft/advancement/nether/use_lodestone',
-            'minecraft/advancement/nether/netherite_armor',
-            'minecraft/advancement/nether/charge_respawn_anchor',
-            'minecraft/advancement/nether/explore_nether',
-            'minecraft/advancement/story/root',
-            'minecraft/advancement/story/mine_stone',
-            'minecraft/advancement/story/upgrade_tools',
-            'minecraft/advancement/story/smelt_iron',
-            'minecraft/advancement/story/obtain_armor',
-            'minecraft/advancement/story/lava_bucket',
-            'minecraft/advancement/story/iron_tools',
-            'minecraft/advancement/story/deflect_arrow',
-            'minecraft/advancement/story/form_obsidian',
-            'minecraft/advancement/story/mine_diamond',
-            'minecraft/advancement/story/enter_the_nether',
-            'minecraft/advancement/story/shiny_gear',
-            'minecraft/advancement/story/enchant_item',
-            'minecraft/advancement/story/cure_zombie_villager',
-            'minecraft/advancement/story/follow_ender_eye',
-            'minecraft/advancement/story/enter_the_end'
-        ]
-        files = list(self.datapack.defined_file_pos.keys())
+
+        files = self.datapack.jsons.keys()
 
         if namespace == "minecraft":
-            minecraft_files: list[str] = ['/'.join(i.split("/")[2:]) for i in files + minecraft_advancements if i.split("/")[0] == "minecraft"]
-            if advancement not in minecraft_files:
+            if not(f"minecraft/advancements/{advancement}" in MinecraftAdvancements().advancements or f"minecraft/advancements/{advancement}" in files):
                 raise JMCFileNotFoundError(f"'{advancement}' advancement in '{namespace}' is not defined or missing")
-        else:
-            namespace_files: list[str] = ['/'.join(i.split("/")[1:]) for i in files] 
-            if advancement not in namespace_files:
+        elif advancement:
+            if f"advancements/{advancement}" not in files:
                 raise JMCFileNotFoundError(f"'{advancement}' advancement in '{namespace}' is not defined or missing")
 
-        if (not(selection in ["everything","from","only","through","until"])):
+        if type not in {"everything","from","only","through","until"}:
             raise JMCValueError(
-                f"'{selection}' is not an valid argument",
-                self.raw_args["selection"].token,
+                f"'{type}' is not an valid argument",
+                self.raw_args["type"].token,
                 self.tokenizer,
                 suggestion="valid arguments are: everything,from,only,through,until"
             )
             
-        if (selection == "everything" and advancement != ""):
+        if type == "everything" and advancement != "":
             raise JMCValueError(
                 f"Extra argument: 'advancement'",
-                None,
+                self.raw_args["advancement"].token,
                 self.tokenizer
             )
 
-        elif (advancement == ""):
+        elif type != "everything" and not advancement:
             raise JMCValueError(
                 f"Missing argument 'advancement'",
-                None,
+                self.raw_args["advancement"].token,
                 self.tokenizer
             )
         
-        resource_location = f"{namespace}:{advancement}" if (selection != "everything") else ""
-        return f"advancement revoke {target} {selection} {resource_location}"
+        resource_location = f" {namespace}:{advancement}" if (type != "everything") else ""
+        return f"advancement revoke {target} {type}{resource_location}"
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
@@ -750,9 +665,9 @@ class AdvancementRevoke(JMCFunction):
     name="advancement_grant",
     arg_type= {
         "target": ArgType.SELECTOR,
-        "selection": ArgType.STRING,
-        "advancement": ArgType.STRING,
-        "namespace": ArgType.STRING
+        "type": ArgType.KEYWORD,
+        "advancement": ArgType.KEYWORD,
+        "namespace": ArgType.KEYWORD
     },
     defaults={
         "advancement": "",
@@ -764,123 +679,39 @@ class AdvancementGrant(JMCFunction):
     def call(self) -> str:
         advancement = self.args["advancement"]
         target = self.args["target"]
-        selection = self.args["selection"]
+        type = self.args["type"]
         namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
-        minecraft_advancements = [
-            'minecraft/advancement/adventure/root',
-            'minecraft/advancement/adventure/voluntary_exile',
-            'minecraft/advancement/adventure/kill_a_mob',
-            'minecraft/advancement/adventure/trade',
-            'minecraft/advancement/adventure/honey_block_slide',
-            'minecraft/advancement/adventure/ol_betsy',
-            'minecraft/advancement/adventure/sleep_in_bed',
-            'minecraft/advancement/adventure/hero_of_the_village',
-            'minecraft/advancement/adventure/throw_trident',
-            'minecraft/advancement/adventure/shoot_arrow',
-            'minecraft/advancement/adventure/kill_all_mobs',
-            'minecraft/advancement/adventure/totem_of_undying',
-            'minecraft/advancement/adventure/summon_iron_golem',
-            'minecraft/advancement/adventure/two_birds_one_arrow',
-            'minecraft/advancement/adventure/whos_the_pillager_now',
-            'minecraft/advancement/adventure/arbalistic',
-            'minecraft/advancement/adventure/adventuring_time',
-            'minecraft/advancement/adventure/very_very_frightening',
-            'minecraft/advancement/adventure/sniper_duel',
-            'minecraft/advancement/adventure/bullseye',
-            'minecraft/advancement/end/root',
-            'minecraft/advancement/end/kill_dragon',
-            'minecraft/advancement/end/dragon_egg',
-            'minecraft/advancement/end/enter_end_gateway',
-            'minecraft/advancement/end/respawn_dragon',
-            'minecraft/advancement/end/dragon_breath',
-            'minecraft/advancement/end/find_end_city',
-            'minecraft/advancement/end/elytra',
-            'minecraft/advancement/end/levitate',
-            'minecraft/advancement/husbandry/root',
-            'minecraft/advancement/husbandry/safely_harvest_honey',
-            'minecraft/advancement/husbandry/breed_an_animal',
-            'minecraft/advancement/husbandry/tame_an_animal',
-            'minecraft/advancement/husbandry/fishy_business',
-            'minecraft/advancement/husbandry/silk_touch_nest',
-            'minecraft/advancement/husbandry/plant_seed',
-            'minecraft/advancement/husbandry/breed_all_animals',
-            'minecraft/advancement/husbandry/complete_catalogue',
-            'minecraft/advancement/husbandry/tactical_fishing',
-            'minecraft/advancement/husbandry/balanced_diet',
-            'minecraft/advancement/husbandry/break_diamond_hoe',
-            'minecraft/advancement/husbandry/obtain_netherite_hoe',
-            'minecraft/advancement/nether/root',
-            'minecraft/advancement/nether/fast_travel',
-            'minecraft/advancement/nether/find_fortress',
-            'minecraft/advancement/nether/return_to_sender',
-            'minecraft/advancement/nether/obtain_blaze_rod',
-            'minecraft/advancement/nether/get_wither_skull',
-            'minecraft/advancement/nether/uneasy_alliance',
-            'minecraft/advancement/nether/brew_potion',
-            'minecraft/advancement/nether/summon_wither',
-            'minecraft/advancement/nether/all_potions',
-            'minecraft/advancement/nether/create_beacon',
-            'minecraft/advancement/nether/all_effects',
-            'minecraft/advancement/nether/create_full_beacon',
-            'minecraft/advancement/nether/find_bastion',
-            'minecraft/advancement/nether/obtain_ancient_debris',
-            'minecraft/advancement/nether/obtain_crying_obsidian',
-            'minecraft/advancement/nether/distract_piglin',
-            'minecraft/advancement/nether/ride_strider',
-            'minecraft/advancement/nether/loot_bastion',
-            'minecraft/advancement/nether/use_lodestone',
-            'minecraft/advancement/nether/netherite_armor',
-            'minecraft/advancement/nether/charge_respawn_anchor',
-            'minecraft/advancement/nether/explore_nether',
-            'minecraft/advancement/story/root',
-            'minecraft/advancement/story/mine_stone',
-            'minecraft/advancement/story/upgrade_tools',
-            'minecraft/advancement/story/smelt_iron',
-            'minecraft/advancement/story/obtain_armor',
-            'minecraft/advancement/story/lava_bucket',
-            'minecraft/advancement/story/iron_tools',
-            'minecraft/advancement/story/deflect_arrow',
-            'minecraft/advancement/story/form_obsidian',
-            'minecraft/advancement/story/mine_diamond',
-            'minecraft/advancement/story/enter_the_nether',
-            'minecraft/advancement/story/shiny_gear',
-            'minecraft/advancement/story/enchant_item',
-            'minecraft/advancement/story/cure_zombie_villager',
-            'minecraft/advancement/story/follow_ender_eye',
-            'minecraft/advancement/story/enter_the_end'
-        ]
-        files = list(self.datapack.defined_file_pos.keys())
+
+        files = self.datapack.jsons.keys()
 
         if namespace == "minecraft":
-            minecraft_files: list[str] = ['/'.join(i.split("/")[2:]) for i in files + minecraft_advancements if i.split("/")[0] == "minecraft"]
-            if advancement not in minecraft_files:
+            if not(f"minecraft/advancements/{advancement}" in MinecraftAdvancements().advancements or f"minecraft/advancements/{advancement}" in files):
                 raise JMCFileNotFoundError(f"'{advancement}' advancement in '{namespace}' is not defined or missing")
-        else:
-            namespace_files: list[str] = ['/'.join(i.split("/")[1:]) for i in files] 
-            if advancement not in namespace_files:
+        elif advancement:
+            if f"advancements/{advancement}" not in files:
                 raise JMCFileNotFoundError(f"'{advancement}' advancement in '{namespace}' is not defined or missing")
 
-        if (not(selection in ["everything","from","only","through","until"])):
+        if type not in {"everything","from","only","through","until"}:
             raise JMCValueError(
-                f"Invalid argument '{selection}'",
-                self.raw_args["selection"].token,
+                f"'{type}' is not an valid argument",
+                self.raw_args["type"].token,
                 self.tokenizer,
                 suggestion="valid arguments are: everything,from,only,through,until"
             )
             
-        if (selection == "everything" and advancement != ""):
+        if type == "everything" and advancement != "":
             raise JMCValueError(
                 f"Extra argument: 'advancement'",
-                None,
+                self.raw_args["advancement"].token,
                 self.tokenizer
             )
 
-        elif (advancement == ""):
+        elif type != "everything" and not advancement:
             raise JMCValueError(
                 f"Missing argument 'advancement'",
-                None,
+                self.raw_args["advancement"].token,
                 self.tokenizer
             )
         
-        resource_location = f"{namespace}:{advancement}" if (selection != "everything") else ""
-        return f"advancement grant {target} {selection} {resource_location}"
+        resource_location = f" {namespace}:{advancement}" if (type != "everything") else ""
+        return f"advancement grant {target} {type}{resource_location}"
