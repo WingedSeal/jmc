@@ -332,6 +332,9 @@ class Lexer:
             raise JMCSyntaxException(
                 "JSON content cannot be empty", command[3], tokenizer)
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
+        f = open(".jmccache/defined_files","w")
+        f.write(','.join(list(self.datapack.defined_file_pos.keys())))
+        f.close()
         self.datapack.jsons[json_path] = json
 
     def parse_class(self, tokenizer: Tokenizer,
