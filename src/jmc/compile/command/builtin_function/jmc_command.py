@@ -616,7 +616,7 @@ class GUIRun(JMCFunction):
     },
     defaults={
         "advancement": "",
-        "namespace": json.load(open("./jmc_config.json",'r'))["namespace"]
+        "namespace": ""
     }
 )
 class AdvancementRevoke(JMCFunction):
@@ -624,7 +624,7 @@ class AdvancementRevoke(JMCFunction):
         advancement = self.args["advancement"]
         target = self.args["target"]
         selection = self.args["selection"]
-        namespace = self.args["namespace"]
+        namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
         minecraft_advancements = [
             'minecraft/advancement/adventure/root',
             'minecraft/advancement/adventure/voluntary_exile',
@@ -708,10 +708,7 @@ class AdvancementRevoke(JMCFunction):
             'minecraft/advancement/story/follow_ender_eye',
             'minecraft/advancement/story/enter_the_end'
         ]
-
-        with open(".jmccache/defined_files",'r') as f:
-            files: list[str] = f.read().split(",")
-            f.close()
+        files = list(self.datapack.defined_file_pos.keys())
 
         if namespace == "minecraft":
             minecraft_files: list[str] = ['/'.join(i.split("/")[2:]) for i in files + minecraft_advancements if i.split("/")[0] == "minecraft"]
@@ -759,7 +756,7 @@ class AdvancementRevoke(JMCFunction):
     },
     defaults={
         "advancement": "",
-        "namespace": json.load(open("./jmc_config.json",'r'))["namespace"]
+        "namespace": ""
     }
 )
 
@@ -768,7 +765,7 @@ class AdvancementGrant(JMCFunction):
         advancement = self.args["advancement"]
         target = self.args["target"]
         selection = self.args["selection"]
-        namespace = self.args["namespace"]
+        namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
         minecraft_advancements = [
             'minecraft/advancement/adventure/root',
             'minecraft/advancement/adventure/voluntary_exile',
@@ -852,13 +849,10 @@ class AdvancementGrant(JMCFunction):
             'minecraft/advancement/story/follow_ender_eye',
             'minecraft/advancement/story/enter_the_end'
         ]
-
-        with open(".jmccache/defined_files",'r') as f:
-            files: list[str] = f.read().split(",")
-            f.close()
+        files = list(self.datapack.defined_file_pos.keys())
 
         if namespace == "minecraft":
-            minecraft_files: list[str] = ['/'.join(i.split("/")[2:]) for i in files if i.split("/")[0] == "minecraft"] + minecraft_advancements
+            minecraft_files: list[str] = ['/'.join(i.split("/")[2:]) for i in files + minecraft_advancements if i.split("/")[0] == "minecraft"]
             if advancement not in minecraft_files:
                 raise JMCFileNotFoundError(f"'{advancement}' advancement in '{namespace}' is not defined or missing")
         else:

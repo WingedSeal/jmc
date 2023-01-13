@@ -249,8 +249,6 @@ class Configuration:
             break
         self.output = output
 
-        os.makedirs(".jmccache",exist_ok=True)
-
     def __bool__(self) -> bool:
         return self.is_configed
 
