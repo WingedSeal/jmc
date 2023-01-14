@@ -91,7 +91,7 @@ class FuncContent:
     :param programs: List of commands(List of arguments(Token))
     :param is_load: Whether the function is a load function
     """
-    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "commands", "command", "is_expect_command", "is_execute", "lexer"
+    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "__commands", "command", "is_expect_command", "is_execute", "lexer"
 
     command: list[Token]
     is_expect_command: bool
@@ -104,7 +104,7 @@ class FuncContent:
         self.programs = programs
         self.is_load = is_load
         self.command_strings: list[str] = []
-        self.commands: list[str] = []
+        self.__commands: list[str] = []
         self.lexer = lexer
 
     def parse(self) -> list[str]:
@@ -138,12 +138,12 @@ class FuncContent:
             if self.lexer.if_else_box:
                 if self.command[0].string != "else":
                     append_commands(
-                        self.commands, self.lexer.parse_if_else(
+                        self.__commands, self.lexer.parse_if_else(
                             self.tokenizer))
 
-            if self.commands:
-                self.command_strings.append(" ".join(self.commands))
-                self.commands = []
+            if self.__commands:
+                self.command_strings.append(" ".join(self.__commands))
+                self.__commands = []
 
             self.__parse_commands()
         # End of Program
@@ -154,13 +154,13 @@ class FuncContent:
                 "Expected 'while'", self.programs[-1][-1], self.tokenizer)
         if self.lexer.if_else_box:
             append_commands(
-                self.commands,
+                self.__commands,
                 self.lexer.parse_if_else(
                     self.tokenizer))
 
-        if self.commands:
-            self.command_strings.append(" ".join(self.commands))
-            self.commands = []
+        if self.__commands:
+            self.command_strings.append(" ".join(self.__commands))
+            self.__commands = []
         return self.command_strings
 
     def __parse_commands(self) -> None:
@@ -187,34 +187,34 @@ class FuncContent:
         """
         if token.token_type != TokenType.KEYWORD:
             return False
-        if not self.commands:
+        if not self.__commands:
             return False
 
         # `execute as @s`
         if (
             token.string == "@s" and
-            self.commands[-1] == "as" and
-            self.commands[-2] not in {"rotated", "positioned"}
+            self.__commands[-1] == "as" and
+            self.__commands[-2] not in {"rotated", "positioned"}
         ):
 
-            self.commands[-1] = "if entity"
+            self.__commands[-1] = "if entity"
             return False
 
         # `execute run`
         if (
             token.string == "run"
-            and self.commands[-1] == "execute"
+            and self.__commands[-1] == "execute"
         ):
-            del self.commands[-1]
+            del self.__commands[-1]
             return True
 
         # `run execute`
         if (
             token.string == "execute"
-            and self.commands[-1] == "run"
-            and self.commands[0] == "execute"
+            and self.__commands[-1] == "run"
+            and self.__commands[0] == "execute"
         ):
-            del self.commands[-1]
+            del self.__commands[-1]
             return True
 
         return False
@@ -238,11 +238,11 @@ class FuncContent:
         if (
             token.token_type == TokenType.KEYWORD and
             (token.string in FIRST_ARGUMENTS or token.string in Header().commands) and
-            len(self.commands) > command_pos and
+            len(self.__commands) > command_pos and
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
-                self.commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
+                self.__commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
             ) and
             not is_connected(token, self.command[key_pos - 1])
         ):
@@ -253,28 +253,28 @@ class FuncContent:
             return
 
         if token.token_type == TokenType.PAREN_ROUND:
-            self.commands[-1], success = search_to_string(
-                self.commands[-1], token, DataPack.var_name, self.tokenizer)
+            self.__commands[-1], success = search_to_string(
+                self.__commands[-1], token, DataPack.var_name, self.tokenizer)
             if not success:
                 if is_connected(token, self.command[key_pos - 1]):
-                    self.commands[-1] += self.lexer.clean_up_paren_token(
+                    self.__commands[-1] += self.lexer.clean_up_paren_token(
                         token, self.tokenizer)
                 else:
                     append_commands(
-                        self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
+                        self.__commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             if is_connected(token, self.command[key_pos - 1]):
-                self.commands[-1] += self.lexer.clean_up_paren_token(
+                self.__commands[-1] += self.lexer.clean_up_paren_token(
                     token, self.tokenizer)
             else:
                 append_commands(
-                    self.commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
+                    self.__commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type == TokenType.STRING:
-            append_commands(self.commands, dumps(token.string))
+            append_commands(self.__commands, dumps(token.string))
         elif token.token_type in {TokenType.OPERATOR, TokenType.KEYWORD} and is_connected(token, self.command[key_pos - 1]):
-            self.commands[-1] += token.string
+            self.__commands[-1] += token.string
         else:
-            append_commands(self.commands, token.string)
+            append_commands(self.__commands, token.string)
 
     def __expect_command(self, key_pos: int, token: Token) -> bool:
         """
@@ -289,7 +289,7 @@ class FuncContent:
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
             if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
-                append_commands(self.commands, self.lexer.datapack.add_arrow_function(
+                append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
                     "anonymous", token, self.tokenizer))
                 return True
             raise JMCSyntaxException(
@@ -341,7 +341,7 @@ class FuncContent:
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
                     f"Custom function({token.string})'s argument is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
-            append_commands(self.commands,
+            append_commands(self.__commands,
                             f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True
 
@@ -368,7 +368,7 @@ class FuncContent:
 
         if self.__optimize(token):
             return False
-        append_commands(self.commands, token.string)
+        append_commands(self.__commands, token.string)
         return False
 
     def __is_number(self, key_pos: int, token: Token) -> None:
@@ -413,7 +413,7 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Newline found in say command", self.command[key_pos + 1], self.tokenizer, suggestion=r"Use '\\n' instead of '\n'")
         append_commands(
-            self.commands, f"say {self.command[key_pos+1].string}")
+            self.__commands, f"say {self.command[key_pos+1].string}")
 
     def __is_schedule(self, key_pos: int, token: Token) -> bool:
         if len(self.command) < key_pos + 3:
@@ -422,10 +422,10 @@ class FuncContent:
             self.command[key_pos + 2].token_type == TokenType.PAREN_CURLY
         ):
             # `schedule 1t {say "command";}`
-            append_commands(self.commands, "schedule")
-            append_commands(self.commands, self.lexer.datapack.add_arrow_function(
+            append_commands(self.__commands, "schedule")
+            append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
                 "anonymous", self.command[key_pos + 2], self.tokenizer, force_create_func=True))
-            append_commands(self.commands, self.command[key_pos + 1].string)
+            append_commands(self.__commands, self.command[key_pos + 1].string)
             return True
         if len(self.command) < key_pos + 4:
             return False
@@ -441,10 +441,10 @@ class FuncContent:
             if self.command[key_pos + 3].string != "()":
                 raise JMCSyntaxException(
                     f"'schedule' does not support argument is not supported.\nExpected empty bracket", self.command[key_pos + 3], self.tokenizer)
-            append_commands(self.commands, "schedule")
-            append_commands(self.commands, self.command[key_pos + 1].string)
+            append_commands(self.__commands, "schedule")
+            append_commands(self.__commands, self.command[key_pos + 1].string)
             append_commands(
-                self.commands,
+                self.__commands,
                 f"{self.lexer.datapack.namespace}:{convention_jmc_to_mc(self.command[key_pos + 2], self.tokenizer)}")
             if self.command[key_pos + 1].string == "clear":
                 if len(self.command) > key_pos + 4:
@@ -454,13 +454,13 @@ class FuncContent:
             if len(self.command) < key_pos + 5:
                 raise JMCSyntaxException(
                     f"Expected time in schedule call", self.command[key_pos + 4], self.tokenizer)
-            append_commands(self.commands, self.command[key_pos + 4].string)
+            append_commands(self.__commands, self.command[key_pos + 4].string)
             if len(self.command) == key_pos + 6:
                 if self.command[key_pos +
                                 5].string not in {"append", "replace"}:
                     raise JMCSyntaxException(
                         f"Expected 'append' or 'replace' (got {self.command[key_pos + 5]}", self.command[key_pos + 5], self.tokenizer)
-                append_commands(self.commands,
+                append_commands(self.__commands,
                                 self.command[key_pos + 5].string)
             if len(self.command) > key_pos + 6:
                 raise JMCSyntaxException(
@@ -474,11 +474,11 @@ class FuncContent:
                             2].string not in {"append", "replace"}:
                 raise JMCSyntaxException(
                     f"Expected 'append' or 'replace' (got {self.command[key_pos + 2]}", self.command[key_pos + 2], self.tokenizer)
-            append_commands(self.commands, "schedule")
-            append_commands(self.commands, self.lexer.datapack.add_arrow_function(
+            append_commands(self.__commands, "schedule")
+            append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
                 "anonymous", self.command[key_pos + 3], self.tokenizer, force_create_func=True))
-            append_commands(self.commands, self.command[key_pos + 1].string)
-            append_commands(self.commands, self.command[key_pos + 2].string)
+            append_commands(self.__commands, self.command[key_pos + 1].string)
+            append_commands(self.__commands, self.command[key_pos + 2].string)
             return True
         return False
 
@@ -486,12 +486,11 @@ class FuncContent:
         if len(
                 self.command) > key_pos + 1 and self.command[key_pos + 1].string == "run" and self.command[key_pos + 1].token_type == TokenType.KEYWORD:
             self.is_execute = True
-            append_commands(self.commands,
+            append_commands(self.__commands,
                             f"execute store result score {token.string} {DataPack.var_name}")
             return False
-
-        append_commands(self.commands, variable_operation(
-            self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute))
+        append_commands(self.__commands, variable_operation(
+            self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
         return True
 
     def __is_jmc_function(self, key_pos: int, token: Token) -> bool:
@@ -508,7 +507,7 @@ class FuncContent:
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
 
             self.lexer.datapack.used_command.add(token.string)
-            append_commands(self.commands, load_once_command(
+            append_commands(self.__commands, load_once_command(
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
             return True
 
@@ -519,7 +518,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
             self.lexer.datapack.used_command.add(token.string)
-            append_commands(self.commands, execute_excluded_command(
+            append_commands(self.__commands, execute_excluded_command(
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
             return True
 
@@ -531,7 +530,7 @@ class FuncContent:
             if not self.is_load:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
-            append_commands(self.commands, load_only_command(
+            append_commands(self.__commands, load_only_command(
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
             return True
 
@@ -540,7 +539,7 @@ class FuncContent:
             if len(self.command) > key_pos + 2:
                 raise JMCSyntaxException(
                     "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
-            append_commands(self.commands, jmc_command(
+            append_commands(self.__commands, jmc_command(
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
             return True
 
@@ -560,7 +559,7 @@ class FuncContent:
             return_value = flow_control_command(
                 self.command[key_pos:], self.lexer.datapack, self.tokenizer)
             if return_value is not None:
-                append_commands(self.commands, return_value)
+                append_commands(self.__commands, return_value)
             return True
         return False
 

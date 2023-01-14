@@ -1,16 +1,21 @@
 """Module handling variable operation"""
+from typing import TYPE_CHECKING
+
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType
 
+if TYPE_CHECKING:
+    from jmc.compile.lexer_func_content import FuncContent
+
 VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
     FuncType.VARIABLE_OPERATION)
 
 
 def variable_operation(
-        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool) -> str:
+        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool, FuncContent: type["FuncContent"], first_arguments: set[str]) -> str:
     """
     Parse statement for variable operation including custom JMC command that return and integer to be stored in scoreboard value
 
@@ -42,6 +47,18 @@ def variable_operation(
 
     operator = tokens[1].string
 
+    if operator == "=" and len(
+            tokens) > 2 and tokens[2].string in first_arguments:
+        func_content = FuncContent(tokenizer, [tokens[2:]],
+                                   is_load=False, lexer=datapack.lexer).parse()
+        if len(func_content) > 1:
+            raise JMCSyntaxException(
+                f"Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
+        if func_content[0].startswith("execute"):
+            # len("execute") = 7
+            return f"execute store result score {tokens[0].string} {DataPack.var_name} {func_content[0][7:]}"
+        return f"execute store result score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
+
     if operator in {"++", "--"}:
         if len(tokens) > 2:
             raise JMCSyntaxException(
@@ -50,6 +67,19 @@ def variable_operation(
             return f"scoreboard players add {tokens[0].string} {DataPack.var_name} 1"
         if operator == "--":
             return f"scoreboard players remove {tokens[0].string} {DataPack.var_name} 1"
+    elif operator == "?=":
+        if len(tokens) == 2:
+            raise JMCSyntaxException(
+                f"Expected command after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer)
+        func_content = FuncContent(tokenizer, [tokens[2:]],
+                                   is_load=False, lexer=datapack.lexer).parse()
+        if len(func_content) > 1:
+            raise JMCSyntaxException(
+                f"Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
+        if func_content[0].startswith("execute"):
+            # len("execute") = 7
+            return f"execute store success score {tokens[0].string} {DataPack.var_name} {func_content[0][7:]}"
+        return f"execute store success score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
     elif operator in {"*=", "+=", "-=", "*=", "/=", "%=", "++", "--", "><", "->", ">", "<", "="}:
         if len(tokens) == 2:
             raise JMCSyntaxException(

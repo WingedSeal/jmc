@@ -154,7 +154,7 @@ PAREN_PAIR = {
 }
 """Dictionary of left bracket(string) and right bracket(string)"""
 
-OPERATORS = {"+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&"}
+OPERATORS = {"+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&", "?"}
 
 
 class Tokenizer:

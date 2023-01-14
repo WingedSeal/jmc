@@ -145,6 +145,46 @@ execute store result score @s obj run scoreboard players get $x __variable__
 $x.get(key=value);
         """).build()
 
+    def test_store_result(self):
+        pack = JMCTestPack().set_jmc_file("""
+$currentAmmo = data get entity @s SelectedItem.tag.ammo;
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute store result score $currentAmmo __variable__ run data get entity @s SelectedItem.tag.ammo
+            """)
+        )
+
+    def test_store_success(self):
+        pack = JMCTestPack().set_jmc_file("""
+$currentAmmo ?= data get entity @s SelectedItem.tag.ammo;
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+  "values": [
+    "TEST:__load__"
+  ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute store success score $currentAmmo __variable__ run data get entity @s SelectedItem.tag.ammo
+            """)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
