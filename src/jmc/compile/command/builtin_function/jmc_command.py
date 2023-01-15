@@ -24,89 +24,6 @@ def drange(start: float | int, stop: float | int,
         yield result
         result += step
 
-MINECRAFT_ADVANCEMENTS = {
-    'adventure/root',
-    'adventure/voluntary_exile',
-    'adventure/kill_a_mob',
-    'adventure/trade',
-    'adventure/honey_block_slide',
-    'adventure/ol_betsy',
-    'adventure/sleep_in_bed',
-    'adventure/hero_of_the_village',
-    'adventure/throw_trident',
-    'adventure/shoot_arrow',
-    'adventure/kill_all_mobs',
-    'adventure/totem_of_undying',
-    'adventure/summon_iron_golem',
-    'adventure/two_birds_one_arrow',
-    'adventure/whos_the_pillager_now',
-    'adventure/arbalistic',
-    'adventure/adventuring_time',
-    'adventure/very_very_frightening',
-    'adventure/sniper_duel',
-    'adventure/bullseye',
-    'end/root',
-    'end/kill_dragon',
-    'end/dragon_egg',
-    'end/enter_end_gateway',
-    'end/respawn_dragon',
-    'end/dragon_breath',
-    'end/find_end_city',
-    'end/elytra',
-    'end/levitate',
-    'husbandry/root',
-    'husbandry/safely_harvest_honey',
-    'husbandry/breed_an_animal',
-    'husbandry/tame_an_animal',
-    'husbandry/fishy_business',
-    'husbandry/silk_touch_nest',
-    'husbandry/plant_seed',
-    'husbandry/breed_all_animals',
-    'husbandry/complete_catalogue',
-    'husbandry/tactical_fishing',
-    'husbandry/balanced_diet',
-    'husbandry/break_diamond_hoe',
-    'husbandry/obtain_netherite_hoe',
-    'nether/root',
-    'nether/fast_travel',
-    'nether/find_fortress',
-    'nether/return_to_sender',
-    'nether/obtain_blaze_rod',
-    'nether/get_wither_skull',
-    'nether/uneasy_alliance',
-    'nether/brew_potion',
-    'nether/summon_wither',
-    'nether/all_potions',
-    'nether/create_beacon',
-    'nether/all_effects',
-    'nether/create_full_beacon',
-    'nether/find_bastion',
-    'nether/obtain_ancient_debris',
-    'nether/obtain_crying_obsidian',
-    'nether/distract_piglin',
-    'nether/ride_strider',
-    'nether/loot_bastion',
-    'nether/use_lodestone',
-    'nether/netherite_armor',
-    'nether/charge_respawn_anchor',
-    'nether/explore_nether',
-    'story/root',
-    'story/mine_stone',
-    'story/upgrade_tools',
-    'story/smelt_iron',
-    'story/obtain_armor',
-    'story/lava_bucket',
-    'story/iron_tools',
-    'story/deflect_arrow',
-    'story/form_obsidian',
-    'story/mine_diamond',
-    'story/enter_the_nether',
-    'story/shiny_gear',
-    'story/enchant_item',
-    'story/cure_zombie_villager',
-    'story/follow_ender_eye',
-    'story/enter_the_end'
-}
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
@@ -690,11 +607,97 @@ class GUIRun(JMCFunction):
 
         return self.datapack.call_func(f"gui/{name}", "run")
 
+
+MINECRAFT_ADVANCEMENTS = {
+    "adventure/root",
+    "adventure/voluntary_exile",
+    "adventure/kill_a_mob",
+    "adventure/trade",
+    "adventure/honey_block_slide",
+    "adventure/ol_betsy",
+    "adventure/sleep_in_bed",
+    "adventure/hero_of_the_village",
+    "adventure/throw_trident",
+    "adventure/shoot_arrow",
+    "adventure/kill_all_mobs",
+    "adventure/totem_of_undying",
+    "adventure/summon_iron_golem",
+    "adventure/two_birds_one_arrow",
+    "adventure/whos_the_pillager_now",
+    "adventure/arbalistic",
+    "adventure/adventuring_time",
+    "adventure/very_very_frightening",
+    "adventure/sniper_duel",
+    "adventure/bullseye",
+    "end/root",
+    "end/kill_dragon",
+    "end/dragon_egg",
+    "end/enter_end_gateway",
+    "end/respawn_dragon",
+    "end/dragon_breath",
+    "end/find_end_city",
+    "end/elytra",
+    "end/levitate",
+    "husbandry/root",
+    "husbandry/safely_harvest_honey",
+    "husbandry/breed_an_animal",
+    "husbandry/tame_an_animal",
+    "husbandry/fishy_business",
+    "husbandry/silk_touch_nest",
+    "husbandry/plant_seed",
+    "husbandry/breed_all_animals",
+    "husbandry/complete_catalogue",
+    "husbandry/tactical_fishing",
+    "husbandry/balanced_diet",
+    "husbandry/break_diamond_hoe",
+    "husbandry/obtain_netherite_hoe",
+    "nether/root",
+    "nether/fast_travel",
+    "nether/find_fortress",
+    "nether/return_to_sender",
+    "nether/obtain_blaze_rod",
+    "nether/get_wither_skull",
+    "nether/uneasy_alliance",
+    "nether/brew_potion",
+    "nether/summon_wither",
+    "nether/all_potions",
+    "nether/create_beacon",
+    "nether/all_effects",
+    "nether/create_full_beacon",
+    "nether/find_bastion",
+    "nether/obtain_ancient_debris",
+    "nether/obtain_crying_obsidian",
+    "nether/distract_piglin",
+    "nether/ride_strider",
+    "nether/loot_bastion",
+    "nether/use_lodestone",
+    "nether/netherite_armor",
+    "nether/charge_respawn_anchor",
+    "nether/explore_nether",
+    "story/root",
+    "story/mine_stone",
+    "story/upgrade_tools",
+    "story/smelt_iron",
+    "story/obtain_armor",
+    "story/lava_bucket",
+    "story/iron_tools",
+    "story/deflect_arrow",
+    "story/form_obsidian",
+    "story/mine_diamond",
+    "story/enter_the_nether",
+    "story/shiny_gear",
+    "story/enchant_item",
+    "story/cure_zombie_villager",
+    "story/follow_ender_eye",
+    "story/enter_the_end"
+}
+
+
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Advancement.revoke",
     name="advancement_revoke",
-    arg_type= {
+    arg_type={
         "target": ArgType.SELECTOR,
         "type": ArgType.KEYWORD,
         "advancement": ArgType.KEYWORD,
@@ -712,32 +715,31 @@ class AdvancementRevoke(JMCFunction):
         type_ = self.args["type"]
         namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
 
-        files = self.datapack.jsons.keys()
-
         if namespace == "minecraft":
-            if not(f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in files):
+            if not (
+                    f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
         elif advancement:
-            if f"advancements/{advancement}" not in files:
+            if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
 
-        if type_ not in {"everything","from","only","through","until"}:
+        if type_ not in {"everything", "from", "only", "through", "until"}:
             raise JMCValueError(
                 f"'{type_}' is not an valid argument",
                 self.raw_args["type"].token,
                 self.tokenizer,
                 suggestion="valid arguments are: everything,from,only,through,until"
             )
-            
-        if type_ == "everything" and advancement != "":
+
+        if type_ == "everything" and advancement:
             raise JMCValueError(
                 f"Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
@@ -750,15 +752,17 @@ class AdvancementRevoke(JMCFunction):
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )
-        
-        resource_location = f" {namespace}:{advancement}" if (type_ != "everything") else ""
+
+        resource_location = f" {namespace}:{advancement}" if (
+            type_ != "everything") else ""
         return f"advancement revoke {target} {type_}{resource_location}"
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Advancement.grant",
     name="advancement_grant",
-    arg_type= {
+    arg_type={
         "target": ArgType.SELECTOR,
         "type": ArgType.KEYWORD,
         "advancement": ArgType.KEYWORD,
@@ -769,7 +773,6 @@ class AdvancementRevoke(JMCFunction):
         "namespace": ""
     }
 )
-
 class AdvancementGrant(JMCFunction):
     def call(self) -> str:
         advancement = self.args["advancement"]
@@ -777,32 +780,31 @@ class AdvancementGrant(JMCFunction):
         type_ = self.args["type"]
         namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
 
-        files = self.datapack.jsons.keys()
-
         if namespace == "minecraft":
-            if not(f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in files):
+            if not (
+                    f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
         elif advancement:
-            if f"advancements/{advancement}" not in files:
+            if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
 
-        if type_ not in {"everything","from","only","through","until"}:
+        if type_ not in {"everything", "from", "only", "through", "until"}:
             raise JMCValueError(
                 f"'{type_}' is not an valid argument",
                 self.raw_args["type"].token,
                 self.tokenizer,
                 suggestion="valid arguments are: everything,from,only,through,until"
             )
-            
-        if type_ == "everything" and advancement != "":
+
+        if type_ == "everything" and advancement:
             raise JMCValueError(
                 f"Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
@@ -815,6 +817,7 @@ class AdvancementGrant(JMCFunction):
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )
-        
-        resource_location = f" {namespace}:{advancement}" if (type_ != "everything") else ""
+
+        resource_location = f" {namespace}:{advancement}" if (
+            type_ != "everything") else ""
         return f"advancement grant {target} {type_}{resource_location}"
