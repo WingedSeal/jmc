@@ -85,12 +85,14 @@ INT=__int__"""
         """
         logger.info("Building from JMCPack")
         Header.clear()
-        read_cert(self.config, _test_file=self.cert)
+        is_delete, cert_config, cert_file = read_cert(
+            self.config, _test_file=self.cert)
         read_header(self.config, _test_file=self.header_file)
         lexer = Lexer(self.config, _test_file=self.jmc_file)
         built = build(
             lexer.datapack,
             self.config,
+            is_delete, cert_config, cert_file,
             _is_virtual=True)
         if built is None:
             raise ValueError

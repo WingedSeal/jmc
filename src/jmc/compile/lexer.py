@@ -46,20 +46,35 @@ class Lexer:
 
     :param config: JMC configuration
     """
+    __slots__ = (
+        "if_else_box",
+        "load_tokenizer",
+        "do_while_box",
+        "imports",
+        "config",
+        "datapack")
+
+    if_else_box: list[tuple[Token | None, Token]]
+    """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
     load_tokenizer: Tokenizer
     """Tokenizer for load function"""
-    do_while_box: Token | None = None
+    do_while_box: Token | None
     """paren_curly token for code block of `do` in `do while`"""
+    imports: set[Path]
+    """Set of path that's already imported"""
+    config: "Configuration"
+    """JMC configuration"""
+    datapack: DataPack
+    """Datapack object"""
 
     def __init__(self, config: "Configuration",
                  _test_file: str | None = None) -> None:
         logger.debug("Initializing Lexer")
-        self.if_else_box: list[tuple[Token | None, Token]] = []
-        """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
+        self.do_while_box = None
+        self.imports = set()
+        self.if_else_box = []
         self.config = config
-        """JMC configuration"""
         self.datapack = DataPack(config.namespace, self)
-        """Datapack object"""
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 

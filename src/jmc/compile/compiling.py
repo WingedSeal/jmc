@@ -29,12 +29,12 @@ def compile_jmc(config: "Configuration", debug: bool = False) -> None:
     logger.info("Configuration:\n" + dumps(config.toJSON(), indent=2))
     Header.clear()
     read_header(config)
-    read_cert(config)
+    is_delete, cert_config, cert_file = read_cert(config)
     logger.info("Parsing")
     lexer = Lexer(config)
     if debug:
         logger.info(f"Datapack :{lexer.datapack!r}")
-    build(lexer.datapack, config)
+    build(lexer.datapack, config, is_delete, cert_config, cert_file)
 
 
 def cert_config_to_string(cert_config: dict[str, str]) -> str:
@@ -155,16 +155,17 @@ def rmtree(path: Path, directory_exceptions: set[Path]) -> None:
         folder.rmdir()
 
 
-def read_cert(config: "Configuration", _test_file: str | None = None):
+def read_cert(config: "Configuration", _test_file: str |
+              None = None) -> tuple[bool, dict[str, str], Path]:
     """
     Read Certificate(JMC.txt)
 
     :param config: JMC configuration
     :param _test_file: Used for testing purposes
+    :return: Whether to delete the namespace folder or not, cert_config and cert_file
     :raises JMCBuildError: Can't find JMC.txt
     """
     namespace_folder = Path(config.output) / "data" / config.namespace
-    minecraft_folder = Path(config.output) / "data" / "minecraft"
     cert_file = namespace_folder / JMC_CERT_FILE_NAME
     old_cert_config = get_cert()
     if namespace_folder.is_dir() or _test_file is not None:
@@ -194,25 +195,12 @@ def read_cert(config: "Configuration", _test_file: str | None = None):
             "STORAGE", old_cert_config["STORAGE"])
         cert_config = get_cert()
         if _test_file is None:
-            statics = Header().statics
-            if statics:
-                rmtree(namespace_folder, statics)
-            else:
-                try:
-                    shutil.rmtree(namespace_folder)
-                except OSError as error:
-                    raise JMCBuildError(
-                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
-            if minecraft_folder.is_dir():
-                try:
-                    shutil.rmtree(minecraft_folder)
-                except OSError as error:
-                    raise JMCBuildError(
-                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+            return True, cert_config, cert_file
     else:
         cert_config = old_cert_config
     if _test_file is None:
         make_cert(cert_config, cert_file)
+    return False, cert_config, cert_file
 
 
 def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
@@ -262,7 +250,7 @@ def post_process(string: str) -> str:
     return string
 
 
-def build(datapack: DataPack, config: "Configuration",
+def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_config: dict[str, str], cert_file: Path,
           _is_virtual: bool = False) -> dict[Path, str] | None:
     """
     Build and write files for minecraft datapack
@@ -279,8 +267,29 @@ def build(datapack: DataPack, config: "Configuration",
     datapack.build()
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
+    minecraft_folder = output_folder / "data" / "minecraft"
     functions_tags_folder = output_folder / \
         "data" / "minecraft" / "tags" / "functions"
+
+    if is_delete:
+        statics = Header().statics
+        if statics:
+            rmtree(namespace_folder, statics)
+        else:
+            try:
+                shutil.rmtree(namespace_folder)
+            except OSError as error:
+                raise JMCBuildError(
+                    "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+        if minecraft_folder.is_dir():
+            try:
+                shutil.rmtree(minecraft_folder)
+            except OSError as error:
+                raise JMCBuildError(
+                    "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+
+    if not _is_virtual:
+        make_cert(cert_config, cert_file)
 
     if not _is_virtual:
         functions_tags_folder.mkdir(exist_ok=True, parents=True)

@@ -88,11 +88,18 @@ class PyJMC:
         :return: Self
         """
         Header.clear()
-        read_cert(self.config, _test_file=self.__cert_file)
+        is_delete, cert_config, cert_file = read_cert(
+            self.config, _test_file=self.__cert_file)
         read_header(self.config)
         lexer = Lexer(self.config)
         datapack = lexer.datapack
-        built = build(datapack, self.config, _is_virtual=True)
+        built = build(
+            datapack,
+            self.config,
+            is_delete,
+            cert_config,
+            cert_file,
+            _is_virtual=True)
         if built is None:
             raise ValueError("Lexer.built return None")
         self.files = built
