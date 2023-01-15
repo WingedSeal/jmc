@@ -283,10 +283,11 @@ class Lexer:
                 "Expected (", command[1], tokenizer)
         if len(command) < 4:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, col_length=True)
-        if command[3].token_type != TokenType.PAREN_CURLY:
+                "Expected { or [", command[2], tokenizer, col_length=True)
+        if command[3].token_type not in {
+                TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             raise JMCSyntaxException(
-                "Expected {", command[3], tokenizer)
+                "Expected { or [", command[3], tokenizer)
 
         json_type = convention_jmc_to_mc(
             command[1], tokenizer, is_make_lower=False)
