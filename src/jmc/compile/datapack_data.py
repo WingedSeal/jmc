@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..compile.tokenizer import Token
 
-
 @dataclass(slots=True, frozen=True, eq=True)
 class Item:
     item_type: str
