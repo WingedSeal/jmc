@@ -61,7 +61,7 @@ COMMANDS = {
     "weather",
     "whitelist",
     "worldborder",
-    "xp"
+    "xp",
     # OP Level 3-4
     "jfr",
     "perf",

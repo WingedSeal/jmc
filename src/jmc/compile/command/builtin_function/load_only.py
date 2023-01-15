@@ -888,8 +888,8 @@ class GUICreate(JMCFunction):
         item_tags = f"#{self.datapack.namespace}:{self.datapack.private_name}/gui/{name}"
 
         reset_commands = gui.get_reset_commands()
-        reset_commands.append("kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{name:%s}}}}]" % repr(
-            name),)
+        # reset_commands.append("kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{name:%s}}}}]" % repr(
+        #     name),)
         reset = self.datapack.add_raw_private_function(
             f"gui/{name}", reset_commands, "reset")
 

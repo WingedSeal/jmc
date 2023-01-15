@@ -600,4 +600,9 @@ class GUIRun(JMCFunction):
                 f"GUI Template '{name}' was never created",
                 self.raw_args["name"].token,
                 self.tokenizer, suggestion="Use GUI.create BEFORE running")
+
+        if self.is_never_used():
+            self.datapack.add_tick_command(
+                "kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{}}}}]", is_after=True)
+
         return self.datapack.call_func(f"gui/{name}", "run")

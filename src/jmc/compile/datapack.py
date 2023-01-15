@@ -133,7 +133,7 @@ class DataPack:
                 "functions", "load_function", "jsons",
                 "private_functions", "private_function_count",
                 "__scoreboards", "loads", "ticks", "namespace",
-                "used_command", "lexer", "defined_file_pos")
+                "used_command", "lexer", "defined_file_pos", "after_ticks", "after_loads")
     private_name = "__private__"
     load_name = "__load__"
     tick_name = "__tick__"
@@ -167,6 +167,10 @@ class DataPack:
         """Output list of commands for load"""
         self.ticks: list[str] = []
         """Output list of commands for tick"""
+        self.after_loads: list[str] = []
+        """Output list of commands at the end of load"""
+        self.after_ticks: list[str] = []
+        """Output list of commands at the end of tick"""
         self.namespace = namespace
         """Datapack's namespace"""
 
@@ -331,21 +335,31 @@ class DataPack:
         return self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
-    def add_tick_command(self, command: str) -> None:
+    def add_tick_command(self, command: str, *,
+                         is_after: bool = False) -> None:
         """
-        Add command to self.ticks
+        Add command to self.ticks or self.after_ticks
 
         :param command: Minecraft command string
+        :param is_after: Whether to add it to after_ticks instead
         """
-        self.ticks.append(command)
+        if is_after:
+            self.after_ticks.append(command)
+        else:
+            self.ticks.append(command)
 
-    def add_load_command(self, command: str) -> None:
+    def add_load_command(self, command: str, *,
+                         is_after: bool = False) -> None:
         """
-        Add command to self.loads
+        Add command to self.loads or self.after_loads
 
         :param command: Minecraft command string
+        :param is_after: Whether to add it to after_loads instead
         """
-        self.loads.append(command)
+        if is_after:
+            self.after_loads.append(command)
+        else:
+            self.loads.append(command)
 
     def add_int(self, integer: int) -> None:
         """
@@ -369,11 +383,19 @@ class DataPack:
         ]
         if self.loads:
             self.functions[self.load_name].insert_extend(self.loads, 0)
+        if self.after_loads:
+            self.functions[self.load_name].extend(self.after_loads)
         if self.ticks:
             if self.tick_name in self.functions:
                 self.functions[self.tick_name].insert_extend(self.ticks, 0)
             else:
                 self.functions[self.tick_name] = Function(self.ticks)
+        if self.after_ticks:
+            if self.tick_name in self.functions:
+                self.functions[self.tick_name].extend(
+                    self.after_ticks)
+            else:
+                self.functions[self.tick_name] = Function(self.after_ticks)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func

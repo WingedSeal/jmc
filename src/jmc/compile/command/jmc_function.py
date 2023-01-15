@@ -289,7 +289,7 @@ class JMCFunction:
         """
         Add current function to datapack.used_command and return whether it's not already there
 
-        :param call_string: Any string instead of default call string for more specific check. For example, minecraft command
+        :param call_string: Any string instead of default call string for more specific check. For example, minecraft command, defaults to self.call_string
         :param parameters: Details of call_string
         :return: Whether this function has never been called by the user before
         """
