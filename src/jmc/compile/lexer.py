@@ -31,11 +31,17 @@ JSON_FILE_TYPES = [
     "worldgen/biome",
     "worldgen/configured_carver",
     "worldgen/configured_feature",
-    "worldgen/configured_structure_feature",
     "worldgen/configured_surface_builder",
+    "worldgen/density_function",
+    "worldgen/flat_level_generator_preset",
+    "worldgen/noise",
     "worldgen/noise_settings",
+    "worldgen/placed_feature",
     "worldgen/processor_list",
+    "worldgen/structure",
+    "worldgen/structure_set",
     "worldgen/template_pool",
+    "worldgen/world_preset"
 ]
 """List of all possible vanilla json file types"""
 
