@@ -130,7 +130,7 @@ class Configuration:
         Read configuration file
         """
         try:
-            with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("r") as file:
+            with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("r", encoding="utf-8") as file:
                 json = load(file)
             self.namespace = json["namespace"]
             self.description = json["description"]
@@ -156,7 +156,7 @@ class Configuration:
         pprint(
             f"Your configuration has been saved to {self.global_data.CONFIG_FILE_NAME}", Colors.INFO
         )
-        with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("w") as file:
+        with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("w", encoding="utf-8") as file:
             dump(self.toJSON(), file, indent=2)
 
     def ask_and_save(self):

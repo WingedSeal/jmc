@@ -77,9 +77,9 @@ def __log_debug() -> None:
     logger.info("Requesting debug log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     debug_log = get_debug_log()
-    with (global_data.LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open("w+") as file:
+    with (global_data.LOG_PATH / datetime.now().strftime("JMC_DEBUG - %y-%m-%d %H.%M.%S.log")).open("w+", encoding="utf-8") as file:
         file.write(debug_log)
-    with (global_data.LOG_PATH / "latest.log").open("w+") as file:
+    with (global_data.LOG_PATH / "latest.log").open("w+", encoding="utf-8") as file:
         file.write(debug_log)
 
 
@@ -87,9 +87,9 @@ def __log_info() -> None:
     logger.info("Requesting info log")
     global_data.LOG_PATH.mkdir(exist_ok=True)
     info_log = get_info_log()
-    with (global_data.LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open("w+") as file:
+    with (global_data.LOG_PATH / datetime.now().strftime("JMC_INFO - %y-%m-%d %H.%M.%S.log")).open("w+", encoding="utf-8") as file:
         file.write(info_log)
-    with (global_data.LOG_PATH / "latest.log").open("w+") as file:
+    with (global_data.LOG_PATH / "latest.log").open("w+", encoding="utf-8") as file:
         file.write(info_log)
 
 
@@ -152,7 +152,7 @@ Type `cancel` to cancel
     else:
         pprint(f"Current {key}: {config_json[key]}", Colors.YELLOW)
         config_json[key] = get_input("New Value: ")
-        with (global_data.cwd / global_data.CONFIG_FILE_NAME).open("w") as file:
+        with (global_data.cwd / global_data.CONFIG_FILE_NAME).open("w", encoding="utf-8") as file:
             dump(config_json, file, indent=2)
 
         global_data.config.load_config()

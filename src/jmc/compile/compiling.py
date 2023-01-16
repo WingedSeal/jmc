@@ -71,7 +71,7 @@ def make_cert(cert_config: dict[str, str], path: Path) -> None:
     :param path: Path to write `cert_config` to
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w+") as file:
+    with path.open("w+", encoding="utf-8") as file:
         file.write(cert_config_to_string(cert_config))
 
 
@@ -173,7 +173,7 @@ def read_cert(config: "Configuration", _test_file: str |
             raise JMCBuildError(
                 f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself.")
         if _test_file is None:
-            with cert_file.open("r") as file:
+            with cert_file.open("r", encoding="utf-8") as file:
                 cert_str = file.read()
         else:
             cert_str = _test_file
@@ -214,7 +214,7 @@ def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
     :return: Content of function tag file in dictionary
     """
     if path.is_file():
-        with path.open("r") as file:
+        with path.open("r", encoding="utf-8") as file:
             content = file.read()
         try:
             json: dict[str, Any] = loads(content)
@@ -305,7 +305,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     if _is_virtual:
         output[load_tag] = dumps(load_json, indent=2)
     else:
-        with load_tag.open("w+") as file:
+        with load_tag.open("w+", encoding="utf-8") as file:
             dump(load_json, file, indent=2)
 
     if DataPack.tick_name in datapack.functions and datapack.functions[DataPack.tick_name]:
@@ -314,7 +314,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
         if _is_virtual:
             output[tick_tag] = dumps(tick_json, indent=2)
         else:
-            with tick_tag.open("w+") as file:
+            with tick_tag.open("w+", encoding="utf-8") as file:
                 dump(tick_json, file, indent=2)
 
     for func_path, func in datapack.functions.items():
@@ -330,7 +330,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 output[path] = content
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                with path.open("w+") as file:
+                with path.open("w+", encoding="utf-8") as file:
                     file.write(content)
 
     for json_path, json in datapack.jsons.items():
@@ -345,12 +345,12 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 output[path] = dumps(json, indent=2)
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                with path.open("w+") as file:
+                with path.open("w+", encoding="utf-8") as file:
                     dump(json, file, indent=2)
     if _is_virtual:
         return output
 
-    with (output_folder / "pack.mcmeta").open("w+") as file:
+    with (output_folder / "pack.mcmeta").open("w+", encoding="utf-8") as file:
         dump({
             "pack": {
                 "pack_format": int(config.pack_format),

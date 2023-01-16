@@ -118,7 +118,7 @@ class Lexer:
         file_path_str = file_path.resolve().as_posix()
         if _test_file is None:
             try:
-                with file_path.open("r") as file:
+                with file_path.open("r", encoding="utf-8") as file:
                     raw_string = file.read()
             except FileNotFoundError as error:
                 raise JMCFileNotFoundError(

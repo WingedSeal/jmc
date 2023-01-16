@@ -153,7 +153,7 @@ def __parse_header(header_str: str, file_name: str,
             header_file = parent_target / new_file_name
             if not header_file.is_file():
                 raise HeaderFileNotFoundError(header_file)
-            with header_file.open("r") as file:
+            with header_file.open("r", encoding="utf-8") as file:
                 header_str = file.read()
             logger.info(f"Parsing {header_file}")
             if header.is_header_exist(header_file):
