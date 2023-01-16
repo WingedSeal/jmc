@@ -29,12 +29,18 @@ const Header = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Replace a keyword with another keyword
+                        Replace a keyword with other token(s). This process will
+                        happen before the compilation.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#define</CodeText> replacement
-                        original_keyword
+                        <CodeText type="operator">#define</CodeText> A B C
                     </CodeBlock>
+                    <p>
+                        <Tab />
+                        Means define <code>A</code> as <code>B C</code> and
+                        every keyword <code>A</code> in the <code>.jmc</code>{" "}
+                        will be replaced with <code>B C</code>.
+                    </p>
                     <p>
                         <Tab />
                         Example
@@ -51,6 +57,24 @@ const Header = () => {
                         say <CodeText type="string">"Run every tick"</CodeText>;
                         <br />
                         {"}"}
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        You can also use macro factory to modify the token
+                        inside the other tokens dynamically.
+                    </p>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#define</CodeText> createObj (
+                        <CodeText type="param">x</CodeText>) scoreboard
+                        objectives add x dummy
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="function">createObj</CodeText>(
+                        <CodeText type="param">my_obj</CodeText>);
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">

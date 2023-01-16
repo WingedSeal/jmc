@@ -31,6 +31,16 @@ const JsonFiles = () => {
                         <br />
                         {"}"}
                     </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="keyword">new</CodeText>{" "}
+                        <CodeText type="class">file_type</CodeText>
+                        (folder_name.file_name) {"["}
+                        <br />
+                        <Tab />
+                        JSON content
+                        <br />
+                        {"]"};
+                    </CodeBlock>
                     <p>Example:</p>
                     <CodeBlock>
                         <CodeText type="keyword">new</CodeText>{" "}

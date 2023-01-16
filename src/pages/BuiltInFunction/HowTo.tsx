@@ -149,7 +149,7 @@ const howTo = (
             <CodeText type="operator">=</CodeText> my_objective{" "}
             <CodeText type="comment">{"//"} An existing objective</CodeText>
             <br />
-            <CodeText type="class">criteria</CodeText>{" "}
+            <CodeText type="class">Criteria</CodeText>{" "}
             <CodeText type="operator">=</CodeText> used.carrot_on_a_stick{" "}
             <CodeText type="comment">{"//"} An scoreboard criteria</CodeText>
             <br />

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 
@@ -27,14 +28,12 @@ const Variable = () => {
                         minecraft scoreboard works, you can assign a variable
                         without declaring it.
                         <CodeBlock>
-                            <CodeText type="operator">$</CodeText>
-                            {"<variable> "}
+                            <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
                             <CodeText type="operator">=</CodeText>{" "}
                             <CodeText type="number">{"<integer>"}</CodeText>;
                         </CodeBlock>
                         <CodeBlock>
-                            <CodeText type="operator">$</CodeText>
-                            {"my_variable "}
+                            <CodeText type="variable">$my_variable</CodeText>{" "}
                             <CodeText type="operator">=</CodeText>{" "}
                             <CodeText type="number">5</CodeText>;
                         </CodeBlock>
@@ -78,27 +77,26 @@ const Variable = () => {
                         </li>
                     </ul>
                     <CodeBlock>
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable> "}
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
                         <CodeText type="operator">{"<operator>"}</CodeText>{" "}
                         <CodeText type="number">{"<integer>"}</CodeText>; <br />
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable> "}
+                        <CodeText type="variable">
+                            {"$<variable>"}
+                        </CodeText>{" "}
                         <CodeText type="operator">{"<operator>"}</CodeText>{" "}
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"};
+                        <CodeText type="variable">{"$<variable>"}</CodeText>;
                         <br />
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable> "}
+                        <CodeText type="variable">
+                            {"$<variable>"}
+                        </CodeText>{" "}
                         <CodeText type="operator">{"<operator>"}</CodeText>{" "}
                         objective
                         <CodeText type="operator">:</CodeText>
                         selector;
                     </CodeBlock>
                     <CodeBlock>
-                        <CodeText type="operator">$</CodeText>
-                        my_variable <CodeText type="operator">+=</CodeText>{" "}
-                        my_objective
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">+=</CodeText> my_objective
                         <CodeText type="operator">:</CodeText>
                         <CodeText type="param">@s</CodeText>;
                     </CodeBlock>
@@ -112,8 +110,7 @@ const Variable = () => {
                         scoreboard
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"}
+                        <CodeText type="variable">{"$<variable>"}</CodeText>
                         <CodeText type="operator">{"->"}</CodeText>objective
                         <CodeText type="operator">:</CodeText>
                         selector;
@@ -126,28 +123,32 @@ const Variable = () => {
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
                         <li>
                             <code>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable>"}
+                                <CodeText type="variable">
+                                    {"$<variable>"}
+                                </CodeText>
                                 <CodeText type="operator">++</CodeText>
                             </code>{" "}
                             is equivalent to{" "}
                             <code>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable> "}
+                                <CodeText type="variable">
+                                    {"$<variable>"}
+                                </CodeText>{" "}
                                 <CodeText type="operator">+=</CodeText>{" "}
                                 <CodeText type="number">1</CodeText>;
                             </code>
                         </li>
                         <li>
                             <code>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable>"}
+                                <CodeText type="variable">
+                                    {"$<variable>"}
+                                </CodeText>
                                 <CodeText type="operator">--</CodeText>
                             </code>{" "}
                             is equivalent to{" "}
                             <code>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable> "}
+                                <CodeText type="variable">
+                                    {"$<variable>"}
+                                </CodeText>{" "}
                                 <CodeText type="operator">-=</CodeText>{" "}
                                 <CodeText type="number">1</CodeText>;
                             </code>
@@ -172,7 +173,7 @@ const Variable = () => {
                         <CodeText type="param">@s</CodeText> Motion[
                         <CodeText type="number">0</CodeText>] double{" "}
                         <CodeText type="number">0.01</CodeText> run{" "}
-                        <CodeText type="operator">$</CodeText>var
+                        <CodeText type="variable">$var</CodeText>
                         <CodeText type="operator">.</CodeText>
                         <CodeText type="function">get</CodeText>();
                     </CodeBlock>
@@ -192,13 +193,50 @@ const Variable = () => {
                         code. To change the style, pass argument(s) into the
                         method.
                     </p>
+                    <p className="text-warning">
+                        <Tab />
+                        Using{" "}
+                        <Link to="/documentation/built-in-function">
+                            FormattedText
+                        </Link>{" "}
+                        is prefered over <code>.toString</code>
+                    </p>
                     <CodeBlock>
                         tellraw <CodeText type="param">@a</CodeText>{" "}
-                        <CodeText type="operator">$</CodeText>my_var
+                        <CodeText type="variable">$my_var</CodeText>
                         <CodeText type="function">.toString</CodeText>
                         (color<CodeText type="operator">=</CodeText>
                         red<CodeText type="operator">,</CodeText> bold
                         <CodeText type="operator">=</CodeText>true);
+                    </CodeBlock>
+                </div>
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Execute store
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <CodeBlock>
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText> {"<command>"}{" "}
+                        <CodeText type="comment">
+                            // execute store result
+                        </CodeText>
+                        <br />
+                        <CodeText type="variable">
+                            {"$<variable>"}
+                        </CodeText>{" "}
+                        <CodeText type="operator">?=</CodeText> {"<command>"}{" "}
+                        <CodeText type="comment">
+                            // execute store success
+                        </CodeText>
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_var</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText> data get entity
+                        @s SelectedItem.tag.my_var;
                     </CodeBlock>
                 </div>
             </section>

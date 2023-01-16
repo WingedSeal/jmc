@@ -58,14 +58,24 @@ const getDefault = (param: Parameter) => {
     }
 
     let type;
-    if (param.type === "integer" || param.type === "float") {
-        type = "number";
-    } else if (param.type === "TargetSelector") {
-        type = "param";
-    } else if (param.type === "boolean") {
-        type = "operator";
-    } else {
-        type = param.type;
+    switch (param.type) {
+        case "integer":
+            type = "number";
+            break;
+        case "float":
+            type = "number";
+            break;
+        case "TargetSelector":
+            type = "param";
+            break;
+        case "boolean":
+            type = "operator";
+            break;
+        case "FormattedString":
+            type = "string";
+            break;
+        default:
+            type = param.type;
     }
 
     return <CodeText type={type}>{param.default}</CodeText>;

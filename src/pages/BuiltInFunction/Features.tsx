@@ -19,7 +19,7 @@ const BuildinFeatures = [
             name="Player.onEvent"
             type="LoadOnly"
             params={[
-                { key: "criteria", type: "criteria" },
+                { key: "criteria", type: "Criteria" },
                 { key: "function", type: "Function" },
             ]}
         />
@@ -894,6 +894,86 @@ const BuildinFeatures = [
             name="GUI.run"
             type="JMCFunction"
             params={[{ key: "name", type: "Keyword" }]}
+        />
+    </Feature>,
+    <Feature
+        id="advancement_grant"
+        summary="Advancement.grant()"
+        keywords="vanilla"
+    >
+        <p>Grant advancement, an alternative to vanilla syntax</p>
+        <p>
+            Available <code>type</code> are "everything", "from", "only",
+            "through", "until"
+        </p>
+        <Command
+            name="Advancement.grant"
+            type="JMCFunction"
+            params={[
+                { key: "target", type: "TargetSelector" },
+                { key: "type", type: "Keyword" },
+                { key: "advancement", type: "Keyword" },
+                { key: "namespace", type: "Keyword", default: '""' },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="advancement_revoke"
+        summary="Advancement.revoke()"
+        keywords="vanilla"
+    >
+        <p>Revoke advancement, an alternative to vanilla syntax</p>
+        <p>
+            Available <code>type</code> are "everything", "from", "only",
+            "through", "until"
+        </p>
+        <Command
+            name="Advancement.revoke"
+            type="JMCFunction"
+            params={[
+                { key: "target", type: "TargetSelector" },
+                { key: "type", type: "Keyword" },
+                { key: "advancement", type: "Keyword" },
+                { key: "namespace", type: "Keyword", default: '""' },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="scoreboard_add"
+        summary="Scoreboard.add()"
+        keywords="objective vanilla"
+    >
+        <p>Add scoreboard objective, an alternative to vanilla syntax</p>
+        <Command
+            name="Scoreboard.add"
+            type="JMCFunction"
+            params={[
+                { key: "objective", type: "Keyword" },
+                { key: "criteria", type: "Criteria", default: "dummy" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+            ]}
+        />
+    </Feature>,
+    <Feature id="bossbar_add" summary="Bossbar.add()" keywords="vanilla">
+        <p>Add bossbar, an alternative to vanilla syntax</p>
+        <Command
+            name="Bossbar.add"
+            type="JMCFunction"
+            params={[
+                { key: "team", type: "Keyword" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+            ]}
+        />
+    </Feature>,
+    <Feature id="team_add" summary="Team.add()" keywords="vanilla">
+        <p>Add team, an alternative to vanilla syntax</p>
+        <Command
+            name="Team.add"
+            type="JMCFunction"
+            params={[
+                { key: "id", type: "Keyword" },
+                { key: "name", type: "FormattedString", default: '""' },
+            ]}
         />
     </Feature>,
 ];
