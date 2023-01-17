@@ -102,8 +102,12 @@ class GUI:
             if template_item.variable is None:
                 raise ValueError("template_item.variable is None")
 
+            iterator = enumerate(template_item.items)
+            _, matched_item = next(iterator)
+            commands.append(
+                f"execute unless score {template_item.variable} matches 1.. run item replace {self.mode.value[1]} {self.mode.value[0]}.{index} with {matched_item} 1")
             commands.extend(
-                f"execute if score {template_item.variable} matches {matched_index} run item replace {self.mode.value[1]} {self.mode.value[0]}.{index} with {matched_item} 1" for matched_index, matched_item in enumerate(template_item.items))
+                f"execute if score {template_item.variable} matches {matched_index} run item replace {self.mode.value[1]} {self.mode.value[0]}.{index} with {matched_item} 1" for matched_index, matched_item in iterator)
         return commands
 
 

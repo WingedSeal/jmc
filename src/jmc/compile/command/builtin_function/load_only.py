@@ -662,6 +662,11 @@ class GUIRegisters(JMCFunction):
 
         item_strings = self.datapack.parse_list(self.raw_args["items"].token,
                                                 self.tokenizer, TokenType.KEYWORD)
+        if not item_strings:
+            raise JMCValueError(
+                f"GUI Template expected non-empty 'items' argument",
+                self.raw_args["items"].token,
+                self.tokenizer)
 
         items: list[Item] = []
 
