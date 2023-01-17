@@ -244,7 +244,8 @@ class FuncContent:
                 and
                 self.__commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
             ) and
-            not is_connected(token, self.command[key_pos - 1])
+            not is_connected(token, self.command[key_pos - 1]) and
+            token.string not in Header().dels
         ):
             raise JMCSyntaxException(
                 f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)

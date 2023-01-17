@@ -196,6 +196,16 @@ def __parse_header(header_str: str, file_name: str,
                     f"Expected keyword after '#command' (got {arg_tokens[0].token_type.value})", file_name, line, line_str)
             header.commands.add(arg_tokens[0].string)
 
+        # #del
+        elif directive_token.string == "del":
+            if not arg_tokens or len(arg_tokens) != 1:
+                raise HeaderSyntaxException(
+                    f"Expected 1 arguments after '#del' (got {len(arg_tokens)})", file_name, line, line_str)
+            if arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    f"Expected keyword after '#del' (got {arg_tokens[0].token_type.value})", file_name, line, line_str)
+            header.dels.add(arg_tokens[0].string)
+
         # #static
         elif directive_token.string == "static":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.STRING:

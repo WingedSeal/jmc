@@ -33,7 +33,8 @@ class Header(SingleTon):
         "credits",
         "is_enable_macro",
         "commands",
-        "statics"
+        "statics",
+        "dels"
     )
 
     file_read: set[str]
@@ -50,6 +51,8 @@ class Header(SingleTon):
     """List of extra command(first arguments) to allow"""
     statics: set[Path]
     """All path that JMC will not remove"""
+    dels: set[str]
+    """List of exception to command(first arguments) to ignore"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -70,6 +73,7 @@ class Header(SingleTon):
         obj.is_override_minecraft = False
         obj.commands = set()
         obj.statics = set()
+        obj.dels = set()
 
     def add_file_read(self, path: Path) -> None:
         """
