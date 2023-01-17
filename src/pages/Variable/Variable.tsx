@@ -218,7 +218,7 @@ const Variable = () => {
                         <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
                         <CodeText type="operator">=</CodeText> {"<command>"}{" "}
                         <CodeText type="comment">
-                            // execute store result
+                            {"//"} execute store result
                         </CodeText>
                         <br />
                         <CodeText type="variable">
@@ -226,7 +226,7 @@ const Variable = () => {
                         </CodeText>{" "}
                         <CodeText type="operator">?=</CodeText> {"<command>"}{" "}
                         <CodeText type="comment">
-                            // execute store success
+                            {"//"} execute store success
                         </CodeText>
                     </CodeBlock>
                     <p>
