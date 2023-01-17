@@ -6,7 +6,7 @@ JMC (JavaScript-like Minecraft Function) is a mcfunction extension language for 
 
 ![JMC-icon](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/jmc_icon192.png?raw=true)
 
-**Documentation:** <https://wingedseal.github.io/jmc/>
+**Documentation:** <https://jmc.wingedseal.com>
 
 **Trailer:** <https://www.youtube.com/watch?v=cFgvCScpirw&ab_channel=WingedSeal>
 
