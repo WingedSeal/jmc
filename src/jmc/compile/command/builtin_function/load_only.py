@@ -178,6 +178,66 @@ class ItemCreate(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string="Item.createSpawnEgg",
+    arg_type={
+        "itemId": ArgType.KEYWORD,
+        "mob_type": ArgType.KEYWORD,
+        "displayName": ArgType.STRING,
+        "onPlace": ArgType.FUNC,
+        "lore": ArgType.LIST,
+        "nbt": ArgType.JS_OBJECT
+    },
+    name="item_create_spawn_egg",
+    defaults={
+        "lore": "",
+        "nbt": "",
+    }
+)
+class ItemCreateSpawnEgg(JMCFunction):
+    def call(self) -> str:
+        mob_type = self.args["mob_type"]
+        spawn_egg = mob_type + "_spawn_egg"
+        item_id = self.args["itemId"]
+        on_place = self.args["onPlace"]
+        name = self.args["displayName"]
+        if self.args["lore"]:
+            lores = self.datapack.parse_list(
+                self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
+        else:
+            lores = []
+
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args["nbt"].token) if self.args["nbt"] else {}
+
+        if "display" in nbt:
+            raise JMCValueError(
+                "display is already inside the nbt",
+                self.token,
+                self.tokenizer)
+
+        lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                         for lore in lores)
+
+        self.add_event("used:" + spawn_egg, f"""execute as @e[type=marker,tag=__spawn_egg_{item_id}] at @s run {self.datapack.add_raw_private_function(self.name, [
+            "kill @s",
+            on_place
+        ])}""")
+
+        nbt["display"] = Token.empty(f"""{{Name:{repr(
+            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
+            )},Lore:[{lore_}]}},EntityTag:{{id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]}}""")
+
+        self.datapack.data.item[self.args["itemId"]] = Item(
+            spawn_egg,
+            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt
+        )
+
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string="Item.createSign",
     arg_type={
         "itemId": ArgType.KEYWORD,
@@ -197,18 +257,18 @@ class ItemCreate(JMCFunction):
     }
 )
 class ItemCreateSign(JMCFunction):
-    _variants = {"oak", "spruce", "birch", "jungle",
+    _VARIANTS = {"oak", "spruce", "birch", "jungle",
                  "acacia", "dark_oak", "crimson", "warped"}
 
     def call(self) -> str:
         variant = self.args["variant"]
 
-        if variant not in self._variants:
+        if variant not in self._VARIANTS:
             raise JMCValueError(
                 f"Unrecognized wood variant for sign ({variant})",
                 self.raw_args["variant"].token,
                 self.tokenizer,
-                suggestion=f"Available variants are {' '.join(repr(i) for i in self._variants)}")
+                suggestion=f"Available variants are {' '.join(repr(i) for i in self._VARIANTS)}")
 
         on_click = self.args["onClick"]
         name = self.args["displayName"]
