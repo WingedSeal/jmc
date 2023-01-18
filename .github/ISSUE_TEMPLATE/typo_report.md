@@ -2,8 +2,8 @@
 name: Typo report
 about: "Report simple typo."
 title: "[TYPO]"
-labels: ""
-assignees: ""
+labels: "Type: Bug"
+assignees: "WingedSeal"
 ---
 
 ## Where

@@ -1,34 +1,35 @@
 ---
 name: Built-in function request
 about:
-    You can suggest built-in function, I may or may not implement it, or I might
-    implement Part of it
+    Request a built-in function for JMC.
 title: "[FUNCTION_REQUEST] "
-labels: ""
-assignees: ""
+labels: "Type: Feature request"
+assignees: "WingedSeal"
 ---
 
-## functionName([parameter], [parameter], [parameter],.....)
+## [functionName]([parameter]: [type], [parameter]: [type], [parameter]: [type] = [default],...)
 
-[function description (what does it do)]
+[Function description (what does it do)]
 
-## parameters
+## Parameters
 
-- [parameter]: [description (includes type such as integer string etc.)]
-- [parameter]: [description (includes type such as integer string etc.)]
-- [parameter]: [description (includes type such as integer string etc.)]
+- [parameter]: [description]
+- [parameter]: [description]
+- [parameter]: [description]
+
+### Compliation Result:
 
 ```elixir
-[compiled mcfunction]
+[Compiled mcfunction]
 ```
 
-**Example:**
+#### Example:
 
 ```javascript
-[example];
+[Usage example];
 ```
 
-_Output:_
+_Result:_
 
 `[file_name].mcfunction`
 
@@ -42,5 +43,5 @@ _Output:_
 [output example]
 ```
 
-Extra Description:
-[describe logic and extra description you'd like to inform]
+### Extra Description:
+[Describe logic and extra description you would like to inform]
