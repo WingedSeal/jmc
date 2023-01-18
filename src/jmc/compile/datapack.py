@@ -59,6 +59,15 @@ class Function:
         """
         self.commands.extend(self.__split([command]))
 
+    def insert(self, command: str, index: int) -> None:
+        """
+        Insert 1 or more command in form of a single string
+
+        :param commands:  1 or more line of minecraft command string
+        :param index: Line/Position of the function to insert to
+        """
+        self.commands[index:index] = self.__split([command])
+
     def extend(self, commands: list[str]) -> None:
         """
         Append multiple minecraft commands

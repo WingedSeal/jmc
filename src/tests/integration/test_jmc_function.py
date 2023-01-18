@@ -609,6 +609,9 @@ say 2
 Player.onEvent("used:carrot_on_a_stick", ()=>{
     say "Hello World";
 });
+Player.onEvent("used:carrot_on_a_stick", ()=>{
+    say "Hello World 2";
+});
         """).build()
 
         self.assertDictEqual(
@@ -630,10 +633,11 @@ Player.onEvent("used:carrot_on_a_stick", ()=>{
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add on_event0 used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={on_event0=1..}] at @s run function TEST:__private__/player_on_event/0
-> VIRTUAL/data/TEST/functions/__private__/player_on_event/0.mcfunction
+execute as @a[scores={on_event0=1..}] at @s run function TEST:__private__/player_on_event/used_carrot_on_a_stick
+> VIRTUAL/data/TEST/functions/__private__/player_on_event/used_carrot_on_a_stick.mcfunction
 scoreboard players set @s on_event0 0
 say Hello World
+say Hello World 2
             """)
         )
 

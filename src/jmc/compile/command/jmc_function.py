@@ -203,6 +203,31 @@ class JMCFunction:
             nbt
         )
 
+    def add_event(self, criteria: str, command: str) -> None:
+        """
+        Add multiline command that'll run on criteria event
+
+        :param criteria: Minecraft criteria
+        :param command: Commands run
+        """
+        criteria = criteria.replace("minecraft.", "")
+        count = criteria.lower().replace(":", "_")
+        if self.is_never_used("on_event", parameters=[criteria]):
+            objective = f"on_event{self.datapack.get_count('on_event')}"
+            self.datapack.add_load_command(
+                f"scoreboard objectives add {objective} {criteria}"
+            )
+            func_call = self.datapack.add_raw_private_function(
+                self.name, [f"scoreboard players set @s {objective} 0", command], count=count)
+            self.datapack.add_tick_command(
+                f"execute as @a[scores={{{objective}=1..}}] at @s run {func_call}")
+
+        else:
+            func = self.datapack.private_functions[self.name][count]
+            func.append(
+                command
+            )
+
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
                     lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
         if modify_nbt is None:
@@ -295,9 +320,9 @@ class JMCFunction:
         """
         if call_string is None:
             call_string = self.call_string
-        is_not_in = call_string not in self.datapack.used_command
         if parameters is not None:
             call_string = call_string + '/' + '/'.join(parameters)
+        is_not_in = call_string not in self.datapack.used_command
         self.datapack.used_command.add(call_string)
         return is_not_in
 

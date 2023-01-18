@@ -280,20 +280,7 @@ class ItemCreateSign(JMCFunction):
 )
 class PlayerOnEvent(JMCFunction):
     def call(self) -> str:
-        objective = f"on_event{self.datapack.get_count('on_event')}"
-        if not self.is_never_used(parameters=[self.args['criteria']]):
-            raise JMCValueError(
-                f"{self.args['criteria']} criteria was already used.",
-                self.raw_args["criteria"].token,
-                self.tokenizer)
-        self.datapack.add_load_command(
-            f"scoreboard objectives add {objective} {self.args['criteria']}"
-        )
-        count = self.datapack.get_count(self.name)
-        func = self.datapack.add_raw_private_function(
-            self.name, [f"scoreboard players set @s {objective} 0", self.args['function']], count=count)
-        self.datapack.add_tick_command(
-            f"execute as @a[scores={{{objective}=1..}}] at @s run {func}")
+        self.add_event(self.args['criteria'], self.args['function'])
         return ""
 
 
