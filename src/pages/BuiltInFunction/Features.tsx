@@ -280,7 +280,7 @@ const BuildinFeatures = [
         <p>
             Simplify integer randomization process using{" "}
             <a
-                href="https://en.wikipedia.org/wiki/Linear_congruential_generato1"
+                href="https://en.wikipedia.org/wiki/Linear_congruential_generator"
                 target="_blank"
                 rel="noreferrer"
             >
