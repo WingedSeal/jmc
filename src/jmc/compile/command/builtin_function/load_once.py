@@ -44,18 +44,9 @@ class PlayerFirstJoin(JMCFunction):
 )
 class PlayerRejoin(JMCFunction):
     obj = "__rejoin__"
-    reset = f"scoreboard players set @s {obj} 0"
 
     def call(self) -> str:
-        self.datapack.add_objective(
-            self.obj, "custom:leave_game")
-        self.datapack.add_tick_command(
-            f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "main")}')
-        self.datapack.add_raw_private_function(
-            self.name, [
-                self.reset,
-                self.args["function"]
-            ], "main")
+        self.add_event("custom:leave_game", self.args["function"])
         return ""
 
 

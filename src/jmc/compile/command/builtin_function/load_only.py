@@ -58,17 +58,19 @@ class RightClickSetup(JMCFunction):
     tag_id_var = "__item_id__"
 
     def call(self) -> str:
-        self.rc_obj = "__rc__" + self.args["idName"][:10]
+        # self.rc_obj = "__rc__" + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
             self.raw_args["functionMap"].token, self.tokenizer)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["idName"]
-        self.datapack.add_objective(self.rc_obj, "used:carrot_on_a_stick")
         if self.is_never_used():
-            self.datapack.add_tick_command(
-                f"""execute as @a[scores={{{self.rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [f'scoreboard players set @s {self.rc_obj} 0'], 'main')}""")
+            self.add_event(
+                "used:carrot_on_a_stick",
+                self.datapack.call_func(
+                    self.name,
+                    "main"))
+            self.make_empty_private_function("main")
 
         main_func = self.get_private_function("main")
 
@@ -146,18 +148,13 @@ class ItemCreate(JMCFunction):
                 suggestion="Change item_type to carrot_on_a_stick or warped_fungus_on_a_stick")
 
         if on_click:
-            rc_obj = self.rc_obj[self.args["itemType"]]
             item_id = self.datapack.data.get_item_id()
-            self.datapack.add_objective(
-                rc_obj, "used:" + self.args["itemType"])
             if self.is_never_used():
-                self.datapack.add_tick_command(
-                    f"""execute as @a[scores={{{rc_obj}=1..}}] at @s run {self.datapack.add_raw_private_function(self.name,
-                                                       [
-                                                        f'scoreboard players set @s {rc_obj} 0',
-                                                        f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
-                                                        f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
-                                                        ], "main")}""")
+                self.add_events("used:" + self.args["itemType"], [
+                    f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
+                    f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
+                ]
+                )
                 self.datapack.add_raw_private_function(self.name, [], "found")
 
             found_func = self.get_private_function("found")
