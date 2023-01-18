@@ -1,12 +1,13 @@
 """Module handling jmc's header"""
 from pathlib import Path
-from typing import Callable, TYPE_CHECKING, Protocol
+from typing import Any, Callable, TYPE_CHECKING, Protocol
 
 from .utils import SingleTon
 from .log import Logger
 
 if TYPE_CHECKING:
     from .tokenizer import Token
+    from ..compile.datapack import DataPack
 
 logger = Logger(__name__)
 
@@ -34,7 +35,8 @@ class Header(SingleTon):
         "is_enable_macro",
         "commands",
         "statics",
-        "dels"
+        "dels",
+        "post_process"
     )
 
     file_read: set[str]
@@ -53,6 +55,8 @@ class Header(SingleTon):
     """All path that JMC will not remove"""
     dels: set[str]
     """List of exception to command(first arguments) to ignore"""
+    post_process: list[Callable[["DataPack"], Any]]
+    """Python function to run before building datapack"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -74,6 +78,7 @@ class Header(SingleTon):
         obj.commands = set()
         obj.statics = set()
         obj.dels = set()
+        obj.post_process = []
 
     def add_file_read(self, path: Path) -> None:
         """

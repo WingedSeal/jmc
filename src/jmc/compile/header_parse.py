@@ -1,11 +1,15 @@
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
+
 
 from .utils import is_connected
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
 from .log import Logger
+
+if TYPE_CHECKING:
+    from ..compile.datapack import DataPack
 
 logger = Logger(__name__)
 
@@ -223,6 +227,23 @@ def __parse_header(header_str: str, file_name: str,
                 raise HeaderSyntaxException(
                     f"Static folder not found: {static_folder.as_posix()}", file_name, line, line_str, suggestion="Please recheck that the path is correct so that JMC won't accidentally delete your folder.")
             header.statics.add(static_folder)
+        elif directive_token.string == "uninstall":
+            if arg_tokens:
+                raise HeaderSyntaxException(
+                    f"Expected 0 arguments after '#uninstall' (got {len(arg_tokens)})", file_name, line, line_str)
+
+            def __uninstall(datapack: "DataPack"):
+                if "uninstall" not in datapack.functions:
+                    raise HeaderSyntaxException(
+                        f"'#uninstall' requires an existing 'uninstall' function", file_name, line, line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
+                datapack.functions["uninstall"].extend([
+                    *(f"scoreboard objectives remove {obj}" for obj in datapack._scoreboards),
+                    *(f"scoreboard objectives remove {obj}" for obj in datapack.data.scoreboards),
+                    *(f"team remove {team}" for team in datapack.data.teams),
+                    *(f"bossbar remove {bossbar}" for bossbar in datapack.data.bossbars),
+                ])
+
+            header.post_process.append(__uninstall)
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{directive_token.string}'", file_name, line, line_str)

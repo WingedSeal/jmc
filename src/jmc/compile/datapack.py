@@ -1,6 +1,6 @@
 """Module handling datapack"""
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
 
@@ -8,10 +8,10 @@ from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
 from .exception import JMCSyntaxWarning, JMCValueError
 from .log import Logger
+from .header import Header
 
 if TYPE_CHECKING:
     from .lexer import Lexer
-    from .header import Header
 
 logger = Logger(__name__)
 
@@ -141,7 +141,7 @@ class DataPack:
     __slot__ = ("data", "ints",
                 "functions", "load_function", "jsons",
                 "private_functions", "private_function_count",
-                "__scoreboards", "loads", "ticks", "namespace",
+                "_scoreboards", "loads", "ticks", "namespace",
                 "used_command", "lexer", "defined_file_pos", "after_ticks", "after_loads")
     private_name = "__private__"
     load_name = "__load__"
@@ -167,7 +167,7 @@ class DataPack:
         """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
-        self.__scoreboards: dict[str, str] = {
+        self._scoreboards: dict[str, str] = {
             self.var_name: "dummy"
         }
         """Minecraft scoreboards that are going to be created"""
@@ -203,10 +203,10 @@ class DataPack:
         :param criteria: Criteria of scoreboard, defaults to 'dummy'
         :raises ValueError: If scoreboard already exists
         """
-        if objective in self.__scoreboards and self.__scoreboards[objective] != criteria:
+        if objective in self._scoreboards and self._scoreboards[objective] != criteria:
             raise ValueError(
-                f"Conflict on adding scoreboard, '{objective}' objective with '{self.__scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
-        self.__scoreboards[objective] = criteria
+                f"Conflict on adding scoreboard, '{objective}' objective with '{self._scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
+        self._scoreboards[objective] = criteria
 
     def get_count(self, name: str) -> str:
         """
@@ -298,6 +298,16 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
+    def add_function(self, name: str, commands: list[str]) -> None:
+        """
+        Add function
+
+        :param name: Name of the function path
+        :param commands: Multiple minecraft commands
+        """
+
+        self.functions[name] = Function(commands)
+
     def add_private_function(self, name: str, command: str,
                              count: str | None = None) -> str:
         """
@@ -383,11 +393,13 @@ class DataPack:
         Finializing DataPack for building (NO file writing)
         """
         logger.debug("Finializing DataPack")
+        for py_func in Header().post_process:
+            py_func(self)
         if self.ints:
             self.add_objective(self.int_name)
         self.loads[0:0] = [
             *[f"scoreboard objectives add {objective} {criteria}" for objective,
-                criteria in self.__scoreboards.items()],
+                criteria in self._scoreboards.items()],
             *[f"scoreboard players set {n} {self.int_name} {n}" for n in self.ints],
         ]
         if self.loads:
@@ -489,7 +501,7 @@ class DataPack:
     VAR_NAME = {self.var_name},
     INT_NAME = {self.int_name}
 
-    objectives = {dumps(self.__scoreboards, indent=2)}
+    objectives = {dumps(self._scoreboards, indent=2)}
     ints = {self.ints!r}
     functions = {dumps(self.functions, indent=2, cls=FunctionEncoder)}
     jsons = {dumps(self.jsons, indent=2)}
