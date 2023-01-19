@@ -1,9 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.57140c6b.css",
-    "main.js": "/static/js/main.19ae03b6.js",
+    "main.css": "/static/css/main.e0dbea81.css",
+    "main.js": "/static/js/main.22fa4168.js",
     "static/media/background.jpg": "/static/media/background.2f910f698191ec5b6f03.jpg",
     "static/media/minecraft_wallpaper.jpg": "/static/media/minecraft_wallpaper.bcfcc2b9349acb0ef714.jpg",
+    "static/media/jmc-introdution.png": "/static/media/jmc-introdution.08f7a6b2ad1b71e30b6c.png",
     "static/media/jmc_icon.png": "/static/media/jmc_icon.91c8f873ccc4cb864414.png",
     "static/media/config.png": "/static/media/config.7559856c7f5c818a04b0.png",
     "static/media/what_is_jmc.png": "/static/media/what_is_jmc.3bb867036c4d1770b740.png",
@@ -24,11 +25,11 @@
     "static/media/magnifying_glass_solid.svg": "/static/media/magnifying_glass_solid.0d77c20f42772be34342020a736153a7.svg",
     "static/media/xmark_solid.svg": "/static/media/xmark_solid.ae469738e479d31aa952364e12120ad2.svg",
     "static/media/windows.svg": "/static/media/windows.5b6a791c75bcdc873387befc6b024437.svg",
-    "main.57140c6b.css.map": "/static/css/main.57140c6b.css.map",
-    "main.19ae03b6.js.map": "/static/js/main.19ae03b6.js.map"
+    "main.e0dbea81.css.map": "/static/css/main.e0dbea81.css.map",
+    "main.22fa4168.js.map": "/static/js/main.22fa4168.js.map"
   },
   "entrypoints": [
-    "static/css/main.57140c6b.css",
-    "static/js/main.19ae03b6.js"
+    "static/css/main.e0dbea81.css",
+    "static/js/main.22fa4168.js"
   ]
 }
