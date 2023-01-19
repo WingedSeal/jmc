@@ -26,7 +26,8 @@
         <meta property="og:image:height" content="512" />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:alt" content="JMC" />
-        <!-- For google search console -->
+
+        <!-- Google search console -->
         <meta
             name="google-site-verification"
             content="5mvXHOGzolYBiuF2LoalK_BXZAsem1jBNWahmQTVKA0"
@@ -35,7 +36,29 @@
             name="google-site-verification"
             content="vr6atx7mNygB7Z23FY5v_ma6e0jzrKu6sq9kNTlti2U"
         />
-        <!-- For google search console -->
+        <!-- Google search console -->
+
+        <!-- GitHub Pages https://github.com/rafgraph/spa-github-pages-->
+        <script type="text/javascript">
+            (function (location) {
+                if (location.search[1] === "/") {
+                    var decoded = location.search
+                        .slice(1)
+                        .split("&")
+                        .map(function (s) {
+                            return s.replace(/~and~/g, "&");
+                        })
+                        .join("?");
+                    window.history.replaceState(
+                        null,
+                        null,
+                        location.pathname.slice(0, -1) + decoded + location.hash
+                    );
+                }
+            })(window.location);
+        </script>
+        <!-- GitHub Pages -->
+
         <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
         <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
         <title>JMC</title>
