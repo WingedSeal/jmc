@@ -240,7 +240,7 @@ def __parse_header(header_str: str, file_name: str,
                     *(f"scoreboard objectives remove {obj}" for obj in datapack._scoreboards),
                     *(f"scoreboard objectives remove {obj}" for obj in datapack.data.scoreboards),
                     *(f"team remove {team}" for team in datapack.data.teams),
-                    *(f"bossbar remove {bossbar}" for bossbar in datapack.data.bossbars),
+                    *(f"bossbar remove {bossbar}" for bossbar in datapack.data.bossbars)
                 ])
 
             header.post_process.append(__uninstall)
