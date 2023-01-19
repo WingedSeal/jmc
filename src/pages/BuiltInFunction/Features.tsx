@@ -82,9 +82,12 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="item_create" summary="Item.create()" keywords="new">
+    <Feature id="item_create" summary="Item.create()" keywords="new rightclick">
         <p>Create a custom item and save it for further use.</p>
-        <p>onClick can only be used with "carrot_on_a_stick" itemType.</p>
+        <p>
+            onClick can only be used with "carrot_on_a_stick" or
+            "warped_fungus_on_a_stick" itemType.
+        </p>
         <p>
             <code>itemId</code> is the unique name of this item so that it can
             be referenced in other Item function.
