@@ -1,0 +1,34 @@
+<!-- https://github.com/rafgraph/spa-github-pages -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>404 Rerouting</title>
+        <script type="text/javascript">
+            let pathSegmentsToKeep = 0;
+            let location = window.location;
+            location.replace(
+                location.protocol +
+                    "//" +
+                    location.hostname +
+                    (location.port ? ":" + location.port : "") +
+                    location.pathname
+                        .split("/")
+                        .slice(0, 1 + pathSegmentsToKeep)
+                        .join("/") +
+                    "/?/" +
+                    location.pathname
+                        .slice(1)
+                        .split("/")
+                        .slice(pathSegmentsToKeep)
+                        .join("/")
+                        .replace(/&/g, "~and~") +
+                    (location.search
+                        ? "&" + location.search.slice(1).replace(/&/g, "~and~")
+                        : "") +
+                    location.hash
+            );
+        </script>
+    </head>
+    <body></body>
+</html>
