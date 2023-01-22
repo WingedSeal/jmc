@@ -141,10 +141,10 @@ const FlowControls = () => {
                         <Tab />
                         Simulate programming languages' <code>if</code>-
                         <code>else</code> using temporary variable and
-                        "anonymouse function". So you can write if/else in
+                        "anonymous function". So you can write if/else in
                         JavaScript and the compiler will handle the logic and
                         optimization for you. The chain will be terminated once
-                        a codition is satisfied.
+                        a condition is satisfied.
                     </p>
                     <CodeBlock>
                         <CodeText type="keyword">if</CodeText> ({"<condition>"}){" "}
