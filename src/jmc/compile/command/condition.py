@@ -73,8 +73,10 @@ def custom_condition(
             DataPack.VARIABLE_SIGN):
 
         if len(tokens) == 1:
-            raise JMCSyntaxException(
-                "Operator not found in custom condition", tokens[0], tokenizer)
+            return Condition(
+                f"score {tokens[0].string} {DataPack.var_name} matches 1..", True)
+            # raise JMCSyntaxException(
+            #     "Operator not found in custom condition", tokens[0], tokenizer)
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
