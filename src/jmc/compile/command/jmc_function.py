@@ -186,7 +186,7 @@ class JMCFunction:
     def create_new_item(
             self, item: "Item", modify_nbt: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
         item_type = item.item_type
-        nbt = item.raw_nbt
+        nbt = dict(item.raw_nbt)
         if modify_nbt is None:
             modify_nbt = {}
         for key, value_token in modify_nbt.items():
