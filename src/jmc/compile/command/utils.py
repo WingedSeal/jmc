@@ -613,7 +613,7 @@ class FormattedText:
                 is_expect_color_code = False
                 if char == self.SIGN:
                     if isinstance(self.current_json["text"], str):
-                        self.current_json["text"] += char
+                        self.current_json["text"] += char  # type: ignore
                         continue
                 if char == self.OPEN_BRACKET:
                     self.__push()
@@ -628,7 +628,7 @@ class FormattedText:
                 continue
 
             if isinstance(self.current_json["text"], str):
-                self.current_json["text"] += char
+                self.current_json["text"] += char  # type: ignore
 
         if is_bracket_format:
             raise JMCValueError(

@@ -600,12 +600,13 @@ class Tokenizer:
         return tokens
 
     def find_token(self, tokens: list[Token],
-                   string: str) -> list[list[Token]]:
+                   string: str, allow_string_token: bool = False) -> list[list[Token]]:
         """
         Split list of tokens by token that match the string
 
         :param tokens: List of token
         :param string: String to match for splitting
+        :param allow_string_token: Whether to allow string token
         :return: List of list of tokens
 
         .. example::
@@ -615,7 +616,13 @@ class Tokenizer:
         result: list[list[Token]] = []
         token_array: list[Token] = []
         for token in tokens:
-            if token.string == string:
+            if allow_string_token:
+                is_append_result = token.string == string
+
+            else:
+                is_append_result = token.string == string and token.token_type != TokenType.STRING
+
+            if is_append_result:
                 result.append(token_array)
                 token_array = []
             else:
