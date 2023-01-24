@@ -728,7 +728,7 @@ class GUIRegisters(JMCFunction):
                         suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
                     )
                 items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
-                    "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}))
+                    "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}, error_token=self.raw_args["items"].token))
 
             self.set_items(
                 name,
