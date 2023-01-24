@@ -59,6 +59,13 @@ def variable_operation(
             return f"execute store result score {tokens[0].string} {DataPack.var_name} {func_content[0][7:]}"
         return f"execute store result score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
 
+    if operator == "=" and len(
+            tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
+        if len(tokens) > 3:
+            raise JMCSyntaxException(
+                f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
+        return f"scoreboard players set {tokens[0].string} {DataPack.var_name} {'1' if tokens[2].string == 'true' else '0'}"
+
     if operator in {"++", "--"}:
         if len(tokens) > 2:
             raise JMCSyntaxException(
