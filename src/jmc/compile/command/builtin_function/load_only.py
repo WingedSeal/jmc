@@ -201,10 +201,11 @@ class ItemCreateSpawnEgg(JMCFunction):
         on_place = self.args["onPlace"]
         name = self.args["displayName"]
         if self.args["lore"]:
-            lores = self.datapack.parse_list(
+            lores, lores_tokens = self.datapack.parse_list(
                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
+            lores_tokens = []
 
         nbt = self.tokenizer.parse_js_obj(
             self.raw_args["nbt"].token) if self.args["nbt"] else {}
@@ -215,8 +216,8 @@ class ItemCreateSpawnEgg(JMCFunction):
                 self.token,
                 self.tokenizer)
 
-        lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
-                         for lore in lores)
+        lore_ = ",".join(repr(str(FormattedText(lore, lore_token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                         for lore, lore_token in zip(lores, lores_tokens))
 
         self.add_event("used:" + spawn_egg, f"""execute as @e[type=marker,tag=__spawn_egg_{item_id}] at @s run {self.datapack.add_raw_private_function(self.name, [
             "kill @s",
@@ -273,16 +274,18 @@ class ItemCreateSign(JMCFunction):
         on_click = self.args["onClick"]
         name = self.args["displayName"]
         if self.args["lore"]:
-            lores = self.datapack.parse_list(
+            lores, lores_tokens = self.datapack.parse_list(
                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
+            lores_tokens = []
 
         if self.args["texts"]:
-            texts = self.datapack.parse_list(
+            texts, texts_tokens = self.datapack.parse_list(
                 self.raw_args["texts"].token, self.tokenizer, TokenType.STRING)
         else:
             texts = []
+            texts_tokens = []
 
         if len(texts) > 4:
             raise JMCValueError(
@@ -300,10 +303,10 @@ class ItemCreateSign(JMCFunction):
                 self.token,
                 self.tokenizer)
 
-        lore_ = ",".join(repr(str(FormattedText(lore, self.raw_args["lore"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
-                         for lore in lores)
-        formatted_texts_ = [FormattedText(text, self.raw_args["texts"].token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
-                            for text in texts]
+        lore_ = ",".join(repr(str(FormattedText(lore, lore_token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                         for lore, lore_token in zip(lores, lores_tokens))
+        formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
+                            for text, text_token in zip(texts, texts_tokens)]
         if on_click:
             formatted_texts_[0].add_key(
                 "clickEvent", {
@@ -630,7 +633,7 @@ class GUITemplate(JMCFunction):
     }
 
     def call(self) -> str:
-        template = self.datapack.parse_list(
+        template, _ = self.datapack.parse_list(
             self.raw_args["template"].token, self.tokenizer, TokenType.STRING)
         name = convention_jmc_to_mc(
             self.raw_args["name"].token, self.tokenizer)
@@ -704,8 +707,8 @@ class GUIRegisters(JMCFunction):
                 self.raw_args["id"].token,
                 self.tokenizer)
 
-        item_strings = self.datapack.parse_list(self.raw_args["items"].token,
-                                                self.tokenizer, TokenType.KEYWORD)
+        item_strings, item_strings_tokens = self.datapack.parse_list(self.raw_args["items"].token,
+                                                                     self.tokenizer, TokenType.KEYWORD)
         if not item_strings:
             raise JMCValueError(
                 f"GUI Template expected non-empty 'items' argument",
@@ -719,7 +722,8 @@ class GUIRegisters(JMCFunction):
                 f"gui/{name}/on_click", self.args["onClick"])
             interactive_id = self.datapack.get_count(
                 f"{self.name}/{name}")
-            for item_str in item_strings:
+            for item_str, item_str_token in zip(
+                    item_strings, item_strings_tokens):
                 if item_str not in self.datapack.data.item:
                     raise JMCValueError(
                         f'Item id: \'{item_str}\' is not defined.',
@@ -728,7 +732,7 @@ class GUIRegisters(JMCFunction):
                         suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
                     )
                 items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
-                    "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}, error_token=self.raw_args["items"].token))
+                    "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}, error_token=item_str_token))
 
             self.set_items(
                 name,
@@ -738,7 +742,8 @@ class GUIRegisters(JMCFunction):
                 interactive_id,
                 on_click)
         else:
-            for item_str in item_strings:
+            for item_str, item_str_token in zip(
+                    item_strings, item_strings_tokens):
                 if item_str not in self.datapack.data.item:
                     raise JMCValueError(
                         f'Item id: \'{item_str}\' is not defined.',
@@ -747,7 +752,7 @@ class GUIRegisters(JMCFunction):
                         suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
                     )
                 items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
-                    "__gui__": Token.empty(f"{{name:{repr(name)}}}")}))
+                    "__gui__": Token.empty(f"{{name:{repr(name)}}}")}, error_token=item_str_token))
             self.set_items(
                 name,
                 self.args["id"],

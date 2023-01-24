@@ -114,7 +114,7 @@ class HardcodeRepeat(JMCFunction):
 )
 class HardcodeRepeatList(JMCFunction):
     def call(self) -> str:
-        strings = self.datapack.parse_list(
+        strings, _ = self.datapack.parse_list(
             self.raw_args["strings"].token, self.tokenizer, TokenType.STRING)
         commands: list[str] = []
         for i in strings:

@@ -245,7 +245,7 @@ class JMCFunction:
         if item_type.startswith("minecraft:"):
             item_type = item_type[10:]
         if self.args[lore_param]:
-            lores = self.datapack.parse_list(
+            lores, _ = self.datapack.parse_list(
                 self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
