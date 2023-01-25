@@ -528,34 +528,6 @@ class ScoreboardAdd(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string="Team.add",
-    arg_type={
-        "team": ArgType.KEYWORD,
-        "displayName": ArgType.STRING
-    },
-    name="team_add",
-    defaults={
-        "displayName": ""
-    }
-)
-class TeamAdd(JMCFunction):
-    def call(self) -> str:
-        command = f'team add {self.args["team"]}'
-        if self.args["team"] in self.datapack.data.teams:
-            team = self.datapack.data.teams[self.args["team"]]
-            raise JMCValueError(
-                f"Team {self.args['team']} was already defined",
-                self.raw_args["team"].token,
-                self.tokenizer, suggestion=f"It was defined at line {team[1].line} col {team[1].col}")
-        self.datapack.data.teams[self.args["team"]] = (
-            self.args["displayName"], self.raw_args["team"].token)
-        if self.args["displayName"]:
-            command += ' ' + self.format_text("displayName")
-        return command
-
-
-@func_property(
-    func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.add",
     arg_type={
         "id": ArgType.KEYWORD,
