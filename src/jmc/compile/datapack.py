@@ -1,5 +1,6 @@
 """Module handling datapack"""
 from collections import defaultdict
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
@@ -194,6 +195,9 @@ class DataPack:
 
         self.defined_file_pos: dict[str, tuple[Token, Tokenizer]] = {}
         """Dictionary of mcfunction or json path and it's first defined token and tokenizer"""
+
+        self._imported: set[Path] = set()
+        """Set of path that's already imported"""
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """

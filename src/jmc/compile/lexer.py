@@ -114,6 +114,9 @@ class Lexer:
         :raises JMCSyntaxException: Path in `@import` is invalid
         :raises JMCSyntaxException: _description_
         """
+        if file_path in self.datapack._imported:
+            return
+        self.datapack._imported.add(file_path)
         logger.info(f"Parsing file: {file_path}")
         file_path_str = file_path.resolve().as_posix()
         if _test_file is None:
