@@ -61,14 +61,21 @@ def is_float(string: str) -> bool:
 
 def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     """Whether 2 tokens are next to each other"""
-    if previous_token._macro_length != 0:
-        length = previous_token._macro_length
-    else:
-        length = previous_token.length
+    if not previous_token._macro_length:
+        return (
+            previous_token.line == current_token.line and
+            previous_token.col +
+            previous_token.length == current_token.col
+        )
     return (
         previous_token.line == current_token.line and
-        previous_token.col +
-        length == current_token.col
+        (
+            previous_token.col +
+            previous_token.length == current_token.col
+            or
+            previous_token.col +
+            previous_token._macro_length == current_token.col
+        )
     )
 
 

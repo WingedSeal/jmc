@@ -56,8 +56,8 @@ class Token:
     line: int
     col: int
     string: str
-    _macro_length: int = 0
     """The string representation (including parentheses, excluding quotation mark)"""
+    _macro_length: int = 0
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
     #     return super().__new__(cls)
