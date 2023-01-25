@@ -308,7 +308,6 @@ class ItemCreateSign(JMCFunction):
                          for lore, lore_token in zip(lores, lores_tokens))
         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text, text_token in zip(texts, texts_tokens)]
-        print(formatted_texts_)
         if on_click:
             formatted_texts_[0].add_key(
                 "clickEvent", {
