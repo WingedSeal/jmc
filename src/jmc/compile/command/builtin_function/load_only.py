@@ -181,7 +181,7 @@ class ItemCreate(JMCFunction):
     call_string="Item.createSpawnEgg",
     arg_type={
         "itemId": ArgType.KEYWORD,
-        "mob_type": ArgType.KEYWORD,
+        "mobType": ArgType.KEYWORD,
         "displayName": ArgType.STRING,
         "onPlace": ArgType.FUNC,
         "lore": ArgType.LIST,
@@ -195,7 +195,7 @@ class ItemCreate(JMCFunction):
 )
 class ItemCreateSpawnEgg(JMCFunction):
     def call(self) -> str:
-        mob_type = self.args["mob_type"]
+        mob_type = self.args["mobType"]
         spawn_egg = mob_type + "_spawn_egg"
         item_id = self.args["itemId"]
         on_place = self.args["onPlace"]
