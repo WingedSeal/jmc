@@ -128,6 +128,20 @@ const Header = () => {
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Delete Commands
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Make JMC ignore command when searching for missing
+                        semicolons. Usually used when having a name that's the
+                        same as a command.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#del</CodeText> my_command
+                    </CodeBlock>
+                </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Override minecraft namespace
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
@@ -175,6 +189,25 @@ const Header = () => {
                         ;
                         <br />
                         {"}"}
+                    </CodeBlock>
+                </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Uninstall
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Automatically modify <code>uninstall</code> function to
+                        remove traces of the datapack. This only works with
+                        things created by JMC. (For example,{" "}
+                        <code>Scoreboard.add</code>)
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#uninstall</CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        <CodeText type="function">uninstall</CodeText>() {"{}"}
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">

@@ -135,6 +135,30 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
+    <Feature
+        id="item_create_spawn_egg"
+        summary="Item.createSpawnEgg()"
+        keywords="new spawner"
+    >
+        <p>Create a custom spawn egg and save it for further use.</p>
+        <p>
+            The spawn egg will not summon any mob unless specified in{" "}
+            <code>onPlace</code>
+        </p>
+        <Command
+            name="Item.createSpawnEgg"
+            type="LoadOnly"
+            params={[
+                { key: "itemId", type: "Keyword" },
+                { key: "mob_type", type: "Keyword" },
+                { key: "displayName", type: "FormattedString" },
+                { key: "onPlace", type: "Function", default: "()=>{}" },
+                { key: "lore", type: "List<FormattedString>", default: "[]" },
+                { key: "nbt", type: "JSObject", default: "{}" },
+            ]}
+            newline
+        />
+    </Feature>,
     <Feature id="item_give" summary="Item.give()" keywords="gave">
         <p>
             Give item created from <code>Item.create</code> to a player
