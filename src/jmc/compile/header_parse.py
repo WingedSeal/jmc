@@ -96,7 +96,6 @@ def __parse_header(header_str: str, file_name: str,
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
         line += 1
-        print(line)
         if line_str.isspace() or line_str.startswith("//") or line_str == "":
             continue
 
