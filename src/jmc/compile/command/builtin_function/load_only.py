@@ -293,6 +293,7 @@ class ItemCreateSign(JMCFunction):
                 self.raw_args["texts"].token,
                 self.tokenizer)
         texts.extend([''] * (4 - len(texts)))
+        texts_tokens.extend([Token.empty()] * (4 - len(texts_tokens)))
 
         nbt = self.tokenizer.parse_js_obj(
             self.raw_args["nbt"].token) if self.args["nbt"] else {}
@@ -307,6 +308,7 @@ class ItemCreateSign(JMCFunction):
                          for lore, lore_token in zip(lores, lores_tokens))
         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text, text_token in zip(texts, texts_tokens)]
+        print(formatted_texts_)
         if on_click:
             formatted_texts_[0].add_key(
                 "clickEvent", {
@@ -333,7 +335,7 @@ class ItemCreateSign(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string="Player.onEvent",
     arg_type={
-        "criteria": ArgType.STRING,
+        "criteria": ArgType.KEYWORD,
         "function": ArgType.FUNC,
     },
     name="player_on_event"

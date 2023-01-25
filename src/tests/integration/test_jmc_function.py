@@ -608,10 +608,10 @@ say 2
 
     def test_PlayerOnEvent(self):
         pack = JMCTestPack().set_jmc_file("""
-Player.onEvent("used:carrot_on_a_stick", ()=>{
+Player.onEvent(used:carrot_on_a_stick, ()=>{
     say "Hello World";
 });
-Player.onEvent("used:carrot_on_a_stick", ()=>{
+Player.onEvent(used:carrot_on_a_stick, ()=>{
     say "Hello World 2";
 });
         """).build()
