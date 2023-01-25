@@ -96,6 +96,7 @@ def __parse_header(header_str: str, file_name: str,
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
         line += 1
+        print(line)
         if line_str.isspace() or line_str.startswith("//") or line_str == "":
             continue
 
@@ -231,11 +232,14 @@ def __parse_header(header_str: str, file_name: str,
             if arg_tokens:
                 raise HeaderSyntaxException(
                     f"Expected 0 arguments after '#uninstall' (got {len(arg_tokens)})", file_name, line, line_str)
+            _line = line
+            _line_str = line_str
+            _file_name = file_name
 
             def __uninstall(datapack: "DataPack"):
                 if "uninstall" not in datapack.functions:
                     raise HeaderSyntaxException(
-                        f"'#uninstall' requires an existing 'uninstall' function", file_name, line, line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
+                        f"'#uninstall' requires an existing 'uninstall' function", _file_name, _line, _line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
                 datapack.functions["uninstall"].extend([
                     *(f"scoreboard objectives remove {obj}" for obj in datapack._scoreboards),
                     *(f"scoreboard objectives remove {obj}" for obj in datapack.data.scoreboards),
