@@ -55,8 +55,8 @@ def variable_operation(
             raise JMCSyntaxException(
                 f"Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
-            # len("execute") = 7
-            return f"execute store result score {tokens[0].string} {DataPack.var_name} {func_content[0][7:]}"
+            # len("execute ") = 8
+            return f"execute store result score {tokens[0].string} {DataPack.var_name} {func_content[0][8:]}"
         return f"execute store result score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
 
     if operator == "=" and len(
@@ -84,8 +84,8 @@ def variable_operation(
             raise JMCSyntaxException(
                 f"Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
-            # len("execute") = 7
-            return f"execute store success score {tokens[0].string} {DataPack.var_name} {func_content[0][7:]}"
+            # len("execute ") = 8
+            return f"execute store success score {tokens[0].string} {DataPack.var_name} {func_content[0][8:]}"
         return f"execute store success score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
     elif operator in {"*=", "+=", "-=", "*=", "/=", "%=", "++", "--", "><", "->", ">", "<", "="}:
         if len(tokens) == 2:

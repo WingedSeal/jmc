@@ -539,7 +539,7 @@ class FuncContent:
         if jmc_command is not None:
             if len(self.command) > key_pos + 2:
                 raise JMCSyntaxException(
-                    "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False)
+                    "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False, suggestion="Expected semicolon")
             append_commands(self.__commands, jmc_command(
                 self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
             return True
