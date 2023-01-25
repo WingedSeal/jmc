@@ -989,11 +989,13 @@ class GUICreate(JMCFunction):
     call_string="Team.add",
     arg_type={
         "team": ArgType.KEYWORD,
-        "displayName": ArgType.STRING
+        "displayName": ArgType.STRING,
+        "properties": ArgType.JS_OBJECT
     },
     name="team_add",
     defaults={
-        "displayName": ""
+        "displayName": "",
+        "properties": "",
     }
 )
 class TeamAdd(JMCFunction):
@@ -1009,6 +1011,12 @@ class TeamAdd(JMCFunction):
             self.args["displayName"], self.raw_args["team"].token)
         if self.args["displayName"]:
             command += ' ' + self.format_text("displayName")
+
+        properties = self.tokenizer.parse_js_obj(
+            self.raw_args["properties"].token) if self.args["properties"] else {}
+        for key, value in properties.items():
+            command += f"\nteam modify {self.args['team']} {key} {value.string}"
+
         return command
 
 
