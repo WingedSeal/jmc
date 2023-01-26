@@ -666,3 +666,28 @@ class FormattedText:
 
     def __repr__(self) -> str:
         return f"FormattedText(raw_text={repr(self.raw_text)}, result={repr(json.dumps(self.result))})"
+
+
+ZERO_TO_Z_LENGTH = 36
+
+
+def __custom_hash(text: str):
+    hashed = 0
+    for ch in text:
+        hashed = (hashed * 281 ^ ord(ch) * 997) & 0xFFFFFFFF
+    return hashed
+
+
+def hash_string_to_string(string: str, length: int) -> str:
+    number: int = __custom_hash(string) % (ZERO_TO_Z_LENGTH**length)
+    if number == 0:
+        digits: list[int] = [0]
+    else:
+        digits = []
+        for _ in range(length):
+            digits.append(int(number % ZERO_TO_Z_LENGTH))
+            number //= ZERO_TO_Z_LENGTH
+        digits = digits[::-1]
+
+    return ''.join(str(digit) if 0 <= digit <= 9 else chr(
+        digit - 10 + 97) for digit in digits)

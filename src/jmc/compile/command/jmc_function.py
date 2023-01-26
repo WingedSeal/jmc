@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from ...compile.utils import convention_jmc_to_mc, is_float
 from ...compile.datapack_data import Item
-from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, verify_args, Arg
+from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, hash_string_to_string, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, TokenType, Tokenizer
@@ -222,7 +222,7 @@ class JMCFunction:
         criteria = criteria.replace("minecraft.", "")
         count = criteria.lower().replace(":", "_")
         if self.is_never_used("on_event", parameters=[criteria]):
-            objective = f"on_event{self.datapack.get_count('on_event')}"
+            objective = f"on_event_{hash_string_to_string(criteria, 7)}"
             self.datapack.add_objective(
                 objective, criteria)
             func_call = self.datapack.add_raw_private_function(
