@@ -85,8 +85,11 @@ class MathSqrt(JMCFunction):
 class MathRandom(JMCFunction):
     def call(self) -> str:
         seed = "__math__.seed"
+        result = "__math__.rng.result"
         a = "__math__.rng.a"
         c = "__math__.rng.c"
+        bound = "__math__.rng.bound"
+        tmp = "__math__.tmp"
         var = DataPack.var_name
         start = int(self.args["min"])
         end = int(self.args["max"])
@@ -111,20 +114,27 @@ class MathRandom(JMCFunction):
             self.datapack.add_raw_private_function(
                 self.name,
                 [
-                    f"execute if score {seed} {var} matches ..0 run scoreboard players add {seed} {var} 2147483647",
+                    # f"execute if score {seed} {var} matches ..0 run scoreboard players add {seed} {var} 2147483647",
                     f"scoreboard players operation {seed} {var} *= {a} {var}",
-                    f"scoreboard players operation {seed} {var} += {c} {var}"
+                    f"scoreboard players operation {seed} {var} += {c} {var}",
+                    f"scoreboard players operation {result} {var} = {seed} {var}",
+
+                    f"scoreboard players operation {tmp} {var} = {result} {var}",
+                    f"scoreboard players operation {result} {var} %= {bound} {var}",
+                    f"scoreboard players operation {tmp} {var} -= {result} {var}",
+                    # m = bound - 1
+                    f"scoreboard players operation {tmp} {var} += {bound} {var}",
+                    # tmp = result - (result % bound) + bound
+                    f"execute if score {tmp} {var} matches ..0 run " +
+                    self.datapack.call_func(self.name, "main")
                 ],
                 "main"
             )
 
-        mod = end - start + 1
-        self.datapack.add_int(mod)
-
         run = [
+            f"scoreboard players set {bound} {var} {end - start + 1}",
             self.datapack.call_func(self.name, "main"),
-            f"scoreboard players operation {self.var} {var} = {seed} {var}",
-            f"scoreboard players operation {self.var} {var} %= {mod} {DataPack.int_name}"
+            f"scoreboard players operation {self.var} {var} = {result} {var}",
         ]
 
         if start:
