@@ -649,7 +649,7 @@ class FormattedText:
 
     def __str__(self) -> str:
         if not self.result:
-            return ''
+            return '""'
 
         if len(self.result) == 1:
             if self.is_default_no_italic and "italic" not in self.result[0]:
