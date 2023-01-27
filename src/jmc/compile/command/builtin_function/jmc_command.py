@@ -793,3 +793,31 @@ class AdvancementGrant(JMCFunction):
         resource_location = f" {namespace}:{advancement}" if (
             type_ != "everything") else ""
         return f"advancement grant {target} {type_}{resource_location}"
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Entity.launch",
+    arg_type={
+        "power": ArgType.FLOAT
+    },
+    name="entity_launch",
+    defaults={
+        "power": "1"
+    },
+    number_type={
+        "power": NumberType.NON_ZERO
+    }
+)
+class EntityLaunch(JMCFunction):
+    def call(self) -> str:
+        if self.is_never_used(self.name, [self.args["power"]]):
+            self.datapack.add_raw_private_function(
+                self.name,
+                [f"execute positioned 0.0 0.0 0.0 run tp ^ ^ ^{self.args['power']}",
+                 f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} Motion set from entity @s Pos",
+                 "tp ~ ~ ~",
+                 f"data modify entity @s Motion set from storage {self.datapack.namespace}:{self.datapack.storage_name} Motion"],
+                self.args["power"]
+            )
+        return self.datapack.call_func(self.name, self.args["power"])
