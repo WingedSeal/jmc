@@ -150,7 +150,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "itemId", type: "Keyword" },
-                { key: "mob_type", type: "Keyword" },
+                { key: "mobType", type: "Keyword" },
                 { key: "displayName", type: "FormattedString" },
                 { key: "onPlace", type: "Function", default: "()=>{}" },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
@@ -994,12 +994,21 @@ const BuildinFeatures = [
     </Feature>,
     <Feature id="team_add" summary="Team.add()" keywords="vanilla">
         <p>Add team, an alternative to vanilla syntax</p>
+        <p>
+            Example of <code>properties</code> is{" "}
+            <code>{"{nametagVisibility: never}"}</code>
+        </p>
         <Command
             name="Team.add"
-            type="JMCFunction"
+            type="LoadOnly"
             params={[
                 { key: "id", type: "Keyword" },
                 { key: "name", type: "FormattedString", default: '""' },
+                {
+                    key: "properties",
+                    type: "JSObject<Keyword, Keyword>",
+                    default: "{}",
+                },
             ]}
         />
     </Feature>,

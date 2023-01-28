@@ -37,6 +37,22 @@ const Variable = () => {
                             <CodeText type="operator">=</CodeText>{" "}
                             <CodeText type="number">5</CodeText>;
                         </CodeBlock>
+                        <CodeBlock>
+                            <CodeText type="variable">$my_variable</CodeText>{" "}
+                            <CodeText type="operator">=</CodeText>{" "}
+                            <CodeText type="operator">true</CodeText>;{" "}
+                            <CodeText type="comment">
+                                {"//"} $my_variable = 1
+                            </CodeText>
+                        </CodeBlock>
+                        <CodeBlock>
+                            <CodeText type="variable">$my_variable</CodeText>{" "}
+                            <CodeText type="operator">=</CodeText>{" "}
+                            <CodeText type="operator">false</CodeText>;{" "}
+                            <CodeText type="comment">
+                                {"//"} $my_variable = 0
+                            </CodeText>
+                        </CodeBlock>
                     </p>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">

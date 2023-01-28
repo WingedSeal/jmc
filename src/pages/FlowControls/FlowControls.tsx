@@ -20,8 +20,7 @@ const FlowControls = () => {
                         JMC will treat both as the same thing.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"} ({" "}
+                        <CodeText type="class">${"<variable>"}</CodeText> ({" "}
                         <CodeText type="operator">{">="}</CodeText> |{" "}
                         <CodeText type="operator">{"<="}</CodeText> |{" "}
                         <CodeText type="operator">{"="}</CodeText> |{" "}
@@ -30,8 +29,7 @@ const FlowControls = () => {
                         <CodeText type="operator">{"<"}</CodeText> ){" "}
                         <CodeText type="number">{"<integer>"}</CodeText>
                         <br />
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"} ({" "}
+                        <CodeText type="class">${"<variable>"}</CodeText> ({" "}
                         <CodeText type="operator">{">="}</CodeText> |{" "}
                         <CodeText type="operator">{"<="}</CodeText> |{" "}
                         <CodeText type="operator">{"="}</CodeText> |{" "}
@@ -41,8 +39,7 @@ const FlowControls = () => {
                         <CodeText type="operator">$</CodeText>
                         {"<variable>"}
                         <br />
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"}{" "}
+                        <CodeText type="class">${"<variable>"}</CodeText>{" "}
                         <CodeText type="operator">matches</CodeText> [
                         <CodeText type="number">
                             {"<inclusive_min_integer>"}
@@ -52,6 +49,8 @@ const FlowControls = () => {
                             {"<inclusive_max_integer>"}
                         </CodeText>
                         ]
+                        <br />
+                        <CodeText type="class">${"<variable>"}</CodeText>
                     </CodeBlock>
                     <p>
                         <Tab />
@@ -59,7 +58,7 @@ const FlowControls = () => {
                     </p>
                     <CodeBlock>
                         <CodeText type="keyword">if</CodeText> (
-                        <CodeText type="operator">$</CodeText>deathCount
+                        <CodeText type="class">$deathCount</CodeText>
                         <CodeText type="operator">{">"}</CodeText>
                         <CodeText type="number">5</CodeText> ) {"{"}
                         <br />
@@ -68,7 +67,7 @@ const FlowControls = () => {
                         <CodeText type="string">"More than 5 death!"</CodeText>;
                         <br />
                         {"}"} <CodeText type="keyword">else if</CodeText> (
-                        <CodeText type="operator">$</CodeText>deathCount{" "}
+                        <CodeText type="class">$deathCount</CodeText>{" "}
                         <CodeText type="operator">matches</CodeText>{" "}
                         <CodeText type="number">2</CodeText>
                         <CodeText type="operator">..</CodeText>
@@ -81,9 +80,24 @@ const FlowControls = () => {
                         </CodeText>
                         ;
                         <br />
-                        {"}"}
+                        {"} "}
+                        <CodeText type="keyword">else if</CodeText> (
+                        <CodeText type="class">$deathCount</CodeText>) {"{"}
                         <br />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">"At least 1 death"</CodeText>
+                        ;
+                        <br />
+                        {"}"}
                     </CodeBlock>
+                    <p>
+                        <Tab />
+                        Normal command arguments after <code>
+                            execute if
+                        </code>{" "}
+                        can be used as condition as well.
+                    </p>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Logic Gate

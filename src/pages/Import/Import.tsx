@@ -13,7 +13,8 @@ const Import = () => {
                     <Tab />
                     All importing does is practically copying the code from
                     another file to main JMC file. The file name and folder
-                    structure does not matter after the import.
+                    structure does not matter after the import. If the file is
+                    already imported, importing it again will not do anything.
                 </p>
                 <p>
                     <Tab />
