@@ -44,9 +44,7 @@ FIRST_ARGUMENTS = {
     "@import",
     "new"
 }
-"""Set of all vanilla commands and JMC custom syntax
-- `if` is excluded since it can be used in execute
-- `give` is exluced since it can also be arguments (`/effect give`)"""
+"""Set of all vanilla commands and JMC custom syntax"""
 
 FIRST_ARGUMENTS_EXCEPTION = {
     "give": {"effect", "recipe", "give"},
@@ -57,9 +55,12 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "bossbar": {"execute"},
     "title": {"title"},
     "item": {"summon"},
-    "loot": {"loot"}
+    "loot": {"loot"},
+    "data": {"execute"}
 }
-"""Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)"""
+"""Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
+
+Example: `/effect clear` -> `"clear": {"effect"}`"""
 
 
 # ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
