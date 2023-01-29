@@ -207,12 +207,6 @@ class Lexer:
                 self.parse_file(file_path=new_path)
                 self.__update_load(file_path_str, raw_string)
             else:
-                # if not is_load:
-                #     raise JMCSyntaxException(
-                # f"Command({command[0].string}) found inside non-load file
-                # (Not main JMC file)", command[1], tokenizer,
-                # suggestion="Consider putting it in a new function")
-
                 self.datapack.load_function.append(command)
 
         self.parse_current_load()

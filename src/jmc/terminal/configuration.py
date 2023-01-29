@@ -3,7 +3,7 @@ from json import JSONDecodeError, dump, load
 import os
 from pathlib import Path
 import threading
-from typing import Any, Callable, Protocol, Union
+from typing import Any, Callable, Protocol
 
 from .utils import Colors, get_input, pprint
 from ..compile.utils import SingleTon
@@ -13,12 +13,13 @@ from dataclasses import dataclass
 logger = Logger(__name__)
 
 
-class TerminalCommand(Protocol):
-    """Protocal for a function(callable) representing a jmc terminal command"""
-    __name__: str
+# class TerminalCommand(Protocol):
+#     """Protocal for a function(callable) representing a jmc terminal command"""
+#     __name__: str
 
-    def __call__(self, *args: str) -> None:
-        ...
+#     def __call__(self, *args: str) -> None:
+#         ...
+TerminalCommand = Callable[..., None]
 
 
 @dataclass(slots=True, frozen=True, order=True, eq=True)
