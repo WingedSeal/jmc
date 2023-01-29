@@ -267,7 +267,8 @@ class DataPack:
         :return: Minecraft function call string
         """
         if token.string == "{}":
-            raise JMCSyntaxWarning("Empty function", token, tokenizer)
+            raise JMCSyntaxWarning(
+                "Unexpected empty function content.", token, tokenizer)
 
         commands = self.parse_function_token(token, tokenizer)
         if not force_create_func and len(

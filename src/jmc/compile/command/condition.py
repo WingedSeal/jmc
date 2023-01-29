@@ -185,7 +185,7 @@ def custom_condition(
         if token.token_type == TokenType.PAREN_SQUARE:
             if not conditions:
                 raise JMCSyntaxException(
-                    "Unexpected square parenthesis []", token, tokenizer)
+                    "Unexpected square bracket, `[]`", token, tokenizer)
             conditions[-1] += token.string
         elif is_connected(
                 token, last_token):
@@ -234,13 +234,13 @@ def condition_to_ast(
     :param tokens: Condition in form of tokens
     :param tokenizer: Tokenizer
     :param datapack: Datapack object
-    :raises JMCSyntaxException: Empty round parenthesis inside condition
+    :raises JMCSyntaxException: Empty round bracket inside condition
     :return: Abstract syntax tree
     """
     if len(tokens) == 1 and tokens[0].token_type == TokenType.PAREN_ROUND:
         if tokens[0].string == "()":
             raise JMCSyntaxException(
-                "Empty round parenthesis () inside condition", tokens[0], tokenizer)
+                "Unexpected empty round bracket, `()`, inside condition", tokens[0], tokenizer)
 
         tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
                               tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)

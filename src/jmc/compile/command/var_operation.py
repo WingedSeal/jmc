@@ -33,7 +33,7 @@ def variable_operation(
 
         if tokens[1].string != "()":
             raise JMCSyntaxException(
-                "'get' function takes no arguments, expected empty bracket ()", tokens[1], tokenizer)
+                "'get' method takes no arguments, expected empty bracket, `.get()`", tokens[1], tokenizer)
 
         return f"scoreboard players get {tokens[0].string[:-4]} {DataPack.var_name}"
 

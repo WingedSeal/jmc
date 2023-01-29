@@ -240,7 +240,7 @@ class Lexer:
                 "Expected keyword(function's name)", command[1], tokenizer)
         if command[2].string != "()":
             raise JMCSyntaxException(
-                "Expected empty round parenthesis", command[2], tokenizer)
+                "Expected empty round bracket, `()`", command[2], tokenizer)
         if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
@@ -298,7 +298,7 @@ class Lexer:
                 "Expected keyword(JSON file's type)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected round parenthesis(JSON file's path)", command[1], tokenizer, col_length=True)
+                "Expected round bracket(JSON file's path)", command[1], tokenizer, col_length=True)
         if command[2].string == "()":
             raise JMCSyntaxException(
                 "Expected JSON file's path in the bracket", command[1], tokenizer)

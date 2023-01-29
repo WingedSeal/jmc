@@ -68,7 +68,7 @@ Example: `/effect clear` -> `"clear": {"effect"}`"""
 #     "clear",
 #     "setblock"
 # }
-# """Set of vanilla command to stop JMC from terminating line from curly parenthesis (Allow number after curly parenthesis)"""
+# """Set of vanilla command to stop JMC from terminating line from curly bracket (Allow number after curly bracket)"""
 
 
 def append_commands(commands: list[str], string: str) -> None:
@@ -342,7 +342,7 @@ class FuncContent:
 
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
-                    f"Custom function({token.string})'s argument is not supported.\nExpected empty bracket", self.command[key_pos + 1], self.tokenizer)
+                    f"Argument is not supported in custom function({token.string}).\nExpected 0 argument, `()`", self.command[key_pos + 1], self.tokenizer, suggestion="You might have misspell the built-in function name. (It is case-sensitive.)")
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True
