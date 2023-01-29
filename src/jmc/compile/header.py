@@ -36,7 +36,8 @@ class Header(SingleTon):
         "commands",
         "statics",
         "dels",
-        "post_process"
+        "post_process",
+        "finished_compiled_time"
     )
 
     file_read: set[str]
@@ -57,6 +58,7 @@ class Header(SingleTon):
     """List of exception to command(first arguments) to ignore"""
     post_process: list[Callable[["DataPack"], Any]]
     """Python function to run before building datapack"""
+    finished_compiled_time: float
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -79,6 +81,7 @@ class Header(SingleTon):
         obj.statics = set()
         obj.dels = set()
         obj.post_process = []
+        obj.finished_compiled_time = 0
 
     def add_file_read(self, path: Path) -> None:
         """

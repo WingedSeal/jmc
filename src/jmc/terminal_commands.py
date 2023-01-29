@@ -8,6 +8,8 @@ import threading
 from time import perf_counter
 from traceback import format_exc
 
+from .compile.header import Header
+
 from .terminal.utils import RestartException, error_report, get_input, handle_exception, press_enter
 from .terminal import pprint, Colors, GlobalData, add_command
 from .compile import compile_jmc, Logger, EXCEPTIONS, get_debug_log, get_info_log
@@ -58,9 +60,10 @@ def compile_(debug: str = "") -> None:
     try:
         start_time = perf_counter()
         compile_jmc(global_data.config, debug=True)
+        finished_compiled_time = Header().finished_compiled_time
         stop_time = perf_counter()
         pprint(
-            f"Compiled successfully in {stop_time-start_time} seconds", Colors.INFO)
+            f"Compiled successfully in {finished_compiled_time-start_time:.5f} seconds, datapack built in {stop_time-finished_compiled_time:.5f} seconds", Colors.INFO)
     except EXCEPTIONS as error:
         logger.debug(format_exc())
         error_report(error)

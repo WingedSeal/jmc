@@ -1,7 +1,9 @@
 """Module responsibile for all compiling in jmc"""
 from json import JSONDecodeError, dump, dumps, loads
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING, Any
+
 
 from .header import Header
 from .header_parse import parse_header
@@ -265,6 +267,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
 
     logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
+    Header().finished_compiled_time = perf_counter()
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
     minecraft_folder = output_folder / "data" / "minecraft"
