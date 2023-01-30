@@ -122,8 +122,8 @@ class Configuration:
             "namespace": self.namespace,
             "description": self.description,
             "pack_format": self.pack_format,
-            "target": self.target.as_posix(),
-            "output": self.output.as_posix(),
+            "target": self.target.relative_to(self.global_data.cwd).as_posix(),
+            "output": self.output.relative_to(self.global_data.cwd).as_posix(),
         }
 
     def load_config(self) -> None:
@@ -136,19 +136,19 @@ class Configuration:
             self.namespace = json["namespace"]
             self.description = json["description"]
             self.pack_format = json["pack_format"]
-            self.target = Path(json["target"])
-            self.output = Path(json["output"])
+            self.target = self.global_data.cwd / json["target"]
+            self.output = self.global_data.cwd / json["output"]
             self.is_configed = True
         except JSONDecodeError as error:
             pprint(
                 f"Invalid JSON syntax in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
             )
-            raise error
+            raise error from error
         except KeyError as error:
             pprint(
                 f"Invalid JSON data in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
             )
-            raise error
+            raise error from error
 
     def save_config(self):
         """
@@ -158,7 +158,7 @@ class Configuration:
             f"Your configuration has been saved to {self.global_data.CONFIG_FILE_NAME}", Colors.INFO
         )
         with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("w", encoding="utf-8") as file:
-            dump(self.toJSON(), file, indent=2)
+            dump(self.toJSON(), file, indent=4)
 
     def ask_and_save(self):
         """
