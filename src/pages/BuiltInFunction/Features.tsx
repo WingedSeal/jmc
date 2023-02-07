@@ -596,7 +596,7 @@ const BuildinFeatures = [
             <code>{"{my_id:2}"}</code>
         </p>
         <Command
-            name="Trigger.setup"
+            name="RightClick.setup"
             type="LoadOnly"
             params={[
                 { key: "idName", type: "Keyword" },
@@ -1010,6 +1010,21 @@ const BuildinFeatures = [
                     default: "{}",
                 },
             ]}
+        />
+    </Feature>,
+    <Feature
+        id="entity_launch"
+        summary="Entity.launch()"
+        keywords="motion shoot"
+    >
+        <p>
+            Launch the entity running the command foward(the direction the
+            command is running). Usually used with <code>execute</code>.
+        </p>
+        <Command
+            name="Entity.launch"
+            type="JMCFunction"
+            params={[{ key: "power", type: "float", default: "1" }]}
         />
     </Feature>,
 ];
