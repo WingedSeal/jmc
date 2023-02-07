@@ -6,7 +6,7 @@
         <title>404 Rerouting</title>
         <script type="text/javascript">
             var pathSegmentsToKeep = 0;
-            var location = window.location;
+            let test = window.location;
             location.replace(
                 location.protocol +
                     "//" +
@@ -29,6 +29,9 @@
                     location.hash
             );
             console.log(location);
+            setTimeout(() => {
+                var location = test;
+            }, 5000);
         </script>
     </head>
     <body></body>
