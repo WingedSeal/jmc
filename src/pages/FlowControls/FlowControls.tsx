@@ -36,8 +36,17 @@ const FlowControls = () => {
                         <CodeText type="operator">{"=="}</CodeText> |{" "}
                         <CodeText type="operator">{">"}</CodeText> |{" "}
                         <CodeText type="operator">{"<"}</CodeText> ){" "}
-                        <CodeText type="operator">$</CodeText>
-                        {"<variable>"}
+                        <CodeText type="class">${"<variable>"}</CodeText>
+                        <br />
+                        <CodeText type="class">${"<variable>"}</CodeText> ({" "}
+                        <CodeText type="operator">{">="}</CodeText> |{" "}
+                        <CodeText type="operator">{"<="}</CodeText> |{" "}
+                        <CodeText type="operator">{"="}</CodeText> |{" "}
+                        <CodeText type="operator">{"=="}</CodeText> |{" "}
+                        <CodeText type="operator">{">"}</CodeText> |{" "}
+                        <CodeText type="operator">{"<"}</CodeText> ) objective
+                        <CodeText type="operator">:</CodeText>
+                        selector
                         <br />
                         <CodeText type="class">${"<variable>"}</CodeText>{" "}
                         <CodeText type="operator">matches</CodeText> [

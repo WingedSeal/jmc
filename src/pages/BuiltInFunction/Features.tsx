@@ -456,7 +456,7 @@ const BuildinFeatures = [
     <Feature
         id="hardcode_repeat_list"
         summary="Hardcode.repeatList()"
-        keywords="copy paste list"
+        keywords="copy paste list array"
     >
         <p>
             Does the same thing as <code>Hardcode.repeat</code> but use list to
@@ -468,7 +468,27 @@ const BuildinFeatures = [
             params={[
                 { key: "indexString", type: "string" },
                 { key: "function", type: "ArrowFunction" },
-                { key: "strings", type: "List" },
+                { key: "strings", type: "List<string>" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
+        id="hardcode_repeat_lists"
+        summary="Hardcode.repeatLists()"
+        keywords="copy paste lists arrays"
+    >
+        <p>
+            Does the same thing as <code>Hardcode.repeatList</code> but it can
+            replace multiple indexes at the same time.
+        </p>
+        <Command
+            name="Hardcode.repeatLists"
+            type="ExecuteExcluded"
+            params={[
+                { key: "indexStrings", type: "List<string>" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "strings", type: "List<List<string>>" },
             ]}
             newline
         />
