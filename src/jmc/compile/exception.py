@@ -39,7 +39,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     if token is None:
         string = ""
         length = 1
-        col = tokenizer.col
+        col = tokenizer.col - 1
         line = tokenizer.line
     else:
         string = token.get_full_string()
@@ -66,10 +66,23 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     else:
         display_col += 1
     try:
+        msgs_ = tokenizer.file_string.split(NEW_LINE)
+        max_space = len(str(display_line + 1))
         if entire_line:
-            msg = f"In {tokenizer.file_path}\n{message} at line {line}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])} <-"
+            line_ = overide_file_str(msgs_[display_line - 1])
+            msg = f"""In {tokenizer.file_path}
+{message} at line {line}.
+{display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2] if display_line > 1 else ""}
+{display_line}{" "*(max_space-len(str(display_line)))} |{line_}
+{" "*(col+max_space+1)}{"^"*(len(line_)-col+1)}
+{display_line+1} |{msgs_[display_line] if display_line < len(msgs_) else ""}"""
         else:
-            msg = f"In {tokenizer.file_path}\n{message} at line {line} col {col}.\n{overide_file_str(tokenizer.file_string.split(NEW_LINE)[display_line-1])[:display_col-1]} <-"
+            msg = f"""In {tokenizer.file_path}
+{message} at line {line} col {col}.
+{display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2] if display_line > 1 else ""}
+{display_line}{" "*(max_space-len(str(display_line)))} |{overide_file_str(msgs_[display_line-1])}
+{" "*(col+max_space+1)}{"^"*(display_col-col)}
+{display_line+1} |{msgs_[display_line] if display_line < len(msgs_) else ""}"""
     except IndexError as error:
         logger.critical(
             f"Error happens at wrong file: {tokenizer.file_path=}, {line=}, {col=}")

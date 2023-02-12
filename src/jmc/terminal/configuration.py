@@ -63,7 +63,7 @@ def get_pack_format(string: str) -> str:
     string_split = string.split(".")
     if not 2 <= len(string_split) <= 3:
         pprint(
-            f"Invalid Minecraft version: Expect 1-2 dot (got {len(string_split)}).",
+            f"Invalid Minecraft version: Expect 1 or 2 dot (got {len(string_split)-1}).",
             Colors.FAIL)
         return ""
 

@@ -338,11 +338,11 @@ class FuncContent:
                                                              1].token_type == TokenType.PAREN_ROUND:
             if len(self.command[key_pos:]) > 2:
                 raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos], self.tokenizer, col_length=True)
 
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
-                    f"Argument is not supported in custom function({token.string}).\nExpected 0 argument, `()`", self.command[key_pos + 1], self.tokenizer, suggestion="You might have misspell the built-in function name. (It is case-sensitive.)")
+                    f"Argument is not supported in custom function({token.string}).\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspell the built-in function name. (It is case-sensitive.)")
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.namespace}:{convention_jmc_to_mc(token, self.tokenizer)}")
             return True

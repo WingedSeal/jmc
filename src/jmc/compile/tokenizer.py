@@ -400,7 +400,7 @@ class Tokenizer:
         self.is_comment = False
         if self.state == TokenType.STRING:
             raise JMCSyntaxException(
-                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False, suggestion="Consider changing '\\n' to '\\\\n'")
+                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)  # suggestion="Consider changing '\\n' to '\\\\n'")
         if self.state == TokenType.COMMENT:
             self.state = None
         elif self.state == TokenType.KEYWORD or self.state == TokenType.OPERATOR:
