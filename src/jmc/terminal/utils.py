@@ -1,6 +1,7 @@
 from enum import Enum
 from getpass import getpass
 from threading import Event
+from traceback import format_exc
 from ..compile import Logger
 
 logger = Logger(__name__)
@@ -76,8 +77,9 @@ def handle_exception(error: Exception, event: Event, is_ok: bool):
     pprint(type(error).__name__, Colors.FAIL_BOLD)
     pprint(error, Colors.FAIL)
     if not is_ok:
+        pprint(format_exc(), Colors.YELLOW)
         pprint(
-            "NOTE: This shouldn't happen. Please contact WingedSeal.",
+            "Please report this error at https://github.com/WingedSeal/jmc/issues/new/choose or https://discord.gg/PNWKpwdzD3.",
             Colors.FAIL)
     logger.critical("Program crashed")
     logger.exception("")
