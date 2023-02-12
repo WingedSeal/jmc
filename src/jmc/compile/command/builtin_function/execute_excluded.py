@@ -47,6 +47,16 @@ def _hardcode_process(string: str, index_string: str,
     return string
 
 
+def _hardcode_processes(string: str, index_strings: list[str],
+                        i_s: list[str], token: Token, tokenizer: Tokenizer) -> str:
+    for i, index_string in zip(i_s, index_strings):
+        string = string.replace(index_string, i)
+    calc_pos = string.find("Hardcode.calc")
+    if calc_pos != -1:
+        string = _hardcode_parse(calc_pos, string, token, tokenizer)
+    return string
+
+
 @func_property(
     func_type=FuncType.EXECUTE_EXCLUDED,
     call_string="Hardcode.repeat",
@@ -132,6 +142,62 @@ class HardcodeRepeatList(JMCFunction):
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_process(
                     string, self.args["indexString"], i, self.token, self.tokenizer
+                ))
+                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                raise error
+
+        return "\n".join(commands)
+
+
+@func_property(
+    func_type=FuncType.EXECUTE_EXCLUDED,
+    call_string="Hardcode.repeatLists",
+    arg_type={
+        "indexStrings": ArgType.LIST,
+        "function": ArgType.ARROW_FUNC,
+        "stringLists": ArgType.LIST
+    },
+    name="hardcode_repeat_lists",
+    ignore={
+        "function"
+    }
+)
+class HardcodeRepeatLists(JMCFunction):
+    def call(self) -> str:
+        index_strings, _ = self.datapack.parse_list(
+            self.raw_args["indexStrings"].token, self.tokenizer, TokenType.STRING)
+        string_lists, _ = self.datapack.parse_lists(
+            self.raw_args["stringLists"].token, self.tokenizer, TokenType.STRING)
+        if len(index_strings) != len(string_lists):
+            raise JMCValueError(
+                f"Size of indexStrings({len(index_strings)}) doesn't match the size of stringLists({len(string_lists)})",
+                self.raw_args["indexStrings"].token,
+                self.tokenizer)
+        string_lists_count = [len(string_list) for string_list in string_lists]
+        if string_lists_count.count(
+                string_lists_count[0]) != len(string_lists_count):
+            raise JMCValueError(
+                f"Not all of list in stringLists have equal size",
+                self.raw_args["stringLists"].token,
+                self.tokenizer)
+        commands: list[str] = []
+        for index in range(len(string_lists[0])):
+            try:
+                commands.extend(self.datapack.parse_function_token(
+                    Token(
+                        TokenType.PAREN_CURLY,
+                        self.raw_args["function"].token.line,
+                        self.raw_args["function"].token.col,
+                        _hardcode_processes(
+                            self.raw_args["function"].token.string, index_strings, [
+                                string_list[index] for string_list in string_lists], self.token, self.tokenizer
+                        )
+                    ), self.tokenizer)
+                )
+            except JMCSyntaxException as error:
+                error.reinit(lambda string: _hardcode_processes(
+                    string, index_strings, [
+                        string_list[index] for string_list in string_lists], self.token, self.tokenizer
                 ))
                 error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error

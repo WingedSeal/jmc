@@ -479,6 +479,30 @@ class DataPack:
                     f"Expected list/array of {list_of.value}, got list/array of {token_type}", token, tokenizer)
         return [token_.string for token_ in token_list], token_list
 
+    def parse_lists(self, token: Token,
+                    tokenizer: Tokenizer, list_of: TokenType) -> tuple[list[list[str]], list[list[Token]]]:
+        """
+        Parse paren_square token into list of list of strings
+
+        :param token: paren_square token
+        :param tokenizer: token's Tokenizer
+        :param list_of: TokenType of elements in the list for verification
+        :raises JMCValueError: Wrong TokenType
+        :return: List of list ofstrings and List of list of tokens
+        """
+        token_list = tokenizer.parse_list(token)
+        result_strings: list[list[str]] = []
+        result_tokens: list[list[Token]] = []
+        for token_ in token_list:
+            if token_.token_type != TokenType.PAREN_SQUARE:
+                raise JMCValueError(
+                    f"Expected list/array of list/array of {list_of.value}, got list/array of {token_.token_type}", token, tokenizer)
+            result_string, result_token = self.parse_list(
+                token_, tokenizer, list_of)
+            result_strings.append(result_string)
+            result_tokens.append(result_token)
+        return result_strings, result_tokens
+
     def token_dict_to_raw_js_object(
             self, token_dict: dict[str, Token], tokenizer: Tokenizer) -> str:
         """
