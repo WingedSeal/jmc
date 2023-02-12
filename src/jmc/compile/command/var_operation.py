@@ -91,10 +91,10 @@ def variable_operation(
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer, suggestion="Expected integer or variable or target selector")
-        if tokens[2].token_type == TokenType.OPERATOR and len(
-                tokens) > 3 and tokens[3].token_type == TokenType.KEYWORD:
-            tokens[2] = tokenizer.merge_tokens(tokens[2:4])
-            del tokens[3]
+        # if tokens[2].token_type == TokenType.OPERATOR and len(
+        #         tokens) > 3 and tokens[3].token_type == TokenType.KEYWORD:
+        #     tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+        #     del tokens[3]
         if tokens[2].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type.value})", tokens[2], tokenizer, suggestion="Expected integer or variable or target selector")
@@ -129,13 +129,7 @@ def variable_operation(
                 and
                 tokens[4].token_type == TokenType.KEYWORD
             ):
-                right_token = Token(
-                    TokenType.KEYWORD,
-                    tokens[2].line,
-                    tokens[2].col,
-                    tokens[2].string +
-                    ":" +
-                    tokens[4].string)
+                right_token = tokenizer.merge_tokens(tokens[2:5])
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")

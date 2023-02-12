@@ -79,8 +79,13 @@ def custom_condition(
             raise JMCSyntaxException(
                 f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
         if len(tokens) > 3:
-            raise JMCSyntaxException(
-                f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+            if tokens[3].token_type == TokenType.OPERATOR and tokens[4].token_type == TokenType.KEYWORD:
+                tokens[2] = tokenizer.merge_tokens(tokens[2:5])
+                del tokens[4]
+                del tokens[3]
+            else:
+                raise JMCSyntaxException(
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
 
         first_token, operator_token, second_token = tokens
         if operator_token.token_type == TokenType.OPERATOR:
