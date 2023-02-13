@@ -47,11 +47,13 @@ const TryOut = () => {
                     defaultValue="namespace"
                     className="mb-2"
                     onChange={() => {}}
+                    spellCheck="false"
                 />
                 <textarea
                     ref={contentHeaderArea}
                     className="w-4/5 h-[60vh] mb-4"
                     placeholder="Header"
+                    spellCheck="false"
                     onKeyDown={(e) => {
                         if (e.key === "Tab") {
                             e.preventDefault();
@@ -74,6 +76,7 @@ const TryOut = () => {
                 <textarea
                     ref={contentTextArea}
                     className="w-4/5 h-[60vh]"
+                    spellCheck="false"
                     onKeyDown={(e) => {
                         if (e.key === "Tab") {
                             e.preventDefault();
