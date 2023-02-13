@@ -32,8 +32,8 @@ const howTo = (
             ]}
         />
         <p>
-            Default means that you do not need to provide the argument and JMC
-            wil automatically fallback to that value
+            <code>default</code> means that the argument is not required and
+            will automatically fallback to that value.
         </p>
         <p>
             Module is actually a part of the function name and bare no special
