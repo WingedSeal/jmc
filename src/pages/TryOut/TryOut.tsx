@@ -44,16 +44,55 @@ const TryOut = () => {
                 <p className="text-white">{JMCVersion}</p>
                 <input
                     ref={namespaceInput}
-                    value="namespace"
+                    defaultValue="namespace"
                     className="mb-2"
-                    readOnly
+                    onChange={() => {}}
                 />
                 <textarea
                     ref={contentHeaderArea}
                     className="w-4/5 h-[60vh] mb-4"
                     placeholder="Header"
+                    onKeyDown={(e) => {
+                        if (e.key === "Tab") {
+                            e.preventDefault();
+                            const start =
+                                contentTextArea.current!.selectionStart;
+                            const end = contentTextArea.current!.selectionEnd;
+                            contentTextArea.current!.value =
+                                contentTextArea.current!.value.substring(
+                                    0,
+                                    start
+                                ) +
+                                "\t" +
+                                contentTextArea.current!.value.substring(end);
+                            contentTextArea.current!.selectionStart =
+                                contentTextArea.current!.selectionEnd =
+                                    start + 1;
+                        }
+                    }}
                 />
-                <textarea ref={contentTextArea} className="w-4/5 h-[60vh]" />
+                <textarea
+                    ref={contentTextArea}
+                    className="w-4/5 h-[60vh]"
+                    onKeyDown={(e) => {
+                        if (e.key === "Tab") {
+                            e.preventDefault();
+                            const start =
+                                contentTextArea.current!.selectionStart;
+                            const end = contentTextArea.current!.selectionEnd;
+                            contentTextArea.current!.value =
+                                contentTextArea.current!.value.substring(
+                                    0,
+                                    start
+                                ) +
+                                "\t" +
+                                contentTextArea.current!.value.substring(end);
+                            contentTextArea.current!.selectionStart =
+                                contentTextArea.current!.selectionEnd =
+                                    start + 1;
+                        }
+                    }}
+                />
                 <button
                     onClick={() => {
                         if (pyodide === undefined) return;
@@ -96,12 +135,12 @@ except EXCEPTIONS as error:
                     {/* No Error */}
                     {Object.keys(Object.fromEntries(JMCResult)).map((key) => {
                         return (
-                            <>
+                            <div key={key}>
                                 <div className="bg-secondary-dark">
                                     {">"} {key}
                                 </div>
                                 <pre>{JMCResult.get(key)}</pre>
-                            </>
+                            </div>
                         );
                     })}
                 </div>
