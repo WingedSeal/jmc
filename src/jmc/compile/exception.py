@@ -35,7 +35,6 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     :param suggestion: A suggestion message at the end of the error message
     :return: Error message
     """
-
     if token is None:
         string = ""
         length = 1
@@ -56,7 +55,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
             col = length - string.rfind("\n")
         else:
             col += length
-
+        col -= 1
     if display_col_length:
         if "\n" in string:
             display_line += string.count("\n")

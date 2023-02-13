@@ -562,7 +562,7 @@ class Tokenizer:
                 self.append_keywords()
             else:
                 raise JMCSyntaxException(
-                    "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
+                    "Expected semicolon(;)", self.keywords[-1], self)
 
         if not expect_semicolon:
             if self.token_str != "":
