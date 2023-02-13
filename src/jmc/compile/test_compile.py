@@ -44,7 +44,7 @@ INT=__int__"""
             namespace=namespace,
             description="__THIS_IS_FOR_TESTING__",
             pack_format="10",
-            target=Path(__file__),
+            target=Path("main.jmc"),
             output=Path(output)
         )
 
