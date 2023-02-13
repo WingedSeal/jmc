@@ -401,11 +401,11 @@ class FuncContent:
     def __is_say(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) == 1:
             raise JMCSyntaxException(
-                "Expected string after 'say' command", token, self.tokenizer, col_length=True)
+                "Expected string after 'say' command", token, self.tokenizer)
 
         if self.command[key_pos + 1].token_type != TokenType.STRING:
             raise JMCSyntaxException(
-                "Expected string after 'say' command", self.command[key_pos + 1], self.tokenizer, display_col_length=False, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
+                "Expected string after 'say' command", self.command[key_pos + 1], self.tokenizer, suggestion="(In JMC, you are required to wrapped say command's argument in quote.)")
 
         if len(self.command[key_pos:]) > 2:
             raise JMCSyntaxException(
