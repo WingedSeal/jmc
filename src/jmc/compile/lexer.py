@@ -313,7 +313,7 @@ class Lexer:
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
             raise MinecraftSyntaxWarning(
-                f"Unrecognized JSON file's type({json_type})", command[2], tokenizer
+                f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
             )
 
         json_name = prefix + convention_jmc_to_mc(
