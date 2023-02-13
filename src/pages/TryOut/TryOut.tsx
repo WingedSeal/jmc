@@ -121,7 +121,11 @@ except EXCEPTIONS as error:
                             .toJs();
                         if (built.size === 0) {
                             setIsError(true);
-                            setJMCError(pyodide.globals.get("ERROR"));
+                            setJMCError(
+                                pyodide.globals
+                                    .get("ERROR")
+                                    .replace("/home/pyodide/", "")
+                            );
                         } else {
                             setIsError(false);
                             setJMCResult(built);
