@@ -56,17 +56,17 @@ const TryOut = () => {
                         if (e.key === "Tab") {
                             e.preventDefault();
                             const start =
-                                contentTextArea.current!.selectionStart;
-                            const end = contentTextArea.current!.selectionEnd;
-                            contentTextArea.current!.value =
-                                contentTextArea.current!.value.substring(
+                                contentHeaderArea.current!.selectionStart;
+                            const end = contentHeaderArea.current!.selectionEnd;
+                            contentHeaderArea.current!.value =
+                                contentHeaderArea.current!.value.substring(
                                     0,
                                     start
                                 ) +
                                 "\t" +
-                                contentTextArea.current!.value.substring(end);
-                            contentTextArea.current!.selectionStart =
-                                contentTextArea.current!.selectionEnd =
+                                contentHeaderArea.current!.value.substring(end);
+                            contentHeaderArea.current!.selectionStart =
+                                contentHeaderArea.current!.selectionEnd =
                                     start + 1;
                         }
                     }}
