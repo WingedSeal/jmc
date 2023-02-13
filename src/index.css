@@ -46,6 +46,10 @@ body {
   background-color: dimgray;
 }
 
+pre {
+  font-family: Minecraft, sans-serif;
+}
+
 @screen md {
   body {
     overflow-y: auto !important;

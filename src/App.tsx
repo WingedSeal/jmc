@@ -28,6 +28,7 @@ import Advanced from "./pages/Advanced";
 import Submitted from "./pages/Submitted";
 import Function from "./pages/Function";
 import Header from "./pages/Header";
+import TryOut from "./pages/TryOut";
 
 function App() {
     return (
@@ -89,6 +90,7 @@ function App() {
                     <Route path="/examples/basics" element={<Basics />} />
                     <Route path="/examples/advanced" element={<Advanced />} />
                     <Route path="/examples/submitted" element={<Submitted />} />
+                    <Route path="/try-out" element={<TryOut />} />
                     <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
             </div>

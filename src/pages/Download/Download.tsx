@@ -3,7 +3,7 @@ import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.
 import { ReactComponent as WindowsSvg } from "../../assets/image/windows.svg";
 import { ReactComponent as PythonSvg } from "../../assets/image/python.svg";
 import { ReactComponent as LinuxSvg } from "../../assets/image/linux.svg";
-import CodeBlock from "../../components/CodeBlock";
+// import CodeBlock from "../../components/CodeBlock";
 
 const Download = () => {
     return (
