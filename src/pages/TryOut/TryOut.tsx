@@ -172,7 +172,10 @@ except EXCEPTIONS as error:
                                 setJMCError(
                                     pyodide.globals
                                         .get("ERROR")
-                                        .replace("/home/pyodide/", "")
+                                        .replace(
+                                            new RegExp("/home/pyodide/", "g"),
+                                            ""
+                                        )
                                 );
                             } else {
                                 setIsError(false);
