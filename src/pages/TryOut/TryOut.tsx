@@ -42,6 +42,7 @@ const TryOut = () => {
         if (JMCError === loadingMsg) {
             compile();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pyodide]);
 
     const compile = () => {
@@ -134,7 +135,7 @@ except EXCEPTIONS as error:
 
                     <textarea
                         ref={contentHeaderArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full"
+                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         placeholder="Header File"
                         spellCheck="false"
                         hidden={!isShowHeader}
@@ -162,7 +163,7 @@ except EXCEPTIONS as error:
                     />
                     <textarea
                         ref={contentTextArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full"
+                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         spellCheck="false"
                         placeholder="JMC File"
                         hidden={isShowHeader}
