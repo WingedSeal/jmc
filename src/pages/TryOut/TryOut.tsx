@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { loadPyodide, PyodideInterface } from "pyodide";
 import LoadingScreen from "../../components/LoadingScreen";
+import CodeBlock from "../../components/CodeBlock";
 
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
@@ -84,7 +85,7 @@ const TryOut = () => {
 
                     <textarea
                         ref={contentHeaderArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] z-10 max-w-full"
+                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full"
                         placeholder="Header File"
                         spellCheck="false"
                         hidden={!isShowHeader}
@@ -112,7 +113,7 @@ const TryOut = () => {
                     />
                     <textarea
                         ref={contentTextArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] z-10 max-w-full"
+                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full text-xs md:text-xl"
                         spellCheck="false"
                         placeholder="JMC File"
                         hidden={isShowHeader}
@@ -183,22 +184,30 @@ except EXCEPTIONS as error:
                         Compile
                     </button>
                 </div>
-                <div className="text-white  max-w-full" hidden={isError}>
+                <div className="mt-8 max-w-full" hidden={isError}>
                     {/* No Error */}
                     {Object.keys(Object.fromEntries(JMCResult)).map((key) => {
                         return (
                             <div key={key}>
-                                <div className="bg-secondary-dark">
+                                <div className="bg-gray-900 text-sm md:text-xl text-primary-contrast p-2 rounded-sm">
                                     {">"} {key}
                                 </div>
-                                <pre>{JMCResult.get(key)}</pre>
+                                <CodeBlock>
+                                    <pre className="inline text-sm md:text-lg">
+                                        {JMCResult.get(key)}
+                                    </pre>
+                                </CodeBlock>
                             </div>
                         );
                     })}
                 </div>
                 <div className="text-white max-w-full" hidden={!isError}>
                     {/* Error */}
-                    <pre className="text-warning">{JMCError}</pre>
+                    <CodeBlock>
+                        <pre className="text-warning inline font-mono text-sm md:text-xl">
+                            {JMCError}
+                        </pre>
+                    </CodeBlock>
                 </div>
             </section>
         </>
