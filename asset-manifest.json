@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.cd4e0ed6.css",
-    "main.js": "/static/js/main.cf77c691.js",
+    "main.css": "/static/css/main.649d586f.css",
+    "main.js": "/static/js/main.8a8c2ff2.js",
     "static/js/617.148e8678.chunk.js": "/static/js/617.148e8678.chunk.js",
     "static/js/406.63e2a4b3.chunk.js": "/static/js/406.63e2a4b3.chunk.js",
     "static/js/359.e768ae91.chunk.js": "/static/js/359.e768ae91.chunk.js",
@@ -19,27 +19,28 @@
     "static/media/what_is_jmc.png": "/static/media/what_is_jmc.3bb867036c4d1770b740.png",
     "static/media/config_python.png": "/static/media/config_python.33754eeb4f42d3c5103c.png",
     "static/media/file_location.png": "/static/media/file_location.02ee78f2d20e8fced6cf.png",
+    "static/media/hjmc_icon192.png": "/static/media/hjmc_icon192.93c07d06db337087df49.png",
     "static/media/MinecraftItalic-R8Mo.otf": "/static/media/MinecraftItalic-R8Mo.ce040688d15f830ad909.otf",
     "static/media/MinecraftBoldItalic-1y1e.otf": "/static/media/MinecraftBoldItalic-1y1e.9693305371d02954a88f.otf",
     "static/media/MinecraftBold-nMK1.otf": "/static/media/MinecraftBold-nMK1.a9b3bc2a90dd462c9c18.otf",
     "static/media/MinecraftRegular-Bmg3.otf": "/static/media/MinecraftRegular-Bmg3.82ba08919dc2add9422f.otf",
     "static/media/python.svg": "/static/media/python.305e01105111fce9c952aef7382c1f5d.svg",
-    "static/media/linux.svg": "/static/media/linux.e9286898cca413482a1b38b0a75f88f9.svg",
+    "static/media/linux.svg": "/static/media/linux.a971148b19e2cd77526ca80216c499b9.svg",
     "static/media/MinecraftTen-VGORe.ttf": "/static/media/MinecraftTen-VGORe.cd1235551b5f89f4710f.ttf",
-    "static/media/download_icon.svg": "/static/media/download_icon.e688f806b45a79f85c879f8bccb6ea10.svg",
+    "static/media/download_icon.svg": "/static/media/download_icon.d1593aac0f6cb45f2d3c0025fdfe9b3f.svg",
     "static/media/discord.svg": "/static/media/discord.9b77b0ca8596e569ad5e9704fc314f38.svg",
     "index.html": "/index.html",
-    "static/media/github.svg": "/static/media/github.a2945ca0cb36e60c9a53dbdcfa81a726.svg",
+    "static/media/github.svg": "/static/media/github.731966909e46c5d132fbce41524a51ea.svg",
     "static/media/menu.svg": "/static/media/menu.1bb7d0b14d4f1a7485e3b1084d7b9957.svg",
-    "static/media/magnifying_glass_solid.svg": "/static/media/magnifying_glass_solid.0d77c20f42772be34342020a736153a7.svg",
     "static/media/xmark_solid.svg": "/static/media/xmark_solid.ae469738e479d31aa952364e12120ad2.svg",
+    "static/media/magnifying_glass_solid.svg": "/static/media/magnifying_glass_solid.32a24cea497f59ea23b87d0a10a4cc74.svg",
     "static/media/windows.svg": "/static/media/windows.5b6a791c75bcdc873387befc6b024437.svg",
-    "main.cd4e0ed6.css.map": "/static/css/main.cd4e0ed6.css.map",
-    "main.cf77c691.js.map": "/static/js/main.cf77c691.js.map",
+    "main.649d586f.css.map": "/static/css/main.649d586f.css.map",
+    "main.8a8c2ff2.js.map": "/static/js/main.8a8c2ff2.js.map",
     "359.e768ae91.chunk.js.map": "/static/js/359.e768ae91.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cd4e0ed6.css",
-    "static/js/main.cf77c691.js"
+    "static/css/main.649d586f.css",
+    "static/js/main.8a8c2ff2.js"
   ]
 }
