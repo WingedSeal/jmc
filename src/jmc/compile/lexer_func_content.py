@@ -456,7 +456,7 @@ class FuncContent:
                 return True
             if len(self.command) < key_pos + 5:
                 raise JMCSyntaxException(
-                    f"Expected time in schedule call", self.command[key_pos + 4], self.tokenizer)
+                    f"Expected time in schedule call", self.command[key_pos + 3], self.tokenizer)
             append_commands(self.__commands, self.command[key_pos + 4].string)
             if len(self.command) == key_pos + 6:
                 if self.command[key_pos +
