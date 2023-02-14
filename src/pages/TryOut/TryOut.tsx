@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { loadPyodide, PyodideInterface } from "pyodide";
-import LoadingScreen from "../../components/LoadingScreen";
 import CodeBlock from "../../components/CodeBlock";
 
 const getPyodide = async () => {
@@ -16,8 +15,10 @@ const getPyodide = async () => {
     return pyodide;
 };
 
+const loadingMsg =
+    "The compiler is still loading, please wait a moment.\nCompilation will start once the compiler is loaded.";
+
 const TryOut = () => {
-    const [isLoaded, setIsLoaded] = useState(false);
     const [pyodide, setPyodide] = useState<PyodideInterface>();
     const [JMCVersion, setJMCVersion] = useState("");
     const [JMCResult, setJMCResult] = useState<Map<string, string>>(new Map());
@@ -30,7 +31,6 @@ const TryOut = () => {
     useEffect(() => {
         getPyodide().then((pyodide) => {
             setPyodide(pyodide);
-            setIsLoaded(true);
             pyodide.runPython(
                 "from jmc.api import VERSION, EXCEPTIONS;from jmc import JMCTestPack"
             );
@@ -38,9 +38,50 @@ const TryOut = () => {
         });
     }, []);
 
+    useEffect(() => {
+        if (JMCError === loadingMsg) {
+            compile();
+        }
+    }, [pyodide]);
+
+    const compile = () => {
+        if (pyodide === undefined) {
+            setIsError(true);
+            setJMCError(loadingMsg);
+            return;
+        }
+        pyodide.globals.set(
+            "NAMESPACE",
+            namespaceInput.current!.value
+                ? namespaceInput.current!.value
+                : namespaceInput.current!.placeholder
+        );
+        pyodide.globals.set("JMC_FILE", contentTextArea.current!.value);
+        pyodide.globals.set("HEADER_FILE", contentHeaderArea.current!.value);
+        pyodide.runPython(
+            `
+try:
+    BUILT = JMCTestPack(namespace=NAMESPACE, output=".").set_jmc_file(JMC_FILE).set_header_file(HEADER_FILE).built
+except EXCEPTIONS as error:
+    BUILT = {}
+    ERROR = type(error).__name__ + "\\n" + str(error)`
+        );
+        const built: Map<string, string> = pyodide.globals.get("BUILT").toJs();
+        if (built.size === 0) {
+            setIsError(true);
+            setJMCError(
+                pyodide.globals
+                    .get("ERROR")
+                    .replace(new RegExp("/home/pyodide/", "g"), "")
+            );
+        } else {
+            setIsError(false);
+            setJMCResult(built);
+        }
+    };
+
     return (
         <>
-            <LoadingScreen isLoaded={isLoaded} />
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[12vh] pb-5 md:pt-[13vh] px-4 md:px-11 flex-col items-centers content-center relative">
                 <div className="mx-auto flex flex-col items-centers content-center relative w-[80vw]">
                     <div className="flex">
@@ -49,10 +90,18 @@ const TryOut = () => {
                             src={require("../../assets/image/jmc_icon.png")}
                             alt="JMC-icon"
                         />
-                        <h2 className="text-primary text-xl md:text-6xl mr-auto line">
-                            JMC Compiler{" "}
-                            <span className="inline-block">{JMCVersion}</span>
-                        </h2>
+                        {JMCVersion === "" ? (
+                            <h2 className="text-[#FFAA00] text-xl md:text-6xl mr-auto line">
+                                Loading JMC Compiler...
+                            </h2>
+                        ) : (
+                            <h2 className="text-primary text-xl md:text-6xl mr-auto line">
+                                JMC Compiler{" "}
+                                <span className="inline-block">
+                                    {JMCVersion}
+                                </span>
+                            </h2>
+                        )}
                     </div>
                     <div className="relative my-1 md:my-2 min-w-[80vw] max-w-full">
                         <input
@@ -113,7 +162,7 @@ const TryOut = () => {
                     />
                     <textarea
                         ref={contentTextArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full text-xs md:text-xl"
+                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full"
                         spellCheck="false"
                         placeholder="JMC File"
                         hidden={isShowHeader}
@@ -140,48 +189,7 @@ const TryOut = () => {
                         }}
                     />
                     <button
-                        onClick={() => {
-                            if (pyodide === undefined) return;
-                            pyodide.globals.set(
-                                "NAMESPACE",
-                                namespaceInput.current!.value
-                                    ? namespaceInput.current!.value
-                                    : namespaceInput.current!.placeholder
-                            );
-                            pyodide.globals.set(
-                                "JMC_FILE",
-                                contentTextArea.current!.value
-                            );
-                            pyodide.globals.set(
-                                "HEADER_FILE",
-                                contentHeaderArea.current!.value
-                            );
-                            pyodide.runPython(
-                                `
-try:
-    BUILT = JMCTestPack(namespace=NAMESPACE, output=".").set_jmc_file(JMC_FILE).set_header_file(HEADER_FILE).built
-except EXCEPTIONS as error:
-    BUILT = {}
-    ERROR = type(error).__name__ + "\\n" + str(error)`
-                            );
-                            const built: Map<string, string> = pyodide.globals
-                                .get("BUILT")
-                                .toJs();
-                            if (built.size === 0) {
-                                setIsError(true);
-                                setJMCError(
-                                    pyodide.globals
-                                        .get("ERROR")
-                                        .replace(
-                                            new RegExp("/home/pyodide/", "g"),
-                                            ""
-                                        )
-                                );
-                            } else {
-                                setIsError(false);
-                                setJMCResult(built);
-                            }
-                        }}
+                        onClick={compile}
                         className="text-2xl tracking-widest font-bold mt-1 mx-auto w-[50vw] h-[6vh] text-primary-dark bg-primary rounded-lg border-r-4 border-b-4 border-gray-300 hover:scale-x-[1.02] active:scale-x-[0.98] active:border-r-2 active:border-b-2 transition-all"
                     >
                         Compile
