@@ -236,7 +236,7 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     f"Unexpected token after target selector",
                     tokens[2],
                     tokenizer,
-                    suggestion="This could be a result from missing comma")
+                    suggestion="This can be a result from missing comma or missing quotation mark")
             return ArgType.SELECTOR
         raise JMCSyntaxException(
             f"Expected '[' or nothing after target selector type (got {tokens[1].token_type})",
@@ -254,7 +254,7 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     f"2 keywords are next to each other in function argument",
                     token,
                     tokenizer,
-                    suggestion="This could be a result from missing comma")
+                    suggestion="This can be a result from missing comma or missing quotation mark")
         return ArgType.KEYWORD
 
     raise JMCValueError(
