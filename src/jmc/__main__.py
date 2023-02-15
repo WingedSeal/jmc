@@ -14,7 +14,7 @@ logger = Logger(__name__)
 
 def main():
     """Main function"""
-    atexit.register(lambda: print(Colors.EXIT.value+"\n"))
+    atexit.register(lambda: print(Colors.EXIT.value + "\n"))
     logger.info("Starting session")
     global_data = GlobalData()
     while True:

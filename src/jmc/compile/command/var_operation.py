@@ -25,7 +25,7 @@ def variable_operation(
     :param is_execute: Whether the statement/function is in `/execute`
     :return: Full minecraft command
     """
-    if tokens[2].string == "-" and len(tokens) > 3:
+    if len(tokens) > 3 and tokens[2].string == "-":
         tokens[2] = tokenizer.merge_tokens(tokens[2:4])
         del tokens[3]
 
@@ -141,10 +141,6 @@ def variable_operation(
         scoreboard_player = find_scoreboard_player_type(
             right_token, tokenizer, allow_integer=False)
 
-        if operator != "=" and scoreboard_player.player_type == PlayerType.INTEGER and scoreboard_player.value < 0:
-            raise JMCSyntaxException(
-                    f"Expected a number greater than or equal to 0 (got {scoreboard_player.value})", right_token, tokenizer)
-
         if operator == "->":
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 raise JMCSyntaxException(
@@ -156,8 +152,12 @@ def variable_operation(
 
         if scoreboard_player.player_type == PlayerType.INTEGER:
             if operator == "+=":
+                if scoreboard_player.value < 0:  # type: ignore
+                    return f"scoreboard players remove {left_token.string} {DataPack.var_name} {scoreboard_player.value*-1}"
                 return f"scoreboard players add {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
             if operator == "-=":
+                if scoreboard_player.value < 0:  # type: ignore
+                    return f"scoreboard players add {left_token.string} {DataPack.var_name} {scoreboard_player.value*1}"
                 return f"scoreboard players remove {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
             if operator == "=":
                 return f"scoreboard players set {left_token.string} {DataPack.var_name} {scoreboard_player.value}"
