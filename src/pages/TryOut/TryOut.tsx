@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { loadPyodide, PyodideInterface } from "pyodide";
 import CodeBlock from "../../components/CodeBlock";
+import { useSearchParams } from "react-router-dom";
+import { Buffer } from "buffer";
 
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.22.1/full/",
     });
-    const consoleLog = console.log;
-    console.log = () => {};
+    // const consoleLog = console.log;
+    // console.log = () => {};
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
     await micropip.install("jmcfunction", false, true, null, true);
-    console.log = consoleLog;
+    // console.log = consoleLog;
     return pyodide;
 };
 
@@ -25,10 +27,31 @@ const TryOut = () => {
     const [JMCError, setJMCError] = useState("");
     const [isError, setIsError] = useState(false);
     const [isShowHeader, setIsShowHeader] = useState(false);
+    const [shareText, setShareText] = useState("SHARE");
     const namespaceInput = useRef<HTMLInputElement>(null);
     const contentTextArea = useRef<HTMLTextAreaElement>(null);
     const contentHeaderArea = useRef<HTMLTextAreaElement>(null);
+    const [params, setParams] = useSearchParams();
+    let copiedTimeout: NodeJS.Timeout;
+    let shareTimeout: NodeJS.Timeout;
     useEffect(() => {
+        let namespace = params.get("namespace");
+        let jmc = params.get("jmc");
+        let header = params.get("header");
+        if (namespace)
+            namespaceInput.current!.value = decodeURI(
+                Buffer.from(namespace, "base64").toString()
+            );
+        if (jmc)
+            contentTextArea.current!.value = decodeURI(
+                Buffer.from(jmc, "base64").toString()
+            );
+        if (header)
+            contentHeaderArea.current!.value = decodeURI(
+                Buffer.from(header, "base64").toString()
+            );
+        if (namespace || jmc || header) compile();
+        setParams(new URLSearchParams());
         getPyodide().then((pyodide) => {
             setPyodide(pyodide);
             pyodide.runPython(
@@ -36,6 +59,7 @@ const TryOut = () => {
             );
             setJMCVersion(pyodide.globals.get("VERSION"));
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -189,12 +213,67 @@ except EXCEPTIONS as error:
                             }
                         }}
                     />
-                    <button
-                        onClick={compile}
-                        className="text-2xl tracking-widest font-bold mt-1 mx-auto w-[50vw] h-[6vh] text-primary-dark bg-primary rounded-lg border-r-4 border-b-4 border-gray-300 hover:scale-x-[1.02] active:scale-x-[0.98] active:border-r-2 active:border-b-2 transition-all"
-                    >
-                        Compile
-                    </button>
+                    <div className="mx-auto mt-1 relative">
+                        <button
+                            onClick={compile}
+                            className="text-2xl tracking-widest font-bold mx-auto w-[50vw] h-[6vh] text-primary-dark bg-primary rounded-lg border-r-4 border-b-4 border-gray-300 hover:scale-x-[1.02] active:scale-x-[0.98] active:border-r-2 active:border-b-2 transition-all"
+                        >
+                            Compile
+                        </button>
+                        <button
+                            className="absolute top-1/2 left-full -translate-y-1/2 translate-x-1/2 bg-slate-900 text-tertiary p-2 tracking-wide rounded-md hover:scale-105 transition-all active:scale-95"
+                            onClick={() => {
+                                let namespace = encodeURI(
+                                    Buffer.from(
+                                        namespaceInput.current!.value
+                                    ).toString("base64")
+                                );
+                                let jmc = encodeURI(
+                                    Buffer.from(
+                                        contentTextArea.current!.value
+                                    ).toString("base64")
+                                );
+                                let header = encodeURI(
+                                    Buffer.from(
+                                        contentHeaderArea.current!.value
+                                    ).toString("base64")
+                                );
+                                if (namespace)
+                                    params.set("namespace", namespace);
+                                else params.delete("namespace");
+                                if (jmc) params.set("jmc", jmc);
+                                else params.delete("jmc");
+                                if (header) params.set("header", header);
+                                else params.delete("header");
+                                const paramsString = params.toString();
+                                if (paramsString.length > 1900) {
+                                    alert(
+                                        `The content is too big to share! (${Number(
+                                            paramsString.length / 19
+                                        ).toFixed(2)}% of the limit)`
+                                    );
+                                } else {
+                                    navigator.clipboard.writeText(
+                                        window.location.href +
+                                            "?" +
+                                            paramsString
+                                    );
+                                    if (copiedTimeout)
+                                        clearTimeout(copiedTimeout);
+                                    if (shareTimeout)
+                                        clearTimeout(shareTimeout);
+                                    copiedTimeout = setTimeout(() => {
+                                        setShareText("Copied");
+                                    }, 200);
+                                    shareTimeout = setTimeout(() => {
+                                        setShareText("SHARE");
+                                    }, 3000);
+                                }
+                            }}
+                        >
+                            {shareText}
+                        </button>
+                    </div>
                 </div>
                 <div className="mt-8 max-w-full" hidden={isError}>
                     {/* No Error */}
