@@ -221,7 +221,7 @@ except EXCEPTIONS as error:
                             Compile
                         </button>
                         <button
-                            className="absolute top-1/2 left-full -translate-y-1/2 translate-x-1/2 bg-slate-900 text-tertiary p-2 tracking-wide rounded-md hover:scale-105 transition-all active:scale-95"
+                            className="absolute top-1/2 left-full -translate-y-1/2 translate-x-1/4 md:translate-x-1/2 bg-slate-900 text-tertiary p-2 tracking-wide rounded-md hover:scale-105 transition-all active:scale-95"
                             onClick={() => {
                                 let namespace = encodeURI(
                                     Buffer.from(
