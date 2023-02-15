@@ -86,7 +86,7 @@ class ObjectIsEqual(JMCFunction):
         if self.args["type1"] == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if self.args["type2"] == "storage" and ":" not in self.args["source2"]:
-            source1 = f"{self.datapack.namespace}:{source2}"
+            source2 = f"{self.datapack.namespace}:{source2}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
             f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {self.args['type1']} {source1} {self.args['path1']}",
