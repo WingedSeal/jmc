@@ -57,7 +57,8 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "item": {"summon"},
     "loot": {"loot"},
     "data": {"execute"},
-    "playsound": {"weather"}
+    "playsound": {"weather"},
+    "particle": {"item"}
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
