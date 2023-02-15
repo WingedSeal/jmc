@@ -25,6 +25,10 @@ def variable_operation(
     :param is_execute: Whether the statement/function is in `/execute`
     :return: Full minecraft command
     """
+    if tokens[2].string == "-" and len(tokens) > 3:
+        tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+        del tokens[3]
+
     if tokens[0].string.endswith(".get") and len(
             tokens) > 1 and tokens[1].token_type == TokenType.PAREN_ROUND:
         if len(tokens) > 2:
@@ -136,6 +140,10 @@ def variable_operation(
 
         scoreboard_player = find_scoreboard_player_type(
             right_token, tokenizer, allow_integer=False)
+
+        if operator != "=" and scoreboard_player.player_type == PlayerType.INTEGER and scoreboard_player.value < 0:
+            raise JMCSyntaxException(
+                    f"Expected a number greater than or equal to 0 (got {scoreboard_player.value})", right_token, tokenizer)
 
         if operator == "->":
             if scoreboard_player.player_type == PlayerType.INTEGER:
