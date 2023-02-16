@@ -804,7 +804,7 @@ const BuildinFeatures = [
     </Feature>,
     <Feature id="jmc_put" summary="JMC.put()" keywords="">
         <p>
-            Ignore any parsing and output the command directly. Mainly used for
+            Ignore any parsing and output the command directly. Usually used to
             bypass compiler failures.
         </p>
         <Command
