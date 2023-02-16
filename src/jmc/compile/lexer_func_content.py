@@ -55,7 +55,7 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "bossbar": {"execute"},
     "title": {"title"},
     "item": {"summon"},
-    "loot": {"loot"},
+    "loot": {"loot", "give"},
     "data": {"execute"},
     "playsound": {"weather"},
     "particle": {"item"}
