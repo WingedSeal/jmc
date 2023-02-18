@@ -821,7 +821,7 @@ Item.give(block, @a);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}',Lore:[]}} 1
+give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}'}} 1
                             """)
                              )
 
