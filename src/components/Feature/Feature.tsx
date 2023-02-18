@@ -23,7 +23,7 @@ const Feature: React.FC<FeatureInterface> = (props) => {
             >
                 <summary
                     className={
-                        "feature transition-all ease-in-out duration-500 overflow-y-scroll scrollbar-none text-xl md:text-5xl cursor-pointer text-slate-100 " +
+                        "feature transition-all ease-in-out duration-500 overflow-y-hidden scrollbar-none text-xl md:text-5xl cursor-pointer text-slate-100 " +
                         props.className
                     }
                 >
