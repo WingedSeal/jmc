@@ -1,5 +1,6 @@
 """Utility for compiling"""
 import functools
+from random import Random
 import re
 from json import JSONEncoder, dumps
 from typing import TYPE_CHECKING, Any
@@ -226,3 +227,11 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
             f"Invalid character detected in '{string}'", token, tokenizer
         )
     return string.replace(".", "/")
+
+
+def get_mc_uuid(seed: Any) -> str:
+    random_instance = Random(seed)
+
+    def rand_java_int() -> int:
+        return random_instance.randint(-2147483648, 2147483647)
+    return f"[I;{rand_java_int()},{rand_java_int()},{rand_java_int()},{rand_java_int()}]"
