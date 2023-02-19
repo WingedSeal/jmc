@@ -1,14 +1,14 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
-
-from .utils import is_connected
+from .utils import is_connected, get_mc_uuid
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
 from .log import Logger
 
 if TYPE_CHECKING:
+    from ..terminal.configuration import Configuration
     from ..compile.datapack import DataPack
 
 logger = Logger(__name__)
@@ -25,6 +25,46 @@ def __copy_macro_token(token: Token, line: int, col: int,
         token_col = token.col
     return Token(token.token_type, line=line, col=col + token_col - replaced_token_col,
                  string=token.string, _macro_length=length)
+
+
+def __custom_macro_factory(
+        replaced_tokens: list[Token], key: str) -> tuple[MacroFactory, int]:
+
+    # Creating template
+    template_tokens: list[Token | tuple[int, Token]] = []
+    replaced_token_col = replaced_tokens[0].col
+    for token in replaced_tokens:
+        template_tokens.append(token)
+
+    def macro_factory(
+            argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+
+        return_list: list[Token] = []
+        extra_col = 0
+        for token_or_int in template_tokens:
+            if isinstance(token_or_int, Token):
+                return_list.append(
+                    __copy_macro_token(
+                        token_or_int, line, col +
+                        extra_col, len(key), replaced_token_col
+                    )
+                )
+            else:
+                return_list.append(
+                    __copy_macro_token(
+                        argument_tokens[token_or_int[0]],
+                        line,
+                        col,
+                        len(key),
+                        replaced_token_col,
+                        token_or_int[1].col
+                    )
+                )
+                extra_col += argument_tokens[token_or_int[0]
+                                             ].length - token_or_int[1].length
+
+        return return_list
+    return macro_factory, 0
 
 
 def __create_macro_factory(
@@ -91,7 +131,7 @@ def __create_macro_factory(
 
 
 def __parse_header(header_str: str, file_name: str,
-                   parent_target: Path, namespace_path: Path) -> Header:
+                   parent_target: Path, namespace_path: Path, config: "Configuration") -> Header:
     header = Header()
     lines = header_str.split("\n")
     for line, line_str in enumerate(lines):
@@ -143,7 +183,35 @@ def __parse_header(header_str: str, file_name: str,
                     arg_tokens[1:], None, key, tokenizer, HeaderSyntaxException(
                         "Invalid marcro argument syntax", file_name, line, line_str))
 
-                # #include
+        # #bind
+        elif directive_token.string == "bind":
+            if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    "Expected keyword(binder) after '#define'", file_name, line, line_str)
+
+            binder = arg_tokens[0].string
+            if len(arg_tokens) == 1:
+                #  #bind BINDINDER
+                key = binder
+            else:
+                #  #bind BINDER TOKEN
+                key = arg_tokens[1].string
+
+            replaced_tokens: list[Token]
+            if binder == "__namespace__":
+                replaced_tokens = [Token.empty(config.namespace)]
+            elif binder == "__UUID__":
+                replaced_tokens = [Token.empty(get_mc_uuid(key), TokenType.PAREN_SQUARE)]
+            else:
+                raise HeaderSyntaxException(
+                    "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__UUID__'")
+
+            if key in header.macros:
+                raise HeaderDuplicatedMacro(
+                    f"'{key}' macro is already defined", file_name, line, line_str)
+            header.macros[key] = __custom_macro_factory(replaced_tokens, key)
+
+        # #include
         elif directive_token.string == "include":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.STRING:
                 raise HeaderSyntaxException(
@@ -168,7 +236,8 @@ def __parse_header(header_str: str, file_name: str,
                 header_str,
                 header_file.as_posix(),
                 parent_target,
-                namespace_path)
+                namespace_path,
+                config)
 
         # #credit
         elif directive_token.string == "credit":
@@ -251,7 +320,7 @@ def __parse_header(header_str: str, file_name: str,
 
 
 def parse_header(header_str: str, file_name: str,
-                 parent_target: Path, namespace_path: Path) -> Header:
+                 parent_target: Path, namespace_path: Path, config: "Configuration") -> Header:
     """
     Parse header and store the information in the header object
 
@@ -276,6 +345,7 @@ def parse_header(header_str: str, file_name: str,
         header_str,
         file_name,
         parent_target,
-        namespace_path)
+        namespace_path,
+        config)
     header.is_enable_macro = True
     return return_value

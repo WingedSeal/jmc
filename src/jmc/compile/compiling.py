@@ -118,7 +118,8 @@ def read_header(config: "Configuration",
             header_str,
             header_file.as_posix(),
             parent_target,
-            namespace_path)
+            namespace_path,
+            config)
         return True
 
     logger.info("Header file not found.")

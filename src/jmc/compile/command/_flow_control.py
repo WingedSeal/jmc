@@ -302,17 +302,17 @@ def for_(command: list[Token], datapack: DataPack,
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
     _first_statement = statements[0]
-    if not (_first_statement[0].string.startswith(
-            DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
-        raise JMCSyntaxException(
-            "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
+    # if not (_first_statement[0].string.startswith(
+    #         DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
+    #     raise JMCSyntaxException(
+    #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
 
     first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
 
-    if not (_first_statement[1].string ==
-            "=" and _first_statement[1].token_type == TokenType.OPERATOR):
-        raise JMCSyntaxException(
-            "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
+    # if not (_first_statement[1].string ==
+    #         "=" and _first_statement[1].token_type == TokenType.OPERATOR):
+    #     raise JMCSyntaxException(
+    #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 
     condition, precommand = parse_condition(statements[1], tokenizer, datapack)
     last_statement = datapack.lexer.parse_line(statements[2], tokenizer)

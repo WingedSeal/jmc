@@ -51,11 +51,9 @@ class JMCFunction:
     :raises JMCValueError: Missing required positional argument
     :raises NotImplementedError: Call function not implemented
     """
-    __slots__ = ("arg_type", "func_type", "name",
-                 "call_string", "defaults", "_ignore",
-                 "token", "datapack", "tokenizer",
+    __slots__ = ("token", "datapack", "tokenizer",
                  "is_execute", "var", "args",
-                 "raw_args", "number_type")
+                 "raw_args")
     _decorated: bool = False
     """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -270,13 +268,20 @@ class JMCFunction:
                     "display is already inside the nbt",
                     self.token,
                     self.tokenizer)
-
-            nbt["display"] = Token.empty(f"""{{Name:{repr(
-                self.format_text(
+            new_token_string = "{"
+            name_ = self.format_text(
                 display_name_param,
                 is_default_no_italic=True,
                 is_allow_score_selector=False)
-                )},Lore:[{lore_}]}}""")
+            if name_:
+                new_token_string += f"""Name:{repr(name_)}"""
+            if lore_:
+                if name_:
+                    new_token_string += ","
+                new_token_string += f"""Lore:[{lore_}]"""
+            new_token_string += "}"
+            if name_ or lore_:
+                nbt["display"] = Token.empty(new_token_string)
 
         return Item(
             item_type,
