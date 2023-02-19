@@ -307,25 +307,8 @@ const FlowControls = () => {
                     </p>
                     <ol className="ml-4 md:ml-6 list-decimal list-inside">
                         <li>
-                            <code>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable> "}
-                                <CodeText type="operator">=</CodeText> (
-                                <CodeText type="number">{"<integer>"}</CodeText>
-                                <CodeText type="operator">|</CodeText>
-                                <CodeText type="operator">$</CodeText>
-                                {"<variable>"}
-                                <CodeText type="operator">|</CodeText>
-                                objective
-                                <CodeText type="operator">:</CodeText>
-                                selector);
-                            </code>{" "}
-                            is executed (one time) before the execution of the
-                            code block.{" "}
-                            <span className="text-warning">
-                                And it must be variable assignment with
-                                integer/variable/scoreboard and nothing else.
-                            </span>
+                            <code>statement</code> is executed (one time) before
+                            the execution of the code block.
                         </li>
                         <li>
                             <code>{"condition"}</code> defines the condition for

@@ -33,13 +33,16 @@ const Header = () => {
                         happen before the compilation.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#define</CodeText> A B C
+                        <CodeText type="operator">#define</CodeText>{" "}
+                        {"<Keyword> <Token> <Token> ..."}
                     </CodeBlock>
                     <p>
                         <Tab />
-                        Means define <code>A</code> as <code>B C</code> and
-                        every keyword <code>A</code> in the <code>.jmc</code>{" "}
-                        will be replaced with <code>B C</code>.
+                        Means define <code>{"<Keyword>"}</code> as{" "}
+                        <code>{"<Token> <Token> ..."}</code> and every
+                        keyword(string not included) <code>{"<Keyword>"}</code>{" "}
+                        in the <code>.jmc</code> will be replaced with{" "}
+                        <code>{"<Token> <Token> ..."}</code>.
                     </p>
                     <p>
                         <Tab />
@@ -68,13 +71,72 @@ const Header = () => {
                         Example
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#define</CodeText> createObj (
+                        <CodeText type="operator">#define</CodeText> createObj(
                         <CodeText type="param">x</CodeText>) scoreboard
                         objectives add x dummy
                     </CodeBlock>
                     <CodeBlock>
                         <CodeText type="function">createObj</CodeText>(
                         <CodeText type="param">my_obj</CodeText>);
+                    </CodeBlock>
+                </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Binding / Special Macro
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Similar to <code>#define</code> but the compiler
+                        generate the result for you.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#bind</CodeText>{" "}
+                        {"<binder> [<keyword>]"}
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        All available binders are
+                    </p>
+                    <ul className="list-disc list-inside">
+                        <li>
+                            <code>__UUID__</code>: Generate random minecraft
+                            UUID arrays using the binded keyword as the seed.
+                        </li>
+                        <li>
+                            <code>__namespace__</code>: Namespace of the
+                            datapack
+                        </li>
+                    </ul>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#bind</CodeText> __namespace__
+                    </CodeBlock>
+                    <CodeBlock>
+                        execute as <CodeText type="param">@a</CodeText> run{" "}
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        __namespace__<CodeText type="operator">:</CodeText>
+                        my_func{" "}
+                        <CodeText type="comment">
+                            {"//"} execute as @a run function
+                            your_namespace:my_func
+                        </CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="operator">#bind</CodeText> __namespace__
+                        example_keyword
+                    </CodeBlock>
+                    <CodeBlock>
+                        execute as <CodeText type="param">@a</CodeText> run{" "}
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        example_keyword<CodeText type="operator">:</CodeText>
+                        my_func{" "}
+                        <CodeText type="comment">
+                            {"//"} execute as @a run function
+                            your_namespace:my_func
+                        </CodeText>
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -114,7 +176,7 @@ const Header = () => {
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Mod/New Commands
+                    Mod / New Commands
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>

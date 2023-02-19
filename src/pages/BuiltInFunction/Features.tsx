@@ -98,7 +98,7 @@ const BuildinFeatures = [
             params={[
                 { key: "itemId", type: "Keyword" },
                 { key: "itemType", type: "Item" },
-                { key: "displayName", type: "FormattedString" },
+                { key: "displayName", type: "FormattedString", default: '""' },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
@@ -121,12 +121,12 @@ const BuildinFeatures = [
             be referenced in other Item function.
         </p>
         <Command
-            name="Item.create"
+            name="Item.createSign"
             type="LoadOnly"
             params={[
                 { key: "itemId", type: "Keyword" },
                 { key: "variant", type: "Keyword" },
-                { key: "displayName", type: "FormattedString" },
+                { key: "displayName", type: "FormattedString", default: '""' },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "texts", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
@@ -151,7 +151,7 @@ const BuildinFeatures = [
             params={[
                 { key: "itemId", type: "Keyword" },
                 { key: "mobType", type: "Keyword" },
-                { key: "displayName", type: "FormattedString" },
+                { key: "displayName", type: "FormattedString", default: '""' },
                 { key: "onPlace", type: "Function", default: "()=>{}" },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
