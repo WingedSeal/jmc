@@ -190,6 +190,7 @@ class ItemCreate(JMCFunction):
     },
     name="item_create_spawn_egg",
     defaults={
+        "displayName": "",
         "lore": "",
         "nbt": "",
     }
@@ -252,6 +253,7 @@ class ItemCreateSpawnEgg(JMCFunction):
     },
     name="item_create_sign",
     defaults={
+        "displayName": "",
         "lore": "",
         "texts": "",
         "nbt": "",
