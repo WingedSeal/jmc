@@ -532,7 +532,7 @@ Player.die(onDeath=()=>{
 scoreboard objectives add __variable__ dummy
 scoreboard objectives add __die__ deathCount
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={__die__=1..}] at @s run function TEST:__private__/player_die/on_death
+execute as @a[scores={__die__=1}] at @s run function TEST:__private__/player_die/on_death
 execute as @e[type=player,scores={__die__=2..}] at @s run function TEST:__private__/player_die/on_respawn
 > VIRTUAL/data/TEST/functions/__private__/player_die/on_death.mcfunction
 scoreboard players set @s __die__ 2

@@ -74,7 +74,7 @@ class PlayerDie(JMCFunction):
                                        self.token, self.tokenizer)
         self.datapack.add_objective(self.obj, "deathCount")
         self.datapack.add_tick_command(
-            f'execute as @a[scores={{{self.obj}=1..}}] at @s run {self.datapack.call_func(self.name, "on_death")}')
+            f'execute as @a[scores={{{self.obj}=1}}] at @s run {self.datapack.call_func(self.name, "on_death")}')
         self.datapack.add_tick_command(
             f'execute as @e[type=player,scores={{{self.obj}=2..}}] at @s run {self.datapack.call_func(self.name, "on_respawn")}')
         self.datapack.add_raw_private_function(
