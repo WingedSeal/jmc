@@ -192,24 +192,29 @@ def __parse_header(header_str: str, file_name: str,
             binder = arg_tokens[0].string
             if len(arg_tokens) == 1:
                 #  #bind BINDINDER
-                key = binder
+                keys = [binder]
             else:
                 #  #bind BINDER TOKEN
-                key = arg_tokens[1].string
+                keys = [token_.string for token_ in arg_tokens[1:]]
 
-            replaced_tokens: list[Token]
-            if binder == "__namespace__":
-                replaced_tokens = [Token.empty(config.namespace)]
-            elif binder == "__UUID__":
-                replaced_tokens = [Token.empty(get_mc_uuid(key), TokenType.PAREN_SQUARE)]
-            else:
-                raise HeaderSyntaxException(
-                    "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__UUID__'")
+            for key in keys:
+                replaced_tokens: list[Token]
+                if binder == "__namespace__":
+                    replaced_tokens = [Token.empty(config.namespace)]
+                elif binder == "__UUID__":
+                    replaced_tokens = [
+                        Token.empty(
+                            get_mc_uuid(key),
+                            TokenType.PAREN_SQUARE)]
+                else:
+                    raise HeaderSyntaxException(
+                        "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__UUID__'")
 
-            if key in header.macros:
-                raise HeaderDuplicatedMacro(
-                    f"'{key}' macro is already defined", file_name, line, line_str)
-            header.macros[key] = __custom_macro_factory(replaced_tokens, key)
+                if key in header.macros:
+                    raise HeaderDuplicatedMacro(
+                        f"'{key}' macro is already defined", file_name, line, line_str)
+                header.macros[key] = __custom_macro_factory(
+                    replaced_tokens, key)
 
         # #include
         elif directive_token.string == "include":
