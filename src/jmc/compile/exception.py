@@ -56,7 +56,8 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
             col = length - string.rfind("\n")
         else:
             col += length
-        col -= 1
+        display_col += 1
+        # col -= 1
     if display_col_length:
         if "\n" in string:
             display_line += string.count("\n")

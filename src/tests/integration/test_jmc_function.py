@@ -146,10 +146,10 @@ execute unless score @s my_objective matches 1.. run say Timer is over
 
 class TestExecuteExcluded(unittest.TestCase):
     def test_error_execute(self):
-        with self.assertRaises(JMCSyntaxException):
-            JMCTestPack().set_jmc_file("""
-execute as @a run Hardcode.repeat();
-            """).build()
+        #         with self.assertRaises(JMCSyntaxException):
+        #             JMCTestPack().set_jmc_file("""
+        # execute as @a run Hardcode.repeat();
+        #             """).build()
 
         with self.assertRaises(JMCMissingValueError):
             JMCTestPack().set_jmc_file("""

@@ -519,11 +519,11 @@ class FuncContent:
             token, EXECUTE_EXCLUDED_COMMANDS)
         if execute_excluded_command is not None:
             if self.is_execute:
-                raise JMCSyntaxException(
-                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
-            self.lexer.datapack.used_command.add(token.string)
-            append_commands(self.__commands, execute_excluded_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                append_commands(self.__commands, self.lexer.datapack.add_raw_private_function("anonymous", [execute_excluded_command(
+                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call()]))
+            else:
+                append_commands(self.__commands, execute_excluded_command(
+                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
             return True
 
         load_only_command = self.get_function(token, LOAD_ONLY_COMMANDS)
