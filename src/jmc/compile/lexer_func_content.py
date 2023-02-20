@@ -310,7 +310,7 @@ class FuncContent:
             return True
 
         if token.string == "schedule":
-            if self.__is_schedule(key_pos, token):
+            if self.__is_schedule(key_pos):
                 return True
 
         if token.string.startswith(DataPack.VARIABLE_SIGN):
@@ -419,7 +419,7 @@ class FuncContent:
         append_commands(
             self.__commands, f"say {self.command[key_pos+1].string}")
 
-    def __is_schedule(self, key_pos: int, token: Token) -> bool:
+    def __is_schedule(self, key_pos: int) -> bool:
         if len(self.command) < key_pos + 3:
             return False
         if (
