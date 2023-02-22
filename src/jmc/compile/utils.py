@@ -202,7 +202,7 @@ kwargs={dumps(kwargs, indent=2, cls=JSONUniversalEncoder)}
 
 
 def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
-                         is_make_lower: bool = True, substr: tuple[int, int] | None = None) -> str:
+                         is_make_lower: bool = True, substr: tuple[int, int] | None = None, custom_string: str | None = None) -> str:
     """
     Turns JMC function/predicate name syntax to vanilla's syntax
 
@@ -213,7 +213,10 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
     :param token: keyword token
     :param tokenizer: token's tokenizer
     """
-    string = token.string
+    if custom_string is None:
+        string = token.string
+    else:
+        string = custom_string
     if substr is not None:
         string = string[substr[0]:substr[1]]
     if string.startswith("."):

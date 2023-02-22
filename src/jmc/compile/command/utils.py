@@ -10,7 +10,7 @@ from typing import Any, Callable
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import is_number, is_float
+from ..utils import convention_jmc_to_mc, is_number, is_float
 
 
 class PlayerType(Enum):
@@ -525,6 +525,26 @@ class FormattedText:
                 if not value:
                     raise JMCValueError(
                         f"Selector cannot be false", self.token, self.tokenizer)
+                continue
+
+            if prop.endswith("()"):
+                open_paren_index = prop.find("(")
+                trig = prop[open_paren_index + 1:-1].strip()
+                obj = prop[:open_paren_index]
+                if not trig:
+                    trig = "1"
+                if not trig.isnumeric():
+                    raise JMCValueError(
+                        f"Expected a number for trigger in parenthesis (got '{trig}')", self.token, self.tokenizer)
+                if " " in obj:
+                    raise JMCValueError(
+                        f"Unexpected space in trigger objective name (got '{obj!r})", self.token, self.tokenizer)
+                self.current_json["clickEvent"] = {
+                    "action": "run_command",
+                    "value": f"trigger {obj} set {trig}"}
+                if not value:
+                    raise JMCValueError(
+                        f"Click Event cannot be false", self.token, self.tokenizer)
                 continue
 
             raise JMCValueError(
