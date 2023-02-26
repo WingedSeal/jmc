@@ -159,6 +159,8 @@ class DataPack:
         """Set of integers going to be used in scoreboard"""
         self.functions: dict[str, Function] = {}
         """Dictionary of function name and a Function object"""
+        self.functions_called: dict[str, tuple[Token, Tokenizer]] = {}
+        """Dictionary of of function name that is called by user and its coresponding token and tokenizer"""
         self.load_function: list[list[Token]] = []
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
@@ -425,6 +427,12 @@ class DataPack:
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
+
+        for function_called, (token,
+                              tokenizer) in self.functions_called.items():
+            if function_called not in self.functions:
+                raise JMCValueError(
+                    f"Function '{function_called}' was not defined", token, tokenizer)
 
         self.private_functions = {}
         self.loads = []

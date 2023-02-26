@@ -48,6 +48,9 @@ customFunction(argument);
     def test_call(self):
         pack = JMCTestPack().set_jmc_file("""
 customFunction();
+function customFunction() {
+    say "test";
+}
         """).build()
 
         self.assertDictEqual(
@@ -62,6 +65,8 @@ customFunction();
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 function TEST:customfunction
+> VIRTUAL/data/TEST/functions/customfunction.mcfunction
+say test
             """)
         )
 
