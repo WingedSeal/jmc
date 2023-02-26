@@ -156,7 +156,7 @@ Type `cancel` to cancel
         pprint(f"Current {key}: {config_json[key]}", Colors.YELLOW)
         config_json[key] = get_input("New Value: ")
         with (global_data.cwd / global_data.CONFIG_FILE_NAME).open("w", encoding="utf-8") as file:
-            dump(config_json, file, indent=2)
+            dump(config_json, file, indent=4)
 
         global_data.config.load_config()
 

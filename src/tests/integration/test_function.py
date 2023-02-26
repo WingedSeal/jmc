@@ -21,9 +21,9 @@ function customFunction() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/customfunction.mcfunction
 say Hello World
@@ -58,9 +58,9 @@ function customFunction() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -83,9 +83,9 @@ execute as @a run {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -117,9 +117,9 @@ class foo {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/foo/bar.mcfunction
 say bar
@@ -127,11 +127,11 @@ say bar
 scoreboard objectives add __variable__ dummy
 > VIRTUAL/data/TEST/advancements/foo/bar.json
 {
-  "criteria": {
-    "requirement": {
-      "trigger": "minecraft:tick"
+    "criteria": {
+        "requirement": {
+            "trigger": "minecraft:tick"
+        }
     }
-  }
 }
             """)
         )
@@ -180,9 +180,9 @@ say "Hello World 2"; // This is also a jmc comment
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -203,15 +203,15 @@ function __tick__() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
 say Hello World

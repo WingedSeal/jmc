@@ -538,11 +538,11 @@ class DataPack:
     VAR_NAME = {self.var_name},
     INT_NAME = {self.int_name}
 
-    objectives = {dumps(self._scoreboards, indent=2)}
+    objectives = {dumps(self._scoreboards, indent=4)}
     ints = {self.ints!r}
-    functions = {dumps(self.functions, indent=2, cls=FunctionEncoder)}
-    jsons = {dumps(self.jsons, indent=2)}
-    private_functions = {dumps(self.private_functions, indent=2, cls=FunctionEncoder)}
-    loads = {dumps(self.loads, indent=2)}
-    tick = {dumps(self.ticks, indent=2)}
+    functions = {dumps(self.functions, indent=4, cls=FunctionEncoder)}
+    jsons = {dumps(self.jsons, indent=4)}
+    private_functions = {dumps(self.private_functions, indent=4, cls=FunctionEncoder)}
+    loads = {dumps(self.loads, indent=4)}
+    tick = {dumps(self.ticks, indent=4)}
 )"""

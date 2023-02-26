@@ -28,7 +28,7 @@ def compile_jmc(config: "Configuration", debug: bool = False) -> None:
     :param config: Configuration dictionary
     :param debug: Whether to debug into log, defaults to False
     """
-    logger.info("Configuration:\n" + dumps(config.toJSON(), indent=2))
+    logger.info("Configuration:\n" + dumps(config.toJSON(), indent=4))
     Header.clear()
     read_header(config)
     is_delete, cert_config, cert_file = read_cert(config)
@@ -307,19 +307,19 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
 
     load_json["values"].append(f'{config.namespace}:{DataPack.load_name}')
     if _is_virtual:
-        output[load_tag] = dumps(load_json, indent=2)
+        output[load_tag] = dumps(load_json, indent=4)
     else:
         with load_tag.open("w+", encoding="utf-8") as file:
-            dump(load_json, file, indent=2)
+            dump(load_json, file, indent=4)
 
     if DataPack.tick_name in datapack.functions and datapack.functions[DataPack.tick_name]:
         tick_json["values"].append(
             f"{config.namespace}:{DataPack.tick_name}")
         if _is_virtual:
-            output[tick_tag] = dumps(tick_json, indent=2)
+            output[tick_tag] = dumps(tick_json, indent=4)
         else:
             with tick_tag.open("w+", encoding="utf-8") as file:
-                dump(tick_json, file, indent=2)
+                dump(tick_json, file, indent=4)
 
     for func_path, func in datapack.functions.items():
         if header.is_override_minecraft and func_path.startswith("minecraft/"):
@@ -346,11 +346,11 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
             path = namespace_folder / (json_path + ".json")
         if json:
             if _is_virtual:
-                output[path] = dumps(json, indent=2)
+                output[path] = dumps(json, indent=4)
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 with path.open("w+", encoding="utf-8") as file:
-                    dump(json, file, indent=2)
+                    dump(json, file, indent=4)
     if _is_virtual:
         return output
 
@@ -360,5 +360,5 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 "pack_format": int(config.pack_format),
                 "description": config.description
             }
-        }, file, indent=2)
+        }, file, indent=4)
     return None

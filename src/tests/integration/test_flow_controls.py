@@ -20,9 +20,9 @@ if (entity condition) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -44,9 +44,9 @@ if (entity condition) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -75,9 +75,9 @@ if (entity condition) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -110,9 +110,9 @@ while (entity condition) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -135,9 +135,9 @@ do {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -162,9 +162,9 @@ if ($i==1) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -184,9 +184,9 @@ if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -211,9 +211,9 @@ for ($i=0;$i<10;$i++) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -254,9 +254,9 @@ function askJob() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/askjob.mcfunction
 scoreboard players operation $job_id __variable__ = @s job_id

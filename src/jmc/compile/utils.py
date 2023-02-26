@@ -193,9 +193,9 @@ def monitor_results(func):
     def wrapper(*args, **kwargs):
         return_value = func(*args, **kwargs)
         print(f"""Function call {func.__name__}(
-args={dumps(args, indent=2, cls=JSONUniversalEncoder)},
-kwargs={dumps(kwargs, indent=2, cls=JSONUniversalEncoder)}
-) returns {dumps(return_value, indent=2, cls=JSONUniversalEncoder)}
+args={dumps(args, indent=4, cls=JSONUniversalEncoder)},
+kwargs={dumps(kwargs, indent=4, cls=JSONUniversalEncoder)}
+) returns {dumps(return_value, indent=4, cls=JSONUniversalEncoder)}
 """)
         return return_value
     return wrapper

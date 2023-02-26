@@ -14,7 +14,7 @@ class TestNew(unittest.TestCase):
 new advancements(my_datapack.first_join) {
     "criteria": {
         "requirement": {
-          "trigger": "minecraft:tick"
+            "trigger": "minecraft:tick"
         }
     },
     "rewards": {"function": "namespace:mydatapack/rejoin/first_join"}
@@ -26,22 +26,22 @@ new advancements(my_datapack.first_join) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 > VIRTUAL/data/TEST/advancements/my_datapack/first_join.json
 {
-  "criteria": {
-    "requirement": {
-      "trigger": "minecraft:tick"
+    "criteria": {
+        "requirement": {
+            "trigger": "minecraft:tick"
+        }
+    },
+    "rewards": {
+        "function": "namespace:mydatapack/rejoin/first_join"
     }
-  },
-  "rewards": {
-    "function": "namespace:mydatapack/rejoin/first_join"
-  }
 }
             """)
         )
@@ -52,7 +52,7 @@ scoreboard objectives add __variable__ dummy
 new advancements(myDatapack.firstJoin) {
     "criteria": {
         "requirement": {
-          "trigger": "minecraft:tick"
+            "trigger": "minecraft:tick"
         }
     },
     "rewards": {"function": "namespace:mydatapack/rejoin/first_join"}

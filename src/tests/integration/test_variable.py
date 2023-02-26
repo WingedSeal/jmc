@@ -20,9 +20,9 @@ $y += 0;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -51,9 +51,9 @@ $z->obj:var3;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -79,9 +79,9 @@ $x -= $y;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -108,9 +108,9 @@ $x--;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -130,9 +130,9 @@ execute store result score @s obj run $x.get();
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -155,9 +155,9 @@ $currentAmmo = data get entity @s SelectedItem.tag.ammo;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -175,9 +175,9 @@ $currentAmmo ?= data get entity @s SelectedItem.tag.ammo;
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy

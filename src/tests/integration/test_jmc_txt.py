@@ -23,9 +23,9 @@ INT=__int__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:load"
-  ]
+    "values": [
+        "TEST:load"
+    ]
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -51,15 +51,15 @@ INT=__int__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:loop"
-  ]
+    "values": [
+        "TEST:loop"
+    ]
 }
 > VIRTUAL/data/TEST/functions/loop.mcfunction
 say Hello World
@@ -87,9 +87,9 @@ INT=__int__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -116,9 +116,9 @@ INT=__int__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add var dummy
@@ -142,9 +142,9 @@ INT=int
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __var__ dummy
@@ -170,9 +170,9 @@ INT=__int__=init
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -197,9 +197,9 @@ UNKNOWN=__test__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:load"
-  ]
+    "values": [
+        "TEST:load"
+    ]
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -222,9 +222,9 @@ VAR=__variable__
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:load"
-  ]
+    "values": [
+        "TEST:load"
+    ]
 }
 > VIRTUAL/data/TEST/functions/load.mcfunction
 scoreboard objectives add __variable__ dummy

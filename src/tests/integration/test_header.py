@@ -21,9 +21,9 @@ TEST_DEFINE "Hello World";
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -62,9 +62,9 @@ function myFunc() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/myfunc.mcfunction
 say My function
@@ -98,7 +98,7 @@ test "TEST";
     def test_override_minecraft_json(self):
         pack = JMCTestPack().set_jmc_file("""
 new tags.functions(minecraft.custom) {
-  "values": []
+    "values": []
 }
         """).set_header_file("""
 #override_minecraft
@@ -109,13 +109,13 @@ new tags.functions(minecraft.custom) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/custom.json
 {
-  "values": []
+    "values": []
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -124,7 +124,7 @@ scoreboard objectives add __variable__ dummy
 
         pack2 = JMCTestPack().set_jmc_file("""
 new tags.functions(minecraft.custom) {
-  "values": []
+    "values": []
 }
         """).build()
 
@@ -133,13 +133,13 @@ new tags.functions(minecraft.custom) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/tags/functions/minecraft/custom.json
 {
-  "values": []
+    "values": []
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -149,7 +149,7 @@ scoreboard objectives add __variable__ dummy
     def test_override_minecraft_mcfunction(self):
         pack = JMCTestPack().set_jmc_file("""
 function minecraft.custom() {
-  say "custom";
+    say "custom";
 }
         """).set_header_file("""
 #override_minecraft
@@ -160,9 +160,9 @@ function minecraft.custom() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/functions/custom.mcfunction
 say custom
@@ -182,9 +182,9 @@ function minecraft.custom() {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/minecraft/custom.mcfunction
 say custom

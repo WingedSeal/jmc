@@ -20,9 +20,9 @@ $i = Math.sqrt($i);//COMMENT_TEST
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -77,9 +77,9 @@ $z = Math.random(max=10);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -133,9 +133,9 @@ if (Timer.isOver(my_objective)) {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -168,9 +168,9 @@ Hardcode.repeat("index", ()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -194,9 +194,9 @@ Hardcode.repeat("index", ()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -221,9 +221,9 @@ Hardcode.switch($var, "index", ()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -271,9 +271,9 @@ Timer.set(my_objective, @s, 5);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -292,9 +292,9 @@ Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2.0, spread=10);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -329,9 +329,9 @@ Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1.0, spread=10);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -360,9 +360,9 @@ Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1, spread=10);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -391,9 +391,9 @@ Particle.line("dust 1.0 1.0 1.0 0.7", distance=10.5, spread=10);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -448,9 +448,9 @@ Player.firstJoin(()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -458,14 +458,14 @@ scoreboard objectives add __variable__ dummy
 tellraw @s "Welcome!"
 > VIRTUAL/data/TEST/advancements/__private__/player_first_join.json
 {
-  "criteria": {
-    "requirement": {
-      "trigger": "minecraft:tick"
+    "criteria": {
+        "requirement": {
+            "trigger": "minecraft:tick"
+        }
+    },
+    "rewards": {
+        "function": "TEST:__private__/player_first_join/main"
     }
-  },
-  "rewards": {
-    "function": "TEST:__private__/player_first_join/main"
-  }
 }
             """)
         )
@@ -482,15 +482,15 @@ Player.rejoin(()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -518,15 +518,15 @@ Player.die(onDeath=()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -576,15 +576,15 @@ RightClick.setup(
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -622,15 +622,15 @@ Player.onEvent(used:carrot_on_a_stick, ()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -658,15 +658,15 @@ Trigger.setup(help, {
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -686,14 +686,14 @@ scoreboard players set @s help 0
 scoreboard players enable @s help
 > VIRTUAL/data/TEST/advancements/__private__/trigger_setup/enable.json
 {
-  "criteria": {
-    "requirement": {
-      "trigger": "minecraft:tick"
+    "criteria": {
+        "requirement": {
+            "trigger": "minecraft:tick"
+        }
+    },
+    "rewards": {
+        "function": "TEST:__private__/trigger_setup/enable"
     }
-  },
-  "rewards": {
-    "function": "TEST:__private__/trigger_setup/enable"
-  }
 }
             """)
         )
@@ -710,15 +710,15 @@ Timer.add(help_cd, runOnce, @a, ()=>{
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -757,9 +757,9 @@ Recipe.table({
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -771,30 +771,30 @@ advancement revoke @s only TEST:__private__/recipe_table/0
 tellraw @s "Wow! You crafted a special diamond"
 > VIRTUAL/data/TEST/advancements/__private__/recipe_table/0.json
 {
-  "criteria": {
-    "requirement": {
-      "trigger": "minecraft:recipe_unlocked",
-      "conditions": {
-        "recipe": "TEST:__private__/recipe_table/0"
-      }
+    "criteria": {
+        "requirement": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "TEST:__private__/recipe_table/0"
+            }
+        }
+    },
+    "rewards": {
+        "function": "TEST:__private__/recipe_table/0"
     }
-  },
-  "rewards": {
-    "function": "TEST:__private__/recipe_table/0"
-  }
 }
 > VIRTUAL/data/TEST/recipes/__private__/recipe_table/0.json
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "minecraft:oak_planks"
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:oak_planks"
+        }
+    ],
+    "result": {
+        "item": "minecraft:barrier",
+        "count": 1
     }
-  ],
-  "result": {
-    "item": "minecraft:barrier",
-    "count": 1
-  }
 }
             """)
         )
@@ -815,9 +815,9 @@ Item.give(block, @a);
                              string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -868,15 +868,15 @@ execute as @a run Item.give(veryCoolSword);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/minecraft/tags/functions/tick.json
 {
-  "values": [
-    "TEST:__tick__"
-  ]
+    "values": [
+        "TEST:__tick__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
@@ -915,9 +915,9 @@ Timer.set(test, @a[tag=test], 1);
             string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
-  "values": [
-    "TEST:__load__"
-  ]
+    "values": [
+        "TEST:__load__"
+    ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
