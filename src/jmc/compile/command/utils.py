@@ -529,26 +529,25 @@ class FormattedText:
 
             if prop.endswith("()"):
                 open_paren_index = prop.find("(")
-                trig = prop[open_paren_index + 1:-1].strip()
-                obj = prop[:open_paren_index]
-                if not trig:
-                    trig = "1"
-                if not trig.isnumeric():
+                prop_ = prop[open_paren_index + 1:-1].strip()
+                arg = prop[:open_paren_index]
+                if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
-                        f"Expected a number for trigger in parenthesis (got '{trig}')", self.token, self.tokenizer)
-                if " " in obj:
+                        f"Unknown property '{prop}'", self.token, self.tokenizer)
+                key, json_body = self.datapack.data.formatted_text_prop[prop_]
+                if not callable(json_body):
                     raise JMCValueError(
-                        f"Unexpected space in trigger objective name (got '{obj!r})", self.token, self.tokenizer)
-                self.current_json["clickEvent"] = {
-                    "action": "run_command",
-                    "value": f"trigger {obj} set {trig}"}
-                if not value:
-                    raise JMCValueError(
-                        f"Click Event cannot be false", self.token, self.tokenizer)
-                continue
+                        f"Custom property '{prop}' expected no argument", self.token, self.tokenizer)
+                self.current_json[key] = json_body(arg)
 
-            raise JMCValueError(
-                f"Unknown property '{prop}'", self.token, self.tokenizer)
+            if prop not in self.datapack.data.formatted_text_prop:
+                raise JMCValueError(
+                    f"Unknown property '{prop}'", self.token, self.tokenizer)
+            key, json_body = self.datapack.data.formatted_text_prop[prop]
+            if callable(json_body):
+                raise JMCValueError(
+                    f"Custom property '{prop}' expected an argument (got 0)", self.token, self.tokenizer)
+            self.current_json[key] = json_body
 
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color

@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from ..compile.tokenizer import Token
@@ -111,6 +111,11 @@ class GUI:
         return commands
 
 
+SIMPLE_JSON_BODY = str | bool | dict[
+    str, str | bool
+]
+
+
 class Data:
     """
     Data shared across all JMC function in the datapack
@@ -123,7 +128,8 @@ class Data:
         "scoreboards",
         "teams",
         "bossbars",
-        "guis")
+        "guis",
+        "formatted_text_prop")
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
@@ -134,6 +140,9 @@ class Data:
         self.teams: dict[str, tuple[str, "Token"]] = {}
         self.bossbars: dict[str, tuple[str, "Token"]] = {}
         self.guis: dict[str, GUI] = {}
+        self.formatted_text_prop: dict[str,
+                                       tuple[str, SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY]]] = {}
+        """Dictionary of property and (key("clickEvent", etc.) and function that accept string(property's param) and return json's body to be in)"""
 
     def get_item_id(self) -> str:
         """
