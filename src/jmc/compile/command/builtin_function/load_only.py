@@ -1,12 +1,13 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
-from jmc.compile.utils import convention_jmc_to_mc
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
-from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText
+from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
+
+from functools import lru_cache
 
 
 @func_property(
@@ -1079,6 +1080,8 @@ class TextPropClickCommand(JMCFunction):
 )
 class TextPropsClickCommand(JMCFunction):
     def call(self) -> str:
+
+        @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             command = self.datapack.parse_function_token(
                 self.raw_args["function"].token,
