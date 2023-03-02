@@ -529,25 +529,32 @@ class FormattedText:
 
             if prop.endswith("()"):
                 open_paren_index = prop.find("(")
-                prop_ = prop[open_paren_index + 1:-1].strip()
-                arg = prop[:open_paren_index]
+                arg = prop[open_paren_index + 1:-1].strip()
+                prop_ = prop[:open_paren_index]
                 if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
-                        f"Unknown property '{prop}'", self.token, self.tokenizer)
-                key, json_body = self.datapack.data.formatted_text_prop[prop_]
+                        f"Unknown property '{prop_}'", self.token, self.tokenizer)
+                key, json_body, is_local = self.datapack.data.formatted_text_prop[prop_]
                 if not callable(json_body):
                     raise JMCValueError(
-                        f"Custom property '{prop}' expected no argument", self.token, self.tokenizer)
+                        f"Custom property '{prop_}' expected no argument", self.token, self.tokenizer, suggestion="Remove '()'")
+                if not arg:
+                    raise JMCValueError(
+                        f"Expected value inside parenthesis of property '{prop_}' (got nothing)", self.token, self.tokenizer)
                 self.current_json[key] = json_body(arg)
+                if is_local:
+                    del self.datapack.data.formatted_text_prop[prop_]
 
             if prop not in self.datapack.data.formatted_text_prop:
                 raise JMCValueError(
                     f"Unknown property '{prop}'", self.token, self.tokenizer)
-            key, json_body = self.datapack.data.formatted_text_prop[prop]
+            key, json_body, is_local = self.datapack.data.formatted_text_prop[prop]
             if callable(json_body):
                 raise JMCValueError(
                     f"Custom property '{prop}' expected an argument (got 0)", self.token, self.tokenizer)
             self.current_json[key] = json_body
+            if is_local:
+                del self.datapack.data.formatted_text_prop[prop]
 
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color

@@ -1023,6 +1023,43 @@ class TeamAdd(JMCFunction):
         return command
 
 
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clickCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_click_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropClickCommand(JMCFunction):
+    def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 0 and command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "run_command", "value": "/" + command[0]}, self.check_bool("local"))
+        return ""
+
+
 # @ func_property(
 #     func_type=FuncType.load_only,
 #     call_string='Debug.track',

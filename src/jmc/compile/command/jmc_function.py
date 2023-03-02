@@ -4,7 +4,7 @@ from json import JSONDecodeError, loads
 from typing import TYPE_CHECKING, Any, Callable
 
 from ...compile.utils import convention_jmc_to_mc, is_float
-from ...compile.datapack_data import Item
+from ...compile.datapack_data import Item, SIMPLE_JSON_BODY
 from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, hash_string_to_string, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
@@ -409,6 +409,15 @@ class JMCFunction:
                 self.raw_args[parameter].token,
                 self.tokenizer)
         return self.args[parameter] == "true"
+
+    def add_formatted_text_prop(self, key: str, body: SIMPLE_JSON_BODY,
+                                is_local: bool, property_name="propertyName"):
+        if self.args[property_name] in self.datapack.data.formatted_text_prop:
+            raise JMCValueError(
+                f"Text's property '{self.args[property_name]}' was already defined",
+                self.raw_args["propertyName"].token, self.tokenizer)
+        self.datapack.data.formatted_text_prop[self.args[property_name]] = (
+            key, body, is_local)
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
