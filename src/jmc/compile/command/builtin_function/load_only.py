@@ -2,7 +2,7 @@
 from jmc.compile.utils import convention_jmc_to_mc
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
-from ...datapack_data import GUI, GUIMode, Item
+from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
 from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -1059,6 +1059,47 @@ class TextPropClickCommand(JMCFunction):
                 "action": "run_command", "value": "/" + command[0]}, self.check_bool("local"))
         return ""
 
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clickCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_click_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropsClickCommand(JMCFunction):
+    def call(self) -> str:
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            command = self.datapack.parse_function_token(
+                self.raw_args["function"].token,
+                self.tokenizer)
+            if command:
+                command[0] = command[0].replace(self.args["indexString"], arg)
+            if len(command) > 1:
+                raise JMCValueError(
+                    f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                    self.raw_args["function"].token,
+                    self.tokenizer)
+            if command and command[0].startswith("say"):
+                raise JMCValueError(
+                    f"'{self.call_string}' doesn't allow 'say' command",
+                    self.raw_args["function"].token,
+                    self.tokenizer, suggestion="This is due to minecraft's limitation")
+            return {
+                "action": "run_command", "value": "/" + command[0]}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
 
 # @ func_property(
 #     func_type=FuncType.load_only,

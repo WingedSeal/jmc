@@ -527,7 +527,7 @@ class FormattedText:
                         f"Selector cannot be false", self.token, self.tokenizer)
                 continue
 
-            if prop.endswith("()"):
+            if prop.endswith(")"):
                 open_paren_index = prop.find("(")
                 arg = prop[open_paren_index + 1:-1].strip()
                 prop_ = prop[:open_paren_index]
@@ -544,6 +544,7 @@ class FormattedText:
                 self.current_json[key] = json_body(arg)
                 if is_local:
                     del self.datapack.data.formatted_text_prop[prop_]
+                continue
 
             if prop not in self.datapack.data.formatted_text_prop:
                 raise JMCValueError(
@@ -555,6 +556,7 @@ class FormattedText:
             self.current_json[key] = json_body
             if is_local:
                 del self.datapack.data.formatted_text_prop[prop]
+            continue
 
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color

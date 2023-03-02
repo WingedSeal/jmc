@@ -410,7 +410,7 @@ class JMCFunction:
                 self.tokenizer)
         return self.args[parameter] == "true"
 
-    def add_formatted_text_prop(self, key: str, body: SIMPLE_JSON_BODY,
+    def add_formatted_text_prop(self, key: str, body: SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY],
                                 is_local: bool, property_name="propertyName"):
         if self.args[property_name] in self.datapack.data.formatted_text_prop:
             raise JMCValueError(

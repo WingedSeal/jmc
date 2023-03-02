@@ -141,7 +141,7 @@ class Data:
         self.bossbars: dict[str, tuple[str, "Token"]] = {}
         self.guis: dict[str, GUI] = {}
         self.formatted_text_prop: dict[str,
-                                       tuple[str, SIMPLE_JSON_BODY, bool]] = {}
+                                       tuple[str, SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY], bool]] = {}
         """
         Dictionary of property and (key("clickEvent", etc.) and json body and wheter to delete it after use)
         """
