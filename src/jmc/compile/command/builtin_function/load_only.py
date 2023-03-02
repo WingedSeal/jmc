@@ -228,7 +228,12 @@ class ItemCreateSpawnEgg(JMCFunction):
         ])}""")
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
+            str(FormattedText(name,
+    self.raw_args["displayName"].token,
+    self.tokenizer,
+    self.datapack,
+    is_default_no_italic=True,
+     is_allow_score_selector=False))
             )},Lore:[{lore_}]}},EntityTag:{{id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(
@@ -322,7 +327,12 @@ class ItemCreateSign(JMCFunction):
         texts_ = [repr(str(text)) for text in formatted_texts_]
 
         nbt["display"] = Token.empty(f"""{{Name:{repr(
-            str(FormattedText(name, self.raw_args["displayName"].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
+            str(FormattedText(name,
+    self.raw_args["displayName"].token,
+    self.tokenizer,
+    self.datapack,
+    is_default_no_italic=True,
+     is_allow_score_selector=False))
             )},Lore:[{lore_}]}},BlockEntityTag:{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")
 
         self.datapack.data.item[self.args["itemId"]] = Item(
@@ -1045,12 +1055,17 @@ class TextPropClickCommand(JMCFunction):
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
             self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                f"'Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
         if len(command) > 1:
             raise JMCValueError(
                 f"'{self.call_string}' only allows 1 command (got {len(command)})",
                 self.raw_args["function"].token,
                 self.tokenizer)
-        if len(command) > 0 and command[0].startswith("say"):
+        if command[0].startswith("say"):
             raise JMCValueError(
                 f"'{self.call_string}' doesn't allow 'say' command",
                 self.raw_args["function"].token,
@@ -1080,26 +1095,29 @@ class TextPropClickCommand(JMCFunction):
 )
 class TextPropsClickCommand(JMCFunction):
     def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                f"'Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            command = self.datapack.parse_function_token(
-                self.raw_args["function"].token,
-                self.tokenizer)
-            if command:
-                command[0] = command[0].replace(self.args["indexString"], arg)
-            if len(command) > 1:
-                raise JMCValueError(
-                    f"'{self.call_string}' only allows 1 command (got {len(command)})",
-                    self.raw_args["function"].token,
-                    self.tokenizer)
-            if command and command[0].startswith("say"):
-                raise JMCValueError(
-                    f"'{self.call_string}' doesn't allow 'say' command",
-                    self.raw_args["function"].token,
-                    self.tokenizer, suggestion="This is due to minecraft's limitation")
             return {
-                "action": "run_command", "value": "/" + command[0]}
+                "action": "run_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
         self.add_formatted_text_prop(
             "clickEvent", inner, self.check_bool("local"))
         return ""
