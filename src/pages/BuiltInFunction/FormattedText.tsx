@@ -169,6 +169,18 @@ const formattedText = (
             Zombie & WingedSeal{" "}
             <span className="text-[#ffaa00]">are very cool.</span>
         </p>
+        <p>
+            You can also use custom properties defined by <code>TextProp</code>{" "}
+            and <code>TextProps</code> functions. To add an argument for{" "}
+            <code>TextProps</code>, use <code>(my_arg)</code>. Note that spaces,
+            commas etc. are not allowed as argument and you may only have 1
+            argument.
+        </p>
+        <CodeBlock>
+            <CodeText type="string">"{"&<my_props(12)>Text"}"</CodeText>
+            <br />
+            <CodeText type="string">"{"&<my_prop>Text"}"</CodeText>
+        </CodeBlock>
     </Feature>
 );
 

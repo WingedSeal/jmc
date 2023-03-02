@@ -1047,6 +1047,26 @@ const BuildinFeatures = [
             params={[{ key: "power", type: "float", default: "1" }]}
         />
     </Feature>,
+    <Feature
+        id="text_prop_click_command"
+        summary="TextProp.clickCommand()"
+        keywords="run_command clickevent"
+    >
+        <p>
+            Create custom property for FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add run_command clickEvent to the text.</p>
+        <Command
+            name="TextProp.clickCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
 ];
 
 export default BuildinFeatures;
