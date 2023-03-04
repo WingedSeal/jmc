@@ -338,7 +338,7 @@ class Tokenizer:
         elif char in {Paren.R_CURLY, Paren.R_ROUND, Paren.R_SQUARE}:
             raise JMCSyntaxException(
                 "Unexpected bracket", None, self, display_col_length=False)
-        elif char == Re.HASH and self.col == 1:
+        elif char == Re.HASH and not self.keywords:
             self.state = TokenType.COMMENT
         elif char == Re.COMMA:
             self.token_str += char
@@ -460,7 +460,7 @@ class Tokenizer:
         elif char in {Quote.SINGLE, Quote.DOUBLE}:
             self.is_string = True
             self.quote = char
-        elif char == Re.HASH and self.col == 1:
+        elif char == Re.HASH and not self.keywords:
             self.is_comment = True
         elif char == Re.SLASH:
             if self.is_slash:
