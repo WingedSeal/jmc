@@ -94,8 +94,11 @@ class Token:
 
     def get_full_string(self) -> str:
         """Get self.string including quotation mark"""
-        return repr(
-            self.string) if self.token_type == TokenType.STRING else self.string
+        if self.token_type == TokenType.STRING:
+            if "\n" in self.string:
+                return "`\n" + repr(self.string)[1:-1] + "\n`"
+            return repr(self.string)
+        return self.string
 
     @classmethod
     def empty(cls, string: str = "",
@@ -136,6 +139,7 @@ class Re:
 class Quote:
     SINGLE = "'"
     DOUBLE = '"'
+    BACKTICK = "`"
 
 
 class Paren:
@@ -316,7 +320,7 @@ class Tokenizer:
                 "Unnecessary semicolon(;)", None, self)
 
     def __parse_none(self, char: str) -> bool:
-        if char in {Quote.SINGLE, Quote.DOUBLE}:
+        if char in {Quote.SINGLE, Quote.DOUBLE, Quote.BACKTICK}:
             self.state = TokenType.STRING
             self.token_pos = Pos(self.line, self.col)
             self.quote = char
@@ -399,8 +403,11 @@ class Tokenizer:
     def __parse_newline(self, char: str):
         self.is_comment = False
         if self.state == TokenType.STRING:
-            raise JMCSyntaxException(
-                "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)  # suggestion="Consider changing '\\n' to '\\\\n'")
+            if self.quote == Quote.BACKTICK:
+                self.token_str += char
+            else:
+                raise JMCSyntaxException(
+                    "String literal contains an unescaped line break.", None, self, entire_line=True, display_col_length=False)  # suggestion="Consider changing '\\n' to '\\\\n'")
         if self.state == TokenType.COMMENT:
             self.state = None
         elif self.state == TokenType.KEYWORD or self.state == TokenType.OPERATOR:
@@ -410,12 +417,34 @@ class Tokenizer:
         self.line += 1
         self.col = 0
 
+    def __parse_multiline_string(self):
+        lines = self.token_str.split(NEW_LINE)
+        if len(lines) <= 2:
+            if len(lines) == 1:
+                raise JMCSyntaxException(
+                    "Expected newline after open backtick(`) for multiline string", None, self, display_col_length=False)
+            if len(lines) == 2:
+                raise JMCSyntaxException(
+                    "Expected newline before close backtick(`) for multiline string", None, self)
+        if lines[0] and not re.match(Re.WHITESPACE, lines[0]):
+            raise JMCSyntaxException(
+                f"Expected whitespaces line after open backtick(`) (got {lines[0]!r})", None, self)
+        if lines[-1] and not re.match(Re.WHITESPACE, lines[-1]):
+            raise JMCSyntaxException(
+                f"Expected whitespaces line before close backtick(`) (got {lines[-1]!r})", None, self)
+        self.token_str = "\n".join(lines[1:-1])
+
     def __parse_string(self, char: str):
         self.token_str += char
         if char == Re.BACKSLASH and not self.is_escaped:
             self.is_escaped = True
         elif char == self.quote and not self.is_escaped:
-            self.token_str = literal_eval(self.token_str)
+            if self.quote == Quote.BACKTICK:
+                self.token_str: str = literal_eval(
+                    '"""' + self.token_str[1:-1] + '"""')
+                self.__parse_multiline_string()
+            else:
+                self.token_str: str = literal_eval(self.token_str)
             self.append_token()
         elif self.is_escaped:
             self.is_escaped = False
@@ -457,7 +486,7 @@ class Tokenizer:
             self.paren_count += 1
         elif char == self.r_paren:
             self.paren_count -= 1
-        elif char in {Quote.SINGLE, Quote.DOUBLE}:
+        elif char in {Quote.SINGLE, Quote.DOUBLE, Quote.BACKTICK}:
             self.is_string = True
             self.quote = char
         elif char == Re.HASH and not self.keywords:

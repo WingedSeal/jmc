@@ -39,7 +39,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     if token is None:
         string = ""
         length = 1
-        col = tokenizer.col - 1
+        col = tokenizer.col
         line = tokenizer.line
     else:
         string = token.get_full_string()
@@ -57,11 +57,11 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
         else:
             col += length
         display_col += 1
-        # col -= 1
+
     if display_col_length:
         if "\n" in string:
             display_line += string.count("\n")
-            display_col = length - string.rfind("\n")
+            display_col = length - string.rfind("\n") + 1
         else:
             display_col += length
     else:
@@ -128,7 +128,7 @@ class HeaderSyntaxException(SyntaxError):
 class JMCSyntaxException(SyntaxError):
     """Invalid syntax for JMC"""
 
-    def __init__(self, message: str, token: "Token|None", tokenizer: "Tokenizer", *, col_length: bool = False,
+    def __init__(self, message: str, token: "Token | None", tokenizer: "Tokenizer", *, col_length: bool = False,
                  display_col_length: bool = True, entire_line: bool = False, suggestion: str | None = None) -> None:
         self.message = message
         self.token = token
