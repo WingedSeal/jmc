@@ -60,7 +60,7 @@ class Lexer:
         "config",
         "datapack")
 
-    if_else_box: list[tuple[Token | None, Token]]
+    if_else_box: list[tuple[Token | None, Token | list[Token]]]
     """List of tuple of condition(Token) and code block(paren_curly Token) in if-else chain"""
     load_tokenizer: Tokenizer
     """Tokenizer for load function"""

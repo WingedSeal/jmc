@@ -257,7 +257,7 @@ class DataPack:
         """
         self.jsons[f"{json_type}/{name}"] = json
 
-    def add_arrow_function(self, name: str, token: Token,
+    def add_arrow_function(self, name: str, token: Token | list[Token],
                            tokenizer: Tokenizer, force_create_func: bool = False) -> str:
         """
         Add private function for user (arrow function)
@@ -268,7 +268,7 @@ class DataPack:
         :raises JMCSyntaxWarning: If the string in curly bracket is empty
         :return: Minecraft function call string
         """
-        if token.string == "{}":
+        if not isinstance(token, list) and token.string == "{}":
             raise JMCSyntaxWarning(
                 "Unexpected empty function content.", token, tokenizer)
 
@@ -281,7 +281,7 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def add_custom_private_function(self, name: str, token: Token, tokenizer: Tokenizer, count: str,
+    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str,
                                     precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
         """
         Wrap custom commands around user's commands
@@ -349,7 +349,7 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def parse_function_token(self, token: Token,
+    def parse_function_token(self, token: Token | list[Token],
                              tokenizer: Tokenizer) -> list[str]:
         """
         "Parse a paren_curly token into a list of commands(string)
@@ -358,6 +358,8 @@ class DataPack:
         :param tokenizer: token's tokenizer
         :return: List of minecraft commands(string)
         """
+        if isinstance(token, list):
+            return self.lexer._parse_func_content(tokenizer, [token], is_load=False)
         return self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
