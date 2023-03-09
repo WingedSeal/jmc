@@ -35,6 +35,7 @@ class Condition:
     pre_commands: list[str] = field(default_factory=list)
 
     def reverse(self) -> None:
+        """Reverse condition"""
         self.if_unless = not self.if_unless
 
     def __str__(self) -> str:

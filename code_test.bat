@@ -19,4 +19,6 @@ echo =================================
 echo ^> Code Style(PEP8) (pycodestyle)
 echo =================================
 pycodestyle ./src --ignore=E501,W50
-@REM pylint src/jmc --disable=C0301,W1201,W1203
+@REM pylint src/jmc --disable=C0301,W1201,W1203,R0913
+@REM pylint src/jmc --disable=C,W,R --enable=C0116  // Missing function docstring
+@REM pylint src/jmc --disable=C,W,R --enable=W1309  // F-string that does not have any interpolated variables 

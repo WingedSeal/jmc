@@ -446,7 +446,7 @@ class FuncContent:
                     "Expected 'function' or 'clear' after 'schedule'", self.command[key_pos + 1], self.tokenizer)
             if self.command[key_pos + 3].string != "()":
                 raise JMCSyntaxException(
-                    f"'schedule' does not support argument is not supported.\nExpected empty bracket", self.command[key_pos + 3], self.tokenizer)
+                    "'schedule' does not support argument is not supported.\nExpected empty bracket", self.command[key_pos + 3], self.tokenizer)
             append_commands(self.__commands, "schedule")
             append_commands(self.__commands, self.command[key_pos + 1].string)
             append_commands(
@@ -459,7 +459,7 @@ class FuncContent:
                 return True
             if len(self.command) < key_pos + 5:
                 raise JMCSyntaxException(
-                    f"Expected time in schedule call", self.command[key_pos + 3], self.tokenizer)
+                    "Expected time in schedule call", self.command[key_pos + 3], self.tokenizer)
             append_commands(self.__commands, self.command[key_pos + 4].string)
             if len(self.command) == key_pos + 6:
                 if self.command[key_pos +

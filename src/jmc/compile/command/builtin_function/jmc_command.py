@@ -110,10 +110,10 @@ class ItemSummon(JMCFunction):
             self.raw_args["nbt"].token) if self.args["nbt"] else {}
         if "Item" in nbt:
             raise JMCValueError(
-                f'`Item` key found inside Item.summon nbt argument.',
+                '`Item` key found inside Item.summon nbt argument.',
                 self.token,
                 self.tokenizer,
-                suggestion=f"Remove `Item` in the nbt"
+                suggestion="Remove `Item` in the nbt"
             )
         return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}{","+self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
 
@@ -304,6 +304,13 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
 class ParticleCircle(JMCFunction):
     def draw(self, radius: float,
              spread: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param radius: Radius of the circle
+        :param spread: How close are particles to each other
+        :return: List of coordinate for each particles
+        """
         points = []
         angle = 2 * math.pi / spread
         for i in drange(0, spread, angle):
@@ -357,6 +364,14 @@ class ParticleCircle(JMCFunction):
 class ParticleSpiral(JMCFunction):
     def draw(self, radius: float, height: float,
              spread: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param radius: Radius of the spiral
+        :param height: Height of the spiral
+        :param spread: How close are particles to each other
+        :return: List of coordinate for each particles
+        """
         points = []
         angle = 2 * math.pi / spread
         d_y = height / spread
@@ -418,6 +433,15 @@ class ParticleSpiral(JMCFunction):
 class ParticleCylinder(JMCFunction):
     def draw(self, radius: float, height: float, spread_xz: int,
              spread_y: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param radius: Radius of the cylinder
+        :param height: Height of the cylinder
+        :param spread: How close are particles to each other in xz plane
+        :param spread: How close are particles to each other in y axis
+        :return: List of coordinate for each particles
+        """
         points = []
         d_y = height / spread_y
         for y in range(spread_y):
@@ -475,6 +499,13 @@ class ParticleCylinder(JMCFunction):
 class ParticleLine(JMCFunction):
     def draw(self, distance: float,
              spread: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param distance: How long the line is
+        :param spread: How close are particles to each other
+        :return: List of coordinate for each particles
+        """
         return [(0, 0, n) for n in drange(1, distance + 1, distance / spread)]
 
     def call(self) -> str:
@@ -713,14 +744,14 @@ class AdvancementRevoke(JMCFunction):
 
         if type_ == "everything" and advancement:
             raise JMCValueError(
-                f"Extra argument: 'advancement'",
+                "Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )
 
         elif type_ != "everything" and not advancement:
             raise JMCValueError(
-                f"Missing argument 'advancement'",
+                "Missing argument 'advancement'",
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )
@@ -778,14 +809,14 @@ class AdvancementGrant(JMCFunction):
 
         if type_ == "everything" and advancement:
             raise JMCValueError(
-                f"Extra argument: 'advancement'",
+                "Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )
 
         elif type_ != "everything" and not advancement:
             raise JMCValueError(
-                f"Missing argument 'advancement'",
+                "Missing argument: 'advancement'",
                 self.raw_args["advancement"].token,
                 self.tokenizer
             )

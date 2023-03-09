@@ -16,6 +16,14 @@ from .jmc_function import JMCFunction
 class ItemMixin(JMCFunction):
     def create_new_item(
             self, item: "Item", modify_nbt: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
+        """
+        Create new item from existing item
+
+        :param item: An Item to copy from
+        :param modify_nbt: NBT to modify, defaults to None
+        :param error_token: Token to raise an error to, defaults to None
+        :return: New Item
+        """
         item_type = item.item_type
         nbt = dict(item.raw_nbt)
         if modify_nbt is None:
@@ -36,6 +44,16 @@ class ItemMixin(JMCFunction):
 
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
                     lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
+        """
+        Create new item from arguments given in the JMCFunction
+
+        :param item_type_param: Paramter to access `self.args`,defaults to "displayName"
+        :param display_name_param: Paramter to access `self.args`,defaults to "itemType"
+        :param lore_param: Paramter to access `self.args`,defaults to "lore"
+        :param nbt_param: Paramter to access `self.args`,defaults to "nbt"
+        :param modify_nbt: NBT to modify, defaults to None
+        :return: Item
+        """
         if modify_nbt is None:
             modify_nbt = {}
 

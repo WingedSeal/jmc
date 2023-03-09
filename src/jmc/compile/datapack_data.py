@@ -84,6 +84,7 @@ class GUI:
 
     @property
     def length(self) -> int:
+        """Total size"""
         empty = 0
         for template_item in self.template:
             if template_item.items is None:
@@ -91,6 +92,7 @@ class GUI:
         return self.size[0] * self.size[1] - empty
 
     def get_reset_commands(self) -> list[str]:
+        """Generate reset commands"""
         commands: list[str] = []
         for index, template_item in enumerate(self.template):
             if template_item.items is None:

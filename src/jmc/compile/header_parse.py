@@ -14,8 +14,7 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 
 
-def __empty_macro_factory(
-        argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+def __empty_macro_factory(*args) -> list[Token]:
     return []
 
 
@@ -308,7 +307,7 @@ def __parse_header(header_str: str, file_name: str,
             def __uninstall(datapack: "DataPack"):
                 if "uninstall" not in datapack.functions:
                     raise HeaderSyntaxException(
-                        f"'#uninstall' requires an existing 'uninstall' function", _file_name, _line, _line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
+                        "'#uninstall' requires an existing 'uninstall' function", _file_name, _line, _line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
                 datapack.functions["uninstall"].extend([
                     *(f"scoreboard objectives remove {obj}" for obj in datapack._scoreboards),
                     *(f"scoreboard objectives remove {obj}" for obj in datapack.data.scoreboards),

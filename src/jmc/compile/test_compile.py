@@ -103,6 +103,7 @@ INT=__int__"""
 
     @property
     def built(self) -> dict[str, str]:
+        """Access built datapack"""
         if self.__built is None:
             self.build()
         if self.__built is None:
@@ -110,9 +111,16 @@ INT=__int__"""
         return self.__built
 
     def dumps(self, *, indent: int = 4) -> str:
+        """
+        Dumps the built datapack into json formatted string
+
+        :param indent: indentation, defaults to 4
+        :return: JSON as string
+        """
         return dumps(self.built, indent=indent)
 
     def to_string(self) -> str:
+        """Get human-readable string"""
         return "\n".join(
             [f"> {file_name}\n{file_content}" for file_name, file_content in self.built.items()])
 

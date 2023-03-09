@@ -9,6 +9,9 @@ from ..exception import JMCSyntaxException
 
 def if_(command: list[Token], datapack: DataPack,
         tokenizer: Tokenizer) -> None:
+    """
+    Parse `if`
+    """
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
@@ -29,6 +32,9 @@ def if_(command: list[Token], datapack: DataPack,
 
 def else_(command: list[Token], datapack: DataPack,
           tokenizer: Tokenizer) -> str | None:
+    """
+    Parse `else`
+    """
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
             "'else' cannot be used without 'if'", command[0], tokenizer)
@@ -76,6 +82,9 @@ WHILE_NAME = "while_loop"
 
 def while_(command: list[Token], datapack: "DataPack",
            tokenizer: "Tokenizer") -> str:
+    """
+    Parse `while`
+    """
     if datapack.lexer.do_while_box is None:
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -121,6 +130,9 @@ def while_(command: list[Token], datapack: "DataPack",
 
 
 def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
+    """
+    Parse `do`
+    """
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected {", command[0], tokenizer, col_length=True)
@@ -197,6 +209,9 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
 
 def switch(command: list[Token], datapack: DataPack,
            tokenizer: Tokenizer) -> str:
+    """
+    Parse `switch`
+    """
     if len(command) == 1:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
@@ -274,7 +289,7 @@ def switch(command: list[Token], datapack: DataPack,
 
     if scoreboard_player.player_type == PlayerType.INTEGER:
         raise JMCSyntaxException(
-            f"Unexpected integer in switch case", tokens[0], tokenizer)
+            "Unexpected integer in switch case", tokens[0], tokenizer)
 
     return parse_switch(scoreboard_player, func_contents, datapack)
 
@@ -284,6 +299,9 @@ FOR_NAME = "for_loop"
 
 def for_(command: list[Token], datapack: DataPack,
          tokenizer: Tokenizer) -> str:
+    """
+    Parse `for`
+    """
     if len(command) == 1:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)

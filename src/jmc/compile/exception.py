@@ -143,11 +143,11 @@ class JMCSyntaxException(SyntaxError):
         super().__init__(msg)
 
     def reinit(self, overide_file_str: Callable[[str], str]):
+        """
+        Overide initialization
+        """
         self.msg = error_msg(self.message, self.token, self.tokenizer, self.col_length,
                              self.display_col_length, self.entire_line, self.suggestion, overide_file_str)
-        """
-        Overide initiation
-        """
         logger.warning("Overiding file string")
         log(self, (self.msg, ))
 

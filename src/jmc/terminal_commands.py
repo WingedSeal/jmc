@@ -170,10 +170,9 @@ def config(mode: str = "") -> None:
         if not global_data.config:
             global_data.config.ask_and_save()
             return
-        else:
-            pprint(
-                "Configuration file is already generated. To reset, use `cofig reset`",
-                Colors.FAIL)
+        pprint(
+            "Configuration file is already generated. To reset, use `cofig reset`",
+            Colors.FAIL)
     if mode == "reset":
         __config_reset()
     elif mode == "edit":

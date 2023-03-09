@@ -727,7 +727,7 @@ class GUIRegisters(ItemMixin):
                                                                      self.tokenizer, TokenType.KEYWORD)
         if not item_strings:
             raise JMCValueError(
-                f"GUI Template expected non-empty 'items' argument",
+                "GUI Template expected non-empty 'items' argument",
                 self.raw_args["items"].token,
                 self.tokenizer)
 
@@ -783,7 +783,7 @@ class GUIRegisters(ItemMixin):
         for item in items:
             if item.item_type == "air":
                 raise JMCValueError(
-                    f"Item cannot be air",
+                    "Item cannot be air",
                     token,
                     self.tokenizer)
             gui.item_types.add(item.item_type)
@@ -931,9 +931,9 @@ class GUICreate(JMCFunction):
             ], "copy_item_owner")
 
             self.datapack.add_raw_private_function(
-                f"__gui__", [
-                    f"data modify entity @s Owner set from entity @p[tag=__gui__.clicker] UUID",
-                    f"tp @s @p[tag=__gui__.clicker]"
+                "__gui__", [
+                    "data modify entity @s Owner set from entity @p[tag=__gui__.clicker] UUID",
+                    "tp @s @p[tag=__gui__.clicker]"
                 ], "return_item"
             )
 
@@ -1058,7 +1058,7 @@ class TextPropClickCommand(JMCFunction):
             self.tokenizer)
         if not command:
             raise JMCValueError(
-                f"'Unexpected empty arrow function",
+                "Unexpected empty arrow function",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if len(command) > 1:
@@ -1101,7 +1101,7 @@ class TextPropsClickCommand(JMCFunction):
             self.tokenizer)
         if not command:
             raise JMCValueError(
-                f"'Unexpected empty arrow function",
+                "Unexpected empty arrow function",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if len(command) > 1:

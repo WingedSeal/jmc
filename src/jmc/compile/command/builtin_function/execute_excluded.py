@@ -177,7 +177,7 @@ class HardcodeRepeatLists(JMCFunction):
         if string_lists_count.count(
                 string_lists_count[0]) != len(string_lists_count):
             raise JMCValueError(
-                f"Not all of list in stringLists have equal size",
+                "Not all of list in stringLists have equal size",
                 self.raw_args["stringLists"].token,
                 self.tokenizer)
         commands: list[str] = []

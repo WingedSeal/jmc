@@ -233,7 +233,7 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         if tokens[1].token_type == TokenType.PAREN_SQUARE:
             if len(tokens) > 2:
                 raise JMCSyntaxException(
-                    f"Unexpected token after target selector",
+                    "Unexpected token after target selector",
                     tokens[2],
                     tokenizer,
                     suggestion="This can be a result from missing comma or missing quotation mark")
@@ -251,7 +251,7 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         for index, token in enumerate(tokens[1:]):
             if token.token_type == tokens[index].token_type == TokenType.KEYWORD:
                 raise JMCSyntaxException(
-                    f"2 keywords are next to each other in function argument",
+                    "2 keywords are next to each other in function argument",
                     token,
                     tokenizer,
                     suggestion="This can be a result from missing comma or missing quotation mark")
@@ -412,6 +412,12 @@ class FormattedText:
 
     def add_key(self, key: str, value: str | bool |
                 dict[str, str | bool]) -> None:
+        """
+        Add json to result
+
+        :param key: JSON Key
+        :param value: JSON Value
+        """
         if self.result:
             self.result[0][key] = value
             return
@@ -488,43 +494,43 @@ class FormattedText:
             if prop.startswith(DataPack.VARIABLE_SIGN):
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        f"selector used with score in formatted text", self.token, self.tokenizer)
+                        "selector used with score in formatted text", self.token, self.tokenizer)
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        f"score used twice in formatted text", self.token, self.tokenizer)
+                        "score used twice in formatted text", self.token, self.tokenizer)
                 self.current_json["score"] = {
                     "name": prop, "objective": self.datapack.var_name}
                 if not value:
                     raise JMCValueError(
-                        f"Score cannot be false", self.token, self.tokenizer)
+                        "Score cannot be false", self.token, self.tokenizer)
                 continue
 
             if prop.count(":") == 1:
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        f"selector used with score in formatted text", self.token, self.tokenizer)
+                        "selector used with score in formatted text", self.token, self.tokenizer)
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        f"score used twice in formatted text", self.token, self.tokenizer)
+                        "score used twice in formatted text", self.token, self.tokenizer)
                 objective, name = prop.split(":")
                 self.current_json["score"] = {
                     "name": name, "objective": objective}
                 if not value:
                     raise JMCValueError(
-                        f"Score cannot be false", self.token, self.tokenizer)
+                        "Score cannot be false", self.token, self.tokenizer)
                 continue
 
             if prop.startswith("@"):
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        f"score used with selector in formatted text", self.token, self.tokenizer)
+                        "score used with selector in formatted text", self.token, self.tokenizer)
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        f"selector used with selector in formatted text", self.token, self.tokenizer)
+                        "selector used with selector in formatted text", self.token, self.tokenizer)
                 self.current_json["selector"] = prop
                 if not value:
                     raise JMCValueError(
-                        f"Selector cannot be false", self.token, self.tokenizer)
+                        "Selector cannot be false", self.token, self.tokenizer)
                 continue
 
             if prop.endswith(")"):
@@ -565,10 +571,10 @@ class FormattedText:
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        f"score is not allowed in this context in formatted text", self.token, self.tokenizer)
+                        "score is not allowed in this context in formatted text", self.token, self.tokenizer)
                 else:
                     raise JMCValueError(
-                        f"selector is not allowed in this context in formatted text", self.token, self.tokenizer)
+                        "selector is not allowed in this context in formatted text", self.token, self.tokenizer)
             del self.current_json["text"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
@@ -660,7 +666,7 @@ class FormattedText:
 
         if is_bracket_format:
             raise JMCValueError(
-                f"'<' was never closed in formatted text", self.token, self.tokenizer)
+                "'<' was never closed in formatted text", self.token, self.tokenizer)
         self.__push()
 
         if is_expect_color_code:
@@ -670,6 +676,13 @@ class FormattedText:
     @classmethod
     def empty(cls, tokenizer: Tokenizer,
               datapack: DataPack) -> "FormattedText":
+        """
+        Generate an empty FormattedText with empty Token
+
+        :param tokenizer: Tokenizer
+        :param datapack: Datapack
+        :return: FormattedText
+        """
         return cls('', Token.empty(), tokenizer, datapack)
 
     def __bool__(self) -> bool:
@@ -699,7 +712,13 @@ class FormattedText:
 ZERO_TO_Z_LENGTH = 36
 
 
-def __custom_hash(text: str):
+def __custom_hash(text: str) -> int:
+    """
+    Custom hash to use for hashing string to string
+
+    :param text: String to hash
+    :return: Hashed string
+    """
     hashed = 0
     for ch in text:
         hashed = (hashed * 281 ^ ord(ch) * 997) & 0xFFFFFFFF
@@ -707,6 +726,13 @@ def __custom_hash(text: str):
 
 
 def hash_string_to_string(string: str, length: int) -> str:
+    """
+    Hash a string into another string with fixed length
+
+    :param string: String to hash
+    :param length: Length of the result string
+    :return: Result string
+    """
     number: int = __custom_hash(string) % (ZERO_TO_Z_LENGTH**length)
     if number == 0:
         digits: list[int] = [0]

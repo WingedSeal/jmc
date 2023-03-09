@@ -754,7 +754,7 @@ class Tokenizer:
                     comma_separated_token) > 1 and comma_separated_token[1].string == "=":
                 if len(comma_separated_token) == 2:
                     raise JMCSyntaxException(
-                        f"Expected keyword argument after '=' in function arguments",
+                        "Expected keyword argument after '=' in function arguments",
                         comma_separated_token[1],
                         self)
                 key = comma_separated_token[0].string
@@ -808,8 +808,8 @@ class Tokenizer:
 
         return tokens
 
-    def parse_nbt(self, token: Token) -> dict[str, str]:
-        return {}
+    # def parse_nbt(self, token: Token) -> dict[str, str]:
+    #     return {}
 
     def parse_js_obj(self, token: Token) -> dict[str, Token]:
         """
@@ -850,7 +850,7 @@ class Tokenizer:
 
             if len(comma_separated_token) == 2:
                 raise JMCSyntaxException(
-                    f"Expected value after ':' in JSObject/NBT",
+                    "Expected value after ':' in JSObject/NBT",
                     comma_separated_token[1],
                     self)
             key = comma_separated_token[0].string

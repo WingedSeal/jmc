@@ -71,7 +71,7 @@ def get_pack_format(string: str) -> str:
         current_version = MinecraftVersion(*(int(x) for x in string_split))
     except ValueError:
         pprint(
-            f"Invalid Minecraft version: Non integer detected.",
+            "Invalid Minecraft version: Non integer detected.",
             Colors.FAIL)
         return ""
 
@@ -210,7 +210,7 @@ class Configuration:
         # Target
         while True:
             target_str = get_input(
-                f"Main JMC file(Leave blank for default[main.jmc]): "
+                "Main JMC file(Leave blank for default[main.jmc]): "
             )
             if target_str == "":
                 target = (

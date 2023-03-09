@@ -57,7 +57,7 @@ def variable_operation(
                                    is_load=False, lexer=datapack.lexer).parse()
         if len(func_content) > 1:
             raise JMCSyntaxException(
-                f"Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
+                "Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
             return f"execute store result score {tokens[0].string} {DataPack.var_name} {func_content[0][8:]}"
@@ -86,7 +86,7 @@ def variable_operation(
                                    is_load=False, lexer=datapack.lexer).parse()
         if len(func_content) > 1:
             raise JMCSyntaxException(
-                f"Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
+                "Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
             return f"execute store success score {tokens[0].string} {DataPack.var_name} {func_content[0][8:]}"
@@ -114,7 +114,7 @@ def variable_operation(
 
             if len(tokens) > 4:
                 raise JMCSyntaxException(
-                    f"Unexpected token", tokens[4], tokenizer)
+                    "Unexpected token", tokens[4], tokenizer)
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3], datapack, tokenizer, var=tokens[0].string, is_execute=is_execute).call()

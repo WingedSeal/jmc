@@ -304,6 +304,14 @@ class JMCFunction:
 
     def add_formatted_text_prop(self, key: str, body: SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY],
                                 is_local: bool, property_name="propertyName"):
+        """
+        Add property of FormattedText to `datapack.data`
+
+        :param key: Key of the minecraft json, (clickEvent etc.)
+        :param body: Body of the minecraft json
+        :param is_local: Whether to delete the property after one use
+        :param property_name: Parameters to access `self.args` , defaults to "propertyName"
+        """
         if self.args[property_name] in self.datapack.data.formatted_text_prop:
             raise JMCValueError(
                 f"Text's property '{self.args[property_name]}' was already defined",

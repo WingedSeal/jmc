@@ -233,6 +233,12 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
 
 
 def get_mc_uuid(seed: Any) -> str:
+    """
+    Generate UUID in minecraft syntax
+
+    :param seed: Seed for randomization
+    :return: UUID in minecraft syntax (`[I;...]`)
+    """
     random_instance = Random(seed)
 
     def rand_java_int() -> int:
