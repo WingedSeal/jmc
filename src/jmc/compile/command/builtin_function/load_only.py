@@ -1,4 +1,5 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
+from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
@@ -55,7 +56,7 @@ class PredicateLocations(JMCFunction):
     },
     name="right_click_setup"
 )
-class RightClickSetup(JMCFunction):
+class RightClickSetup(EventMixin):
     tag_id_var = "__item_id__"
 
     def call(self) -> str:
@@ -129,7 +130,7 @@ class RightClickSetup(JMCFunction):
         "onClick": ""
     }
 )
-class ItemCreate(JMCFunction):
+class ItemCreate(ItemMixin, EventMixin):
     rc_obj = {
         "carrot_on_a_stick": "__item_rc_carrot",
         "warped_fungus_on_a_stick": "__item_rc_warped"
@@ -196,7 +197,7 @@ class ItemCreate(JMCFunction):
         "nbt": "",
     }
 )
-class ItemCreateSpawnEgg(JMCFunction):
+class ItemCreateSpawnEgg(EventMixin):
     def call(self) -> str:
         mob_type = self.args["mobType"]
         spawn_egg = mob_type + "_spawn_egg"
@@ -353,7 +354,7 @@ class ItemCreateSign(JMCFunction):
     },
     name="player_on_event"
 )
-class PlayerOnEvent(JMCFunction):
+class PlayerOnEvent(EventMixin):
     def call(self) -> str:
         self.add_event(self.args['criteria'], self.args['function'])
         return ""
@@ -706,7 +707,7 @@ class GUITemplate(JMCFunction):
         "onClickAsGUI": ""
     }
 )
-class GUIRegisters(JMCFunction):
+class GUIRegisters(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
             self.raw_args["name"].token, self.tokenizer)
@@ -828,7 +829,7 @@ class GUIRegisters(JMCFunction):
         "onClickAsGUI": ""
     }
 )
-class GUIRegister(JMCFunction):
+class GUIRegister(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
             self.raw_args["name"].token, self.tokenizer)

@@ -3,8 +3,8 @@ from enum import Enum, auto
 from json import JSONDecodeError, loads
 from typing import TYPE_CHECKING, Any, Callable
 
-from ...compile.utils import convention_jmc_to_mc, is_float
-from ...compile.datapack_data import Item, SIMPLE_JSON_BODY
+from ..utils import convention_jmc_to_mc, is_float
+from ..datapack_data import Item, SIMPLE_JSON_BODY
 from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, hash_string_to_string, verify_args, Arg
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
@@ -54,8 +54,8 @@ class JMCFunction:
     __slots__ = ("token", "datapack", "tokenizer",
                  "is_execute", "var", "args",
                  "raw_args")
-    _decorated: bool = False
-    """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
+    # _decorated: bool = False
+    # """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
     """Dictionary containing all parameter and it's ArgType (Set by decorator)"""
     func_type: FuncType
@@ -87,8 +87,8 @@ class JMCFunction:
     raw_args: dict[str, Arg]
     """Dictionary containing parameter and given argument as Arg object"""
 
-    __subcls: dict[FuncType, dict[str, type["JMCFunction"]]
-                   ] = defaultdict(dict)
+    _subcls: dict[FuncType, dict[str, type["JMCFunction"]]
+                  ] = defaultdict(dict)
     """:cvar: Dictionary of (Function type and according dictionary of funtion name and a subclass)"""
 
     def __new__(cls, *args, **kwargs):
@@ -104,10 +104,10 @@ class JMCFunction:
         self.tokenizer = tokenizer
         self.is_execute = is_execute
         self.var = var
-        if not self._decorated:
-            raise NotImplementedError("Missing decorator")
-        if self.func_type is None:
-            raise NotImplementedError("Missing func_type")
+        # if not self._decorated:
+        #     raise NotImplementedError("Missing decorator")
+        # if self.func_type is None:
+        #     raise NotImplementedError("Missing func_type")
 
         args_Args = verify_args(self.arg_type,
                                 self.call_string, token, tokenizer)
@@ -181,114 +181,6 @@ class JMCFunction:
         This function will be called after initialization of the object
         """
 
-    def create_new_item(
-            self, item: "Item", modify_nbt: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
-        item_type = item.item_type
-        nbt = dict(item.raw_nbt)
-        if modify_nbt is None:
-            modify_nbt = {}
-        for key, value_token in modify_nbt.items():
-            if key in nbt:
-                raise JMCValueError(
-                    f"{key} is already inside the nbt",
-                    value_token if error_token is None else error_token,
-                    self.tokenizer)
-
-            nbt[key] = value_token
-        return Item(
-            item_type,
-            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
-            nbt
-        )
-
-    def add_event(self, criteria: str, command: str) -> None:
-        """
-        Add command that'll run on criteria event
-
-        :param criteria: Minecraft criteria
-        :param command: Command to run
-        """
-        self.add_events(criteria, [command])
-
-    def add_events(self, criteria: str, commands: list[str]) -> None:
-        """
-        Add multiple commands that'll run on criteria event
-
-        :param criteria: Minecraft criteria
-        :param commands: Commands to run
-        """
-        criteria = criteria.replace("minecraft.", "")
-        count = criteria.lower().replace(":", "_")
-        if self.is_never_used("on_event", parameters=[criteria]):
-            objective = f"on_event_{hash_string_to_string(criteria, 7)}"
-            self.datapack.add_objective(
-                objective, criteria)
-            func_call = self.datapack.add_raw_private_function(
-                "on_event", [f"scoreboard players set @s {objective} 0", *commands], count=count)
-            self.datapack.add_tick_command(
-                f"execute as @a[scores={{{objective}=1..}}] at @s run {func_call}")
-
-        else:
-            func = self.datapack.private_functions["on_event"][count]
-            func.extend(
-                commands
-            )
-
-    def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
-                    lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
-        if modify_nbt is None:
-            modify_nbt = {}
-
-        item_type = self.args[item_type_param]
-        if item_type.startswith("minecraft:"):
-            item_type = item_type[10:]
-        if self.args[lore_param]:
-            lores, _ = self.datapack.parse_list(
-                self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
-        else:
-            lores = []
-        nbt = self.tokenizer.parse_js_obj(
-            self.raw_args[nbt_param].token) if self.args[nbt_param] else {}
-
-        for key, value_token in modify_nbt.items():
-            if key in nbt:
-                raise JMCValueError(
-                    f"{key} is already inside the nbt",
-                    value_token,
-                    self.tokenizer)
-
-            nbt[key] = value_token
-
-        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
-                         for lore in lores])
-
-        if self.args[display_name_param]:
-            if "display" in nbt:
-                raise JMCValueError(
-                    "display is already inside the nbt",
-                    self.token,
-                    self.tokenizer)
-            new_token_string = "{"
-            name_ = self.format_text(
-                display_name_param,
-                is_default_no_italic=True,
-                is_allow_score_selector=False)
-            if name_:
-                new_token_string += f"""Name:{repr(name_)}"""
-            if lore_:
-                if name_:
-                    new_token_string += ","
-                new_token_string += f"""Lore:[{lore_}]"""
-            new_token_string += "}"
-            if name_ or lore_:
-                nbt["display"] = Token.empty(new_token_string)
-
-        return Item(
-            item_type,
-            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
-            nbt
-        )
-
     def call(self) -> str:
         """
         This function will be called when user call matching JMC custom function
@@ -316,11 +208,11 @@ class JMCFunction:
         :param func_type: Function type to search for
         :return: Dictionary of jmcfunction name and jmcfunction class
         """
-        if func_type not in cls.__subcls:
-            for subcls in cls.__subclasses__():
-                cls.__subcls[subcls.func_type][subcls.call_string] = subcls
+        # if func_type not in cls._subcls:
+        #     for subcls in cls.__subclasses__():
+        #         cls._subcls[subcls.func_type][subcls.call_string] = subcls
 
-        return cls.__subcls[func_type]
+        return cls._subcls[func_type]
 
     def is_never_used(self, call_string: str | None = None,
                       parameters: list[str] | None = None) -> bool:
@@ -452,6 +344,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
         cls._ignore = ignore
         cls.name = name
 
-        cls._decorated = True
+        # cls._decorated = True
+        JMCFunction._subcls[func_type][call_string] = cls
         return cls
     return decorator

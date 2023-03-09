@@ -1,5 +1,5 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function and used once"""
-
+from ..jmc_function_mixin import EventMixin
 from ...exception import JMCMissingValueError
 from ...datapack import DataPack
 from ..utils import ArgType
@@ -42,7 +42,7 @@ class PlayerFirstJoin(JMCFunction):
     },
     name="player_rejoin"
 )
-class PlayerRejoin(JMCFunction):
+class PlayerRejoin(EventMixin):
     obj = "__rejoin__"
 
     def call(self) -> str:
