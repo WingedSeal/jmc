@@ -274,8 +274,25 @@ class FuncContent:
                 append_commands(
                     self.__commands, self.lexer.clean_up_paren_token(token, self.tokenizer))
         elif token.token_type == TokenType.STRING:
+            if is_connected(
+                    token, self.command[key_pos - 1]) and self.command[key_pos - 1].token_type == TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    "Expected whitespace between string and a keyword", self.command[key_pos - 1], self.tokenizer, col_length=True)
             append_commands(self.__commands, dumps(token.string))
-        elif token.token_type in {TokenType.OPERATOR, TokenType.KEYWORD} and is_connected(token, self.command[key_pos - 1]):
+        elif (
+            token.token_type == TokenType.KEYWORD
+            and
+            is_connected(token, self.command[key_pos - 1])
+            and
+            self.command[key_pos - 1].token_type == TokenType.STRING
+        ):
+            raise JMCSyntaxException(
+                "Expected whitespace between string and a keyword", self.command[key_pos - 1], self.tokenizer, col_length=True)
+        elif (
+            token.token_type in {TokenType.OPERATOR, TokenType.KEYWORD}
+            and
+            is_connected(token, self.command[key_pos - 1])
+        ):
             self.__commands[-1] += token.string
         else:
             append_commands(self.__commands, token.string)
