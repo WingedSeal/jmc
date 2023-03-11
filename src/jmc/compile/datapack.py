@@ -170,7 +170,7 @@ class DataPack:
         """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
-        self._scoreboards: dict[str, str] = {
+        self.scoreboards: dict[str, str] = {
             self.var_name: "dummy"
         }
         """Minecraft scoreboards that are going to be created"""
@@ -209,10 +209,10 @@ class DataPack:
         :param criteria: Criteria of scoreboard, defaults to 'dummy'
         :raises ValueError: If scoreboard already exists
         """
-        if objective in self._scoreboards and self._scoreboards[objective] != criteria:
+        if objective in self.scoreboards and self.scoreboards[objective] != criteria:
             raise ValueError(
-                f"Conflict on adding scoreboard, '{objective}' objective with '{self._scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
-        self._scoreboards[objective] = criteria
+                f"Conflict on adding scoreboard, '{objective}' objective with '{self.scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
+        self.scoreboards[objective] = criteria
 
     def get_count(self, name: str) -> str:
         """
@@ -359,7 +359,8 @@ class DataPack:
         :return: List of minecraft commands(string)
         """
         if isinstance(token, list):
-            return self.lexer._parse_func_content(tokenizer, [token], is_load=False)
+            return self.lexer._parse_func_content(
+                tokenizer, [token], is_load=False)
         return self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
@@ -408,7 +409,7 @@ class DataPack:
             self.add_objective(self.int_name)
         self.loads[0:0] = [
             *[f"scoreboard objectives add {objective} {criteria}" for objective,
-                criteria in self._scoreboards.items()],
+                criteria in self.scoreboards.items()],
             *[f"scoreboard players set {n} {self.int_name} {n}" for n in self.ints],
         ]
         if self.loads:
@@ -540,7 +541,7 @@ class DataPack:
     VAR_NAME = {self.var_name},
     INT_NAME = {self.int_name}
 
-    objectives = {dumps(self._scoreboards, indent=4)}
+    objectives = {dumps(self.scoreboards, indent=4)}
     ints = {self.ints!r}
     functions = {dumps(self.functions, indent=4, cls=FunctionEncoder)}
     jsons = {dumps(self.jsons, indent=4)}

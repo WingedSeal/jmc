@@ -1,6 +1,6 @@
 """Module handling jmc's header"""
 from pathlib import Path
-from typing import Any, Callable, TYPE_CHECKING, Protocol
+from typing import Any, Callable, TYPE_CHECKING
 
 from .utils import SingleTon
 from .log import Logger

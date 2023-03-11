@@ -309,7 +309,7 @@ def __parse_header(header_str: str, file_name: str,
                     raise HeaderSyntaxException(
                         "'#uninstall' requires an existing 'uninstall' function", _file_name, _line, _line_str, suggestion="Add 'function uninstall() {}' to a jmc file")
                 datapack.functions["uninstall"].extend([
-                    *(f"scoreboard objectives remove {obj}" for obj in datapack._scoreboards),
+                    *(f"scoreboard objectives remove {obj}" for obj in datapack.scoreboards),
                     *(f"scoreboard objectives remove {obj}" for obj in datapack.data.scoreboards),
                     *(f"team remove {team}" for team in datapack.data.teams),
                     *(f"bossbar remove {bossbar}" for bossbar in datapack.data.bossbars)

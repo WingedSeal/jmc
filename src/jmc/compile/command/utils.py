@@ -572,9 +572,8 @@ class FormattedText:
                 if "score" in self.current_json:
                     raise JMCValueError(
                         "score is not allowed in this context in formatted text", self.token, self.tokenizer)
-                else:
-                    raise JMCValueError(
-                        "selector is not allowed in this context in formatted text", self.token, self.tokenizer)
+                raise JMCValueError(
+                    "selector is not allowed in this context in formatted text", self.token, self.tokenizer)
             del self.current_json["text"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}

@@ -441,7 +441,7 @@ class Tokenizer:
         elif char == self.quote and not self.is_escaped:
             if self.quote == Quote.BACKTICK:
                 self.token_str: str = literal_eval(
-                    '"""' + self.token_str[1:-1] + '"""')
+                    '"""\n' + self.token_str[1:-1] + '\n"""')[1:-1]
                 self.__parse_multiline_string()
             else:
                 self.token_str: str = literal_eval(self.token_str)

@@ -91,7 +91,7 @@ def variable_operation(
             # len("execute ") = 8
             return f"execute store success score {tokens[0].string} {DataPack.var_name} {func_content[0][8:]}"
         return f"execute store success score {tokens[0].string} {DataPack.var_name} run {func_content[0]}"
-    elif operator in {"*=", "+=", "-=", "*=", "/=", "%=", "++", "--", "><", "->", ">", "<", "="}:
+    elif operator in {"+=", "-=", "*=", "/=", "%=", "++", "--", "><", "->", ">", "<", "="}:
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer, suggestion="Expected integer or variable or target selector")
