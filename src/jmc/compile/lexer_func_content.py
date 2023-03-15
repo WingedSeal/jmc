@@ -7,7 +7,7 @@ from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .exception import JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
-from .utils import convention_jmc_to_mc, is_number, is_connected, search_to_string
+from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS
 from .header import Header
@@ -129,6 +129,9 @@ class FuncContent:
             if self.command[0].string == "function" and len(self.command) == 4:
                 raise JMCSyntaxException(
                     "Function declaration found in function", self.command[0], self.tokenizer)
+            if is_decorator(self.command[0].string):
+                raise JMCSyntaxException(
+                    "Decorated function declaration found in function", self.command[0], self.tokenizer)
             if self.command[0].string == "import":
                 raise JMCSyntaxException(
                     "Importing found in function", self.command[0], self.tokenizer)
@@ -238,17 +241,29 @@ class FuncContent:
                     "'run' keyword found outside 'execute' command", token, self.tokenizer)
             self.is_expect_command = True
 
-        if (
-            token.token_type == TokenType.KEYWORD and
-            (token.string in FIRST_ARGUMENTS or token.string in Header().commands) and
+        __is_first_arg = (
+            token.string in FIRST_ARGUMENTS
+            or
+            token.string in Header().commands
+            or is_decorator(token.string)
+        )
+        __is_not_exception = (
             len(self.__commands) > command_pos and
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
                 self.__commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
-            ) and
-            not is_connected(token, self.command[key_pos - 1]) and
-            token.string not in Header().dels
+            )
+        )
+        __is_not_connected = not is_connected(token, self.command[key_pos - 1])
+        __is_not_deleted = token.string not in Header().dels
+
+        if (
+            token.token_type == TokenType.KEYWORD and
+            __is_first_arg and
+            __is_not_exception and
+            __is_not_connected and
+            __is_not_deleted
         ):
             raise JMCSyntaxException(
                 f"Keyword({token.string}) at line {token.line} col {token.col} is recognized as a command.\nExpected semicolon(;)", self.command[key_pos - 1], self.tokenizer, col_length=True)
@@ -349,7 +364,7 @@ class FuncContent:
             len(self.command) == key_pos + 4
             and self.command[key_pos + 2].token_type == TokenType.PAREN_ROUND
             and self.command[key_pos + 3].token_type == TokenType.PAREN_CURLY
-        ):
+        ) or is_decorator(token.string):
             if self.is_execute:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)

@@ -4,7 +4,7 @@ from ast import literal_eval
 from enum import Enum
 import re
 
-from .utils import is_connected
+from .utils import is_connected, is_decorator
 from .header import MacroFactory, Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
@@ -477,7 +477,7 @@ class Tokenizer:
             if is_paren and expect_semicolon and (
                 self.keywords[0].string in TERMINATE_LINE or (
                     self.keywords[0].string == "execute" and self.keywords[-2].string == "run"
-                )
+                ) or is_decorator(self.keywords[0].string)
             ):
                 self.append_keywords()
             return True
@@ -591,7 +591,7 @@ class Tokenizer:
                 self.append_keywords()
             else:
                 raise JMCSyntaxException(
-                    "Expected semicolon(;) at the end of the file", self.keywords[-1], self, col_length=True)
+                    "Expected semicolon(;)", self.keywords[-1], self, col_length=True)
 
         if not expect_semicolon:
             if self.token_str != "":

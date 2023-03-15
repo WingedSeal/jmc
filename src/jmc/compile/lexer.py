@@ -4,12 +4,13 @@ from json import loads, JSONDecodeError, dumps
 from typing import TYPE_CHECKING
 
 
+from .decorator_parse import DECORATORS
 from .header import Header
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function
 from .log import Logger
-from .utils import convention_jmc_to_mc, search_to_string
+from .utils import convention_jmc_to_mc, is_decorator, search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -156,9 +157,13 @@ class Lexer:
                 )
             ):
                 raise JMCSyntaxException(
-                    "'function' expect Minecraft syntax('namespace:folder/function') or JMC syntax('function name() {}')",
+                    "'function' expected Minecraft syntax('namespace:folder/function') or JMC syntax('function name() {}')",
                     command[0],
                     tokenizer)
+            elif is_decorator(command[0].string):
+                self.parse_current_load()
+                self.parse_decorated_function(
+                    tokenizer, command, file_path_str)
             elif command[0].string == "new":
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
@@ -211,8 +216,37 @@ class Lexer:
 
         self.parse_current_load()
 
+    def parse_decorated_function(self, tokenizer: Tokenizer,
+                                 command: list[Token], file_path_str: str, prefix: str = ''):
+        decorator_name = command[0].string[1:]
+        if decorator_name not in DECORATORS:
+            raise JMCSyntaxException(
+                f"Unrecognized decorator '{decorator_name}'",
+                command[0],
+                tokenizer)
+        jmc_decorator = DECORATORS[decorator_name]
+        if len(command) < 5:
+            raise JMCSyntaxException(
+                "Function decorator expected '@decorator_name function name() {}' or '@decorator_name() function name() {}'",
+                command[0],
+                tokenizer)
+        if command[1].token_type == TokenType.PAREN_ROUND:
+            function_commands = command[2:]
+            args = command[1]
+        else:
+            function_commands = command[1:]
+            args = None
+        jmc_function, func_path = self.parse_func(
+            tokenizer,
+            function_commands,
+            file_path_str,
+            prefix,
+            is_save_to_datapack=False)
+        jmc_decorator(args).modify(jmc_function)
+        self.datapack.functions[func_path] = jmc_function
+
     def parse_func(self, tokenizer: Tokenizer,
-                   command: list[Token], file_path_str: str, prefix: str = '') -> None:
+                   command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
         """
         Parse a function definition in form of list of token
 
@@ -220,6 +254,8 @@ class Lexer:
         :param command: List of token inside a function definition
         :param file_path_str: File path to current JMC function as string
         :param prefix: Prefix of function(for Class feature), defaults to ''
+        :param is_save_to_datapack: Whether to save the result function into the datapack, defaults to True
+        :return: A tuple of Function and its path string
         :raises JMCSyntaxException: Function name isn't keyword token
         :raises JMCSyntaxException: Function name is not followed by paren_round token
         :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
@@ -258,8 +294,11 @@ class Lexer:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
-        self.datapack.functions[func_path] = Function(self.parse_func_content(
+        return_value = Function(self.parse_func_content(
             func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
+        if is_save_to_datapack:
+            self.datapack.functions[func_path] = return_value
+        return return_value, func_path
 
     def parse_new(self, tokenizer: Tokenizer,
                   command: list[Token], prefix: str = ''):
@@ -458,6 +497,9 @@ class Lexer:
         for command in tokenizer.programs:
             if command[0].string == "function" and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
+            elif is_decorator(command[0].string):
+                self.parse_decorated_function(
+                    tokenizer, command, file_path_str)
             elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":
