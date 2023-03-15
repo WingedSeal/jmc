@@ -165,7 +165,7 @@ class Lexer:
             elif command[0].string == "class":
                 self.parse_current_load()
                 self.parse_class(tokenizer, command, file_path_str)
-            elif command[0].string == "@import":
+            elif command[0].string == "import":
                 self.parse_current_load()
                 if len(command) < 2:
                     raise JMCSyntaxException(
@@ -462,7 +462,7 @@ class Lexer:
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":
                 self.parse_class(tokenizer, command, file_path_str, prefix)
-            elif command[0].string == "@import":
+            elif command[0].string == "import":
                 raise JMCSyntaxException(
                     "Importing is not supported in class", command[0], tokenizer)
             else:

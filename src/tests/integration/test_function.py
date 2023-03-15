@@ -152,19 +152,19 @@ class TestFeatures(unittest.TestCase):
     def test_import_error(self):
         with self.assertRaises(JMCFileNotFoundError):
             JMCTestPack().set_jmc_file("""
-@import "foo";
+import "foo";
             """).build()
         with self.assertRaises(JMCFileNotFoundError):
             JMCTestPack().set_jmc_file("""
-@import "foo.jmc";
+import "foo.jmc";
             """).build()
         with self.assertRaises(JMCSyntaxException):
             JMCTestPack().set_jmc_file("""
-@import;
+import;
             """).build()
         with self.assertRaises(JMCSyntaxException):
             JMCTestPack().set_jmc_file("""
-@import foo;
+import foo;
             """).build()
 
     def test_comment(self):

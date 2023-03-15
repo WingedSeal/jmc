@@ -41,7 +41,7 @@ FIRST_ARGUMENTS = {
     *EXECUTE_EXCLUDED_COMMANDS,
     *VANILLA_COMMANDS,
     "class",
-    "@import",
+    "import",
     "new"
 }
 """Set of all vanilla commands and JMC custom syntax"""
@@ -129,7 +129,7 @@ class FuncContent:
             if self.command[0].string == "function" and len(self.command) == 4:
                 raise JMCSyntaxException(
                     "Function declaration found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == "@import":
+            if self.command[0].string == "import":
                 raise JMCSyntaxException(
                     "Importing found in function", self.command[0], self.tokenizer)
 
@@ -343,7 +343,7 @@ class FuncContent:
         if self.__is_flow_control_command(key_pos, token):
             return True
 
-        if token.string in {"new", "class", "@import"} or (
+        if token.string in {"new", "class", "import"} or (
             token.string == "function"
             and
             len(self.command) == key_pos + 4
