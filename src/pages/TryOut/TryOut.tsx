@@ -37,7 +37,6 @@ const TryOut = () => {
         let namespace = params.get("namespace");
         let jmc = params.get("jmc");
         let header = params.get("header");
-        console.log(namespace);
         if (namespace)
             namespaceInput.current!.value =
                 lzString.decompressFromEncodedURIComponent(namespace);
