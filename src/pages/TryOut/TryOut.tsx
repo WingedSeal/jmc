@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { loadPyodide, PyodideInterface } from "pyodide";
 import CodeBlock from "../../components/CodeBlock";
 import { useSearchParams } from "react-router-dom";
-import { Buffer } from "buffer";
-
+import lzString from "lz-string";
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.22.1/full/",
@@ -38,18 +37,16 @@ const TryOut = () => {
         let namespace = params.get("namespace");
         let jmc = params.get("jmc");
         let header = params.get("header");
+        console.log(namespace);
         if (namespace)
-            namespaceInput.current!.value = decodeURI(
-                Buffer.from(namespace, "base64").toString()
-            );
+            namespaceInput.current!.value =
+                lzString.decompressFromEncodedURIComponent(namespace);
         if (jmc)
-            contentTextArea.current!.value = decodeURI(
-                Buffer.from(jmc, "base64").toString()
-            );
+            contentTextArea.current!.value =
+                lzString.decompressFromEncodedURIComponent(jmc);
         if (header)
-            contentHeaderArea.current!.value = decodeURI(
-                Buffer.from(header, "base64").toString()
-            );
+            contentHeaderArea.current!.value =
+                lzString.decompressFromEncodedURIComponent(header);
         if (namespace || jmc || header) compile();
         setParams(new URLSearchParams());
         getPyodide().then((pyodide) => {
@@ -223,27 +220,27 @@ except EXCEPTIONS as error:
                         <button
                             className="absolute top-1/2 left-full -translate-y-1/2 translate-x-1/4 md:translate-x-1/2 bg-slate-900 text-tertiary p-2 tracking-wide rounded-md hover:scale-105 transition-all active:scale-95"
                             onClick={() => {
-                                let namespace = encodeURI(
-                                    Buffer.from(
+                                let namespace =
+                                    lzString.compressToEncodedURIComponent(
                                         namespaceInput.current!.value
-                                    ).toString("base64")
-                                );
-                                let jmc = encodeURI(
-                                    Buffer.from(
+                                    );
+                                let jmc =
+                                    lzString.compressToEncodedURIComponent(
                                         contentTextArea.current!.value
-                                    ).toString("base64")
-                                );
-                                let header = encodeURI(
-                                    Buffer.from(
+                                    );
+                                let header =
+                                    lzString.compressToEncodedURIComponent(
                                         contentHeaderArea.current!.value
-                                    ).toString("base64")
-                                );
-                                if (namespace)
+                                    );
+                                const ENCODED_EMPTY_STR = "Q";
+                                if (namespace !== ENCODED_EMPTY_STR)
                                     params.set("namespace", namespace);
                                 else params.delete("namespace");
-                                if (jmc) params.set("jmc", jmc);
+                                if (jmc !== ENCODED_EMPTY_STR)
+                                    params.set("jmc", jmc);
                                 else params.delete("jmc");
-                                if (header) params.set("header", header);
+                                if (header !== ENCODED_EMPTY_STR)
+                                    params.set("header", header);
                                 else params.delete("header");
                                 const paramsString = params.toString();
                                 if (paramsString.length > 1900) {
