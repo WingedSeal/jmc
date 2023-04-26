@@ -510,7 +510,7 @@ class TimerAdd(JMCFunction):
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
         if mode in {"runOnce",
-                    "runTick"} and ("function" not in self.raw_args or self.raw_args["function"]) is None:
+                    "runTick"} and ("function" not in self.raw_args or self.raw_args["function"] is None):
             raise JMCMissingValueError("function", self.token, self.tokenizer)
         if mode == "none" and self.raw_args["function"] is not None:
             raise JMCSyntaxException(
@@ -537,20 +537,17 @@ class TimerAdd(JMCFunction):
         if mode == "runOnce":
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute {if_selector} {obj} matches 0 {at_at_s}run {self.datapack.add_raw_private_function(
+                f"""execute {if_selector} {obj} matches 0 {at_at_s}run {self.datapack.add_private_function(
                     self.name,
-                    [
-                        f"scoreboard players set {at_s} {obj} 0",
-                        self.args["function"]
-                    ],
+                    self.args["function"],
                     count
                 )}""")
         elif mode == "runTick":
             count = self.datapack.get_count(self.name)
             main_func.append(
-                f"""execute {unless_selector} {obj} matches 1.. {at_at_s}run {self.datapack.add_raw_private_function(
+                f"""execute {unless_selector} {obj} matches 1.. {at_at_s}run {self.datapack.add_private_function(
                     self.name,
-                    [self.args["function"]],
+                    self.args["function"],
                     count
                 )}""")
 
