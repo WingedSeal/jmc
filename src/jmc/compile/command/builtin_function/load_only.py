@@ -510,9 +510,9 @@ class TimerAdd(JMCFunction):
                 f"Avaliable modes for {self.call_string} are 'runOnce', 'runTick' and 'none' (got '{mode}')", self.raw_args["mode"].token, self.tokenizer, suggestion="'runOnce' run the commands once after the timer is over.\n'runTick' run the commands every tick if timer is over.\n'none' do not run any command.")
 
         if mode in {"runOnce",
-                    "runTick"} and ("function" not in self.raw_args or self.raw_args["function"] is None):
+                    "runTick"} and ("function" not in self.raw_args):
             raise JMCMissingValueError("function", self.token, self.tokenizer)
-        if mode == "none" and self.raw_args["function"] is not None:
+        if mode == "none" and "function" in self.raw_args:
             raise JMCSyntaxException(
                 f"'function' is provided in 'none' mode {self.call_string}", self.raw_args["function"].token, self.tokenizer)
         self.datapack.add_objective(obj)

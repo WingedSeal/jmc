@@ -71,8 +71,8 @@ def is_connected(current_token: "Token", previous_token: "Token") -> bool:
     return (
         previous_token.line == current_token.line and
         current_token.col in {
-            previous_token.length,
-            previous_token._macro_length
+            previous_token.col + previous_token.length,
+            previous_token.col + previous_token._macro_length
         }
     )
 
