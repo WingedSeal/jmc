@@ -125,7 +125,7 @@ def variable_operation(
 
         if len(tokens) > 3:
             if (  # If rvar is obj:selector
-                len(tokens) == 5
+                len(tokens) >= 5
                 and
                 tokens[3].token_type == TokenType.OPERATOR
                 and
@@ -133,7 +133,12 @@ def variable_operation(
                 and
                 tokens[4].token_type == TokenType.KEYWORD
             ):
-                right_token = tokenizer.merge_tokens(tokens[2:5])
+                if len(tokens) == 5:
+                    right_token = tokenizer.merge_tokens(tokens[2:5])
+                elif len(tokens) == 6:
+                    tokens[5] = Token(tokens[5].token_type, tokens[5].line, tokens[5].col, datapack.lexer.clean_up_paren_token(
+                        tokens[5], tokenizer))
+                    right_token = tokenizer.merge_tokens(tokens[2:6])
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
