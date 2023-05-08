@@ -250,7 +250,7 @@ class HardcodeSwitch(JMCFunction):
                 error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
-        return parse_switch(scoreboard_player, func_contents,
+        return parse_switch(scoreboard_player, func_contents, 1,
                             self.datapack, self.name)
 
 

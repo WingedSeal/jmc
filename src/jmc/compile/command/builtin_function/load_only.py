@@ -419,7 +419,7 @@ class TriggerSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
             run = [
                 parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (obj, "@s")), func_contents, self.datapack, self.name),
+                    PlayerType.SCOREBOARD, (obj, "@s")), func_contents, 1, self.datapack, self.name),
             ]
         else:
             run = []

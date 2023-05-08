@@ -191,7 +191,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
+                 func_contents: list[list[str]], start: int, datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -202,7 +202,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     :return: Minecraft function call to initiate switch case
     """
     count = datapack.get_count(name)
-    __parse_switch_binary(1, len(func_contents), count,
+    __parse_switch_binary(start, len(func_contents) + start - 1, count,
                           datapack, func_contents, scoreboard_player, name)
     return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{count}"
 
@@ -231,7 +231,8 @@ def switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_count = 1
+    case_count = None;
+    case_start = None;
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
     if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
@@ -251,6 +252,10 @@ def switch(command: list[Token], datapack: DataPack,
                     "Expected case number", tokens[1], tokenizer)
 
             count = int(count_str)
+            if case_count == None:
+                case_count = count
+            if case_start == None:
+                case_start = case_count
             if count != case_count:
                 raise JMCSyntaxException(
                     f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
@@ -291,7 +296,7 @@ def switch(command: list[Token], datapack: DataPack,
         raise JMCSyntaxException(
             "Unexpected integer in switch case", tokens[0], tokenizer)
 
-    return parse_switch(scoreboard_player, func_contents, datapack)
+    return parse_switch(scoreboard_player, func_contents, case_start, datapack)
 
 
 FOR_NAME = "for_loop"
