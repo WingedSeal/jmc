@@ -26,6 +26,61 @@ class ScoreboardPlayer:
     """Contains either integer or (objective and selector)"""
 
 
+def is_obj_selector(tokens: list[Token], start_index: int = 0) -> bool:
+    return (
+        len(tokens) >= start_index + 3
+        and
+        tokens[start_index].token_type == TokenType.KEYWORD
+        and
+        tokens[start_index + 1].token_type == TokenType.OPERATOR
+        and
+        tokens[start_index + 1].string == ":"
+        and
+        tokens[start_index + 2].token_type == TokenType.KEYWORD
+    )  # or (
+    #     len(tokens) >= start_index + 4
+    #     and
+    #     tokens[start_index].token_type == TokenType.KEYWORD
+    #     and
+    #     tokens[start_index + 1].token_type == TokenType.OPERATOR
+    #     and
+    #     tokens[start_index + 1].string == ":"
+    #     and
+    #     tokens[start_index + 2].token_type == TokenType.KEYWORD
+    #     and
+    #     tokens[start_index + 3].token_type == TokenType.PAREN_SQUARE
+    # )
+
+
+def merge_obj_selector(tokens: list[Token], tokenizer: Tokenizer,
+                       datapack: DataPack, start_index: int = 0) -> Token:
+    """
+    Merge objective:selector[] into one token
+
+    :param tokens: List of tokens
+    :param tokenizer: Tokenizer
+    :param datapack: Datapack
+    :param start_index: Index of the first token(keyword) in objective:selector[], defaults to 0
+    :raises ValueError: Impossible tokens array length (merge_obj_selector used without is_obj_selector)
+    :return: Merged token
+    """
+    if len(tokens) >= start_index + \
+            4 and tokens[start_index + 3].token_type == TokenType.PAREN_SQUARE:
+        tokens[start_index + 3] = Token(tokens[start_index + 3].token_type, tokens[start_index + 3].line, tokens[start_index + 3].col, datapack.lexer.clean_up_paren_token(
+            tokens[start_index + 3], tokenizer))
+        return_value = tokenizer.merge_tokens(
+            tokens[start_index:start_index + 4])
+        del tokens[start_index + 1:start_index + 4]
+        return return_value
+    elif len(tokens) >= start_index + 3:
+        return_value = tokenizer.merge_tokens(
+            tokens[start_index:start_index + 3])
+        del tokens[start_index + 1:start_index + 3]
+        return return_value
+    raise ValueError(
+        "Impossible tokens array length (merge_obj_selector used without is_obj_selector)")
+
+
 def find_scoreboard_player_type(
         token: Token, tokenizer: Tokenizer, allow_integer: bool = True) -> ScoreboardPlayer:
     """
