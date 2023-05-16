@@ -147,7 +147,7 @@ SWITCH_CASE_NAME = "switch_case"
 
 
 def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
-                          func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str) -> None:
+                          func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str, start_at: int = 1) -> None:
     """
     For recursion of JMC switch-case's binary tree
 
@@ -164,7 +164,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
         raise ValueError("min_ is more than max_ in __parse_switch_binary")
     if max_ == min_:
         datapack.add_raw_private_function(
-            name, func_contents[min_ - 1], count)
+            name, func_contents[min_ - start_at], count)
     else:
         count_less = datapack.get_count(name)
         count_more = datapack.get_count(name)
@@ -185,13 +185,13 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
             ], count)
 
         __parse_switch_binary(min_, half1, count_less,
-                              datapack, func_contents, scoreboard_player, name)
+                              datapack, func_contents, scoreboard_player, name, start_at)
         __parse_switch_binary(half2, max_, count_more,
-                              datapack, func_contents, scoreboard_player, name)
+                              datapack, func_contents, scoreboard_player, name, start_at)
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], start: int, datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
+                 func_contents: list[list[str]], start_at: int, datapack: DataPack, name: str = SWITCH_CASE_NAME) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -202,8 +202,8 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     :return: Minecraft function call to initiate switch case
     """
     count = datapack.get_count(name)
-    __parse_switch_binary(start, len(func_contents) + start - 1, count,
-                          datapack, func_contents, scoreboard_player, name)
+    __parse_switch_binary(start_at, len(func_contents) + start_at - 1, count,
+                          datapack, func_contents, scoreboard_player, name, start_at)
     return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{count}"
 
 
@@ -246,8 +246,12 @@ def switch(command: list[Token], datapack: DataPack,
             if len(tokens) == 1:
                 raise JMCSyntaxException(
                     "Expected case number", tokens[0], tokenizer, col_length=True)
-            count_str = tokens[1].string
-            if not count_str.isalnum():
+            if tokens[1].string == "-":
+                count_str = tokens[1].string + tokens[2].string
+                tokens.pop(2)
+            else:
+                count_str = tokens[1].string
+            if not count_str.lstrip('-').isalnum():
                 raise JMCSyntaxException(
                     "Expected case number", tokens[1], tokenizer)
 
