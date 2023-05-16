@@ -171,7 +171,7 @@ def variable_operation(
                 return f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value}"
             if operator == "-=":
                 if scoreboard_player.value < 0:  # type: ignore
-                    return f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value*1}"
+                    return f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value*-1}"
                 return f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value}"
             if operator == "=":
                 return f"scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}"
