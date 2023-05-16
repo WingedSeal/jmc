@@ -246,8 +246,12 @@ def switch(command: list[Token], datapack: DataPack,
             if len(tokens) == 1:
                 raise JMCSyntaxException(
                     "Expected case number", tokens[0], tokenizer, col_length=True)
-            count_str = tokens[1].string
-            if not count_str.isalnum():
+            if tokens[1].string == "-":
+                count_str = tokens[1].string + tokens[2].string
+                tokens.pop(2)
+            else:
+                count_str = tokens[1].string
+            if not count_str.lstrip('-').isalnum():
                 raise JMCSyntaxException(
                     "Expected case number", tokens[1], tokenizer)
 
