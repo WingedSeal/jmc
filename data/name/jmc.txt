@@ -1,0 +1,6 @@
+LOAD=__load__
+TICK=__tick__
+PRIVATE=__private__
+VAR=__variable__
+INT=__int__
+STORAGE=__storage__

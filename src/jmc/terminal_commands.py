@@ -14,7 +14,7 @@ from .terminal.utils import RestartException, error_report, get_input, handle_ex
 from .terminal import pprint, Colors, GlobalData, add_command
 from .compile import compile_jmc, Logger, EXCEPTIONS, get_debug_log, get_info_log
 
-global_data = GlobalData()
+global_data: GlobalData = GlobalData()
 logger = Logger(__name__)
 
 NEW_LINE = "\n"

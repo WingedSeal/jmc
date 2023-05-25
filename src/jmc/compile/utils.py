@@ -30,7 +30,7 @@ class SingleTon(metaclass=SingleTonMeta):
     :raises TypeError: Instantiated directly
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         pass
 
     def __new__(cls, *args, **kwargs):

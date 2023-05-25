@@ -213,9 +213,7 @@ class Configuration:
                 "Main JMC file(Leave blank for default[main.jmc]): "
             )
             if target_str == "":
-                target = (
-                    self.global_data.cwd / "main.jmc"
-                ).resolve()
+                target = self._default_target()
                 break
             if not target_str.endswith(".jmc"):
                 pprint(
@@ -237,7 +235,7 @@ class Configuration:
                 "Output directory(Leave blank for default[current directory]): "
             )
             if output_str == "":
-                output = self.global_data.cwd.resolve()
+                output = self._default_output()
                 break
             try:
                 output = Path(output_str).resolve()
@@ -249,6 +247,12 @@ class Configuration:
                 continue
             break
         self.output = output
+
+    def _default_output(self):
+        return self.global_data.cwd.resolve()
+
+    def _default_target(self):
+        return (self.global_data.cwd / "main.jmc").resolve()
 
     def __bool__(self) -> bool:
         return self.is_configed
