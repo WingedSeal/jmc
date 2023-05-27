@@ -85,13 +85,12 @@ def custom_condition(
         if len(tokens) > 2 and is_obj_selector(tokens[2:]):
             tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
-            # if tokens[3].token_type == TokenType.OPERATOR and tokens[4].token_type == TokenType.KEYWORD:
-            #     tokens[2] = tokenizer.merge_tokens(tokens[2:5])
-            #     del tokens[4]
-            #     del tokens[3]
-            # else:
-            raise JMCSyntaxException(
-                f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+            if tokens[2].string == "-":
+                tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+                del tokens[3]
+            else:
+                raise JMCSyntaxException(
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
 
         first_token, operator_token, second_token = tokens
         if operator_token.token_type == TokenType.OPERATOR:
