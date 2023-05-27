@@ -8,7 +8,7 @@ from ...compile.utils import is_connected
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
-from .utils import find_scoreboard_player_type, PlayerType
+from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
 from .jmc_function import JMCFunction, FuncType
 
 from .builtin_function import bool_function
@@ -70,23 +70,28 @@ def custom_condition(
     :param datapack: Datapack object
     :return: Condition object parsed from list of tokens
     """
-    if tokens[0].token_type == TokenType.KEYWORD and tokens[0].string.startswith(
-            DataPack.VARIABLE_SIGN):
 
+    if tokens[0].string.startswith(
+            DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
         if len(tokens) == 1:
             return Condition(
                 f"score {tokens[0].string} {DataPack.var_name} matches 1..", True)
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
+
+        if is_obj_selector(tokens):
+            tokens[0] = merge_obj_selector(tokens, tokenizer, datapack)
+        if len(tokens) > 2 and is_obj_selector(tokens[2:]):
+            tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
-            if tokens[3].token_type == TokenType.OPERATOR and tokens[4].token_type == TokenType.KEYWORD:
-                tokens[2] = tokenizer.merge_tokens(tokens[2:5])
-                del tokens[4]
-                del tokens[3]
-            else:
-                raise JMCSyntaxException(
-                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+            # if tokens[3].token_type == TokenType.OPERATOR and tokens[4].token_type == TokenType.KEYWORD:
+            #     tokens[2] = tokenizer.merge_tokens(tokens[2:5])
+            #     del tokens[4]
+            #     del tokens[3]
+            # else:
+            raise JMCSyntaxException(
+                f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
 
         first_token, operator_token, second_token = tokens
         if operator_token.token_type == TokenType.OPERATOR:

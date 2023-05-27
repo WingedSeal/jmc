@@ -1,1 +1,0 @@
-scoreboard objectives add __variable__ dummy
