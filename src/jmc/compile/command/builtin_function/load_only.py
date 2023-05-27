@@ -93,7 +93,7 @@ class RightClickSetup(EventMixin):
 
             main_func.append(
                 f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, self.name)}""")
+                    PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, name=self.name)}""")
         else:
             main_func.append(
                 f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
@@ -419,7 +419,7 @@ class TriggerSetup(JMCFunction):
                         [f"function {self.datapack.namespace}:{func}"])
             run = [
                 parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (obj, "@s")), func_contents, 1, self.datapack, self.name),
+                    PlayerType.SCOREBOARD, (obj, "@s")), func_contents, self.datapack, self.name),
             ]
         else:
             run = []

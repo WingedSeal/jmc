@@ -229,12 +229,12 @@ class HardcodeRepeatLists(JMCFunction):
 )
 class HardcodeSwitch(JMCFunction):
     def call(self) -> str:
-        begin_at = int(self.args["begin_at"])
+        start_at = int(self.args["begin_at"])
         count = int(self.args["count"])
         func_contents: list[list[str]] = []
         scoreboard_player = find_scoreboard_player_type(
             self.raw_args["switch"].token, self.tokenizer)
-        for i in range(begin_at, count + 1):
+        for i in range(start_at, count + 1):
             try:
                 func_contents.append(self.datapack.parse_function_token(
                     Token(
@@ -255,8 +255,8 @@ class HardcodeSwitch(JMCFunction):
                 error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
-        return parse_switch(scoreboard_player, func_contents, begin_at,
-                            self.datapack, self.name)
+        return parse_switch(scoreboard_player, func_contents,
+                            self.datapack, self.name, start_at)
 
 
 @func_property(
