@@ -231,8 +231,8 @@ def switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_count = 0
-    case_start = 0
+    case_count = None
+    case_start = None
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
     if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
@@ -256,9 +256,9 @@ def switch(command: list[Token], datapack: DataPack,
                     "Expected case number", tokens[1], tokenizer)
 
             count = int(count_str)
-            if not case_count:
+            if case_count is None:
                 case_count = count
-            if not case_start:
+            if case_start is None:
                 case_start = case_count
             if count != case_count:
                 raise JMCSyntaxException(
