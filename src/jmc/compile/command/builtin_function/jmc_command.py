@@ -338,6 +338,66 @@ class ParticleCircle(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.sphere",
+    arg_type={
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_sphere",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleSphere(JMCFunction):
+    def draw(self, radius: float,
+             spread: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param radius: Radius of the sphere
+        :param spread: How close are particles to each other
+        :return: List of coordinate for each particles
+        """
+        points = []
+        angle = 2 * math.pi / spread
+        for theta in drange(0, spread, angle):
+            for phi in drange(0, spread, angle):
+                points.append((radius * math.sin(theta) * math.cos(phi), radius * math.cos(theta), radius * math.sin(theta) * math.sin(phi)))
+        return points
+
+    def call(self) -> str:
+        if self.args["mode"] not in {"force", "normal"}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    float(self.args["radius"]),
+                    int(self.args["spread"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="Particle.square",
     arg_type={
         "particle": ArgType.STRING,
