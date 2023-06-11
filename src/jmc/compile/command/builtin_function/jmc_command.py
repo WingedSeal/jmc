@@ -568,6 +568,35 @@ class ParticleSpiral(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.helix",
+    arg_type={
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "height": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_spiral",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "height": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleHelix(ParticleSpiral):
+    pass
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="Particle.cylinder",
     arg_type={
         "particle": ArgType.STRING,
