@@ -445,7 +445,7 @@ class ParticleSquare(JMCFunction):
         if spread == 1:
             return [(0.0, 0.0, 0.0)]
         spacing = length / (spread - 1)
-        start = 0
+        start: float = 0
         if align == "center":
             start -= length / 2
         stop = start + length
@@ -523,7 +523,7 @@ class ParticleCube(JMCFunction):
         if spread == 1:
             return [(0.0, 0.0, 0.0)]
         spacing = length / (spread - 1)
-        start = 0
+        start: float = 0
         if align == "center":
             start -= length / 2
         stop = start + length
