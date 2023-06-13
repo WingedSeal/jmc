@@ -180,8 +180,8 @@ def custom_condition(
     # End
 
     conditions: list[str] = []
-    if tokens[0].string not in {"block", "blocks",
-                                "data", "entity", "predicate", "score"}:
+    if tokens[0].string not in {"biome", "block", "blocks",
+                                "data", "dimension", "entity", "loaded", "predicate", "score"}:
         raise JMCValueError(
             f"Unrecoginized condition '{tokens[0].string}'",
             tokens[0],

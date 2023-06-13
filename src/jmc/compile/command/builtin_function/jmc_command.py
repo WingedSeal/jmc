@@ -7,6 +7,7 @@ from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
+from .utils.isolated import IsolatedEnvironment  # type: ignore
 
 
 def drange(start: float | int, stop: float | int,
@@ -311,7 +312,7 @@ class ParticleCircle(JMCFunction):
         :param spread: How close are particles to each other
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         angle = 2 * math.pi / spread
         for i in drange(0, spread, angle):
             points.append((radius * math.cos(i), 0.0, radius * math.sin(i)))
@@ -328,6 +329,240 @@ class ParticleCircle(JMCFunction):
                 self.draw(
                     float(self.args["radius"]),
                     int(self.args["spread"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.sphere",
+    arg_type={
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_sphere",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleSphere(JMCFunction):
+    def draw(self, radius: float,
+             spread: int) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param radius: Radius of the sphere
+        :param spread: How close are particles to each other
+        :return: List of coordinate for each particles
+        """
+        points: list[tuple[float, float, float]] = []
+        angle = 2 * math.pi / spread
+        for theta in drange(0, spread, angle):
+            for phi in drange(0, spread, angle):
+                points.append(
+                    (radius *
+                     math.sin(theta) *
+                        math.cos(phi),
+                        radius *
+                        math.cos(theta),
+                        radius *
+                        math.sin(theta) *
+                        math.sin(phi)))
+        return points
+
+    def call(self) -> str:
+        if self.args["mode"] not in {"force", "normal"}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    float(self.args["radius"]),
+                    int(self.args["spread"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.square",
+    arg_type={
+        "particle": ArgType.STRING,
+        "length": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "align": ArgType.KEYWORD,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_square",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "align": "corner",
+        "mode": "normal"
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "length": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleSquare(JMCFunction):
+    def draw(self, length: float, spread: int,
+             align: str) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param length: Side length of the square
+        :param spread: How close are particles to each other
+        :param align: Whether to the current position should be the center or the corner
+        :return: List of coordinate for each particles
+        """
+        points: list[tuple[float, float, float]] = []
+        if spread == 1:
+            return [(0.0, 0.0, 0.0)]
+        spacing = length / (spread - 1)
+        start: float = 0
+        if align == "center":
+            start -= length / 2
+        stop = start + length
+
+        for i in drange(start, stop, spacing):
+            points.append((start, 0.0, i + spacing))  # west
+            points.append((stop, 0.0, i))  # east
+            points.append((i, 0.0, start))  # north
+            points.append((i + spacing, 0.0, stop))  # south
+
+        return points
+
+    def call(self) -> str:
+        if self.args["align"] not in {"corner", "center"}:
+            raise JMCSyntaxException(
+                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'", self.raw_args["mode"].token, self.tokenizer)
+
+        if self.args["mode"] not in {"force", "normal"}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    float(self.args["length"]),
+                    int(self.args["spread"]),
+                    str(self.args["align"])),
+                self.args["particle"],
+                self.args["speed"],
+                self.args["count"],
+                self.args["mode"]
+            ),
+        )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.cube",
+    arg_type={
+        "particle": ArgType.STRING,
+        "length": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "align": ArgType.KEYWORD,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_cube",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "align": "corner",
+        "mode": "normal"
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "length": NumberType.POSITIVE,
+        "count": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleCube(JMCFunction):
+    def draw(self, length: float, spread: int,
+             align: str) -> list[tuple[float, float, float]]:
+        """
+        Draw particles
+
+        :param length: Side length of the cube
+        :param spread: How close are particles to each other
+        :param align: Whether to the current position should be the center or the corner
+        :return: List of coordinate for each particles
+        """
+        points: list[tuple[float, float, float]] = []
+        if spread == 1:
+            return [(0.0, 0.0, 0.0)]
+        spacing = length / (spread - 1)
+        start: float = 0
+        if align == "center":
+            start -= length / 2
+        stop = start + length
+
+        for i in drange(start, stop, spacing):
+            points.append((start, start, i + spacing))  # lower west edge
+            points.append((stop, start, i))  # lower east edge
+            points.append((i, start, start))  # lower north edge
+            points.append((i + spacing, start, stop))  # lower south edge
+
+            points.append((start, i, start))  # northwest edge
+            points.append((stop, i, start))  # northeast edge
+            points.append((start, i, stop))  # southwest edge
+            points.append((stop, i + spacing, stop))  # southeast edge
+
+            points.append((start, stop, i))  # upper west edge
+            points.append((stop, stop, i))  # upper east edge
+            points.append((i, stop, start))  # upper north edge
+            points.append((i, stop, stop))  # upper south edge
+
+        return points
+
+    def call(self) -> str:
+        if self.args["align"] not in {"corner", "center"}:
+            raise JMCSyntaxException(
+                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'", self.raw_args["mode"].token, self.tokenizer)
+
+        if self.args["mode"] not in {"force", "normal"}:
+            raise JMCSyntaxException(
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+
+        return self.datapack.add_raw_private_function(
+            self.name,
+            commands=points_to_commands(
+                self.draw(
+                    float(self.args["length"]),
+                    int(self.args["spread"]),
+                    str(self.args["align"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
@@ -372,7 +607,7 @@ class ParticleSpiral(JMCFunction):
         :param spread: How close are particles to each other
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         angle = 2 * math.pi / spread
         d_y = height / spread
         for i in range(spread):
@@ -400,6 +635,35 @@ class ParticleSpiral(JMCFunction):
                 self.args["mode"]
             ),
         )
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Particle.helix",
+    arg_type={
+        "particle": ArgType.STRING,
+        "radius": ArgType.FLOAT,
+        "height": ArgType.FLOAT,
+        "spread": ArgType.INTEGER,
+        "speed": ArgType.INTEGER,
+        "count": ArgType.INTEGER,
+        "mode": ArgType.KEYWORD,
+    },
+    name="particle_spiral",
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "mode": "normal",
+    },
+    number_type={
+        "spread": NumberType.POSITIVE,
+        "radius": NumberType.POSITIVE,
+        "height": NumberType.POSITIVE,
+        "speed": NumberType.ZERO_POSITIVE
+    }
+)
+class ParticleHelix(ParticleSpiral):
+    pass
 
 
 @func_property(
@@ -852,3 +1116,30 @@ class EntityLaunch(JMCFunction):
                 self.args["power"]
             )
         return self.datapack.call_func(self.name, self.args["power"])
+
+
+ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.python",
+    name="jmc_python",
+    arg_type={
+        "pythonCode": ArgType.STRING,
+        "env": ArgType.STRING
+    },
+    defaults={
+        "env": ""
+    }
+)
+class JMCPython(JMCFunction):
+    def call(self) -> str:
+        try:
+            return ISOLATED_ENVIRONMENT.run(
+                self.args["pythonCode"], self.args["env"] if self.args["env"] else None)
+        except Exception as error:
+            raise JMCValueError(
+                "An exception occured in JMC.python",
+                self.raw_args["pythonCode"].token,
+                self.tokenizer, suggestion=str(error))

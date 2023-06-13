@@ -750,8 +750,11 @@ class Tokenizer:
                     self)
             comma_token_index += len(comma_separated_token) + 1
 
-            if len(
-                    comma_separated_token) > 1 and comma_separated_token[1].string == "=":
+            if (
+                len(comma_separated_token) > 1
+                and
+                comma_separated_token[1].string in {"=", "=+", "=-"}
+            ):
                 if len(comma_separated_token) == 2:
                     raise JMCSyntaxException(
                         "Expected keyword argument after '=' in function arguments",
@@ -760,6 +763,15 @@ class Tokenizer:
                 key = comma_separated_token[0].string
                 value = self.__parse_func_arg(
                     comma_separated_token[2:], False)
+                equal_token = comma_separated_token[1]
+                if (equal_token.string in {"=+", "=-"}):
+                    value.insert(
+                        0,
+                        Token(
+                            equal_token.token_type,
+                            equal_token.line,
+                            equal_token.col +
+                            1, equal_token.string[1:], equal_token._macro_length))
                 if key in kwargs:
                     raise JMCSyntaxException(
                         f"Duplicated key({key})", comma_separated_token[0], self)
@@ -770,6 +782,7 @@ class Tokenizer:
                 self.__parse_func_arg(
                     comma_separated_token,
                     bool(kwargs)))
+
         return args, kwargs
 
     def parse_list(self, token: Token) -> list[Token]:

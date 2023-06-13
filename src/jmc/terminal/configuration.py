@@ -118,12 +118,20 @@ class Configuration:
         """
         # if not self.target or not self.output:
         #     raise ValueError("toJSON used on empty config")
+        if self.target.is_relative_to(self.global_data.cwd):
+            target = self.target.relative_to(self.global_data.cwd)
+        else:
+            target = self.target
+        if self.output.is_relative_to(self.global_data.cwd):
+            output = self.output.relative_to(self.global_data.cwd)
+        else:
+            output = self.output
         return {
             "namespace": self.namespace,
             "description": self.description,
             "pack_format": self.pack_format,
-            "target": self.target.relative_to(self.global_data.cwd).as_posix(),
-            "output": self.output.relative_to(self.global_data.cwd).as_posix(),
+            "target": target.as_posix(),
+            "output": output.as_posix(),
         }
 
     def load_config(self) -> None:

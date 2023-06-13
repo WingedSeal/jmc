@@ -50,6 +50,7 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "give": {"effect", "recipe", "give"},
     "clear": {"effect", "schedule"},
     "if": {"execute"},
+    "summon": {"execute"},
     "function": {"schedule"},
     "trigger": {"scoreboard"},
     "bossbar": {"execute"},
