@@ -488,7 +488,7 @@ const BuildinFeatures = [
             params={[
                 { key: "indexStrings", type: "List<string>" },
                 { key: "function", type: "ArrowFunction" },
-                { key: "strings", type: "List<List<string>>" },
+                { key: "stringLists", type: "List<List<string>>" },
             ]}
             newline
         />
