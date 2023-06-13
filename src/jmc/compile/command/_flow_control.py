@@ -231,8 +231,8 @@ def switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_count = None
-    case_start = None
+    case_count: int | None = None
+    case_start: int | None = None
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
     if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
@@ -299,6 +299,9 @@ def switch(command: list[Token], datapack: DataPack,
     if scoreboard_player.player_type == PlayerType.INTEGER:
         raise JMCSyntaxException(
             "Unexpected integer in switch case", tokens[0], tokenizer)
+
+    if case_start is None:
+        raise ValueError("case_start is None")
 
     return parse_switch(scoreboard_player, func_contents,
                         datapack, start_at=case_start)

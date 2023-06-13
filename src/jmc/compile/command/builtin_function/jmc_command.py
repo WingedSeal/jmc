@@ -311,7 +311,7 @@ class ParticleCircle(JMCFunction):
         :param spread: How close are particles to each other
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         angle = 2 * math.pi / spread
         for i in drange(0, spread, angle):
             points.append((radius * math.cos(i), 0.0, radius * math.sin(i)))
@@ -370,11 +370,19 @@ class ParticleSphere(JMCFunction):
         :param spread: How close are particles to each other
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         angle = 2 * math.pi / spread
         for theta in drange(0, spread, angle):
             for phi in drange(0, spread, angle):
-                points.append((radius * math.sin(theta) * math.cos(phi), radius * math.cos(theta), radius * math.sin(theta) * math.sin(phi)))
+                points.append(
+                    (radius *
+                     math.sin(theta) *
+                        math.cos(phi),
+                        radius *
+                        math.cos(theta),
+                        radius *
+                        math.sin(theta) *
+                        math.sin(phi)))
         return points
 
     def call(self) -> str:
@@ -423,7 +431,8 @@ class ParticleSphere(JMCFunction):
     }
 )
 class ParticleSquare(JMCFunction):
-    def draw(self, length: float, spread: int, align: str) -> list[tuple[float, float, float]]:
+    def draw(self, length: float, spread: int,
+             align: str) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -432,7 +441,7 @@ class ParticleSquare(JMCFunction):
         :param align: Whether to the current position should be the center or the corner
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         if spread == 1:
             return [(0.0, 0.0, 0.0)]
         spacing = length / (spread - 1)
@@ -442,10 +451,10 @@ class ParticleSquare(JMCFunction):
         stop = start + length
 
         for i in drange(start, stop, spacing):
-            points.append((start, 0.0, i + spacing)) # west
-            points.append((stop, 0.0, i)) # east
-            points.append((i, 0.0, start)) # north
-            points.append((i + spacing, 0.0, stop)) # south
+            points.append((start, 0.0, i + spacing))  # west
+            points.append((stop, 0.0, i))  # east
+            points.append((i, 0.0, start))  # north
+            points.append((i + spacing, 0.0, stop))  # south
 
         return points
 
@@ -500,7 +509,8 @@ class ParticleSquare(JMCFunction):
     }
 )
 class ParticleCube(JMCFunction):
-    def draw(self, length: float, spread: int, align: str) -> list[tuple[float, float, float]]:
+    def draw(self, length: float, spread: int,
+             align: str) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -509,7 +519,7 @@ class ParticleCube(JMCFunction):
         :param align: Whether to the current position should be the center or the corner
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         if spread == 1:
             return [(0.0, 0.0, 0.0)]
         spacing = length / (spread - 1)
@@ -519,20 +529,20 @@ class ParticleCube(JMCFunction):
         stop = start + length
 
         for i in drange(start, stop, spacing):
-            points.append((start, start, i + spacing)) # lower west edge
-            points.append((stop, start, i)) # lower east edge
-            points.append((i, start, start)) # lower north edge
-            points.append((i + spacing, start, stop)) # lower south edge
+            points.append((start, start, i + spacing))  # lower west edge
+            points.append((stop, start, i))  # lower east edge
+            points.append((i, start, start))  # lower north edge
+            points.append((i + spacing, start, stop))  # lower south edge
 
-            points.append((start, i, start)) # northwest edge
-            points.append((stop, i, start)) # northeast edge
-            points.append((start, i, stop)) # southwest edge
-            points.append((stop, i + spacing, stop)) # southeast edge
+            points.append((start, i, start))  # northwest edge
+            points.append((stop, i, start))  # northeast edge
+            points.append((start, i, stop))  # southwest edge
+            points.append((stop, i + spacing, stop))  # southeast edge
 
-            points.append((start, stop, i)) # upper west edge
-            points.append((stop, stop, i)) # upper east edge
-            points.append((i, stop, start)) # upper north edge
-            points.append((i, stop, stop)) # upper south edge
+            points.append((start, stop, i))  # upper west edge
+            points.append((stop, stop, i))  # upper east edge
+            points.append((i, stop, start))  # upper north edge
+            points.append((i, stop, stop))  # upper south edge
 
         return points
 
@@ -596,7 +606,7 @@ class ParticleSpiral(JMCFunction):
         :param spread: How close are particles to each other
         :return: List of coordinate for each particles
         """
-        points = []
+        points: list[tuple[float, float, float]] = []
         angle = 2 * math.pi / spread
         d_y = height / spread
         for i in range(spread):
