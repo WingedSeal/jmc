@@ -7,6 +7,7 @@ from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
+from .utils.isolated import IsolatedEnvironment
 
 
 def drange(start: float | int, stop: float | int,
@@ -1115,3 +1116,30 @@ class EntityLaunch(JMCFunction):
                 self.args["power"]
             )
         return self.datapack.call_func(self.name, self.args["power"])
+
+
+ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.python",
+    name="jmc_python",
+    arg_type={
+        "pythonCode": ArgType.STRING,
+        "env": ArgType.STRING
+    },
+    defaults={
+        "env": ""
+    }
+)
+class JMCPython(JMCFunction):
+    def call(self) -> str:
+        try:
+            return ISOLATED_ENVIRONMENT.run(
+                self.args["pythonCode"], self.args["env"] if self.args["env"] else None)
+        except Exception as error:
+            raise JMCValueError(
+                "An exception occured in JMC.python",
+                self.raw_args["pythonCode"].token,
+                self.tokenizer, suggestion=str(error))
