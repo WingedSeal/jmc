@@ -7,7 +7,7 @@ from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
-from .utils.isolated import IsolatedEnvironment
+from .utils.isolated import IsolatedEnvironment  # type: ignore
 
 
 def drange(start: float | int, stop: float | int,
