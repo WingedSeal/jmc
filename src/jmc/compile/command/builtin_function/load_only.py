@@ -1,4 +1,5 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
+import json
 from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
@@ -1118,6 +1119,34 @@ class TextPropsClickCommand(JMCFunction):
                 "action": "run_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
         self.add_formatted_text_prop(
             "clickEvent", inner, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.hoverText",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_hover_text",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropHoverText(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty FormattedText",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "hoverEvent", {
+                "action": "show_text", "contents": json.loads(self.format_text("text"))}, self.check_bool("local"))
         return ""
 
 # @ func_property(
