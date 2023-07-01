@@ -1124,6 +1124,34 @@ class TextPropsClickCommand(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.url",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "url": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_url",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropURL(JMCFunction):
+    def call(self) -> str:
+        url = self.raw_args["url"]
+        if not url:
+            raise JMCValueError(
+                "Unexpected empty URL",
+                self.raw_args["url"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "open_url", "value": self.args["url"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string="TextProp.hoverText",
     arg_type={
         "propertyName": ArgType.STRING,
