@@ -1124,6 +1124,95 @@ class TextPropsClickCommand(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.suggestCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_suggest_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropSuggestCommand(JMCFunction):
+    def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                "Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "suggest_command", "value": "/" + command[0]}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.suggestCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_suggest_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropsSuggestCommand(JMCFunction):
+    def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                "Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "suggest_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string="TextProp.url",
     arg_type={
         "propertyName": ArgType.STRING,
