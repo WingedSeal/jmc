@@ -1273,6 +1273,66 @@ class TextPropsURL(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clipboard",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_clipboard",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropClipboard(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty clipboard content",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "copy_to_clipboard", "value": self.args["text"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clipboard",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_clipboard",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsClipboard(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected emptyclipboard content",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "copy_to_clipboard", "value": self.args["text"].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+   
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string="TextProp.hoverText",
     arg_type={
         "propertyName": ArgType.STRING,
