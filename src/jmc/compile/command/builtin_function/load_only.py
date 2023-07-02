@@ -270,7 +270,8 @@ class ItemCreateSpawnEgg(EventMixin):
 )
 class ItemCreateSign(JMCFunction):
     _VARIANTS = {"oak", "spruce", "birch", "jungle",
-                 "acacia", "dark_oak", "crimson", "warped"}
+                 "acacia", "dark_oak", "crimson", "warped", 
+                 "mangrove", "bamboo", "cherry"}
 
     def call(self) -> str:
         variant = self.args["variant"]
