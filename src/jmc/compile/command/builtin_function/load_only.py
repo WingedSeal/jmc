@@ -1390,6 +1390,65 @@ class TextPropsHoverText(JMCFunction):
             "hoverEvent", inner, self.check_bool("local"))
         return ""
     
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.font",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "font": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_font",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropFont(JMCFunction):
+    def call(self) -> str:
+        font = self.raw_args["font"]
+        if not font:
+            raise JMCValueError(
+                "Missing font in TextProp.font",
+                self.raw_args["font"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "font", self.args["font"], self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.font",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "font": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_font",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsFont(JMCFunction):
+    def call(self) -> str:
+        font = self.raw_args["font"]
+        if not font:
+            raise JMCValueError(
+                "Missing font in TextProps.font",
+                self.raw_args["font"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return self.args["font"].replace(self.args["indexString"], arg)
+        self.add_formatted_text_prop(
+            "font", inner, self.check_bool("local"))
+        return ""
+    
+
 # @ func_property(
 #     func_type=FuncType.load_only,
 #     call_string='Debug.track',
