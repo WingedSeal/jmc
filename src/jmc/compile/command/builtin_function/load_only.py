@@ -1152,6 +1152,38 @@ class TextPropURL(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.url",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "url": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_url",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsURL(JMCFunction):
+    def call(self) -> str:
+        url = self.raw_args["url"]
+        if not url:
+            raise JMCValueError(
+                "Unexpected empty URL",
+                self.raw_args["url"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "open_url", "value": self.args["url"].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
     call_string="TextProp.hoverText",
     arg_type={
         "propertyName": ArgType.STRING,
@@ -1177,6 +1209,38 @@ class TextPropHoverText(JMCFunction):
                 "action": "show_text", "contents": json.loads(self.format_text("text"))}, self.check_bool("local"))
         return ""
 
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.hoverText",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_hover_text",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsHoverText(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty FormattedText",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "show_text", "contents": json.loads(self.format_text("text").replace(self.args["indexString"], arg))}
+        self.add_formatted_text_prop(
+            "hoverEvent", inner, self.check_bool("local"))
+        return ""
+    
 # @ func_property(
 #     func_type=FuncType.load_only,
 #     call_string='Debug.track',
