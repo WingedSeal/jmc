@@ -531,7 +531,7 @@ class FormattedText:
                 continue
 
             if prop in {"bold", "italic", "underlined",
-                        "strikethrough", "obfuscated"}:
+                        "strikethrough", "obfuscated", "interpret"}:
                 self.current_json[prop] = value
                 continue
 
@@ -676,7 +676,7 @@ class FormattedText:
             self.current_color = prop
 
         if prop in {"bold", "italic", "underlined",
-                    "strikethrough", "obfuscated"}:
+                    "strikethrough", "obfuscated", "interpret"}:
             if self.current_color:
                 self.current_json["color"] = self.current_color
             self.current_json[prop] = True
