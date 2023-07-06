@@ -45,9 +45,6 @@ class MathSqrt(JMCFunction):
                     self.datapack.call_func(self.name, "newton_raphson"),
                     f"scoreboard players operation {x_n_sq} {var} = {x_n} {var}",
                     f"scoreboard players operation {x_n_sq} {var} *= {x_n} {var}",
-                    f"scoreboard players operation {x_n} {var} /= 2 {DataPack.int_name}",
-                    f"scoreboard players operation {diff} {var} = {x} {var}",
-                    f"scoreboard players operation {diff} {var} -= {x_n} {var}",
                     f"execute if score {x_n_sq} {var} > {N} {var} run scoreboard players remove {x_n} {var} 1",
                 ],
                 "main"
