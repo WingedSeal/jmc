@@ -175,12 +175,12 @@ def __parse_header(header_str: str, file_name: str,
                 #  #define KEYWORD(arg1, arg2)
                 header.macros[key] = __create_macro_factory(
                     arg_tokens[2:], arg_tokens[1], key, tokenizer, HeaderSyntaxException(
-                        "Invalid marcro argument syntax", file_name, line, line_str))
+                        "Invalid macro argument syntax", file_name, line, line_str))
             else:
                 #  #define KEYWORD TOKEN
                 header.macros[key] = __create_macro_factory(
                     arg_tokens[1:], None, key, tokenizer, HeaderSyntaxException(
-                        "Invalid marcro argument syntax", file_name, line, line_str))
+                        "Invalid macro argument syntax", file_name, line, line_str))
 
         # #bind
         elif directive_token.string == "bind":
