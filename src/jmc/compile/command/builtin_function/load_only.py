@@ -1450,6 +1450,64 @@ class TextPropsFont(JMCFunction):
         return ""
     
 
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.keybind",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "keybind": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_keybind",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropKeybind(JMCFunction):
+    def call(self) -> str:
+        keybind = self.raw_args["keybind"]
+        if not keybind:
+            raise JMCValueError(
+                "Missing keybind in TextProp.keybind",
+                self.raw_args["keybind"].token,
+                self.tokenizer)
+
+        self.add_formatted_text_prop(
+            "keybind", self.args["keybind"], self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.keybind",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "keybind": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_keybind",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsKeybind(JMCFunction):
+    def call(self) -> str:
+        keybind = self.raw_args["keybind"]
+        if not keybind:
+            raise JMCValueError(
+                "Missing keybind in TextProps.keybind",
+                self.raw_args["keybind"].token,
+                self.tokenizer)
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return self.args["keybind"].replace(self.args["indexString"], arg)
+        self.add_formatted_text_prop(
+            "keybind", inner, self.check_bool("local"))
+        return ""
+
+        
 # @ func_property(
 #     func_type=FuncType.load_only,
 #     call_string='Debug.track',

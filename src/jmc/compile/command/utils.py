@@ -623,7 +623,7 @@ class FormattedText:
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
 
-        if "score" in self.current_json or "selector" in self.current_json:
+        if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json:
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
                     raise JMCValueError(
