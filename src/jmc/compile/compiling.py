@@ -322,10 +322,14 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 dump(tick_json, file, indent=4)
 
     for func_path, func in datapack.functions.items():
+        namespace = func_path.split("/")[0]
         if header.is_override_minecraft and func_path.startswith("minecraft/"):
             # len("minecraft/") = 10
             path = output_folder / "data" / "minecraft" / "functions" / \
                 (func_path[10:] + ".mcfunction")
+        elif namespace in header.custom_namespaces:
+             path = output_folder / "data" / namespace / "functions" / \
+                (func_path[index("/"):] + ".mcfunction")
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
@@ -338,10 +342,14 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                     file.write(content)
 
     for json_path, json in datapack.jsons.items():
+        namespace = json_path.split("/")[0]
         if header.is_override_minecraft and json_path.startswith("minecraft/"):
             # len("minecraft/") = 10
             path = output_folder / "data" / \
                 "minecraft" / (json_path[10:] + ".json")
+        elif namespace in header.custom_namespaces:
+            path = output_folder / "data" / \
+                namespace / (json_path[index("/"):] + ".json")
         else:
             path = namespace_folder / (json_path + ".json")
         if json:

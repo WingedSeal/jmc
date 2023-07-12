@@ -77,6 +77,7 @@ class Header(SingleTon):
         obj.credits = []
         obj.is_enable_macro = True
         obj.is_override_minecraft = False
+        obj.custom_namespaces = set()
         obj.commands = set()
         obj.statics = set()
         obj.dels = set()
