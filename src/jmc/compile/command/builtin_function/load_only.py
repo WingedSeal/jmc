@@ -1214,18 +1214,18 @@ class TextPropsSuggestCommand(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string="TextProp.url",
+    call_string="TextProp.clickURL",
     arg_type={
         "propertyName": ArgType.STRING,
         "url": ArgType.STRING,
         "local": ArgType.KEYWORD
     },
-    name="text_prop_url",
+    name="text_prop_click_url",
     defaults={
         "local": "false"
     }
 )
-class TextPropURL(JMCFunction):
+class TextPropClickURL(JMCFunction):
     def call(self) -> str:
         url = self.raw_args["url"]
         if not url:
@@ -1242,19 +1242,19 @@ class TextPropURL(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
-    call_string="TextProps.url",
+    call_string="TextProps.clickURL",
     arg_type={
         "propertyName": ArgType.STRING,
         "indexString": ArgType.STRING,
         "url": ArgType.STRING,
         "local": ArgType.KEYWORD
     },
-    name="text_props_url",
+    name="text_props_click_url",
     defaults={
         "local": "false"
     }
 )
-class TextPropsURL(JMCFunction):
+class TextPropsClickURL(JMCFunction):
     def call(self) -> str:
         url = self.raw_args["url"]
         if not url:
