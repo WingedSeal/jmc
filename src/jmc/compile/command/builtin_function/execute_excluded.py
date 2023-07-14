@@ -22,8 +22,9 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
         elif char == ")":
             count -= 1
 
-        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
-                        "8", "9", "+", "-", "*", "/", " ", "\t", "\n", "(", ")"}:
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
+                        "+", "-", "*", "/", "%", "&", "|", "~", "^",
+                        " ", "\t", "\n", "(", ")"}:
             raise JMCSyntaxException(
                 f"Invalid charater({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 

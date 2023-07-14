@@ -371,8 +371,9 @@ def eval_expr(expr: str) -> str:
 
 
 OPERATORS: dict[type, Callable[..., Any]] = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-                                             ast.Div: op.truediv, ast.Pow: op.pow,
-                                             ast.USub: op.neg}
+                                             ast.Div: op.truediv, ast.Pow: op.pow, ast.Mod: op.mod,
+                                             ast.BitAnd: op.and_, ast.BitOr: op.or_, ast.BitXor: op.xor,
+                                             ast.USub: op.neg, ast.Invert: op.invert}
 
 
 def __eval(node):
