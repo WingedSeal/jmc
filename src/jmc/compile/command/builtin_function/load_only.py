@@ -5,7 +5,7 @@ from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
-from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
+from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -1270,6 +1270,61 @@ class TextPropsClickURL(JMCFunction):
         self.add_formatted_text_prop(
             "clickEvent", inner, self.check_bool("local"))
         return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clickPage",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "page": ArgType.INTEGER,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_click_page",
+    defaults={
+        "local": "false"
+    },
+    number_type={
+        "page": NumberType.POSITIVE
+    }
+)
+class TextPropClickPage(JMCFunction):
+    def call(self) -> str:
+        page = self.raw_args["page"]
+        if not page:
+            raise JMCValueError(
+                "Unexpected empty page number",
+                self.raw_args["page"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "change_page", "value": self.args["page"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clickPage",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_click_page",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsClickPage(JMCFunction):
+    def call(self) -> str:
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "change_page", "value": arg}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
     
 
 @func_property(
@@ -1712,6 +1767,7 @@ class TextPropsNBT(JMCFunction):
         self.add_formatted_text_prop(
              "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": inner}, self.check_bool("local"))
         return ""
+
 
 # @ func_property(
 #     func_type=FuncType.load_only,
