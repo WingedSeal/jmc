@@ -292,10 +292,13 @@ def __parse_header(header_str: str, file_name: str,
                 raise HeaderSyntaxException(
                     f"Expected 1 arguments after '#static' (got {len(arg_tokens)})", file_name, line, line_str)
             static_folder = namespace_path / arg_tokens[0].string
-            if not static_folder.is_dir():
+            if not static_folder.is_dir() and arg_tokens[0].string != "pack.mcmeta":
                 raise HeaderSyntaxException(
                     f"Static folder not found: {static_folder.as_posix()}", file_name, line, line_str, suggestion="Please recheck that the path is correct so that JMC won't accidentally delete your folder.")
-            header.statics.add(static_folder)
+            if arg_tokens[0].string == "pack.mcmeta":
+                header.statics.add(Path(config.output) / "pack.mcmeta")
+            else:
+                header.statics.add(static_folder)
         elif directive_token.string == "uninstall":
             if arg_tokens:
                 raise HeaderSyntaxException(
