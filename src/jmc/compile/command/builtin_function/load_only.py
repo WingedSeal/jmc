@@ -1645,8 +1645,8 @@ class TextPropsKeybind(JMCFunction):
 )
 class TextPropNBT(JMCFunction):
     def call(self) -> str:
-        type = self.raw_args["type"]
-        if not type:
+        _type = self.raw_args["type"]
+        if not _type:
             raise JMCValueError(
                 "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
                 self.raw_args["type"].token,
@@ -1665,11 +1665,53 @@ class TextPropNBT(JMCFunction):
                 self.tokenizer)
 
         self.add_formatted_text_prop(
-            "nbt", self.args["path"], self.check_bool("local"))
-        self.add_formatted_text_prop(
-            self.args["type"], self.args["source"], self.check_bool("local"), )
+             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"]}, self.check_bool("local"))
         return ""
 
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.nbt",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "type": ArgType.KEYWORD,
+        "source": ArgType.STRING,
+        "path": ArgType.KEYWORD,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_nbt",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsNBT(JMCFunction):
+    def call(self) -> str:
+        _type = self.raw_args["type"]
+        if not _type:
+            raise JMCValueError(
+                "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
+                self.raw_args["type"].token,
+                self.tokenizer)
+        source = self.raw_args["source"]
+        if not source:
+            raise JMCValueError(
+                "Missing NBT source in TextProp.nbt",
+                self.raw_args["source"].token,
+                self.tokenizer)
+        path = self.raw_args["path"]
+        if not path:
+            raise JMCValueError(
+                "Missing NBT path in TextProp.nbt",
+                self.raw_args["path"].token,
+                self.tokenizer)
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return self.args["path"].replace(self.args["indexString"], arg)
+        self.add_formatted_text_prop(
+             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": inner}, self.check_bool("local"))
+        return ""
 
 # @ func_property(
 #     func_type=FuncType.load_only,

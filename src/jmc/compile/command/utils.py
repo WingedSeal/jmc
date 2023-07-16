@@ -598,13 +598,23 @@ class FormattedText:
                     raise JMCValueError(
                         f"Unknown property '{prop_}'", self.token, self.tokenizer)
                 key, json_body, is_local = self.datapack.data.formatted_text_prop[prop_]
-                if not callable(json_body):
+                if isinstance(json_body, dict) and 'nbt' in json_body.keys():
+                    self.current_json[key] = {}
+                    self.current_json[key]["nbt"] = json_body["nbt"](arg)
+                    if "entity" in json_body.keys():
+                        self.current_json[key]["entity"] = json_body["entity"]
+                    if "block" in json_body.keys():
+                        self.current_json[key]["block"] = json_body["block"]
+                    if "storage" in json_body.keys():
+                        self.current_json[key]["storage"] = json_body["storage"]
+                elif not callable(json_body):
                     raise JMCValueError(
                         f"Custom property '{prop_}' expected no argument", self.token, self.tokenizer, suggestion="Remove '()'")
-                if not arg:
+                elif not arg:
                     raise JMCValueError(
                         f"Expected value inside parenthesis of property '{prop_}' (got nothing)", self.token, self.tokenizer)
-                self.current_json[key] = json_body(arg)
+                else:
+                    self.current_json[key] = json_body(arg)
                 if is_local:
                     del self.datapack.data.formatted_text_prop[prop_]
                 continue
@@ -624,7 +634,7 @@ class FormattedText:
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
 
-        if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json:
+        if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json or "__private_nbt_expand__" in self.current_json:
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
                     raise JMCValueError(
@@ -633,14 +643,24 @@ class FormattedText:
                     "selector is not allowed in this context in formatted text", self.token, self.tokenizer)
             del self.current_json["text"]
 
+            if "__private_nbt_expand__" in self.current_json:
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]
+                if "storage" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]
+                if "block" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]
+                if "entity" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]
+                del self.current_json["__private_nbt_expand__"]
+
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
             for prop_, value_ in self.current_json.items():
-                if prop_ in {"bold", "italic", "underlined",
-                             "strikethrough", "obfuscated", "color"}:
+                if prop_ in {"bold", "italic", "underlined", "strikethrough", 
+                             "obfuscated", "color", "interpret"}:
                     tmp_json[prop_] = value_
             self.result.append(self.current_json)
             self.current_json = tmp_json
-
+        
     def __parse_code(self, char: str) -> None:
         """
         Parse color code
