@@ -1410,7 +1410,7 @@ class TextPropHoverItem(JMCFunction):
         item = self.raw_args["item"]
         if not item:
             raise JMCValueError(
-                "Missing item in TextProp.hoveritem",
+                "Missing item in TextProp.hoverItem",
                 self.raw_args["item"].token,
                 self.tokenizer)
         
@@ -1439,7 +1439,7 @@ class TextPropsHoverItem(JMCFunction):
         item = self.raw_args["item"]
         if not item:
             raise JMCValueError(
-                "Missing item in TextProps.hoveritem",
+                "Missing item in TextProps.hoverItem",
                 self.raw_args["item"].token,
                 self.tokenizer)
         
@@ -1447,6 +1447,66 @@ class TextPropsHoverItem(JMCFunction):
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             return {
                 "action": "show_item", "contents": json.loads(self.args["item"].replace(self.args["indexString"], arg))}
+        self.add_formatted_text_prop(
+            "hoverEvent", inner, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.hoverEntity",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "entity": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_hover_entity",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropHoverEntity(JMCFunction):
+    def call(self) -> str:
+        entity = self.raw_args["entity"]
+        if not entity:
+            raise JMCValueError(
+                "Missing entity in TextProp.hoverEntity",
+                self.raw_args["entity"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "hoverEvent", {
+                "action": "show_entity", "contents": json.loads(self.args["entity"])}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.hoverEntity",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "entity": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_hover_entity",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsHoverEntity(JMCFunction):
+    def call(self) -> str:
+        entity = self.raw_args["entity"]
+        if not entity:
+            raise JMCValueError(
+                "Missing entity in TextProps.hoverEntity",
+                self.raw_args["entity"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "show_entity", "contents": json.loads(self.args["entity"].replace(self.args["indexString"], arg))}
         self.add_formatted_text_prop(
             "hoverEvent", inner, self.check_bool("local"))
         return ""
