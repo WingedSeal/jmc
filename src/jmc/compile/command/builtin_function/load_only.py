@@ -1722,7 +1722,7 @@ class TextPropNBT(JMCFunction):
                 self.tokenizer)
 
         self.add_formatted_text_prop(
-             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "intepret": self.args["interpret"]}, self.check_bool("local"))
+             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "interpret": self.args["interpret"]}, self.check_bool("local"))
         return ""
 
 
@@ -1767,7 +1767,7 @@ class TextPropsNBT(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(self.args["indexString"], arg), "intepret": self.args["interpret"]}
+            return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(self.args["indexString"], arg), "interpret": self.args["interpret"]}
         self.add_formatted_text_prop(
              "__private_nbt_expand__", inner, self.check_bool("local"))
         return ""
