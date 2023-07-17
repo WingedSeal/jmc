@@ -600,13 +600,13 @@ class FormattedText:
                 key, json_body, is_local = self.datapack.data.formatted_text_prop[prop_]
                 if isinstance(json_body, dict) and 'nbt' in json_body.keys():
                     self.current_json[key] = {}
-                    self.current_json[key]["nbt"] = json_body["nbt"](arg)
+                    self.current_json[key]["nbt"] = json_body["nbt"](arg) # type: ignore
                     if "entity" in json_body.keys():
-                        self.current_json[key]["entity"] = json_body["entity"]
+                        self.current_json[key]["entity"] = json_body["entity"] # type: ignore
                     if "block" in json_body.keys():
-                        self.current_json[key]["block"] = json_body["block"]
+                        self.current_json[key]["block"] = json_body["block"] # type: ignore
                     if "storage" in json_body.keys():
-                        self.current_json[key]["storage"] = json_body["storage"]
+                        self.current_json[key]["storage"] = json_body["storage"] # type: ignore
                 elif not callable(json_body):
                     raise JMCValueError(
                         f"Custom property '{prop_}' expected no argument", self.token, self.tokenizer, suggestion="Remove '()'")
@@ -644,13 +644,13 @@ class FormattedText:
             del self.current_json["text"]
 
             if "__private_nbt_expand__" in self.current_json:
-                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]
-                if "storage" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]
-                if "block" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]
-                if "entity" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"] # type: ignore
+                if "storage" in self.current_json["__private_nbt_expand__"]:  # type: ignore
+                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]  # type: ignore
+                if "block" in self.current_json["__private_nbt_expand__"]:  # type: ignore
+                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]  # type: ignore
+                if "entity" in self.current_json["__private_nbt_expand__"]: # type: ignore
+                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]  # type: ignore
                 del self.current_json["__private_nbt_expand__"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
