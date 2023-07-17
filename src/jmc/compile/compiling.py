@@ -364,6 +364,6 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 }
             }
             if datapack.filter:
-                mcmeta_body["pack"]["filter"] = datapack.filter
+                mcmeta_body["filter"] = datapack.filter
             dump(mcmeta_body, file, indent=4)
     return None
