@@ -329,7 +329,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 (func_path[10:] + ".mcfunction")
         elif namespace in header.custom_namespaces:
              path = output_folder / "data" / namespace / "functions" / \
-                (func_path[index("/"):] + ".mcfunction")
+                (func_path[func_path.index("/"):] + ".mcfunction")
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
@@ -349,7 +349,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                 "minecraft" / (json_path[10:] + ".json")
         elif namespace in header.custom_namespaces:
             path = output_folder / "data" / \
-                namespace / (json_path[index("/"):] + ".json")
+                namespace / (json_path[json_path.index("/"):] + ".json")
         else:
             path = namespace_folder / (json_path + ".json")
         if json:
