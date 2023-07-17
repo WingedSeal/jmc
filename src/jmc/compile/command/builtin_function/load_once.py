@@ -2,7 +2,7 @@
 from ..jmc_function_mixin import EventMixin
 from ...exception import JMCMissingValueError
 from ...datapack import DataPack
-from ..utils import ArgType
+from ..utils import ArgType, json
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
@@ -93,4 +93,21 @@ class PlayerDie(JMCFunction):
             ],
             "on_respawn"
         )
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONCE,
+    call_string="JMC.setFilter",
+    arg_type={
+        "filter": ArgType.JSON
+    },
+    name="jmc_set_filter"
+)
+class JMCSetFilter(JMCFunction):
+    def call(self) -> str:
+        if not self.args["filter"]:
+            raise JMCMissingValueError("filter", self.token, self.tokenizer)
+        self.datapack.filter = json.loads(self.args["filter"])
+        
         return ""

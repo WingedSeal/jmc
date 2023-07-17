@@ -173,6 +173,7 @@ class DataPack:
         self.scoreboards: dict[str, str] = {
             self.var_name: "dummy"
         }
+        self.filter: None | dict[str, Any] = None
         """Minecraft scoreboards that are going to be created"""
 
         self.loads: list[str] = []
