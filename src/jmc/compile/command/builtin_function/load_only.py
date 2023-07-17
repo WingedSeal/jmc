@@ -1691,10 +1691,12 @@ class TextPropsKeybind(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD
     },
     name="text_prop_nbt",
     defaults={
+        "interpret": "false",
         "local": "false"
     }
 )
@@ -1720,7 +1722,7 @@ class TextPropNBT(JMCFunction):
                 self.tokenizer)
 
         self.add_formatted_text_prop(
-             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"]}, self.check_bool("local"))
+             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "intepret": self.args["interpret"]}, self.check_bool("local"))
         return ""
 
 
@@ -1733,10 +1735,12 @@ class TextPropNBT(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD
     },
     name="text_props_nbt",
     defaults={
+        "interpret": "false",
         "local": "false"
     }
 )
@@ -1763,9 +1767,9 @@ class TextPropsNBT(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return self.args["path"].replace(self.args["indexString"], arg)
+            return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(self.args["indexString"], arg), "intepret": self.args["interpret"]}
         self.add_formatted_text_prop(
-             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": inner}, self.check_bool("local"))
+             "__private_nbt_expand__", inner, self.check_bool("local"))
         return ""
 
 

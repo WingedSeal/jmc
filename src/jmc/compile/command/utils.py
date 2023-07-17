@@ -533,7 +533,7 @@ class FormattedText:
                 continue
 
             if prop in {"bold", "italic", "underlined",
-                        "strikethrough", "obfuscated", "interpret"}:
+                        "strikethrough", "obfuscated"}:
                 self.current_json[prop] = value
                 continue
 
@@ -655,8 +655,8 @@ class FormattedText:
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
             for prop_, value_ in self.current_json.items():
-                if prop_ in {"bold", "italic", "underlined", "strikethrough", 
-                             "obfuscated", "color", "interpret"}:
+                if prop_ in {"bold", "italic", "underlined", 
+                             "strikethrough", "obfuscated", "color"}:
                     tmp_json[prop_] = value_
             self.result.append(self.current_json)
             self.current_json = tmp_json
@@ -699,7 +699,7 @@ class FormattedText:
             self.current_color = prop
 
         if prop in {"bold", "italic", "underlined",
-                    "strikethrough", "obfuscated", "interpret"}:
+                    "strikethrough", "obfuscated"}:
             if self.current_color:
                 self.current_json["color"] = self.current_color
             self.current_json[prop] = True
