@@ -323,13 +323,9 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
 
     for func_path, func in datapack.functions.items():
         namespace = func_path.split("/")[0]
-        if header.is_override_minecraft and func_path.startswith("minecraft/"):
-            # len("minecraft/") = 10
-            path = output_folder / "data" / "minecraft" / "functions" / \
-                (func_path[10:] + ".mcfunction")
-        elif namespace in header.custom_namespaces:
+        if namespace in header.namespace_overrides:
              path = output_folder / "data" / namespace / "functions" / \
-                (func_path[func_path.index("/"):] + ".mcfunction")
+                (func_path[len(namespace)+1:] + ".mcfunction")
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
@@ -343,13 +339,9 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
 
     for json_path, json in datapack.jsons.items():
         namespace = json_path.split("/")[0]
-        if header.is_override_minecraft and json_path.startswith("minecraft/"):
-            # len("minecraft/") = 10
+        if namespace in header.namespace_overrides:
             path = output_folder / "data" / \
-                "minecraft" / (json_path[10:] + ".json")
-        elif namespace in header.custom_namespaces:
-            path = output_folder / "data" / \
-                namespace / (json_path[json_path.index("/"):] + ".json")
+                namespace / (json_path[len(namespace)+1:] + ".json")
         else:
             path = namespace_folder / (json_path + ".json")
         if json:
