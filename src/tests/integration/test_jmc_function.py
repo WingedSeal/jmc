@@ -48,9 +48,6 @@ scoreboard players set __math__.x_n __variable__ 1225
 function TEST:__private__/math_sqrt/newton_raphson
 scoreboard players operation __main__.x_n_sq __variable__ = __math__.x_n __variable__
 scoreboard players operation __main__.x_n_sq __variable__ *= __math__.x_n __variable__
-scoreboard players operation __math__.x_n __variable__ /= 2 __int__
-scoreboard players operation __math__.different __variable__ = __math__.x __variable__
-scoreboard players operation __math__.different __variable__ -= __math__.x_n __variable__
 execute if score __main__.x_n_sq __variable__ > __math__.N __variable__ run scoreboard players remove __math__.x_n __variable__ 1
             """)
         )
