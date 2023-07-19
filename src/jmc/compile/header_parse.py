@@ -256,12 +256,13 @@ def __parse_header(header_str: str, file_name: str,
             else:
                 header.credits.append("")
 
-        # #override_minecraft
-        elif directive_token.string == "override_minecraft":
-            if arg_tokens:
+        # #override
+
+        elif directive_token.string == "override":
+            if not arg_tokens or len(arg_tokens) != 1:
                 raise HeaderSyntaxException(
-                    f"Expected 0 arguments after '#override_minecraft' (got {len(arg_tokens)})", file_name, line, line_str)
-            header.is_override_minecraft = True
+                    f"Expected 1 arguments after '#namespace' (got {len(arg_tokens)})", file_name, line, line_str)
+            header.namespace_overrides.add(arg_tokens[0].string)
 
         # #command
         elif directive_token.string == "command":

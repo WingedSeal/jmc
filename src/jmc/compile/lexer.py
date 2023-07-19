@@ -358,9 +358,9 @@ class Lexer:
         json_name = prefix + convention_jmc_to_mc(
             command[2], tokenizer, is_make_lower=False, substr=(1, -1))
 
-        if Header().is_override_minecraft and json_name.startswith("minecraft/"):
-            # len('minecraft/') = 10
-            json_path = "minecraft/" + json_type + "/" + json_name[10:]
+        namespace = json_name.split("/")[0]
+        if namespace in Header().namespace_overrides:
+            json_path = namespace + "/" + json_type + "/" + json_name[len(namespace)+1:]
         else:
             json_path = json_type + "/" + json_name
 
