@@ -22,10 +22,11 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
         elif char == ")":
             count -= 1
 
-        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
-                        "8", "9", "+", "-", "*", "/", " ", "\t", "\n", "(", ")"}:
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7", 
+                        "8", "9", "+", "-", "*", "/", "\\", "%",
+                        " ", "\t", "\n", "(", ")"}:
             raise JMCSyntaxException(
-                f"Invalid charater({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
+                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 
         expression += char
         if count == 0:
@@ -35,7 +36,7 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
         raise JMCSyntaxException(
             "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
 
-    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
+    return string[:calc_pos] + eval_expr(expression.replace("\\", "//")) + string[index + 13:]
 
 
 def _hardcode_process(string: str, index_string: str,

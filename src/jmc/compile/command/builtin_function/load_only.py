@@ -1,10 +1,11 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
+import json
 from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
-from ..utils import ArgType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
+from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -269,7 +270,8 @@ class ItemCreateSpawnEgg(EventMixin):
 )
 class ItemCreateSign(JMCFunction):
     _VARIANTS = {"oak", "spruce", "birch", "jungle",
-                 "acacia", "dark_oak", "crimson", "warped"}
+                 "acacia", "dark_oak", "crimson", "warped", 
+                 "mangrove", "bamboo", "cherry"}
 
     def call(self) -> str:
         variant = self.args["variant"]
@@ -1119,6 +1121,657 @@ class TextPropsClickCommand(JMCFunction):
         self.add_formatted_text_prop(
             "clickEvent", inner, self.check_bool("local"))
         return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.suggestCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_suggest_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropSuggestCommand(JMCFunction):
+    def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                "Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "suggest_command", "value": "/" + command[0]}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.suggestCommand",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_suggest_command",
+    defaults={
+        "local": "false"
+    },
+    ignore={
+        "function",
+    }
+)
+class TextPropsSuggestCommand(JMCFunction):
+    def call(self) -> str:
+        command = self.datapack.parse_function_token(
+            self.raw_args["function"].token,
+            self.tokenizer)
+        if not command:
+            raise JMCValueError(
+                "Unexpected empty arrow function",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if len(command) > 1:
+            raise JMCValueError(
+                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                self.raw_args["function"].token,
+                self.tokenizer)
+        if command[0].startswith("say"):
+            raise JMCValueError(
+                f"'{self.call_string}' doesn't allow 'say' command",
+                self.raw_args["function"].token,
+                self.tokenizer, suggestion="This is due to minecraft's limitation")
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "suggest_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clickURL",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "url": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_click_url",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropClickURL(JMCFunction):
+    def call(self) -> str:
+        url = self.raw_args["url"]
+        if not url:
+            raise JMCValueError(
+                "Unexpected empty URL",
+                self.raw_args["url"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "open_url", "value": self.args["url"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clickURL",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "url": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_click_url",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsClickURL(JMCFunction):
+    def call(self) -> str:
+        url = self.raw_args["url"]
+        if not url:
+            raise JMCValueError(
+                "Unexpected empty URL",
+                self.raw_args["url"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "open_url", "value": self.args["url"].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clickPage",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "page": ArgType.INTEGER,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_click_page",
+    defaults={
+        "local": "false"
+    },
+    number_type={
+        "page": NumberType.POSITIVE
+    }
+)
+class TextPropClickPage(JMCFunction):
+    def call(self) -> str:
+        page = self.raw_args["page"]
+        if not page:
+            raise JMCValueError(
+                "Unexpected empty page number",
+                self.raw_args["page"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "change_page", "value": self.args["page"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clickPage",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_click_page",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsClickPage(JMCFunction):
+    def call(self) -> str:
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "change_page", "value": arg}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.clipboard",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_clipboard",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropClipboard(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty clipboard content",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "clickEvent", {
+                "action": "copy_to_clipboard", "value": self.args["text"]}, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.clipboard",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_clipboard",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsClipboard(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected emptyclipboard content",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "copy_to_clipboard", "value": self.args["text"].replace(self.args["indexString"], arg)}
+        self.add_formatted_text_prop(
+            "clickEvent", inner, self.check_bool("local"))
+        return ""
+   
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.hoverText",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_hover_text",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropHoverText(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty FormattedText",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "hoverEvent", {
+                "action": "show_text", "contents": json.loads(self.format_text("text"))}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.hoverText",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "text": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_hover_text",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsHoverText(JMCFunction):
+    def call(self) -> str:
+        text = self.raw_args["text"]
+        if not text:
+            raise JMCValueError(
+                "Unexpected empty FormattedText",
+                self.raw_args["text"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "show_text", "contents": json.loads(self.format_text("text").replace(self.args["indexString"], arg))}
+        self.add_formatted_text_prop(
+            "hoverEvent", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.hoverItem",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "item": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_hover_item",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropHoverItem(JMCFunction):
+    def call(self) -> str:
+        item = self.raw_args["item"]
+        if not item:
+            raise JMCValueError(
+                "Missing item in TextProp.hoverItem",
+                self.raw_args["item"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "hoverEvent", {
+                "action": "show_item", "contents": json.loads(self.args["item"])}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.hoverItem",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "item": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_hover_item",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsHoverItem(JMCFunction):
+    def call(self) -> str:
+        item = self.raw_args["item"]
+        if not item:
+            raise JMCValueError(
+                "Missing item in TextProps.hoverItem",
+                self.raw_args["item"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "show_item", "contents": json.loads(self.args["item"].replace(self.args["indexString"], arg))}
+        self.add_formatted_text_prop(
+            "hoverEvent", inner, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.hoverEntity",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "entity": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_hover_entity",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropHoverEntity(JMCFunction):
+    def call(self) -> str:
+        entity = self.raw_args["entity"]
+        if not entity:
+            raise JMCValueError(
+                "Missing entity in TextProp.hoverEntity",
+                self.raw_args["entity"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "hoverEvent", {
+                "action": "show_entity", "contents": json.loads(self.args["entity"])}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.hoverEntity",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "entity": ArgType.JSON,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_hover_entity",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsHoverEntity(JMCFunction):
+    def call(self) -> str:
+        entity = self.raw_args["entity"]
+        if not entity:
+            raise JMCValueError(
+                "Missing entity in TextProps.hoverEntity",
+                self.raw_args["entity"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {
+                "action": "show_entity", "contents": json.loads(self.args["entity"].replace(self.args["indexString"], arg))}
+        self.add_formatted_text_prop(
+            "hoverEvent", inner, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.font",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "font": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_font",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropFont(JMCFunction):
+    def call(self) -> str:
+        font = self.raw_args["font"]
+        if not font:
+            raise JMCValueError(
+                "Missing font in TextProp.font",
+                self.raw_args["font"].token,
+                self.tokenizer)
+        
+        self.add_formatted_text_prop(
+            "font", self.args["font"], self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.font",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "font": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_font",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsFont(JMCFunction):
+    def call(self) -> str:
+        font = self.raw_args["font"]
+        if not font:
+            raise JMCValueError(
+                "Missing font in TextProps.font",
+                self.raw_args["font"].token,
+                self.tokenizer)
+        
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return self.args["font"].replace(self.args["indexString"], arg)
+        self.add_formatted_text_prop(
+            "font", inner, self.check_bool("local"))
+        return ""
+    
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.keybind",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "keybind": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_keybind",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropKeybind(JMCFunction):
+    def call(self) -> str:
+        keybind = self.raw_args["keybind"]
+        if not keybind:
+            raise JMCValueError(
+                "Missing keybind in TextProp.keybind",
+                self.raw_args["keybind"].token,
+                self.tokenizer)
+
+        self.add_formatted_text_prop(
+            "keybind", self.args["keybind"], self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.keybind",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "keybind": ArgType.STRING,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_keybind",
+    defaults={
+        "local": "false"
+    }
+)
+class TextPropsKeybind(JMCFunction):
+    def call(self) -> str:
+        keybind = self.raw_args["keybind"]
+        if not keybind:
+            raise JMCValueError(
+                "Missing keybind in TextProps.keybind",
+                self.raw_args["keybind"].token,
+                self.tokenizer)
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return self.args["keybind"].replace(self.args["indexString"], arg)
+        self.add_formatted_text_prop(
+            "keybind", inner, self.check_bool("local"))
+        return ""
+
+        
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProp.nbt",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "type": ArgType.KEYWORD,
+        "source": ArgType.STRING,
+        "path": ArgType.KEYWORD,
+        "interpret": ArgType.KEYWORD,
+        "local": ArgType.KEYWORD
+    },
+    name="text_prop_nbt",
+    defaults={
+        "interpret": "false",
+        "local": "false"
+    }
+)
+class TextPropNBT(JMCFunction):
+    def call(self) -> str:
+        _type = self.raw_args["type"]
+        if not _type:
+            raise JMCValueError(
+                "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
+                self.raw_args["type"].token,
+                self.tokenizer)
+        source = self.raw_args["source"]
+        if not source:
+            raise JMCValueError(
+                "Missing NBT source in TextProp.nbt",
+                self.raw_args["source"].token,
+                self.tokenizer)
+        path = self.raw_args["path"]
+        if not path:
+            raise JMCValueError(
+                "Missing NBT path in TextProp.nbt",
+                self.raw_args["path"].token,
+                self.tokenizer)
+
+        self.add_formatted_text_prop(
+             "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "interpret": self.args["interpret"]}, self.check_bool("local"))
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="TextProps.nbt",
+    arg_type={
+        "propertyName": ArgType.STRING,
+        "indexString": ArgType.STRING,
+        "type": ArgType.KEYWORD,
+        "source": ArgType.STRING,
+        "path": ArgType.KEYWORD,
+        "interpret": ArgType.KEYWORD,
+        "local": ArgType.KEYWORD
+    },
+    name="text_props_nbt",
+    defaults={
+        "interpret": "false",
+        "local": "false"
+    }
+)
+class TextPropsNBT(JMCFunction):
+    def call(self) -> str:
+        _type = self.raw_args["type"]
+        if not _type:
+            raise JMCValueError(
+                "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
+                self.raw_args["type"].token,
+                self.tokenizer)
+        source = self.raw_args["source"]
+        if not source:
+            raise JMCValueError(
+                "Missing NBT source in TextProp.nbt",
+                self.raw_args["source"].token,
+                self.tokenizer)
+        path = self.raw_args["path"]
+        if not path:
+            raise JMCValueError(
+                "Missing NBT path in TextProp.nbt",
+                self.raw_args["path"].token,
+                self.tokenizer)
+
+        @lru_cache()
+        def inner(arg: str) -> SIMPLE_JSON_BODY:
+            return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(self.args["indexString"], arg), "interpret": self.args["interpret"]}
+        self.add_formatted_text_prop(
+             "__private_nbt_expand__", inner, self.check_bool("local"))
+        return ""
+
 
 # @ func_property(
 #     func_type=FuncType.load_only,

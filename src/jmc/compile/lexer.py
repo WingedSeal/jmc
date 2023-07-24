@@ -223,7 +223,8 @@ class Lexer:
             raise JMCSyntaxException(
                 f"Unrecognized decorator '{decorator_name}'",
                 command[0],
-                tokenizer)
+                tokenizer,
+                suggestion="Did you mean to write 'import' instead?" if decorator_name == "import" else None)
         jmc_decorator = DECORATORS[decorator_name]
         if len(command) < 5:
             raise JMCSyntaxException(
