@@ -70,8 +70,8 @@ class MathSqrt(JMCFunction):
     func_type=FuncType.VARIABLE_OPERATION,
     call_string="Math.random",
     arg_type={
-        "min": ArgType.SCOREBOARD_PLAYER,
-        "max": ArgType.SCOREBOARD_PLAYER
+        "min": ArgType.INTEGER,
+        "max": ArgType.INTEGER
     },
     name="math_random",
     defaults={
