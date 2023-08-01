@@ -204,26 +204,28 @@ const Header = () => {
                     </CodeBlock>
                 </div>
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Override minecraft namespace
+                    Override custom/minecraft namespace
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Grant JMC the authority to fully control minecraft
+                        Grant JMC the authority to fully control any other
                         namespace of the datapack. This will result in JMC
-                        deleting minecraft namespace before it compiles. You'll
-                        be able to edit it directly from jmc using{" "}
-                        <code>minecraft</code> as a folder.
+                        deleting that namespace before it compiles. You'll be
+                        able to edit it directly from jmc using namespace's name
+                        as a folder.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#override_minecraft</CodeText>
+                        <CodeText type="operator">
+                            #override namespace_name
+                        </CodeText>
                     </CodeBlock>
                     <p>
                         <Tab />
                         Example
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#override_minecraft</CodeText>
+                        <CodeText type="operator">#override minecraft</CodeText>
                     </CodeBlock>
                     <CodeBlock>
                         <CodeText type="keyword">new</CodeText>{" "}

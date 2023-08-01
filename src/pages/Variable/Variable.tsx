@@ -255,6 +255,30 @@ const Variable = () => {
                         @s SelectedItem.tag.my_var;
                     </CodeBlock>
                 </div>
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Null Coalescing
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <CodeBlock>
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
+                        <CodeText type="operator">??=</CodeText>{" "}
+                        <CodeText type="number">
+                            {"<integer>/<$variable>/<objective:selector>"}
+                        </CodeText>{" "}
+                        <CodeText type="comment">
+                            {"//"} if null, set to that integer
+                        </CodeText>
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_var</CodeText>{" "}
+                        <CodeText type="operator">??=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );

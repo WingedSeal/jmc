@@ -663,6 +663,27 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
+    <Feature id="particle_helix" summary="Particle.helix ()" keywords="">
+        <p>
+            Make spiral shaped particles. The higher the spread number, the less
+            distance between particle becomes. (Alias to{" "}
+            <code>Particle.spiral</code>)
+        </p>
+        <Command
+            name="Particle.helix "
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "radius", type: "float" },
+                { key: "height", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+            newline
+        />
+    </Feature>,
     <Feature id="particle_cylinder" summary="Particle.cylinder()" keywords="">
         <p>
             Make cylinder shaped particles. The higher the spread number, the
@@ -695,6 +716,73 @@ const BuildinFeatures = [
             params={[
                 { key: "particle", type: "string" },
                 { key: "distance", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature id="particle_square" summary="Particle.square()" keywords="">
+        <p>
+            Make square shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
+        <p>
+            Available <code>align</code> are <code>corner</code> and{" "}
+            <code>center</code>.
+        </p>
+        <Command
+            name="Particle.square"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "length", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "align", type: "Keyword", default: "corner" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature id="particle_cube" summary="Particle.cube()" keywords="">
+        <p>
+            Make cube shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
+        <p>
+            Available <code>align</code> are <code>corner</code> and{" "}
+            <code>center</code>.
+        </p>
+        <Command
+            name="Particle.square"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "length", type: "float" },
+                { key: "spread", type: "integer" },
+                { key: "align", type: "Keyword", default: "corner" },
+                { key: "speed", type: "integer", default: "1" },
+                { key: "count", type: "integer", default: "1" },
+                { key: "mode", type: "Keyword", default: "normal" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature id="particle_sphere" summary="Particle.sphere()" keywords="">
+        <p>
+            Make sphere shaped particles. The higher the spread number, the less
+            distance between particle becomes.
+        </p>
+        <Command
+            name="Particle.sphere"
+            type="JMCFunction"
+            params={[
+                { key: "particle", type: "string" },
+                { key: "radius", type: "float" },
                 { key: "spread", type: "integer" },
                 { key: "speed", type: "integer", default: "1" },
                 { key: "count", type: "integer", default: "1" },
@@ -811,6 +899,29 @@ const BuildinFeatures = [
             name="JMC.put"
             type="JMCFunction"
             params={[{ key: "command", type: "string" }]}
+        />
+    </Feature>,
+    <Feature
+        id="jmc_python"
+        summary="JMC.python()"
+        keywords="code program javascript run"
+    >
+        <p>
+            Allow you to use python code directly inside jmc, use{" "}
+            <code>emit()</code> function to return one or more commands
+        </p>
+        <p>
+            Use the same <code>env</code> to continue using old
+            variables/functions declared earlier (By default, it generates new
+            environment)
+        </p>
+        <Command
+            name="JMC.python"
+            type="JMCFunction"
+            params={[
+                { key: "pythonCode", type: "string" },
+                { key: "env", type: "string ", default: '""' },
+            ]}
         />
     </Feature>,
     <Feature
