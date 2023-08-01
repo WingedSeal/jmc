@@ -1178,6 +1178,195 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature
+        id="text_props_click_command"
+        summary="TextProps.clickCommand()"
+        keywords="run_command clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickCommand</code>, but you can use
+            <code>indexString</code> as a parameter within <code>function</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clickCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_suggest_command"
+        summary="TextProp.suggestCommand()"
+        keywords="suggest_command clickevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.clickCommand</code>, but it only 
+            suggests the command in chat instead of running it immediately.
+            <code>local</code> will delete the property after it has been used once.
+        </p>
+        <p>Add suggest_command clickEvent to the text.</p>
+        <Command
+            name="TextProp.suggestCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_suggest_command"
+        summary="TextProps.suggestCommand()"
+        keywords="suggest_command clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.suggestCommand</code>, but you can use
+            <code>indexString</code> as a parameter within <code>function</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add suggest_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.suggestCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_click_url"
+        summary="TextProp.clickURL()"
+        keywords="open_url clickevent"
+    >
+        <p>
+            Create clickable web link inside FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add open_url clickEvent to the text.</p>
+        <Command
+            name="TextProp.clickURL"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "url", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_click_url"
+        summary="TextProps.clickURL()"
+        keywords="open_url clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickURL</code>, but you can use
+            <code>indexString</code> as a parameter within <code>url</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add open_url clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clickURL"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "url", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_click_page"
+        summary="TextProp.clickPage()"
+        keywords="change_page clickevent"
+    >
+        <p>
+            Change page of book when FormattedString text is clicked, <code>local</code> 
+            will delete the property after it has been used once.
+        </p>
+        <p>Add change_page clickEvent to the text. <b>Only</b> works in books!</p>
+        <Command
+            name="TextProp.clickPage"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "page", type: "integer" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_click_page"
+        summary="TextProps.clickPage()"
+        keywords="change_page clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickPage</code>, but you can use
+            <code>indexString</code> as a parameter within <code>page</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>
+            Add change_page clickEvent to the text, replacing <code>indexString</code> with an argument. 
+            <b>Only</b> works in books!
+        </p>
+        <Command
+            name="TextProps.clickPage"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "page", type: "integer" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_clipboard"
+        summary="TextProp.clipboard()"
+        keywords="copy_to_clipboard clickevent"
+    >
+        <p>
+            Make copiable text inside FormattedString, <code>local</code> 
+            will delete the property after it has been used once.
+        </p>
+        <p>Add copy_to_clipboard clickEvent to the text.</p>
+        <Command
+            name="TextProp.clipboard"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_clipboard"
+        summary="TextProps.clipboard()"
+        keywords="copy_to_clipboard clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clipboard</code>, but you can use
+            <code>indexString</code> as a parameter within <code>page</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add copy_to_clipboard clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clipboard"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
 ];
 
 export default BuildinFeatures;
