@@ -189,7 +189,10 @@ def variable_operation(
         if isinstance(scoreboard_player.value, int):
             raise ValueError("scoreboard_player.value is int")
 
-        return f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+        if operator == "??=":
+            return f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players operation {left_token.string} {objective_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+        else:
+            return f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
 
     raise JMCSyntaxException(
         f"Unrecognized operator ({operator})", tokens[1], tokenizer)

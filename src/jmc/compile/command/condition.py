@@ -185,7 +185,7 @@ def custom_condition(
     if tokens[0].string not in {"biome", "block", "blocks",
                                 "data", "dimension", "entity", "loaded", "predicate", "score"}:
         raise JMCValueError(
-            f"Unrecoginized condition '{tokens[0].string}'",
+            f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],
             tokenizer,
             suggestion="Consider using 'block' or 'blocks' or 'data' or 'entity' or 'predicate' or 'score'.")

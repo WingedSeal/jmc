@@ -48,7 +48,7 @@ class Header(SingleTon):
     """Dictionary of string to replace and what to replace it with"""
     is_enable_macro: bool
     """Whether to enable macro at the time of creating a token"""
-    is_override_minecraft: bool
+    namespace_overrides: set[str]
     """Whether to allow jmc to take control over minecraft namespace"""
     commands: set[str]
     """List of extra command(first arguments) to allow"""
@@ -76,7 +76,7 @@ class Header(SingleTon):
         obj.macros = {}
         obj.credits = []
         obj.is_enable_macro = True
-        obj.is_override_minecraft = False
+        obj.namespace_overrides = set()
         obj.commands = set()
         obj.statics = set()
         obj.dels = set()

@@ -223,7 +223,8 @@ class Lexer:
             raise JMCSyntaxException(
                 f"Unrecognized decorator '{decorator_name}'",
                 command[0],
-                tokenizer)
+                tokenizer,
+                suggestion="Did you mean to write 'import' instead?" if decorator_name == "import" else None)
         jmc_decorator = DECORATORS[decorator_name]
         if len(command) < 5:
             raise JMCSyntaxException(
@@ -358,9 +359,9 @@ class Lexer:
         json_name = prefix + convention_jmc_to_mc(
             command[2], tokenizer, is_make_lower=False, substr=(1, -1))
 
-        if Header().is_override_minecraft and json_name.startswith("minecraft/"):
-            # len('minecraft/') = 10
-            json_path = "minecraft/" + json_type + "/" + json_name[10:]
+        namespace = json_name.split("/")[0]
+        if namespace in Header().namespace_overrides:
+            json_path = namespace + "/" + json_type + "/" + json_name[len(namespace)+1:]
         else:
             json_path = json_type + "/" + json_name
 
