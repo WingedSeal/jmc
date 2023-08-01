@@ -101,7 +101,7 @@ new tags.functions(minecraft.custom) {
     "values": []
 }
         """).set_header_file("""
-#override_minecraft
+#override minecraft
         """).build()
 
         self.assertDictEqual(
@@ -152,7 +152,7 @@ function minecraft.custom() {
     say "custom";
 }
         """).set_header_file("""
-#override_minecraft
+#override minecraft
         """).build()
 
         self.assertDictEqual(

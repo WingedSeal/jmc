@@ -361,7 +361,8 @@ class Lexer:
 
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
-            json_path = namespace + "/" + json_type + "/" + json_name[len(namespace)+1:]
+            json_path = namespace + "/" + json_type + \
+                "/" + json_name[len(namespace) + 1:]
         else:
             json_path = json_type + "/" + json_name
 
