@@ -1353,7 +1353,7 @@ const BuildinFeatures = [
     >
         <p>
             Similar to <code>TextProp.clipboard</code>, but you can use
-            <code>indexString</code> as a parameter within <code>page</code>,
+            <code>indexString</code> as a parameter within <code>text</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
         <p>Add copy_to_clipboard clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
@@ -1363,6 +1363,129 @@ const BuildinFeatures = [
             params={[
                 { key: "propertyName", type: "string" },
                 { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_text"
+        summary="TextProp.hoverText()"
+        keywords="show_text hoverevent"
+    >
+        <p>
+            Create custom hover property for FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add show_text hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverText"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_text"
+        summary="TextProps.hoverText()"
+        keywords="show_text hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverText</code>, but you can use
+            <code>indexString</code> as a parameter within <code>text</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_text hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverText"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_item"
+        summary="TextProp.hoverItem()"
+        keywords="show_item hoverevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            an item description/tooltip instead of regular text.
+        </p>
+        <p>Add show_item hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverItem"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "item", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_item"
+        summary="TextProps.hoverItem()"
+        keywords="show_item hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverItem</code>, but you can use
+            <code>indexString</code> as a parameter within <code>item</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_item hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverItem"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "item", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_entity"
+        summary="TextProp.hoverEntity()"
+        keywords="show_entity hoverevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            an entity's name and UUID, instead of regular text.
+        </p>
+        <p>Add show_entity hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverEntity"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "entity", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_entity"
+        summary="TextProps.hoverEntity()"
+        keywords="show_entity hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverEntity</code>, but you can use
+            <code>indexString</code> as a parameter within <code>entity</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_entity hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverEntity"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "entity", type: "JSON" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
         />
