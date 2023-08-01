@@ -904,7 +904,7 @@ const BuildinFeatures = [
     <Feature
         id="jmc_python"
         summary="JMC.python()"
-        keywords="code program javascript run"
+        keywords="code program javascript python run"
     >
         <p>
             Allow you to use python code directly inside jmc, use{" "}
@@ -1488,6 +1488,139 @@ const BuildinFeatures = [
                 { key: "entity", type: "JSON" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_font"
+        summary="TextProp.font()"
+        keywords="run_command clickevent"
+    >
+        <p>
+            Use a custom font for FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add run_command clickEvent to the text.</p>
+        <Command
+            name="TextProp.font"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "font", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_font"
+        summary="TextProps.font()"
+        keywords="run_command clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.font</code>, but you can use
+            <code>indexString</code> as a parameter within <code>font</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.font"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "font", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_keybind"
+        summary="TextProp.keybind()"
+        keywords="keybind key control"
+    >
+        <p>
+            Display one of the player's keybind (e.g. jump, sneak, attack, etc.) as a
+            property inside FormattedString. <code>local</code> will delete the property 
+            after it has been used once.
+        </p>
+        <p>Add keybind to the text.</p>
+        <Command
+            name="TextProp.keybind"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "keybind", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_keybind"
+        summary="TextProps.keybind()"
+        keywords="keybind key control"
+    >
+        <p>
+            Similar to <code>TextProp.keybind</code>, but you can use
+            <code>indexString</code> as a parameter within <code>keybind</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add keybind to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.keybind"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "keybind", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_nbt"
+        summary="TextProp.nbt()"
+        keywords="resolve embed nbt"
+    >
+        <p>
+            Embed the NBT path inside FormattedString. <code>interpret</code> determines
+            whether or not to resolve the value of the NBT path as JSON text string. 
+            <code>local</code> will delete the property after it has been used once.
+        </p>
+        <p>Add nbt to the text.</p>
+        <Command
+            name="TextProp.nbt"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "type", type: "keyword" },
+                { key: "source", type: "string" },
+                { key: "path", type: "string" },
+                { key: "interpret", type: "boolean", default: "false" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
+        id="text_props_nbt"
+        summary="TextProps.nbt()"
+        keywords="resolve embed nbt"
+    >
+        <p>
+            Similar to <code>TextProp.nbt</code>, but you can use
+            <code>indexString</code> as a parameter within <code>path</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add nbt to the text, replacing <code>indexString</code> in <code>path</code> with an argument.</p>
+        <Command
+            name="TextProps.nbt"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "type", type: "keyword" },
+                { key: "source", type: "string" },
+                { key: "path", type: "string" },
+                { key: "interpret", type: "boolean", default: "false" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+            newline
         />
     </Feature>,
 ];
