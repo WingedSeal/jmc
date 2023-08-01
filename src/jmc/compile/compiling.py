@@ -324,8 +324,8 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     for func_path, func in datapack.functions.items():
         namespace = func_path.split("/")[0]
         if namespace in header.namespace_overrides:
-             path = output_folder / "data" / namespace / "functions" / \
-                (func_path[len(namespace)+1:] + ".mcfunction")
+            path = output_folder / "data" / namespace / "functions" / \
+                (func_path[len(namespace) + 1:] + ".mcfunction")
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
@@ -341,7 +341,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
         namespace = json_path.split("/")[0]
         if namespace in header.namespace_overrides:
             path = output_folder / "data" / \
-                namespace / (json_path[len(namespace)+1:] + ".json")
+                namespace / (json_path[len(namespace) + 1:] + ".json")
         else:
             path = namespace_folder / (json_path + ".json")
         if json:
