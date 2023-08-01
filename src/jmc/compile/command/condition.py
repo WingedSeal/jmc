@@ -80,8 +80,10 @@ def custom_condition(
             raise JMCSyntaxException(
                 f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
 
+        objective = DataPack.var_name
         if is_obj_selector(tokens):
-            tokens[0] = merge_obj_selector(tokens, tokenizer, datapack)
+            objective = tokens[0].string
+            del tokens[0:2]
         if len(tokens) > 2 and is_obj_selector(tokens[2:]):
             tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
@@ -101,7 +103,7 @@ def custom_condition(
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 if not isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is not int")
-                compared = f'score {first_token.string} {DataPack.var_name} matches'
+                compared = f'score {first_token.string} {objective} matches'
                 if operator in {"===", "==", "="}:
                     return Condition(
                         f'{compared} {scoreboard_player.value}', IF)
@@ -128,7 +130,7 @@ def custom_condition(
                     if isinstance(scoreboard_player.value, int):
                         raise ValueError("scoreboard_player.value is int")
                     return Condition(
-                        f'score {first_token.string} {DataPack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
+                        f'score {first_token.string} {objective} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
 
                 if operator in {"===", "==", "="}:
                     operator = '='
@@ -136,7 +138,7 @@ def custom_condition(
                 if isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is int")
                 return Condition(
-                    f'score {first_token.string} {DataPack.var_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
+                    f'score {first_token.string} {objective} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
 
         elif operator_token.token_type == TokenType.KEYWORD and operator_token.string == "matches":
             match_tokens_ = tokenizer.split_keyword_token(tokens[2], "..")
@@ -162,7 +164,7 @@ def custom_condition(
                     "First integer must be less than second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?")
 
             return Condition(
-                f'score {first_token.string} {DataPack.var_name} matches {tokens[2].string}', IF)
+                f'score {first_token.string} {objective} matches {tokens[2].string}', IF)
 
         else:
             raise JMCSyntaxException(
