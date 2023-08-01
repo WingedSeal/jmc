@@ -1194,6 +1194,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "function", type: "ArrowFunction" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1236,6 +1237,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "function", type: "ArrowFunction" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1277,6 +1279,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "url", type: "string" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1321,6 +1324,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "page", type: "integer" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1362,6 +1366,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "text", type: "string" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1403,6 +1408,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "text", type: "string" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1444,6 +1450,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "item", type: "JSON" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1485,6 +1492,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "entity", type: "JSON" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1526,6 +1534,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "font", type: "string" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1568,6 +1577,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "keybind", type: "string" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1614,6 +1624,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
                 { key: "type", type: "keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "string" },
