@@ -1311,12 +1311,11 @@ const BuildinFeatures = [
         keywords="change_page clickevent"
     >
         <p>
-            Similar to <code>TextProp.clickPage</code>, but you can use
-            <code>indexString</code> as a parameter within <code>page</code>,
-            (same as how it works in the <code>Hardcode</code> functions)
+            Similar to <code>TextProp.clickPage</code>, but you can use a parameter when 
+            referencing it in FormattedText, similar to macro factory arguments.
         </p>
         <p>
-            Add change_page clickEvent to the text, replacing <code>indexString</code> with an argument. 
+            Add argument-based change_page clickEvent to the text.
             <b>Only</b> works in books!
         </p>
         <Command
@@ -1324,8 +1323,6 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
-                { key: "indexString", type: "string" },
-                { key: "page", type: "integer" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
         />
