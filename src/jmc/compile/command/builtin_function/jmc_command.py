@@ -56,28 +56,23 @@ class TimerSet(JMCFunction):
     arg_type={
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
-        "amount": ArgType.ANY
+        "amount": ArgType.INTEGER
     },
     name="item_clear",
     defaults={
         "selector": "@s",
-        "amount": ''
+        "amount": "-1"
     }
 )
 class ItemClear(JMCFunction):
     def call(self) -> str:
-        if self.args["amount"]:
-            try:
-                numerical_amount = float(self.args["amount"])
-            except ValueError:
-                raise JMCValueError(
-                    f'\'amount\' parameter must be numerical.', self.raw_args["amount"].token, self.tokenizer,
-                )
-            else:
-                if numerical_amount < 0:
-                    raise JMCValueError(
-                        f'\'amount\' parameter must be greater than or equal to 0', self.raw_args["amount"].token, self.tokenizer,
-                    )
+        numerical_amount = float(self.args["amount"])
+        if numerical_amount == -1:
+            amount = ""
+        elif numerical_amount < 0:
+            raise JMCValueError(
+                f'\'amount\' parameter must be greater than or equal to 0', self.raw_args["amount"].token, self.tokenizer,
+            )
                 
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
