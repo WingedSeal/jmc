@@ -904,7 +904,7 @@ const BuildinFeatures = [
     <Feature
         id="jmc_python"
         summary="JMC.python()"
-        keywords="code program javascript python run"
+        keywords="code program javascript run"
     >
         <p>
             Allow you to use python code directly inside jmc, use{" "}
@@ -1498,7 +1498,7 @@ const BuildinFeatures = [
     <Feature
         id="text_prop_font"
         summary="TextProp.font()"
-        keywords="run_command clickevent"
+        keywords=""
     >
         <p>
             Use a custom font for FormattedString, <code>local</code> will
@@ -1518,7 +1518,7 @@ const BuildinFeatures = [
     <Feature
         id="text_props_font"
         summary="TextProps.font()"
-        keywords="run_command clickevent"
+        keywords=""
     >
         <p>
             Similar to <code>TextProp.font</code>, but you can use
