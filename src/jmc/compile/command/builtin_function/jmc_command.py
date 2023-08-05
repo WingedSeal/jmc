@@ -52,6 +52,40 @@ class TimerSet(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Item.clear",
+    arg_type={
+        "itemId": ArgType.KEYWORD,
+        "selector": ArgType.SELECTOR,
+        "amount": ArgType.INTEGER
+    },
+    name="item_clear",
+    defaults={
+        "selector": "@s",
+        "amount": "-1"
+    }
+)
+class ItemClear(JMCFunction):
+    def call(self) -> str:
+        numerical_amount = float(self.args["amount"])
+        if numerical_amount == -1:
+            amount = ""
+        elif numerical_amount < 0:
+            raise JMCValueError(
+                f'\'amount\' parameter must be greater than or equal to 0', self.raw_args["amount"].token, self.tokenizer,
+            )
+                
+        if self.args["itemId"] not in self.datapack.data.item:
+            raise JMCValueError(
+                f'Item id: \'{self.args["itemId"]}\' is not defined.',
+                self.raw_args["itemId"].token,
+                self.tokenizer,
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+            )
+        return f'clear {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
+    
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="Item.give",
     arg_type={
         "itemId": ArgType.KEYWORD,
