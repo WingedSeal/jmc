@@ -89,7 +89,19 @@ const Variable = () => {
                         <li>
                             <code>%=</code> Modulus: Divide target's score by
                             source's score, and use the positive remainder to
-                            set the target score
+                            set the target score.
+                        </li>
+                        <li>
+                            <code>{">"}</code> Maximum: Compare target and source
+                            scores, and set target score to whichever is higher.
+                        </li>
+                        <li>
+                            <code>{"<"}</code> Minimum: Compare target and source
+                            scores, and set target score to whichever is lower.
+                        </li>
+                        <li>
+                            <code>{"><"}</code> Swap: Swap target's score with 
+                            source's score.
                         </li>
                     </ul>
                     <CodeBlock>

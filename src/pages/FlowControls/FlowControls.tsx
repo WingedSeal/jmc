@@ -388,12 +388,12 @@ const FlowControls = () => {
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
                         <li>
-                            Case can only starts at 1 and increase in ascending
+                            Cases must increase in ascending
                             order.
                         </li>
                         <li>
-                            You cannot skip a number. Case n+1 must comes after
-                            Case n.
+                            Case can start at any number, but you can't skip numbers afterwards. 
+                            (Case n+1 must comes after Case n.)
                         </li>
                         <li>
                             You are required to{" "}
@@ -404,7 +404,7 @@ const FlowControls = () => {
                             >
                                 break
                             </a>{" "}
-                            out of switch statements. Eventhough, you are not
+                            out of switch statements. Even though you are not
                             required to explicitly use the <code>break</code>{" "}
                             keyword, JMC will do that for you.
                         </li>

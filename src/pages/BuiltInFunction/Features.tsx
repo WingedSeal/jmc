@@ -1178,6 +1178,459 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature
+        id="text_props_click_command"
+        summary="TextProps.clickCommand()"
+        keywords="run_command clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickCommand</code>, but you can use
+            <code>indexString</code> as a parameter within <code>function</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clickCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_suggest_command"
+        summary="TextProp.suggestCommand()"
+        keywords="suggest_command clickevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.clickCommand</code>, but it only 
+            suggests the command in chat instead of running it immediately.
+            <code>local</code> will delete the property after it has been used once.
+        </p>
+        <p>Add suggest_command clickEvent to the text.</p>
+        <Command
+            name="TextProp.suggestCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_suggest_command"
+        summary="TextProps.suggestCommand()"
+        keywords="suggest_command clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.suggestCommand</code>, but you can use
+            <code>indexString</code> as a parameter within <code>function</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add suggest_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.suggestCommand"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "function", type: "ArrowFunction" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_click_url"
+        summary="TextProp.clickURL()"
+        keywords="open_url clickevent"
+    >
+        <p>
+            Create clickable web link inside FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add open_url clickEvent to the text.</p>
+        <Command
+            name="TextProp.clickURL"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "url", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_click_url"
+        summary="TextProps.clickURL()"
+        keywords="open_url clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickURL</code>, but you can use
+            <code>indexString</code> as a parameter within <code>url</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add open_url clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clickURL"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "url", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_click_page"
+        summary="TextProp.clickPage()"
+        keywords="change_page clickevent"
+    >
+        <p>
+            Change page of book when FormattedString text is clicked, <code>local</code> 
+            will delete the property after it has been used once.
+        </p>
+        <p>Add change_page clickEvent to the text. <b>Only</b> works in books!</p>
+        <Command
+            name="TextProp.clickPage"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "page", type: "integer" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_click_page"
+        summary="TextProps.clickPage()"
+        keywords="change_page clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clickPage</code>, but you can use a parameter when 
+            referencing it in FormattedText, similar to macro factory arguments.
+        </p>
+        <p>
+            Add argument-based change_page clickEvent to the text.
+            <b>Only</b> works in books!
+        </p>
+        <Command
+            name="TextProps.clickPage"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_clipboard"
+        summary="TextProp.clipboard()"
+        keywords="copy_to_clipboard clickevent"
+    >
+        <p>
+            Make copiable text inside FormattedString, <code>local</code> 
+            will delete the property after it has been used once.
+        </p>
+        <p>Add copy_to_clipboard clickEvent to the text.</p>
+        <Command
+            name="TextProp.clipboard"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_clipboard"
+        summary="TextProps.clipboard()"
+        keywords="copy_to_clipboard clickevent"
+    >
+        <p>
+            Similar to <code>TextProp.clipboard</code>, but you can use
+            <code>indexString</code> as a parameter within <code>text</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add copy_to_clipboard clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.clipboard"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_text"
+        summary="TextProp.hoverText()"
+        keywords="show_text hoverevent"
+    >
+        <p>
+            Create custom hover property for FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add show_text hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverText"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_text"
+        summary="TextProps.hoverText()"
+        keywords="show_text hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverText</code>, but you can use
+            <code>indexString</code> as a parameter within <code>text</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_text hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverText"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "text", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_item"
+        summary="TextProp.hoverItem()"
+        keywords="show_item hoverevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            an item description/tooltip instead of regular text.
+        </p>
+        <p>Add show_item hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverItem"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "item", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_item"
+        summary="TextProps.hoverItem()"
+        keywords="show_item hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverItem</code>, but you can use
+            <code>indexString</code> as a parameter within <code>item</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_item hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverItem"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "item", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_hover_entity"
+        summary="TextProp.hoverEntity()"
+        keywords="show_entity hoverevent"
+    >
+        <p>
+            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            an entity's name and UUID, instead of regular text.
+        </p>
+        <p>Add show_entity hoverEvent to the text.</p>
+        <Command
+            name="TextProp.hoverEntity"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "entity", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_hover_entity"
+        summary="TextProps.hoverEntity()"
+        keywords="show_entity hoverevent"
+    >
+        <p>
+            Similar to <code>TextProp.hoverEntity</code>, but you can use
+            <code>indexString</code> as a parameter within <code>entity</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add show_entity hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.hoverEntity"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "entity", type: "JSON" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_font"
+        summary="TextProp.font()"
+        keywords=""
+    >
+        <p>
+            Use a custom font for FormattedString, <code>local</code> will
+            delete the property after it has been used once.
+        </p>
+        <p>Add run_command clickEvent to the text.</p>
+        <Command
+            name="TextProp.font"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "font", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_font"
+        summary="TextProps.font()"
+        keywords=""
+    >
+        <p>
+            Similar to <code>TextProp.font</code>, but you can use
+            <code>indexString</code> as a parameter within <code>font</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.font"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "font", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_keybind"
+        summary="TextProp.keybind()"
+        keywords="keybind key control"
+    >
+        <p>
+            Display one of the player's keybind (e.g. jump, sneak, attack, etc.) as a
+            property inside FormattedString. <code>local</code> will delete the property 
+            after it has been used once.
+        </p>
+        <p>Add keybind to the text.</p>
+        <Command
+            name="TextProp.keybind"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "keybind", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_props_keybind"
+        summary="TextProps.keybind()"
+        keywords="keybind key control"
+    >
+        <p>
+            Similar to <code>TextProp.keybind</code>, but you can use
+            <code>indexString</code> as a parameter within <code>keybind</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add keybind to the text, replacing <code>indexString</code> with an argument.</p>
+        <Command
+            name="TextProps.keybind"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "keybind", type: "string" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="text_prop_nbt"
+        summary="TextProp.nbt()"
+        keywords="resolve embed nbt"
+    >
+        <p>
+            Embed the NBT path inside FormattedString. <code>interpret</code> determines
+            whether or not to resolve the value of the NBT path as JSON text string. 
+            <code>local</code> will delete the property after it has been used once.
+        </p>
+        <p>Add nbt to the text.</p>
+        <Command
+            name="TextProp.nbt"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "type", type: "keyword" },
+                { key: "source", type: "string" },
+                { key: "path", type: "string" },
+                { key: "interpret", type: "boolean", default: "false" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
+        id="text_props_nbt"
+        summary="TextProps.nbt()"
+        keywords="resolve embed nbt"
+    >
+        <p>
+            Similar to <code>TextProp.nbt</code>, but you can use
+            <code>indexString</code> as a parameter within <code>path</code>,
+            (same as how it works in the <code>Hardcode</code> functions)
+        </p>
+        <p>Add nbt to the text, replacing <code>indexString</code> in <code>path</code> with an argument.</p>
+        <Command
+            name="TextProps.nbt"
+            type="LoadOnly"
+            params={[
+                { key: "propertyName", type: "string" },
+                { key: "indexString", type: "string" },
+                { key: "type", type: "keyword" },
+                { key: "source", type: "string" },
+                { key: "path", type: "string" },
+                { key: "interpret", type: "boolean", default: "false" },
+                { key: "local", type: "boolean", default: "false" },
+            ]}
+            newline
+        />
+    </Feature>,
 ];
 
 export default BuildinFeatures;

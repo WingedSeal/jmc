@@ -25,7 +25,7 @@ const Import = () => {
                     <code>main.jmc</code>
                 </p>
                 <CodeBlock>
-                    <CodeText type="operator">@import</CodeText>{" "}
+                    <CodeText type="operator">import</CodeText>{" "}
                     <CodeText type="string">"folder_name/file_name"</CodeText>;
                 </CodeBlock>
                 <p>
@@ -55,7 +55,7 @@ const Import = () => {
                     using wildcard import (asterisk)
                 </p>
                 <CodeBlock>
-                    <CodeText type="operator">@import</CodeText>{" "}
+                    <CodeText type="operator">import</CodeText>{" "}
                     <CodeText type="string">"folder_name/*"</CodeText>;
                 </CodeBlock>
             </div>
