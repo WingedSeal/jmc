@@ -68,7 +68,7 @@ class ItemClear(JMCFunction):
     def call(self) -> str:
         numerical_amount = float(self.args["amount"])
         if numerical_amount == -1:
-            amount = ""
+            self.args["amount"] = ""
         elif numerical_amount < 0:
             raise JMCValueError(
                 f'\'amount\' parameter must be greater than or equal to 0', self.raw_args["amount"].token, self.tokenizer,
