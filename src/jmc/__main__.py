@@ -26,9 +26,9 @@ def main():
     logger.info(f"Args: {args}")
     if args.command == "init":
         init(args)
-    elif (args.command == "compile"):
+    elif args.command == "compile":
         compile()
-    elif (args.command == "config"):
+    elif args.command == "config":
         config(args)
     elif args.command == "run" or args.command is None:
         run()
