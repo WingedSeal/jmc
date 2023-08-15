@@ -84,6 +84,9 @@ def custom_condition(
         if is_obj_selector(tokens):
             objective = tokens[0].string
             del tokens[0:2]
+        if len(tokens) >= 2 and tokens[1].token_type == TokenType.PAREN_SQUARE:
+            tokens[1] = tokenizer.merge_tokens(tokens[:2])
+            del tokens[0]
         if len(tokens) > 2 and is_obj_selector(tokens[2:]):
             tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
