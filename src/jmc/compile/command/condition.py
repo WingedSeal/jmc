@@ -73,12 +73,6 @@ def custom_condition(
 
     if tokens[0].string.startswith(
             DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
-        if len(tokens) == 1:
-            return Condition(
-                f"score {tokens[0].string} {DataPack.var_name} matches 1..", True)
-        if len(tokens) == 2:
-            raise JMCSyntaxException(
-                f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
 
         objective = DataPack.var_name
         if is_obj_selector(tokens):
@@ -87,6 +81,14 @@ def custom_condition(
         if len(tokens) >= 2 and tokens[1].token_type == TokenType.PAREN_SQUARE:
             tokens[1] = tokenizer.merge_tokens(tokens[:2])
             del tokens[0]
+
+        if len(tokens) == 1:
+            return Condition(
+                f"score {tokens[0].string} {objective} matches 1..", True)
+        if len(tokens) == 2:
+            raise JMCSyntaxException(
+                f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
+
         if len(tokens) > 2 and is_obj_selector(tokens[2:]):
             tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
