@@ -37,7 +37,8 @@ class Header(SingleTon):
         "statics",
         "dels",
         "post_process",
-        "finished_compiled_time"
+        "finished_compiled_time",
+        "nometa"
     )
 
     file_read: set[str]
@@ -59,6 +60,8 @@ class Header(SingleTon):
     post_process: list[Callable[["DataPack"], Any]]
     """Python function to run before building datapack"""
     finished_compiled_time: float
+    nometa: bool
+    "Whether hand pack.mcmeta to user"
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -82,6 +85,7 @@ class Header(SingleTon):
         obj.dels = set()
         obj.post_process = []
         obj.finished_compiled_time = 0
+        obj.nometa = False
 
     def add_file_read(self, path: Path) -> None:
         """

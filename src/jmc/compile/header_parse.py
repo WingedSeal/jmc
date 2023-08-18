@@ -297,6 +297,8 @@ def __parse_header(header_str: str, file_name: str,
                 raise HeaderSyntaxException(
                     f"Static folder not found: {static_folder.as_posix()}", file_name, line, line_str, suggestion="Please recheck that the path is correct so that JMC won't accidentally delete your folder.")
             header.statics.add(static_folder)
+
+        # #uninstall
         elif directive_token.string == "uninstall":
             if arg_tokens:
                 raise HeaderSyntaxException(
@@ -317,6 +319,10 @@ def __parse_header(header_str: str, file_name: str,
                 ])
 
             header.post_process.append(__uninstall)
+        # #nometa
+        elif directive_token.string == "nometa":
+            header.nometa = True
+
         else:
             raise HeaderSyntaxException(
                 f"Unrecognized directive '{directive_token.string}'", file_name, line, line_str)

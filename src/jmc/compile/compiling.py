@@ -354,11 +354,12 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     if _is_virtual:
         return output
 
-    with (output_folder / "pack.mcmeta").open("w+", encoding="utf-8") as file:
-        dump({
-            "pack": {
-                "pack_format": int(config.pack_format),
-                "description": config.description
-            }
-        }, file, indent=4)
+    if not header.nometa:
+        with (output_folder / "pack.mcmeta").open("w+", encoding="utf-8") as file:
+            dump({
+                "pack": {
+                    "pack_format": int(config.pack_format),
+                    "description": config.description
+                }
+            }, file, indent=4)
     return None
