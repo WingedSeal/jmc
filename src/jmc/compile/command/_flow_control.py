@@ -24,8 +24,6 @@ def if_(command: list[Token], datapack: DataPack,
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
         return
-        # raise JMCSyntaxException(
-        #     "Expected {", command[2], tokenizer, display_col_length=False)
 
     datapack.lexer.if_else_box.append((command[1], command[2]))
 
