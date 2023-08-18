@@ -476,7 +476,8 @@ class Tokenizer:
             self.append_token()
             if is_paren and expect_semicolon and (
                 self.keywords[0].string in TERMINATE_LINE or (
-                    self.keywords[0].string == "execute" and self.keywords[-2].string == "run"
+                    self.keywords[0].string == "execute" and self.keywords[-2].string in {
+                        "run", "expand"}
                 ) or is_decorator(self.keywords[0].string)
             ):
                 self.append_keywords()
