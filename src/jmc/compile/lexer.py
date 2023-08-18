@@ -535,11 +535,18 @@ class Lexer:
         if is_expand:
             expanded_commands = self.datapack.parse_function_token(
                 if_else_box[0][1], tokenizer)
-            return "\n".join(
-                f"{precommand}execute {condition} {expanded_command[8:]}" if expanded_command.startswith("execute ")
-                else f"{precommand}execute {condition} run {expanded_command}"
-
-                for expanded_command in expanded_commands)
+            output = []
+            for expanded_command in expanded_commands:
+                if "\n" in expanded_command:
+                    output.append(
+                        f"{precommand}execute {condition} run {self.datapack.add_private_function('expand', expanded_command)}")
+                elif expanded_command.startswith("execute "):
+                    output.append(
+                        f"{precommand}execute {condition} {expanded_command[8:]}")
+                else:
+                    output.append(
+                        f"{precommand}execute {condition} run {expanded_command}")
+            return "\n".join(output)
 
         # Case 1: `if` only
         if len(if_else_box) == 1:
