@@ -95,10 +95,11 @@ class FuncContent:
     :param programs: List of commands(List of arguments(Token))
     :param is_load: Whether the function is a load function
     """
-    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "__commands", "command", "is_expect_command", "is_execute", "lexer"
+    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "__commands", "command", "is_expect_command", "is_execute", "lexer", "expanded_commands"
 
     command: list[Token]
     is_expect_command: bool
+    expanded_commands: list[str] | None
     is_execute: bool
 
     def __init__(self, tokenizer: Tokenizer,
@@ -110,6 +111,7 @@ class FuncContent:
         self.command_strings: list[str] = []
         self.__commands: list[str] = []
         self.lexer = lexer
+        self.expanded_commands = None
 
     def parse(self) -> list[str]:
         """
@@ -149,8 +151,14 @@ class FuncContent:
                             self.tokenizer))
 
             if self.__commands:
-                self.command_strings.append(" ".join(self.__commands))
+                if self.expanded_commands is not None:
+                    for expanded_command in self.expanded_commands:
+                        self.command_strings.append(
+                            " ".join(self.__commands) + " " + expanded_command)
+                else:
+                    self.command_strings.append(" ".join(self.__commands))
                 self.__commands = []
+                self.expanded_commands = None
 
             self.__parse_commands()
         # End of Program
@@ -166,8 +174,14 @@ class FuncContent:
                     self.tokenizer))
 
         if self.__commands:
-            self.command_strings.append(" ".join(self.__commands))
+            if self.expanded_commands is not None:
+                for expanded_command in self.expanded_commands:
+                    self.command_strings.append(
+                        " ".join(self.__commands) + " " + expanded_command)
+            else:
+                self.command_strings.append(" ".join(self.__commands))
             self.__commands = []
+            self.expanded_commands = None
         return self.command_strings
 
     def __parse_commands(self) -> None:
@@ -241,6 +255,11 @@ class FuncContent:
                 raise MinecraftSyntaxWarning(
                     "'run' keyword found outside 'execute' command", token, self.tokenizer)
             self.is_expect_command = True
+
+        if token.string == "expand" and token.token_type == TokenType.KEYWORD:
+            if self.is_execute:
+                self.is_expect_command = True
+                self.expanded_commands = []
 
         __is_first_arg = (
             token.string in FIRST_ARGUMENTS
@@ -326,8 +345,13 @@ class FuncContent:
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
             if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
-                append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
-                    "anonymous", token, self.tokenizer))
+                if self.expanded_commands is not None:
+                    self.expanded_commands = self.lexer.datapack.parse_function_token(
+                        token, self.tokenizer)
+                    self.__commands[-1] = "run"
+                else:
+                    append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
+                        "anonymous", token, self.tokenizer))
                 return True
             raise JMCSyntaxException(
                 "Expected keyword", token, self.tokenizer)
