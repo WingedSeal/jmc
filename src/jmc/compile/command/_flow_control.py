@@ -8,7 +8,7 @@ from ..exception import JMCSyntaxException
 
 
 def if_(command: list[Token], datapack: DataPack,
-        tokenizer: Tokenizer) -> None:
+        tokenizer: Tokenizer) -> str | None:
     """
     Parse `if`
     """
@@ -21,6 +21,13 @@ def if_(command: list[Token], datapack: DataPack,
     if len(command) < 3:
         raise JMCSyntaxException(
             "Expected {", command[1], tokenizer, col_length=True)
+    if command[2].string == "expand":
+        if len(command) < 4:
+            raise JMCSyntaxException(
+                "Expected {", command[2], tokenizer, col_length=True)
+        datapack.lexer.if_else_box.append((command[1], command[3]))
+        return datapack.lexer.parse_if_else(tokenizer, is_expand=True)
+
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
         return

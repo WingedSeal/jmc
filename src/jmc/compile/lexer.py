@@ -514,7 +514,7 @@ class Lexer:
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer,
-                      name: str = "if_else") -> str:
+                      name: str = "if_else", is_expand: bool = False) -> str:
         """
         Parse if-else chain using if_else_box attribute
 
@@ -524,13 +524,23 @@ class Lexer:
         """
         VAR = "__if_else__"
 
-        logger.debug(f"Handling if-else (name={name})")
+        logger.debug(f"Handling if-else (name={name}, is_expand={is_expand})")
         if_else_box = self.if_else_box
         self.if_else_box = []
         if if_else_box[0][0] is None:
             raise ValueError("if_else_box[0][0] is None")
         condition, precommand = parse_condition(
             if_else_box[0][0], tokenizer, self.datapack)
+
+        if is_expand:
+            expanded_commands = self.datapack.parse_function_token(
+                if_else_box[0][1], tokenizer)
+            return "\n".join(
+                f"{precommand}execute {condition} {expanded_command[8:]}" if expanded_command.startswith("execute ")
+                else f"{precommand}execute {condition} run {expanded_command}"
+
+                for expanded_command in expanded_commands)
+
         # Case 1: `if` only
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
