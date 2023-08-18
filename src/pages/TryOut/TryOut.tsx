@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import lzString from "lz-string";
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.22.1/full/",
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
     });
     // const consoleLog = console.log;
     // console.log = () => {};
