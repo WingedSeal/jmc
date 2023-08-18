@@ -7,7 +7,7 @@ from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
 from ..utils import ArgType, NumberType
 from ..jmc_function import JMCFunction, FuncType, func_property
-from .utils.isolated import IsolatedEnvironment  # type: ignore
+from .utils.isolated import IsolatedEnvironment
 
 
 def drange(start: float | int, stop: float | int,
@@ -71,9 +71,10 @@ class ItemClear(JMCFunction):
             self.args["amount"] = ""
         elif numerical_amount < 0:
             raise JMCValueError(
-                f'\'amount\' parameter must be greater than or equal to 0', self.raw_args["amount"].token, self.tokenizer,
+                f'\'amount\' parameter must be greater than or equal to 0', self.raw_args[
+                    "amount"].token, self.tokenizer,
             )
-                
+
         if self.args["itemId"] not in self.datapack.data.item:
             raise JMCValueError(
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
@@ -82,7 +83,7 @@ class ItemClear(JMCFunction):
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
             )
         return f'clear {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
-    
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
