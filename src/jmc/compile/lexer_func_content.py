@@ -154,7 +154,7 @@ class FuncContent:
                 if self.expanded_commands is not None:
                     for expanded_command in self.expanded_commands:
                         self.command_strings.append(
-                            " ".join(self.__commands) + " " + expanded_command)
+                            " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
                 else:
                     self.command_strings.append(" ".join(self.__commands))
                 self.__commands = []
@@ -177,7 +177,7 @@ class FuncContent:
             if self.expanded_commands is not None:
                 for expanded_command in self.expanded_commands:
                     self.command_strings.append(
-                        " ".join(self.__commands) + " " + expanded_command)
+                        " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
             else:
                 self.command_strings.append(" ".join(self.__commands))
             self.__commands = []
