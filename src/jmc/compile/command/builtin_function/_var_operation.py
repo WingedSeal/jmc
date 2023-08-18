@@ -134,7 +134,10 @@ class MathRandom(JMCFunction):
             f"scoreboard players operation {self.var} {var} = {result} {var}",
         ]
 
-        if start:
+        if start < 0:
+            run.append(
+                f"scoreboard players remove {self.var} {var} {abs(start)}")
+        elif start > 0:
             run.append(f"scoreboard players add {self.var} {var} {start}")
 
         if self.is_execute:
