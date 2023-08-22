@@ -30,9 +30,10 @@ def if_(command: list[Token], datapack: DataPack,
 
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
-        return
+        return None
 
     datapack.lexer.if_else_box.append((command[1], command[2]))
+    return None
 
 
 def else_(command: list[Token], datapack: DataPack,

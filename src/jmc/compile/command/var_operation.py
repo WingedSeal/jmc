@@ -93,7 +93,8 @@ def variable_operation(
                 f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
         return f"scoreboard players set {tokens[0].string} {objective_name} {'1' if tokens[2].string == 'true' else '0'}"
 
-    if operator == "??=" and len(tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
+    if operator == "??=" and len(
+            tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
         if len(tokens) > 3:
             raise JMCSyntaxException(
                 f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
@@ -153,7 +154,10 @@ def variable_operation(
 
         if (len(tokens) == 4 and operator ==
                 "=" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].token_type == TokenType.PAREN_ROUND):
-            return f"execute store result score {tokens[0].string} {objective_name} run function {datapack.namespace}:{convention_jmc_to_mc(tokens[2], tokenizer)}"
+            func = convention_jmc_to_mc(tokens[2], tokenizer)
+            datapack.functions_called[func] = tokens[2], tokenizer
+            return f"""execute store result score {tokens[0].string} {objective_name} run function {
+                datapack.namespace}:{func}"""
 
         left_token = tokens[0]
         right_token = tokens[2]
