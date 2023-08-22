@@ -1,6 +1,8 @@
 """Module handling variable operation"""
 from typing import TYPE_CHECKING
 
+from jmc.compile.utils import convention_jmc_to_mc
+
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -139,6 +141,10 @@ def variable_operation(
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3], datapack, tokenizer, var=tokens[0].string, is_execute=is_execute).call()
+
+        if (len(tokens) == 4 and operator ==
+                "=" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].token_type == TokenType.PAREN_ROUND):
+            return f"execute store result score {tokens[0].string} {objective_name} run function {datapack.namespace}:{convention_jmc_to_mc(tokens[2], tokenizer)}"
 
         left_token = tokens[0]
         right_token = tokens[2]
