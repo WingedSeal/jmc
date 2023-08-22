@@ -162,7 +162,7 @@ def variable_operation(
         # left_token.string operator right_token.string
 
         if len(tokens) > 3:
-            if operator in {"=", "==", "==="}:
+            if operator in {"=", "=="}:
                 return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments)}""".replace(
                     "run execute store", "store")
             else:
