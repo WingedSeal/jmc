@@ -93,6 +93,15 @@ def variable_operation(
                 f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
         return f"scoreboard players set {tokens[0].string} {objective_name} {'1' if tokens[2].string == 'true' else '0'}"
 
+    if operator == "??=" and len(tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
+        if len(tokens) > 3:
+            raise JMCSyntaxException(
+                f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
+        if tokens[2].string == 'true':
+            return f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1"
+        elif tokens[2].string == 'false':
+            return f"scoreboard players add {tokens[0].string} {objective_name} 0"
+
     if operator in {"++", "--"}:
         if len(tokens) > 2:
             raise JMCSyntaxException(
