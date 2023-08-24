@@ -36,7 +36,7 @@ In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/d
 - **Python 3.10+**
 
 ```bash
-pip install jmcfunction
+pip install jmcfunction --pre
 ```
 
 ## Build
