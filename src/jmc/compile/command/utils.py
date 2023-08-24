@@ -110,11 +110,11 @@ def find_scoreboard_player_type(
             if token.string == "true":
                 raise JMCSyntaxException(
                     "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if ($var) {`")
+                    suggestion="Did you mean `if ($var) {`?")
             if token.string == "false":
                 raise JMCSyntaxException(
                     "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if (!$var) {`")
+                    suggestion="Did you mean `if (!$var) {`?")
             raise JMCSyntaxException(
                 "Expected integer, variable, or objective:selector", token, tokenizer, suggestion="Did you mean ")
         raise JMCSyntaxException(
