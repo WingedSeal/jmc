@@ -290,6 +290,18 @@ const Header = () => {
                         </CodeText>
                     </CodeBlock>
                 </div>
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    No pack.mcmeta
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        Make <code>pack.mcmeta</code> static and hand the
+                        responsibility back to user.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#nometa</CodeText>
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );
