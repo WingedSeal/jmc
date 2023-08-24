@@ -138,21 +138,6 @@ const Variable = () => {
                     </CodeBlock>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Scoreboard
-                </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <p>
-                        <Tab /> Copy value of JMC variable into minecraft
-                        scoreboard
-                    </p>
-                    <CodeBlock>
-                        <CodeText type="variable">{"$<variable>"}</CodeText>
-                        <CodeText type="operator">{"->"}</CodeText>objective
-                        <CodeText type="operator">:</CodeText>
-                        selector;
-                    </CodeBlock>
-                </div>
-                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Incrementation
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
@@ -283,7 +268,7 @@ const Variable = () => {
                         <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
                         <CodeText type="operator">??=</CodeText>{" "}
                         <CodeText type="number">
-                            {"<integer>/<$variable>/<objective:selector>"}
+                            {"<integer>/<$variable>"}
                         </CodeText>{" "}
                         <CodeText type="comment">
                             {"//"} if null, set to that integer
