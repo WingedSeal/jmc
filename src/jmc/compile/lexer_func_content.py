@@ -403,9 +403,9 @@ class FuncContent:
             if len(self.command[key_pos:]) > 2:
                 if token.string == "unless":
                     raise JMCSyntaxException(
-                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
+                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
                 raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos], self.tokenizer, col_length=True)
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
 
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
