@@ -13,9 +13,10 @@ const Variable = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Variables in JMC always start with <code>$</code>. Any
-                        command starting with <code>$</code> will trigger JMC to
-                        treat it a a variable command.
+                        Variables in JMC always start with <code>$</code>.
+                        Alternatively, you can use your custom scoreboard
+                        objective by using <code>objective:selector</code>{" "}
+                        syntax
                     </p>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
@@ -34,6 +35,11 @@ const Variable = () => {
                         </CodeBlock>
                         <CodeBlock>
                             <CodeText type="variable">$my_variable</CodeText>{" "}
+                            <CodeText type="operator">=</CodeText>{" "}
+                            <CodeText type="number">5</CodeText>;
+                        </CodeBlock>
+                        <CodeBlock>
+                            <CodeText type="variable">scores:@s</CodeText>{" "}
                             <CodeText type="operator">=</CodeText>{" "}
                             <CodeText type="number">5</CodeText>;
                         </CodeBlock>
@@ -92,15 +98,17 @@ const Variable = () => {
                             set the target score.
                         </li>
                         <li>
-                            <code>{">"}</code> Maximum: Compare target and source
-                            scores, and set target score to whichever is higher.
+                            <code>{">"}</code> Maximum: Compare target and
+                            source scores, and set target score to whichever is
+                            higher.
                         </li>
                         <li>
-                            <code>{"<"}</code> Minimum: Compare target and source
-                            scores, and set target score to whichever is lower.
+                            <code>{"<"}</code> Minimum: Compare target and
+                            source scores, and set target score to whichever is
+                            lower.
                         </li>
                         <li>
-                            <code>{"><"}</code> Swap: Swap target's score with 
+                            <code>{"><"}</code> Swap: Swap target's score with
                             source's score.
                         </li>
                     </ul>
