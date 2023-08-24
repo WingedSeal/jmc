@@ -3,6 +3,6 @@ rm -r jmcfunction* /a
 cd ..
 python setup.py sdist bdist_wheel 
 twine upload dist/jmcfunction*
-rm jmcfunction.egg-info
+rm -r jmcfunction.egg-info
 rm -r build
 cd ..
