@@ -36,6 +36,30 @@ class PlayerFirstJoin(JMCFunction):
 
 @func_property(
     func_type=FuncType.LOAD_ONCE,
+    call_string="Player.join",
+    arg_type={
+        "function": ArgType.FUNC
+    },
+    name="player_join"
+)
+class PlayerJoin(JMCFunction):
+    def call(self) -> str:
+        obj_name = "__player_join__"
+
+        self.datapack.add_tick_command(
+            f"scoreboard players add $__global__ {obj_name} 1")
+        self.datapack.add_tick_command(
+            f"scoreboard players add @a {obj_name} 1")
+        self.datapack.add_tick_command(
+            f"""execute as @a unless score @s ticks matches $__global__ {obj_name} run {
+                self.datapack.add_private_function(self.name,
+                    self.args["function"]
+                , "main")}""")
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONCE,
     call_string="Player.rejoin",
     arg_type={
         "function": ArgType.FUNC
