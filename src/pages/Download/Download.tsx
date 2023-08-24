@@ -47,7 +47,9 @@ const Download = () => {
                     <div className="flex flex-col flex-nowrap items-center m-8">
                         <PythonSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
                         <div className="m-auto p-2 flex bg-[#292D3E] text-[#eeffff] h-16 w-44 md:h-24 md:w-72 rounded-md text-sm md:text-lg">
-                            <p className="m-auto">pip install jmcfunction</p>
+                            <p className="m-auto">
+                                pip install jmcfunction --pre
+                            </p>
                         </div>
                     </div>
                 </div>
