@@ -28,6 +28,7 @@ def __copy_macro_token(token: Token, line: int, col: int,
 
 def __custom_macro_factory(
         replaced_tokens: list[Token], key: str) -> tuple[MacroFactory, int]:
+    """Used for binding"""
 
     # Creating template
     template_tokens: list[Token | tuple[int, Token]] = []
