@@ -12,9 +12,7 @@ const Comment = () => {
                 <p>
                     <Tab />
                     JMC supports both traditional minecraft comment and in-line
-                    comment using <code>{"//"}</code>. However, traditional{" "}
-                    <code>#</code> cannot be used as in-line comment due to
-                    conflict with group tag.
+                    comment using <code>{"//"}</code> or <code>#</code>.
                 </p>
                 <p>
                     <Tab />
@@ -32,17 +30,13 @@ const Comment = () => {
                     say <CodeText type="string">"Hello World"</CodeText>;{" "}
                     <CodeText type="comment">{"//"} says hello world.</CodeText>
                     <br />
+                    <Tab />
+                    say <CodeText type="string">"Hello World"</CodeText>;{" "}
+                    <CodeText type="comment"># says hello world.</CodeText>
+                    <br />
                     {"}"}
                     <br />
                     <CodeText type="comment">{"//"} Ends of function</CodeText>
-                </CodeBlock>
-                <p className="text-warning">
-                    <Tab />
-                    But you cannot do this.
-                </p>
-                <CodeBlock>
-                    say <CodeText type="string">"Hello World"</CodeText>;{" "}
-                    <CodeText type="error"># says hello world.</CodeText>
                 </CodeBlock>
                 <p>
                     <Tab />
