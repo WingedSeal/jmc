@@ -42,7 +42,7 @@ class PyJMC:
                  "config",
                  "core",
                  "pack_mcmeta",
-                 "__cert_file")
+                 "_cert_file")
     files: dict[Path, str]
     """Dictionary of path to the file and its content"""
     resource_locations: list[Resource]
@@ -55,7 +55,7 @@ class PyJMC:
     """Inner working of JMC"""
     pack_mcmeta: dict[str, dict[str, int | str]]
     """Content of pack.mcmeta file"""
-    __cert_file: str
+    _cert_file: str
 
     def __init__(self, namespace: str, description: str,
                  pack_format: str, target: str, jmc_txt: dict[str, str] = {
@@ -76,7 +76,7 @@ class PyJMC:
         )
 
         self.__build()
-        self.__cert_file = cert_config_to_string(jmc_txt)
+        self._cert_file = cert_config_to_string(jmc_txt)
         self.pack_mcmeta = {"pack": {
             "pack_format": int(self.config.pack_format),
             "description": self.config.description
@@ -89,7 +89,7 @@ class PyJMC:
         """
         Header.clear()
         is_delete, cert_config, cert_file = read_cert(
-            self.config, _test_file=self.__cert_file)
+            self.config, _test_file=self._cert_file)
         read_header(self.config)
         lexer = Lexer(self.config)
         datapack = lexer.datapack
