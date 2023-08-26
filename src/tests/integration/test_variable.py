@@ -237,6 +237,32 @@ scoreboard players operation $var __variable__ = selector[tag=test] obj
             """)
         )
 
+    def test_null_coalesce(self):
+        pack = JMCTestPack().set_jmc_file("""
+$a ??= 0;
+$a ??= false;
+$a ??= true;
+$a ??= $b;
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard players add $a __variable__ 0
+scoreboard players add $a __variable__ 0
+execute unless score $a __variable__ = $a __variable__ run scoreboard players set $a __variable__ 1
+execute unless score $a __variable__ = $a __variable__ run scoreboard players operation $a __variable__ = $b __variable__
+            """)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
