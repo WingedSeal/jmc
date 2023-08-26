@@ -263,6 +263,26 @@ execute unless score $a __variable__ = $a __variable__ run scoreboard players op
             """)
         )
 
+    def test_execute_store(self):
+        pack = JMCTestPack().set_jmc_file("""
+$a = data get entity @s SelectedItem.tag.my_var;
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute store result score $a __variable__ run data get entity @s SelectedItem.tag.my_var
+            """)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
