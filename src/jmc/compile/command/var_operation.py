@@ -161,18 +161,20 @@ def variable_operation(
         right_token = tokens[2]
         # left_token.string operator right_token.string
 
+        old_tokens = None
+        if len(tokens) > 3 and is_obj_selector(
+                tokens, 2):  # If rvar is obj:selector
+            old_tokens = tokens.copy()
+            right_token = merge_obj_selector(
+                tokens, tokenizer, datapack, 2)
+
         if len(tokens) > 3:
             if operator in {"=", "=="}:
-                return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments)}""".replace(
+                return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments)}""".replace(
                     "run execute store", "store")
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
-
-        if len(tokens) > 3:
-            if (is_obj_selector(tokens, 2)):  # If rvar is obj:selector
-                right_token = merge_obj_selector(
-                    tokens, tokenizer, datapack, 2)
 
         scoreboard_player = find_scoreboard_player_type(
             right_token, tokenizer, allow_integer=False)
