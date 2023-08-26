@@ -185,6 +185,58 @@ execute store success score $currentAmmo __variable__ run data get entity @s Sel
             """)
         )
 
+    def test_chain(self):
+        pack = JMCTestPack().set_jmc_file("""
+$var1 = obj1:selector1 = $var2 = obj2:selector2[tag=tag2];
+$var1 = obj1:selector1 = $var2 = obj2:selector2[tag=tag2] = 5;
+$var1 = obj1:selector1 = $var2 > obj2:selector2[tag=tag2];
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute store result score $var1 __variable__ store result score selector1 obj1 run scoreboard players operation $var2 __variable__ = selector2[tag=tag2] obj2
+execute store result score $var1 __variable__ store result score selector1 obj1 store result score $var2 __variable__ run scoreboard players set selector2[tag=tag2] obj2 5
+execute store result score $var1 __variable__ store result score selector1 obj1 run scoreboard players operation $var2 __variable__ > selector2[tag=tag2] obj2
+            """)
+        )
+
+    def test_obj_selector(self):
+        pack = JMCTestPack().set_jmc_file("""
+obj:selector = 1;
+obj:selector[tag=test] = 1;
+obj:selector = $var;
+$var = obj:selector;
+$var = obj:selector[tag=test];
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard players set selector obj 1
+scoreboard players set selector[tag=test] obj 1
+scoreboard players operation selector obj = $var __variable__
+scoreboard players operation $var __variable__ = selector obj
+scoreboard players operation $var __variable__ = selector[tag=test] obj
+            """)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
