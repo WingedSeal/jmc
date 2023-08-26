@@ -1,7 +1,9 @@
 import React from "react";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const HowItWorks = () => {
+    useScrollToHash();
     return (
         <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
             <div className="text-primary text-3xl md:text-6xl mx-auto">

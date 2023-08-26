@@ -1,8 +1,10 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const FlowControls = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
@@ -387,13 +389,11 @@ const FlowControls = () => {
                         <span className="text-warning">restrictions</span>.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
+                        <li>Cases must increase in ascending order.</li>
                         <li>
-                            Cases must increase in ascending
-                            order.
-                        </li>
-                        <li>
-                            Case can start at any number, but you can't skip numbers afterwards. 
-                            (Case n+1 must comes after Case n.)
+                            Case can start at any number, but you can't skip
+                            numbers afterwards. (Case n+1 must comes after Case
+                            n.)
                         </li>
                         <li>
                             You are required to{" "}

@@ -3,6 +3,7 @@ import { loadPyodide, PyodideInterface } from "pyodide";
 import CodeBlock from "../../components/CodeBlock";
 import { useSearchParams } from "react-router-dom";
 import lzString from "lz-string";
+import useScrollToHash from "../../utils/scrollToHash";
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
@@ -100,7 +101,7 @@ except EXCEPTIONS as error:
             setJMCResult(built);
         }
     };
-
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[12vh] pb-5 md:pt-[13vh] px-4 md:px-11 flex-col items-centers content-center relative">

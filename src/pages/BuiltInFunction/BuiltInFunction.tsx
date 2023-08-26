@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import BuildinFeatures from "./Features";
 import { ReactComponent as SearchSvg } from "../../assets/image/icon/magnifying_glass_solid.svg";
 import { ReactComponent as ClearSvg } from "../../assets/image/icon/xmark_solid.svg";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const isDisplay = (summary: string, searchValue: string, keywords: string) => {
     summary = summary.toLowerCase();
@@ -45,6 +46,7 @@ const closeAll = () => {
 };
 
 const BuiltInFunction = () => {
+    useScrollToHash();
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     return (

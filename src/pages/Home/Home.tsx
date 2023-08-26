@@ -5,6 +5,7 @@ import { ReactComponent as DiscordSvg } from "../../assets/image/discord.svg";
 import { ReactComponent as GithubSvg } from "../../assets/image/github.svg";
 import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.svg";
 import { Link } from "react-router-dom";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const DownwardArrow = () => {
     return (
@@ -193,6 +194,7 @@ const Home = () => {
     imageLoader.onload = () => {
         setIsLoaded(true);
     };
+    useScrollToHash();
     return (
         <>
             <LoadingScreen isLoaded={isLoaded} />

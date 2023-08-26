@@ -1,8 +1,10 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const JsonFiles = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-secondary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">

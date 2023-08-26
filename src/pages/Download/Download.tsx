@@ -3,9 +3,10 @@ import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.
 import { ReactComponent as WindowsSvg } from "../../assets/image/windows.svg";
 import { ReactComponent as PythonSvg } from "../../assets/image/python.svg";
 import { ReactComponent as LinuxSvg } from "../../assets/image/linux.svg";
-// import CodeBlock from "../../components/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Download = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] md:pt-[15vh] px-2 md:px-10 flex-col items-centers">
