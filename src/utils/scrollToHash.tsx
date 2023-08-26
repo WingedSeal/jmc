@@ -34,7 +34,10 @@ const useScrollToHash = () => {
     useEffect(() => {
         const hash = window.location.hash.substring(1);
         if (!hash) return;
-        if (scrollToId(hash)) focusOnDetails(hash);
+        if (scrollToId(hash))
+            setTimeout(() => {
+                focusOnDetails(hash);
+            }, 700);
     }, []);
 };
 
