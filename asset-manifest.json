@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.ed9cb57c.css",
-    "main.js": "/static/js/main.c4ce5b6b.js",
+    "main.css": "/static/css/main.79d9939c.css",
+    "main.js": "/static/js/main.cbd3ce7d.js",
     "static/js/617.148e8678.chunk.js": "/static/js/617.148e8678.chunk.js",
     "static/js/406.63e2a4b3.chunk.js": "/static/js/406.63e2a4b3.chunk.js",
     "static/js/359.e768ae91.chunk.js": "/static/js/359.e768ae91.chunk.js",
@@ -13,6 +13,7 @@
     "static/js/950.c7fe332f.chunk.js": "/static/js/950.c7fe332f.chunk.js",
     "static/media/background.jpg": "/static/media/background.2f910f698191ec5b6f03.jpg",
     "static/media/minecraft_wallpaper.jpg": "/static/media/minecraft_wallpaper.bcfcc2b9349acb0ef714.jpg",
+    "static/media/Monocraft.ttf": "/static/media/Monocraft.f79a673cfd34fa9b4fac.ttf",
     "static/media/jmc-introdution.png": "/static/media/jmc-introdution.08f7a6b2ad1b71e30b6c.png",
     "static/media/jmc_icon.png": "/static/media/jmc_icon.91c8f873ccc4cb864414.png",
     "static/media/config.png": "/static/media/config.7559856c7f5c818a04b0.png",
@@ -35,12 +36,12 @@
     "static/media/xmark_solid.svg": "/static/media/xmark_solid.ae469738e479d31aa952364e12120ad2.svg",
     "static/media/magnifying_glass_solid.svg": "/static/media/magnifying_glass_solid.32a24cea497f59ea23b87d0a10a4cc74.svg",
     "static/media/windows.svg": "/static/media/windows.5b6a791c75bcdc873387befc6b024437.svg",
-    "main.ed9cb57c.css.map": "/static/css/main.ed9cb57c.css.map",
-    "main.c4ce5b6b.js.map": "/static/js/main.c4ce5b6b.js.map",
+    "main.79d9939c.css.map": "/static/css/main.79d9939c.css.map",
+    "main.cbd3ce7d.js.map": "/static/js/main.cbd3ce7d.js.map",
     "359.e768ae91.chunk.js.map": "/static/js/359.e768ae91.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ed9cb57c.css",
-    "static/js/main.c4ce5b6b.js"
+    "static/css/main.79d9939c.css",
+    "static/js/main.cbd3ce7d.js"
   ]
 }
