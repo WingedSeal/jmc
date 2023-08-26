@@ -1,43 +1,20 @@
 .main-section {
-  background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("../../assets/image/background.jpg");
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/image/background.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 }
 
-@-webkit-keyframes bouncing-arrow {
-  0%,
-  100% {
-    -webkit-transform: translateY(-8%);
-            transform: translateY(-8%);
-    -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    -webkit-transform: none;
-            transform: none;
-    -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-}
-
 @keyframes bouncing-arrow {
-  0%,
-  100% {
-    -webkit-transform: translateY(-8%);
-            transform: translateY(-8%);
-    -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  0%, 100% {
+    transform: translateY(-8%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   50% {
-    -webkit-transform: none;
-            transform: none;
-    -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
-
-.pop-up, .avoid-repetitive-task ::before, .superior-syntax ::before, .low-learning-curve ::before {
+.pop-up, .low-learning-curve ::before, .superior-syntax ::before, .avoid-repetitive-task ::before {
   @apply text-sm md:text-2xl bg-black px-2 py-1 md:px-4 md:py-3 text-white z-10 absolute w-[70vw] border-4 rounded-lg transition-all duration-100;
   top: 20%;
   left: 20%;
@@ -46,12 +23,10 @@
 .avoid-repetitive-task {
   @apply relative;
 }
-
 .avoid-repetitive-task ::before {
   content: "Notice yourself implementing the same algorithm again and again? JMC has features to implement those for you and the code will already be optimized without you having to put in any work.";
   @apply scale-x-0;
 }
-
 .avoid-repetitive-task :hover::before {
   @apply scale-x-100;
 }
@@ -59,12 +34,10 @@
 .superior-syntax {
   @apply relative;
 }
-
 .superior-syntax ::before {
   content: "Aren't you tired of creating new file for each function? In JMC, you can write everything in a single file if you want. But, you still have option to split it into multiple file. JMC also supports  inline-comment, multiline-command. And you no longer need to create tick.json or load.json";
   @apply scale-x-0;
 }
-
 .superior-syntax :hover::before {
   @apply scale-x-100;
 }
@@ -72,13 +45,10 @@
 .low-learning-curve {
   @apply relative;
 }
-
 .low-learning-curve ::before {
   content: "It takes 5-10 minutes to learn basic JMC if you already know Minecraft Datapack";
   @apply scale-x-0;
 }
-
 .low-learning-curve :hover::before {
   @apply scale-x-100;
-}
-/*# sourceMappingURL=Home.css.map */
+}/*# sourceMappingURL=Home.css.map */

@@ -128,7 +128,7 @@ except EXCEPTIONS as error:
                         <input
                             ref={namespaceInput}
                             placeholder="namespace"
-                            className="bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-w-[80vw] max-w-full"
+                            className="font-monocraft bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-w-[80vw] max-w-full"
                             onChange={() => {}}
                             spellCheck="false"
                         />
@@ -155,7 +155,7 @@ except EXCEPTIONS as error:
 
                     <textarea
                         ref={contentHeaderArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
+                        className="font-monocraft mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         placeholder="Header File"
                         spellCheck="false"
                         hidden={!isShowHeader}
@@ -183,7 +183,7 @@ except EXCEPTIONS as error:
                     />
                     <textarea
                         ref={contentTextArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
+                        className="font-monocraft mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         spellCheck="false"
                         placeholder="JMC File"
                         hidden={isShowHeader}
@@ -276,11 +276,11 @@ except EXCEPTIONS as error:
                     {Object.keys(Object.fromEntries(JMCResult)).map((key) => {
                         return (
                             <div key={key}>
-                                <div className="bg-gray-900 text-sm md:text-xl text-primary-contrast p-2 rounded-sm">
+                                <div className="font-monocraft font-bold bg-gray-900 text-sm md:text-xl text-primary-contrast p-2 rounded-sm whitespace-nowrap overflow-x-auto">
                                     {">"} {key}
                                 </div>
                                 <CodeBlock>
-                                    <pre className="inline text-sm md:text-lg">
+                                    <pre className="font-monocraft inline text-sm md:text-lg">
                                         {JMCResult.get(key)}
                                     </pre>
                                 </CodeBlock>
