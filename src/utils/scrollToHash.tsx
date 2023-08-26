@@ -5,13 +5,21 @@ const scrollToId = (sectionId: string) => {
         `section#${sectionId}`
     )?.offsetTop;
     if (offsetTop === undefined) {
-        return true;
+        return false;
     }
     window.scrollTo({
         top: offsetTop,
         behavior: "smooth",
     });
-    return false;
+    return true;
+};
+
+const focusOnDetails = (sectionId: string) => {
+    const element = document.querySelector<HTMLDetailsElement>(
+        `details#${sectionId}`
+    );
+    if (element === null) return;
+    element.open = true;
 };
 
 // function removeHash() {
@@ -26,7 +34,7 @@ const useScrollToHash = () => {
     useEffect(() => {
         const hash = window.location.hash.substring(1);
         if (!hash) return;
-        if (scrollToId(hash)) return;
+        if (scrollToId(hash)) focusOnDetails(hash);
     }, []);
 };
 
