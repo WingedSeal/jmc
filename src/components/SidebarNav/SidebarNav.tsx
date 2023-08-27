@@ -9,13 +9,38 @@ interface SidebarNavInterface {
 }
 
 const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
-    const [isOpen, setOpen] = useState("true");
+    const [isOpen, setOpen] = useState(true);
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     return (
         <div className="flex">
-            <div className="min-h-screen w-1/6" />
-            <section className="bg-gray-900 min-h-screen w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto">
+            <div
+                className={
+                    "min-h-screen w-full md:w-1/6" +
+                    (!isOpen ? " scale-x-0" : "")
+                }
+            />
+            {isOpen ? (
+                <div
+                    className="text-white mt-[12vh] fixed z-10 ml-[calc(16.667%-0.25rem)] translate-x-[-120%]"
+                    onClick={() => setOpen(false)}
+                >
+                    {"<"}
+                </div>
+            ) : (
+                <div
+                    className="text-white mt-[12vh] fixed z-10 ml-1"
+                    onClick={() => setOpen(true)}
+                >
+                    {">"}
+                </div>
+            )}
+            <section
+                className={
+                    "bg-gray-900 min-h-screen w-full md:w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto" +
+                    (!isOpen ? " scale-x-0" : "")
+                }
+            >
                 <p className="text-gray-400">
                     this sidebar nav is under construction but im publishing it
                     anyway, wat u gonna do about it{" "}
@@ -67,7 +92,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         )
                 )}
             </section>
-            <div className="w-5/6">{children}</div>
+            <div className={isOpen ? "w-5/6" : "w-full"}>{children}</div>
         </div>
     );
 };
