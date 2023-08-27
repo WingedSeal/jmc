@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const scrollToId = (sectionId: string) => {
+export const scrollToId = (sectionId: string) => {
     const offsetTop = document.querySelector<HTMLElement>(
         `section#${sectionId}`
     )?.offsetTop;

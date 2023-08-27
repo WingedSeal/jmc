@@ -36,6 +36,13 @@ const getDocsPages = (
                     hash="function_defining"
                     searchValue={searchValue}
                 />,
+                <DocsLink
+                    name="Function calling"
+                    keyword=""
+                    page="function"
+                    hash="function_calling"
+                    searchValue={searchValue}
+                />,
             ]}
         />,
     ];
