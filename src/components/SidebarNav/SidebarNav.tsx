@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ReactComponent as SearchSvg } from "../../assets/image/icon/magnifying_glass_solid.svg";
 import { ReactComponent as ClearSvg } from "../../assets/image/icon/xmark_solid.svg";
 import isDisplay from "../../utils/isDisplay";
@@ -12,6 +12,11 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
     const [isOpen, setOpen] = useState(true);
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (window.outerWidth < 768)
+            // 768px is md (phone)
+            setOpen(false);
+    }, []);
     return (
         <div className="flex">
             <div
