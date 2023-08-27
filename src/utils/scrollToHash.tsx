@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import closeNavBarEvent from "./events/closeNavBar";
 
 export const scrollToId = (sectionId: string) => {
     const offsetTop = document.querySelector<HTMLElement>(
@@ -11,6 +12,10 @@ export const scrollToId = (sectionId: string) => {
         top: offsetTop,
         behavior: "smooth",
     });
+    setTimeout(() => {
+        if (Math.abs(window.scrollY - offsetTop) <= 1)
+            window.dispatchEvent(closeNavBarEvent);
+    }, Math.abs(offsetTop - window.scrollY) * 1.1);
     return true;
 };
 

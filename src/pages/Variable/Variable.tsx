@@ -31,38 +31,39 @@ const Variable = () => {
                         Set a variable to an integer. Due to nature of how
                         minecraft scoreboard works, you can assign a variable
                         without declaring it.
-                        <CodeBlock>
-                            <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="number">{"<integer>"}</CodeText>;
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="number">5</CodeText>;
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">scores:@s</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="number">5</CodeText>;
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="operator">true</CodeText>;{" "}
-                            <CodeText type="comment">
-                                {"//"} $my_variable = 1
-                            </CodeText>
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="operator">false</CodeText>;{" "}
-                            <CodeText type="comment">
-                                {"//"} $my_variable = 0
-                            </CodeText>
-                        </CodeBlock>
                     </p>
+
+                    <CodeBlock>
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">{"<integer>"}</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">scores:@s</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="operator">true</CodeText>;{" "}
+                        <CodeText type="comment">
+                            {"//"} $my_variable = 1
+                        </CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="operator">false</CodeText>;{" "}
+                        <CodeText type="comment">
+                            {"//"} $my_variable = 0
+                        </CodeText>
+                    </CodeBlock>
                 </div>
                 <section id="variable_operation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">

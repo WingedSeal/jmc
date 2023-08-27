@@ -9,6 +9,7 @@ interface SidebarNavInterface {
 }
 
 const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
+    const [isOpen, setOpen] = useState("true");
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     return (

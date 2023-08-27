@@ -31,6 +31,9 @@ const NavBar = () => {
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("closeNavBar", () => {
+            setIsScrollUp(false);
+        });
         // window.addEventListener("resize", handleWindowResize, {
         //     passive: true,
         // });
