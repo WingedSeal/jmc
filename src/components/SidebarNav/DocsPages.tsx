@@ -1,22 +1,44 @@
-import DocsLink from "./DocsLink";
+import React, { ReactElement } from "react";
+import DocsLink, { DocsLinkInterface } from "./DocsLink";
 
-const DocsPages = [
-    <DocsLink name="Multiline Command" keyword="" page="multiline-command" />,
-    <DocsLink name="Import" keyword="" page="import" />,
-    <DocsLink name="Comment" keyword="" page="comment" />,
-    <DocsLink
-        name="Function"
-        keyword=""
-        page="function"
-        sections={[
-            <DocsLink
-                name="Function defining"
-                keyword=""
-                page="function"
-                hash="function_defining"
-            />,
-        ]}
-    />,
-];
+const getDocsPages = (
+    searchValue: string
+): ReactElement<DocsLinkInterface>[] => {
+    return [
+        <DocsLink
+            name="Multiline Command"
+            keyword=""
+            page="multiline-command"
+            searchValue={searchValue}
+        />,
+        <DocsLink
+            name="Import"
+            keyword=""
+            page="import"
+            searchValue={searchValue}
+        />,
+        <DocsLink
+            name="Comment"
+            keyword=""
+            page="comment"
+            searchValue={searchValue}
+        />,
+        <DocsLink
+            name="Function"
+            keyword=""
+            page="function"
+            searchValue={searchValue}
+            sections={[
+                <DocsLink
+                    name="Function defining"
+                    keyword=""
+                    page="function"
+                    hash="function_defining"
+                    searchValue={searchValue}
+                />,
+            ]}
+        />,
+    ];
+};
 
-export default DocsPages;
+export default getDocsPages;
