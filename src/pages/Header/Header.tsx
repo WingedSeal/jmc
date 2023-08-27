@@ -25,6 +25,7 @@ const Header = () => {
                     </p>
                 </div>
 
+                <section id="macro" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Macros
                 </div>
@@ -82,6 +83,7 @@ const Header = () => {
                         <CodeText type="param">my_obj</CodeText>);
                     </CodeBlock>
                 </div>
+                <section id="binding" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Binding / Special Macro
                 </div>
@@ -141,6 +143,7 @@ const Header = () => {
                         </CodeText>
                     </CodeBlock>
                 </div>
+                <section id="credit" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Credit
                 </div>
@@ -164,6 +167,7 @@ const Header = () => {
                         <CodeText type="string">"WingedSeal"</CodeText>
                     </CodeBlock>
                 </div>
+                <section id="include" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Include
                 </div>
@@ -177,6 +181,7 @@ const Header = () => {
                         <CodeText type="string">"header_name"</CodeText>
                     </CodeBlock>
                 </div>
+                <section id="command" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Mod / New Commands
                 </div>
@@ -191,6 +196,7 @@ const Header = () => {
                         my_mod_command
                     </CodeBlock>
                 </div>
+                <section id="del" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Delete Commands
                 </div>
@@ -205,6 +211,7 @@ const Header = () => {
                         <CodeText type="operator">#del</CodeText> my_command
                     </CodeBlock>
                 </div>
+                <section id="override" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Override custom/minecraft namespace
                 </div>
@@ -257,6 +264,7 @@ const Header = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="uninstall" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Uninstall
                 </div>
@@ -276,6 +284,7 @@ const Header = () => {
                         <CodeText type="function">uninstall</CodeText>() {"{}"}
                     </CodeBlock>
                 </div>
+                <section id="static" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Static folder
                 </div>
@@ -292,6 +301,7 @@ const Header = () => {
                         </CodeText>
                     </CodeBlock>
                 </div>
+                <section id="nometa" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     No pack.mcmeta
                 </div>

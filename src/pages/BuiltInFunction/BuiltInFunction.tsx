@@ -15,6 +15,7 @@ const closeAll = () => {
 const BuiltInFunction = () => {
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
+    useScrollToHash();
     return (
         <section className="bg-secondary-dark min-h-screen w-screen flex flex-col px-2 md:px-10 pt-[17vh]">
             {/* Begin search bar */}

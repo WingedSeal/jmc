@@ -21,6 +21,7 @@ const Variable = () => {
                         syntax
                     </p>
                 </div>
+                <section id="variable_assignment" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Assignment
                 </div>
@@ -63,6 +64,7 @@ const Variable = () => {
                         </CodeBlock>
                     </p>
                 </div>
+                <section id="variable_operation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Operation
                 </div>
@@ -113,6 +115,11 @@ const Variable = () => {
                             <code>{"><"}</code> Swap: Swap target's score with
                             source's score.
                         </li>
+                        <li>
+                            <code>??=</code> Null Coalescing: If source's score
+                            is null/undefined, set source's score to target's
+                            score.
+                        </li>
                     </ul>
                     <CodeBlock>
                         <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
@@ -139,6 +146,7 @@ const Variable = () => {
                         <CodeText type="param">@s</CodeText>;
                     </CodeBlock>
                 </div>
+                <section id="variable_incrementation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Incrementation
                 </div>
@@ -178,6 +186,7 @@ const Variable = () => {
                         </li>
                     </ul>
                 </div>
+                <section id="get_variable" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Get variable
                 </div>
@@ -201,6 +210,7 @@ const Variable = () => {
                         <CodeText type="function">get</CodeText>();
                     </CodeBlock>
                 </div>
+                <section id="convert_to_string" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Convert to string
                 </div>
@@ -219,7 +229,7 @@ const Variable = () => {
                     <p className="text-warning">
                         <Tab />
                         Using{" "}
-                        <Link to="/documentation/built-in-function">
+                        <Link to="/documentation/built-in-function#formatted_text">
                             FormattedText
                         </Link>{" "}
                         is prefered over <code>.toString</code>
@@ -233,6 +243,7 @@ const Variable = () => {
                         <CodeText type="operator">=</CodeText>true);
                     </CodeBlock>
                 </div>
+                <section id="execute_store" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Execute store
                 </div>
@@ -260,30 +271,6 @@ const Variable = () => {
                         <CodeText type="variable">$my_var</CodeText>{" "}
                         <CodeText type="operator">=</CodeText> data get entity
                         @s SelectedItem.tag.my_var;
-                    </CodeBlock>
-                </div>
-                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Null Coalescing
-                </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <CodeBlock>
-                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
-                        <CodeText type="operator">??=</CodeText>{" "}
-                        <CodeText type="number">
-                            {"<integer>/<$variable>"}
-                        </CodeText>{" "}
-                        <CodeText type="comment">
-                            {"//"} if null, set to that integer
-                        </CodeText>
-                    </CodeBlock>
-                    <p>
-                        <Tab />
-                        Example
-                    </p>
-                    <CodeBlock>
-                        <CodeText type="variable">$my_var</CodeText>{" "}
-                        <CodeText type="operator">??=</CodeText>{" "}
-                        <CodeText type="number">5</CodeText>;
                     </CodeBlock>
                 </div>
             </section>

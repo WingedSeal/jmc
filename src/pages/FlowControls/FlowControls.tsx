@@ -11,6 +11,7 @@ const FlowControls = () => {
                 <div className="text-primary text-3xl md:text-6xl mx-auto">
                     Flow controls
                 </div>
+                <section id="condition" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Condition
                 </div>
@@ -110,8 +111,9 @@ const FlowControls = () => {
                         can be used as condition as well.
                     </p>
                 </div>
+                <section id="logical_disjunction" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Logic Gate
+                    Logical Disjunction (Logic Gate)
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -158,6 +160,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="if_else" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     If & Else
                 </div>
@@ -240,6 +243,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     While Loop
                 </div>
@@ -270,6 +274,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="do_while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Do-While Loop
                 </div>
@@ -298,6 +303,7 @@ const FlowControls = () => {
                         {"<condition>"});
                     </CodeBlock>
                 </div>
+                <section id="for" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     For Loop
                 </div>
@@ -347,6 +353,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case
                 </div>
