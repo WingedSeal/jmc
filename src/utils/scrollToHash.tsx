@@ -15,7 +15,7 @@ export const scrollToId = (sectionId: string) => {
     setTimeout(() => {
         if (Math.abs(window.scrollY - offsetTop) <= 1)
             window.dispatchEvent(closeNavBarEvent);
-    }, Math.abs(offsetTop - window.scrollY) * 1.1);
+    }, 300 + Math.abs(offsetTop - window.scrollY) * 0.5);
     return true;
 };
 

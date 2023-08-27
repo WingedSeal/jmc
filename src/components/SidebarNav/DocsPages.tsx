@@ -87,7 +87,7 @@ const getDocsPages = (
                 />,
                 <DocsLink
                     name="Variable Operation"
-                    keyword="+=-=*=/=%=><??= null coalescing coalesce maximum minimum operator add subtract modulus division divide assignment set swap"
+                    keyword="+=-=*=/=%=><??= null coalescing coalesce maximum minimum operator addition subtraction modulus multiply multiplication division divide assignment set swap"
                     page="variable"
                     hash="variable_operation"
                     searchValue={searchValue}
@@ -134,6 +134,138 @@ const getDocsPages = (
                     page="flow-controls"
                     searchValue={searchValue}
                     hash="condition"
+                />,
+                <DocsLink
+                    name="Logical Disjunction"
+                    keyword="logic gate and or not parenthesis"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="logical_disjunction"
+                />,
+                <DocsLink
+                    name="If/Else"
+                    keyword="elif"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="if_else"
+                />,
+                <DocsLink
+                    name="While"
+                    keyword="loop"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="while"
+                />,
+                <DocsLink
+                    name="Do-While"
+                    keyword="loop break"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="do_while"
+                />,
+                <DocsLink
+                    name="For"
+                    keyword="loop"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="for"
+                />,
+                <DocsLink
+                    name="Switch Case"
+                    keyword="optimization optimize binary search tree performance break default match"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="switch_case"
+                />,
+            ]}
+        />,
+        <DocsLink
+            name="JSON Files"
+            keyword="new advancements item_modifiers loot_tables tags"
+            page="json-files"
+            searchValue={searchValue}
+        />,
+        <DocsLink
+            name="Built-in Function"
+            keyword="feature"
+            page="built-in-function"
+            searchValue={searchValue}
+        />,
+        <DocsLink
+            name="Header"
+            keyword="feature hjmc preprocessor preprocessing configuration"
+            page="header"
+            searchValue={searchValue}
+            sections={[
+                <DocsLink
+                    name="Macros"
+                    keyword="replaced token difine"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="define"
+                />,
+                <DocsLink
+                    name="Binding"
+                    keyword="special macro __uuid__ __namespace__ random generate auto"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="binding"
+                />,
+                <DocsLink
+                    name="Credit"
+                    keyword="comment end mcfunction"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="credit"
+                />,
+                <DocsLink
+                    name="Include"
+                    keyword="import copy"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="include"
+                />,
+                <DocsLink
+                    name="Command"
+                    keyword="new mod error create"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="command"
+                />,
+                <DocsLink
+                    name="Delete"
+                    keyword="ignore semicolons same command"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="del"
+                />,
+                <DocsLink
+                    name="Override"
+                    keyword="minecraft folder otehr namespace authority control directly"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="override"
+                />,
+                <DocsLink
+                    name="Uninstall"
+                    keyword="modify function"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="uninstall"
+                />,
+                <DocsLink
+                    name="Static"
+                    keyword="folder deleted"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="static"
+                />,
+                <DocsLink
+                    name="Nometa"
+                    keyword="pack.mcmeta static"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="nometa"
                 />,
             ]}
         />,
