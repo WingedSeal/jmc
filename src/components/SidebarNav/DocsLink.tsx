@@ -29,7 +29,7 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
                             ? `/documentation/${props.page}#${props.hash}`
                             : `/documentation/${props.page}`
                     }
-                    className="text-white no-underline"
+                    className="text-white no-underline "
                     onClick={() => {
                         if (
                             props.hash &&
@@ -41,7 +41,9 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
                             }, 100);
                     }}
                 >
-                    {props.name}
+                    <p className="hover:text-gray-300 hover:scale-105">
+                        {props.name}
+                    </p>
                 </Link>
             ) : (
                 ""
