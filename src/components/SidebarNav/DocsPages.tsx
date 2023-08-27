@@ -122,6 +122,21 @@ const getDocsPages = (
                 />,
             ]}
         />,
+        <DocsLink
+            name="Flow Controls"
+            keyword=""
+            page="flow-controls"
+            searchValue={searchValue}
+            sections={[
+                <DocsLink
+                    name="Condition"
+                    keyword=">= <= === matches if"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="condition"
+                />,
+            ]}
+        />,
     ];
 };
 
