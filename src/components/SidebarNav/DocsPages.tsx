@@ -87,7 +87,7 @@ const getDocsPages = (
                 />,
                 <DocsLink
                     name="Variable Operation"
-                    keyword="+=-=*=/=%=><??= null coalescing coalesce maximum minimum operator addition subtraction modulus multiply multiplication division divide assignment set swap"
+                    keyword="+=-=*=/=%=><??= null coalescing coalesce maximum minimum operator addition subtraction modulus multiply multiplication division divide assignment set swap math"
                     page="variable"
                     hash="variable_operation"
                     searchValue={searchValue}
@@ -137,7 +137,7 @@ const getDocsPages = (
                 />,
                 <DocsLink
                     name="Logical Operator"
-                    keyword="logic gate and or not parenthesis disjunction"
+                    keyword="logic gate and or not parenthesis disjunction discrete math"
                     page="flow-controls"
                     searchValue={searchValue}
                     hash="logical_operator"
