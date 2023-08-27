@@ -136,11 +136,11 @@ const getDocsPages = (
                     hash="condition"
                 />,
                 <DocsLink
-                    name="Logical Disjunction"
-                    keyword="logic gate and or not parenthesis"
+                    name="Logical Operator"
+                    keyword="logic gate and or not parenthesis disjunction"
                     page="flow-controls"
                     searchValue={searchValue}
-                    hash="logical_disjunction"
+                    hash="logical_operator"
                 />,
                 <DocsLink
                     name="If/Else"

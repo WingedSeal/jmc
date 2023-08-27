@@ -111,9 +111,9 @@ const FlowControls = () => {
                         can be used as condition as well.
                     </p>
                 </div>
-                <section id="logical_disjunction" />
+                <section id="logical_operator" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Logical Disjunction (Logic Gate)
+                    Logical Operator (Logic Gate)
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
