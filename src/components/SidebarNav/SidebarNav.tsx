@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ReactComponent as SearchSvg } from "../../assets/image/icon/magnifying_glass_solid.svg";
 import { ReactComponent as ClearSvg } from "../../assets/image/icon/xmark_solid.svg";
+import { ReactComponent as GreaterThanSvg } from "../../assets/image/icon/greater_than.svg";
 import isDisplay from "../../utils/isDisplay";
 import getDocsPages from "./DocsPages";
 
@@ -27,17 +28,17 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             />
             {isOpen ? (
                 <div
-                    className="cursor-pointer text-white mt-[calc(100vh-1.75rem)] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg"
+                    className="cursor-pointer text-white mt-[calc(100vh-1.75rem)] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg flex"
                     onClick={() => setOpen(false)}
                 >
-                    <div className="m-auto text-center">{"<"}</div>
+                    <GreaterThanSvg className="rotate-180 fill-white m-auto w-3/4 h-3/4" />
                 </div>
             ) : (
                 <div
-                    className="cursor-pointer text-white mt-8 fixed z-30 w-7 h-7 bg-tertiary-contrast rounded-tr-lg rounded-br-lg"
+                    className="cursor-pointer text-white mt-8 fixed z-30 w-7 h-7 bg-tertiary-contrast rounded-tr-lg rounded-br-lg flex"
                     onClick={() => setOpen(true)}
                 >
-                    <div className="m-auto text-center">{">"}</div>
+                    <GreaterThanSvg className="fill-white m-auto w-3/4 h-3/4" />
                 </div>
             )}
             <section
