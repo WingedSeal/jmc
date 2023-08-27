@@ -22,22 +22,22 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             />
             {isOpen ? (
                 <div
-                    className="text-white mt-[12vh] fixed z-10 ml-[calc(16.667%-0.25rem)] translate-x-[-100%]"
+                    className="text-white mt-[calc(100vh-1.75rem)] md:mt-[12vh] fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg"
                     onClick={() => setOpen(false)}
                 >
-                    {"<"}
+                    <div className="m-auto text-center">{"<"}</div>
                 </div>
             ) : (
                 <div
-                    className="text-white mt-[12vh] fixed z-10 ml-1"
+                    className="text-white mt-[12vh] fixed z-30 w-7 h-7 bg-tertiary-contrast rounded-tr-lg rounded-br-lg"
                     onClick={() => setOpen(true)}
                 >
-                    {">"}
+                    <div className="m-auto text-center">{">"}</div>
                 </div>
             )}
             <section
                 className={
-                    "bg-gray-900 min-h-screen w-full md:w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto transition-all duration-200 ease-out" +
+                    "bg-gray-900 min-h-screen w-full md:w-1/6 flex flex-col px-1 pl-4 md:px-3 pt-[13vh] fixed overflow-y-auto transition-all duration-200 ease-out z-20" +
                     (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
                 }
             >
@@ -88,7 +88,9 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         )
                 )}
             </section>
-            <div className={isOpen ? "w-5/6" : "w-full"}>{children}</div>
+            <div className={isOpen ? "w-max md:w-5/6" : "w-full"}>
+                {children}
+            </div>
         </div>
     );
 };
