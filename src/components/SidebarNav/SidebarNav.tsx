@@ -13,7 +13,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     return (
         <div className="flex">
-            <section className="bg-secondary-dark min-h-screen w-1/5 flex flex-col px-1 md:px-2 pt-[17vh]">
+            <section className="bg-secondary-dark min-h-screen w-1/6 flex flex-col px-1 md:px-2 pt-[17vh]">
                 {/* Begin search bar */}
                 <div className="relative h-6 mx-0 mb-4">
                     <div
@@ -61,7 +61,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         )
                 )}
             </section>
-            {children}
+            <div className="w-5/6">{children}</div>
         </div>
     );
 };

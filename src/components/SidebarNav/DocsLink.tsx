@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import isDisplay from "../../utils/isDisplay";
+import { scrollToHash } from "../../utils/scrollToHash";
 
 export interface DocsLinkInterface {
     name: string;
@@ -15,8 +16,8 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
     return (
         <div>
             {!props.sections ||
-            props.sections?.some((DocsLink) => {
-                isDisplay(
+            props.sections!.some((DocsLink) => {
+                return isDisplay(
                     DocsLink.props.name,
                     props.searchValue,
                     DocsLink.props.keyword
@@ -29,6 +30,9 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
                             : `/documentation/${props.page}`
                     }
                     className="text-white no-underline"
+                    onClick={() => {
+                        scrollToHash();
+                    }}
                 >
                     {props.name}
                 </Link>
