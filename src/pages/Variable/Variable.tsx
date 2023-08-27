@@ -72,7 +72,7 @@ const Variable = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Perform scoreboard operations, with 6 available
+                        Perform scoreboard operations, with 10 available
                         operations.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
