@@ -1,18 +1,10 @@
 import React, { useRef, useState } from "react";
-import BuildinFeatures from "./Features";
 import { ReactComponent as SearchSvg } from "../../assets/image/icon/magnifying_glass_solid.svg";
 import { ReactComponent as ClearSvg } from "../../assets/image/icon/xmark_solid.svg";
-import useScrollToHash from "../../utils/scrollToHash";
+import DocsPages from "./DocsPages";
 import isDisplay from "../../utils/isDisplay";
 
-const closeAll = () => {
-    const features = document.querySelectorAll(".feature");
-    features.forEach((feature) => {
-        feature.removeAttribute("open");
-    });
-};
-
-const BuiltInFunction = () => {
+const SidebarNav = () => {
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     return (
@@ -23,7 +15,6 @@ const BuiltInFunction = () => {
                     className="absolute top-0 left-0 w-12 h-full bg-tertiary z-20 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast transition-all active:scale-105"
                     onClick={(e) => {
                         setSearchValue(inputRef.current!.value);
-                        closeAll();
                     }}
                 >
                     <SearchSvg className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 fill-white text-2xl" />
@@ -38,7 +29,6 @@ const BuiltInFunction = () => {
                             setSearchValue(
                                 (event.target as HTMLInputElement).value
                             );
-                            closeAll();
                         }
                     }}
                 />
@@ -54,16 +44,16 @@ const BuiltInFunction = () => {
                 </div>
             </div>
             {/* End search bar */}
-            {BuildinFeatures.map(
-                (BuildinFeature, i) =>
+            {DocsPages.map(
+                (DocsPage, i) =>
                     isDisplay(
-                        BuildinFeature.props.summary,
+                        DocsPage.props.name,
                         searchValue,
-                        BuildinFeature.props.keywords
-                    ) && <div key={i}>{BuildinFeature}</div>
+                        DocsPage.props.keywords
+                    ) && <div key={i}>{DocsPage}</div>
             )}
         </section>
     );
 };
 
-export default BuiltInFunction;
+export default SidebarNav;

@@ -12,6 +12,7 @@ const Function = () => {
                 <div className="text-secondary text-3xl md:text-6xl mx-auto">
                     Function
                 </div>
+                <section id="function_defining" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function defining
                 </div>
