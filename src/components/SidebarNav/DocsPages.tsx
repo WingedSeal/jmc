@@ -96,7 +96,7 @@ const getDocsPages = (
                     name="Incrementation"
                     keyword="decrementation"
                     page="variable"
-                    hash="decrementation"
+                    hash="variable_incrementation"
                     searchValue={searchValue}
                 />,
                 <DocsLink
