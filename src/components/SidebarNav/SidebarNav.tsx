@@ -92,14 +92,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         )
                 )}
             </section>
-            <div
-                className={
-                    "transition-all duration-200 ease-out" +
-                    (isOpen ? " w-5/6" : " w-full")
-                }
-            >
-                {children}
-            </div>
+            <div className={isOpen ? "w-5/6" : "w-full"}>{children}</div>
         </div>
     );
 };
