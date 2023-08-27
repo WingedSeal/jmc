@@ -27,14 +27,14 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             />
             {isOpen ? (
                 <div
-                    className="text-white mt-[calc(100vh-1.75rem)] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg"
+                    className="cursor-pointer text-white mt-[calc(100vh-1.75rem)] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg"
                     onClick={() => setOpen(false)}
                 >
                     <div className="m-auto text-center">{"<"}</div>
                 </div>
             ) : (
                 <div
-                    className="text-white mt-8 fixed z-30 w-7 h-7 bg-tertiary-contrast rounded-tr-lg rounded-br-lg"
+                    className="cursor-pointer text-white mt-8 fixed z-30 w-7 h-7 bg-tertiary-contrast rounded-tr-lg rounded-br-lg"
                     onClick={() => setOpen(true)}
                 >
                     <div className="m-auto text-center">{">"}</div>
