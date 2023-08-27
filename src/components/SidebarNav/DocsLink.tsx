@@ -53,7 +53,7 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
                         props.searchValue,
                         DocsLink.props.keyword
                     ) && (
-                        <div key={i} className="ml-2">
+                        <div key={i} className="ml-4">
                             {DocsLink}
                         </div>
                     )
