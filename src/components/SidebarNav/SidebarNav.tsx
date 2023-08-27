@@ -16,13 +16,13 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
         <div className="flex">
             <div
                 className={
-                    "min-h-screen w-full md:w-1/6" +
-                    (!isOpen ? " scale-x-0" : "")
+                    "min-h-screen w-full md:w-1/6 bg-gray-900" +
+                    (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
                 }
             />
             {isOpen ? (
                 <div
-                    className="text-white mt-[12vh] fixed z-10 ml-[calc(16.667%-0.25rem)] translate-x-[-120%]"
+                    className="text-white mt-[12vh] fixed z-10 ml-[calc(16.667%-0.25rem)] translate-x-[-100%]"
                     onClick={() => setOpen(false)}
                 >
                     {"<"}
@@ -37,8 +37,8 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             )}
             <section
                 className={
-                    "bg-gray-900 min-h-screen w-full md:w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto" +
-                    (!isOpen ? " scale-x-0" : "")
+                    "bg-gray-900 min-h-screen w-full md:w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto transition-all duration-200 ease-out" +
+                    (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
                 }
             >
                 <p className="text-gray-400">
@@ -92,7 +92,14 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         )
                 )}
             </section>
-            <div className={isOpen ? "w-5/6" : "w-full"}>{children}</div>
+            <div
+                className={
+                    "transition-all duration-200 ease-out" +
+                    (isOpen ? " w-5/6" : " w-full")
+                }
+            >
+                {children}
+            </div>
         </div>
     );
 };
