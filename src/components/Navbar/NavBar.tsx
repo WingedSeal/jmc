@@ -69,7 +69,7 @@ const NavBar = () => {
                     alt="JMC-icon"
                 />
             </Link>
-            <div className="flex-initial w-1/2"></div>
+            <div className="flex-initial w-2/5"></div>
             {/* Mobile */}
             <button
                 className="block mr-5 ml-auto md:hidden z-20"
@@ -238,6 +238,11 @@ const NavBar = () => {
                         </LinkItem>
                     </ul>
                 </li>
+                <li className="mr-5 ml-auto mt-3">
+                    <LinkItem to="/try-out" ulRefs={ulRefsMobile}>
+                        Tryout
+                    </LinkItem>
+                </li>
                 <li className="mr-5 ml-auto relative mt-3 flex justify-end">
                     <DropDownButton
                         to="/examples"
@@ -376,6 +381,11 @@ const NavBar = () => {
                             Header
                         </LinkItem>
                     </ul>
+                </li>
+                <li className="mx-1">
+                    <LinkItem to="/try-out" ulRefs={ulRefs}>
+                        Tryout
+                    </LinkItem>
                 </li>
                 <li className="mx-1 relative">
                     <DropDownButton
