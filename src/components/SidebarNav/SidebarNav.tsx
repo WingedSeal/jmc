@@ -14,7 +14,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
     return (
         <div className="flex">
             <div className="min-h-screen w-1/6" />
-            <section className="bg-gray-800 min-h-screen w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto">
+            <section className="bg-gray-900 min-h-screen w-1/6 flex flex-col px-1 md:px-3 pt-[13vh] fixed overflow-y-auto">
                 <p className="text-gray-400">
                     this sidebar nav is under construction but im publishing it
                     anyway, wat u gonna do about it{" "}
