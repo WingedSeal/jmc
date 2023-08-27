@@ -13,13 +13,13 @@ const getDocsPages = (
         />,
         <DocsLink
             name="Import"
-            keyword=""
+            keyword="include copy"
             page="import"
             searchValue={searchValue}
         />,
         <DocsLink
             name="Comment"
-            keyword=""
+            keyword="comments // #"
             page="comment"
             searchValue={searchValue}
         />,
@@ -31,7 +31,7 @@ const getDocsPages = (
             sections={[
                 <DocsLink
                     name="Function defining"
-                    keyword=""
+                    keyword="define"
                     page="function"
                     hash="function_defining"
                     searchValue={searchValue}
@@ -41,6 +41,20 @@ const getDocsPages = (
                     keyword=""
                     page="function"
                     hash="function_calling"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Anonymous Function"
+                    keyword="arrow hidden execute"
+                    page="function"
+                    hash="anonymous_function"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Execute Expand"
+                    keyword="copy paste hardcode"
+                    page="function"
+                    hash="execute_expand"
                     searchValue={searchValue}
                 />,
             ]}
