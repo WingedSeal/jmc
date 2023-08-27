@@ -16,8 +16,8 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
         <div className="flex">
             <div
                 className={
-                    "min-h-screen w-full md:w-1/6 bg-gray-900" +
-                    (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
+                    "min-h-screen bg-gray-900" +
+                    (!isOpen ? " w-0 md:w-0" : " w-full md:w-1/6")
                 }
             />
             {isOpen ? (
@@ -41,10 +41,6 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                     (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
                 }
             >
-                <p className="text-gray-400">
-                    this sidebar nav is under construction but im publishing it
-                    anyway, wat u gonna do about it{" "}
-                </p>
                 {/* Begin search bar */}
                 <div className="relative h-6 mx-0 mb-4">
                     <div
