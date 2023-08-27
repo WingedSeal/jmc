@@ -28,7 +28,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             />
             {isOpen ? (
                 <div
-                    className="cursor-pointer text-white mt-[calc(100vh-1.75rem)] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg flex"
+                    className="cursor-pointer text-white mt-[80vh] md:mt-8 fixed z-30 ml-[calc(100%-1.75rem)] md:ml-[16.667%] w-7 h-7 bg-tertiary-contrast rounded-tl-lg md:rounded-none md:rounded-tr-lg md:rounded-br-lg flex"
                     onClick={() => setOpen(false)}
                 >
                     <GreaterThanSvg className="rotate-180 fill-white m-auto w-3/4 h-3/4" />
