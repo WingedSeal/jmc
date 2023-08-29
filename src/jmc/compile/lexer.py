@@ -50,6 +50,14 @@ JSON_FILE_TYPES = [
 ]
 """List of all possible vanilla json file types"""
 
+JMC_JSON_FILE_TYPES = {
+    "advancement": "advancements",
+    "loot_table": "loot_tables",
+    "structure": "structures",
+    "recipe": "recipes",
+}
+"""Dictionary of JMC's custom file type that'll be automatically converted to vanilla ones"""
+
 
 class Lexer:
     """
@@ -356,9 +364,14 @@ class Lexer:
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
-            raise MinecraftSyntaxWarning(
-                f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
-            )
+            if json_type in JMC_JSON_FILE_TYPES:
+                json_type = JMC_JSON_FILE_TYPES[json_type]
+            elif json_type.startswith("tag/"):
+                json_type = json_type.replace("tag/", "tags/")
+            else:
+                raise MinecraftSyntaxWarning(
+                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
+                )
 
         json_name = prefix + convention_jmc_to_mc(
             command[2], tokenizer, is_make_lower=False, substr=(1, -1))
