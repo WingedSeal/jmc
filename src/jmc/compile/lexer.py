@@ -42,7 +42,11 @@ JSON_FILE_TYPES = [
     "worldgen/structure",
     "worldgen/structure_set",
     "worldgen/template_pool",
-    "worldgen/world_preset"
+    "worldgen/world_preset",
+    "trim_material",
+    "trim_pattern",
+    "chat_type",
+    "damage_type"
 ]
 """List of all possible vanilla json file types"""
 
