@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import isDisplay from "../../utils/isDisplay";
-import { scrollToHash, scrollToId } from "../../utils/scrollToHash";
+import { scrollToHash } from "../../utils/scrollToHash";
 
 export interface DocsLinkInterface {
     name: string;
@@ -33,12 +33,10 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
                     onClick={() => {
                         if (
                             props.hash &&
-                            window.location.pathname ==
+                            window.location.pathname ===
                                 `/documentation/${props.page}`
                         )
-                            setTimeout(() => {
-                                scrollToId(props.hash!);
-                            }, 100);
+                            scrollToHash(props.hash);
                     }}
                 >
                     <p className="hover:text-gray-300 hover:scale-105">

@@ -19,7 +19,7 @@ export const scrollToId = (sectionId: string) => {
     return true;
 };
 
-const focusOnDetails = (sectionId: string) => {
+export const focusOnDetails = (sectionId: string) => {
     const element = document.querySelector<HTMLDetailsElement>(
         `details#${sectionId}`
     );
@@ -35,12 +35,12 @@ const focusOnDetails = (sectionId: string) => {
 //     );
 // }
 
-export const scrollToHash = () => {
-    const hash = window.location.hash.substring(1);
+export const scrollToHash = (hash: string | null = null) => {
+    hash ??= window.location.hash.substring(1);
     if (!hash) return;
     if (scrollToId(hash))
         setTimeout(() => {
-            focusOnDetails(hash);
+            focusOnDetails(hash!);
         }, 700);
 };
 
