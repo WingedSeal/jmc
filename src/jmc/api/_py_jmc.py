@@ -106,13 +106,19 @@ class PyJMC:
         self.namespace = datapack.namespace
         self.resource_locations = []
         for path, content in self.files.items():
-            relative_path = path.relative_to(self.config.output)
-            if relative_path.parents[-2] == "tags":
-                resource_type = f"tags/{relative_path.parents[-3].as_posix()}"
+            relative_path = path.relative_to(self.config.output / "data")
+            if relative_path.parts[1] == "tags":
+                resource_type = "/".join(relative_path.parts[1:3])
+                resource_path = "/".join(
+                    relative_path.parts[3:-1] + (relative_path.stem, ))
             else:
-                resource_type = relative_path.parents[-2].as_posix()
+                resource_type = relative_path.parts[1]
+                resource_path = "/".join(
+                    relative_path.parts[2:-1] + (relative_path.stem, ))
+            namespace = relative_path.parts[0]
 
-            resource_location = f'{self.namespace}:{relative_path.relative_to(resource_type).with_suffix("").as_posix()}'
+            # f'{namespace}:{relative_path.relative_to(resource_type).with_suffix("").as_posix()}'
+            resource_location = f"{namespace}:{resource_path}"
             self.resource_locations.append(
                 Resource(resource_type, resource_location, content))
         self.core = Core(datapack, lexer, self.config.global_data, Header())
