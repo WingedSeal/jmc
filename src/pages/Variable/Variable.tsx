@@ -15,10 +15,12 @@ const Variable = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Variables in JMC always start with <code>$</code>.
+                        Variables in JMC is simply a fake player in scoreboard
+                        of vanilla minecraft, hence it can only represents
+                        integer. It always start with <code>$</code>.
                         Alternatively, you can use your custom scoreboard
                         objective by using <code>objective:selector</code>{" "}
-                        syntax
+                        syntax.
                     </p>
                 </div>
                 <section id="variable_assignment" />
