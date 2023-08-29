@@ -6,7 +6,7 @@ import { scrollToHash } from "../../utils/scrollToHash";
 
 const howTo = (
     <Feature
-        id="how_to_read"
+        id="how_to_use"
         summary="How to use built-in function"
         keywords="tutorial explaination parameter type help basic"
         className="text-tertiary"
