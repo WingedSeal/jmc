@@ -75,8 +75,8 @@ class PyJMC:
             output=Path("Virtual-PyJMC")
         )
 
-        self.__build()
         self._cert_file = cert_config_to_string(jmc_txt)
+        self.__build()
         self.pack_mcmeta = {"pack": {
             "pack_format": int(self.config.pack_format),
             "description": self.config.description
