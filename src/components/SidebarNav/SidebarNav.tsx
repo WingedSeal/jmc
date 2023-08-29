@@ -43,7 +43,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
             )}
             <section
                 className={
-                    "bg-gray-900 min-h-screen max-h-screen w-full md:w-1/6 flex flex-col px-1 pl-4 md:px-3 pt-8 fixed overflow-y-auto transition-all duration-200 ease-out z-20" +
+                    "bg-gray-900 min-h-screen max-h-screen w-full md:w-1/6 flex flex-col px-1 pl-4 md:px-3 pt-8 fixed overflow-y-auto transition-all duration-200 ease-out z-30" +
                     (!isOpen ? " scale-x-0 -translate-x-1/2" : "")
                 }
             >
@@ -51,7 +51,7 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                     {/* Begin search bar */}
                     <div className="relative h-6 mx-0 mb-4">
                         <div
-                            className="absolute top-0 left-0 w-6 h-full bg-tertiary z-20 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast transition-all active:scale-105"
+                            className="absolute top-0 left-0 w-6 h-full bg-tertiary z-30 cursor-pointer rounded-[50%] hover:bg-tertiary-contrast transition-all active:scale-105"
                             onClick={(e) => {
                                 setSearchValue(inputRef.current!.value);
                             }}
