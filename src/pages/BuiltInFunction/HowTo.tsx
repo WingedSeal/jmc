@@ -256,7 +256,6 @@ const howTo = (
             <CodeText type="operator">,</CodeText> parameter3
             <CodeText type="operator">=</CodeText>argument3);
         </CodeBlock>
-        <p>To use a function, you can call it like the following.</p>
         <CodeBlock>
             <CodeText type="class">Module</CodeText>
             <CodeText type="operator">.</CodeText>
