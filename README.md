@@ -23,7 +23,7 @@ JMC allows you to write minecraft functions in a better language (.jmc) which is
 
 ## Documentation
 
-Everything you need to know about JMC can be found at <https://wingedseal.github.io/jmc/>
+Everything you need to know about JMC can be found at <https://jmc.wingedseal.com>
 
 ## Installation
 
