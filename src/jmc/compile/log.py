@@ -37,4 +37,5 @@ def Logger(name: str) -> logging.Logger:
     stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
 
+    logger.propagate = False
     return logger
