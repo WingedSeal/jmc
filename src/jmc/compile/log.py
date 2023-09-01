@@ -25,7 +25,6 @@ def Logger(name: str) -> logging.Logger:
     ```"""
 
     logger = logging.getLogger(name)
-    logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler(debug_log_stream)
