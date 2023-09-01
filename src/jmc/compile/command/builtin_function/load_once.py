@@ -2,7 +2,7 @@
 from ..jmc_function_mixin import EventMixin
 from ...exception import JMCMissingValueError
 from ...datapack import DataPack
-from ..utils import ArgType
+from ..utils import ArgType, hash_string_to_string
 from ..jmc_function import JMCFunction, FuncType, func_property
 
 
@@ -44,16 +44,20 @@ class PlayerFirstJoin(JMCFunction):
 )
 class PlayerJoin(JMCFunction):
     def call(self) -> str:
-        obj_name = "__player_join__"
+        obj_name = hash_string_to_string(
+            self.datapack.namespace, 9) + "_p_join"
 
         self.datapack.add_tick_command(
             f"scoreboard players add $__global__ {obj_name} 1")
         self.datapack.add_tick_command(
             f"scoreboard players add @a {obj_name} 1")
         self.datapack.add_tick_command(
-            f"""execute as @a unless score @s ticks matches $__global__ {obj_name} run {
-                self.datapack.add_private_function(self.name,
-                    self.args["function"]
+            f"""execute as @a unless score @s {obj_name} matches $__global__ {obj_name} run {
+                self.datapack.add_raw_private_function(self.name,
+                    [
+                        self.args["function"],
+                        f"scoreboard players operation @s {obj_name} = $__global__ {obj_name}"
+                    ]
                 , "main")}""")
         return ""
 
