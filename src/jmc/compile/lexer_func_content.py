@@ -554,14 +554,6 @@ class FuncContent:
         return False
 
     def __is_startswith_var(self, key_pos: int) -> bool:
-
-        # I forgot what this thing do
-        # if len(
-        #         self.command) > key_pos + 1 and self.command[key_pos + 1].string == "run" and self.command[key_pos + 1].token_type == TokenType.KEYWORD:
-        #     self.is_execute = True
-        #     append_commands(self.__commands,
-        #                     f"execute store result score {selector} {obj}")
-        #     return False
         append_commands(self.__commands, variable_operation(
             self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
         return True
