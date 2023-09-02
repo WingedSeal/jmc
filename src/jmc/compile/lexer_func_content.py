@@ -5,7 +5,7 @@ from json import dumps
 
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .exception import JMCSyntaxException, MinecraftSyntaxWarning
+from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
 from .datapack import DataPack
@@ -113,6 +113,52 @@ class FuncContent:
         self.lexer = lexer
         self.expanded_commands = None
 
+    def parse_self_command(self):
+        """
+        Parse self.command
+        """
+        if self.command[0].token_type != TokenType.KEYWORD:
+            raise JMCSyntaxException(
+                f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
+        if self.command[0].string == "new":
+            raise JMCSyntaxException(
+                "'new' keyword found in function", self.command[0], self.tokenizer)
+        if self.command[0].string == "class":
+            raise JMCSyntaxException(
+                "'class' keyword found in function", self.command[0], self.tokenizer)
+        if self.command[0].string == "function" and len(self.command) == 4:
+            raise JMCSyntaxException(
+                "Function declaration found in function", self.command[0], self.tokenizer)
+        if is_decorator(self.command[0].string):
+            raise JMCSyntaxException(
+                "Decorated function declaration found in function", self.command[0], self.tokenizer)
+        if self.command[0].string == "import":
+            raise JMCSyntaxException(
+                "Importing found in function", self.command[0], self.tokenizer)
+
+        # Boxes check
+        if self.lexer.do_while_box is not None:
+            if self.command[0].string != "while":
+                raise JMCSyntaxException(
+                    "Expected 'while'", self.command[0], self.tokenizer)
+        if self.lexer.if_else_box:
+            if self.command[0].string != "else":
+                append_commands(
+                    self.__commands, self.lexer.parse_if_else(
+                        self.tokenizer))
+
+        if self.__commands:
+            if self.expanded_commands is not None:
+                for expanded_command in self.expanded_commands:
+                    self.command_strings.append(
+                        " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
+            else:
+                self.command_strings.append(" ".join(self.__commands))
+            self.__commands = []
+            self.expanded_commands = None
+
+        self.__parse_commands()
+
     def parse(self) -> list[str]:
         """
         Parse the content
@@ -120,48 +166,7 @@ class FuncContent:
         """
         for command in self.programs:
             self.command = command
-            if self.command[0].token_type != TokenType.KEYWORD:
-                raise JMCSyntaxException(
-                    f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
-            if self.command[0].string == "new":
-                raise JMCSyntaxException(
-                    "'new' keyword found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == "class":
-                raise JMCSyntaxException(
-                    "'class' keyword found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == "function" and len(self.command) == 4:
-                raise JMCSyntaxException(
-                    "Function declaration found in function", self.command[0], self.tokenizer)
-            if is_decorator(self.command[0].string):
-                raise JMCSyntaxException(
-                    "Decorated function declaration found in function", self.command[0], self.tokenizer)
-            if self.command[0].string == "import":
-                raise JMCSyntaxException(
-                    "Importing found in function", self.command[0], self.tokenizer)
-
-            # Boxes check
-            if self.lexer.do_while_box is not None:
-                if self.command[0].string != "while":
-                    raise JMCSyntaxException(
-                        "Expected 'while'", self.command[0], self.tokenizer)
-            if self.lexer.if_else_box:
-                if self.command[0].string != "else":
-                    append_commands(
-                        self.__commands, self.lexer.parse_if_else(
-                            self.tokenizer))
-
-            if self.__commands:
-                if self.expanded_commands is not None:
-                    for expanded_command in self.expanded_commands:
-                        self.command_strings.append(
-                            " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
-                else:
-                    self.command_strings.append(" ".join(self.__commands))
-                self.__commands = []
-                self.expanded_commands = None
-
-            self.__parse_commands()
-        # End of Program
+            self.parse_self_command()
 
         # Boxes check
         if self.lexer.do_while_box is not None:
@@ -554,8 +559,27 @@ class FuncContent:
         return False
 
     def __is_startswith_var(self, key_pos: int) -> bool:
-        append_commands(self.__commands, variable_operation(
-            self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
+        try:
+            append_commands(self.__commands, variable_operation(
+                self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
+        except EXCEPTIONS as var_error:
+            if key_pos != 0:
+                raise var_error
+            first_token = self.command[0]
+            self.command[0] = Token(first_token.token_type,
+                                    first_token.line,
+                                    first_token.col + 1,
+                                    first_token.string[1:],
+                                    first_token._macro_length)
+            try:
+                self.parse_self_command()
+            except EXCEPTIONS as normal_error:
+                token = self.command[0]
+                if token.string not in VANILLA_COMMANDS and token.string not in Header(
+                ).commands and token.string != "":
+                    raise var_error
+                raise normal_error
+            self.__commands[0] = "$" + self.__commands[0]
         return True
 
     def __is_jmc_function(self, key_pos: int, token: Token) -> bool:

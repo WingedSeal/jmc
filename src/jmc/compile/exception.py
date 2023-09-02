@@ -226,3 +226,18 @@ class MinecraftSyntaxWarning(SyntaxError):
                         display_col_length, entire_line, suggestion)
         log(self, (msg, ))
         super().__init__(msg)
+
+
+EXCEPTIONS = (
+    HeaderDuplicatedMacro,
+    HeaderFileNotFoundError,
+    HeaderSyntaxException,
+    JMCDecodeJSONError,
+    JMCFileNotFoundError,
+    JMCMissingValueError,
+    JMCSyntaxException,
+    JMCSyntaxWarning,
+    JMCValueError,
+    MinecraftSyntaxWarning,
+    JMCBuildError
+)
