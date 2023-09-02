@@ -402,7 +402,7 @@ class Lexer:
                 suggestion=f"This json was already defined at line {old_json_token.line} col {old_json_token.col} in {old_json_tokenizer.file_path}")
 
         try:
-            json: dict[str, str] = loads(json_content)
+            json: dict[str, str] = loads(json_content.replace('\t', '').replace('\n', ''))
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(error, command[3], tokenizer) from error
         if not json:
