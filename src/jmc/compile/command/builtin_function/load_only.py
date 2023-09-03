@@ -1692,10 +1692,12 @@ class TextPropsKeybind(JMCFunction):
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
         "interpret": ArgType.KEYWORD,
-        "local": ArgType.KEYWORD
+        "local": ArgType.KEYWORD,
+        "separator": ArgType.STRING
     },
     name="text_prop_nbt",
     defaults={
+        "separator": ", ",
         "interpret": "false",
         "local": "false"
     }
@@ -1721,8 +1723,11 @@ class TextPropNBT(JMCFunction):
                 self.raw_args["path"].token,
                 self.tokenizer)
 
+        output = {self.args["type"]: self.args["source"], "nbt": self.args["path"], "interpret": self.args["interpret"]}
+        if self.args["separator"] != ", ":
+            output["separator"] = json.loads(self.format_text("separator"))
         self.add_formatted_text_prop(
-            "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "interpret": self.args["interpret"]}, self.check_bool("local"))
+            "__private_nbt_expand__", output, self.check_bool("local"))
         return ""
 
 
@@ -1736,10 +1741,12 @@ class TextPropNBT(JMCFunction):
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
         "interpret": ArgType.KEYWORD,
-        "local": ArgType.KEYWORD
+        "local": ArgType.KEYWORD,
+        "separator": ArgType.STRING
     },
     name="text_props_nbt",
     defaults={
+        "separator":", ",
         "interpret": "false",
         "local": "false"
     }
@@ -1768,7 +1775,7 @@ class TextPropsNBT(JMCFunction):
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(
-                self.args["indexString"], arg), "interpret": self.args["interpret"]}
+                self.args["indexString"], arg), "interpret": self.args["interpret"], "separator": json.loads(self.format_text("separator"))}
         self.add_formatted_text_prop(
             "__private_nbt_expand__", inner, self.check_bool("local"))
         return ""
