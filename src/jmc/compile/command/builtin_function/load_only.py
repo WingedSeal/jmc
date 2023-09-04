@@ -1812,3 +1812,4 @@ class TextPropsNBT(JMCFunction):
 # )
 # class DebugCleanup(JMCFunction):
 #     pass
+
