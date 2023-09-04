@@ -1691,9 +1691,9 @@ class TextPropsKeybind(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
-        "local": ArgType.KEYWORD,
-        "separator": ArgType.STRING
+        "local": ArgType.KEYWORD
     },
     name="text_prop_nbt",
     defaults={
@@ -1740,9 +1740,9 @@ class TextPropNBT(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
-        "local": ArgType.KEYWORD,
-        "separator": ArgType.STRING
+        "local": ArgType.KEYWORD
     },
     name="text_props_nbt",
     defaults={

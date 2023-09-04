@@ -609,8 +609,8 @@ class FormattedText:
                     self.current_json[key] = {}
                     self.current_json[key]["nbt"] = json_body["nbt"](arg)  # type: ignore # fmt: off
                     self.current_json[key]["interpret"] = json_body["interpret"](arg)  # type: ignore # fmt: off
-                if "separator" in json_body.keys():
-                    self.current_json[key]["separator"] = json_body["separator"](arg)
+                    if "separator" in json_body.keys():
+                        self.current_json[key]["separator"] = json_body["separator"](arg)
 
                     if "entity" in json_body.keys():
                         self.current_json[key]["entity"] = json_body["entity"]  # type: ignore # fmt: off
