@@ -220,7 +220,7 @@ def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
         with path.open("r", encoding="utf-8") as file:
             content = file.read()
         try:
-            json: dict[str, Any] = loads(content)
+            json: dict[str, Any] = loads(content, strict = False)
             json["values"] = [
                 value for value in json["values"] if not value.startswith(config.namespace + ":")]
         except JSONDecodeError as error:
