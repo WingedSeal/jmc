@@ -101,6 +101,14 @@ def custom_condition(
 
         first_token, operator_token, second_token = tokens
         if operator_token.token_type == TokenType.OPERATOR:
+            if second_token.string == "true":
+                raise JMCSyntaxException(
+                    "Expected integer, variable, or objective:selector", second_token, tokenizer,
+                    suggestion=f"Did you mean `if ({first_token.string}) {{`?")
+            if second_token.string == "false":
+                raise JMCSyntaxException(
+                    "Expected integer, variable, or objective:selector", second_token, tokenizer,
+                    suggestion=f"Did you mean `if (!{first_token.string}) {{`?")
             scoreboard_player = find_scoreboard_player_type(
                 second_token, tokenizer)
             operator = operator_token.string
