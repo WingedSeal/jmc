@@ -107,22 +107,10 @@ def find_scoreboard_player_type(
     splits = token.string.split(":", 1)
     if len(splits) == 1:
         if allow_integer:
-            if token.string == "true":
-                raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if ($var) {`?")
-            if token.string == "false":
-                raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if (!$var) {`?")
             raise JMCSyntaxException(
                 "Expected integer, variable, or objective:selector", token, tokenizer, suggestion="Did you mean ")
         raise JMCSyntaxException(
             "Expected variable or objective:selector", token, tokenizer)
-    # if len(splits) > 2:
-    #     raise JMCSyntaxException(
-    #         "Scoreboard's player cannot contain more than 1 colon(:)", token, tokenizer)
-
     return ScoreboardPlayer(
         player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
