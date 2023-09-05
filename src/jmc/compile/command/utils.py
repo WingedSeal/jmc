@@ -487,11 +487,30 @@ class FormattedText:
 
         self.result.append({key: value})
 
+    def __can_merge(self) -> bool:
+        """
+        Whether current_json and result[-1] can merge
+        """
+        return (
+            bool(self.result) and
+            len(self.result[-1]) == 2 and
+            "text" in self.result[-1] and
+            "color" in self.result[-1] and
+            len(self.current_json) == 2 and
+            "text" in self.current_json and
+            "color" in self.current_json and
+            self.result[-1]["color"] == self.current_json["color"]
+        )
+
     def __push(self) -> None:
         """
         Append current_json to result and reset it
         """
         if not self.current_json["text"]:
+            return
+        if self.__can_merge():
+            self.result[-1]["text"] += self.current_json["text"]  # type: ignore # fmt: off
+            self.current_json = {"text": ""}
             return
         self.result.append(self.current_json)
         self.current_json = {"text": ""}
@@ -703,7 +722,7 @@ class FormattedText:
             self.current_json["color"] = prop
             self.current_color = prop
 
-        if prop in {"bold", "italic", "underlined",
+        elif prop in {"bold", "italic", "underlined",
                     "strikethrough", "obfuscated"}:
             if self.current_color:
                 self.current_json["color"] = self.current_color
