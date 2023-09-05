@@ -774,6 +774,9 @@ class FormattedText:
         if not self.result:
             return '""'
 
+        if len(self.result) == 1 and len(self.result[0]) == 1 and "text" in self.result[0]:
+            return json.dumps(self.result[0]["text"])
+
         if len(self.result) == 1:
             if self.is_default_no_italic and "italic" not in self.result[0]:
                 self.result[0]["italic"] = False
