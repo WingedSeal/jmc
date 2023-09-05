@@ -700,10 +700,6 @@ class FormattedText:
             "black",
             "reset",
         }:
-            if "color" in self.current_json:
-                raise JMCValueError(
-                    f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
-
             self.current_json["color"] = prop
             self.current_color = prop
 
