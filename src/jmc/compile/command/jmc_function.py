@@ -280,7 +280,7 @@ class JMCFunction:
         :return: JSON
         """
         try:
-            json = loads(self.args[parameter])
+            json = loads(self.args[parameter], strict=False)
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
                 error, self.raw_args[parameter].token, self.tokenizer) from error

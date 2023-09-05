@@ -1,2 +1,2 @@
-VERSION = "v1.2.15-alpha.7"
+VERSION = "v1.2.15"
 CONFIG_FILE_NAME = "jmc_config.json"
