@@ -118,7 +118,7 @@ const BuildinFeatures = [
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
             newline
-        />
+        /> 
     </Feature>,
     <Feature
         id="item_create_sign"
@@ -187,8 +187,8 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="item_clear" summary="Item.clear()" keywords="remove">
-        <p>
+    <Feature id="item_clear" summary="Item.clear()" keywords="remove erase take away">
+        <p> 
             Clear item created from <code>Item.create</code> from a player.{" "}
             <code>amount</code> at -1 means to clear all.
         </p>
