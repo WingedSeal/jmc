@@ -1657,6 +1657,7 @@ const BuildinFeatures = [
                 { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "Keyword" },
+                { key: "separator", type: "string" },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1686,6 +1687,7 @@ const BuildinFeatures = [
                 { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "Keyword" },
+                { key: "separator", type: "string", default: "\"\"" },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
