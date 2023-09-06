@@ -840,7 +840,7 @@ const BuildinFeatures = [
                 <code>boxSize</code> is the size of entity detection cube.
             </li>
             <li>
-                <code>target</code> is acceptable target for collution.
+                <code>target</code> is acceptable target for collusion.
             </li>
             <li>
                 <code>startAtEye</code> is wheter to start at the entity's eyes.
