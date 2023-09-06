@@ -155,16 +155,16 @@ const howTo = (
             {"}"}
             <br />
             <CodeText type="class">
-                JSObject{"<ParameterType1, ParameterType2>"}
+                JSObject{"<KeyType, ValueType>"}
             </CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"{"}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             <CodeText type="operator">,</CodeText>{" "}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             {"}"}
             <br />
             <CodeText type="class">List{"<ParameterType>"}</CodeText>{" "}
