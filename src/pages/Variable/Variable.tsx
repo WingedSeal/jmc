@@ -46,7 +46,9 @@ const Variable = () => {
                         <CodeText type="number">5</CodeText>;
                     </CodeBlock>
                     <CodeBlock>
-                        <CodeText type="variable">scores:@s</CodeText>{" "}
+                        scores
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="param">@s</CodeText>{" "}
                         <CodeText type="operator">=</CodeText>{" "}
                         <CodeText type="number">5</CodeText>;
                     </CodeBlock>
@@ -70,8 +72,9 @@ const Variable = () => {
                         <CodeText type="variable">$var1</CodeText>{" "}
                         <CodeText type="operator">=</CodeText>{" "}
                         <CodeText type="variable">$var2</CodeText>{" "}
-                        <CodeText type="operator">=</CodeText>{" "}
-                        <CodeText type="variable">scores:@s</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText> scores
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="param">@s</CodeText>{" "}
                         <CodeText type="operator">=</CodeText>{" "}
                         <CodeText type="number">5</CodeText>;
                     </CodeBlock>
