@@ -377,6 +377,11 @@ class FuncContent:
             if self.__is_schedule(key_pos):
                 return True
 
+        if token.string == "$" and len(
+                self.command) > key_pos and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND:
+            append_commands(self.__commands, token.string)
+            return False
+
         if token.string.startswith(DataPack.VARIABLE_SIGN):
             if self.__is_startswith_var(key_pos):
                 return True
@@ -473,7 +478,8 @@ class FuncContent:
                             f"function {self.lexer.datapack.namespace}:{func}")
             return True
 
-        if token.string not in VANILLA_COMMANDS and token.string not in Header().commands:
+        if token.string not in VANILLA_COMMANDS and token.string not in Header(
+        ).commands:
             if not self.command_strings:
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
