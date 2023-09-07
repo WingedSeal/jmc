@@ -150,6 +150,13 @@ const getDocsPages = (
                     hash="if_else"
                 />,
                 <DocsLink
+                    name="If expand"
+                    keyword="execute"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="if_expand"
+                />,
+                <DocsLink
                     name="While"
                     keyword="loop"
                     page="flow-controls"

@@ -66,6 +66,15 @@ const Variable = () => {
                             {"//"} $my_variable = 0
                         </CodeText>
                     </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$var1</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="variable">$var2</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="variable">scores:@s</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
                 </div>
                 <section id="variable_operation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">

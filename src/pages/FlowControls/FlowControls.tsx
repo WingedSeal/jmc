@@ -1,7 +1,8 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
-import useScrollToHash from "../../utils/scrollToHash";
+import useScrollToHash, { scrollToHash } from "../../utils/scrollToHash";
+import { Link } from "react-router-dom";
 
 const FlowControls = () => {
     useScrollToHash();
@@ -242,6 +243,25 @@ const FlowControls = () => {
                         <br />
                         {"}"}
                     </CodeBlock>
+                </div>
+                <section id="if_expand" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    If expand
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Similar to{" "}
+                        <Link
+                            to="/documentation/function#execute_expand"
+                            onClick={() => {
+                                scrollToHash("execute_expand");
+                            }}
+                        >
+                            Execute expand
+                        </Link>{" "}
+                        but for <code>if</code>.
+                    </p>
                 </div>
                 <section id="while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">

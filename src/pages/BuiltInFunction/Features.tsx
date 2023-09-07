@@ -59,6 +59,17 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
+    <Feature id="player_join" summary="Player.join()" keywords="">
+        <p>
+            Run commands as player and at player every time a player joins the
+            world.
+        </p>
+        <Command
+            name="Player.join"
+            type="LoadOnce"
+            params={[{ key: "function", type: "Function" }]}
+        />
+    </Feature>,
     <Feature
         id="player_die"
         summary="Player.die()"
@@ -173,6 +184,21 @@ const BuildinFeatures = [
                 { key: "itemId", type: "Keyword" },
                 { key: "selector", type: "TargetSelector", default: "@s" },
                 { key: "amount", type: "integer", default: "1" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="item_clear" summary="Item.clear()" keywords="remove">
+        <p>
+            Clear item created from <code>Item.create</code> from a player.{" "}
+            <code>amount</code> at -1 means to clear all.
+        </p>
+        <Command
+            name="Item.clear"
+            type="JMCFunction"
+            params={[
+                { key: "itemId", type: "Keyword" },
+                { key: "selector", type: "TargetSelector", default: "@s" },
+                { key: "amount", type: "integer", default: "-1" },
             ]}
         />
     </Feature>,
