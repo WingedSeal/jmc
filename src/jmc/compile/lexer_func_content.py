@@ -126,7 +126,8 @@ class FuncContent:
         if self.command[0].string == "class":
             raise JMCSyntaxException(
                 "'class' keyword found in function", self.command[0], self.tokenizer)
-        if self.command[0].string == "function" and len(self.command) == 4:
+        if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
+                self.command):
             raise JMCSyntaxException(
                 "Function declaration found in function", self.command[0], self.tokenizer)
         if is_decorator(self.command[0].string):
