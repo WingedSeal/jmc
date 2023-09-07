@@ -11,6 +11,9 @@ const BuildinFeatures = [
         id="player_on_event"
         summary="Player.onEvent()"
         keywords="scoreboard jump drop craft stats change"
+        examples={[
+            "jmc=AoGwhgngpgTgdAewHYFEBuUkBcAUArAVwFsAHAGgAIcBKAXgD4BvAKAEgBnSCgIgEkLCpKABMAhNwDczAL7UJQA",
+        ]}
     >
         <p>
             Run commands on positive change of scoreboard and reset the score.
@@ -1185,10 +1188,13 @@ const BuildinFeatures = [
     >
         <p>
             Similar to <code>TextProp.clickCommand</code>, but you can use
-            <code>indexString</code> as a parameter within <code>function</code>,
-            (same as how it works in the <code>Hardcode</code> functions)
+            <code>indexString</code> as a parameter within <code>function</code>
+            , (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add run_command clickEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.clickCommand"
             type="LoadOnly"
@@ -1206,9 +1212,10 @@ const BuildinFeatures = [
         keywords="suggest_command clickevent"
     >
         <p>
-            Does the same thing as <code>TextProp.clickCommand</code>, but it only 
-            suggests the command in chat instead of running it immediately.
-            <code>local</code> will delete the property after it has been used once.
+            Does the same thing as <code>TextProp.clickCommand</code>, but it
+            only suggests the command in chat instead of running it immediately.
+            <code>local</code> will delete the property after it has been used
+            once.
         </p>
         <p>Add suggest_command clickEvent to the text.</p>
         <Command
@@ -1228,10 +1235,13 @@ const BuildinFeatures = [
     >
         <p>
             Similar to <code>TextProp.suggestCommand</code>, but you can use
-            <code>indexString</code> as a parameter within <code>function</code>,
-            (same as how it works in the <code>Hardcode</code> functions)
+            <code>indexString</code> as a parameter within <code>function</code>
+            , (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add suggest_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add suggest_command clickEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.suggestCommand"
             type="LoadOnly"
@@ -1249,8 +1259,8 @@ const BuildinFeatures = [
         keywords="open_url clickevent"
     >
         <p>
-            Create clickable web link inside FormattedString, <code>local</code> will
-            delete the property after it has been used once.
+            Create clickable web link inside FormattedString, <code>local</code>{" "}
+            will delete the property after it has been used once.
         </p>
         <p>Add open_url clickEvent to the text.</p>
         <Command
@@ -1273,7 +1283,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>url</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add open_url clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add open_url clickEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.clickURL"
             type="LoadOnly"
@@ -1291,10 +1304,13 @@ const BuildinFeatures = [
         keywords="change_page clickevent"
     >
         <p>
-            Change page of book when FormattedString text is clicked, <code>local</code> 
+            Change page of book when FormattedString text is clicked,{" "}
+            <code>local</code>
             will delete the property after it has been used once.
         </p>
-        <p>Add change_page clickEvent to the text. <b>Only</b> works in books!</p>
+        <p>
+            Add change_page clickEvent to the text. <b>Only</b> works in books!
+        </p>
         <Command
             name="TextProp.clickPage"
             type="LoadOnly"
@@ -1311,8 +1327,9 @@ const BuildinFeatures = [
         keywords="change_page clickevent"
     >
         <p>
-            Similar to <code>TextProp.clickPage</code>, but you can use a parameter when 
-            referencing it in FormattedText, similar to macro factory arguments.
+            Similar to <code>TextProp.clickPage</code>, but you can use a
+            parameter when referencing it in FormattedText, similar to macro
+            factory arguments.
         </p>
         <p>
             Add argument-based change_page clickEvent to the text.
@@ -1333,7 +1350,7 @@ const BuildinFeatures = [
         keywords="copy_to_clipboard clickevent"
     >
         <p>
-            Make copiable text inside FormattedString, <code>local</code> 
+            Make copiable text inside FormattedString, <code>local</code>
             will delete the property after it has been used once.
         </p>
         <p>Add copy_to_clipboard clickEvent to the text.</p>
@@ -1357,7 +1374,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>text</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add copy_to_clipboard clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add copy_to_clipboard clickEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.clipboard"
             type="LoadOnly"
@@ -1375,8 +1395,8 @@ const BuildinFeatures = [
         keywords="show_text hoverevent"
     >
         <p>
-            Create custom hover property for FormattedString, <code>local</code> will
-            delete the property after it has been used once.
+            Create custom hover property for FormattedString, <code>local</code>{" "}
+            will delete the property after it has been used once.
         </p>
         <p>Add show_text hoverEvent to the text.</p>
         <Command
@@ -1399,7 +1419,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>text</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add show_text hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add show_text hoverEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.hoverText"
             type="LoadOnly"
@@ -1417,7 +1440,7 @@ const BuildinFeatures = [
         keywords="show_item hoverevent"
     >
         <p>
-            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            Does the same thing as <code>TextProp.hoverText</code>, but displays
             an item description/tooltip instead of regular text.
         </p>
         <p>Add show_item hoverEvent to the text.</p>
@@ -1441,7 +1464,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>item</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add show_item hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add show_item hoverEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.hoverItem"
             type="LoadOnly"
@@ -1459,7 +1485,7 @@ const BuildinFeatures = [
         keywords="show_entity hoverevent"
     >
         <p>
-            Does the same thing as <code>TextProp.hoverText</code>, but displays 
+            Does the same thing as <code>TextProp.hoverText</code>, but displays
             an entity's name and UUID, instead of regular text.
         </p>
         <p>Add show_entity hoverEvent to the text.</p>
@@ -1483,7 +1509,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>entity</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add show_entity hoverEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add show_entity hoverEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.hoverEntity"
             type="LoadOnly"
@@ -1495,11 +1524,7 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature
-        id="text_prop_font"
-        summary="TextProp.font()"
-        keywords=""
-    >
+    <Feature id="text_prop_font" summary="TextProp.font()" keywords="">
         <p>
             Use a custom font for FormattedString, <code>local</code> will
             delete the property after it has been used once.
@@ -1515,17 +1540,16 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature
-        id="text_props_font"
-        summary="TextProps.font()"
-        keywords=""
-    >
+    <Feature id="text_props_font" summary="TextProps.font()" keywords="">
         <p>
             Similar to <code>TextProp.font</code>, but you can use
             <code>indexString</code> as a parameter within <code>font</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add run_command clickEvent to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add run_command clickEvent to the text, replacing{" "}
+            <code>indexString</code> with an argument.
+        </p>
         <Command
             name="TextProps.font"
             type="LoadOnly"
@@ -1543,9 +1567,9 @@ const BuildinFeatures = [
         keywords="keybind key control"
     >
         <p>
-            Display one of the player's keybind (e.g. jump, sneak, attack, etc.) as a
-            property inside FormattedString. <code>local</code> will delete the property 
-            after it has been used once.
+            Display one of the player's keybind (e.g. jump, sneak, attack, etc.)
+            as a property inside FormattedString. <code>local</code> will delete
+            the property after it has been used once.
         </p>
         <p>Add keybind to the text.</p>
         <Command
@@ -1568,7 +1592,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>keybind</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add keybind to the text, replacing <code>indexString</code> with an argument.</p>
+        <p>
+            Add keybind to the text, replacing <code>indexString</code> with an
+            argument.
+        </p>
         <Command
             name="TextProps.keybind"
             type="LoadOnly"
@@ -1586,9 +1613,11 @@ const BuildinFeatures = [
         keywords="resolve embed nbt"
     >
         <p>
-            Embed the NBT path inside FormattedString. <code>interpret</code> determines
-            whether or not to resolve the value of the NBT path as JSON text string. 
-            <code>local</code> will delete the property after it has been used once.
+            Embed the NBT path inside FormattedString. <code>interpret</code>{" "}
+            determines whether or not to resolve the value of the NBT path as
+            JSON text string.
+            <code>local</code> will delete the property after it has been used
+            once.
         </p>
         <p>Add nbt to the text.</p>
         <Command
@@ -1615,7 +1644,10 @@ const BuildinFeatures = [
             <code>indexString</code> as a parameter within <code>path</code>,
             (same as how it works in the <code>Hardcode</code> functions)
         </p>
-        <p>Add nbt to the text, replacing <code>indexString</code> in <code>path</code> with an argument.</p>
+        <p>
+            Add nbt to the text, replacing <code>indexString</code> in{" "}
+            <code>path</code> with an argument.
+        </p>
         <Command
             name="TextProps.nbt"
             type="LoadOnly"
