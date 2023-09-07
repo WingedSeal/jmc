@@ -101,6 +101,19 @@ const howTo = (
                 {"//"} A plain text to be used as is
             </CodeText>
             <br />
+            <CodeText type="class">string</CodeText>{" "}
+            <CodeText type="operator">=</CodeText>{" "}
+            <CodeText type="string">`</CodeText>
+            <br />
+            <CodeText type="string">
+                {" "}
+                line1
+                <br />
+                line2
+                <br />`
+            </CodeText>{" "}
+            <CodeText type="comment">{"//"} A multiline string</CodeText>
+            <br />
             <CodeText type="class">FormattedString</CodeText>{" "}
             <CodeText type="operator">=</CodeText>{" "}
             <CodeText type="string">{'"&<gold,bold>Cooler String"'}</CodeText>{" "}
