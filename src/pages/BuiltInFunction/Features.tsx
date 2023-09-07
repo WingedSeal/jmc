@@ -563,6 +563,9 @@ const BuildinFeatures = [
         id="trigger_setup"
         summary="Trigger.setup()"
         keywords="permissions perms scoreboard op"
+        examples={[
+            "jmc=GYVwdgxgLglg9mABAWwJ4DFwQBQEpEDeAUAJADOAhqogEQCSiAThUgAZSMwDmXApoylQAVTj36IyvKIgBMrGgG4iAXyJER3PowB0kqCAAO2NBrGMANIVIBGAFyI8AXgB8BStXpMWidqK2DTLXkFZXNSGXs0TEgVXAUgA",
+        ]}
     >
         <p>
             Setup a trigger system for custom command or allowing players with
