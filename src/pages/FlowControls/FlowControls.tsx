@@ -1,7 +1,8 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
-import useScrollToHash from "../../utils/scrollToHash";
+import useScrollToHash, { scrollToHash } from "../../utils/scrollToHash";
+import { Link } from "react-router-dom";
 
 const FlowControls = () => {
     useScrollToHash();
@@ -11,6 +12,7 @@ const FlowControls = () => {
                 <div className="text-primary text-3xl md:text-6xl mx-auto">
                     Flow controls
                 </div>
+                <section id="condition" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Condition
                 </div>
@@ -110,8 +112,9 @@ const FlowControls = () => {
                         can be used as condition as well.
                     </p>
                 </div>
+                <section id="logical_operator" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Logic Gate
+                    Logical Operator (Logic Gate)
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -158,6 +161,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="if_else" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     If & Else
                 </div>
@@ -240,6 +244,26 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="if_expand" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    If expand
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Similar to{" "}
+                        <Link
+                            to="/documentation/function#execute_expand"
+                            onClick={() => {
+                                scrollToHash("execute_expand");
+                            }}
+                        >
+                            Execute expand
+                        </Link>{" "}
+                        but for <code>if</code>.
+                    </p>
+                </div>
+                <section id="while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     While Loop
                 </div>
@@ -270,6 +294,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="do_while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Do-While Loop
                 </div>
@@ -298,6 +323,7 @@ const FlowControls = () => {
                         {"<condition>"});
                     </CodeBlock>
                 </div>
+                <section id="for" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     For Loop
                 </div>
@@ -347,6 +373,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case
                 </div>

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import closeNavBarEvent from "./events/closeNavBar";
 
-const scrollToId = (sectionId: string) => {
+export const scrollToId = (sectionId: string) => {
     const offsetTop = document.querySelector<HTMLElement>(
         `section#${sectionId}`
     )?.offsetTop;
@@ -11,10 +12,14 @@ const scrollToId = (sectionId: string) => {
         top: offsetTop,
         behavior: "smooth",
     });
+    setTimeout(() => {
+        if (Math.abs(window.scrollY - offsetTop) <= 1)
+            window.dispatchEvent(closeNavBarEvent);
+    }, 300 + Math.abs(offsetTop - window.scrollY) * 0.5);
     return true;
 };
 
-const focusOnDetails = (sectionId: string) => {
+export const focusOnDetails = (sectionId: string) => {
     const element = document.querySelector<HTMLDetailsElement>(
         `details#${sectionId}`
     );
@@ -30,15 +35,17 @@ const focusOnDetails = (sectionId: string) => {
 //     );
 // }
 
+export const scrollToHash = (hash: string | null = null) => {
+    hash ??= window.location.hash.substring(1);
+    if (!hash) return;
+    if (scrollToId(hash))
+        setTimeout(() => {
+            focusOnDetails(hash!);
+        }, 700);
+};
+
 const useScrollToHash = () => {
-    useEffect(() => {
-        const hash = window.location.hash.substring(1);
-        if (!hash) return;
-        if (scrollToId(hash))
-            setTimeout(() => {
-                focusOnDetails(hash);
-            }, 700);
-    }, []);
+    useEffect(scrollToHash, []);
 };
 
 export default useScrollToHash;
