@@ -30,7 +30,7 @@ const BuildinFeatures = [
     <Feature
         id="player_first_join"
         summary="Player.firstJoin()"
-        keywords="world"
+        keywords="world connect login"
     >
         <p>
             Run commands as player and at player when joining the World for the
@@ -45,7 +45,7 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_rejoin" summary="Player.rejoin()" keywords="leave">
+    <Feature id="player_rejoin" summary="Player.rejoin()" keywords="leave reconnect relog">
         <p>
             Run commands as player and at player when a player leave a world
             then join back.
@@ -59,7 +59,7 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_join" summary="Player.join()" keywords="">
+    <Feature id="player_join" summary="Player.join()" keywords="world connect login">
         <p>
             Run commands as player and at player every time a player joins the
             world.
@@ -118,7 +118,7 @@ const BuildinFeatures = [
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
             newline
-        />
+        /> 
     </Feature>,
     <Feature
         id="item_create_sign"
@@ -187,8 +187,8 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="item_clear" summary="Item.clear()" keywords="remove">
-        <p>
+    <Feature id="item_clear" summary="Item.clear()" keywords="remove erase take away">
+        <p> 
             Clear item created from <code>Item.create</code> from a player.{" "}
             <code>amount</code> at -1 means to clear all.
         </p>
@@ -1433,7 +1433,7 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
-                { key: "text", type: "string" },
+                { key: "text", type: "FormattedString" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
         />
@@ -1458,7 +1458,7 @@ const BuildinFeatures = [
             params={[
                 { key: "propertyName", type: "string" },
                 { key: "indexString", type: "string" },
-                { key: "text", type: "string" },
+                { key: "text", type: "FormattedString" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
         />
@@ -1654,9 +1654,10 @@ const BuildinFeatures = [
             type="LoadOnly"
             params={[
                 { key: "propertyName", type: "string" },
-                { key: "type", type: "keyword" },
+                { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
-                { key: "path", type: "string" },
+                { key: "path", type: "Keyword" },
+                { key: "separator", type: "string", default: "\"\"" },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1683,9 +1684,10 @@ const BuildinFeatures = [
             params={[
                 { key: "propertyName", type: "string" },
                 { key: "indexString", type: "string" },
-                { key: "type", type: "keyword" },
+                { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
-                { key: "path", type: "string" },
+                { key: "path", type: "Keyword" },
+                { key: "separator", type: "string", default: "\"\"" },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}

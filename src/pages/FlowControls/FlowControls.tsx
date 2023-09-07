@@ -71,9 +71,9 @@ const FlowControls = () => {
                     </p>
                     <CodeBlock>
                         <CodeText type="keyword">if</CodeText> (
-                        <CodeText type="class">$deathCount</CodeText>
-                        <CodeText type="operator">{">"}</CodeText>
-                        <CodeText type="number">5</CodeText> ) {"{"}
+                        <CodeText type="class">$deathCount</CodeText>{" "}
+                        <CodeText type="operator">{">"}</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>) {"{"}
                         <br />
                         <Tab />
                         say{" "}
@@ -84,7 +84,7 @@ const FlowControls = () => {
                         <CodeText type="operator">matches</CodeText>{" "}
                         <CodeText type="number">2</CodeText>
                         <CodeText type="operator">..</CodeText>
-                        <CodeText type="number">3</CodeText> ) {"{"}
+                        <CodeText type="number">3</CodeText>) {"{"}
                         <br />
                         <Tab />
                         say{" "}
