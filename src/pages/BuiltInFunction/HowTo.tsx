@@ -155,16 +155,16 @@ const howTo = (
             {"}"}
             <br />
             <CodeText type="class">
-                JSObject{"<ParameterType1, ParameterType2>"}
+                JSObject{"<KeyType, ValueType>"}
             </CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"{"}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             <CodeText type="operator">,</CodeText>{" "}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             {"}"}
             <br />
             <CodeText type="class">List{"<ParameterType>"}</CodeText>{" "}
@@ -193,7 +193,7 @@ const howTo = (
             <CodeText type="class">FunctionName</CodeText>
             <br />
             <CodeText type="class">TargetSelector</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> @a[tag
+            <CodeText type="operator">=</CodeText> <CodeText type="param">@a</CodeText>[tag
             <CodeText type="operator">=</CodeText>test]
             <br />
             <CodeText type="class">Scoreboard</CodeText>{" "}
@@ -230,7 +230,7 @@ const howTo = (
             <CodeText type="operator">:</CodeText> Used in condition such as if,
             while etc.
             <br />
-            if ( <CodeText type="class">Bool</CodeText>
+            <CodeText type="keyword">if</CodeText> ( <CodeText type="class">Bool</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">example</CodeText>(argument) ) {"{"}
             <br />
@@ -356,7 +356,7 @@ const howTo = (
             <br />
             <Tab />
             <Tab />
-            effect give @s speed 1 255 True;
+            effect give <CodeText type="param">@s</CodeText> speed <CodeText type="number">1</CodeText> <CodeText type="number">255</CodeText> <CodeText type="operator">true</CodeText>;
             <br />
             <Tab />
             {"} "}
@@ -371,7 +371,7 @@ const howTo = (
                 }
             </CodeText>
             <br />
-            execute as @a run <CodeText type="class">Item</CodeText>
+            execute as <CodeText type="param">@a</CodeText> run <CodeText type="class">Item</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">give</CodeText>(veryCoolSword);
         </CodeBlock>
