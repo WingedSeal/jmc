@@ -56,7 +56,7 @@ If you would like to build the executable yourself (on Windows).
 If you would like to use latest unreleased feature, you can install jmc directly from github repository.
 
 1. Install [Python 3.10](https://www.python.org/downloads/release/python-3108/)
-2. Open command prompt
+2. Open a terminal (command prompt as administrator on Windows)
 3. Go to repository directory using `cd`
 4. Run `cd ./src` 
 5. Run `pip install setuptools`
