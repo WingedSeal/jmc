@@ -616,6 +616,9 @@ class FormattedText:
                     self.current_json[key] = {}
                     self.current_json[key]["nbt"] = json_body["nbt"](arg)  # type: ignore # fmt: off
                     self.current_json[key]["interpret"] = json_body["interpret"](arg)  # type: ignore # fmt: off
+                    if "separator" in json_body.keys():
+                        self.current_json[key]["separator"] = json_body["separator"](arg)
+
                     if "entity" in json_body.keys():
                         self.current_json[key]["entity"] = json_body["entity"]  # type: ignore # fmt: off
                     if "block" in json_body.keys():
@@ -661,6 +664,8 @@ class FormattedText:
             if "__private_nbt_expand__" in self.current_json:
                 self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  # type: ignore # fmt: off
                 self.current_json["interpret"] = self.current_json["__private_nbt_expand__"]["interpret"]  # type: ignore # fmt: off
+                if "separator" in self.current_json["__private_nbt_expand__"].keys():
+                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]  # type: ignore # fmt: off
                 if "storage" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
                     self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]  # type: ignore # fmt: off
                 if "block" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
