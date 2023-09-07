@@ -410,12 +410,20 @@ class FuncContent:
                 if token.string == "unless":
                     raise JMCSyntaxException(
                         f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
-                raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+                if self.command[key_pos + 3].string == "with":
+                    raise JMCSyntaxException(
+                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
 
-            if self.command[key_pos + 1].string != "()":
-                raise JMCSyntaxException(
-                    f"Argument is not supported in custom function({token.string}).\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
+                if self.command[key_pos + 1].string != "()":
+                    raise JMCSyntaxException(
+                        f"Argument is not supported in custom function({token.string}) with `with` syntax.\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
+                func = convention_jmc_to_mc(token, self.tokenizer)
+                self.lexer.datapack.functions_called[func] = token, self.tokenizer
+                append_commands(self.__commands,
+                                f"function {self.lexer.datapack.namespace}:{func}")
+                del self.command[key_pos + 1]  # delete ()
+                return False
+
             func = convention_jmc_to_mc(token, self.tokenizer)
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             append_commands(self.__commands,
