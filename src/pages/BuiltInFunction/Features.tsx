@@ -30,7 +30,7 @@ const BuildinFeatures = [
     <Feature
         id="player_first_join"
         summary="Player.firstJoin()"
-        keywords="world"
+        keywords="world connect login"
     >
         <p>
             Run commands as player and at player when joining the World for the
@@ -45,7 +45,7 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_rejoin" summary="Player.rejoin()" keywords="leave">
+    <Feature id="player_rejoin" summary="Player.rejoin()" keywords="leave reconnect relog">
         <p>
             Run commands as player and at player when a player leave a world
             then join back.
@@ -59,7 +59,7 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_join" summary="Player.join()" keywords="">
+    <Feature id="player_join" summary="Player.join()" keywords="world connect login">
         <p>
             Run commands as player and at player every time a player joins the
             world.
