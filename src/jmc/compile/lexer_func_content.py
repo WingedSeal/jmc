@@ -5,6 +5,7 @@ from json import dumps
 
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
+from .command.utils import verify_args
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
@@ -423,6 +424,48 @@ class FuncContent:
                                 f"function {self.lexer.datapack.namespace}:{func}")
                 del self.command[key_pos + 1]  # delete ()
                 return False
+
+            if self.command[key_pos + 1].string != "()":
+                arg_token = self.command[key_pos + 1]
+                func = convention_jmc_to_mc(token, self.tokenizer)
+                self.lexer.datapack.functions_called[func] = token, self.tokenizer
+
+                args, kwargs = self.tokenizer.parse_func_args(arg_token)
+                if args:
+                    if len(args) > 1:
+                        raise JMCSyntaxException(
+                            f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if kwargs:
+                        raise JMCSyntaxException(
+                            f"Expected exclusively positional or keyword argument", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if len(args[0]) > 1:
+                        raise JMCSyntaxException(
+                            f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if args[0][0].token_type != TokenType.PAREN_CURLY:
+                        raise JMCSyntaxException(
+                            f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
+                            arg_token,
+                            self.tokenizer,
+                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    append_commands(self.__commands,
+                                    f"function {self.lexer.datapack.namespace}:{func} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
+                    return True
+                if kwargs:
+                    json = {}
+                    for key, value in kwargs.items():
+                        if len(value) > 1:
+                            raise JMCSyntaxException(
+                                f"Unexpected token after `{{}}` in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                        if value[0].token_type != TokenType.STRING:
+                            raise JMCSyntaxException(
+                                f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                        json[key] = value[0].string
+                    append_commands(self.__commands,
+                                    f"function {self.lexer.datapack.namespace}:{func} {dumps(json, separators=(',', ':'))}")
+                    return True
+
+                raise JMCSyntaxException(
+                    f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
 
             func = convention_jmc_to_mc(token, self.tokenizer)
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
