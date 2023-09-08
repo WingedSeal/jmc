@@ -9,12 +9,16 @@ class Content:
     Content returned from isolated environment
     """
     __content: list[str] = field(default_factory=list, init=False)
+    get_command_function: str | None = field(default=None, init=False)
     """Content in form of list of command"""
 
     def __init__(self) -> None:
         self.__content = []
 
-    def add_command(self, content: Any) -> list[str]:
+    def add_command(self, content: str) -> list[str]:
+        if not isinstance(content, str):
+            raise ValueError(
+                f"{self.get_command_function} expected str, got {content.__class__.__name__}")
         self.__content.append(str(content))
         return self.__content
 
@@ -72,6 +76,7 @@ class IsolatedEnvironment:
         :param environment_id: ID of the environment, same id will share the same environment
         :return: Commands that the code return back with add_command
         """
+        self.content.get_command_function = self.get_command_function
         compiled = compile(
             NodeTransformer().visit(ast.parse(code)),
             filename="<ast>",
