@@ -104,9 +104,6 @@ const Function = () => {
                         schedule clear{" "}
                         <CodeText type="function">function_name</CodeText>
                         ();
-                        <CodeText type="function">
-                            folder_name.function_name
-                        </CodeText>
                         <br />
                         <CodeText type="variable">$var</CodeText>{" "}
                         <CodeText type="operator">=</CodeText>{" "}
