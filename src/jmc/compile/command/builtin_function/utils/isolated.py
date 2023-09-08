@@ -14,11 +14,8 @@ class Content:
     def __init__(self) -> None:
         self.__content = []
 
-    def add_command(self, content: str) -> list[str]:
-        if not isinstance(content, str):
-            raise ValueError(
-                f"add_command expected str, got {content.__class__.__name__}")
-        self.__content.append(content)
+    def add_command(self, content: Any) -> list[str]:
+        self.__content.append(str(content))
         return self.__content
 
     def get_content(self) -> str:
