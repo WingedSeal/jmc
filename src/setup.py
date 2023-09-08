@@ -46,7 +46,7 @@ setup(
     },
     python_requires=">=3.10",
     project_urls={
-        "Documentation": "https://wingedseal.github.io/jmc/",
+        "Documentation": "https://jmc.wingedseal.com/",
         "Repository": "https://github.com/WingedSeal/jmc",
     },
     license="MIT License"
