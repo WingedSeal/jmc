@@ -1177,4 +1177,4 @@ class JMCPython(JMCFunction):
             raise JMCValueError(
                 "An exception occured in JMC.python",
                 self.raw_args["pythonCode"].token,
-                self.tokenizer, suggestion=str(error))
+                self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
