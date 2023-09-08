@@ -130,7 +130,7 @@ class FuncContent:
         if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
                 self.command):
             raise JMCSyntaxException(
-                "Function declaration found in function", self.command[0], self.tokenizer)
+                "Function declaration found in function", self.command[0], self.tokenizer, suggestion="You might be trying to call a function with a wrong vanilla syntax")
         if is_decorator(self.command[0].string):
             raise JMCSyntaxException(
                 "Decorated function declaration found in function", self.command[0], self.tokenizer)

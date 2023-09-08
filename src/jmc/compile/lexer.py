@@ -317,6 +317,14 @@ class Lexer:
             command[3].token_type == TokenType.KEYWORD
         ):
             return False
+        if len(command) > 4:
+            command = command.copy()
+            # Clear paths
+            for index, token in enumerate(command[4::2]):
+                if token.string == "/" and len(command) > index + 1:
+                    del command[index]
+                    del command[index + 1]
+
         if len(command) == 4:
             return True
         if len(
