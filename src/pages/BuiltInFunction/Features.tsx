@@ -45,7 +45,11 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_rejoin" summary="Player.rejoin()" keywords="leave reconnect relog">
+    <Feature
+        id="player_rejoin"
+        summary="Player.rejoin()"
+        keywords="leave reconnect relog"
+    >
         <p>
             Run commands as player and at player when a player leave a world
             then join back.
@@ -59,7 +63,11 @@ const BuildinFeatures = [
             params={[{ key: "function", type: "Function" }]}
         />
     </Feature>,
-    <Feature id="player_join" summary="Player.join()" keywords="world connect login">
+    <Feature
+        id="player_join"
+        summary="Player.join()"
+        keywords="world connect login"
+    >
         <p>
             Run commands as player and at player every time a player joins the
             world.
@@ -118,7 +126,7 @@ const BuildinFeatures = [
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
             newline
-        /> 
+        />
     </Feature>,
     <Feature
         id="item_create_sign"
@@ -173,7 +181,14 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
-    <Feature id="item_give" summary="Item.give()" keywords="gave">
+    <Feature
+        id="item_give"
+        summary="Item.give()"
+        keywords="gave"
+        examples={[
+            "jmc=JIFwpgtgdAxgTmAhuAFAKAJAQJ6kgGkwBMBLRCAewDsjCMAiAMgCMBBAAgDcw5t2YKFADbtGQ0uWpF6aAJQBuNGjzQA5iW4ocK-OwACiBUA",
+        ]}
+    >
         <p>
             Give item created from <code>Item.create</code> to a player
         </p>
@@ -187,8 +202,12 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="item_clear" summary="Item.clear()" keywords="remove erase take away">
-        <p> 
+    <Feature
+        id="item_clear"
+        summary="Item.clear()"
+        keywords="remove erase take away"
+    >
+        <p>
             Clear item created from <code>Item.create</code> from a player.{" "}
             <code>amount</code> at -1 means to clear all.
         </p>
@@ -301,7 +320,12 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="math_sqrt" summary="Math.sqrt()" keywords="square root">
+    <Feature
+        id="math_sqrt"
+        summary="Math.sqrt()"
+        keywords="square root"
+        examples={["jmc=CQQwBAvGCMAMDcAoYAjSYCyIAuALAdAM4COATtgBSgCU8QA"]}
+    >
         <p>
             Use{" "}
             <a
@@ -439,6 +463,10 @@ const BuildinFeatures = [
         id="hardcode_repeat"
         summary="Hardcode.repeat()"
         keywords="copy paste"
+        examples={[
+            "jmc=BIQwTgJgxg9hCmA6M8AO8QBcAUAoAkAEQDaAlgHYIAeAuoQDQHYCUAvAHwDeB%2BAziAE8ABCQrU6AbgIBfRn0zhMrAAxzemGKlYBGZbmYSgA",
+            "jmc=BIQwTgJgxg9hCmA6M8AO8QBcAUAoAkAEQDaAlgHYIAeAuoQDQHYCUAvAHwDeB%2BAziAE8ABIVCRYCRFBAAbKNjKV4tAFQqATM0IBuAgF9GfTOEysADId6YYqVgEYzuZtqA",
+        ]}
     >
         <p>
             Some features in minecraft datapack require hard coding, this
@@ -486,6 +514,9 @@ const BuildinFeatures = [
         id="hardcode_repeat_list"
         summary="Hardcode.repeatList()"
         keywords="copy paste list array"
+        examples={[
+            "jmc=BIQwTgJgxg9hCmA6M8AO8QBcAyBLAzpgBQBQAkAEQDauAdggB4C6FANOUQJQC8AfAN7ky%2BEAE8ABNTqMWAbnIBfdmSoUQbSQCMNFKDogUmJTrKA",
+        ]}
     >
         <p>
             Does the same thing as <code>Hardcode.repeat</code> but use list to
@@ -506,6 +537,9 @@ const BuildinFeatures = [
         id="hardcode_repeat_lists"
         summary="Hardcode.repeatLists()"
         keywords="copy paste lists arrays"
+        examples={[
+            "jmc=BIQwTgJgxg9hCmA6M8AO8QBcAyBLAzpvgBQBQAkANoXkBEluAdggB4CMAurQDQ31OsATFwode5YgEoAvAD4A3jXwgAngAJ%2BzeOw5qAtGoZaWw2gG4KAX3HVyVWiDY8NAIyfcNUdxohOxNSgdBZ1oXYI9aKHCfYI5RUkkzIA",
+        ]}
     >
         <p>
             Does the same thing as <code>Hardcode.repeatList</code> but it can
@@ -937,6 +971,11 @@ const BuildinFeatures = [
         id="jmc_python"
         summary="JMC.python()"
         keywords="code program javascript run"
+        examples={[
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAEwKYBmABAM5QCGAtmgJQBcWAkAUgE5ED6RAlika%2BRQBzPGgCMABnpNGeStzhoARCXIwiACTwAbbUiIB1NtpxKaWDABoiSyuV5mA3Fiyr1SgzoDGSSniJw%2BngAHlRQ2nhKzqCQsIiomK4U1OZWNnYONI5AA",
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAEwKYBmABAUkmnHgB5wCUAXFgJB4C2AlnGgQEQDOAQxhEA3pRoBfHrSylyPAEYCATtKwZaAbixZQkWIlSZchEmQrU6jFhy69BwnOwIE8yvCjijxcKTLloiipqGppAA",
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAMyUgAgF4CAiAZwEMYCBGUrDAGjIFMUA3egSgG4tQkWIlSZc%2BYmSo0ATA2ZtOcvgPDR4ydNlYBbAJZw0eJN0YtS7LqT5A",
+        ]}
     >
         <p>
             Allow you to use python code directly inside jmc, use{" "}
@@ -1657,7 +1696,7 @@ const BuildinFeatures = [
                 { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "Keyword" },
-                { key: "separator", type: "string", default: "\"\"" },
+                { key: "separator", type: "string", default: '""' },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
@@ -1687,7 +1726,7 @@ const BuildinFeatures = [
                 { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "Keyword" },
-                { key: "separator", type: "string", default: "\"\"" },
+                { key: "separator", type: "string", default: '""' },
                 { key: "interpret", type: "boolean", default: "false" },
                 { key: "local", type: "boolean", default: "false" },
             ]}
