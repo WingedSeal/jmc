@@ -47,7 +47,7 @@ FIRST_ARGUMENTS = {
 """Set of all vanilla commands and JMC custom syntax"""
 
 FIRST_ARGUMENTS_EXCEPTION = {
-    "give": {"effect", "recipe", "give"},
+    "give": {"effect", "recipe", "give", "loot"},
     "clear": {"effect", "schedule"},
     "if": {"execute"},
     "summon": {"execute"},
