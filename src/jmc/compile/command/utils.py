@@ -134,7 +134,7 @@ class ArgType(Enum):
     LIST = "list/array"
     FUNC = "function"
     _FUNC_CALL = "function"
-    SCOREBOARD_PLAYER = "integer, variable, or objective:selector"
+    SCOREBOARD_INT = "integer, variable, or objective:selector"
     ANY = None
 
 
@@ -157,7 +157,7 @@ class Arg:
         """
         if verifier == ArgType.ANY:
             return self
-        if verifier == ArgType.SCOREBOARD_PLAYER:
+        if verifier == ArgType.SCOREBOARD_INT:
             if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
             if self.arg_type == ArgType.KEYWORD and self.token.string.count(

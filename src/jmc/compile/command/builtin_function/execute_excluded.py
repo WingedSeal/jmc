@@ -271,7 +271,7 @@ class HardcodeSwitch(JMCFunction):
         "onStep": ArgType.FUNC,
         "onBeforeStep": ArgType.FUNC,
         "interval": ArgType.FLOAT,
-        "maxIter": ArgType.SCOREBOARD_PLAYER,
+        "maxIter": ArgType.SCOREBOARD_INT,
         "boxSize": ArgType.FLOAT,
         "target": ArgType.SELECTOR,
         "startAtEye": ArgType.KEYWORD,

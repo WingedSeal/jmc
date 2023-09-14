@@ -138,7 +138,7 @@ class JMCFunction:
                     datapack.parse_function_token(arg.token, tokenizer))
             elif arg.arg_type == ArgType.FLOAT:
                 self.args[key] = str(float(arg.token.string))
-            elif arg.arg_type in {ArgType.SCOREBOARD_PLAYER, ArgType.SCOREBOARD}:
+            elif arg.arg_type in {ArgType.SCOREBOARD_INT, ArgType.SCOREBOARD}:
                 scoreboard_player = find_scoreboard_player_type(
                     arg.token, tokenizer)
                 if isinstance(scoreboard_player.value, int):
@@ -149,7 +149,7 @@ class JMCFunction:
                 self.args[key] = arg.token.string
 
         for parameter, number_type in self.number_type.items():
-            if self.arg_type[parameter] == ArgType.SCOREBOARD_PLAYER:
+            if self.arg_type[parameter] == ArgType.SCOREBOARD_INT:
                 if not is_float(self.args[parameter]):
                     continue
 

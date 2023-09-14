@@ -32,7 +32,7 @@ def drange(start: float | int, stop: float | int,
     arg_type={
         "objective": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
-        "tick": ArgType.SCOREBOARD_PLAYER
+        "tick": ArgType.SCOREBOARD_INT
     },
     name="timer_set"
 )
