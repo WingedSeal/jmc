@@ -6,6 +6,16 @@ from .tokenizer import Token, Tokenizer
 class PackVersion:
     """
     Class containing information about pack_format
+
+    .. example::
+    >>> self.datapack.version >= 10
+    True
+    >>> self.datapack.version > 20
+    False
+    >>> self.datapack.version.require(7, token, tokenizer)
+    None
+    >>> self.datapack.version.require(11, token, tokenizer)
+    raise MinecraftVersionTooLow
     """
     __slot__ = ('_pack_format', )
 
