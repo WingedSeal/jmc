@@ -93,7 +93,9 @@ class Lexer:
         self.imports = set()
         self.if_else_box = []
         self.config = config
-        self.datapack = DataPack(config.namespace, self)
+        self.datapack = DataPack(
+            config.namespace, int(
+                config.pack_format), self)
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
@@ -148,30 +150,10 @@ class Lexer:
         self.__update_load(file_path_str, raw_string)
 
         for command in tokenizer.programs:
-            if (
-                command[0].string == "function"
-                and
-                len(command) == 4
-            ):
+            if command[0].string == "function" and not self._is_vanilla_func(
+                    command):
                 self.parse_current_load()
                 self.parse_func(tokenizer, command, file_path_str)
-            elif (
-                command[0].string == "function"
-                and
-                (
-                    len(command) < 2
-                    or
-                    any(token_.token_type !=
-                        TokenType.KEYWORD for token_ in command[1::2])
-                    or
-                    any(token_.token_type !=
-                        TokenType.OPERATOR for token_ in command[2::2])
-                )
-            ):
-                raise JMCSyntaxException(
-                    "'function' expected Minecraft syntax('namespace:folder/function') or JMC syntax('function name() {}')",
-                    command[0],
-                    tokenizer)
             elif is_decorator(command[0].string):
                 self.parse_current_load()
                 self.parse_decorated_function(
@@ -278,15 +260,27 @@ class Lexer:
         :raises JMCSyntaxException: Define private function
         """
         logger.debug(f"Parsing function, prefix = {prefix!r}")
+        if len(command) < 2:
+            raise JMCSyntaxException(
+                "Expected keyword(function's name)", command[0], tokenizer, display_col_length=True, col_length=True)
         if command[1].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 "Expected keyword(function's name)", command[1], tokenizer)
+        if len(command) < 3:
+            raise JMCSyntaxException(
+                "Expected empty round bracket, `()`", command[1], tokenizer, display_col_length=True, col_length=True)
         if command[2].string != "()":
             raise JMCSyntaxException(
                 "Expected empty round bracket, `()`", command[2], tokenizer)
+        if len(command) < 4:
+            raise JMCSyntaxException(
+                "Expected {", command[2], tokenizer, display_col_length=True, col_length=True)
         if command[3].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
+        if len(command) > 4:
+            raise JMCSyntaxException(
+                "Unexpected token", command[4], tokenizer)
 
         func_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
         if func_path.startswith(DataPack.private_name + "/"):
@@ -312,6 +306,38 @@ class Lexer:
         if is_save_to_datapack:
             self.datapack.functions[func_path] = return_value
         return return_value, func_path
+
+    def _is_vanilla_func(self, command: list[Token]) -> bool:
+        """
+        Whether command is in vanilla function syntax
+        """
+        if not (
+            len(command) >= 4 and
+            command[1].token_type == TokenType.KEYWORD and
+            command[2].token_type == TokenType.OPERATOR and
+            command[2].string == ":" and
+            command[3].token_type == TokenType.KEYWORD
+        ):
+            return False
+        if len(command) > 4:
+            command = command.copy()
+            # Clear paths
+            for index, token in enumerate(command[4::2]):
+                if token.string == "/" and len(command) > index + 1:
+                    del command[index]
+                    del command[index + 1]
+
+        if len(command) == 4:
+            return True
+        if len(
+                command) == 5 and command[4].token_type == TokenType.PAREN_CURLY:
+            return True
+        if (
+            len(command) >= 5 and
+            command[4].string == "with"
+        ):
+            return True
+        return False
 
     def parse_new(self, tokenizer: Tokenizer,
                   command: list[Token], prefix: str = ''):

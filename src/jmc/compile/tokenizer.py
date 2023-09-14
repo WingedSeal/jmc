@@ -4,6 +4,7 @@ from ast import literal_eval
 from enum import Enum
 import re
 
+
 from .utils import is_connected, is_decorator
 from .header import MacroFactory, Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
@@ -483,6 +484,12 @@ class Tokenizer:
                         "run", "expand"}
                 ) or is_decorator(self.keywords[0].string)
             ):
+                if self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
+                   self.keywords[2].string != "expand"
+                   and
+                   self.keywords[2].token_type != TokenType.PAREN_CURLY
+                   ):
+                    return True
                 self.append_keywords()
             return True
 
@@ -711,7 +718,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 f"Unexpected {tokens[1].token_type.value} after {tokens[0].token_type.value} in {where}",
                 tokens[1],
-                self)
+                self, suggestion="You may have missed a comma")
         if tokens[0].string == (":" if is_nbt else "="):
             raise JMCSyntaxException(
                 f"Empty key in {where}", tokens[0], self)

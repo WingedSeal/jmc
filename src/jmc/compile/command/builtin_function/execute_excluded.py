@@ -43,8 +43,10 @@ def _hardcode_parse(calc_pos: int, string: str, token: Token,
 def _hardcode_process(string: str, index_string: str,
                       i: str, token: Token, tokenizer: Tokenizer) -> str:
     string = string.replace(index_string, i)
-    calc_pos = string.find("Hardcode.calc")
-    if calc_pos != -1:
+    while True:
+        calc_pos = string.find("Hardcode.calc")
+        if calc_pos == -1:
+            break
         string = _hardcode_parse(calc_pos, string, token, tokenizer)
     return string
 

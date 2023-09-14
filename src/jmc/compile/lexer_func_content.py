@@ -5,6 +5,7 @@ from json import dumps
 
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
+from .command.utils import verify_args
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
@@ -126,9 +127,10 @@ class FuncContent:
         if self.command[0].string == "class":
             raise JMCSyntaxException(
                 "'class' keyword found in function", self.command[0], self.tokenizer)
-        if self.command[0].string == "function" and len(self.command) == 4:
+        if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
+                self.command):
             raise JMCSyntaxException(
-                "Function declaration found in function", self.command[0], self.tokenizer)
+                "Function declaration found in function", self.command[0], self.tokenizer, suggestion="You might be trying to call a function with a wrong vanilla syntax")
         if is_decorator(self.command[0].string):
             raise JMCSyntaxException(
                 "Decorated function declaration found in function", self.command[0], self.tokenizer)
@@ -375,6 +377,11 @@ class FuncContent:
             if self.__is_schedule(key_pos):
                 return True
 
+        if token.string == "$" and len(
+                self.command) > key_pos and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND:
+            append_commands(self.__commands, token.string)
+            return False
+
         if token.string.startswith(DataPack.VARIABLE_SIGN):
             if self.__is_startswith_var(key_pos):
                 return True
@@ -409,19 +416,70 @@ class FuncContent:
                 if token.string == "unless":
                     raise JMCSyntaxException(
                         f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
-                raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+                if self.command[key_pos + 3].string == "with":
+                    raise JMCSyntaxException(
+                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+
+                if self.command[key_pos + 1].string != "()":
+                    raise JMCSyntaxException(
+                        f"Argument is not supported in custom function({token.string}) with `with` syntax.\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
+                func = convention_jmc_to_mc(token, self.tokenizer)
+                self.lexer.datapack.functions_called[func] = token, self.tokenizer
+                append_commands(self.__commands,
+                                f"function {self.lexer.datapack.namespace}:{func}")
+                del self.command[key_pos + 1]  # delete ()
+                return False
 
             if self.command[key_pos + 1].string != "()":
+                arg_token = self.command[key_pos + 1]
+                func = convention_jmc_to_mc(token, self.tokenizer)
+                self.lexer.datapack.functions_called[func] = token, self.tokenizer
+
+                args, kwargs = self.tokenizer.parse_func_args(arg_token)
+                if args:
+                    if len(args) > 1:
+                        raise JMCSyntaxException(
+                            f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if kwargs:
+                        raise JMCSyntaxException(
+                            f"Expected exclusively positional or keyword argument", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if len(args[0]) > 1:
+                        raise JMCSyntaxException(
+                            f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    if args[0][0].token_type != TokenType.PAREN_CURLY:
+                        raise JMCSyntaxException(
+                            f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
+                            arg_token,
+                            self.tokenizer,
+                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                    append_commands(self.__commands,
+                                    f"function {self.lexer.datapack.namespace}:{func} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
+                    return True
+                if kwargs:
+                    json = {}
+                    for key, value in kwargs.items():
+                        if len(value) > 1:
+                            raise JMCSyntaxException(
+                                f"Unexpected token after `{{}}` in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                        if value[0].token_type != TokenType.STRING:
+                            raise JMCSyntaxException(
+                                f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                        json[key] = value[0].string
+                    append_commands(self.__commands,
+                                    f"function {self.lexer.datapack.namespace}:{func} {dumps(json, separators=(',', ':'))}")
+                    return True
+
                 raise JMCSyntaxException(
-                    f"Argument is not supported in custom function({token.string}).\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
+                    f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
+
             func = convention_jmc_to_mc(token, self.tokenizer)
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.namespace}:{func}")
             return True
 
-        if token.string not in VANILLA_COMMANDS and token.string not in Header().commands:
+        if token.string not in VANILLA_COMMANDS and token.string not in Header(
+        ).commands:
             if not self.command_strings:
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
@@ -597,7 +655,7 @@ class FuncContent:
 
             self.lexer.datapack.used_command.add(token.string)
             append_commands(self.__commands, load_once_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         execute_excluded_command = self.get_function(
@@ -605,10 +663,10 @@ class FuncContent:
         if execute_excluded_command is not None:
             if self.is_execute:
                 append_commands(self.__commands, self.lexer.datapack.add_raw_private_function("anonymous", [execute_excluded_command(
-                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call()]))
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call()]))
             else:
                 append_commands(self.__commands, execute_excluded_command(
-                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         load_only_command = self.get_function(token, LOAD_ONLY_COMMANDS)
@@ -620,7 +678,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
             append_commands(self.__commands, load_only_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         jmc_command = self.get_function(token, JMC_COMMANDS)
@@ -629,7 +687,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False, suggestion="Expected semicolon")
             append_commands(self.__commands, jmc_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
             return True
 
         if token.string in BOOL_FUNCTIONS:

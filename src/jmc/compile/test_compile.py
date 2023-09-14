@@ -48,6 +48,10 @@ INT=__int__"""
             output=Path(output)
         )
 
+    def set_pack_format(self, pack_format: int) -> "JMCTestPack":
+        self.config.pack_format = str(pack_format)
+        return self
+
     def set_cert(self, file_content: str) -> "JMCTestPack":
         """
         Set certificate(jmc.txt)

@@ -40,6 +40,7 @@ pip install jmcfunction --pre
 ```
 
 ## Build
+### Executable
 
 If you would like to build the executable yourself (on Windows).
 
@@ -49,6 +50,17 @@ If you would like to build the executable yourself (on Windows).
 4. Go to repository directory using `cd`
 5. Run `pip install -r build_requirements.txt`
 6. Run `build`
+
+### Python
+
+If you would like to use latest unreleased feature, you can install jmc directly from github repository.
+
+1. Install [Python 3.10](https://www.python.org/downloads/release/python-3108/)
+2. Open a terminal (command prompt as administrator on Windows)
+3. Go to repository directory using `cd`
+4. Run `cd ./src` 
+5. Run `pip install setuptools`
+6. Run `python setup.py install`
 
 ## License
 

@@ -5,7 +5,7 @@ from typing import Iterator
 
 from ....compile.utils import convention_jmc_to_mc
 from ...exception import JMCSyntaxException, JMCValueError
-from ..utils import ArgType, NumberType
+from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
 
@@ -237,6 +237,39 @@ class JMCPut(JMCFunction):
 class TextTellraw(JMCFunction):
     def call(self) -> str:
         return f'tellraw {self.args["selector"]} {self.format_text("message")}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="printf",
+    arg_type={
+        "text": ArgType.STRING,
+    },
+    name="printf",
+)
+class Printf(JMCFunction):
+    def call(self) -> str:
+        return f'tellraw @a {self.format_text("text")}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="print",
+    arg_type={
+        "value": ArgType.SCOREBOARD,
+    },
+    name="print",
+)
+class Print(JMCFunction):
+    def call(self) -> str:
+        scoreboard_player = find_scoreboard_player_type(
+            self.raw_args["value"].token, self.tokenizer)
+        if isinstance(scoreboard_player.value, int):
+            raise ValueError("value is int")
+        name = scoreboard_player.value[1]
+        obj = scoreboard_player.value[0]
+        return 'tellraw @a {"score":{"name":"%s","objective":"%s"}}' % (
+            name, obj)
 
 
 @func_property(
@@ -1177,4 +1210,4 @@ class JMCPython(JMCFunction):
             raise JMCValueError(
                 "An exception occured in JMC.python",
                 self.raw_args["pythonCode"].token,
-                self.tokenizer, suggestion=str(error))
+                self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)

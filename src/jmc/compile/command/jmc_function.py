@@ -53,7 +53,7 @@ class JMCFunction:
     """
     __slots__ = ("token", "datapack", "tokenizer",
                  "is_execute", "var", "args",
-                 "raw_args")
+                 "raw_args", "self_token")
     # _decorated: bool = False
     # """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -73,6 +73,8 @@ class JMCFunction:
 
     token: Token
     """paren_round Token object containing the arguments"""
+    self_token: Token
+    """keyword Token object of the call string"""
     datapack: DataPack
     """Datapack object"""
     tokenizer: Tokenizer
@@ -97,9 +99,10 @@ class JMCFunction:
                 f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer,
+    def __init__(self, token: Token, self_token: Token, datapack: DataPack, tokenizer: Tokenizer,
                  *, is_execute: bool | None = None, var: str | None = None) -> None:
         self.token = token
+        self.self_token = self_token
         self.datapack = datapack
         self.tokenizer = tokenizer
         self.is_execute = is_execute
@@ -318,6 +321,16 @@ class JMCFunction:
                 self.raw_args["propertyName"].token, self.tokenizer)
         self.datapack.data.formatted_text_prop[self.args[property_name]] = (
             key, body, is_local)
+
+    def require(self, pack_format: int, suggestion: str | None = None):
+        """
+        Raise MinecraftVersionTooLow when pack_format is too low, a shortcut for `self.datapack.version.require`
+
+        :param pack_format: required pack_format
+        :param suggestion: error suggestion, defaults to None
+        """
+        self.datapack.version.require(
+            pack_format, self.self_token, self.tokenizer, suggestion=suggestion)
 
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {

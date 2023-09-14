@@ -1691,11 +1691,13 @@ class TextPropsKeybind(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD
     },
     name="text_prop_nbt",
     defaults={
+        "separator": ", ",
         "interpret": "false",
         "local": "false"
     }
@@ -1721,8 +1723,15 @@ class TextPropNBT(JMCFunction):
                 self.raw_args["path"].token,
                 self.tokenizer)
 
+        output: SIMPLE_JSON_BODY = {
+            self.args["type"]: self.args["source"],
+            "nbt": self.args["path"],
+            "interpret": self.args["interpret"]}
+        if self.args["separator"] != ", ":
+            output["separator"] = json.loads(  # type: ignore # fmt: off
+                self.format_text("separator"))
         self.add_formatted_text_prop(
-            "__private_nbt_expand__", {self.args["type"]: self.args["source"], "nbt": self.args["path"], "interpret": self.args["interpret"]}, self.check_bool("local"))
+            "__private_nbt_expand__", output, self.check_bool("local"))
         return ""
 
 
@@ -1735,11 +1744,13 @@ class TextPropNBT(JMCFunction):
         "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
+        "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD
     },
     name="text_props_nbt",
     defaults={
+        "separator": ", ",
         "interpret": "false",
         "local": "false"
     }
@@ -1767,8 +1778,12 @@ class TextPropsNBT(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(
+            output: SIMPLE_JSON_BODY = {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(
                 self.args["indexString"], arg), "interpret": self.args["interpret"]}
+            if self.args["separator"] != ", ":
+                output["separator"] = self.format_text(  # type: ignore # fmt: off
+                    "separator")
+            return output
         self.add_formatted_text_prop(
             "__private_nbt_expand__", inner, self.check_bool("local"))
         return ""

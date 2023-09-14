@@ -107,22 +107,10 @@ def find_scoreboard_player_type(
     splits = token.string.split(":", 1)
     if len(splits) == 1:
         if allow_integer:
-            if token.string == "true":
-                raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if ($var) {`?")
-            if token.string == "false":
-                raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", token, tokenizer,
-                    suggestion="Did you mean `if (!$var) {`?")
             raise JMCSyntaxException(
                 "Expected integer, variable, or objective:selector", token, tokenizer, suggestion="Did you mean ")
         raise JMCSyntaxException(
             "Expected variable or objective:selector", token, tokenizer)
-    # if len(splits) > 2:
-    #     raise JMCSyntaxException(
-    #         "Scoreboard's player cannot contain more than 1 colon(:)", token, tokenizer)
-
     return ScoreboardPlayer(
         player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
@@ -487,11 +475,30 @@ class FormattedText:
 
         self.result.append({key: value})
 
+    def __can_merge(self) -> bool:
+        """
+        Whether current_json and result[-1] can merge
+        """
+        return (
+            bool(self.result) and
+            len(self.result[-1]) == 2 and
+            "text" in self.result[-1] and
+            "color" in self.result[-1] and
+            len(self.current_json) == 2 and
+            "text" in self.current_json and
+            "color" in self.current_json and
+            self.result[-1]["color"] == self.current_json["color"]
+        )
+
     def __push(self) -> None:
         """
         Append current_json to result and reset it
         """
         if not self.current_json["text"]:
+            return
+        if self.__can_merge():
+            self.result[-1]["text"] += self.current_json["text"]  # type: ignore # fmt: off
+            self.current_json = {"text": ""}
             return
         self.result.append(self.current_json)
         self.current_json = {"text": ""}
@@ -609,6 +616,9 @@ class FormattedText:
                     self.current_json[key] = {}
                     self.current_json[key]["nbt"] = json_body["nbt"](arg)  # type: ignore # fmt: off
                     self.current_json[key]["interpret"] = json_body["interpret"](arg)  # type: ignore # fmt: off
+                    if "separator" in json_body.keys():
+                        self.current_json[key]["separator"] = json_body["separator"](arg)  # type: ignore # fmt: off
+
                     if "entity" in json_body.keys():
                         self.current_json[key]["entity"] = json_body["entity"]  # type: ignore # fmt: off
                     if "block" in json_body.keys():
@@ -654,6 +664,8 @@ class FormattedText:
             if "__private_nbt_expand__" in self.current_json:
                 self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  # type: ignore # fmt: off
                 self.current_json["interpret"] = self.current_json["__private_nbt_expand__"]["interpret"]  # type: ignore # fmt: off
+                if "separator" in self.current_json["__private_nbt_expand__"].keys():  # type: ignore # fmt: off
+                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]  # type: ignore # fmt: off
                 if "storage" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
                     self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]  # type: ignore # fmt: off
                 if "block" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
@@ -700,15 +712,10 @@ class FormattedText:
             "black",
             "reset",
         }:
-            if "color" in self.current_json:
-                raise JMCValueError(
-                    f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
-
             self.current_json["color"] = prop
             self.current_color = prop
 
-        if prop in {"bold", "italic", "underlined",
-                    "strikethrough", "obfuscated"}:
+        elif prop in {"bold", "italic", "underlined", "strikethrough", "obfuscated"}:
             if self.current_color:
                 self.current_json["color"] = self.current_color
             self.current_json[prop] = True
@@ -777,6 +784,9 @@ class FormattedText:
     def __str__(self) -> str:
         if not self.result:
             return '""'
+
+        if len(self.result) == 1 and len(self.result[0]) == 1 and "text" in self.result[0]:
+            return json.dumps(self.result[0]["text"])
 
         if len(self.result) == 1:
             if self.is_default_no_italic and "italic" not in self.result[0]:
