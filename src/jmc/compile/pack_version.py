@@ -13,8 +13,8 @@ class PackVersion:
         self._pack_format = pack_format
         """Datapack's pack_format"""
 
-    def requires(self, pack_format: int, token: Token,
-                 tokenizer: Tokenizer, suggestion: str | None = None) -> None:
+    def require(self, pack_format: int, token: Token,
+                tokenizer: Tokenizer, suggestion: str | None = None) -> None:
         if self._pack_format < pack_format:
             raise MinecraftVersionTooLow(
                 pack_format, token, tokenizer, suggestion=suggestion)
