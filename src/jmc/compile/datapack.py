@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
 
+from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
 from .exception import JMCSyntaxWarning, JMCValueError
@@ -143,7 +144,7 @@ class DataPack:
                 "functions", "load_function", "jsons",
                 "private_functions", "private_function_count",
                 "_scoreboards", "loads", "ticks", "namespace",
-                "used_command", "lexer", "defined_file_pos", "after_ticks", "after_loads")
+                "used_command", "lexer", "defined_file_pos", "after_ticks", "after_loads", "pack_version")
     private_name = "__private__"
     load_name = "__load__"
     tick_name = "__tick__"
@@ -153,8 +154,11 @@ class DataPack:
     VARIABLE_SIGN = "$"
     """Data read from header file(s)"""
 
-    def __init__(self, namespace: str, lexer: "Lexer") -> None:
+    def __init__(self, namespace: str, pack_format: int,
+                 lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
+        self.pack_version: PackVersion = PackVersion(pack_format)
+        """Datapack's version details"""
         self.ints: set[int] = set()
         """Set of integers going to be used in scoreboard"""
         self.functions: dict[str, Function] = {}

@@ -93,7 +93,9 @@ class Lexer:
         self.imports = set()
         self.if_else_box = []
         self.config = config
-        self.datapack = DataPack(config.namespace, self)
+        self.datapack = DataPack(
+            config.namespace, int(
+                config.pack_format), self)
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
