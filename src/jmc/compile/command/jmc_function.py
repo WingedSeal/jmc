@@ -322,6 +322,10 @@ class JMCFunction:
         self.datapack.data.formatted_text_prop[self.args[property_name]] = (
             key, body, is_local)
 
+    def require(self, pack_format: int, suggestion: str | None = None):
+        self.datapack.version.requires(
+            pack_format, self.self_token, self.tokenizer, suggestion=suggestion)
+
 
 def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
 }, ignore: set[str] = set(), number_type: dict[str, NumberType] = {}) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
