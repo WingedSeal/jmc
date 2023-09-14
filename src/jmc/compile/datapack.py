@@ -145,7 +145,8 @@ class DataPack:
                 "private_functions", "private_function_count",
                 "_scoreboards", "loads", "ticks", "namespace",
                 "used_command", "lexer", "defined_file_pos",
-                "after_ticks", "after_loads", "version")
+                "after_ticks", "after_loads", "version",
+                "after_func")
     private_name = "__private__"
     load_name = "__load__"
     tick_name = "__tick__"
@@ -188,6 +189,10 @@ class DataPack:
         """Output list of commands at the end of load"""
         self.after_ticks: list[str] = []
         """Output list of commands at the end of tick"""
+        self.after_func: dict[str, list[str]] = defaultdict(list)
+        """Output list of commands at the end of any function"""
+        self.after_func_token: dict[str, tuple[Token, Tokenizer]] = {}
+        """Output list of token responsible for adding after_func"""
         self.namespace = namespace
         """Datapack's namespace"""
 
@@ -432,6 +437,11 @@ class DataPack:
                     self.after_ticks)
             else:
                 self.functions[self.tick_name] = Function(self.after_ticks)
+        for _func_path, _commands in self.after_func.items():
+            if _func_path not in self.functions:
+                raise JMCValueError(
+                    f"Function '{_func_path}' was not defined", self.after_func_token[_func_path][0], self.after_func_token[_func_path][1])
+            self.functions[_func_path].extend(_commands)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func

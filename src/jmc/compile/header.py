@@ -61,7 +61,7 @@ class Header(SingleTon):
     """Python function to run before building datapack"""
     finished_compiled_time: float
     nometa: bool
-    "Whether hand pack.mcmeta to user"
+    """Whether hand pack.mcmeta to user"""
 
     def __init__(self) -> None:
         self.__clear(self)

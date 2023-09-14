@@ -237,7 +237,12 @@ class Lexer:
             file_path_str,
             prefix,
             is_save_to_datapack=False)
-        jmc_decorator(args).modify(jmc_function)
+        jmc_decorator(
+            tokenizer,
+            self.datapack,
+            args).modify(
+            jmc_function,
+            func_path)
         self.datapack.functions[func_path] = jmc_function
 
     def parse_func(self, tokenizer: Tokenizer,
