@@ -211,10 +211,6 @@ class JMCFunction:
         :param func_type: Function type to search for
         :return: Dictionary of jmcfunction name and jmcfunction class
         """
-        # if func_type not in cls._subcls:
-        #     for subcls in cls.__subclasses__():
-        #         cls._subcls[subcls.func_type][subcls.call_string] = subcls
-
         return cls._subcls[func_type]
 
     def is_never_used(self, call_string: str | None = None,
