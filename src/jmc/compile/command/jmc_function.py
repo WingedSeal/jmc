@@ -323,7 +323,7 @@ class JMCFunction:
             key, body, is_local)
 
     def require(self, pack_format: int, suggestion: str | None = None):
-        self.datapack.version.requires(
+        self.datapack.version.require(
             pack_format, self.self_token, self.tokenizer, suggestion=suggestion)
 
 
