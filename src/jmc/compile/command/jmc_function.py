@@ -53,7 +53,7 @@ class JMCFunction:
     """
     __slots__ = ("token", "datapack", "tokenizer",
                  "is_execute", "var", "args",
-                 "raw_args")
+                 "raw_args", "self_token")
     # _decorated: bool = False
     # """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -73,6 +73,8 @@ class JMCFunction:
 
     token: Token
     """paren_round Token object containing the arguments"""
+    self_token: Token
+    """keyword Token object of the call string"""
     datapack: DataPack
     """Datapack object"""
     tokenizer: Tokenizer
@@ -97,9 +99,10 @@ class JMCFunction:
                 f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, datapack: DataPack, tokenizer: Tokenizer,
+    def __init__(self, token: Token, self_token: Token, datapack: DataPack, tokenizer: Tokenizer,
                  *, is_execute: bool | None = None, var: str | None = None) -> None:
         self.token = token
+        self.self_token = self_token
         self.datapack = datapack
         self.tokenizer = tokenizer
         self.is_execute = is_execute

@@ -655,7 +655,7 @@ class FuncContent:
 
             self.lexer.datapack.used_command.add(token.string)
             append_commands(self.__commands, load_once_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         execute_excluded_command = self.get_function(
@@ -663,10 +663,10 @@ class FuncContent:
         if execute_excluded_command is not None:
             if self.is_execute:
                 append_commands(self.__commands, self.lexer.datapack.add_raw_private_function("anonymous", [execute_excluded_command(
-                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call()]))
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call()]))
             else:
                 append_commands(self.__commands, execute_excluded_command(
-                    self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         load_only_command = self.get_function(token, LOAD_ONLY_COMMANDS)
@@ -678,7 +678,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
             append_commands(self.__commands, load_only_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
             return True
 
         jmc_command = self.get_function(token, JMC_COMMANDS)
@@ -687,7 +687,7 @@ class FuncContent:
                 raise JMCSyntaxException(
                     "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False, suggestion="Expected semicolon")
             append_commands(self.__commands, jmc_command(
-                self.command[key_pos + 1], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
             return True
 
         if token.string in BOOL_FUNCTIONS:
