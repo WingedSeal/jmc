@@ -1,7 +1,7 @@
 """Module containing JMCFunction subclasses for custom JMC function that returns a minecraft integer to a scoreboard variable"""
 
 from ...datapack import DataPack
-from ..utils import ArgType
+from ..utils import ArgType, PlayerType, ScoreboardPlayer, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from ...exception import JMCValueError
 
@@ -70,8 +70,8 @@ class MathSqrt(JMCFunction):
     func_type=FuncType.VARIABLE_OPERATION,
     call_string="Math.random",
     arg_type={
-        "min": ArgType.INTEGER,
-        "max": ArgType.INTEGER
+        "min": ArgType.SCOREBOARD_PLAYER,
+        "max": ArgType.SCOREBOARD_PLAYER
     },
     name="math_random",
     defaults={
@@ -88,9 +88,18 @@ class MathRandom(JMCFunction):
         bound = "__math__.rng.bound"
         tmp = "__math__.tmp"
         var = DataPack.var_name
-        start = int(self.args["min"])
-        end = int(self.args["max"])
-        if end < start:
+        if self.args["min"] == "1":
+            start = ScoreboardPlayer(PlayerType.INTEGER, 1)
+        else:
+            start = find_scoreboard_player_type(
+                self.raw_args["min"].token, self.tokenizer)
+        if self.args["max"] == "2147483647":
+            end = ScoreboardPlayer(PlayerType.INTEGER, 2147483647)
+        else:
+            end = find_scoreboard_player_type(
+                self.raw_args["max"].token, self.tokenizer)
+        if isinstance(start.value, int) and isinstance(
+                end.value, int) and end.value < start.value:
             raise JMCValueError(
                 f"max cannot be less than min in {self.call_string}", self.token, self.tokenizer, suggestion="Try swapping max and min")
         if self.is_never_used():
@@ -128,17 +137,46 @@ class MathRandom(JMCFunction):
                 "main"
             )
 
-        run = [
-            f"scoreboard players set {bound} {var} {end - start + 1}",
+        if isinstance(start.value, int) and isinstance(
+                end.value, int):
+            run = [
+                f"scoreboard players set {bound} {var} {end.value - start.value + 1}"]
+        elif not isinstance(start.value, int) and isinstance(end.value, int):
+            run = [
+                f"scoreboard players set {bound} {var} {end.value + 1}",
+                f"scoreboard players operation {bound} {var} -= {start.value[1]} {start.value[0]}"
+            ]
+        elif isinstance(start.value, int) and not isinstance(
+                end.value, int):
+            run = [
+                f"scoreboard players set {bound} {var} {-start.value + 1}",
+                f"scoreboard players operation {bound} {var} += {end.value[1]} {end.value[0]}"
+            ]
+        else:
+            if isinstance(start.value, int) or isinstance(
+                    end.value, int):
+                raise ValueError()
+            run = [
+                f"scoreboard players operation {bound} {var} = {end.value[1]} {end.value[0]}",
+                f"scoreboard players operation {bound} {var} -= {start.value[1]} {start.value[0]}",
+                f"scoreboard players add {bound} {var} 1"
+            ]
+
+        run.extend([
             self.datapack.call_func(self.name, "main"),
             f"scoreboard players operation {self.var} {var} = {result} {var}",
-        ]
+        ])
 
-        if start < 0:
+        if isinstance(start.value, int):
+            if start.value < 0:
+                run.append(
+                    f"scoreboard players remove {self.var} {var} {abs(start.value)}")
+            elif start.value > 0:
+                run.append(
+                    f"scoreboard players add {self.var} {var} {start.value}")
+        else:
             run.append(
-                f"scoreboard players remove {self.var} {var} {abs(start)}")
-        elif start > 0:
-            run.append(f"scoreboard players add {self.var} {var} {start}")
+                f"scoreboard players operation {self.var} {var} -= {start.value[1]} {start.value[0]}")
 
         if self.is_execute:
             count = self.datapack.get_count(self.name)

@@ -191,7 +191,7 @@ def custom_condition(
                 "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
         return Condition(
-            *matched_function(tokens[1], datapack, tokenizer).call_bool())
+            *matched_function(tokens[1], tokens[0], datapack, tokenizer).call_bool())
     # End
 
     conditions: list[str] = []
