@@ -323,6 +323,12 @@ class JMCFunction:
             key, body, is_local)
 
     def require(self, pack_format: int, suggestion: str | None = None):
+        """
+        Raise MinecraftVersionTooLow when pack_format is too low, a shortcut for `self.datapack.version.require`
+
+        :param pack_format: required pack_format
+        :param suggestion: error suggestion, defaults to None
+        """
         self.datapack.version.require(
             pack_format, self.self_token, self.tokenizer, suggestion=suggestion)
 

@@ -15,6 +15,14 @@ class PackVersion:
 
     def require(self, pack_format: int, token: Token,
                 tokenizer: Tokenizer, suggestion: str | None = None) -> None:
+        """
+        Raise MinecraftVersionTooLow when pack_format is too low
+
+        :param pack_format: required pack_format
+        :param token: Token to raise error
+        :param tokenizer: token's Tokenizer
+        :param suggestion: error suggestion, defaults to None
+        """
         if self._pack_format < pack_format:
             raise MinecraftVersionTooLow(
                 pack_format, token, tokenizer, suggestion=suggestion)
