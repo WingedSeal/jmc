@@ -1,10 +1,12 @@
 import Feature from "../../components/Feature";
 import CodeBlock, { CodeText, Command } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import { Link } from "react-router-dom";
+import { scrollToHash } from "../../utils/scrollToHash";
 
 const howTo = (
     <Feature
-        id="how_to_read"
+        id="how_to_use"
         summary="How to use built-in function"
         keywords="tutorial explaination parameter type help basic"
         className="text-tertiary"
@@ -17,7 +19,6 @@ const howTo = (
                 {
                     key: "parameter1",
                     type: "ParameterType",
-                    default: "default",
                 },
                 {
                     key: "parameter2",
@@ -31,40 +32,102 @@ const howTo = (
                 },
             ]}
         />
-        <p>
-            <code>default</code> means that the argument is not required and
-            will automatically fallback to that value.
+        <Command
+            name="Module.function_name"
+            type="FunctionType"
+            params={[
+                {
+                    key: "parameter1",
+                    type: "ParameterType",
+                },
+                {
+                    key: "parameter2",
+                    type: "ParameterType",
+                    default: "default",
+                },
+                {
+                    key: "parameter3",
+                    type: "ParameterType",
+                    default: "default",
+                },
+            ]}
+            newline
+        />
+        <p className="text-gray-400">
+            Note: A "parameter" is a variable in a function definition. It is a
+            placeholder and hence does not have a concrete value. An "argument"
+            is a value passed during function invocation.
         </p>
+        <ul>
+            <li>
+                <span>
+                    <code>Module.function_name</code> refers to the name of the
+                    function. <code>Module</code> is a part of a function name
+                    in JMC. If you mistype the name, JMC will assume you are
+                    calling your own custom function and throw an error saying
+                    "Custom function's parameter is not supported."
+                </span>
+            </li>
+            <li>
+                <span>
+                    <code>ParameterType</code> is the type of the value that the
+                    parameter expects.
+                </span>
+            </li>
+            <li>
+                <code>default</code> allow the parameters to be initialized with
+                default values if no value is passed. If there's no{" "}
+                <code>default</code>, a value is required.
+            </li>
+            <li>
+                <span>
+                    <code>FunctionType</code> means the type of the function
+                    specifying which condition it can be used in.
+                </span>
+            </li>
+        </ul>
+        <br />
         <p>
-            Module is actually a part of the function name and bare no special
-            meaning. If you mistype the name, JMC will assume you are calling
-            your own custom function and throw an error saying "Custom
-            function's parameter is not supported."
+            Unlike JavaScript, JMC supports "named parameter", which means you
+            can specify which argument it is.
         </p>
-        <p>
-            Unlike JavaScript, JMC actually support named parameter, which mean
-            you can specify which argument it is.
-        </p>
-        <p>To use a function, just call it like this.</p>
-        <CodeBlock copy_text="">
-            <CodeText type="class">Module</CodeText>
-            <CodeText type="operator">.</CodeText>
-            <CodeText type="function">function_name</CodeText>(argument1
-            <CodeText type="operator">,</CodeText> argument2
-            <CodeText type="operator">,</CodeText> parameter3
-            <CodeText type="operator">=</CodeText>argument3);
-        </CodeBlock>
-        <p>Parameter types are</p>
+        <br />
+        <p>Parameter types:</p>
         <CodeBlock>
             <CodeText type="class">string</CodeText>{" "}
             <CodeText type="operator">=</CodeText>{" "}
-            <CodeText type="string">"string"</CodeText>
+            <CodeText type="string">"string"</CodeText>{" "}
+            <CodeText type="comment">
+                {"//"} A plain text to be used as is
+            </CodeText>
+            <br />
+            <CodeText type="class">string</CodeText>{" "}
+            <CodeText type="operator">=</CodeText>{" "}
+            <CodeText type="string">`</CodeText>
+            <br />
+            <CodeText type="string">
+                {" "}
+                line1
+                <br />
+                line2
+                <br />`
+            </CodeText>{" "}
+            <CodeText type="comment">{"//"} A multiline string</CodeText>
             <br />
             <CodeText type="class">FormattedString</CodeText>{" "}
             <CodeText type="operator">=</CodeText>{" "}
             <CodeText type="string">{'"&<gold,bold>Cooler String"'}</CodeText>{" "}
             <CodeText type="comment">
-                {"//"} See Formatted Text section
+                {"//"} See{" "}
+                <Link
+                    to="/documentation/built-in-function#formatted_text"
+                    onClick={() => {
+                        scrollToHash("formatted_text");
+                    }}
+                >
+                    Formatted Text
+                </Link>{" "}
+                section
             </CodeText>
             <br />
             <CodeText type="class">integer</CodeText>{" "}
@@ -92,16 +155,16 @@ const howTo = (
             {"}"}
             <br />
             <CodeText type="class">
-                JSObject{"<ParameterType1, ParameterType2>"}
+                JSObject{"<KeyType, ValueType>"}
             </CodeText>{" "}
             <CodeText type="operator">=</CodeText> {"{"}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             <CodeText type="operator">,</CodeText>{" "}
-            <CodeText type="class">ParameterType1</CodeText>
+            <CodeText type="class">KeyType</CodeText>
             <CodeText type="operator">:</CodeText>{" "}
-            <CodeText type="class">ParameterType2</CodeText>
+            <CodeText type="class">ValueType</CodeText>
             {"}"}
             <br />
             <CodeText type="class">List{"<ParameterType>"}</CodeText>{" "}
@@ -130,7 +193,7 @@ const howTo = (
             <CodeText type="class">FunctionName</CodeText>
             <br />
             <CodeText type="class">TargetSelector</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> @a[tag
+            <CodeText type="operator">=</CodeText> <CodeText type="param">@a</CodeText>[tag
             <CodeText type="operator">=</CodeText>test]
             <br />
             <CodeText type="class">Scoreboard</CodeText>{" "}
@@ -161,13 +224,13 @@ const howTo = (
             <CodeText type="operator">=</CodeText> anyKeyword
             <br />
         </CodeBlock>
-        <p>Function types are</p>
+        <p>Function types:</p>
         <CodeBlock>
             - <CodeText type="class">Bool</CodeText>{" "}
             <CodeText type="operator">:</CodeText> Used in condition such as if,
             while etc.
             <br />
-            if ( <CodeText type="class">Bool</CodeText>
+            <CodeText type="keyword">if</CodeText> ( <CodeText type="class">Bool</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">example</CodeText>(argument) ) {"{"}
             <br />
@@ -197,6 +260,33 @@ const howTo = (
             restrictions
             <br />
         </CodeBlock>
+        <p>To use a function, you can call it like the following.</p>
+        <CodeBlock>
+            <CodeText type="class">Module</CodeText>
+            <CodeText type="operator">.</CodeText>
+            <CodeText type="function">function_name</CodeText>(argument1
+            <CodeText type="operator">,</CodeText> argument2
+            <CodeText type="operator">,</CodeText> parameter3
+            <CodeText type="operator">=</CodeText>argument3);
+        </CodeBlock>
+        <CodeBlock>
+            <CodeText type="class">Module</CodeText>
+            <CodeText type="operator">.</CodeText>
+            <CodeText type="function">function_name</CodeText>(<br />
+            <Tab />
+            argument1
+            <CodeText type="operator">,</CodeText>
+            <br />
+            <Tab />
+            argument2
+            <CodeText type="operator">,</CodeText>
+            <br />
+            <Tab />
+            parameter3
+            <CodeText type="operator">=</CodeText>argument3
+            <br />
+            );
+        </CodeBlock>
         <p>Example:</p>
         <Command
             name="Item.create"
@@ -209,6 +299,7 @@ const howTo = (
                 { key: "nbt", type: "JSObject", default: "{}" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
+            newline
         />
         <CodeBlock>
             <CodeText type="class">Item</CodeText>
@@ -265,15 +356,22 @@ const howTo = (
             <br />
             <Tab />
             <Tab />
-            effect give @s speed 1 255 True;
+            effect give <CodeText type="param">@s</CodeText> speed <CodeText type="number">1</CodeText> <CodeText type="number">255</CodeText> <CodeText type="operator">true</CodeText>;
             <br />
             <Tab />
             {"} "}
-            <CodeText type="comment">{"// ArrowFunction"}</CodeText>
+            <CodeText type="comment">
+                {"// ArrowFunction (A type of Function)"}
+            </CodeText>
             <br />
-            );
+            );{" "}
+            <CodeText type="comment">
+                {
+                    '// "-> LoadOnly" means this function can only be used in load (outside any function)'
+                }
+            </CodeText>
             <br />
-            execute as @a run <CodeText type="class">Item</CodeText>
+            execute as <CodeText type="param">@a</CodeText> run <CodeText type="class">Item</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">give</CodeText>(veryCoolSword);
         </CodeBlock>

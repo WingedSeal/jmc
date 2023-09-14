@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import LoadingScreen from "../../components/LoadingScreen";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Installation = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -13,6 +14,7 @@ const Installation = () => {
             setIsLoaded(true);
         }
     };
+    useScrollToHash();
     return (
         <>
             <LoadingScreen isLoaded={isLoaded} />

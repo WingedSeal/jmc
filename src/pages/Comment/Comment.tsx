@@ -1,8 +1,10 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Comment = () => {
+    useScrollToHash();
     return (
         <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
             <div className="text-primary text-3xl md:text-6xl mx-auto">
@@ -12,9 +14,7 @@ const Comment = () => {
                 <p>
                     <Tab />
                     JMC supports both traditional minecraft comment and in-line
-                    comment using <code>{"//"}</code>. However, traditional{" "}
-                    <code>#</code> cannot be used as in-line comment due to
-                    conflict with group tag.
+                    comment using <code>{"//"}</code> or <code>#</code>.
                 </p>
                 <p>
                     <Tab />
@@ -32,17 +32,13 @@ const Comment = () => {
                     say <CodeText type="string">"Hello World"</CodeText>;{" "}
                     <CodeText type="comment">{"//"} says hello world.</CodeText>
                     <br />
+                    <Tab />
+                    say <CodeText type="string">"Hello World"</CodeText>;{" "}
+                    <CodeText type="comment"># says hello world.</CodeText>
+                    <br />
                     {"}"}
                     <br />
                     <CodeText type="comment">{"//"} Ends of function</CodeText>
-                </CodeBlock>
-                <p className="text-warning">
-                    <Tab />
-                    But you cannot do this.
-                </p>
-                <CodeBlock>
-                    say <CodeText type="string">"Hello World"</CodeText>;{" "}
-                    <CodeText type="error"># says hello world.</CodeText>
                 </CodeBlock>
                 <p>
                     <Tab />

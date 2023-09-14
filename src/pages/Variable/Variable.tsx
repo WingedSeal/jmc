@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Variable = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-secondary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
@@ -13,11 +15,15 @@ const Variable = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Variables in JMC always start with <code>$</code>. Any
-                        command starting with <code>$</code> will trigger JMC to
-                        treat it a a variable command.
+                        Variables in JMC is simply a fake player in scoreboard
+                        of vanilla minecraft, hence it can only represents
+                        integer. It always start with <code>$</code>.
+                        Alternatively, you can use your custom scoreboard
+                        objective by using <code>objective:selector</code>{" "}
+                        syntax.
                     </p>
                 </div>
+                <section id="variable_assignment" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Assignment
                 </div>
@@ -27,41 +33,60 @@ const Variable = () => {
                         Set a variable to an integer. Due to nature of how
                         minecraft scoreboard works, you can assign a variable
                         without declaring it.
-                        <CodeBlock>
-                            <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="number">{"<integer>"}</CodeText>;
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="number">5</CodeText>;
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="operator">true</CodeText>;{" "}
-                            <CodeText type="comment">
-                                {"//"} $my_variable = 1
-                            </CodeText>
-                        </CodeBlock>
-                        <CodeBlock>
-                            <CodeText type="variable">$my_variable</CodeText>{" "}
-                            <CodeText type="operator">=</CodeText>{" "}
-                            <CodeText type="operator">false</CodeText>;{" "}
-                            <CodeText type="comment">
-                                {"//"} $my_variable = 0
-                            </CodeText>
-                        </CodeBlock>
                     </p>
+
+                    <CodeBlock>
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">{"<integer>"}</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        scores
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="param">@s</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="operator">true</CodeText>;{" "}
+                        <CodeText type="comment">
+                            {"//"} $my_variable = 1
+                        </CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_variable</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="operator">false</CodeText>;{" "}
+                        <CodeText type="comment">
+                            {"//"} $my_variable = 0
+                        </CodeText>
+                    </CodeBlock>
+                    <CodeBlock>
+                        <CodeText type="variable">$var1</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="variable">$var2</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText> scores
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="param">@s</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>;
+                    </CodeBlock>
                 </div>
+                <section id="variable_operation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Operation
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        Perform scoreboard operations, with 6 available
+                        Perform scoreboard operations, with 10 available
                         operations.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
@@ -92,16 +117,23 @@ const Variable = () => {
                             set the target score.
                         </li>
                         <li>
-                            <code>{">"}</code> Maximum: Compare target and source
-                            scores, and set target score to whichever is higher.
+                            <code>{">"}</code> Maximum: Compare target and
+                            source scores, and set target score to whichever is
+                            higher.
                         </li>
                         <li>
-                            <code>{"<"}</code> Minimum: Compare target and source
-                            scores, and set target score to whichever is lower.
+                            <code>{"<"}</code> Minimum: Compare target and
+                            source scores, and set target score to whichever is
+                            lower.
                         </li>
                         <li>
-                            <code>{"><"}</code> Swap: Swap target's score with 
+                            <code>{"><"}</code> Swap: Swap target's score with
                             source's score.
+                        </li>
+                        <li>
+                            <code>??=</code> Null Coalescing: If source's score
+                            is null/undefined, set source's score to target's
+                            score.
                         </li>
                     </ul>
                     <CodeBlock>
@@ -129,21 +161,7 @@ const Variable = () => {
                         <CodeText type="param">@s</CodeText>;
                     </CodeBlock>
                 </div>
-                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Scoreboard
-                </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <p>
-                        <Tab /> Copy value of JMC variable into minecraft
-                        scoreboard
-                    </p>
-                    <CodeBlock>
-                        <CodeText type="variable">{"$<variable>"}</CodeText>
-                        <CodeText type="operator">{"->"}</CodeText>objective
-                        <CodeText type="operator">:</CodeText>
-                        selector;
-                    </CodeBlock>
-                </div>
+                <section id="variable_incrementation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Incrementation
                 </div>
@@ -183,6 +201,7 @@ const Variable = () => {
                         </li>
                     </ul>
                 </div>
+                <section id="get_variable" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Get variable
                 </div>
@@ -206,6 +225,7 @@ const Variable = () => {
                         <CodeText type="function">get</CodeText>();
                     </CodeBlock>
                 </div>
+                <section id="convert_to_string" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Convert to string
                 </div>
@@ -224,7 +244,7 @@ const Variable = () => {
                     <p className="text-warning">
                         <Tab />
                         Using{" "}
-                        <Link to="/documentation/built-in-function">
+                        <Link to="/documentation/built-in-function#formatted_text">
                             FormattedText
                         </Link>{" "}
                         is prefered over <code>.toString</code>
@@ -238,6 +258,7 @@ const Variable = () => {
                         <CodeText type="operator">=</CodeText>true);
                     </CodeBlock>
                 </div>
+                <section id="execute_store" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Execute store
                 </div>
@@ -265,30 +286,6 @@ const Variable = () => {
                         <CodeText type="variable">$my_var</CodeText>{" "}
                         <CodeText type="operator">=</CodeText> data get entity
                         @s SelectedItem.tag.my_var;
-                    </CodeBlock>
-                </div>
-                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Null Coalescing
-                </div>
-                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
-                    <CodeBlock>
-                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
-                        <CodeText type="operator">??=</CodeText>{" "}
-                        <CodeText type="number">
-                            {"<integer>/<$variable>/<objective:selector>"}
-                        </CodeText>{" "}
-                        <CodeText type="comment">
-                            {"//"} if null, set to that integer
-                        </CodeText>
-                    </CodeBlock>
-                    <p>
-                        <Tab />
-                        Example
-                    </p>
-                    <CodeBlock>
-                        <CodeText type="variable">$my_var</CodeText>{" "}
-                        <CodeText type="operator">??=</CodeText>{" "}
-                        <CodeText type="number">5</CodeText>;
                     </CodeBlock>
                 </div>
             </section>

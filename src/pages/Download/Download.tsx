@@ -3,9 +3,10 @@ import { ReactComponent as DownloadSvg } from "../../assets/image/download_icon.
 import { ReactComponent as WindowsSvg } from "../../assets/image/windows.svg";
 import { ReactComponent as PythonSvg } from "../../assets/image/python.svg";
 import { ReactComponent as LinuxSvg } from "../../assets/image/linux.svg";
-// import CodeBlock from "../../components/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Download = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] md:pt-[15vh] px-2 md:px-10 flex-col items-centers">
@@ -47,7 +48,9 @@ const Download = () => {
                     <div className="flex flex-col flex-nowrap items-center m-8">
                         <PythonSvg className="mb-4 md:mb-8 h-[min(20vh,30vw)]" />
                         <div className="m-auto p-2 flex bg-[#292D3E] text-[#eeffff] h-16 w-44 md:h-24 md:w-72 rounded-md text-sm md:text-lg">
-                            <p className="m-auto">pip install jmcfunction</p>
+                            <p className="m-auto">
+                                pip install jmcfunction --pre
+                            </p>
                         </div>
                     </div>
                 </div>

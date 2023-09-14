@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import LoadingScreen from "../../components/LoadingScreen/LoadingScreen";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Introduction = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -12,6 +13,7 @@ const Introduction = () => {
             setIsLoaded(true);
         }
     };
+    useScrollToHash();
     return (
         <>
             <LoadingScreen isLoaded={isLoaded} />

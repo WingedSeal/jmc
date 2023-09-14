@@ -5,39 +5,37 @@
 *::before,
 *::after {
   margin: 0;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 @font-face {
   font-family: MinecraftTen;
   src: url(assets/font/MinecraftTen-VGORe.ttf);
 }
-
 @font-face {
   font-family: Minecraft;
   src: url(assets/font/MinecraftRegular-Bmg3.otf);
 }
-
+@font-face {
+  font-family: Monocraft;
+  src: url(assets/font/Monocraft-no-ligatures.ttf);
+}
 @font-face {
   font-family: Minecraft;
   font-weight: bold;
   src: url(assets/font/MinecraftBold-nMK1.otf);
 }
-
 @font-face {
   font-family: Minecraft;
   font-weight: bold;
   font-style: italic;
   src: url(assets/font/MinecraftBoldItalic-1y1e.otf);
 }
-
 @font-face {
   font-family: Minecraft;
   font-style: italic;
   src: url(assets/font/MinecraftItalic-R8Mo.otf);
 }
-
 html {
   font-family: Minecraft, sans-serif;
 }
@@ -55,9 +53,8 @@ pre {
     overflow-y: auto !important;
   }
 }
-
 code {
-  font-family: Minecraft, sans-serif;
+  font-family: Monocraft, sans-serif;
   @apply bg-[#292D3E] p-1 rounded text-[#eeffff];
 }
 
@@ -66,11 +63,7 @@ a {
 }
 
 img.minecraft {
-  -ms-interpolation-mode: nearest-neighbor;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: -moz-crisp-edges;
-      image-rendering: -o-pixelated;
-      image-rendering: pixelated;
+  image-rendering: pixelated;
 }
 
 ::-webkit-scrollbar {
@@ -78,7 +71,7 @@ img.minecraft {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #141414;
+  background-color: rgb(20, 20, 20);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -86,5 +79,4 @@ img.minecraft {
   border-radius: 20px;
   border: 0.3rem solid transparent;
   background-clip: content-box;
-}
-/*# sourceMappingURL=index.css.map */
+}/*# sourceMappingURL=index.css.map */

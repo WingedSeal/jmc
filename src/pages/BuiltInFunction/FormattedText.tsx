@@ -7,6 +7,10 @@ const formattedText = (
         summary="Formatted Text"
         keywords="tutorial explaination help basic string color colour"
         className="text-tertiary"
+        examples={[
+            "jmc=CoUwHgLgCgTg9gBwM4DoDGAbAlmg1gVQCUAZACgCgACayheBEGCATwDkBDAWxEoF5KARABM4aJAH1sAO1wCANOQCQWKUPABlCDBUBzPoIDaCdjpABdeVRoBXGBn0CAFhAjIAXAHoPAK05oUAO66IEJIIOwY6HCcHiJo1txSEOwQWHBSHkYm5gLkAJQA3OSgkLCIqI5wAG6MJRAUNLT0jCwc3A7SuOIqAGZwlsqqGlq6DgYQjroWCo0Q4BAOoBgYSJTMcNaUnHAwPOwARhsL45NSOhb5RXUoc8sw7AGkAALscoIAZABs7wA81kN2FQhN5xCSdUgAMX%2BaFS6Tyb063SkfUh0NhUjyAD4oVIYWkpAJCsV5jcQHcHs9Xh9vn8AdJgZRQZIVLhSABhaKJCDwyiI3pwdmckBJLEczhcwlXEm3DD3R4vN4CL6-f5qQFSBlM8EASU4CB23IRLKRKN1%2BqYWLNBslQA",
+            "jmc=CoUwHgLgCgTg9gBwHQDsBGEAUAoABP3AIgFsBPWRQgGjwIGcI4YBDAcxBoKOOYEsUAXGQDKjFu2q18ZAIIwWpANoBdbAEoA3NlCQkEEABsDLAO6YAAsypEAZAB4yFBAD5CmoA",
+        ]}
     >
         <p>
             Some string paremeters(FormattedString) have special syntax you can

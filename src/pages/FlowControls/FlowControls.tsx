@@ -1,14 +1,18 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash, { scrollToHash } from "../../utils/scrollToHash";
+import { Link } from "react-router-dom";
 
 const FlowControls = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
                 <div className="text-primary text-3xl md:text-6xl mx-auto">
                     Flow controls
                 </div>
+                <section id="condition" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Condition
                 </div>
@@ -67,9 +71,9 @@ const FlowControls = () => {
                     </p>
                     <CodeBlock>
                         <CodeText type="keyword">if</CodeText> (
-                        <CodeText type="class">$deathCount</CodeText>
-                        <CodeText type="operator">{">"}</CodeText>
-                        <CodeText type="number">5</CodeText> ) {"{"}
+                        <CodeText type="class">$deathCount</CodeText>{" "}
+                        <CodeText type="operator">{">"}</CodeText>{" "}
+                        <CodeText type="number">5</CodeText>) {"{"}
                         <br />
                         <Tab />
                         say{" "}
@@ -80,7 +84,7 @@ const FlowControls = () => {
                         <CodeText type="operator">matches</CodeText>{" "}
                         <CodeText type="number">2</CodeText>
                         <CodeText type="operator">..</CodeText>
-                        <CodeText type="number">3</CodeText> ) {"{"}
+                        <CodeText type="number">3</CodeText>) {"{"}
                         <br />
                         <Tab />
                         say{" "}
@@ -108,8 +112,9 @@ const FlowControls = () => {
                         can be used as condition as well.
                     </p>
                 </div>
+                <section id="logical_operator" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Logic Gate
+                    Logical Operator (Logic Gate)
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -156,6 +161,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="if_else" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     If & Else
                 </div>
@@ -238,6 +244,26 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="if_expand" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    If expand
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Similar to{" "}
+                        <Link
+                            to="/documentation/function#execute_expand"
+                            onClick={() => {
+                                scrollToHash("execute_expand");
+                            }}
+                        >
+                            Execute expand
+                        </Link>{" "}
+                        but for <code>if</code>.
+                    </p>
+                </div>
+                <section id="while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     While Loop
                 </div>
@@ -268,6 +294,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="do_while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Do-While Loop
                 </div>
@@ -296,6 +323,7 @@ const FlowControls = () => {
                         {"<condition>"});
                     </CodeBlock>
                 </div>
+                <section id="for" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     For Loop
                 </div>
@@ -345,6 +373,7 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case
                 </div>
@@ -387,13 +416,11 @@ const FlowControls = () => {
                         <span className="text-warning">restrictions</span>.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
+                        <li>Cases must increase in ascending order.</li>
                         <li>
-                            Cases must increase in ascending
-                            order.
-                        </li>
-                        <li>
-                            Case can start at any number, but you can't skip numbers afterwards. 
-                            (Case n+1 must comes after Case n.)
+                            Case can start at any number, but you can't skip
+                            numbers afterwards. (Case n+1 must comes after Case
+                            n.)
                         </li>
                         <li>
                             You are required to{" "}

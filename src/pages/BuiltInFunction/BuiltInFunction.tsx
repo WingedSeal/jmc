@@ -2,40 +2,8 @@ import React, { useRef, useState } from "react";
 import BuildinFeatures from "./Features";
 import { ReactComponent as SearchSvg } from "../../assets/image/icon/magnifying_glass_solid.svg";
 import { ReactComponent as ClearSvg } from "../../assets/image/icon/xmark_solid.svg";
-
-const isDisplay = (summary: string, searchValue: string, keywords: string) => {
-    summary = summary.toLowerCase();
-    if (searchValue === "") {
-        return true;
-    }
-    if (summary.includes(searchValue.toLowerCase())) {
-        return true;
-    }
-
-    let terms = searchValue.match(/(?:[^\s"]+|"[^"]*")+/g); // Split searchValue into multiple terms
-    if (terms === null) {
-        terms = [searchValue];
-    }
-
-    for (let i = 0; i < terms.length; i++) {
-        let value = terms[i].toLowerCase();
-
-        if (
-            value.length > 1 &&
-            value.charAt(0) === '"' &&
-            value.charAt(value.length - 1) === '"'
-        ) {
-            value = value.substring(1, value.length - 1);
-        }
-        if (summary.includes(value)) {
-            return true;
-        }
-        if (keywords.includes(value)) {
-            return true;
-        }
-    }
-    return false;
-};
+import useScrollToHash from "../../utils/scrollToHash";
+import isDisplay from "../../utils/isDisplay";
 
 const closeAll = () => {
     const features = document.querySelectorAll(".feature");
@@ -47,8 +15,9 @@ const closeAll = () => {
 const BuiltInFunction = () => {
     const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
+    useScrollToHash();
     return (
-        <section className="bg-secondary-dark min-h-screen w-screen flex flex-col px-2 md:px-10 pt-[17vh]">
+        <section className="bg-secondary-dark min-h-screen w-full flex flex-col px-2 md:px-10 pt-[17vh]">
             {/* Begin search bar */}
             <div className="relative h-12 mx-8 mb-8">
                 <div
@@ -75,7 +44,7 @@ const BuiltInFunction = () => {
                     }}
                 />
                 <div
-                    className="absolute top-1/2 right-4 -translate-x-1/2 -translate-y-1/2 h-3/4 ml-auto"
+                    className="absolute top-1/2 right-4 -translate-x-1/2 -translate-y-1/2 h-3/4 ml-auto cursor-pointer"
                     onClick={() => {
                         inputRef.current!.value = "";
                         inputRef.current!.focus();

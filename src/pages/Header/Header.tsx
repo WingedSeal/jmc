@@ -1,8 +1,10 @@
 import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Header = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
@@ -23,6 +25,7 @@ const Header = () => {
                     </p>
                 </div>
 
+                <section id="macro" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Macros
                 </div>
@@ -80,6 +83,7 @@ const Header = () => {
                         <CodeText type="param">my_obj</CodeText>);
                     </CodeBlock>
                 </div>
+                <section id="binding" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Binding / Special Macro
                 </div>
@@ -139,6 +143,7 @@ const Header = () => {
                         </CodeText>
                     </CodeBlock>
                 </div>
+                <section id="credit" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Credit
                 </div>
@@ -162,6 +167,7 @@ const Header = () => {
                         <CodeText type="string">"WingedSeal"</CodeText>
                     </CodeBlock>
                 </div>
+                <section id="include" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Include
                 </div>
@@ -175,6 +181,7 @@ const Header = () => {
                         <CodeText type="string">"header_name"</CodeText>
                     </CodeBlock>
                 </div>
+                <section id="command" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Mod / New Commands
                 </div>
@@ -189,6 +196,7 @@ const Header = () => {
                         my_mod_command
                     </CodeBlock>
                 </div>
+                <section id="del" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Delete Commands
                 </div>
@@ -203,6 +211,7 @@ const Header = () => {
                         <CodeText type="operator">#del</CodeText> my_command
                     </CodeBlock>
                 </div>
+                <section id="override" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Override custom/minecraft namespace
                 </div>
@@ -255,6 +264,7 @@ const Header = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="uninstall" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Uninstall
                 </div>
@@ -274,6 +284,7 @@ const Header = () => {
                         <CodeText type="function">uninstall</CodeText>() {"{}"}
                     </CodeBlock>
                 </div>
+                <section id="static" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Static folder
                 </div>
@@ -288,6 +299,19 @@ const Header = () => {
                         <CodeText type="string">
                             "folder_path_from_namespace_folder"
                         </CodeText>
+                    </CodeBlock>
+                </div>
+                <section id="nometa" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    No pack.mcmeta
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        Make <code>pack.mcmeta</code> static and hand the
+                        responsibility back to user.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#nometa</CodeText>
                     </CodeBlock>
                 </div>
             </section>

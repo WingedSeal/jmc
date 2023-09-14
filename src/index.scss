@@ -20,6 +20,11 @@
 }
 
 @font-face {
+    font-family: Monocraft;
+    src: url(assets/font/Monocraft-no-ligatures.ttf);
+}
+
+@font-face {
     font-family: Minecraft;
     font-weight: bold;
     src: url(assets/font/MinecraftBold-nMK1.otf);
@@ -57,7 +62,7 @@ pre {
 }
 
 code {
-    font-family: Minecraft, sans-serif;
+    font-family: Monocraft, sans-serif;
     @apply bg-[#292D3E] p-1 rounded text-[#eeffff];
 }
 

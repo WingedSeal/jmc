@@ -2,14 +2,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
+import useScrollToHash from "../../utils/scrollToHash";
 
 const Function = () => {
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-secondary-dark flex flex-wrap pt-[14vh] pb-5 md:pt-[15vh] px-4 md:px-11 flex-col items-centers">
                 <div className="text-secondary text-3xl md:text-6xl mx-auto">
                     Function
                 </div>
+                <section id="function_defining" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function defining
                 </div>
@@ -69,6 +72,7 @@ const Function = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="function_calling" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function calling
                 </div>
@@ -100,8 +104,16 @@ const Function = () => {
                         schedule clear{" "}
                         <CodeText type="function">function_name</CodeText>
                         ();
+                        <br />
+                        <CodeText type="variable">$var</CodeText>{" "}
+                        <CodeText type="operator">=</CodeText>{" "}
+                        <CodeText type="function">
+                            folder_name.function_name
+                        </CodeText>
+                        ();{" "}
                     </CodeBlock>
                 </div>
+                <section id="anonymous_function" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Anonymous Function
                 </div>
@@ -154,6 +166,38 @@ const Function = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="execute_expand" />
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Execute Expand
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Similar to anonymous function, but instead of creating a
+                        new function. It'll copy paste execute part of the
+                        command instead.
+                    </p>
+                    <CodeBlock>
+                        execute <CodeText type="operator">...</CodeText> expand{" "}
+                        {"{"}
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 1"</CodeText>;
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code example 2"</CodeText>;
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                    <CodeBlock>
+                        execute <CodeText type="operator">...</CodeText> run say{" "}
+                        <CodeText type="string">"Code example 1"</CodeText>;
+                        <br />
+                        execute <CodeText type="operator">...</CodeText> run say{" "}
+                        <CodeText type="string">"Code example 2"</CodeText>;
+                    </CodeBlock>
+                </div>
+                <section id="class" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Class (Function grouping)
                 </div>

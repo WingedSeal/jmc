@@ -1,5 +1,6 @@
 import React from "react";
 import "./Feature.css";
+import Example from "./Example";
 
 interface FeatureInterface {
     id: string;
@@ -7,6 +8,7 @@ interface FeatureInterface {
     keywords: string;
     children: React.ReactNode;
     className?: string;
+    examples?: string[];
     wip?: boolean;
 }
 
@@ -30,6 +32,17 @@ const Feature: React.FC<FeatureInterface> = (props) => {
                     {props.summary}
                 </summary>
                 {props.children}
+                {props.examples ? (
+                    <>
+                        <hr className="mb-2" />
+                        {props.examples.map((url, index) => (
+                            <Example index={index} url={url} key={index} />
+                        ))}
+                    </>
+                ) : (
+                    ""
+                )}
+
                 <div className="mb-2" />
             </details>
         </div>

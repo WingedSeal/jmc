@@ -3,9 +3,10 @@ import { loadPyodide, PyodideInterface } from "pyodide";
 import CodeBlock from "../../components/CodeBlock";
 import { useSearchParams } from "react-router-dom";
 import lzString from "lz-string";
+import useScrollToHash from "../../utils/scrollToHash";
 const getPyodide = async () => {
     const pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.22.1/full/",
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
     });
     // const consoleLog = console.log;
     // console.log = () => {};
@@ -100,7 +101,7 @@ except EXCEPTIONS as error:
             setJMCResult(built);
         }
     };
-
+    useScrollToHash();
     return (
         <>
             <section className="min-h-screen bg-primary-dark flex flex-wrap pt-[12vh] pb-5 md:pt-[13vh] px-4 md:px-11 flex-col items-centers content-center relative">
@@ -128,7 +129,7 @@ except EXCEPTIONS as error:
                         <input
                             ref={namespaceInput}
                             placeholder="namespace"
-                            className="bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-w-[80vw] max-w-full"
+                            className="font-monocraft bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-w-[80vw] max-w-full"
                             onChange={() => {}}
                             spellCheck="false"
                         />
@@ -155,7 +156,7 @@ except EXCEPTIONS as error:
 
                     <textarea
                         ref={contentHeaderArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
+                        className="font-monocraft mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         placeholder="Header File"
                         spellCheck="false"
                         hidden={!isShowHeader}
@@ -183,7 +184,7 @@ except EXCEPTIONS as error:
                     />
                     <textarea
                         ref={contentTextArea}
-                        className="mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
+                        className="font-monocraft mt-1 md:mt-2 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3 min-h-[60vh] max-w-full z-[1]"
                         spellCheck="false"
                         placeholder="JMC File"
                         hidden={isShowHeader}
@@ -276,11 +277,11 @@ except EXCEPTIONS as error:
                     {Object.keys(Object.fromEntries(JMCResult)).map((key) => {
                         return (
                             <div key={key}>
-                                <div className="bg-gray-900 text-sm md:text-xl text-primary-contrast p-2 rounded-sm">
+                                <div className="font-monocraft font-bold bg-gray-900 text-sm md:text-xl text-primary-contrast p-2 rounded-sm whitespace-nowrap overflow-x-auto">
                                     {">"} {key}
                                 </div>
                                 <CodeBlock>
-                                    <pre className="inline text-sm md:text-lg">
+                                    <pre className="font-monocraft inline text-sm md:text-lg">
                                         {JMCResult.get(key)}
                                     </pre>
                                 </CodeBlock>

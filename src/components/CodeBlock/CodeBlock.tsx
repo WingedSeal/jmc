@@ -10,7 +10,7 @@ const CodeBlock: React.FC<Code> = (props) => {
     return (
         <>
             <div className="relative my-2 md:my-4 bg-[#292D3E] rounded-md md:rounded-2xl text-[#eeffff] px-4 py-1 md:px-8 md:py-3">
-                <div className="m-0 p-0 pb-2 text-xs md:text-2xl overflow-y-auto whitespace-nowrap">
+                <div className="font-monocraft m-0 p-0 pb-2 text-xs md:text-2xl overflow-y-auto whitespace-nowrap">
                     {props.children}
                 </div>
             </div>
