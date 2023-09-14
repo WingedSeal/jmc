@@ -132,7 +132,8 @@ const Function = () => {
                         entity running it like normal schedule command.
                     </p>
                     <CodeBlock>
-                        schedule <CodeText type="operator">...</CodeText> {"{"}
+                        schedule <CodeText type="number">{"<time>"}</CodeText>{" "}
+                        [replace/append] {"{"}
                         <br />
                         <Tab />
                         say <CodeText type="string">"Code example 1"</CodeText>;
