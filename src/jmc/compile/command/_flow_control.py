@@ -1,5 +1,6 @@
 """Module for parsing flow controls (if-e;se, while, etc.), called from command/flow_control.py"""
 
+from typing import Literal
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -197,7 +198,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int] | None = None) -> str:
+                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -212,15 +213,22 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
         case_numbers = [*range(1, len(func_contents) + 1)]
     func_count = datapack.get_count(name)
     if datapack.version >= 16:
+        has_default = "default" in case_numbers
         for (func, num) in zip(func_contents, case_numbers):
+            if has_default and num != "default":
+                func.append(f"scoreboard players set __found_case__ {datapack.var_name} 1")
             datapack.add_raw_private_function(
                 name, func, f"{str(func_count)}/{num}")
         datapack.add_raw_private_function(
             name, [
                 f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
             ], f"{str(func_count)}/select")
-        return f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" \
-         + f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}"
+        return (
+            f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "" +
+            f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
+            f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
+            f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else ""
+        )
     else:
         __parse_switch_binary(start_at, len(func_contents) + start_at - 1, func_count,
                             datapack, func_contents, scoreboard_player, name, start_at)
@@ -251,7 +259,7 @@ def switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_numbers: list[int] = []
+    case_numbers: list[int | Literal["default"]] = []
     expected_case: int | None = None
     case_start: int | None = None
     cases_content: list[list[list[Token]]] = []
@@ -293,6 +301,12 @@ def switch(command: list[Token], datapack: DataPack,
             tokens = tokens[3:]
             expected_case += 1
             case_numbers.append(count)
+        if tokens[0].string == "default" and tokens[0].token_type == TokenType.KEYWORD:
+            datapack.version.require(16, tokens[1], tokenizer)
+            cases_content.append(current_case_content)
+            current_case_content = []
+            case_numbers.append("default")
+            tokens = tokens[2:]
         # End If case
         if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
                 tokens) == 1:
