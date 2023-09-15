@@ -197,7 +197,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int] = []) -> str:
+                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int] | None = None) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -208,6 +208,8 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     :param case_numbers: List of case numbers provided (only matters with post-1.20.2 switch)
     :return: Minecraft function call to initiate switch case
     """
+    if case_numbers is None:
+        case_numbers = [*range(1, len(func_contents) + 1)]
     func_count = datapack.get_count(name)
     if datapack.version >= 16:
         for (func, num) in zip(func_contents, case_numbers):
