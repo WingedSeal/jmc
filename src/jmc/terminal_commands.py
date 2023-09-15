@@ -146,7 +146,7 @@ def __config_edit() -> None:
     pprint(f"""Edit configurations (Bypass error checking)
 Type `cancel` to cancel
 {NEW_LINE.join([f"- {key}" for key in config_json])}""", Colors.PURPLE)
-    key = get_input("Configuration: ")
+    key = get_input("Configuration: ").strip()
     if key not in config_json:
         if key.lower() == "cancel":
             return
