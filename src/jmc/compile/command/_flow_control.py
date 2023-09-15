@@ -152,7 +152,7 @@ def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
 SWITCH_CASE_NAME = "switch_case"
 
 
-def __parse_old_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
+def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
                           func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str, start_at: int = 1) -> None:
     """
     For recursion of JMC switch-case's binary tree
@@ -167,7 +167,7 @@ def __parse_old_switch_binary(min_: int, max_: int, count: str, datapack: DataPa
     :raises ValueError: min_ is more than max_
     """
     if max_ < min_:
-        raise ValueError("min_ is more than max_ in __parse_old_switch_binary")
+        raise ValueError("min_ is more than max_ in __parse_switch_binary")
     if max_ == min_:
         datapack.add_raw_private_function(
             name, func_contents[min_ - start_at], count)
@@ -190,14 +190,14 @@ def __parse_old_switch_binary(min_: int, max_: int, count: str, datapack: DataPa
                 f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_more} run function {datapack.namespace}:{DataPack.private_name}/{name}/{count_more}",
             ], count)
 
-        __parse_old_switch_binary(min_, half1, count_less,
+        __parse_switch_binary(min_, half1, count_less,
                               datapack, func_contents, scoreboard_player, name, start_at)
-        __parse_old_switch_binary(half2, max_, count_more,
+        __parse_switch_binary(half2, max_, count_more,
                               datapack, func_contents, scoreboard_player, name, start_at)
 
 
-def parse_old_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1) -> str:
+def parse_switch(scoreboard_player: ScoreboardPlayer,
+                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int] = []) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -205,15 +205,27 @@ def parse_old_switch(scoreboard_player: ScoreboardPlayer,
     :param func_contents: List of function content(List of commands(string)) given by user
     :param datapack: Datapack object
     :param name: Private function's group name, defaults to SWITCH_CASE_NAME
+    :param case_numbers: List of case numbers provided (only matters with post-1.20.2 switch)
     :return: Minecraft function call to initiate switch case
     """
-    count = datapack.get_count(name)
-    __parse_old_switch_binary(start_at, len(func_contents) + start_at - 1, count,
-                          datapack, func_contents, scoreboard_player, name, start_at)
-    return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{count}"
+    func_count = datapack.get_count(name)
+    if datapack.version >= 16:
+        for (func, num) in zip(func_contents, case_numbers):
+            datapack.add_raw_private_function(
+                name, func, f"{str(func_count)}/{num}")
+        datapack.add_raw_private_function(
+            name, [
+                f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
+            ], f"{str(func_count)}/select")
+        return f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" \
+         + f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}"
+    else:
+        __parse_switch_binary(start_at, len(func_contents) + start_at - 1, func_count,
+                            datapack, func_contents, scoreboard_player, name, start_at)
+        return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}"
 
 
-def old_switch(command: list[Token], datapack: DataPack,
+def switch(command: list[Token], datapack: DataPack,
            tokenizer: Tokenizer) -> str:
     """
     Parse `switch`
@@ -237,7 +249,8 @@ def old_switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_count: int | None = None
+    case_numbers: list[int] = []
+    expected_case: int | None = None
     case_start: int | None = None
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
@@ -262,11 +275,11 @@ def old_switch(command: list[Token], datapack: DataPack,
                     "Expected case number", tokens[1], tokenizer)
 
             count = int(count_str)
-            if case_count is None:
-                case_count = count
+            if expected_case is None:
+                expected_case = count
             if case_start is None:
-                case_start = case_count
-            if count != case_count:
+                case_start = expected_case
+            if count != expected_case:
                 datapack.version.require(16, tokens[1], tokenizer)
             if len(tokens) < 3:
                 raise JMCSyntaxException(
@@ -276,7 +289,8 @@ def old_switch(command: list[Token], datapack: DataPack,
                     "Expected colon (:)", tokens[2], tokenizer)
 
             tokens = tokens[3:]
-            case_count += 1
+            expected_case += 1
+            case_numbers.append(count)
         # End If case
         if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
                 tokens) == 1:
@@ -308,100 +322,9 @@ def old_switch(command: list[Token], datapack: DataPack,
     if case_start is None:
         raise ValueError("case_start is None")
 
-    return parse_old_switch(scoreboard_player, func_contents,
-                        datapack, start_at=case_start)
+    return parse_switch(scoreboard_player, func_contents,
+                        datapack, start_at=case_start, case_numbers=case_numbers)
 
-
-def new_switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer):
-    """
-    Parse `switch`
-    """
-    if len(command) == 1:
-        raise JMCSyntaxException(
-            "Expected (", command[0], tokenizer, col_length=True)
-    if command[1].token_type != TokenType.PAREN_ROUND:
-        raise JMCSyntaxException(
-            "Expected (", command[1], tokenizer, display_col_length=False)
-    if len(command) == 2:
-        raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, col_length=True)
-    if command[2].token_type != TokenType.PAREN_CURLY:
-        raise JMCSyntaxException(
-            "Expected {", command[2], tokenizer, display_col_length=False)
-    if command[2].string == "{}":
-        raise JMCSyntaxException(
-            "Switch content cannot be empty", command[2], tokenizer)
-
-    list_of_tokens = tokenizer.parse(
-        command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
-    name = SWITCH_CASE_NAME
-    func_count = datapack.get_count(name)
-    current_case_content: list[list[Token]] = []
-
-    if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
-        raise JMCSyntaxException(
-            "Expected 'case'", list_of_tokens[0][0], tokenizer)
-    for tokens in list_of_tokens:
-        if tokens[0].string == "case" and tokens[0].token_type == TokenType.KEYWORD:
-            current_case_content = []
-            if len(tokens) == 1:
-                raise JMCSyntaxException(
-                    "Expected case number", tokens[0], tokenizer, col_length=True)
-            if tokens[1].string == "-":
-                count_str = tokens[1].string + tokens[2].string
-                del tokens[2]
-            else:
-                count_str = tokens[1].string
-            if not count_str.lstrip("-").isalnum():
-                raise JMCSyntaxException(
-                    "Expected case number", tokens[1], tokenizer)
-
-            if len(tokens) < 3:
-                raise JMCSyntaxException(
-                    "Expected colon (:)", tokens[1], tokenizer, col_length=True)
-            if tokens[2].token_type != TokenType.OPERATOR or tokens[2].string != ":":
-                raise JMCSyntaxException(
-                    "Expected colon (:)", tokens[2], tokenizer)
-
-            tokens = tokens[3:]
-        # End of case
-        if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
-                tokens) == 1:
-            continue
-        current_case_content.append(tokens)
-        datapack.add_raw_private_function(
-                name, datapack.lexer._parse_func_content(tokenizer, current_case_content, is_load=False), f"{str(func_count)}/{count_str}")
-
-    # Parse variable
-    tokens = tokenizer.parse(
-        command[1].string[1:-1], command[1].line, command[1].col + 1, expect_semicolon=False)[0]
-    if len(tokens) > 1:
-        raise JMCSyntaxException(
-            f"Unexpected token({tokens[1].string})", tokens[1], tokenizer)
-
-    scoreboard_player = find_scoreboard_player_type(
-        tokens[0], tokenizer, allow_integer=False)
-
-    if scoreboard_player.player_type == PlayerType.INTEGER:
-        raise JMCSyntaxException(
-            "Unexpected integer in switch case", tokens[0], tokenizer)
-
-    datapack.add_raw_private_function(
-            name, [
-                f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
-            ], f"{str(func_count)}/select")
-
-    return f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" \
-         + f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}"
-
-
-def switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer) -> str:
-    #datapack.version.require(11, "",)
-    if datapack.version >= 16:
-        return new_switch(command, datapack, tokenizer)
-    return old_switch(command, datapack, tokenizer)
 
 FOR_NAME = "for_loop"
 

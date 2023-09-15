@@ -7,7 +7,7 @@ from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
 from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, FormattedText, convention_jmc_to_mc
 from ..jmc_function import JMCFunction, FuncType, func_property
-from .._flow_control import parse_old_switch
+from .._flow_control import parse_switch
 
 from functools import lru_cache
 
@@ -93,7 +93,7 @@ class RightClickSetup(EventMixin):
                         [f"function {self.datapack.namespace}:{func}"])
 
             main_func.append(
-                f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_old_switch(ScoreboardPlayer(
+                f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
                     PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, name=self.name)}""")
         else:
             main_func.append(
@@ -420,7 +420,7 @@ class TriggerSetup(JMCFunction):
                     func_contents.append(
                         [f"function {self.datapack.namespace}:{func}"])
             run = [
-                parse_old_switch(ScoreboardPlayer(
+                parse_switch(ScoreboardPlayer(
                     PlayerType.SCOREBOARD, (obj, "@s")), func_contents, self.datapack, self.name),
             ]
         else:
