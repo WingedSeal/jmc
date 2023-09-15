@@ -290,7 +290,7 @@ def switch(command: list[Token], datapack: DataPack,
             if case_start is None:
                 case_start = expected_case
             if count != expected_case:
-                datapack.version.require(16, tokens[1], tokenizer)
+                datapack.version.require(16, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
             if len(tokens) < 3:
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[1], tokenizer, col_length=True)
