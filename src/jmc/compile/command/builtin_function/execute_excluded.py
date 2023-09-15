@@ -4,7 +4,7 @@ from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property
 from ..utils import ArgType, NumberType, eval_expr, find_scoreboard_player_type
-from .._flow_control import parse_switch
+from .._flow_control import parse_old_switch
 
 
 def _hardcode_parse(calc_pos: int, string: str, token: Token,
@@ -259,7 +259,7 @@ class HardcodeSwitch(JMCFunction):
                 error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
-        return parse_switch(scoreboard_player, func_contents,
+        return parse_old_switch(scoreboard_player, func_contents,
                             self.datapack, self.name, start_at)
 
 
