@@ -224,10 +224,10 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
                 f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
             ], f"{str(func_count)}/select")
         return (
-            f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "" +
+            (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
             f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" + # type: ignore
             f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
-            f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else ""
+            (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
         )
     else:
         __parse_switch_binary(start_at, len(func_contents) + start_at - 1, func_count,
