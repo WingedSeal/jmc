@@ -250,5 +250,6 @@ EXCEPTIONS = (
     JMCSyntaxWarning,
     JMCValueError,
     MinecraftSyntaxWarning,
-    JMCBuildError
+    JMCBuildError,
+    MinecraftVersionTooLow
 )

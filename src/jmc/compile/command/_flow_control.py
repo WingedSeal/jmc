@@ -1,5 +1,6 @@
 """Module for parsing flow controls (if-e;se, while, etc.), called from command/flow_control.py"""
 
+from typing import Literal
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -197,7 +198,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1) -> str:
+                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -205,12 +206,33 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     :param func_contents: List of function content(List of commands(string)) given by user
     :param datapack: Datapack object
     :param name: Private function's group name, defaults to SWITCH_CASE_NAME
+    :param case_numbers: List of case numbers provided (only matters with post-1.20.2 switch)
     :return: Minecraft function call to initiate switch case
     """
-    count = datapack.get_count(name)
-    __parse_switch_binary(start_at, len(func_contents) + start_at - 1, count,
-                          datapack, func_contents, scoreboard_player, name, start_at)
-    return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{count}"
+    if case_numbers is None:
+        case_numbers = [*range(1, len(func_contents) + 1)]
+    func_count = datapack.get_count(name)
+    if datapack.version >= 16:
+        has_default = "default" in case_numbers
+        for (case_body, case_label) in zip(func_contents, case_numbers):
+            if has_default and case_label != "default":
+                case_body.append(f"scoreboard players set __found_case__ {datapack.var_name} 1")
+            datapack.add_raw_private_function(
+                name, case_body, f"{str(func_count)}/{case_label}")
+        datapack.add_raw_private_function(
+            name, [
+                f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
+            ], f"{str(func_count)}/select")
+        assert not isinstance(scoreboard_player, int)
+        return (
+            (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
+            f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
+            f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
+            (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
+        )
+    __parse_switch_binary(start_at, len(func_contents) + start_at - 1, func_count,
+                        datapack, func_contents, scoreboard_player, name, start_at)
+    return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}"
 
 
 def switch(command: list[Token], datapack: DataPack,
@@ -237,7 +259,8 @@ def switch(command: list[Token], datapack: DataPack,
     list_of_tokens = tokenizer.parse(
         command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
 
-    case_count: int | None = None
+    case_numbers: list[int | Literal["default"]] = []
+    expected_case: int | None = None
     case_start: int | None = None
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
@@ -262,13 +285,12 @@ def switch(command: list[Token], datapack: DataPack,
                     "Expected case number", tokens[1], tokenizer)
 
             count = int(count_str)
-            if case_count is None:
-                case_count = count
+            if expected_case is None:
+                expected_case = count
             if case_start is None:
-                case_start = case_count
-            if count != case_count:
-                raise JMCSyntaxException(
-                    f"Expected case {case_count} got case {count}", tokens[1], tokenizer)
+                case_start = expected_case
+            if count != expected_case:
+                datapack.version.require(16, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
             if len(tokens) < 3:
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[1], tokenizer, col_length=True)
@@ -277,7 +299,14 @@ def switch(command: list[Token], datapack: DataPack,
                     "Expected colon (:)", tokens[2], tokenizer)
 
             tokens = tokens[3:]
-            case_count += 1
+            expected_case += 1
+            case_numbers.append(count)
+        if tokens[0].string == "default" and tokens[0].token_type == TokenType.KEYWORD:
+            datapack.version.require(16, tokens[1], tokenizer)
+            cases_content.append(current_case_content)
+            current_case_content = []
+            case_numbers.append("default")
+            tokens = tokens[2:]
         # End If case
         if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
                 tokens) == 1:
@@ -310,7 +339,7 @@ def switch(command: list[Token], datapack: DataPack,
         raise ValueError("case_start is None")
 
     return parse_switch(scoreboard_player, func_contents,
-                        datapack, start_at=case_start)
+                        datapack, start_at=case_start, case_numbers=case_numbers)
 
 
 FOR_NAME = "for_loop"

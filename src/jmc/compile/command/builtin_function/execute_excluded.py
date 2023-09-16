@@ -260,7 +260,7 @@ class HardcodeSwitch(JMCFunction):
                 raise error
 
         return parse_switch(scoreboard_player, func_contents,
-                            self.datapack, self.name, start_at)
+                            self.datapack, self.name, start_at, [*range(start_at, count + 1)])
 
 
 @func_property(
