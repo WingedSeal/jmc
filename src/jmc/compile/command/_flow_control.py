@@ -216,22 +216,32 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
         has_default = "default" in case_numbers
         for (case_body, case_label) in zip(func_contents, case_numbers):
             if has_default and case_label != "default":
-                case_body.append(f"scoreboard players set __found_case__ {datapack.var_name} 1")
+                case_body.append(
+                    f"scoreboard players set __found_case__ {datapack.var_name} 1")
             datapack.add_raw_private_function(
                 name, case_body, f"{str(func_count)}/{case_label}")
         datapack.add_raw_private_function(
             name, [
                 f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
             ], f"{str(func_count)}/select")
-        assert not isinstance(scoreboard_player, int)
+        assert not isinstance(scoreboard_player.value, int)
         return (
             (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
             f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
             f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
             (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
         )
-    __parse_switch_binary(start_at, len(func_contents) + start_at - 1, func_count,
-                        datapack, func_contents, scoreboard_player, name, start_at)
+    __parse_switch_binary(
+        start_at,
+        len(func_contents) +
+        start_at -
+        1,
+        func_count,
+        datapack,
+        func_contents,
+        scoreboard_player,
+        name,
+        start_at)
     return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}"
 
 
@@ -290,7 +300,8 @@ def switch(command: list[Token], datapack: DataPack,
             if case_start is None:
                 case_start = expected_case
             if count != expected_case:
-                datapack.version.require(16, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
+                datapack.version.require(
+                    16, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
             if len(tokens) < 3:
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[1], tokenizer, col_length=True)

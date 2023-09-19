@@ -53,7 +53,7 @@ class MathSqrt(JMCFunction):
         run = [
             f"scoreboard players operation {N} {var} = {self.args['n']}",
             self.datapack.call_func(self.name, "main"),
-            f"scoreboard players operation {self.var} {var} = {x_n} {var}"
+            f"scoreboard players operation {self.var} = {x_n} {var}"
         ]
 
         if self.is_execute:
@@ -164,19 +164,19 @@ class MathRandom(JMCFunction):
 
         run.extend([
             self.datapack.call_func(self.name, "main"),
-            f"scoreboard players operation {self.var} {var} = {result} {var}",
+            f"scoreboard players operation {self.var} = {result} {var}",
         ])
 
         if isinstance(start.value, int):
             if start.value < 0:
                 run.append(
-                    f"scoreboard players remove {self.var} {var} {abs(start.value)}")
+                    f"scoreboard players remove {self.var} {abs(start.value)}")
             elif start.value > 0:
                 run.append(
-                    f"scoreboard players add {self.var} {var} {start.value}")
+                    f"scoreboard players add {self.var} {start.value}")
         else:
             run.append(
-                f"scoreboard players operation {self.var} {var} -= {start.value[1]} {start.value[0]}")
+                f"scoreboard players operation {self.var} -= {start.value[1]} {start.value[0]}")
 
         if self.is_execute:
             count = self.datapack.get_count(self.name)
