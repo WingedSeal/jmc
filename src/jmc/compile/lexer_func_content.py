@@ -532,6 +532,7 @@ class FuncContent:
         if not self.was_anonym_func:
             raise JMCSyntaxException(
                 "Unexpected `with` keyword without anonymous function before it", token, self.tokenizer)
+        self.lexer.datapack.version.require(16, token, self.tokenizer)
         self.command_strings[-1] += " " + \
             " ".join(_token.string for _token in self.command[key_pos:])
 
