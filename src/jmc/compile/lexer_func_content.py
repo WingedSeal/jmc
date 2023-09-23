@@ -630,6 +630,8 @@ class FuncContent:
             if key_pos != 0:
                 raise var_error
             first_token = self.command[0]
+            if first_token.string[0] != "$":
+                raise var_error
             self.command[0] = Token(first_token.token_type,
                                     first_token.line,
                                     first_token.col + 1,
