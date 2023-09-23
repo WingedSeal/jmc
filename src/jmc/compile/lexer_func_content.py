@@ -96,12 +96,25 @@ class FuncContent:
     :param programs: List of commands(List of arguments(Token))
     :param is_load: Whether the function is a load function
     """
-    __slots__ = "tokenizer", "programs", "is_load", "command_strings", "__commands", "command", "is_expect_command", "is_execute", "lexer", "expanded_commands"
+    __slots__ = (
+        "tokenizer",
+        "programs",
+        "is_load",
+        "command_strings",
+        "__commands",
+        "command",
+        "is_expect_command",
+        "is_execute",
+        "lexer",
+        "expanded_commands",
+        "was_anonym_func")
 
     command: list[Token]
     is_expect_command: bool
     expanded_commands: list[str] | None
     is_execute: bool
+    was_anonym_func: bool
+    """Whether the last command function, this is implement for using `with` with anonymous function."""
 
     def __init__(self, tokenizer: Tokenizer,
                  programs: list[list[Token]], is_load: bool, lexer: "Lexer") -> None:
@@ -113,8 +126,9 @@ class FuncContent:
         self.__commands: list[str] = []
         self.lexer = lexer
         self.expanded_commands = None
+        self.was_anonym_func = False
 
-    def parse_self_command(self):
+    def parse_self_command(self, current_line: int):
         """
         Parse self.command
         """
@@ -159,16 +173,16 @@ class FuncContent:
             self.__commands = []
             self.expanded_commands = None
 
-        self.__parse_commands()
+        self.__parse_commands(current_line)
 
     def parse(self) -> list[str]:
         """
         Parse the content
         :return: List of commands(String)
         """
-        for command in self.programs:
+        for current_line, command in enumerate(self.programs):
             self.command = command
-            self.parse_self_command()
+            self.parse_self_command(current_line)
 
         # Boxes check
         if self.lexer.do_while_box is not None:
@@ -191,7 +205,7 @@ class FuncContent:
             self.expanded_commands = None
         return self.command_strings
 
-    def __parse_commands(self) -> None:
+    def __parse_commands(self, current_line: int) -> None:
         """Parse command in self.commands"""
         self.is_expect_command = True
         self.is_execute = (self.command[0].string == "execute")
@@ -204,7 +218,7 @@ class FuncContent:
                 self.__not_expect_command(key_pos, token, command_pos)
                 continue
             command_pos = key_pos
-            if self.__expect_command(key_pos, token):
+            if self.__expect_command(key_pos, token, current_line):
                 break
 
     def __optimize(self, token: Token) -> bool:
@@ -339,7 +353,8 @@ class FuncContent:
         else:
             append_commands(self.__commands, token.string)
 
-    def __expect_command(self, key_pos: int, token: Token) -> bool:
+    def __expect_command(self, key_pos: int, token: Token,
+                         current_line: int) -> bool:
         """
         Called when expecting a command
 
@@ -351,19 +366,29 @@ class FuncContent:
 
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
-            if token.token_type == TokenType.PAREN_CURLY and self.is_execute:
-                if self.expanded_commands is not None:
-                    self.expanded_commands = self.lexer.datapack.parse_function_token(
-                        token, self.tokenizer)
-                    self.__commands[-1] = "run"
-                else:
-                    append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
-                        "anonymous", token, self.tokenizer))
+            if not (token.token_type ==
+                    TokenType.PAREN_CURLY and self.is_execute):
+                raise JMCSyntaxException(
+                    "Expected keyword", token, self.tokenizer)
+            if self.expanded_commands is not None:
+                self.expanded_commands = self.lexer.datapack.parse_function_token(
+                    token, self.tokenizer)
+                self.__commands[-1] = "run"
                 return True
-            raise JMCSyntaxException(
-                "Expected keyword", token, self.tokenizer)
-
+            force_create_func = (
+                len(self.programs) > current_line + 1 and
+                self.programs[current_line + 1][0].string == "with"
+            )
+            append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
+                "anonymous", token, self.tokenizer, force_create_func=force_create_func))
+            self.was_anonym_func = True
+            return True
         # End Handle Errors
+
+        if token.string == "with":
+            self.__is_with(key_pos, token)
+            return True
+        self.was_anonym_func = False
 
         if is_number(token.string) and key_pos == 0:
             self.__is_number(key_pos, token)
@@ -483,20 +508,6 @@ class FuncContent:
             if not self.command_strings:
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
-
-            # if not self.command_strings[-1].startswith("execute"):
-            #     # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-            #     #     if self.command_strings[-1].startswith(_cmd):
-            #     #         self.command_strings[-1] += " " + token.string
-            #     #         return True
-            #     raise JMCSyntaxException(
-            # f"Unrecognized command ({token.string})", token, self.tokenizer)
-
-            # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-            #     if _cmd in self.command_strings[-1]:
-            #         self.command_strings[-1] += " " + token.string
-            #         return True
-
             raise JMCSyntaxException(
                 f"Unrecognized command ({token.string})", token, self.tokenizer)
 
@@ -514,21 +525,15 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Expected command, got number", token, self.tokenizer, display_col_length=False)
 
-        # if not self.command_strings[-1].startswith("execute"):
-        #     for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-        #         if self.command_strings[-1].startswith(_cmd):
-        #             self.command_strings[-1] += " " + token.string
-        #             return
-        #     raise JMCSyntaxException(
-        #         "Unexpected number", token, self.tokenizer, display_col_length=False)
-
-        # for _cmd in ALLOW_KEYWORD_AFTER_CURLY_PAREN:
-        #     if _cmd in self.command_strings[-1]:
-        #         self.command_strings[-1] += " " + token.string
-        #         return
-
         raise JMCSyntaxException(
             "Unexpected number", token, self.tokenizer, display_col_length=False)
+
+    def __is_with(self, key_pos: int, token: Token) -> None:
+        if not self.was_anonym_func:
+            raise JMCSyntaxException(
+                "Unexpected `with` keyword without anonymous function before it", token, self.tokenizer)
+        self.command_strings[-1] += " " + \
+            " ".join(_token.string for _token in self.command[key_pos:])
 
     def __is_say(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) == 1:
@@ -630,7 +635,7 @@ class FuncContent:
                                     first_token.string[1:],
                                     first_token._macro_length)
             try:
-                self.parse_self_command()
+                self.parse_self_command(0)
             except EXCEPTIONS as normal_error:
                 token = self.command[0]
                 if token.string not in VANILLA_COMMANDS and token.string not in Header(
