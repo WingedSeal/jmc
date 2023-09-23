@@ -387,7 +387,7 @@ class FuncContent:
 
         if token.string == "with":
             self.__is_with(key_pos, token)
-            return True
+            return False
         self.was_anonym_func = False
 
         if is_number(token.string) and key_pos == 0:
@@ -533,8 +533,8 @@ class FuncContent:
             raise JMCSyntaxException(
                 "Unexpected `with` keyword without anonymous function before it", token, self.tokenizer)
         self.lexer.datapack.version.require(16, token, self.tokenizer)
-        self.command_strings[-1] += " " + \
-            " ".join(_token.string for _token in self.command[key_pos:])
+        append_commands(self.__commands, self.command_strings.pop())
+        append_commands(self.__commands, "with")
 
     def __is_say(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) == 1:
