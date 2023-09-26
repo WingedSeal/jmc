@@ -549,7 +549,7 @@ class Lexer:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
             elif is_decorator(command[0].string):
                 self.parse_decorated_function(
-                    tokenizer, command, file_path_str)
+                    tokenizer, command, file_path_str, prefix)
             elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":

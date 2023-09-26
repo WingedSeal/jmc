@@ -1,3 +1,4 @@
+from .utils import convention_jmc_to_mc
 from .exception import JMCMissingValueError
 from .header import Header
 from .tokenizer import Token, Tokenizer
@@ -76,18 +77,20 @@ def dec_property(call_string: str,
               })
 class Add(JMCDecorator):
     def modify(self, func: Function, func_path: str) -> None:
-        if self.args["from"] == self.datapack.tick_name:
+        call_from = convention_jmc_to_mc(
+            self.raw_args["from"].token, self.tokenizer)
+        if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
                 f"function {self.datapack.namespace}:{func_path}")
             return
-        if self.args["from"] == self.datapack.load_name:
+        if call_from == self.datapack.load_name:
             self.datapack.after_loads.append(
                 f"function {self.datapack.namespace}:{func_path}")
             return
 
-        self.datapack.after_func[self.args["from"]].append(
+        self.datapack.after_func[call_from].append(
             f"function {self.datapack.namespace}:{func_path}")
         if self.arg_token is None:
             return
-        self.datapack.after_func_token[self.args["from"]
-                                       ] = self.arg_token, self.tokenizer
+        self.datapack.after_func_token[call_from
+                                       ] = self.raw_args["from"].token, self.tokenizer
