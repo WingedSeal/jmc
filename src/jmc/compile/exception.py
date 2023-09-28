@@ -1,5 +1,6 @@
 """Module containing all jmc exceptions"""
 from json import JSONDecodeError
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from .log import Logger
@@ -10,6 +11,19 @@ if TYPE_CHECKING:
 logger = Logger(__name__)
 NEW_LINE = "\n"
 TAB = "\t"
+
+
+def relative_file_name(file_name: str, line: int |
+                       None = None, col: int | None = None) -> str:
+    file_path = Path(file_name)
+    if not file_path.is_relative_to(os.getcwd()):
+        return file_name
+    file_name = file_path.relative_to(os.getcwd()).as_posix()
+    if line is not None:
+        file_name += f":{line}"
+    if col is not None:
+        file_name += f":{col}"
+    return file_name
 
 
 def log(self: object, args: tuple):
@@ -72,7 +86,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
         line_ = overide_file_str(msgs_[display_line - 1])
         if entire_line:
             tab_count = line_.count(TAB)
-            msg = f"""In {tokenizer.file_path}
+            msg = f"""In {relative_file_name(tokenizer.file_path, line)}
 {message} at line {line}.
 {display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2].replace(TAB, "    ") if display_line > 1 else ""}
 {display_line}{" "*(max_space-len(str(display_line)))} |{line_.replace(TAB, "    ")}
@@ -80,7 +94,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
 {display_line+1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
         else:
             tab_count = line_[:col - 1].count(TAB)
-            msg = f"""In {tokenizer.file_path}
+            msg = f"""In {relative_file_name(tokenizer.file_path, line, col)}
 {message} at line {line} col {col}.
 {display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2].replace(TAB, "    ") if display_line > 1 else ""}
 {display_line}{" "*(max_space-len(str(display_line)))} |{line_.replace(TAB, "    ")}
@@ -108,7 +122,7 @@ class HeaderDuplicatedMacro(ValueError):
     """Define same macro twice"""
 
     def __init__(self, message: str, file_name: str, line: int, line_str: str):
-        msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
+        msg = f"In {relative_file_name(file_name, line)}\n{message} at line {line}\n{line_str}"
         log(self, (msg, ))
         super().__init__(msg)
 
@@ -118,7 +132,7 @@ class HeaderSyntaxException(SyntaxError):
 
     def __init__(self, message: str, file_name: str, line: int,
                  line_str: str, suggestion: str | None = None):
-        msg = f"In {file_name}\n{message} at line {line}\n{line_str}"
+        msg = f"In {relative_file_name(file_name, line)}\n{message} at line {line}\n{line_str}"
         if suggestion is not None:
             msg += "\n" + suggestion
         log(self, (message, ))
