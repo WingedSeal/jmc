@@ -662,7 +662,7 @@ class FormattedText:
 
             if "__private_nbt_expand__" in self.current_json:
                 self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  # type: ignore # fmt: off
-                self.current_json["interpret"] =
+                self.current_json["interpret"] = \
                     (self.current_json["__private_nbt_expand__"]["interpret"] == "true") # type: ignore # fmt: off
                 if "separator" in self.current_json["__private_nbt_expand__"].keys():  # type: ignore # fmt: off
                     self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]  # type: ignore # fmt: off
