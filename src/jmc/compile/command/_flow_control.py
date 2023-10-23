@@ -2,7 +2,7 @@
 
 from typing import Literal
 from .condition import parse_condition
-from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, PlayerType
+from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -342,9 +342,9 @@ def switch(command: list[Token], datapack: DataPack,
         command[1].string[1:-1], command[1].line, command[1].col + 1, expect_semicolon=False)[0]
     
     if len(tokens) > 1:
-        try: 
+        if is_obj_selector(tokens): 
             tokens = [merge_obj_selector(tokens, tokenizer, datapack)]
-        except ValueError:
+        else:
             raise JMCSyntaxException(
                 f"Unexpected token({tokens[1].string})", tokens[1], tokenizer) 
     
