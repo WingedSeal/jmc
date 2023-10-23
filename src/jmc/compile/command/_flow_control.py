@@ -209,6 +209,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     :param case_numbers: List of case numbers provided (only matters with post-1.20.2 switch)
     :return: Minecraft function call to initiate switch case
     """
+    assert not isinstance(scoreboard_player.value, int)
     if case_numbers is None:
         case_numbers = [*range(1, len(func_contents) + 1)]
     func_count = datapack.get_count(name)
@@ -224,13 +225,16 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
             name, [
                 f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
             ], f"{str(func_count)}/select")
-        assert not isinstance(scoreboard_player.value, int)
         return (
             (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
             f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
             f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
             (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
         )
+    
+    switch_id = datapack.data.get_current_switch()
+    temp_score = ScoreboardPlayer(player_type = PlayerType.SCOREBOARD, 
+                                  value = (datapack.var_name, switch_id))
     __parse_switch_binary(
         start_at,
         len(func_contents) +
@@ -239,10 +243,11 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
         func_count,
         datapack,
         func_contents,
-        scoreboard_player,
+        temp_score,
         name,
         start_at)
-    return f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}"
+    return (f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n" + 
+            f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}")
 
 
 def switch(command: list[Token], datapack: DataPack,
