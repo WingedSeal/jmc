@@ -233,8 +233,8 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
         )
     
     switch_id = datapack.data.get_current_switch()
-    temp_score = ScoreboardPlayer(player_type = PlayerType.SCOREBOARD, 
-                                  value = (datapack.var_name, switch_id))
+    temp_score = ScoreboardPlayer(player_type=PlayerType.SCOREBOARD, 
+                                  value=(datapack.var_name, switch_id))
     __parse_switch_binary(
         start_at,
         len(func_contents) +
