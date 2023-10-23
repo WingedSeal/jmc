@@ -196,7 +196,8 @@ def custom_condition(
 
     conditions: list[str] = []
     if tokens[0].string not in {"biome", "block", "blocks",
-                                "data", "dimension", "entity", "loaded", "predicate", "score"}:
+                                "data", "dimension", "entity", 
+                                "loaded", "predicate", "score"}:
         raise JMCValueError(
             f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],
