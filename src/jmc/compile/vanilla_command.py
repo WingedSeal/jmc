@@ -35,6 +35,7 @@ COMMANDS = {
     "particle",
     "placefeature",
     "playsound",
+    "random",
     "ride",
     "recipe",
     "reload",
