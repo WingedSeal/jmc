@@ -94,7 +94,7 @@ class RightClickSetup(EventMixin):
 
             main_func.append(
                 f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, name=self.name)}""")
+                    PlayerType.SCOREBOARD, (DataPack.var_name, self.tag_id_var)), func_contents, self.datapack, name=self.name)}""")
         else:
             main_func.append(
                 f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
