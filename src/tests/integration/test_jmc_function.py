@@ -224,13 +224,14 @@ Hardcode.switch($var, "index", ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
+scoreboard players operation __switch__0 __variable__ = $var __variable__
 function TEST:__private__/hardcode_switch/0
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/0.mcfunction
-execute if score $var __variable__ matches 1..2 run function TEST:__private__/hardcode_switch/1
-execute if score $var __variable__ matches 3..5 run function TEST:__private__/hardcode_switch/2
+execute if score __switch__0 __variable__ matches 1..2 run function TEST:__private__/hardcode_switch/1
+execute if score __switch__0 __variable__ matches 3..5 run function TEST:__private__/hardcode_switch/2
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/1.mcfunction
-execute if score $var __variable__ matches 1 run function TEST:__private__/hardcode_switch/3
-execute if score $var __variable__ matches 2 run function TEST:__private__/hardcode_switch/4
+execute if score __switch__0 __variable__ matches 1 run function TEST:__private__/hardcode_switch/3
+execute if score __switch__0 __variable__ matches 2 run function TEST:__private__/hardcode_switch/4
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/3.mcfunction
 tellraw @s "1"
 tellraw @s "1"
@@ -238,14 +239,14 @@ tellraw @s "1"
 tellraw @s "2"
 tellraw @s "4"
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/2.mcfunction
-execute if score $var __variable__ matches 3 run function TEST:__private__/hardcode_switch/5
-execute if score $var __variable__ matches 4..5 run function TEST:__private__/hardcode_switch/6
+execute if score __switch__0 __variable__ matches 3 run function TEST:__private__/hardcode_switch/5
+execute if score __switch__0 __variable__ matches 4..5 run function TEST:__private__/hardcode_switch/6
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/5.mcfunction
 tellraw @s "3"
 tellraw @s "9"
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/6.mcfunction
-execute if score $var __variable__ matches 4 run function TEST:__private__/hardcode_switch/7
-execute if score $var __variable__ matches 5 run function TEST:__private__/hardcode_switch/8
+execute if score __switch__0 __variable__ matches 4 run function TEST:__private__/hardcode_switch/7
+execute if score __switch__0 __variable__ matches 5 run function TEST:__private__/hardcode_switch/8
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/7.mcfunction
 tellraw @s "4"
 tellraw @s "16"
@@ -593,10 +594,11 @@ scoreboard players set @s on_event_1mqyp2x 0
 function TEST:__private__/right_click_setup/main
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/main.mcfunction
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.custom_id
-execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/right_click_setup/1
+execute if score __item_id__ __variable__ matches 1.. run scoreboard players operation __switch__0 __variable__ = __item_id__ __variable__
+function TEST:__private__/right_click_setup/1
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/1.mcfunction
-execute if score @s __item_id__ matches 1 run function TEST:__private__/right_click_setup/2
-execute if score @s __item_id__ matches 2 run function TEST:__private__/right_click_setup/3
+execute if score __switch__0 __variable__ matches 1 run function TEST:__private__/right_click_setup/2
+execute if score __switch__0 __variable__ matches 2 run function TEST:__private__/right_click_setup/3
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/2.mcfunction
 say 1
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/3.mcfunction
@@ -678,6 +680,7 @@ scoreboard players enable @s help
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/1.mcfunction
 tellraw @s {"text":"Cool help commands","color":"gold"}
 > VIRTUAL/data/TEST/functions/__private__/trigger_setup/0.mcfunction
+scoreboard players operation __switch__0 __variable__ = @s help
 function TEST:__private__/trigger_setup/1
 scoreboard players set @s help 0
 scoreboard players enable @s help
