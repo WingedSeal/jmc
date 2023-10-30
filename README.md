@@ -36,14 +36,18 @@ class folder {
         }
     }
 }
-function folder.switchCase() {
-    folder.funcInFolder();
-    switch ($random_int) { // optimized with binary search trees
-        case 1:
-            printf("$random_int is equal to 1");
-        case 55:
-            printf("$random_int is equal to 55");
-    }
+function folder.raycast() {
+    Raycast.simple(
+        onHit=()=>{
+            printf("i hit some block");
+        },
+        onStep=()=>{
+            particle happy_villager ~ ~ ~;
+        }
+        interval=0.5,
+        maxIter=100,
+        stopAtBlock=true,
+    );
 }
 ```
 
