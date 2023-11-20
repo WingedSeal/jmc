@@ -256,6 +256,26 @@ tellraw @s "25"
             """)
         )
 
+    def test_TagUpdate(self):
+        pack = JMCTestPack().set_jmc_file("""
+Tag.update(@e[nbt={OnGround:1b}], onGround);
+        """).build()    
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+tag @e remove onGround
+tag @e[nbt={OnGround:1b}] add onGround
+            """)
+        )
 
 class TestJMCCommand(unittest.TestCase):
     def test_TimerSet(self):
