@@ -3,7 +3,7 @@ from .exception import JMCMissingValueError
 from .header import Header
 from .tokenizer import Token, Tokenizer
 from .command.utils import Arg, ArgType, verify_args
-from .datapack import DataPack, Function
+from .datapack import DataPack, Function, func_with_namespace
 
 
 class JMCDecorator:
@@ -81,15 +81,15 @@ class Add(JMCDecorator):
             self.raw_args["from"].token, self.tokenizer)
         if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
-                f"function {self.datapack.namespace}:{func_path}")
+                f"function {func_with_namespace(func_path, self.datapack)}")
             return
         if call_from == self.datapack.load_name:
             self.datapack.after_loads.append(
-                f"function {self.datapack.namespace}:{func_path}")
+                f"function {func_with_namespace(func_path, self.datapack)}")
             return
 
         self.datapack.after_func[call_from].append(
-            f"function {self.datapack.namespace}:{func_path}")
+            f"function {func_with_namespace(func_path, self.datapack)}")
         if self.arg_token is None:
             return
         self.datapack.after_func_token[call_from

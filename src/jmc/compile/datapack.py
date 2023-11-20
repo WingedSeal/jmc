@@ -448,7 +448,7 @@ class DataPack:
 
         for function_called, (token,
                               tokenizer) in self.functions_called.items():
-            if function_called not in self.functions:
+            if function_called not in self.functions and function_called.split("/")[0].strip() not in Header().namespace_overrides:
                 raise JMCValueError(
                     f"Function '{function_called}' was not defined", token, tokenizer)
 
@@ -564,3 +564,10 @@ class DataPack:
     loads = {dumps(self.loads, indent=4)}
     tick = {dumps(self.ticks, indent=4)}
 )"""
+
+def func_with_namespace(func: str, datapack: DataPack) -> str:
+    first_folder = func.split("/")[0]
+    rest_of_name = func.replace(f"{first_folder}/", "", 1)
+    if first_folder in Header().namespace_overrides:
+        return f"{first_folder}:{rest_of_name}"
+    return f"{datapack.namespace}:{func}"
