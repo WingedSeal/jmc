@@ -188,7 +188,7 @@ class Lexer:
 
                     new_paths = folder.glob("**/*.jmc")
                     for new_path in new_paths:
-                        self.parse_file(file_path=new_path)
+                        self.parse_file(file_path=new_path.resolve())
                         self.__update_load(file_path_str, raw_string)
                     continue
                 try:
