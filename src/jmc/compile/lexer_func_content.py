@@ -293,7 +293,7 @@ class FuncContent:
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
-                self.__commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
+                self.command[command_pos].string in FIRST_ARGUMENTS_EXCEPTION[token.string]
             )
         )
         __is_not_connected = not is_connected(token, self.command[key_pos - 1])
