@@ -460,3 +460,24 @@ class RaycastSimple(JMCFunction):
         if is_remove_tag:
             return_command += f"\ntag @s remove {caster_tag}"
         return return_command
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Tag.update",
+    arg_type={
+        "selector": ArgType.SELECTOR,
+        "tag": ArgType.KEYWORD,
+        "removeFrom": ArgType.SELECTOR
+    },
+    defaults={
+        "removeFrom": "@e",
+    },
+    name="tag_update"
+)
+class TagUpdate(JMCFunction):
+    def call(self) -> str:
+        selector = self.args["selector"]
+        tag = self.args["tag"]
+        remove_from = self.args["removeFrom"]
+        return (f"tag {remove_from} remove {tag}\n" + 
+                f"tag {selector} add {tag}")

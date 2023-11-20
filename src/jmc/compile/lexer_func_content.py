@@ -59,8 +59,8 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "item": {"summon"},
     "loot": {"loot", "give"},
     "data": {"execute"},
-    "playsound": {"weather"},
-    "particle": {"item"}
+    "weather": {"playsound"},
+    "item": {"particle"}
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
@@ -293,7 +293,7 @@ x
             not (
                 token.string in FIRST_ARGUMENTS_EXCEPTION
                 and
-                self.__commands[command_pos] in FIRST_ARGUMENTS_EXCEPTION[token.string]
+                self.command[command_pos].string in FIRST_ARGUMENTS_EXCEPTION[token.string]
             )
         )
         __is_not_connected = not is_connected(token, self.command[key_pos - 1])
@@ -458,9 +458,20 @@ x
             if self.command[key_pos + 1].string != "()":
                 arg_token = self.command[key_pos + 1]
                 func = convention_jmc_to_mc(token, self.tokenizer)
-                self.lexer.datapack.functions_called[func] = token, self.tokenizer
-
                 args, kwargs = self.tokenizer.parse_func_args(arg_token)
+                if func in self.lexer.datapack.lazy_func:
+                    __command = self.lexer.datapack.lazy_func[func].handle_lazy(
+                        args, kwargs)
+                    if self.is_execute and "\n" in __command:
+                        raise JMCSyntaxException(
+                            "Lazy function with multiple commands cannot be used with execute.",
+                            self.command[key_pos],
+                            self.tokenizer)
+                    append_commands(self.__commands,
+                                    __command)
+                    return True
+
+                self.lexer.datapack.functions_called[func] = token, self.tokenizer
                 if args:
                     if len(args) > 1:
                         raise JMCSyntaxException(
@@ -476,7 +487,7 @@ x
                             f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
                             arg_token,
                             self.tokenizer,
-                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
                     append_commands(self.__commands,
                                     f"function {self.lexer.datapack.format_func_path(func)} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
                     return True

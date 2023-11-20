@@ -8,7 +8,7 @@ from .decorator_parse import DECORATORS
 from .header import Header
 from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
 from .tokenizer import Tokenizer, Token, TokenType
-from .datapack import DataPack, Function
+from .datapack import DataPack, Function, PreFunction
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, search_to_string
 from .command import parse_condition
@@ -231,22 +231,25 @@ class Lexer:
         else:
             function_commands = command[1:]
             args = None
-        jmc_function, func_path = self.parse_func(
+        pre_function = self.parse_func_tokens(
             tokenizer,
             function_commands,
             file_path_str,
             prefix,
-            is_save_to_datapack=False)
+            is_save_to_datapack=jmc_decorator.is_save_to_datapack)
+        func_object = None
+        if jmc_decorator.is_save_to_datapack:
+            func_object = pre_function.parse()
+            self.datapack.functions[pre_function.func_path] = func_object
         jmc_decorator(
             tokenizer,
+            command,
             self.datapack,
             args).modify(
-            jmc_function,
-            func_path)
-        self.datapack.functions[func_path] = jmc_function
+            pre_function, func_object)
 
-    def parse_func(self, tokenizer: Tokenizer,
-                   command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
+    def parse_func_tokens(self, tokenizer: Tokenizer,
+                          command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> PreFunction:
         """
         Parse a function definition in form of list of token
 
@@ -255,7 +258,7 @@ class Lexer:
         :param file_path_str: File path to current JMC function as string
         :param prefix: Prefix of function(for Class feature), defaults to ''
         :param is_save_to_datapack: Whether to save the result function into the datapack, defaults to True
-        :return: A tuple of Function and its path string
+        :return: func_content, file_path_str, line, col, file_string, func_path
         :raises JMCSyntaxException: Function name isn't keyword token
         :raises JMCSyntaxException: Function name is not followed by paren_round token
         :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
@@ -273,8 +276,8 @@ class Lexer:
                 "Expected keyword(function's name)", command[1], tokenizer)
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected empty round bracket, `()`", command[1], tokenizer, display_col_length=True, col_length=True)
-        if command[2].string != "()":
+                "Expected round bracket, `()`", command[1], tokenizer, display_col_length=True, col_length=True)
+        if is_save_to_datapack and command[2].string != "()":
             raise JMCSyntaxException(
                 "Expected empty round bracket, `()`", command[2], tokenizer)
         if len(command) < 4:
@@ -306,11 +309,34 @@ class Lexer:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
-        return_value = Function(self.parse_func_content(
-            func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
+        return PreFunction(func_content, file_path_str,
+                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[2], self, tokenizer)
+
+    def parse_func(self, tokenizer: Tokenizer,
+                   command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
+        """
+        Parse a function definition in form of list of token
+
+        :param tokenizer: Tokenizer
+        :param command: List of token inside a function definition
+        :param file_path_str: File path to current JMC function as string
+        :param prefix: Prefix of function(for Class feature), defaults to ''
+        :param is_save_to_datapack: Whether to save the result function into the datapack, defaults to True
+        :return: A tuple of Function and its path string
+        :raises JMCSyntaxException: Function name isn't keyword token
+        :raises JMCSyntaxException: Function name is not followed by paren_round token
+        :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
+        :raises JMCSyntaxException: Start function name with JMC's PRIVATE_NAME
+        :raises JMCSyntaxException: Duplicate function declaration
+        :raises JMCSyntaxException: Define load function
+        :raises JMCSyntaxException: Define private function
+        """
+        pre_function = self.parse_func_tokens(
+            tokenizer, command, file_path_str, prefix, is_save_to_datapack)
+        return_value = pre_function.parse()
         if is_save_to_datapack:
-            self.datapack.functions[func_path] = return_value
-        return return_value, func_path
+            self.datapack.functions[pre_function.func_path] = return_value
+        return return_value, pre_function.func_path
 
     def _is_vanilla_func(self, command: list[Token]) -> bool:
         """
@@ -401,7 +427,7 @@ class Lexer:
                 json_type = json_type.replace("tag/", "tags/")
             else:
                 raise MinecraftSyntaxWarning(
-                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
+                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer, suggestion="The 'minecraft.' prefix is supposed to go *inside* the parentheses." if json_type.startswith("minecraft") else None
                 )
 
         json_name = prefix + convention_jmc_to_mc(

@@ -796,11 +796,49 @@ class Tokenizer:
 
         return args, kwargs
 
+    def parse_param(self, token: Token) -> list[str]:
+        """
+        Parse user's parameters for lazy function
+
+        :param token: paren_round token containing parameters
+        :return: list of parameters in string
+        """
+        assert token.token_type == TokenType.PAREN_ROUND
+
+        if token.string == "()":
+            return []
+
+        keywords = self.parse(token.string[1:-
+                                           1], line=token.line, col=token.col +
+                              1, expect_semicolon=False)[0]
+        is_expect_comma = False  # Whether to expect comma token
+        params: list[str] = []
+
+        for token_ in keywords:
+            if token_.token_type == TokenType.COMMA:
+                if not is_expect_comma:
+                    raise JMCSyntaxException(
+                        "Unexpected duplicated comma(,)", token_, self)
+                is_expect_comma = False
+                continue
+
+            if is_expect_comma:
+                raise JMCSyntaxException(
+                    "Expect comma(,)", token_, self)
+
+            if token_.token_type != TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    f"Expected keyword in parameters (got {token_.token_type.value})", token_, self)
+            params.append(token_.string)
+            is_expect_comma = True
+
+        return params
+
     def parse_list(self, token: Token) -> list[Token]:
         """
         Parse list
 
-        :param token: paren_curly token containing JS object
+        :param token: paren_square token containing list
         :return: Dictionary of key(string) and Token
         """
         if token.token_type != TokenType.PAREN_SQUARE:

@@ -1,9 +1,9 @@
 from .utils import convention_jmc_to_mc
-from .exception import JMCMissingValueError
+from .exception import JMCMissingValueError, JMCSyntaxException
 from .header import Header
 from .tokenizer import Token, Tokenizer
 from .command.utils import Arg, ArgType, verify_args
-from .datapack import DataPack, Function
+from .datapack import DataPack, Function, PreFunction
 
 
 class JMCDecorator:
@@ -13,6 +13,8 @@ class JMCDecorator:
     """Dictionary containing all parameter and it's ArgType (Set by decorator)"""
     tokenizer: Tokenizer
     """Tokenizer"""
+    token: Token
+    """Decorator tokens"""
     call_string: str
     """String that will be used in to call the function (Set by decorator)"""
     raw_args: dict[str, Arg]
@@ -24,8 +26,9 @@ class JMCDecorator:
     datapack: DataPack
     """Datapack"""
 
-    def __init__(self, tokenizer: Tokenizer, datapack: DataPack,
+    def __init__(self, tokenizer: Tokenizer, tokens: list[Token], datapack: DataPack,
                  arg_token: Token | None) -> None:
+        self.tokens = tokens
         self.arg_token = arg_token
         self.tokenizer = tokenizer
         self.datapack = datapack
@@ -44,7 +47,7 @@ class JMCDecorator:
                 self.raw_args[key] = arg
                 self.args[key] = arg.token.string
 
-    def modify(self, func: Function, func_name: str) -> None:
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         raise NotImplementedError(
             "'modify' method of JMCDecorator not implemented")
 
@@ -76,21 +79,28 @@ def dec_property(call_string: str,
                   "from": ArgType._FUNC_CALL
               })
 class Add(JMCDecorator):
-    def modify(self, func: Function, func_path: str) -> None:
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         call_from = convention_jmc_to_mc(
             self.raw_args["from"].token, self.tokenizer)
         if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
-                f"function {self.datapack.format_func_path(func_path)}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}")
             return
         if call_from == self.datapack.load_name:
             self.datapack.after_loads.append(
-                f"function {self.datapack.format_func_path(func_path)}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}")
             return
 
         self.datapack.after_func[call_from].append(
-            f"function {self.datapack.format_func_path(func_path)}")
+            f"function {self.datapack.format_func_path(pre_func.func_path)}")
+        
         if self.arg_token is None:
             return
         self.datapack.after_func_token[call_from
                                        ] = self.raw_args["from"].token, self.tokenizer
+
+
+@dec_property("lazy", is_save_to_datapack=False)
+class Lazy(JMCDecorator):
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
+        self.datapack.lazy_func[pre_func.func_path] = pre_func

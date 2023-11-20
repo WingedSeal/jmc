@@ -32,6 +32,45 @@ class FunctionEncoder(JSONEncoder):
         return super().default(o)
 
 
+class PreFunction:
+    """
+    A class representation of a row function yet to be parsed
+    """
+    __slots__ = ("func_content", "jmc_file_path",
+                 "line", "col", "file_string", "func_path", "params", "lexer", "tokenizer")
+
+    def __init__(self, func_content: str, jmc_file_path: str,
+                 line: int, col: int, file_string: str, func_path: str, params: Token, lexer: "Lexer", tokenizer: Tokenizer) -> None:
+        self.func_content = func_content
+        self.params = params
+        self.jmc_file_path = jmc_file_path
+        self.line = line
+        self.col = col
+        self.file_string = file_string
+        self.func_path = func_path
+        self.lexer = lexer
+        self.tokenizer = tokenizer
+
+    def parse(self) -> "Function":
+        return Function(self.lexer.parse_func_content(
+            self.func_content, self.jmc_file_path, self.line, self.col, self.file_string))
+
+    def handle_lazy(self, args: list[list[Token]],
+                    kwargs: dict[str, list[Token]]) -> str:
+        param_arg: dict[str, str] = {}
+        params = self.tokenizer.parse_param(self.params)
+        for index, param in enumerate(params):
+            if param in kwargs:
+                param_arg[param] = self.tokenizer.merge_tokens(
+                    kwargs[param]).string
+            else:
+                param_arg[param] = self.tokenizer.merge_tokens(
+                    args[index]).string
+        for _param, _arg in param_arg.items():
+            self.func_content = self.func_content.replace("$" + _param, _arg)
+        return "\n".join(self.parse().commands)
+
+
 class Function:
     """
     A class representation for a minecraft function (.mcfunction)
@@ -210,6 +249,9 @@ class DataPack:
 
         self._imported: set[Path] = set()
         """Set of path that's already imported"""
+
+        self.lazy_func: dict[str, PreFunction] = {}
+        """Dictionary of lazy function name and PreFunction object """
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """

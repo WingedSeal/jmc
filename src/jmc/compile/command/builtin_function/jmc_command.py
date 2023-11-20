@@ -46,7 +46,7 @@ class TimerSet(JMCFunction):
 
     def call(self) -> str:
         tick_arg = find_scoreboard_player_type(
-                self.raw_args["tick"].token, self.tokenizer)
+            self.raw_args["tick"].token, self.tokenizer)
         if isinstance(tick_arg.value, int):
             return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
         return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
