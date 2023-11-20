@@ -84,15 +84,16 @@ class Add(JMCDecorator):
             self.raw_args["from"].token, self.tokenizer)
         if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
-                f"function {self.datapack.namespace}:{pre_func.func_path}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}")
             return
         if call_from == self.datapack.load_name:
             self.datapack.after_loads.append(
-                f"function {self.datapack.namespace}:{pre_func.func_path}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}")
             return
 
         self.datapack.after_func[call_from].append(
-            f"function {self.datapack.namespace}:{pre_func.func_path}")
+            f"function {self.datapack.format_func_path(pre_func.func_path)}")
+        
         if self.arg_token is None:
             return
         self.datapack.after_func_token[call_from

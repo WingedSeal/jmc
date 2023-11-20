@@ -155,7 +155,7 @@ def variable_operation(
             func = convention_jmc_to_mc(tokens[2], tokenizer)
             datapack.functions_called[func] = tokens[2], tokenizer
             return f"""execute store result score {tokens[0].string} {objective_name} run function {
-                datapack.namespace}:{func}"""
+                datapack.format_func_path(func)}"""
 
         left_token = tokens[0]
         right_token = tokens[2]

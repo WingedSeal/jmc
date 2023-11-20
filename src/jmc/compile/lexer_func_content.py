@@ -91,7 +91,7 @@ def append_commands(commands: list[str], string: str) -> None:
 class FuncContent:
     """
     A class representation of a raw function for parsing content inside the function
-
+x
     :param tokenizer: Tokenizer
     :param programs: List of commands(List of arguments(Token))
     :param is_load: Whether the function is a load function
@@ -451,7 +451,7 @@ class FuncContent:
                 func = convention_jmc_to_mc(token, self.tokenizer)
                 self.lexer.datapack.functions_called[func] = token, self.tokenizer
                 append_commands(self.__commands,
-                                f"function {self.lexer.datapack.namespace}:{func}")
+                                f"function {self.lexer.datapack.format_func_path(func)}")
                 del self.command[key_pos + 1]  # delete ()
                 return False
 
@@ -489,7 +489,7 @@ class FuncContent:
                             self.tokenizer,
                             suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
                     append_commands(self.__commands,
-                                    f"function {self.lexer.datapack.namespace}:{func} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
+                                    f"function {self.lexer.datapack.format_func_path(func)} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
                     return True
                 if kwargs:
                     json = {}
@@ -502,7 +502,7 @@ class FuncContent:
                                 f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
                         json[key] = value[0].string
                     append_commands(self.__commands,
-                                    f"function {self.lexer.datapack.namespace}:{func} {dumps(json, separators=(',', ':'))}")
+                                    f"function {self.lexer.datapack.format_func_path(func)} {dumps(json, separators=(',', ':'))}")
                     return True
 
                 raise JMCSyntaxException(
@@ -511,7 +511,7 @@ class FuncContent:
             func = convention_jmc_to_mc(token, self.tokenizer)
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             append_commands(self.__commands,
-                            f"function {self.lexer.datapack.namespace}:{func}")
+                            f"function {self.lexer.datapack.format_func_path(func)}")
             return True
 
         if token.string not in VANILLA_COMMANDS and token.string not in Header(

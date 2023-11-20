@@ -416,6 +416,20 @@ class DataPack:
         return self.lexer.parse_func_content(
             token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
 
+    def format_func_path(self, func: str) -> str:
+        """
+        Convert a foo/bar funcition path into either namespace:foo/bar or foo:bar,
+        depending on whether foo is in the set of namespace overrides.
+
+        :param func: function path string (with slashes, not dots)
+        :return: namespace-aware Minecraft function call string
+        """
+        first_folder = func.split("/")[0]
+        rest_of_name = func.replace(f"{first_folder}/", "", 1)
+        if first_folder in Header().namespace_overrides:
+            return f"{first_folder}:{rest_of_name}"
+        return f"{self.namespace}:{func}"
+
     def add_tick_command(self, command: str, *,
                          is_after: bool = False) -> None:
         """
@@ -490,7 +504,7 @@ class DataPack:
 
         for function_called, (token,
                               tokenizer) in self.functions_called.items():
-            if function_called not in self.functions:
+            if function_called not in self.functions and function_called.split("/")[0].strip() not in Header().namespace_overrides:
                 raise JMCValueError(
                     f"Function '{function_called}' was not defined", token, tokenizer)
 
@@ -606,3 +620,4 @@ class DataPack:
     loads = {dumps(self.loads, indent=4)}
     tick = {dumps(self.ticks, indent=4)}
 )"""
+
