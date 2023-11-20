@@ -401,7 +401,7 @@ class Lexer:
                 json_type = json_type.replace("tag/", "tags/")
             else:
                 raise MinecraftSyntaxWarning(
-                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
+                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer, suggestion="The 'minecraft.' prefix is supposed to go *inside* the parentheses." if json_type.startswith("minecraft") else None
                 )
 
         json_name = prefix + convention_jmc_to_mc(
