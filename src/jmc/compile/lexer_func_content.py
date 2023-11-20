@@ -476,7 +476,7 @@ class FuncContent:
                             f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
                             arg_token,
                             self.tokenizer,
-                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
                     append_commands(self.__commands,
                                     f"function {self.lexer.datapack.namespace}:{func} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
                     return True
