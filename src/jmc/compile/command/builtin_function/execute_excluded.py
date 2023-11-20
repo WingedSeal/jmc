@@ -467,6 +467,10 @@ class RaycastSimple(JMCFunction):
     arg_type={
         "selector": ArgType.SELECTOR,
         "tag": ArgType.KEYWORD,
+        "removeFrom": ArgType.SELECTOR
+    },
+    defaults={
+        "removeFrom": "@e",
     },
     name="tag_update"
 )
@@ -474,5 +478,6 @@ class TagUpdate(JMCFunction):
     def call(self) -> str:
         selector = self.args["selector"]
         tag = self.args["tag"]
-        return (f"tag @e remove {tag}\n" + 
+        remove_from = self.args["removeFrom"]
+        return (f"tag {remove_from} remove {tag}\n" + 
                 f"tag {selector} add {tag}")
