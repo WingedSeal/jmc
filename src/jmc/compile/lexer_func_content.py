@@ -460,13 +460,15 @@ class FuncContent:
                 func = convention_jmc_to_mc(token, self.tokenizer)
                 args, kwargs = self.tokenizer.parse_func_args(arg_token)
                 if func in self.lexer.datapack.lazy_func:
-                    if self.is_execute:
+                    __command = self.lexer.datapack.lazy_func[func].handle_lazy(
+                        args, kwargs)
+                    if self.is_execute and "\n" in __command:
                         raise JMCSyntaxException(
-                            "Lazy function cannot be used with execute.",
+                            "Lazy function with multiple commands cannot be used with execute.",
                             self.command[key_pos],
                             self.tokenizer)
                     append_commands(self.__commands,
-                                    self.lexer.datapack.lazy_func[func].handle_lazy(args, kwargs))
+                                    __command)
                     return True
 
                 self.lexer.datapack.functions_called[func] = token, self.tokenizer
