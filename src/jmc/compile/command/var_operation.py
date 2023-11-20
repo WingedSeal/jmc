@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from jmc.compile.utils import convention_jmc_to_mc
 
 from .jmc_function import JMCFunction, FuncType
-from ..datapack import DataPack, func_with_namespace
+from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
@@ -155,7 +155,7 @@ def variable_operation(
             func = convention_jmc_to_mc(tokens[2], tokenizer)
             datapack.functions_called[func] = tokens[2], tokenizer
             return f"""execute store result score {tokens[0].string} {objective_name} run function {
-                func_with_namespace(func, datapack)}"""
+                datapack.format_func_path(func)}"""
 
         left_token = tokens[0]
         right_token = tokens[2]

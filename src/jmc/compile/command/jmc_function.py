@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from ..utils import convention_jmc_to_mc, is_float
 from ..datapack_data import Item, SIMPLE_JSON_BODY
 from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, hash_string_to_string, verify_args, Arg
-from ..datapack import DataPack, Function, func_with_namespace
+from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, TokenType, Tokenizer
 
@@ -132,7 +132,7 @@ class JMCFunction:
                     self.args[key] = f"function {arg.token.string}"
                 else:
                     self.args[
-                        key] = f"function {func_with_namespace(convention_jmc_to_mc(arg.token, self.tokenizer), datapack)}"
+                        key] = f"function {datapack.format_func_path(convention_jmc_to_mc(arg.token, self.tokenizer))}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = "\n".join(
                     datapack.parse_function_token(arg.token, tokenizer))
