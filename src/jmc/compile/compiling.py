@@ -273,7 +273,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
     minecraft_folder = output_folder / "data" / "minecraft"
-    overrides_folders = {output_folder / "data" / namespace 
+    overrides_folders = {output_folder / "data" / namespace
                          for namespace in header.namespace_overrides}
     functions_tags_folder = output_folder / \
         "data" / "minecraft" / "tags" / "functions"
@@ -283,7 +283,7 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
         for folder in {namespace_folder} | overrides_folders:
             if not os.path.isdir(folder):
                 continue
-            
+
             if statics:
                 rmtree(folder, statics)
             else:

@@ -231,9 +231,9 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
             f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
             (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
         )
-    
+
     switch_id = datapack.data.get_current_switch()
-    temp_score = ScoreboardPlayer(player_type=PlayerType.SCOREBOARD, 
+    temp_score = ScoreboardPlayer(player_type=PlayerType.SCOREBOARD,
                                   value=(datapack.var_name, switch_id))
     __parse_switch_binary(
         start_at,
@@ -246,7 +246,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
         temp_score,
         name,
         start_at)
-    return (f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n" + 
+    return (f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n" +
             f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}")
 
 
@@ -340,14 +340,14 @@ def switch(command: list[Token], datapack: DataPack,
     # Parse variable
     tokens = tokenizer.parse(
         command[1].string[1:-1], command[1].line, command[1].col + 1, expect_semicolon=False)[0]
-    
+
     if len(tokens) > 1:
-        if is_obj_selector(tokens): 
+        if is_obj_selector(tokens):
             tokens = [merge_obj_selector(tokens, tokenizer, datapack)]
         else:
             raise JMCSyntaxException(
-                f"Unexpected token({tokens[1].string})", tokens[1], tokenizer) 
-    
+                f"Unexpected token({tokens[1].string})", tokens[1], tokenizer)
+
     scoreboard_player = find_scoreboard_player_type(
         tokens[0], tokenizer, allow_integer=False)
 
