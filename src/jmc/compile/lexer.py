@@ -588,7 +588,7 @@ class Lexer:
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer,
-                      name: str = "if_else", is_expand: bool = False) -> str:
+                      name: str = "if_else", is_expand: bool = False, is_macro: bool = False) -> str:
         """
         Parse if-else chain using if_else_box attribute
 
@@ -626,6 +626,8 @@ class Lexer:
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
                 name, if_else_box[0][1], tokenizer)
+            if is_macro:
+                precommand = f"${precommand}"
             if arrow_func.startswith("execute "):
                 # len('execute ') = 8
                 return f"{precommand}execute {condition} {arrow_func[8:]}"

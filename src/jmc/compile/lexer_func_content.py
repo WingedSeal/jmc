@@ -634,6 +634,9 @@ x
         return False
 
     def __is_startswith_var(self, key_pos: int) -> bool:
+        if self.command[0].string == "$if":
+            # special case
+            return False
         try:
             append_commands(self.__commands, variable_operation(
                 self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
