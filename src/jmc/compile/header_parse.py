@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from jmc.compile.command.utils import hash_string_to_string
+
 from .utils import is_connected, get_mc_uuid
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
@@ -201,6 +203,10 @@ def __parse_header(header_str: str, file_name: str,
                 replaced_tokens: list[Token]
                 if binder == "__namespace__":
                     replaced_tokens = [Token.empty(config.namespace)]
+                elif binder == "__namehash16__":
+                    replaced_tokens = [
+                        Token.empty(
+                            hash_string_to_string(config.namespace, 16))]
                 elif binder == "__UUID__":
                     replaced_tokens = [
                         Token.empty(
@@ -208,7 +214,7 @@ def __parse_header(header_str: str, file_name: str,
                             TokenType.PAREN_SQUARE)]
                 else:
                     raise HeaderSyntaxException(
-                        "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__UUID__'")
+                        "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__namehash16__', '__UUID__'")
 
                 if key in header.macros:
                     raise HeaderDuplicatedMacro(
