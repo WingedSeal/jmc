@@ -461,6 +461,7 @@ class RaycastSimple(JMCFunction):
             return_command += f"\ntag @s remove {caster_tag}"
         return return_command
 
+
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Tag.update",
@@ -479,5 +480,5 @@ class TagUpdate(JMCFunction):
         selector = self.args["selector"]
         tag = self.args["tag"]
         remove_from = self.args["removeFrom"]
-        return (f"tag {remove_from} remove {tag}\n" + 
+        return (f"tag {remove_from} remove {tag}\n" +
                 f"tag {selector} add {tag}")
