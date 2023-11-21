@@ -32,7 +32,7 @@ class folder {
         } else if ($y > $x || $x == 69) {
             printf("X is greater than Y or X is equal to 69");
         } else {
-            printf("X and Y are equal"); // "printf" is shortcut for "tellraw @a"
+            printf("other cases"); // "printf" is shortcut for "tellraw @a"
         }
     }
 }
