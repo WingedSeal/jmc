@@ -473,7 +473,6 @@ class Lexer:
                 "JSON content cannot be empty", command[-1], tokenizer)
 
         if has_extends_arg:
-            while True: break
             super_name = prefix + convention_jmc_to_mc(
                 command[4], tokenizer, is_make_lower=False, substr=(1, -1))
             if namespace in Header().namespace_overrides:
