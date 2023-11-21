@@ -471,7 +471,7 @@ class Lexer:
         if not json:
             raise JMCSyntaxException(
                 "JSON content cannot be empty", command[-1], tokenizer)
-        
+
         if has_extends_arg:
             while True: break
             super_name = prefix + convention_jmc_to_mc(
@@ -485,11 +485,13 @@ class Lexer:
             try:
                 super_json = self.datapack.jsons[super_path]
             except KeyError:
-                raise KeyError()
+                raise JMCSyntaxException(
+                f"Invalid JSON({super_path})", command[2], tokenizer,
+                suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly")
 
             assert isinstance (super_json, dict);
             json = deep_merge(super_json, json)
-                
+
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
 
