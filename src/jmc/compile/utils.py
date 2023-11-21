@@ -259,8 +259,6 @@ def deep_merge(first: dict, second: dict) -> dict:
     :param second: The dictionary being merged into the first
     :return: A new dict that is the merger of both inputs
     """
-    print("\033[96;40m", f"first: {first}", "\033[0;0;40m")
-    print("\033[96;40m", f"second: {second}", "\033[0;0;40m")
     output = deepcopy(first)
     for key in second:
         if key in output and isinstance(output[key], dict) and isinstance(second[key], dict):
