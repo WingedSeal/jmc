@@ -10,7 +10,7 @@ from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxExcept
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function, PreFunction
 from .log import Logger
-from .utils import convention_jmc_to_mc, is_decorator, search_to_string
+from .utils import convention_jmc_to_mc, deep_merge, is_decorator, search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -393,6 +393,8 @@ class Lexer:
         :raises JMCDecodeJSONError: Invalid JSON
         """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
+        # print("\033[96;40m", command, "\033[0;0;40m")
+        has_extends_arg = False
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)", command[0], tokenizer, col_length=True)
@@ -411,7 +413,12 @@ class Lexer:
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected { or [", command[2], tokenizer, col_length=True)
-        if command[3].token_type not in {
+        if command[3].string == "extends":
+            if command[4].token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxException(
+                    "Expected (", command[3], tokenizer)
+            has_extends_arg = True
+        elif command[3].token_type not in {
                 TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             raise JMCSyntaxException(
                 "Expected { or [", command[3], tokenizer)
@@ -450,7 +457,7 @@ class Lexer:
                 f"JSON({json_path}) may override private function of JMC", command[2], tokenizer, suggestion=f"Please avoid starting JSON's path with {DataPack.private_name}")
 
         logger.debug(f"JSON: {json_type}({json_path})")
-        json_content = command[3].string
+        json_content = command[-1].string
         if json_path in self.datapack.jsons:
             old_json_token, old_json_tokenizer = self.datapack.defined_file_pos[
                 json_path]
@@ -461,10 +468,34 @@ class Lexer:
         try:
             json: dict[str, str] = loads(json_content, strict=False)
         except JSONDecodeError as error:
-            raise JMCDecodeJSONError(error, command[3], tokenizer) from error
+            raise JMCDecodeJSONError(error, command[-1], tokenizer) from error
         if not json:
             raise JMCSyntaxException(
-                "JSON content cannot be empty", command[3], tokenizer)
+                "JSON content cannot be empty", command[-1], tokenizer)
+        
+        if has_extends_arg:
+            while True: break
+            super_name = prefix + convention_jmc_to_mc(
+                command[4], tokenizer, is_make_lower=False, substr=(1, -1))
+            if namespace in Header().namespace_overrides:
+                super_path = namespace + "/" + json_type + \
+                    "/" + super_name[len(namespace) + 1:]
+            else:
+                super_path = json_type + "/" + super_name
+
+            try:
+                super_json = self.datapack.jsons[super_path]
+            except KeyError:
+                raise KeyError()
+            
+            print("\033[33;40m", super_path, "\033[94;40m")
+            print("\033[33;40m", super_json, "\033[94;40m")
+
+            assert isinstance (super_json, dict);
+            json = deep_merge(super_json, json)
+
+            print("\033[32;40m", json, "\033[94;40m")
+                
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
 
