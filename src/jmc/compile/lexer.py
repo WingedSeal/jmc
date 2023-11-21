@@ -489,7 +489,7 @@ class Lexer:
                 f"Invalid JSON({super_path})", command[2], tokenizer,
                 suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly")
 
-            assert isinstance (super_json, dict);
+            assert isinstance(super_json, dict)
             json = deep_merge(super_json, json)
 
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
