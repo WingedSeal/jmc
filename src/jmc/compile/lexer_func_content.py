@@ -398,6 +398,11 @@ x
             self.__is_say(key_pos, token)
             return True
 
+        if token.string == "function" and len(self.command) == key_pos + 2 and self.command[key_pos + 1].token_type == TokenType.STRING:
+            append_commands(self.__commands,
+                            f"function {self.command[key_pos + 1].string}")
+            return True
+
         if token.string == "schedule":
             if self.__is_schedule(key_pos):
                 return True

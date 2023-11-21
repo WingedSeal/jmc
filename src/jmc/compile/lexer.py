@@ -342,6 +342,8 @@ class Lexer:
         """
         Whether command is in vanilla function syntax
         """
+        if len(command) == 2 and command[1].token_type == TokenType.STRING:
+            return True
         if not (
             len(command) >= 4 and
             command[1].token_type == TokenType.KEYWORD and
