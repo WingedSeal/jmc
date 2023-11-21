@@ -393,7 +393,6 @@ class Lexer:
         :raises JMCDecodeJSONError: Invalid JSON
         """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
-        # print("\033[96;40m", command, "\033[0;0;40m")
         has_extends_arg = False
         if len(command) < 2:
             raise JMCSyntaxException(
@@ -487,14 +486,9 @@ class Lexer:
                 super_json = self.datapack.jsons[super_path]
             except KeyError:
                 raise KeyError()
-            
-            print("\033[33;40m", super_path, "\033[94;40m")
-            print("\033[33;40m", super_json, "\033[94;40m")
 
             assert isinstance (super_json, dict);
             json = deep_merge(super_json, json)
-
-            print("\033[32;40m", json, "\033[94;40m")
                 
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
