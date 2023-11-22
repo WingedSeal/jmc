@@ -24,6 +24,7 @@ import Variable from "./pages/Variable";
 import FlowControls from "./pages/FlowControls";
 import JsonFiles from "./pages/JsonFiles";
 import BuiltInFunction from "./pages/BuiltInFunction";
+import Decorator from "./pages/Decorator";
 import Basics from "./pages/Basics";
 import Advanced from "./pages/Advanced";
 import Submitted from "./pages/Submitted";
@@ -102,6 +103,10 @@ function App() {
                         <Route
                             path="/documentation/built-in-function"
                             element={<BuiltInFunction />}
+                        />
+                        <Route
+                            path="/documentation/decorator"
+                            element={<Decorator />}
                         />
                         <Route
                             path="/documentation/header"

@@ -1733,6 +1733,22 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
+    <Feature id="tag_update" summary="Tag.update()" keywords="">
+        <p>
+            Simply remove the tag from <code>removeFrom</code> and add it back
+            to <code>selector</code>.
+        </p>
+        <Command
+            name="Tag.update"
+            type="JMCFunction"
+            params={[
+                { key: "selector", type: "Selector" },
+                { key: "tag", type: "Keyword" },
+                { key: "removeFrom", type: "Selector", default: "@e" },
+            ]}
+            newline
+        />
+    </Feature>,
 ];
 
 export default BuildinFeatures;

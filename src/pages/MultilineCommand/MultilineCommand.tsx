@@ -2,7 +2,6 @@ import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash from "../../utils/scrollToHash";
-import SidebarNav from "../../components/SidebarNav";
 
 const MultilineCommand = () => {
     useScrollToHash();

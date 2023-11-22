@@ -199,6 +199,28 @@ const getDocsPages = (
             searchValue={searchValue}
         />,
         <DocsLink
+            name="Decorator"
+            keyword="decorate modify function"
+            page="decorator"
+            searchValue={searchValue}
+            sections={[
+                <DocsLink
+                    name="Add"
+                    keyword="called from tick"
+                    page="decorator"
+                    searchValue={searchValue}
+                    hash="add"
+                />,
+                <DocsLink
+                    name="Lazy"
+                    keyword="replaced token define inline"
+                    page="decorator"
+                    searchValue={searchValue}
+                    hash="lazy"
+                />,
+            ]}
+        />,
+        <DocsLink
             name="Header"
             keyword="feature hjmc preprocessor preprocessing configuration"
             page="header"
@@ -206,7 +228,7 @@ const getDocsPages = (
             sections={[
                 <DocsLink
                     name="Macros"
-                    keyword="replaced token difine"
+                    keyword="replaced token define"
                     page="header"
                     searchValue={searchValue}
                     hash="define"

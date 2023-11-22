@@ -261,6 +261,29 @@ const Function = () => {
                         ();
                     </CodeBlock>
                 </div>
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Vanilla Function Macro (Minecraft 1.20+)
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        JMC has some special syntaxes to call vanilla macros.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="function">function_name</CodeText>
+                        (key<CodeText type="operator">=</CodeText>
+                        <CodeText type="string">"value"</CodeText>);
+                        <br />
+                        <CodeText type="function">function_name</CodeText>({"{"}
+                        <CodeText type="string">"key"</CodeText>
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="string">"value"</CodeText>
+                        {"}"});
+                        <br />
+                        <CodeText type="function">function_name</CodeText>
+                        () with <CodeText type="operator">...</CodeText>;
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );

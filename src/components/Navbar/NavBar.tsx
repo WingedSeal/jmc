@@ -231,6 +231,12 @@ const NavBar = () => {
                             Built-in Function
                         </LinkItem>
                         <LinkItem
+                            to="/documentation/decorator"
+                            ulRefs={ulRefsMobile}
+                        >
+                            Decorator
+                        </LinkItem>
+                        <LinkItem
                             to="/documentation/header"
                             ulRefs={ulRefsMobile}
                         >
@@ -376,6 +382,9 @@ const NavBar = () => {
                             ulRefs={ulRefs}
                         >
                             Built-in Function
+                        </LinkItem>
+                        <LinkItem to="/documentation/decorator" ulRefs={ulRefs}>
+                            Decorator
                         </LinkItem>
                         <LinkItem to="/documentation/header" ulRefs={ulRefs}>
                             Header
