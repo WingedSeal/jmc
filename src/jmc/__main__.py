@@ -119,7 +119,7 @@ def init(args: argparse.Namespace):
     if args.output is None:
         configuration.output = configuration._default_output()
     if not args.is_force and configuration.is_file_exist():
-        print("Initialization failed: Configuration file already exists.")
+        print("Initialization failed: Configuration file already exists. Run with `--force` to override the old file.")
         return
     configuration.save_config()
 
