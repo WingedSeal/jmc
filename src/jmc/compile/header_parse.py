@@ -206,10 +206,10 @@ def __parse_header(header_str: str, file_name: str,
                     replaced_tokens = [Token.empty(config.namespace)]
                 elif binder.startswith("__namehash") and binder.endswith("__"):
                     try:
-                        length = int(binder[11:-2])
+                        length = int(binder[10:-2])
                     except ValueError:
                         raise HeaderSyntaxException(
-                            f"{binder[11:-2]} is invalid string length for __namehash__ directive (non integer detected)", file_name, line, line_str)
+                            f"{binder[10:-2]} is invalid string length for __namehash__ directive (non integer detected)", file_name, line, line_str)
                     replaced_tokens = [
                         Token.empty(
                             hash_string_to_string(config.namespace, length))]
