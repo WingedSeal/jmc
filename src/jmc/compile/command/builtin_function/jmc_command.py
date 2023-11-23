@@ -912,6 +912,7 @@ class BossbarAdd(JMCFunction):
             self.args["name"], self.raw_args["id"].token)
         return f'bossbar add {self.args["id"]} {self.format_text("name")}'
 
+
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.setName",
@@ -926,6 +927,7 @@ class BossbarSetName(JMCFunction):
         self.datapack.data.bossbars[self.args["id"]] = (
             self.args["name"], self.raw_args["id"].token)
         return f'bossbar set {self.args["id"]} name {self.format_text("name")}'
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,

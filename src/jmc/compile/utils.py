@@ -250,6 +250,7 @@ def get_mc_uuid(seed: Any) -> str:
 def is_decorator(string: str) -> bool:
     return (len(string) > 2 and string.startswith("@"))
 
+
 def deep_merge(first: dict, second: dict) -> dict:
     """
     Recursively merges two dictionaries together.
@@ -261,7 +262,8 @@ def deep_merge(first: dict, second: dict) -> dict:
     """
     output = deepcopy(first)
     for key in second:
-        if key in output and isinstance(output[key], dict) and isinstance(second[key], dict):
+        if key in output and isinstance(
+                output[key], dict) and isinstance(second[key], dict):
             output[key] = deep_merge(output[key], second[key])
         else:
             output[key] = second[key]

@@ -36,8 +36,9 @@ def if_(command: list[Token], datapack: DataPack,
     datapack.lexer.if_else_box.append((command[1], command[2]))
     return None
 
+
 def macro_if(command: list[Token], datapack: DataPack,
-        tokenizer: Tokenizer) -> str | None:
+             tokenizer: Tokenizer) -> str | None:
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
@@ -52,7 +53,8 @@ def macro_if(command: list[Token], datapack: DataPack,
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, col_length=True)
         datapack.lexer.if_else_box.append((command[1], command[3]))
-        return datapack.lexer.parse_if_else(tokenizer, is_expand=True, is_macro=True)
+        return datapack.lexer.parse_if_else(
+            tokenizer, is_expand=True, is_macro=True)
 
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
@@ -60,6 +62,7 @@ def macro_if(command: list[Token], datapack: DataPack,
 
     datapack.lexer.if_else_box.append((command[1], command[2]))
     return datapack.lexer.parse_if_else(tokenizer, is_macro=True)
+
 
 def else_(command: list[Token], datapack: DataPack,
           tokenizer: Tokenizer) -> str | None:
