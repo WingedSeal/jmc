@@ -210,6 +210,9 @@ def __parse_header(header_str: str, file_name: str,
                     except ValueError:
                         raise HeaderSyntaxException(
                             f"{binder[10:-2]} is invalid string length for __namehash__ directive (non integer detected)", file_name, line, line_str)
+                    if length not in range(3, 65):
+                        raise HeaderSyntaxException(
+                            f"__namehash__ string length must be at least 3 and at most 64 characters.", file_name, line, line_str)
                     replaced_tokens = [
                         Token.empty(
                             hash_string_to_string(config.namespace, length))]
