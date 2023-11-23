@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 from typing import TYPE_CHECKING
 
 from jmc.compile.command.utils import hash_string_to_string
@@ -203,10 +204,15 @@ def __parse_header(header_str: str, file_name: str,
                 replaced_tokens: list[Token]
                 if binder == "__namespace__":
                     replaced_tokens = [Token.empty(config.namespace)]
-                elif binder == "__namehash16__":
+                elif binder.startswith("__namehash") and binder.endswith("__"):
+                    try:
+                        length = int(binder[11:-2])
+                    except ValueError:
+                        raise HeaderSyntaxException(
+                            f"{binder[11:-2]} is invalid string length for __namehash__ directive (non integer detected)", file_name, line, line_str)
                     replaced_tokens = [
                         Token.empty(
-                            hash_string_to_string(config.namespace, 16))]
+                            hash_string_to_string(config.namespace, length))]
                 elif binder == "__UUID__":
                     replaced_tokens = [
                         Token.empty(
@@ -214,7 +220,7 @@ def __parse_header(header_str: str, file_name: str,
                             TokenType.PAREN_SQUARE)]
                 else:
                     raise HeaderSyntaxException(
-                        "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__namehash16__', '__UUID__'")
+                        "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__namehash{number}__', '__UUID__'")
 
                 if key in header.macros:
                     raise HeaderDuplicatedMacro(
