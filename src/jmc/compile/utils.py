@@ -1,4 +1,5 @@
 """Utility for compiling"""
+from copy import deepcopy
 import functools
 from random import Random
 import re
@@ -248,3 +249,20 @@ def get_mc_uuid(seed: Any) -> str:
 
 def is_decorator(string: str) -> bool:
     return (len(string) > 2 and string.startswith("@"))
+
+def deep_merge(first: dict, second: dict) -> dict:
+    """
+    Recursively merges two dictionaries together.
+    (i.e. it also merges any dicts inside of them)
+
+    :param first: The dictionary to merge stuff to
+    :param second: The dictionary being merged into the first
+    :return: A new dict that is the merger of both inputs
+    """
+    output = deepcopy(first)
+    for key in second:
+        if key in output and isinstance(output[key], dict) and isinstance(second[key], dict):
+            output[key] = deep_merge(output[key], second[key])
+        else:
+            output[key] = second[key]
+    return output

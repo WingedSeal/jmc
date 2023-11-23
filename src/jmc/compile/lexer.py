@@ -10,7 +10,7 @@ from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxExcept
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function, PreFunction
 from .log import Logger
-from .utils import convention_jmc_to_mc, is_decorator, search_to_string
+from .utils import convention_jmc_to_mc, deep_merge, is_decorator, search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -395,6 +395,7 @@ class Lexer:
         :raises JMCDecodeJSONError: Invalid JSON
         """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
+        has_extends_arg = False
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)", command[0], tokenizer, col_length=True)
@@ -413,7 +414,12 @@ class Lexer:
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected { or [", command[2], tokenizer, col_length=True)
-        if command[3].token_type not in {
+        if command[3].string == "extends":
+            if command[4].token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxException(
+                    "Expected (", command[3], tokenizer)
+            has_extends_arg = True
+        elif command[3].token_type not in {
                 TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             raise JMCSyntaxException(
                 "Expected { or [", command[3], tokenizer)
@@ -452,7 +458,7 @@ class Lexer:
                 f"JSON({json_path}) may override private function of JMC", command[2], tokenizer, suggestion=f"Please avoid starting JSON's path with {DataPack.private_name}")
 
         logger.debug(f"JSON: {json_type}({json_path})")
-        json_content = command[3].string
+        json_content = command[-1].string
         if json_path in self.datapack.jsons:
             old_json_token, old_json_tokenizer = self.datapack.defined_file_pos[
                 json_path]
@@ -463,10 +469,30 @@ class Lexer:
         try:
             json: dict[str, str] = loads(json_content, strict=False)
         except JSONDecodeError as error:
-            raise JMCDecodeJSONError(error, command[3], tokenizer) from error
+            raise JMCDecodeJSONError(error, command[-1], tokenizer) from error
         if not json:
             raise JMCSyntaxException(
-                "JSON content cannot be empty", command[3], tokenizer)
+                "JSON content cannot be empty", command[-1], tokenizer)
+
+        if has_extends_arg:
+            super_name = prefix + convention_jmc_to_mc(
+                command[4], tokenizer, is_make_lower=False, substr=(1, -1))
+            if namespace in Header().namespace_overrides:
+                super_path = namespace + "/" + json_type + \
+                    "/" + super_name[len(namespace) + 1:]
+            else:
+                super_path = json_type + "/" + super_name
+
+            try:
+                super_json = self.datapack.jsons[super_path]
+            except KeyError:
+                raise JMCSyntaxException(
+                f"Invalid JSON({super_path})", command[2], tokenizer,
+                suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly")
+
+            assert isinstance(super_json, dict)
+            json = deep_merge(super_json, json)
+
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
 
@@ -590,7 +616,7 @@ class Lexer:
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
     def parse_if_else(self, tokenizer: Tokenizer,
-                      name: str = "if_else", is_expand: bool = False) -> str:
+                      name: str = "if_else", is_expand: bool = False, is_macro: bool = False) -> str:
         """
         Parse if-else chain using if_else_box attribute
 
@@ -628,6 +654,8 @@ class Lexer:
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
                 name, if_else_box[0][1], tokenizer)
+            if is_macro:
+                precommand = f"${precommand}"
             if arrow_func.startswith("execute "):
                 # len('execute ') = 8
                 return f"{precommand}execute {condition} {arrow_func[8:]}"
