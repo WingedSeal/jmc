@@ -8,7 +8,7 @@ from json import JSONEncoder, dumps
 from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
-from .exception import JMCSyntaxWarning, JMCValueError
+from .exception import JMCSyntaxWarning, JMCValueError, JMCMissingValueError
 from .log import Logger
 from .header import Header
 
@@ -59,13 +59,22 @@ class PreFunction:
                     kwargs: dict[str, list[Token]]) -> str:
         param_arg: dict[str, str] = {}
         params = self.tokenizer.parse_param(self.params)
+        if len(args) > len(params):
+            raise JMCValueError(
+                f"{self.func_path}() takes {len(params)} positional arguments, got {len(args)}", self.tokenizer.merge_tokens(args[-1]), self.tokenizer)
         for index, param in enumerate(params):
             if param in kwargs:
                 param_arg[param] = self.tokenizer.merge_tokens(
                     kwargs[param]).string
+                del kwargs[param]
             else:
                 param_arg[param] = self.tokenizer.merge_tokens(
                     args[index]).string
+
+        if kwargs:
+            raise JMCValueError(
+                f"{self.func_path}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'", self.tokenizer.merge_tokens(list(kwargs.values())[-1]), self.tokenizer)
+
         for _param, _arg in param_arg.items():
             self.func_content = self.func_content.replace("$" + _param, _arg)
         return "\n".join(self.parse().commands)

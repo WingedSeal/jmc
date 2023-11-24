@@ -398,7 +398,8 @@ x
             self.__is_say(key_pos, token)
             return True
 
-        if token.string == "function" and len(self.command) == key_pos + 2 and self.command[key_pos + 1].token_type == TokenType.STRING:
+        if token.string == "function" and len(
+                self.command) == key_pos + 2 and self.command[key_pos + 1].token_type == TokenType.STRING:
             append_commands(self.__commands,
                             f"function {self.command[key_pos + 1].string}")
             return True
@@ -514,6 +515,17 @@ x
                     f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
 
             func = convention_jmc_to_mc(token, self.tokenizer)
+            if func in self.lexer.datapack.lazy_func:
+                __command = self.lexer.datapack.lazy_func[func].handle_lazy(
+                    [], {})
+                if self.is_execute and "\n" in __command:
+                    raise JMCSyntaxException(
+                        "Lazy function with multiple commands cannot be used with execute.",
+                        self.command[key_pos],
+                        self.tokenizer)
+                append_commands(self.__commands,
+                                __command)
+                return True
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.format_func_path(func)}")
