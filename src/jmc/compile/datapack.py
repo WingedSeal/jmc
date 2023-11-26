@@ -51,9 +51,9 @@ class PreFunction:
         self.lexer = lexer
         self.tokenizer = tokenizer
 
-    def parse(self) -> "Function":
+    def parse(self, func_content: str | None = None) -> "Function":
         return Function(self.lexer.parse_func_content(
-            self.func_content, self.jmc_file_path, self.line, self.col, self.file_string))
+            (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string))
 
     def handle_lazy(self, args: list[list[Token]],
                     kwargs: dict[str, list[Token]]) -> str:
@@ -75,9 +75,14 @@ class PreFunction:
             raise JMCValueError(
                 f"{self.func_path}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'", self.tokenizer.merge_tokens(list(kwargs.values())[-1]), self.tokenizer)
 
-        for _param, _arg in param_arg.items():
-            self.func_content = self.func_content.replace("$" + _param, _arg)
-        return "\n".join(self.parse().commands)
+        func_content = None
+        for _param, _arg in sorted(
+                param_arg.items(), key=lambda item: len(item[0]), reverse=True):
+            print(_param, _arg)
+            func_content = (
+                self.func_content if func_content is None else func_content).replace(
+                "$" + _param, _arg)
+        return "\n".join(self.parse(func_content).commands)
 
 
 class Function:
