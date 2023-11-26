@@ -481,7 +481,7 @@ x
                 if args:
                     if len(args) > 1:
                         raise JMCSyntaxException(
-                            f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                            f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is intended to be a lazy function, it has to be defined BEFORE using.')
                     if kwargs:
                         raise JMCSyntaxException(
                             f"Expected exclusively positional or keyword argument", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')

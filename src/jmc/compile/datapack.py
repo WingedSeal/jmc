@@ -8,7 +8,7 @@ from json import JSONEncoder, dumps
 from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
-from .exception import JMCSyntaxWarning, JMCValueError, JMCMissingValueError
+from .exception import JMCSyntaxException, JMCSyntaxWarning, JMCValueError, JMCMissingValueError
 from .log import Logger
 from .header import Header
 
@@ -519,6 +519,9 @@ class DataPack:
                               tokenizer) in self.functions_called.items():
             if function_called not in self.functions and function_called.split(
                     "/")[0].strip() not in Header().namespace_overrides:
+                if function_called in self.lexer.datapack.lazy_func:  # FIXME
+                    raise JMCSyntaxException(
+                        f"Lazy function '{function_called}' used before definition.", token, tokenizer, suggestion="Lazy function has to be defined BEFORE using.")
                 raise JMCValueError(
                     f"Function '{function_called}' was not defined", token, tokenizer)
 
