@@ -78,7 +78,6 @@ class PreFunction:
         func_content = None
         for _param, _arg in sorted(
                 param_arg.items(), key=lambda item: len(item[0]), reverse=True):
-            print(_param, _arg)
             func_content = (
                 self.func_content if func_content is None else func_content).replace(
                 "$" + _param, _arg)
