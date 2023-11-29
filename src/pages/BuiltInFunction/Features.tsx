@@ -572,6 +572,7 @@ const BuildinFeatures = [
                 { key: "indexString", type: "string" },
                 { key: "function", type: "ArrowFunction" },
                 { key: "count", type: "integer" },
+                { key: "begin_at", type: "integer", default: "1" },
             ]}
             newline
         />
