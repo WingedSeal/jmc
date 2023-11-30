@@ -84,7 +84,8 @@ const getDefault = (param: Parameter) => {
 const Command: React.FC<CommandInterface> = (props) => {
     const module_function = props.name.split(".");
     const module_name = module_function[0];
-    const function_name = module_function[1];
+    const function_name =
+        module_function.length === 2 ? module_function[1] : null;
     const len = props.params.length;
     const copy_text = `${module_name}.${function_name}(${props.params.map(
         (param, index) => `
@@ -95,9 +96,16 @@ const Command: React.FC<CommandInterface> = (props) => {
     )})`;
     return (
         <CodeBlock copy_text={copy_text}>
-            <CodeText type="class">{module_name}</CodeText>
-            <CodeText type="operator">.</CodeText>
-            <CodeText type="function">{function_name}</CodeText>(
+            {function_name === null ? (
+                <CodeText type="function">{module_function}</CodeText>
+            ) : (
+                <>
+                    <CodeText type="class">{module_name}</CodeText>
+                    <CodeText type="operator">.</CodeText>
+                    <CodeText type="function">{function_name}</CodeText>
+                </>
+            )}
+            (
             {props.newline && (
                 <>
                     <br />

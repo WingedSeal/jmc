@@ -13,14 +13,20 @@ export interface DocsLinkInterface {
 }
 
 const DocsLink: React.FC<DocsLinkInterface> = (props) => {
+    const isSelfDisplay = isDisplay(
+        props.name,
+        props.searchValue,
+        props.keyword
+    );
     return (
-        <div>
+        <>
             {!props.sections ||
-            props.sections!.some((DocsLink) => {
+            isSelfDisplay ||
+            props.sections!.some((DocsLinkSection) => {
                 return isDisplay(
-                    DocsLink.props.name,
+                    DocsLinkSection.props.name,
                     props.searchValue,
-                    DocsLink.props.keyword
+                    DocsLinkSection.props.keyword
                 );
             }) ? (
                 <Link
@@ -48,17 +54,18 @@ const DocsLink: React.FC<DocsLinkInterface> = (props) => {
             )}
             {props.sections?.map(
                 (DocsLink, i) =>
-                    isDisplay(
-                        DocsLink.props.name,
-                        props.searchValue,
-                        DocsLink.props.keyword
-                    ) && (
+                    (isSelfDisplay ||
+                        isDisplay(
+                            DocsLink.props.name,
+                            props.searchValue,
+                            DocsLink.props.keyword
+                        )) && (
                         <div key={i} className="ml-4">
                             {DocsLink}
                         </div>
                     )
             )}
-        </div>
+        </>
     );
 };
 

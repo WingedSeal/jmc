@@ -8,7 +8,7 @@ const getDocsPages = (
         <DocsLink
             name="Multiline Command"
             keyword=""
-            page="multiline-command"
+            page="multiline-command multiple"
             searchValue={searchValue}
         />,
         <DocsLink
@@ -62,6 +62,13 @@ const getDocsPages = (
                     keyword="grouping layer folder"
                     page="function"
                     hash="class"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Vanilla Macro"
+                    keyword="mcfunction"
+                    page="function"
+                    hash="macro"
                     searchValue={searchValue}
                 />,
             ]}
