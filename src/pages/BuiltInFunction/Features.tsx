@@ -7,7 +7,7 @@ import { Tab } from "../../components/CodeBlock/CodeBlock";
 const BuildinFeatures = [
     howTo,
     formattedText,
-    <Feature id="print" summary="print" keywords="variable printf tellraw">
+    <Feature id="print" summary="print()" keywords="variable printf tellraw announce">
         <p>Print a variable for all players in chat.</p>
         <Command
             name="print"
@@ -15,8 +15,8 @@ const BuildinFeatures = [
             params={[{ key: "value", type: "Scoreboard" }]}
         />
     </Feature>,
-    <Feature id="printf" summary="printf" keywords="variable tellraw">
-        <p>Print a text for all players in chat.</p>
+    <Feature id="printf" summary="printf()" keywords="variable tellraw announce">
+        <p>Print a text for all players in chat. Works the same as <code>Text.tellraw(@a, text);</code></p>
         <Command
             name="printf"
             type="JMCFunction"
