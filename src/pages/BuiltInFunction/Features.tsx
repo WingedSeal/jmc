@@ -1211,6 +1211,17 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature id="bossbar_setName" summary="Bossbar.setName()" keywords="vanilla">
+        <p>Change the name of existing bossbar, an alternative to vanilla syntax</p>
+        <Command
+            name="Bossbar.setName"
+            type="JMCFunction"
+            params={[
+                { key: "team", type: "Keyword" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+            ]}
+        />
+    </Feature>,
     <Feature id="team_add" summary="Team.add()" keywords="vanilla">
         <p>Add team, an alternative to vanilla syntax</p>
         <p>
