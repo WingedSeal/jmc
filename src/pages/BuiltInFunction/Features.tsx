@@ -7,6 +7,22 @@ import { Tab } from "../../components/CodeBlock/CodeBlock";
 const BuildinFeatures = [
     howTo,
     formattedText,
+    <Feature id="print" summary="print" keywords="variable printf tellraw">
+        <p>Print a variable for all players in chat.</p>
+        <Command
+            name="print"
+            type="JMCFunction"
+            params={[{ key: "value", type: "Scoreboard" }]}
+        />
+    </Feature>,
+    <Feature id="printf" summary="printf" keywords="variable tellraw">
+        <p>Print a text for all players in chat.</p>
+        <Command
+            name="printf"
+            type="JMCFunction"
+            params={[{ key: "text", type: "FormattedString" }]}
+        />
+    </Feature>,
     <Feature
         id="player_on_event"
         summary="Player.onEvent()"
