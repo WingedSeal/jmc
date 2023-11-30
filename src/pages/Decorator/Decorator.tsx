@@ -66,6 +66,8 @@ const Decorator = () => {
                         time parameters. Instead of creating a new mcfunction
                         directly like regular function do, lazy function will
                         copy the content inside into where ever you call it.
+                        Unlike mcfunction, lazy function has to be defined
+                        BEFORE using.
                     </p>
                     <CodeBlock>
                         <CodeText type="param">@lazy</CodeText>
