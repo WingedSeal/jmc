@@ -371,7 +371,7 @@ const BuildinFeatures = [
     <Feature
         id="math_random"
         summary="Math.random()"
-        keywords="randomize randomization lcg linear congruential generator"
+        keywords="randomize randomization rng lcg linear congruential generator"
     >
         <p>
             Simplify integer randomization process using{" "}
@@ -388,8 +388,8 @@ const BuildinFeatures = [
             name="Math.random"
             type="VariableOperation"
             params={[
-                { key: "min", type: "integer", default: "1" },
-                { key: "max", type: "integer", default: "2147483647" },
+                { key: "min", type: "ScoreboardInteger", default: "1" },
+                { key: "max", type: "ScoreboardInteger", default: "2147483647" },
             ]}
         />
     </Feature>,
