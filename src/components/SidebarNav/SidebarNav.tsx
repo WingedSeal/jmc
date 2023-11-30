@@ -83,18 +83,17 @@ const SidebarNav: React.FC<SidebarNavInterface> = ({ children }) => {
                         </div>
                     </div>
                     {/* End search bar */}
-                    {getDocsPages(searchValue).map((DocsLink, i) => {
-                        if (
-                            isDisplay(
+                    {getDocsPages(searchValue).map(
+                        (DocsLink, i) =>
+                            (isDisplay(
                                 DocsLink.props.name,
                                 searchValue,
                                 DocsLink.props.keyword
                             ) ||
-                            DocsLink.props.sections
-                        )
-                            return <div key={i}>{DocsLink}</div>;
-                        return <></>;
-                    })}
+                                DocsLink.props.sections) && (
+                                <div key={i}>{DocsLink}</div>
+                            )
+                    )}
                     <div className="my-6" />
                 </div>
             </section>
