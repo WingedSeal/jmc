@@ -42,7 +42,7 @@ const Decorator = () => {
                         the decorator
                     </p>
                     <CodeBlock>
-                        <CodeText type="param">@add(__tick__s)</CodeText>
+                        <CodeText type="param">@add(__tick__)</CodeText>
                         <br />
                         <CodeText type="keyword">function</CodeText>{" "}
                         <CodeText type="function">functionName</CodeText>
