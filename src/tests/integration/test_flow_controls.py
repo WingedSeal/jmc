@@ -31,6 +31,7 @@ execute if entity condition run say Hello World
         )
 
     def test_if_else(self):
+        self.maxDiff = None
         pack = JMCTestPack().set_jmc_file("""
 if (entity condition) {
     say "TRUE";

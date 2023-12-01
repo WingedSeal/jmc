@@ -63,7 +63,7 @@ class RightClickSetup(EventMixin):
     def call(self) -> str:
         # self.rc_obj = "__rc__" + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
-            self.raw_args["functionMap"].token, self.tokenizer)
+            self.raw_args["functionMap"].token, self.tokenizer, self.prefix)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["idName"]
@@ -377,7 +377,7 @@ class PlayerOnEvent(EventMixin):
 class TriggerSetup(JMCFunction):
     def call(self) -> str:
         func_map = self.datapack.parse_func_map(
-            self.raw_args["triggers"].token, self.tokenizer)
+            self.raw_args["triggers"].token, self.tokenizer, self.prefix)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         obj = self.args["objective"]
@@ -1054,7 +1054,7 @@ class TextPropClickCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1097,7 +1097,7 @@ class TextPropsClickCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1143,7 +1143,7 @@ class TextPropSuggestCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1186,7 +1186,7 @@ class TextPropsSuggestCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",

@@ -100,7 +100,7 @@ class HardcodeRepeat(JMCFunction):
                             self.raw_args["function"].token.string, self.args["indexString"], str(
                                 i), self.token, self.tokenizer
                         )
-                    ), self.tokenizer)
+                    ), self.tokenizer, self.prefix)
                 )
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_process(
@@ -141,7 +141,7 @@ class HardcodeRepeatList(JMCFunction):
                         _hardcode_process(
                             self.raw_args["function"].token.string, self.args["indexString"], i, self.token, self.tokenizer
                         )
-                    ), self.tokenizer)
+                    ), self.tokenizer, self.prefix)
                 )
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_process(
@@ -196,7 +196,7 @@ class HardcodeRepeatLists(JMCFunction):
                             self.raw_args["function"].token.string, index_strings, [
                                 string_list[index] for string_list in string_lists], self.token, self.tokenizer
                         )
-                    ), self.tokenizer)
+                    ), self.tokenizer, self.prefix)
                 )
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_processes(
@@ -249,7 +249,7 @@ class HardcodeSwitch(JMCFunction):
                             self.raw_args["function"].token.string, self.args["indexString"], str(
                                 i), self.token, self.tokenizer
                         )
-                    ), self.tokenizer)
+                    ), self.tokenizer, self.prefix)
                 )
             except JMCSyntaxException as error:
                 error.reinit(lambda string: _hardcode_process(
@@ -426,7 +426,7 @@ class RaycastSimple(JMCFunction):
                         self.raw_args["overideRecursion"].token.col,
                         self.raw_args["overideRecursion"].token.string.replace(
                             self.args["overideString"], raycast_loop),
-                    ), self.tokenizer)
+                    ), self.tokenizer, self.prefix)
             except JMCSyntaxException as error:
                 error.reinit(
                     lambda string: string.replace(

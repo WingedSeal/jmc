@@ -310,7 +310,7 @@ class Lexer:
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         return PreFunction(func_content, file_path_str,
-                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[2], self, tokenizer)
+                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[2], self, tokenizer, prefix)
 
     def parse_func(self, tokenizer: Tokenizer,
                    command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
@@ -538,10 +538,11 @@ class Lexer:
         :return: List of commands(string)
         """
         tokenizer = self.load_tokenizer
-        return self._parse_func_content(tokenizer, programs, is_load=True)
+        return self._parse_func_content(
+            tokenizer, programs, prefix="", is_load=True)
 
     def parse_line(self, tokens: list[Token],
-                   tokenizer: Tokenizer) -> list[str]:
+                   tokenizer: Tokenizer, prefix: str) -> list[str]:
         """
         Parse just a line of command(List of arguments(Token))
 
@@ -549,11 +550,12 @@ class Lexer:
         :param tokenizer: Tokenizer
         :return: List of minecraft commands
         """
-        return self._parse_func_content(tokenizer, [tokens], is_load=False)
+        return self._parse_func_content(
+            tokenizer, [tokens], prefix, is_load=False)
 
     def parse_func_content(self,
                            func_content: str, file_path_str: str,
-                           line: int, col: int, file_string: str) -> list[str]:
+                           line: int, col: int, file_string: str, prefix: str) -> list[str]:
         """
         Parse function's content
 
@@ -567,10 +569,11 @@ class Lexer:
         tokenizer = Tokenizer(func_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         programs = tokenizer.programs
-        return self._parse_func_content(tokenizer, programs, is_load=False)
+        return self._parse_func_content(
+            tokenizer, programs, prefix, is_load=False)
 
     def _parse_func_content(self, tokenizer: Tokenizer,
-                            programs: list[list[Token]], is_load: bool) -> list[str]:
+                            programs: list[list[Token]], prefix: str, is_load: bool) -> list[str]:
         """
         Parse a content inside function
         :param tokenizer: Tokenizer
@@ -580,7 +583,7 @@ class Lexer:
         :return: List of commands(String)
         """
 
-        return FuncContent(tokenizer, programs, is_load, self).parse()
+        return FuncContent(tokenizer, programs, is_load, self, prefix).parse()
 
     def parse_class_content(self, prefix: str, class_content: str,
                             file_path_str: str, line: int, col: int, file_string: str) -> None:
@@ -615,7 +618,7 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
-    def parse_if_else(self, tokenizer: Tokenizer,
+    def parse_if_else(self, tokenizer: Tokenizer, prefix: str,
                       name: str = "if_else", is_expand: bool = False, is_macro: bool = False) -> str:
         """
         Parse if-else chain using if_else_box attribute
@@ -636,7 +639,7 @@ class Lexer:
 
         if is_expand:
             expanded_commands = self.datapack.parse_function_token(
-                if_else_box[0][1], tokenizer)
+                if_else_box[0][1], tokenizer, prefix)
             output = []
             for expanded_command in expanded_commands:
                 if "\n" in expanded_command:
@@ -653,7 +656,7 @@ class Lexer:
         # Case 1: `if` only
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
-                name, if_else_box[0][1], tokenizer)
+                name, if_else_box[0][1], tokenizer, prefix)
             if is_macro:
                 precommand = f"${precommand}"
             if arrow_func.startswith("execute "):
@@ -666,7 +669,7 @@ class Lexer:
         count_alt = self.datapack.get_count(name)
         output = [
             f"scoreboard players set {VAR} {DataPack.var_name} 0",
-            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
+            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, prefix, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
             f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"]
         del if_else_box[0]
 
@@ -693,7 +696,7 @@ class Lexer:
                     f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"
                 ], count_tmp)
 
-                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, postcommands=[
+                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, prefix, postcommands=[
                     f"scoreboard players set {VAR} {DataPack.var_name} 1"
                 ])
         # `else`
@@ -701,7 +704,7 @@ class Lexer:
             self.datapack.private_functions[name][count_tmp].delete(-1)
         else:
             self.datapack.add_custom_private_function(
-                name, else_, tokenizer, count_alt)
+                name, else_, tokenizer, count_alt, prefix)
         return "\n".join(output)
 
     def clean_up_paren_token(self, token: Token, tokenizer: Tokenizer,

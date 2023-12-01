@@ -37,10 +37,10 @@ class PreFunction:
     A class representation of a row function yet to be parsed
     """
     __slots__ = ("func_content", "jmc_file_path",
-                 "line", "col", "file_string", "func_path", "params", "lexer", "tokenizer")
+                 "line", "col", "file_string", "func_path", "params", "lexer", "tokenizer", "prefix")
 
     def __init__(self, func_content: str, jmc_file_path: str,
-                 line: int, col: int, file_string: str, func_path: str, params: Token, lexer: "Lexer", tokenizer: Tokenizer) -> None:
+                 line: int, col: int, file_string: str, func_path: str, params: Token, lexer: "Lexer", tokenizer: Tokenizer, prefix: str) -> None:
         self.func_content = func_content
         self.params = params
         self.jmc_file_path = jmc_file_path
@@ -50,10 +50,11 @@ class PreFunction:
         self.func_path = func_path
         self.lexer = lexer
         self.tokenizer = tokenizer
+        self.prefix = prefix
 
     def parse(self, func_content: str | None = None) -> "Function":
         return Function(self.lexer.parse_func_content(
-            (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string))
+            (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string, self.prefix))
 
     def handle_lazy(self, args: list[list[Token]],
                     kwargs: dict[str, list[Token]]) -> str:
@@ -323,7 +324,7 @@ class DataPack:
         self.jsons[f"{json_type}/{name}"] = json
 
     def add_arrow_function(self, name: str, token: Token | list[Token],
-                           tokenizer: Tokenizer, force_create_func: bool = False) -> str:
+                           tokenizer: Tokenizer, prefix: str, force_create_func: bool = False) -> str:
         """
         Add private function for user (arrow function)
 
@@ -337,7 +338,7 @@ class DataPack:
             raise JMCSyntaxWarning(
                 "Unexpected empty function content.", token, tokenizer)
 
-        commands = self.parse_function_token(token, tokenizer)
+        commands = self.parse_function_token(token, tokenizer, prefix)
         if not force_create_func and len(
                 commands) == 1 and NEW_LINE not in commands[0]:
             return commands[0]
@@ -346,7 +347,7 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str,
+    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str, prefix: str,
                                     precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
         """
         Wrap custom commands around user's commands
@@ -365,7 +366,7 @@ class DataPack:
             postcommands = []
 
         commands = [*precommands,
-                    *self.parse_function_token(token, tokenizer),
+                    *self.parse_function_token(token, tokenizer, prefix),
                     *postcommands]
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
@@ -415,7 +416,7 @@ class DataPack:
         return self.call_func(name, count)
 
     def parse_function_token(self, token: Token | list[Token],
-                             tokenizer: Tokenizer) -> list[str]:
+                             tokenizer: Tokenizer, prefix: str) -> list[str]:
         """
         "Parse a paren_curly token into a list of commands(string)
 
@@ -425,9 +426,9 @@ class DataPack:
         """
         if isinstance(token, list):
             return self.lexer._parse_func_content(
-                tokenizer, [token], is_load=False)
+                tokenizer, [token], prefix, is_load=False)
         return self.lexer.parse_func_content(
-            token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string)
+            token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string, prefix)
 
     def format_func_path(self, func: str) -> str:
         """
@@ -530,7 +531,7 @@ class DataPack:
         self.ticks = []
 
     def parse_func_map(self, token: Token,
-                       tokenizer: Tokenizer) -> dict[int, tuple[str, bool]]:
+                       tokenizer: Tokenizer, prefix: str) -> dict[int, tuple[str, bool]]:
         """
         Parse JMC function hashmap
 
@@ -551,7 +552,7 @@ class DataPack:
                 func_map[num] = value.string, False
             elif value.token_type == TokenType.FUNC:
                 func_map[num] = "\n".join(
-                    self.parse_function_token(value, tokenizer)), True
+                    self.parse_function_token(value, tokenizer, prefix)), True
             else:
                 raise JMCValueError(
                     f"Expected function, got {value.token_type.value}", token, tokenizer)

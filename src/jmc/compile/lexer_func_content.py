@@ -107,7 +107,8 @@ x
         "is_execute",
         "lexer",
         "expanded_commands",
-        "was_anonym_func")
+        "was_anonym_func",
+        "prefix")
 
     command: list[Token]
     is_expect_command: bool
@@ -117,7 +118,7 @@ x
     """Whether the last command function, this is implement for using `with` with anonymous function."""
 
     def __init__(self, tokenizer: Tokenizer,
-                 programs: list[list[Token]], is_load: bool, lexer: "Lexer") -> None:
+                 programs: list[list[Token]], is_load: bool, lexer: "Lexer", prefix: str) -> None:
 
         self.tokenizer = tokenizer
         self.programs = programs
@@ -127,6 +128,7 @@ x
         self.lexer = lexer
         self.expanded_commands = None
         self.was_anonym_func = False
+        self.prefix = prefix
 
     def parse_self_command(self, current_line: int):
         """
@@ -161,7 +163,7 @@ x
             if self.command[0].string != "else":
                 append_commands(
                     self.__commands, self.lexer.parse_if_else(
-                        self.tokenizer))
+                        self.tokenizer, self.prefix))
 
         if self.__commands:
             if self.expanded_commands is not None:
@@ -192,7 +194,7 @@ x
             append_commands(
                 self.__commands,
                 self.lexer.parse_if_else(
-                    self.tokenizer))
+                    self.tokenizer, self.prefix))
 
         if self.__commands:
             if self.expanded_commands is not None:
@@ -372,7 +374,7 @@ x
                     "Expected keyword", token, self.tokenizer)
             if self.expanded_commands is not None:
                 self.expanded_commands = self.lexer.datapack.parse_function_token(
-                    token, self.tokenizer)
+                    token, self.tokenizer, self.prefix)
                 self.__commands[-1] = "run"
                 return True
             force_create_func = (
@@ -380,7 +382,7 @@ x
                 self.programs[current_line + 1][0].string == "with"
             )
             append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
-                "anonymous", token, self.tokenizer, force_create_func=force_create_func))
+                "anonymous", token, self.tokenizer, self.prefix, force_create_func=force_create_func))
             self.was_anonym_func = True
             return True
         # End Handle Errors
@@ -592,7 +594,7 @@ x
             # `schedule 1t {say "command";}`
             append_commands(self.__commands, "schedule")
             append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
-                "anonymous", self.command[key_pos + 2], self.tokenizer, force_create_func=True))
+                "anonymous", self.command[key_pos + 2], self.tokenizer, self.prefix, force_create_func=True))
             append_commands(self.__commands, self.command[key_pos + 1].string)
             return True
         if len(self.command) < key_pos + 4:
@@ -644,7 +646,7 @@ x
                     f"Expected 'append' or 'replace' (got {self.command[key_pos + 2]}", self.command[key_pos + 2], self.tokenizer)
             append_commands(self.__commands, "schedule")
             append_commands(self.__commands, self.lexer.datapack.add_arrow_function(
-                "anonymous", self.command[key_pos + 3], self.tokenizer, force_create_func=True))
+                "anonymous", self.command[key_pos + 3], self.tokenizer, self.prefix, force_create_func=True))
             append_commands(self.__commands, self.command[key_pos + 1].string)
             append_commands(self.__commands, self.command[key_pos + 2].string)
             return True
@@ -656,7 +658,7 @@ x
             return False
         try:
             append_commands(self.__commands, variable_operation(
-                self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS))
+                self.command[key_pos:], self.tokenizer, self.lexer.datapack, self.is_execute, type(self), FIRST_ARGUMENTS, self.prefix))
         except EXCEPTIONS as var_error:
             if key_pos != 0:
                 raise var_error
@@ -694,7 +696,7 @@ x
 
             self.lexer.datapack.used_command.add(token.string)
             append_commands(self.__commands, load_once_command(
-                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, self.prefix).call())
             return True
 
         execute_excluded_command = self.get_function(
@@ -702,10 +704,10 @@ x
         if execute_excluded_command is not None:
             if self.is_execute:
                 append_commands(self.__commands, self.lexer.datapack.add_raw_private_function("anonymous", [execute_excluded_command(
-                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call()]))
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, self.prefix).call()]))
             else:
                 append_commands(self.__commands, execute_excluded_command(
-                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
+                    self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, self.prefix).call())
             return True
 
         load_only_command = self.get_function(token, LOAD_ONLY_COMMANDS)
@@ -717,7 +719,7 @@ x
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
             append_commands(self.__commands, load_only_command(
-                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, self.prefix).call())
             return True
 
         jmc_command = self.get_function(token, JMC_COMMANDS)
@@ -726,7 +728,7 @@ x
                 raise JMCSyntaxException(
                     "Unexpected token", self.command[key_pos + 2], self.tokenizer, display_col_length=False, suggestion="Expected semicolon")
             append_commands(self.__commands, jmc_command(
-                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, is_execute=self.is_execute).call())
+                self.command[key_pos + 1], self.command[key_pos], self.lexer.datapack, self.tokenizer, self.prefix, is_execute=self.is_execute).call())
             return True
 
         if token.string in BOOL_FUNCTIONS:
@@ -743,7 +745,7 @@ x
                 raise JMCSyntaxException(
                     f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
             return_value = flow_control_command(
-                self.command[key_pos:], self.lexer.datapack, self.tokenizer)
+                self.command[key_pos:], self.lexer.datapack, self.tokenizer, self.prefix)
             if return_value is not None:
                 append_commands(self.__commands, return_value)
             return True

@@ -17,6 +17,7 @@ FLOW_CONTROL_COMMANDS: dict[str, Callable[
         list[Token],
         DataPack,
         Tokenizer,
+        str
     ], str | None]] = {
     "while": while_,
     "do": do,

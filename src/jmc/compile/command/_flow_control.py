@@ -9,7 +9,7 @@ from ..exception import JMCSyntaxException
 
 
 def if_(command: list[Token], datapack: DataPack,
-        tokenizer: Tokenizer) -> str | None:
+        tokenizer: Tokenizer, prefix: str) -> str | None:
     """
     Parse `if`
     """
@@ -27,7 +27,7 @@ def if_(command: list[Token], datapack: DataPack,
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer, col_length=True)
         datapack.lexer.if_else_box.append((command[1], command[3]))
-        return datapack.lexer.parse_if_else(tokenizer, is_expand=True)
+        return datapack.lexer.parse_if_else(tokenizer, prefix, is_expand=True)
 
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
@@ -38,7 +38,7 @@ def if_(command: list[Token], datapack: DataPack,
 
 
 def macro_if(command: list[Token], datapack: DataPack,
-             tokenizer: Tokenizer) -> str | None:
+             tokenizer: Tokenizer, prefix: str) -> str | None:
     if len(command) < 2:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
@@ -54,18 +54,18 @@ def macro_if(command: list[Token], datapack: DataPack,
                 "Expected {", command[2], tokenizer, col_length=True)
         datapack.lexer.if_else_box.append((command[1], command[3]))
         return datapack.lexer.parse_if_else(
-            tokenizer, is_expand=True, is_macro=True)
+            tokenizer, prefix, is_expand=True, is_macro=True)
 
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
-        return datapack.lexer.parse_if_else(tokenizer, is_macro=True)
+        return datapack.lexer.parse_if_else(tokenizer, prefix, is_macro=True)
 
     datapack.lexer.if_else_box.append((command[1], command[2]))
-    return datapack.lexer.parse_if_else(tokenizer, is_macro=True)
+    return datapack.lexer.parse_if_else(tokenizer, prefix, is_macro=True)
 
 
 def else_(command: list[Token], datapack: DataPack,
-          tokenizer: Tokenizer) -> str | None:
+          tokenizer: Tokenizer, prefix: str) -> str | None:
     """
     Parse `else`
     """
@@ -105,7 +105,7 @@ def else_(command: list[Token], datapack: DataPack,
         datapack.lexer.if_else_box.append(
             (None, command[1:])
         )
-    return datapack.lexer.parse_if_else(tokenizer)
+    return datapack.lexer.parse_if_else(tokenizer, prefix)
 
     # raise JMCSyntaxException(
     #     "Expected 'if' or {", command[1], tokenizer, display_col_length=False)
@@ -115,7 +115,7 @@ WHILE_NAME = "while_loop"
 
 
 def while_(command: list[Token], datapack: "DataPack",
-           tokenizer: "Tokenizer") -> str:
+           tokenizer: "Tokenizer", prefix: str) -> str:
     """
     Parse `while`
     """
@@ -138,7 +138,7 @@ def while_(command: list[Token], datapack: "DataPack",
         count = datapack.get_count(WHILE_NAME)
         call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"
         datapack.add_custom_private_function(
-            WHILE_NAME, command[2], tokenizer, count, postcommands=[call_func])
+            WHILE_NAME, command[2], tokenizer, count, prefix, postcommands=[call_func])
         return call_func
 
     else:
@@ -158,12 +158,13 @@ def while_(command: list[Token], datapack: "DataPack",
             command[1], tokenizer, datapack)
         count = datapack.get_count(WHILE_NAME)
         call_func = datapack.add_custom_private_function(
-            WHILE_NAME, func_content, tokenizer, count, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"])
+            WHILE_NAME, func_content, tokenizer, count, prefix, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"])
 
         return call_func
 
 
-def do(command: list[Token], datapack: DataPack, tokenizer: Tokenizer) -> None:
+def do(command: list[Token], datapack: DataPack,
+       tokenizer: Tokenizer, prefix: str) -> None:
     """
     Parse `do`
     """
@@ -278,7 +279,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
 
 
 def switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer) -> str:
+           tokenizer: Tokenizer, prefix: str) -> str:
     """
     Parse `switch`
     """
@@ -362,7 +363,7 @@ def switch(command: list[Token], datapack: DataPack,
     func_contents: list[list[str]] = []
     for case_content in cases_content:
         func_contents.append(datapack.lexer._parse_func_content(
-            tokenizer, case_content, is_load=False))
+            tokenizer, case_content, prefix, is_load=False))
 
     # Parse variable
     tokens = tokenizer.parse(
@@ -393,7 +394,7 @@ FOR_NAME = "for_loop"
 
 
 def for_(command: list[Token], datapack: DataPack,
-         tokenizer: Tokenizer) -> str:
+         tokenizer: Tokenizer, prefix: str) -> str:
     """
     Parse `for`
     """
@@ -429,7 +430,8 @@ def for_(command: list[Token], datapack: DataPack,
     #     raise JMCSyntaxException(
     #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
 
-    first_statement = datapack.lexer.parse_line(_first_statement, tokenizer)
+    first_statement = datapack.lexer.parse_line(
+        _first_statement, tokenizer, prefix)
 
     # if not (_first_statement[1].string ==
     #         "=" and _first_statement[1].token_type == TokenType.OPERATOR):
@@ -437,7 +439,8 @@ def for_(command: list[Token], datapack: DataPack,
     #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
 
     condition, precommand = parse_condition(statements[1], tokenizer, datapack)
-    last_statement = datapack.lexer.parse_line(statements[2], tokenizer)
+    last_statement = datapack.lexer.parse_line(
+        statements[2], tokenizer, prefix)
 
     count = datapack.get_count(FOR_NAME)
     call_func = f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
@@ -447,6 +450,7 @@ def for_(command: list[Token], datapack: DataPack,
         command[2],
         tokenizer,
         count,
+        prefix,
         postcommands=[
             *last_statement,
             call_func

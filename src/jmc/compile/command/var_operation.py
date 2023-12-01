@@ -17,7 +17,7 @@ VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
 
 
 def variable_operation(
-        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool, FuncContent: type["FuncContent"], first_arguments: set[str], is_in_chain: bool = False) -> str:
+        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, is_execute: bool, FuncContent: type["FuncContent"], first_arguments: set[str], prefix: str) -> str:
     """
     Parse statement for variable operation including custom JMC command that return and integer to be stored in scoreboard value
 
@@ -78,7 +78,7 @@ def variable_operation(
     if operator == "=" and len(
             tokens) > 2 and tokens[2].string in first_arguments:
         func_content = FuncContent(tokenizer, [tokens[2:]],
-                                   is_load=False, lexer=datapack.lexer).parse()
+                                   is_load=False, lexer=datapack.lexer, prefix=prefix).parse()
         if len(func_content) > 1:
             raise JMCSyntaxException(
                 "Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
@@ -117,7 +117,7 @@ def variable_operation(
             raise JMCSyntaxException(
                 f"Expected command after operator{tokens[1].string} (got nothing)", tokens[1], tokenizer)
         func_content = FuncContent(tokenizer, [tokens[2:]],
-                                   is_load=False, lexer=datapack.lexer).parse()
+                                   is_load=False, lexer=datapack.lexer, prefix=prefix).parse()
         if len(func_content) > 1:
             raise JMCSyntaxException(
                 "Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
@@ -148,7 +148,7 @@ def variable_operation(
                     "Unexpected token", tokens[4], tokenizer)
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
-                tokens[3], tokens[2], datapack, tokenizer, var=tokens[0].string + " " + objective_name, is_execute=is_execute).call()
+                tokens[3], tokens[2], datapack, tokenizer, prefix, var=tokens[0].string + " " + objective_name, is_execute=is_execute).call()
 
         if (len(tokens) == 4 and operator ==
                 "=" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].token_type == TokenType.PAREN_ROUND):
@@ -170,7 +170,7 @@ def variable_operation(
 
         if len(tokens) > 3:
             if operator in {"=", "=="}:
-                return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments)}""".replace(
+                return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments, prefix)}""".replace(
                     "run execute store", "store")
             else:
                 raise JMCSyntaxException(
