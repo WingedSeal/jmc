@@ -7,7 +7,7 @@ import { Tab } from "../../components/CodeBlock/CodeBlock";
 const BuildinFeatures = [
     howTo,
     formattedText,
-    <Feature id="print" summary="print" keywords="variable printf tellraw">
+    <Feature id="print" summary="print()" keywords="variable printf tellraw announce">
         <p>Print a variable for all players in chat.</p>
         <Command
             name="print"
@@ -15,8 +15,8 @@ const BuildinFeatures = [
             params={[{ key: "value", type: "Scoreboard" }]}
         />
     </Feature>,
-    <Feature id="printf" summary="printf" keywords="variable tellraw">
-        <p>Print a text for all players in chat.</p>
+    <Feature id="printf" summary="printf()" keywords="variable tellraw announce">
+        <p>Print a text for all players in chat. Works the same as <code>Text.tellraw(@a, text);</code></p>
         <Command
             name="printf"
             type="JMCFunction"
@@ -371,7 +371,7 @@ const BuildinFeatures = [
     <Feature
         id="math_random"
         summary="Math.random()"
-        keywords="randomize randomization lcg linear congruential generator"
+        keywords="randomize randomization rng lcg linear congruential generator"
     >
         <p>
             Simplify integer randomization process using{" "}
@@ -388,8 +388,8 @@ const BuildinFeatures = [
             name="Math.random"
             type="VariableOperation"
             params={[
-                { key: "min", type: "integer", default: "1" },
-                { key: "max", type: "integer", default: "2147483647" },
+                { key: "min", type: "ScoreboardInteger", default: "1" },
+                { key: "max", type: "ScoreboardInteger", default: "2147483647" },
             ]}
         />
     </Feature>,
@@ -588,6 +588,7 @@ const BuildinFeatures = [
                 { key: "indexString", type: "string" },
                 { key: "function", type: "ArrowFunction" },
                 { key: "count", type: "integer" },
+                { key: "begin_at", type: "integer", default: "1" },
             ]}
             newline
         />
@@ -1210,6 +1211,17 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature id="bossbar_setName" summary="Bossbar.setName()" keywords="vanilla">
+        <p>Change the name of existing bossbar, an alternative to vanilla syntax</p>
+        <Command
+            name="Bossbar.setName"
+            type="JMCFunction"
+            params={[
+                { key: "team", type: "Keyword" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+            ]}
+        />
+    </Feature>,
     <Feature id="team_add" summary="Team.add()" keywords="vanilla">
         <p>Add team, an alternative to vanilla syntax</p>
         <p>
@@ -1749,7 +1761,7 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
-    <Feature id="tag_update" summary="Tag.update()" keywords="">
+    <Feature id="tag_update" summary="Tag.update()" keywords="filter specific entities">
         <p>
             Simply remove the tag from <code>removeFrom</code> and add it back
             to <code>selector</code>.
@@ -1758,9 +1770,9 @@ const BuildinFeatures = [
             name="Tag.update"
             type="JMCFunction"
             params={[
-                { key: "selector", type: "Selector" },
+                { key: "selector", type: "TargetSelector" },
                 { key: "tag", type: "Keyword" },
-                { key: "removeFrom", type: "Selector", default: "@e" },
+                { key: "removeFrom", type: "TargetSelector", default: "@e" },
             ]}
             newline
         />

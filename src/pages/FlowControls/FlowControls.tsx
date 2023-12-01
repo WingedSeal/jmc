@@ -375,7 +375,7 @@ const FlowControls = () => {
                 </div>
                 <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Switch Case
+                    Switch Case (pre-Minecraft 1.20.2)
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -474,6 +474,91 @@ const FlowControls = () => {
                         <Tab />
                         say{" "}
                         <CodeText type="string">"If $variable is 3"</CodeText>;
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                </div>
+                <section id="switch_case_new" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Switch Case (Minecraft 1.20.2+)
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        If you are using a <code>pack_format</code> of 18 or higher, the switch case statement is more powerful due to{" "}
+                        <a
+                            href="https://minecraft.wiki/w/Function_(Java_Edition)#Macros"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            vanilla function macros
+                        </a>, and most of the restrictions are removed.
+                    </p>
+                    <ul className="ml-4 md:ml-6 list-disc list-inside">
+                        <li> Performance is now as fast as <code>O(1)</code> time, using the macros to create a{" "}
+                        <a
+                            href="https://en.wikipedia.org/wiki/Branch_table"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            jump table
+                        </a>{" "}
+                        that can go directly to the case function without checking a bunch of conditions. 
+                        Also applies to <code>Hardcode.switch()</code>.
+                        </li>
+                        <li>
+                            Case numbers no longer need to be consecutive{";"}{" "}
+                            you can use any numbers you want as long as they are integers.
+                        </li>
+                        <li>
+                            Default case is now allowed and {" "}
+                            will run when nothing matches.
+                        </li>
+                        <li>
+                            You still need to {" "}
+                            <a
+                                href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/break"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                break
+                            </a>{" "}
+                            out of switch statements like before. (There is no "fallthrough".){" "}
+                        </li>
+                    </ul>
+                    <CodeBlock>
+                        <CodeText type="keyword">switch</CodeText>(
+                        <CodeText type="operator">$</CodeText>
+                        {"dayOfWeek"}) {"{"}
+                        <br />
+                        <Tab />
+                        <CodeText type="keyword">case</CodeText>{" "}
+                        <CodeText type="number">6</CodeText>
+                        <CodeText type="operator">:</CodeText>
+                        <br />
+                        <Tab />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">"Today is Saturday"</CodeText>;
+                        <br />
+                        <Tab />
+                        <CodeText type="keyword">case</CodeText>{" "}
+                        <CodeText type="number">0</CodeText>
+                        <CodeText type="operator">:</CodeText>
+                        <br />
+                        <Tab />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">"Today is Sunday"</CodeText>;
+                        <br />
+                        <Tab />
+                        <CodeText type="keyword">default</CodeText>
+                        <CodeText type="operator">:</CodeText>
+                        <br />
+                        <Tab />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">"Looking forward to the weekend..."</CodeText>;
                         <br />
                         {"}"}
                     </CodeBlock>
