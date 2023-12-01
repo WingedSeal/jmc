@@ -443,95 +443,10 @@ x
             if self.is_execute:
                 raise JMCSyntaxException(
                     f"This feature({token.string}) can only be used in load function", token, self.tokenizer)
+
         if len(self.command[key_pos:]) >= 2 and self.command[key_pos +
                                                              1].token_type == TokenType.PAREN_ROUND:
-            if len(self.command[key_pos:]) > 2:
-                if token.string == "unless":
-                    raise JMCSyntaxException(
-                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
-                if self.command[key_pos + 3].string == "with":
-                    raise JMCSyntaxException(
-                        f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
-
-                if self.command[key_pos + 1].string != "()":
-                    raise JMCSyntaxException(
-                        f"Argument is not supported in custom function({token.string}) with `with` syntax.\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
-                func = convention_jmc_to_mc(token, self.tokenizer)
-                self.lexer.datapack.functions_called[func] = token, self.tokenizer
-                append_commands(self.__commands,
-                                f"function {self.lexer.datapack.format_func_path(func)}")
-                del self.command[key_pos + 1]  # delete ()
-                return False
-
-            if self.command[key_pos + 1].string != "()":
-                arg_token = self.command[key_pos + 1]
-                func = convention_jmc_to_mc(token, self.tokenizer)
-                args, kwargs = self.tokenizer.parse_func_args(arg_token)
-                if func in self.lexer.datapack.lazy_func:
-                    __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                        args, kwargs)
-                    if self.is_execute and "\n" in __command:
-                        raise JMCSyntaxException(
-                            "Lazy function with multiple commands cannot be used with execute.",
-                            self.command[key_pos],
-                            self.tokenizer)
-                    append_commands(self.__commands,
-                                    __command)
-                    return True
-
-                self.lexer.datapack.functions_called[func] = token, self.tokenizer
-                if args:
-                    if len(args) > 1:
-                        raise JMCSyntaxException(
-                            f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is intended to be a lazy function, it has to be defined BEFORE using.')
-                    if kwargs:
-                        raise JMCSyntaxException(
-                            f"Expected exclusively positional or keyword argument", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
-                    if len(args[0]) > 1:
-                        raise JMCSyntaxException(
-                            f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
-                    if args[0][0].token_type != TokenType.PAREN_CURLY:
-                        raise JMCSyntaxException(
-                            f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
-                            arg_token,
-                            self.tokenizer,
-                            suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
-                    append_commands(self.__commands,
-                                    f"function {self.lexer.datapack.format_func_path(func)} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
-                    return True
-                if kwargs:
-                    json = {}
-                    for key, value in kwargs.items():
-                        if len(value) > 1:
-                            raise JMCSyntaxException(
-                                f"Unexpected token after `{{}}` in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
-                        if value[0].token_type != TokenType.STRING:
-                            raise JMCSyntaxException(
-                                f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
-                        json[key] = value[0].string
-                    append_commands(self.__commands,
-                                    f"function {self.lexer.datapack.format_func_path(func)} {dumps(json, separators=(',', ':'))}")
-                    return True
-
-                raise JMCSyntaxException(
-                    f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
-
-            func = convention_jmc_to_mc(token, self.tokenizer)
-            if func in self.lexer.datapack.lazy_func:
-                __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                    [], {})
-                if self.is_execute and "\n" in __command:
-                    raise JMCSyntaxException(
-                        "Lazy function with multiple commands cannot be used with execute.",
-                        self.command[key_pos],
-                        self.tokenizer)
-                append_commands(self.__commands,
-                                __command)
-                return True
-            self.lexer.datapack.functions_called[func] = token, self.tokenizer
-            append_commands(self.__commands,
-                            f"function {self.lexer.datapack.format_func_path(func)}")
-            return True
+            return self.__is_function_call(token, key_pos)
 
         if token.string not in VANILLA_COMMANDS and token.string not in Header(
         ).commands:
@@ -545,6 +460,95 @@ x
             return False
         append_commands(self.__commands, token.string)
         return False
+
+    def __is_function_call(self, token: Token, key_pos: int) -> bool:
+        if len(self.command[key_pos:]) > 2:
+            if token.string == "unless":
+                raise JMCSyntaxException(
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
+            if self.command[key_pos + 3].string == "with":
+                raise JMCSyntaxException(
+                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+
+            if self.command[key_pos + 1].string != "()":
+                raise JMCSyntaxException(
+                    f"Argument is not supported in custom function({token.string}) with `with` syntax.\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
+            func = convention_jmc_to_mc(token, self.tokenizer)
+            self.lexer.datapack.functions_called[func] = token, self.tokenizer
+            append_commands(self.__commands,
+                            f"function {self.lexer.datapack.format_func_path(func)}")
+            del self.command[key_pos + 1]  # delete ()
+            return False
+
+        if self.command[key_pos + 1].string != "()":
+            arg_token = self.command[key_pos + 1]
+            func = convention_jmc_to_mc(token, self.tokenizer)
+            args, kwargs = self.tokenizer.parse_func_args(arg_token)
+            if func in self.lexer.datapack.lazy_func:
+                __command = self.lexer.datapack.lazy_func[func].handle_lazy(
+                    args, kwargs)
+                if self.is_execute and "\n" in __command:
+                    raise JMCSyntaxException(
+                        "Lazy function with multiple commands cannot be used with execute.",
+                        self.command[key_pos],
+                        self.tokenizer)
+                append_commands(self.__commands,
+                                __command)
+                return True
+
+            self.lexer.datapack.functions_called[func] = token, self.tokenizer
+            if args:
+                if len(args) > 1:
+                    raise JMCSyntaxException(
+                        f"Expected 1 position argument (got {len(args)})", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is intended to be a lazy function, it has to be defined BEFORE using.')
+                if kwargs:
+                    raise JMCSyntaxException(
+                        f"Expected exclusively positional or keyword argument", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                if len(args[0]) > 1:
+                    raise JMCSyntaxException(
+                        f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
+                if args[0][0].token_type != TokenType.PAREN_CURLY:
+                    raise JMCSyntaxException(
+                        f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
+                        arg_token,
+                        self.tokenizer,
+                        suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
+                append_commands(self.__commands,
+                                f"function {self.lexer.datapack.format_func_path(func)} {self.lexer.clean_up_paren_token(args[0][0], self.tokenizer)}")
+                return True
+            if kwargs:
+                json = {}
+                for key, value in kwargs.items():
+                    if len(value) > 1:
+                        raise JMCSyntaxException(
+                            f"Unexpected token after `{{}}` in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                    if value[0].token_type != TokenType.STRING:
+                        raise JMCSyntaxException(
+                            f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                    json[key] = value[0].string
+                append_commands(self.__commands,
+                                f"function {self.lexer.datapack.format_func_path(func)} {dumps(json, separators=(',', ':'))}")
+                return True
+
+            raise JMCSyntaxException(
+                f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
+
+        func = convention_jmc_to_mc(token, self.tokenizer)
+        if func in self.lexer.datapack.lazy_func:
+            __command = self.lexer.datapack.lazy_func[func].handle_lazy(
+                [], {})
+            if self.is_execute and "\n" in __command:
+                raise JMCSyntaxException(
+                    "Lazy function with multiple commands cannot be used with execute.",
+                    self.command[key_pos],
+                    self.tokenizer)
+            append_commands(self.__commands,
+                            __command)
+            return True
+        self.lexer.datapack.functions_called[func] = token, self.tokenizer
+        append_commands(self.__commands,
+                        f"function {self.lexer.datapack.format_func_path(func)}")
+        return True
 
     def __is_number(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) > 1:
