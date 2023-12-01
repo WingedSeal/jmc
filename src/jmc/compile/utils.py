@@ -225,7 +225,7 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer", prefix: str,
         string = string.lower()
 
     if prefix and string.startswith("this."):
-        string = string.replace("this.", prefix, 1)
+        string = string.replace("this.", prefix.replace("/", "."), 1)
 
     if re.match('^[a-z0-9_\\.]+$', string) is None:
         parens_hint: str | None = None
