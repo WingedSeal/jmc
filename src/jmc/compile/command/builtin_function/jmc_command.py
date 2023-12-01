@@ -941,7 +941,7 @@ class GUIRun(JMCFunction):
 
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",

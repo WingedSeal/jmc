@@ -245,6 +245,7 @@ class Lexer:
             tokenizer,
             command,
             self.datapack,
+            prefix,
             args).modify(
             pre_function, func_object)
 
@@ -290,7 +291,8 @@ class Lexer:
             raise JMCSyntaxException(
                 "Unexpected token", command[4], tokenizer)
 
-        func_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
+        func_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
         if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
@@ -425,7 +427,7 @@ class Lexer:
                 "Expected { or [", command[3], tokenizer)
 
         json_type = convention_jmc_to_mc(
-            command[1], tokenizer, is_make_lower=False)
+            command[1], tokenizer, is_make_lower=False, prefix="")
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
@@ -439,7 +441,7 @@ class Lexer:
                 )
 
         json_name = prefix + convention_jmc_to_mc(
-            command[2], tokenizer, is_make_lower=False, substr=(1, -1))
+            command[2], tokenizer, is_make_lower=False, substr=(1, -1), prefix="")
 
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
@@ -476,7 +478,7 @@ class Lexer:
 
         if has_extends_arg:
             super_name = convention_jmc_to_mc(
-                command[4], tokenizer, is_make_lower=False, substr=(1, -1))
+                command[4], tokenizer, prefix="", is_make_lower=False, substr=(1, -1))
             if namespace in Header().namespace_overrides:
                 super_path = namespace + "/" + json_type + \
                     "/" + super_name[len(namespace) + 1:]
@@ -524,7 +526,8 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer)
 
-        class_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
+        class_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
         class_content = command[2].string[1:-1]
         self.parse_class_content(class_path + "/",
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)

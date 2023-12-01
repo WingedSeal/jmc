@@ -473,7 +473,7 @@ x
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
                     f"Argument is not supported in custom function({token.string}) with `with` syntax.\nExpected 0 argument, `()`", self.command[key_pos], self.tokenizer, suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)")
-            func = convention_jmc_to_mc(token, self.tokenizer)
+            func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.format_func_path(func)}")
@@ -482,7 +482,7 @@ x
 
         if self.command[key_pos + 1].string != "()":
             arg_token = self.command[key_pos + 1]
-            func = convention_jmc_to_mc(token, self.tokenizer)
+            func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
             args, kwargs = self.tokenizer.parse_func_args(arg_token)
             if func in self.lexer.datapack.lazy_func:
                 __command = self.lexer.datapack.lazy_func[func].handle_lazy(
@@ -533,7 +533,7 @@ x
             raise JMCSyntaxException(
                 f"Unrecognized vanilla macro syntax", arg_token, self.tokenizer, suggestion='Available syntaxes are `func({"key":"value"});`, `func(key="value")`')
 
-        func = convention_jmc_to_mc(token, self.tokenizer)
+        func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
         if func in self.lexer.datapack.lazy_func:
             __command = self.lexer.datapack.lazy_func[func].handle_lazy(
                 [], {})
@@ -619,7 +619,7 @@ x
             append_commands(self.__commands, self.command[key_pos + 1].string)
             append_commands(
                 self.__commands,
-                f"{self.lexer.datapack.namespace}:{convention_jmc_to_mc(self.command[key_pos + 2], self.tokenizer)}")
+                f"{self.lexer.datapack.namespace}:{convention_jmc_to_mc(self.command[key_pos + 2], self.tokenizer, self.prefix)}")
             if self.command[key_pos + 1].string == "clear":
                 if len(self.command) > key_pos + 4:
                     raise JMCSyntaxException(

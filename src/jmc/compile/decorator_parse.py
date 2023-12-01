@@ -25,13 +25,16 @@ class JMCDecorator:
     """Defaults value of each parameter as string (Set by decorator)"""
     datapack: DataPack
     """Datapack"""
+    prefix: str
+    """String of function prefix, aka. class it's currently in"""
 
-    def __init__(self, tokenizer: Tokenizer, tokens: list[Token], datapack: DataPack,
+    def __init__(self, tokenizer: Tokenizer, tokens: list[Token], datapack: DataPack, prefix: str,
                  arg_token: Token | None) -> None:
         self.tokens = tokens
         self.arg_token = arg_token
         self.tokenizer = tokenizer
         self.datapack = datapack
+        self.prefix = prefix
         if arg_token:
             args_Args = verify_args(self.arg_type,
                                     self.call_string, arg_token, tokenizer)
@@ -81,7 +84,7 @@ def dec_property(call_string: str,
 class Add(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         call_from = convention_jmc_to_mc(
-            self.raw_args["from"].token, self.tokenizer)
+            self.raw_args["from"].token, self.tokenizer, self.prefix)
         if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
                 f"function {self.datapack.format_func_path(pre_func.func_path)}")

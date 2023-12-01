@@ -152,7 +152,7 @@ def variable_operation(
 
         if (len(tokens) == 4 and operator ==
                 "=" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].token_type == TokenType.PAREN_ROUND):
-            func = convention_jmc_to_mc(tokens[2], tokenizer)
+            func = convention_jmc_to_mc(tokens[2], tokenizer, prefix)
             datapack.functions_called[func] = tokens[2], tokenizer
             return f"""execute store result score {tokens[0].string} {objective_name} run function {
                 datapack.format_func_path(func)}"""

@@ -199,7 +199,7 @@ kwargs={dumps(kwargs, indent=4, cls=JSONUniversalEncoder)}
     return wrapper
 
 
-def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
+def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer", prefix: str,
                          is_make_lower: bool = True, substr: tuple[int, int] | None = None, custom_string: str | None = None) -> str:
     """
     Turns JMC function/predicate name syntax to vanilla's syntax
@@ -223,6 +223,10 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
         raise JMCSyntaxException("Name ended with '.'", token, tokenizer)
     if is_make_lower:
         string = string.lower()
+
+    if prefix and string.startswith("this."):
+        string = string.replace("this.", prefix, 1)
+
     if re.match('^[a-z0-9_\\.]+$', string) is None:
         parens_hint: str | None = None
         if string.endswith("()"):

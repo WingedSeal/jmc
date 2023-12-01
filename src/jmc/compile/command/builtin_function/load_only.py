@@ -651,7 +651,7 @@ class GUITemplate(JMCFunction):
         template, _ = self.datapack.parse_list(
             self.raw_args["template"].token, self.tokenizer, TokenType.STRING)
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         mode_str = self.args["mode"]
         if mode_str not in self.MODE_MAP:
             raise JMCValueError(
@@ -709,7 +709,7 @@ class GUITemplate(JMCFunction):
 class GUIRegisters(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -831,7 +831,7 @@ class GUIRegisters(ItemMixin):
 class GUIRegister(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -905,7 +905,7 @@ class GUICreate(JMCFunction):
 
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
