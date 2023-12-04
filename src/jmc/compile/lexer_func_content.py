@@ -521,7 +521,7 @@ x
                 for key, value in kwargs.items():
                     if len(value) > 1:
                         raise JMCSyntaxException(
-                            f"Unexpected token after `{{}}` in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
+                            f"Expected 1 string token after `=` (got {len(value)}) in keyword argument syntax", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
                     if value[0].token_type != TokenType.STRING:
                         raise JMCSyntaxException(
                             f"Expected string as key in keyword argument syntax (got {value[0].token_type.value})", arg_token, self.tokenizer, suggestion='The keyword argument syntax is `func(key="value")`')
