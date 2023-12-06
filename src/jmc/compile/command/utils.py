@@ -664,17 +664,18 @@ class FormattedText:
             del self.current_json["text"]
 
             if "__private_nbt_expand__" in self.current_json:
-                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  # type: ignore # fmt: off
+                assert isinstance(self.current_json["__private_nbt_expand__"], dict)
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  
                 self.current_json["interpret"] = \
-                    (self.current_json["__private_nbt_expand__"]["interpret"] == "true")  # type: ignore # fmt: off
-                if "separator" in self.current_json["__private_nbt_expand__"].keys():  # type: ignore # fmt: off
-                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]  # type: ignore # fmt: off
-                if "storage" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]  # type: ignore # fmt: off
-                if "block" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]  # type: ignore # fmt: off
-                if "entity" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]  # type: ignore # fmt: off
+                    (self.current_json["__private_nbt_expand__"]["interpret"] == "true")
+                if "separator" in self.current_json["__private_nbt_expand__"].keys():
+                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]
+                if "storage" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]
+                if "block" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]
+                if "entity" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]
                 del self.current_json["__private_nbt_expand__"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
