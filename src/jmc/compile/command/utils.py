@@ -685,6 +685,18 @@ class FormattedText:
             self.result.append(self.current_json)
             self.current_json = tmp_json
 
+        if self.datapack.version >= 19: 
+            for _type in {"score", "selector", "nbt", "keybind"}:
+                if _type in self.current_json:  
+                    self.current_json["type"] = _type
+            if "nbt" in self.current_json and self.datapack.version >= 21:  
+                self.current_json["type"] = "nbt"
+                for source in {"entity", "block", "storage"}:
+                    if source in self.current_json:  
+                        self.current_json["source"] = source
+            elif "type" not in self.current_json:   
+                self.current_json["type"] = "text"
+
     def __parse_code(self, char: str) -> None:
         """
         Parse color code
