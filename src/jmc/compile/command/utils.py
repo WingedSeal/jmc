@@ -500,6 +500,8 @@ class FormattedText:
             self.result[-1]["text"] += self.current_json["text"]  # type: ignore # fmt: off
             self.current_json = {"text": ""}
             return
+        if "color" in self.current_json and self.current_json["color"] == "reset":
+            del self.current_json["color"]
         self.result.append(self.current_json)
         self.current_json = {"text": ""}
 
@@ -650,20 +652,17 @@ class FormattedText:
 
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
-        
-        if "color" in self.current_json and self.current_json["color"] == "reset":
-            del self.current_json["color"]
 
-        if self.datapack.version >= 19: 
+        if self.datapack.version >= 19:
             for _type in {"score", "selector", "nbt", "keybind"}:
-                if _type in self.current_json:  
+                if _type in self.current_json:
                     self.current_json["type"] = _type
-            if "nbt" in self.current_json and self.datapack.version >= 21:  
+            if "nbt" in self.current_json and self.datapack.version >= 21:
                 self.current_json["type"] = "nbt"
                 for source in {"entity", "block", "storage"}:
-                    if source in self.current_json:  
+                    if source in self.current_json:
                         self.current_json["source"] = source
-            elif "type" not in self.current_json:   
+            elif "type" not in self.current_json:
                 self.current_json["type"] = "text"
 
         if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json or "__private_nbt_expand__" in self.current_json:
@@ -677,7 +676,7 @@ class FormattedText:
 
             if "__private_nbt_expand__" in self.current_json:
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
-                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]
                 self.current_json["interpret"] = \
                     (self.current_json["__private_nbt_expand__"]["interpret"] == "true")
                 if "separator" in self.current_json["__private_nbt_expand__"].keys():
@@ -695,9 +694,10 @@ class FormattedText:
                 if prop_ in {"bold", "italic", "underlined",
                              "strikethrough", "obfuscated", "color"}:
                     tmp_json[prop_] = value_
+            if "color" in self.current_json and self.current_json["color"] == "reset":
+                del self.current_json["color"]
             self.result.append(self.current_json)
             self.current_json = tmp_json
-
 
     def __parse_code(self, char: str) -> None:
         """
