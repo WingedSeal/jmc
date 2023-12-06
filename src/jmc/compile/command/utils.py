@@ -654,6 +654,18 @@ class FormattedText:
         if "color" in self.current_json and self.current_json["color"] == "reset":
             del self.current_json["color"]
 
+        if self.datapack.version >= 19: 
+            for _type in {"score", "selector", "nbt", "keybind"}:
+                if _type in self.current_json:  
+                    self.current_json["type"] = _type
+            if "nbt" in self.current_json and self.datapack.version >= 21:  
+                self.current_json["type"] = "nbt"
+                for source in {"entity", "block", "storage"}:
+                    if source in self.current_json:  
+                        self.current_json["source"] = source
+            elif "type" not in self.current_json:   
+                self.current_json["type"] = "text"
+
         if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json or "__private_nbt_expand__" in self.current_json:
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
@@ -686,17 +698,6 @@ class FormattedText:
             self.result.append(self.current_json)
             self.current_json = tmp_json
 
-        if self.datapack.version >= 19: 
-            for _type in {"score", "selector", "nbt", "keybind"}:
-                if _type in self.current_json:  
-                    self.current_json["type"] = _type
-            if "nbt" in self.current_json and self.datapack.version >= 21:  
-                self.current_json["type"] = "nbt"
-                for source in {"entity", "block", "storage"}:
-                    if source in self.current_json:  
-                        self.current_json["source"] = source
-            elif "type" not in self.current_json:   
-                self.current_json["type"] = "text"
 
     def __parse_code(self, char: str) -> None:
         """
