@@ -150,12 +150,17 @@ def variable_operation(
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3], tokens[2], datapack, tokenizer, prefix, var=tokens[0].string + " " + objective_name, is_execute=is_execute).call()
 
-        if (len(tokens) == 4 and operator ==
+        if (len(tokens) >= 4 and operator ==
                 "=" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].token_type == TokenType.PAREN_ROUND):
-            func = convention_jmc_to_mc(tokens[2], tokenizer, prefix)
-            datapack.functions_called[func] = tokens[2], tokenizer
-            return f"""execute store result score {tokens[0].string} {objective_name} run function {
-                datapack.format_func_path(func)}"""
+            func = FuncContent(tokenizer,
+                               [tokens[2:]],
+                               is_load=False,
+                               lexer=datapack.lexer,
+                               prefix=prefix).parse()
+            if len(func) > 1:
+                raise JMCSyntaxException(
+                    f"Multiple commands (got {len(func)}) cannot be assigned to a variable", tokens[2], tokenizer)
+            return f"""execute store result score {tokens[0].string} {objective_name} run {func[0]}"""
 
         left_token = tokens[0]
         right_token = tokens[2]

@@ -520,7 +520,7 @@ class DataPack:
                               tokenizer) in self.functions_called.items():
             if function_called not in self.functions and function_called.split(
                     "/")[0].strip() not in Header().namespace_overrides:
-                if function_called in self.lexer.datapack.lazy_func:  # FIXME
+                if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
                         f"Lazy function '{function_called}' used before definition.", token, tokenizer, suggestion="Lazy function has to be defined BEFORE using.")
                 raise JMCValueError(
