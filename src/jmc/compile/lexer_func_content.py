@@ -276,7 +276,7 @@ x
         :return: Whether to break out of the loop
         """
         if token.string == "run" and token.token_type == TokenType.KEYWORD:
-            if not self.is_execute:
+            if not self.is_execute and self.__commands[key_pos - 1] != "return":
                 raise MinecraftSyntaxWarning(
                     "'run' keyword found outside 'execute' command", token, self.tokenizer)
             self.is_expect_command = True
@@ -371,7 +371,7 @@ x
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
             if not (token.token_type ==
-                    TokenType.PAREN_CURLY and self.is_execute):
+                    TokenType.PAREN_CURLY and (self.is_execute or self.__commands[key_pos - 2] == "return")):
                 raise JMCSyntaxException(
                     "Expected keyword", token, self.tokenizer)
             if self.expanded_commands is not None:
@@ -390,7 +390,7 @@ x
         # End Handle Errors
 
         if token.string == "with":
-            self.__handle_with(key_pos, token)
+            self.__handle_with(token)
             return CONTINUE_LINE
         self.was_anonym_func = False
 
@@ -448,7 +448,7 @@ x
 
         if len(self.command[key_pos:]) >= 2 and self.command[key_pos +
                                                              1].token_type == TokenType.PAREN_ROUND:
-            return self.__handle_function_call(token, key_pos)
+            return self.__handle_function_call(key_pos, token)
 
         if token.string not in VANILLA_COMMANDS and token.string not in Header(
         ).commands:
@@ -463,7 +463,7 @@ x
         append_commands(self.__commands, token.string)
         return CONTINUE_LINE
 
-    def __handle_function_call(self, token: Token, key_pos: int) -> bool:
+    def __handle_function_call(self, key_pos: int, token: Token) -> bool:
         if len(self.command[key_pos:]) > 2:
             if token.string == "unless":
                 raise JMCSyntaxException(
@@ -564,7 +564,7 @@ x
         raise JMCSyntaxException(
             "Unexpected number", token, self.tokenizer, display_col_length=False)
 
-    def __handle_with(self, key_pos: int, token: Token) -> None:
+    def __handle_with(self, token: Token) -> None:
         if not self.was_anonym_func:
             raise JMCSyntaxException(
                 "Unexpected `with` keyword without anonymous function before it", token, self.tokenizer)
