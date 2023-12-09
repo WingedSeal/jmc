@@ -657,10 +657,11 @@ class FormattedText:
             for _type in {"score", "selector", "nbt", "keybind"}:
                 if _type in self.current_json:
                     self.current_json["type"] = _type
-            if "nbt" in self.current_json and self.datapack.version >= 21:
+            if "__private_nbt_expand__" in self.current_json and self.datapack.version >= 21:
+                assert isinstance(self.current_json["__private_nbt_expand__"], dict)
                 self.current_json["type"] = "nbt"
                 for source in {"entity", "block", "storage"}:
-                    if source in self.current_json:
+                    if source in self.current_json["__private_nbt_expand__"]:
                         self.current_json["source"] = source
             elif "type" not in self.current_json:
                 self.current_json["type"] = "text"
