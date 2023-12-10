@@ -25,7 +25,8 @@ TERMINATE_LINE = {
     "do",
     "while",
     "for",
-    "switch"
+    "switch",
+    "return"
 }
 
 
