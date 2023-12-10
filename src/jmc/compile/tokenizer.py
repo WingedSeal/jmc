@@ -453,6 +453,19 @@ class Tokenizer:
         elif self.is_escaped:
             self.is_escaped = False
 
+    def __should_terminate_line(self, start_at: int = 0) -> bool:
+        return self.keywords[start_at].string in TERMINATE_LINE or (
+            self.keywords[start_at].string == "execute" and self.keywords[-2].string in {
+                "run", "expand"}
+        ) or is_decorator(self.keywords[start_at].string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
+
+    def __is_shorten_if(self) -> bool:
+        return self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
+            self.keywords[2].string != "expand"
+            and
+            self.keywords[2].token_type != TokenType.PAREN_CURLY
+        )
+
     def __parse_paren(self, char: str, expect_semicolon: bool) -> bool:
         self.token_str += char
         if self.is_string:
@@ -478,18 +491,9 @@ class Tokenizer:
             elif self.paren == Paren.L_SQUARE:
                 self.state = TokenType.PAREN_SQUARE
             self.append_token()
-            if is_paren and expect_semicolon and (
-                self.keywords[0].string in TERMINATE_LINE or (
-                    self.keywords[0].string == "execute" and self.keywords[-2].string in {
-                        "run", "expand"}
-                ) or is_decorator(self.keywords[0].string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
-            ):
-                # if self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
-                #    self.keywords[2].string != "expand"
-                #    and
-                #    self.keywords[2].token_type != TokenType.PAREN_CURLY
-                #    ):
-                #     return True
+            if is_paren and expect_semicolon and self.__should_terminate_line():
+                if self.__is_shorten_if() and not self.__should_terminate_line(start_at=2):
+                    return True
                 self.append_keywords()
             return True
 
