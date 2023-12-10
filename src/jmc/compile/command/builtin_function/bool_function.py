@@ -61,10 +61,8 @@ class StringIsEqual(JMCFunction):
     func_type=FuncType.BOOL_FUNCTION,
     call_string="Object.isEqual",
     arg_type={
-        "type1": ArgType.KEYWORD,
         "source1": ArgType.STRING,
         "path1": ArgType.KEYWORD,
-        "type2": ArgType.KEYWORD,
         "source2": ArgType.STRING,
         "path2": ArgType.KEYWORD,
     },
@@ -72,23 +70,34 @@ class StringIsEqual(JMCFunction):
 )
 class ObjectIsEqual(JMCFunction):
     current_object = "currentObject"
+    def get_source_type(source):
+        if source.startswith("@"):
+            source_type = "entity"
+        elif source[0] in "~^" or source.isnumeric():
+            source_type = "block"
+        else:
+            source_type = "storage"
+        return source_type
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
         source1 = self.args["source1"]
         source2 = self.args["source2"]
-        for param in ("type1", "type2"):
+        type1 = ObjectIsEqual.get_source_type(source1)
+        type2 = ObjectIsEqual.get_source_type(source1)
+        for param in (f"{type1}", f"{type2}"):
             if self.args[param] not in {"storage", "block", "entity"}:
                 raise JMCValueError(
                     f"'type' parameter expect 'storage' or 'block' or 'entity' (got {self.args[param]})",
                     self.raw_args[param].token,
                     self.tokenizer)
-        if self.args["type1"] == "storage" and ":" not in self.args["source1"]:
+        if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
-        if self.args["type2"] == "storage" and ":" not in self.args["source2"]:
+        if type2 == "storage" and ":" not in self.args["source2"]:
             source2 = f"{self.datapack.namespace}:{source2}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
-            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {self.args['type1']} {source1} {self.args['path1']}",
-            f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set from {self.args['type2']} {source2} {self.args['path2']}"
+            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {type1} {source1} {self.args['path1']}",
+            f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set from {type2} {source2} {self.args['path2']}"
         ]
+    
