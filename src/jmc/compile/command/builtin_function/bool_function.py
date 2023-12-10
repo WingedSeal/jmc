@@ -70,8 +70,11 @@ class StringIsEqual(JMCFunction):
 )
 class ObjectIsEqual(JMCFunction):
     current_object = "currentObject"
+    def is_uuid(string):
+        parts = string.split('-')
+        return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
     def get_source_type(source):
-        if source.startswith("@"):
+        if source.startswith("@") or ObjectIsEqual.is_uuid(source):
             source_type = "entity"
         elif source[0] in "~^" or source.isnumeric():
             source_type = "block"
