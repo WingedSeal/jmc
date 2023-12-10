@@ -25,8 +25,7 @@ TERMINATE_LINE = {
     "do",
     "while",
     "for",
-    "switch",
-    "return"
+    "switch"
 }
 
 
@@ -483,14 +482,14 @@ class Tokenizer:
                 self.keywords[0].string in TERMINATE_LINE or (
                     self.keywords[0].string == "execute" and self.keywords[-2].string in {
                         "run", "expand"}
-                ) or is_decorator(self.keywords[0].string)
+                ) or is_decorator(self.keywords[0].string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
             ):
-                if self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
-                   self.keywords[2].string != "expand"
-                   and
-                   self.keywords[2].token_type != TokenType.PAREN_CURLY
-                   ):
-                    return True
+                # if self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
+                #    self.keywords[2].string != "expand"
+                #    and
+                #    self.keywords[2].token_type != TokenType.PAREN_CURLY
+                #    ):
+                #     return True
                 self.append_keywords()
             return True
 
