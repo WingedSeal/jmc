@@ -382,7 +382,7 @@ class DataPack:
         self.functions[name] = Function(commands)
 
     def add_private_function(self, name: str, command: str,
-                             count: str | None = None) -> str:
+                             count: str | None = None, force_create_func: bool = False) -> str:
         """
         Add private function but don't create new function unless it's neccessary
 
@@ -392,7 +392,7 @@ class DataPack:
         :return: Minecraft function call string / The command itself
         """
 
-        if "\n" not in command:
+        if "\n" not in command and not force_create_func:
             return command
 
         if count is None:

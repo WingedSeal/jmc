@@ -566,8 +566,12 @@ x
 
     def __handle_with(self, token: Token) -> None:
         if not self.was_anonym_func:
-            raise JMCSyntaxException(
-                "Unexpected `with` keyword without anonymous function before it", token, self.tokenizer)
+            first_section, second_section = self.command_strings.pop().split(" run ")
+            append_commands(
+                self.__commands,
+                f"{first_section} run {self.lexer.datapack.add_private_function('anonymous', second_section, force_create_func=True)}")
+            append_commands(self.__commands, "with")
+            return
         self.lexer.datapack.version.require(16, token, self.tokenizer)
         append_commands(self.__commands, self.command_strings.pop())
         append_commands(self.__commands, "with")
