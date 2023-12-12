@@ -26,16 +26,16 @@ class TimerIsOver(JMCFunction):
         return f'score {self.args["selector"]} {self.args["objective"]} matches 1..', UNLESS, [
         ]
 
-class nbtSource: 
-    def __init__(self, source):
+class NbtSource: 
+    def __init__(self, source: str):
         self.source = source
 
     def is_uuid(source: str) -> bool:
         parts = source.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
     
-    def get_source_type(source: str) -> str:
-        if source.startswith("@") or nbtSource.is_uuid(source):
+    def get_type(source: str) -> str:
+        if source.startswith("@") or NbtSource.is_uuid(source):
             return "entity"
         elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', source): # checks if the string is block coord with regex
             return "block"
@@ -57,8 +57,9 @@ class StringIsEqual(JMCFunction):
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
-        source = self.args["source"]
-        source_type = nbtSource.get_source_type(source)
+        # source = self.args["source"]
+        source = NbtSource(self.args["source"])
+        source_type = source.get_type()
         if source_type == "storage" and ":" not in self.args["source"]:
             source = f"{self.datapack.namespace}:{source}"
 
@@ -84,10 +85,10 @@ class ObjectIsEqual(JMCFunction):
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
-        source1 = self.args["source1"]
-        source2 = self.args["source2"]
-        type1 = nbtSource.get_source_type(source1)
-        type2 = nbtSource.get_source_type(source2)
+        source1 = NbtSource(self.args["source1"])
+        source2 = NbtSource(self.args["source2"])
+        type1 = source1.get_type(source1)
+        type2 = source2.get_type(source2)
         if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if type2 == "storage" and ":" not in self.args["source2"]:
