@@ -29,7 +29,7 @@ class TimerIsOver(JMCFunction):
 class NbtSource: 
     def __init__(self: str, source: str):
         self.source = source
-        return self.source
+        # return self.source
 
     def is_uuid(source: str) -> bool:
         parts = source.split('-')
@@ -41,6 +41,9 @@ class NbtSource:
         elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', self.source): # checks if the string is block coord with regex
             return "block"
         return "storage"
+    
+    def __str__(self):
+        return f"NbtSource({self.source})"
     
 
 @func_property(
