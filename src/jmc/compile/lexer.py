@@ -312,7 +312,7 @@ class Lexer:
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         return PreFunction(func_content, file_path_str,
-                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[2], self, tokenizer, prefix)
+                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[1], command[2], self, tokenizer, prefix)
 
     def parse_func(self, tokenizer: Tokenizer,
                    command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:

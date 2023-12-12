@@ -106,4 +106,10 @@ class Add(JMCDecorator):
 @dec_property("lazy", is_save_to_datapack=False)
 class Lazy(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
+        if pre_func.func_path in self.datapack.functions:
+            old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
+                pre_func.func_path]
+            raise JMCSyntaxException(
+                f"Duplicate function declaration({pre_func.func_path})", pre_func.self_token, pre_func.tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
         self.datapack.lazy_func[pre_func.func_path] = pre_func

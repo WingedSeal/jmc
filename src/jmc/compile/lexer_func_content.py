@@ -488,7 +488,7 @@ x
             args, kwargs = self.tokenizer.parse_func_args(arg_token)
             if func in self.lexer.datapack.lazy_func:
                 __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                    args, kwargs)
+                    args, kwargs, self.command[key_pos + 1])
                 if self.is_execute and "\n" in __command:
                     raise JMCSyntaxException(
                         "Lazy function with multiple commands cannot be used with execute.",
@@ -538,7 +538,7 @@ x
         func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
         if func in self.lexer.datapack.lazy_func:
             __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                [], {})
+                [], {}, self.command[key_pos + 1])
             if self.is_execute and "\n" in __command:
                 raise JMCSyntaxException(
                     "Lazy function with multiple commands cannot be used with execute.",
