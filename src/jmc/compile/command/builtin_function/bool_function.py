@@ -87,7 +87,6 @@ class ObjectIsEqual(JMCFunction):
         source2 = self.args["source2"]
         type1 = nbtSource.get_source_type(source1)
         type2 = nbtSource.get_source_type(source1)
-        print(type1, type2)
         if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if type2 == "storage" and ":" not in self.args["source2"]:
