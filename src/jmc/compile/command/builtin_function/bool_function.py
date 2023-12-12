@@ -43,7 +43,7 @@ class NbtSource:
         return "storage"
     
     def __str__(self):
-        return f"NbtSource({self.source})"
+        return f"{self.source}"
     
 
 @func_property(
