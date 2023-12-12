@@ -25,6 +25,19 @@ class TimerIsOver(JMCFunction):
         return f'score {self.args["selector"]} {self.args["objective"]} matches 1..', UNLESS, [
         ]
 
+# please put this somewhere in appropriate place, idk where to put these 2 functions so for now they're here.
+class nbtSource: 
+    def is_uuid(string) -> str:
+        parts = string.split('-')
+        return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
+    def get_source_type(source) -> str:
+        if source.startswith("@") or ObjectIsEqual.is_uuid(source):
+            source_type = "entity"
+        elif source[0] in "~^" or source.isnumeric():
+            source_type = "block"
+        else:
+            source_type = "storage"
+        return source_type
 
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
@@ -43,16 +56,12 @@ class StringIsEqual(JMCFunction):
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
         source = self.args["source"]
-        if self.args["type"] not in {"storage", "block", "entity"}:
-            raise JMCValueError(
-                f"'type' parameter expect 'storage' or 'block' or 'entity' (got {self.args['type']})",
-                self.raw_args["type"].token,
-                self.tokenizer)
-        if self.args["type"] == "storage" and ":" not in self.args["source"]:
+        type = nbtSource.get_source_type(source)
+        if type == "storage" and ":" not in self.args["source"]:
             source = f"{self.datapack.namespace}:{source}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
-            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {self.args['type']} {source} {self.args['path']}",
+            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {type} {source} {self.args['path']}",
             f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set value {self.args['string']}"
         ]
 
@@ -70,30 +79,13 @@ class StringIsEqual(JMCFunction):
 )
 class ObjectIsEqual(JMCFunction):
     current_object = "currentObject"
-    def is_uuid(string):
-        parts = string.split('-')
-        return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
-    def get_source_type(source):
-        if source.startswith("@") or ObjectIsEqual.is_uuid(source):
-            source_type = "entity"
-        elif source[0] in "~^" or source.isnumeric():
-            source_type = "block"
-        else:
-            source_type = "storage"
-        return source_type
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
         source1 = self.args["source1"]
         source2 = self.args["source2"]
-        type1 = ObjectIsEqual.get_source_type(source1)
-        type2 = ObjectIsEqual.get_source_type(source1)
-        for param in (f"{type1}", f"{type2}"):
-            if self.args[param] not in {"storage", "block", "entity"}:
-                raise JMCValueError(
-                    f"'type' parameter expect 'storage' or 'block' or 'entity' (got {self.args[param]})",
-                    self.raw_args[param].token,
-                    self.tokenizer)
+        type1 = nbtSource.get_source_type(source1)
+        type2 = nbtSource.get_source_type(source1)
         if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if type2 == "storage" and ":" not in self.args["source2"]:
