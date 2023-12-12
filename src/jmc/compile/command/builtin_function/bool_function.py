@@ -26,19 +26,21 @@ class TimerIsOver(JMCFunction):
         return f'score {self.args["selector"]} {self.args["objective"]} matches 1..', UNLESS, [
         ]
 
-# please put this somewhere in appropriate place, idk where to put these 2 functions so for now they're here.
 class nbtSource: 
-    def is_uuid(string: str) -> bool:
-        parts = string.split('-')
+    def __init__(self, source):
+        self.source = source
+
+    def is_uuid(source: str) -> bool:
+        parts = source.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
+    
     def get_source_type(source: str) -> str:
         if source.startswith("@") or nbtSource.is_uuid(source):
-            source_type = "entity"
+            return "entity"
         elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', source): # checks if the string is block coord with regex
-            source_type = "block"
-        else:
-            source_type = "storage"
-        return source_type
+            return "block"
+        return "storage"
+    
 
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
