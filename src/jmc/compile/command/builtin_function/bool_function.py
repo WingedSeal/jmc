@@ -44,7 +44,6 @@ class nbtSource:
     func_type=FuncType.BOOL_FUNCTION,
     call_string="String.isEqual",
     arg_type={
-        "type": ArgType.KEYWORD,
         "source": ArgType.STRING,
         "path": ArgType.KEYWORD,
         "string": ArgType.STRING
