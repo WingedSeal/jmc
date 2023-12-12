@@ -44,7 +44,7 @@ class NbtSource:
     
     def __str__(self):
         return f"{self.source}"
-    
+
 
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
