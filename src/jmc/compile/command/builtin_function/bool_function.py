@@ -29,7 +29,7 @@ class TimerIsOver(JMCFunction):
 class NbtSource: 
     def __init__(self: str, source: str):
         self.source = source
-        return self
+        return None
 
     def is_uuid(source: str) -> bool:
         parts = source.split('-')
