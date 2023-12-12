@@ -31,7 +31,7 @@ class nbtSource:
         parts = string.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
     def get_source_type(source) -> str:
-        if source.startswith("@") or ObjectIsEqual.is_uuid(source):
+        if source.startswith("@") or nbtSource.is_uuid(source):
             source_type = "entity"
         elif source[0] in "~^" or source.isnumeric():
             source_type = "block"
@@ -86,6 +86,7 @@ class ObjectIsEqual(JMCFunction):
         source2 = self.args["source2"]
         type1 = nbtSource.get_source_type(source1)
         type2 = nbtSource.get_source_type(source1)
+        print(type1, type2)
         if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if type2 == "storage" and ":" not in self.args["source2"]:
