@@ -56,12 +56,12 @@ class StringIsEqual(JMCFunction):
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
         source = self.args["source"]
-        type = nbtSource.get_source_type(source)
-        if type == "storage" and ":" not in self.args["source"]:
+        source_type = nbtSource.get_source_type(source)
+        if source_type == "storage" and ":" not in self.args["source"]:
             source = f"{self.datapack.namespace}:{source}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
-            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {type} {source} {self.args['path']}",
+            f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {source_type} {source} {self.args['path']}",
             f"execute store success score {bool_result} {self.datapack.var_name} run data modify storage {self.datapack.namespace}:{self.datapack.storage_name} {self.current_object} set value {self.args['string']}"
         ]
 
