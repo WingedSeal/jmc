@@ -27,17 +27,17 @@ class TimerIsOver(JMCFunction):
         ]
 
 class NbtSource: 
-    def __init__(self, nbt_source: str):
-        self.nbt_source = nbt_source
+    def __init__(self, source: str):
+        self.source = source
 
-    def is_uuid(nbt_source: str) -> bool:
-        parts = nbt_source.split('-')
+    def is_uuid(source: str) -> bool:
+        parts = source.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
     
-    def get_type(nbt_source: str) -> str:
-        if nbt_source.startswith("@") or NbtSource.is_uuid(nbt_source):
+    def get_type(self) -> str:
+        if self.source.startswith("@") or NbtSource.is_uuid(self.source):
             return "entity"
-        elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', nbt_source): # checks if the string is block coord with regex
+        elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', self.source): # checks if the string is block coord with regex
             return "block"
         return "storage"
     
