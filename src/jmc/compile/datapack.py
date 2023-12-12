@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
-
 from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
@@ -37,11 +36,12 @@ class PreFunction:
     A class representation of a row function yet to be parsed
     """
     __slots__ = ("func_content", "jmc_file_path",
-                 "line", "col", "file_string", "func_path", "params", "lexer", "tokenizer", "prefix")
+                 "line", "col", "file_string", "func_path", "self_token", "params", "lexer", "tokenizer", "prefix")
 
     def __init__(self, func_content: str, jmc_file_path: str,
-                 line: int, col: int, file_string: str, func_path: str, params: Token, lexer: "Lexer", tokenizer: Tokenizer, prefix: str) -> None:
+                 line: int, col: int, file_string: str, func_path: str, self_token: Token, params: Token, lexer: "Lexer", tokenizer: Tokenizer, prefix: str) -> None:
         self.func_content = func_content
+        self.self_token = self_token
         self.params = params
         self.jmc_file_path = jmc_file_path
         self.line = line
@@ -57,24 +57,28 @@ class PreFunction:
             (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string, self.prefix))
 
     def handle_lazy(self, args: list[list[Token]],
-                    kwargs: dict[str, list[Token]]) -> str:
+                    kwargs: dict[str, list[Token]], error_token: Token, hardcode_parse_calc: Callable[[int, str, Token, Tokenizer], str]) -> str:
         param_arg: dict[str, str] = {}
         params = self.tokenizer.parse_param(self.params)
         if len(args) > len(params):
             raise JMCValueError(
-                f"{self.func_path}() takes {len(params)} positional arguments, got {len(args)}", self.tokenizer.merge_tokens(args[-1]), self.tokenizer)
+                f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}", self.tokenizer.merge_tokens(args[-1]), self.tokenizer)
         for index, param in enumerate(params):
             if param in kwargs:
                 param_arg[param] = self.tokenizer.merge_tokens(
                     kwargs[param]).string
                 del kwargs[param]
-            else:
-                param_arg[param] = self.tokenizer.merge_tokens(
-                    args[index]).string
+                continue
+
+            if len(args) <= index:
+                raise JMCValueError(
+                    f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}", error_token, self.tokenizer)
+            param_arg[param] = self.tokenizer.merge_tokens(
+                args[index]).string
 
         if kwargs:
             raise JMCValueError(
-                f"{self.func_path}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'", self.tokenizer.merge_tokens(list(kwargs.values())[-1]), self.tokenizer)
+                f"{self.self_token.string}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'", self.tokenizer.merge_tokens(list(kwargs.values())[-1]), self.tokenizer)
 
         func_content = None
         for _param, _arg in sorted(
@@ -82,6 +86,13 @@ class PreFunction:
             func_content = (
                 self.func_content if func_content is None else func_content).replace(
                 "$" + _param, _arg)
+        assert func_content is not None
+        while True:
+            calc_pos = func_content.find("Hardcode.calc")
+            if calc_pos == -1:
+                break
+            func_content = hardcode_parse_calc(
+                calc_pos, func_content, self.params, self.tokenizer)
         return "\n".join(self.parse(func_content).commands)
 
 
@@ -382,7 +393,7 @@ class DataPack:
         self.functions[name] = Function(commands)
 
     def add_private_function(self, name: str, command: str,
-                             count: str | None = None) -> str:
+                             count: str | None = None, force_create_func: bool = False) -> str:
         """
         Add private function but don't create new function unless it's neccessary
 
@@ -392,7 +403,7 @@ class DataPack:
         :return: Minecraft function call string / The command itself
         """
 
-        if "\n" not in command:
+        if "\n" not in command and not force_create_func:
             return command
 
         if count is None:

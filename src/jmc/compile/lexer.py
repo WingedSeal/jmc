@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from .decorator_parse import DECORATORS
 from .header import Header
-from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
+from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning, relative_file_name
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function, PreFunction
 from .log import Logger
@@ -306,13 +306,13 @@ class Lexer:
                 func_path]
             raise JMCSyntaxException(
                 f"Duplicate function declaration({func_path})", command[1], tokenizer,
-                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}")
         if func_path == self.datapack.private_name:
             raise JMCSyntaxException(
                 "Private function is defined", command[1], tokenizer, display_col_length=False)
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         return PreFunction(func_content, file_path_str,
-                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[2], self, tokenizer, prefix)
+                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[1], command[2], self, tokenizer, prefix)
 
     def parse_func(self, tokenizer: Tokenizer,
                    command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
