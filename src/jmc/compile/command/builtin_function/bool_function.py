@@ -34,7 +34,7 @@ class nbtSource:
     def get_source_type(source) -> str:
         if source.startswith("@") or nbtSource.is_uuid(source):
             source_type = "entity"
-        elif re.match(r'/^~?\^?-?\d+\s~?\^?-?\d+\s~?\^?-?\d+/mg', source):
+        elif re.match(r'^~?\^?-?\d+\s~?\^?-?\d+\s~?\^?-?\d+', source):
             source_type = "block"
         else:
             source_type = "storage"
