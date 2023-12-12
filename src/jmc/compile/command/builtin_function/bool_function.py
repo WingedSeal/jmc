@@ -87,8 +87,8 @@ class ObjectIsEqual(JMCFunction):
         bool_result = self.datapack.data.get_current_bool_result()
         source1 = NbtSource(self.args["source1"])
         source2 = NbtSource(self.args["source2"])
-        type1 = source1.get_type(source1)
-        type2 = source2.get_type(source2)
+        type1 = source1.get_type()
+        type2 = source2.get_type()
         if type1 == "storage" and ":" not in self.args["source1"]:
             source1 = f"{self.datapack.namespace}:{source1}"
         if type2 == "storage" and ":" not in self.args["source2"]:
