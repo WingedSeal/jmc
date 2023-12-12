@@ -28,10 +28,10 @@ class TimerIsOver(JMCFunction):
 
 # please put this somewhere in appropriate place, idk where to put these 2 functions so for now they're here.
 class nbtSource: 
-    def is_uuid(string) -> bool:
+    def is_uuid(string: str) -> bool:
         parts = string.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
-    def get_source_type(source) -> str:
+    def get_source_type(source: str) -> str:
         if source.startswith("@") or nbtSource.is_uuid(source):
             source_type = "entity"
         elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', source):
