@@ -3,6 +3,7 @@
 from ..utils import ArgType
 from ..jmc_function import JMCFunction, FuncType, func_property
 from ...exception import JMCValueError
+import re
 
 IF = True
 UNLESS = False
@@ -33,7 +34,7 @@ class nbtSource:
     def get_source_type(source) -> str:
         if source.startswith("@") or nbtSource.is_uuid(source):
             source_type = "entity"
-        elif source[0] in "~^" or source.isnumeric():
+        elif source[0] in "~^" or re.match(r"^\d+$", source):
             source_type = "block"
         else:
             source_type = "storage"
