@@ -27,8 +27,9 @@ class TimerIsOver(JMCFunction):
         ]
 
 class NbtSource: 
-    def __init__(self, source: str):
+    def __init__(self: str, source: str):
         self.source = source
+        return self
 
     def is_uuid(source: str) -> bool:
         parts = source.split('-')
@@ -57,7 +58,6 @@ class StringIsEqual(JMCFunction):
 
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
-        # source = self.args["source"]
         source = NbtSource(self.args["source"])
         source_type = source.get_type()
         if source_type == "storage" and ":" not in self.args["source"]:
