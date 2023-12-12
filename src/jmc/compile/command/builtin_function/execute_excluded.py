@@ -3,41 +3,8 @@
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property
-from ..utils import ArgType, NumberType, eval_expr, find_scoreboard_player_type
+from ..utils import ArgType, NumberType, find_scoreboard_player_type, hardcode_parse_calc
 from .._flow_control import parse_switch
-
-
-def _hardcode_parse(calc_pos: int, string: str, token: Token,
-                    tokenizer: Tokenizer) -> str:
-    count = 0
-    expression = ''
-    index = calc_pos
-    if len(string) < calc_pos + 14 or string[calc_pos + 13] != "(":
-        raise JMCSyntaxException(
-            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
-    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
-        index += 1
-        if char == "(":
-            count += 1
-        elif char == ")":
-            count -= 1
-
-        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
-                        "8", "9", "+", "-", "*", "/", "\\", "%",
-                        " ", "\t", "\n", "(", ")"}:
-            raise JMCSyntaxException(
-                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
-
-        expression += char
-        if count == 0:
-            break
-
-    if count != 0:
-        raise JMCSyntaxException(
-            "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
-
-    return string[:calc_pos] + \
-        eval_expr(expression.replace("\\", "//")) + string[index + 13:]
 
 
 def _hardcode_process(string: str, index_string: str,
@@ -47,7 +14,7 @@ def _hardcode_process(string: str, index_string: str,
         calc_pos = string.find("Hardcode.calc")
         if calc_pos == -1:
             break
-        string = _hardcode_parse(calc_pos, string, token, tokenizer)
+        string = hardcode_parse_calc(calc_pos, string, token, tokenizer)
     return string
 
 
@@ -57,7 +24,7 @@ def _hardcode_processes(string: str, index_strings: list[str],
         string = string.replace(index_string, i)
     calc_pos = string.find("Hardcode.calc")
     if calc_pos != -1:
-        string = _hardcode_parse(calc_pos, string, token, tokenizer)
+        string = hardcode_parse_calc(calc_pos, string, token, tokenizer)
     return string
 
 

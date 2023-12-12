@@ -859,3 +859,35 @@ def hash_string_to_string(string: str, length: int) -> str:
 
     return ''.join(str(digit) if 0 <= digit <= 9 else chr(
         digit - 10 + 97) for digit in digits)
+
+
+def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tokenizer) -> str:
+    count = 0
+    expression = ''
+    index = calc_pos
+    if len(string) < calc_pos + 14 or string[calc_pos + 13] != "(":
+        raise JMCSyntaxException(
+            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
+    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
+        index += 1
+        if char == "(":
+            count += 1
+        elif char == ")":
+            count -= 1
+
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
+                        "8", "9", "+", "-", "*", "/", "\\", "%",
+                        " ", "\t", "\n", "(", ")"}:
+            raise JMCSyntaxException(
+                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
+
+        expression += char
+        if count == 0:
+            break
+
+    if count != 0:
+        raise JMCSyntaxException(
+            "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
+
+    return string[:calc_pos] + \
+        eval_expr(expression.replace("\\", "//")) + string[index + 13:]

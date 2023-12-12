@@ -5,7 +5,7 @@ from json import dumps
 
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .command.utils import verify_args
+from .command.utils import hardcode_parse_calc, verify_args
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
@@ -488,7 +488,7 @@ x
             args, kwargs = self.tokenizer.parse_func_args(arg_token)
             if func in self.lexer.datapack.lazy_func:
                 __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                    args, kwargs, self.command[key_pos + 1])
+                    args, kwargs, self.command[key_pos + 1], hardcode_parse_calc)
                 if self.is_execute and "\n" in __command:
                     raise JMCSyntaxException(
                         "Lazy function with multiple commands cannot be used with execute.",
@@ -538,7 +538,7 @@ x
         func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
         if func in self.lexer.datapack.lazy_func:
             __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                [], {}, self.command[key_pos + 1])
+                [], {}, self.command[key_pos + 1], hardcode_parse_calc)
             if self.is_execute and "\n" in __command:
                 raise JMCSyntaxException(
                     "Lazy function with multiple commands cannot be used with execute.",

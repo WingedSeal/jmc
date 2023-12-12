@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
-
 from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
@@ -58,7 +57,7 @@ class PreFunction:
             (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string, self.prefix))
 
     def handle_lazy(self, args: list[list[Token]],
-                    kwargs: dict[str, list[Token]], error_token: Token) -> str:
+                    kwargs: dict[str, list[Token]], error_token: Token, hardcode_parse_calc: Callable[[int, str, Token, Tokenizer], str]) -> str:
         param_arg: dict[str, str] = {}
         params = self.tokenizer.parse_param(self.params)
         if len(args) > len(params):
@@ -87,6 +86,13 @@ class PreFunction:
             func_content = (
                 self.func_content if func_content is None else func_content).replace(
                 "$" + _param, _arg)
+        assert func_content is not None
+        while True:
+            calc_pos = func_content.find("Hardcode.calc")
+            if calc_pos == -1:
+                break
+            func_content = hardcode_parse_calc(
+                calc_pos, func_content, self.params, self.tokenizer)
         return "\n".join(self.parse(func_content).commands)
 
 
