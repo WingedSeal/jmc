@@ -27,15 +27,35 @@ class TimerIsOver(JMCFunction):
         ]
 
 class NbtSource: 
+    """
+    A class that represents a data source and provides methods to get the type of data.
+    """
     def __init__(self: str, source: str):
+        """Initializes a new instance of the NbtSource class.
+
+        Args:
+            source (str): The source of the data.
+        """
         self.source = source
-        # return self.source
 
     def is_uuid(source: str) -> bool:
+        """Checks if the given string is a UUID.
+
+        Args:
+            source (str): The string to check.
+
+        Returns:
+            bool: True if the string is a UUID; otherwise, False.
+        """
         parts = source.split('-')
         return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
     
     def get_type(self) -> str:
+        """Gets the type of data based on the data source.
+
+        Returns:
+            str: The type of data.
+        """
         if self.source.startswith("@") or NbtSource.is_uuid(self.source):
             return "entity"
         elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', self.source): # checks if the string is block coord with regex
@@ -43,6 +63,7 @@ class NbtSource:
         return "storage"
     
     def __str__(self):
+        """Returns a string representation of the NbtSource object."""
         return f"{self.source}"
 
 
