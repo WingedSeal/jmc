@@ -884,7 +884,7 @@ def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tok
         raise JMCSyntaxException(
             "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
 
-    for key, num in Header().number_macros.items():
+    for key, num in sorted(Header().number_macros.items(), key=lambda item: len(item[0]), reverse=True):
         expression = expression.replace(key, num)
 
     for char in expression:
