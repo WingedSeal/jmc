@@ -14,11 +14,16 @@ def is_uuid(source: str) -> bool:
     Tells whether source of the data is minecraft UUID or not
 
     :param source: Source of the data
-    :return: True | False
+    :return: True | Whether the source is in a minecraft UUID format is much better
     """
     parts = source.split('-')
-    return len(parts) == 5 and all(len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts)
-    
+    return len(parts) == 5 and all(len(part) in (
+        8, 4, 4, 4, 12) and part.isalnum() for part in parts)
+
+
+MINECRAFT_POSITION_REGEX = r"^[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?[~\^]?$"
+
+
 def get_nbt_type(source: str) -> str:
     """
     Gets the type of data based on the data source.
@@ -28,7 +33,7 @@ def get_nbt_type(source: str) -> str:
     """
     if source.startswith("@") or is_uuid(source):
         return "entity"
-    elif re.match(r'^[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?\s[~\^]?-?\d*(\.\d+)?[~\^]?$', source): # checks if the string is block coord with regex
+    if re.match(MINECRAFT_POSITION_REGEX, source):
         return "block"
     return "storage"
 
@@ -67,7 +72,7 @@ class StringIsEqual(JMCFunction):
     def call_bool(self) -> tuple[str, bool, list[str]]:
         bool_result = self.datapack.data.get_current_bool_result()
         source = self.args["source"]
-        source_type = get_nbt_type()
+        source_type = get_nbt_type(source)
         if source_type == "storage" and ":" not in self.args["source"]:
             source = f"{self.datapack.namespace}:{source}"
 
