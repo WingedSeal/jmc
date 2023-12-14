@@ -8,6 +8,7 @@ import re
 IF = True
 UNLESS = False
 
+
 def is_uuid(source: str) -> bool:
     """
     Tells whether source of the data is minecraft UUID or not
@@ -31,6 +32,7 @@ def get_nbt_type(source: str) -> str:
         return "block"
     return "storage"
 
+
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
     call_string="Timer.isOver",
@@ -47,6 +49,7 @@ class TimerIsOver(JMCFunction):
     def call_bool(self) -> tuple[str, bool, list[str]]:
         return f'score {self.args["selector"]} {self.args["objective"]} matches 1..', UNLESS, [
         ]
+
 
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
