@@ -7,10 +7,11 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable
 
+from ..header import Header
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import convention_jmc_to_mc, is_number, is_float
+from ..utils import is_number, is_float, convention_jmc_to_mc
 
 
 class PlayerType(Enum):
@@ -875,12 +876,6 @@ def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tok
         elif char == ")":
             count -= 1
 
-        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
-                        "8", "9", "+", "-", "*", "/", "\\", "%",
-                        " ", "\t", "\n", "(", ")"}:
-            raise JMCSyntaxException(
-                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
-
         expression += char
         if count == 0:
             break
@@ -888,6 +883,16 @@ def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tok
     if count != 0:
         raise JMCSyntaxException(
             "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
+
+    for key, num in Header().number_macros.items():
+        expression = expression.replace(key, num)
+
+    for char in expression:
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
+                        "8", "9", "+", "-", "*", "/", "\\", "%",
+                        " ", "\t", "\n", "(", ")"}:
+            raise JMCSyntaxException(
+                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 
     return string[:calc_pos] + \
         eval_expr(expression.replace("\\", "//")) + string[index + 13:]

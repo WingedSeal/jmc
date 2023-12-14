@@ -86,13 +86,14 @@ class PreFunction:
             func_content = (
                 self.func_content if func_content is None else func_content).replace(
                 "$" + _param, _arg)
-        assert func_content is not None
+        if func_content is None:
+            func_content = self.func_content
         while True:
             calc_pos = func_content.find("Hardcode.calc")
             if calc_pos == -1:
                 break
             func_content = hardcode_parse_calc(
-                calc_pos, func_content, self.params, self.tokenizer)
+                calc_pos, func_content, self.self_token, self.tokenizer)
         return "\n".join(self.parse(func_content).commands)
 
 

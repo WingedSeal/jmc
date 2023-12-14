@@ -1,10 +1,8 @@
 from pathlib import Path
-import re
 from typing import TYPE_CHECKING
 
-from jmc.compile.command.utils import hash_string_to_string
-
-from .utils import is_connected, get_mc_uuid
+from .command.utils import hash_string_to_string
+from .utils import is_connected, get_mc_uuid, is_number
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
 from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
@@ -185,6 +183,9 @@ def __parse_header(header_str: str, file_name: str,
                 header.macros[key] = __create_macro_factory(
                     arg_tokens[1:], None, key, tokenizer, HeaderSyntaxException(
                         "Invalid macro argument syntax", file_name, line, line_str))
+                num = arg_tokens[1].string
+                if is_number(num):
+                    header.number_macros[key] = num
 
         # #bind
         elif directive_token.string == "bind":

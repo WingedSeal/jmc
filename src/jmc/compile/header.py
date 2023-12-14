@@ -31,6 +31,7 @@ class Header(SingleTon):
     __slots__ = (
         "file_read",
         "macros",
+        "number_macros",
         "credits",
         "is_enable_macro",
         "commands",
@@ -45,6 +46,8 @@ class Header(SingleTon):
     """Set of files that was already read (to prevent reading the same file multiple times"""
     macros: dict[str, tuple[MacroFactory, int]]
     """Dictionary of keyword to replace and tuple of (macro factory function and its amount of argument"""
+    number_macros: dict[str, str]
+    """Dictionary of text to replace and number to replace with, used in Hardcode.calc"""
     credits: list[str]
     """Dictionary of string to replace and what to replace it with"""
     is_enable_macro: bool
@@ -77,6 +80,7 @@ class Header(SingleTon):
     def __clear(obj: "Header"):
         obj.file_read = set()
         obj.macros = {}
+        obj.number_macros = {}
         obj.credits = []
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
