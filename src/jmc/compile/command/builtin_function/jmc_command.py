@@ -1255,3 +1255,30 @@ class JMCPython(JMCFunction):
                 "An exception occured in JMC.python",
                 self.raw_args["pythonCode"].token,
                 self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Array.forEach",
+    name="array_for_each",
+    arg_type={
+        "target": ArgType.KEYWORD,
+        "path": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC
+    }
+)
+class ArrayForEach(JMCFunction):
+    def call(self) -> str:
+        length = "__length__"
+        current = "__current__"
+        count = self.datapack.get_count("array")
+        loop_func = self.datapack.add_raw_private_function("array", [
+            self.args["function"],
+            f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
+            f"data remove storage {self.args['target']} {self.args['path']}[0]",
+            f"scoreboard players add {current} {self.datapack.var_name} 1",
+            f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array', count)}"
+        ], count)
+        return f"""execute store result score {length} {self.datapack.var_name} run data get storage {self.args["target"]} {self.args["path"]}
+scoreboard players set {current} {self.datapack.var_name} 0
+execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {loop_func}"""
