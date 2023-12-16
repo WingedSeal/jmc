@@ -893,6 +893,34 @@ class ScoreboardAdd(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Team.prefix",
+    arg_type={
+        "team": ArgType.KEYWORD,
+        "prefix": ArgType.STRING,
+    },
+    name="team_prefix"
+)
+class TeamPrefix(JMCFunction):
+    def call(self) -> str:
+        return f"team modify {self.args['team']} prefix {self.format_text('prefix', is_allow_score_selector=False)}"
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Team.suffix",
+    arg_type={
+        "team": ArgType.KEYWORD,
+        "suffix": ArgType.STRING,
+    },
+    name="team_suffix"
+)
+class TeamSuffix(JMCFunction):
+    def call(self) -> str:
+        return f"team modify {self.args['team']} suffix {self.format_text('suffix', is_allow_score_selector=False)}"
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.add",
     arg_type={
         "id": ArgType.KEYWORD,
