@@ -390,7 +390,7 @@ x
         # End Handle Errors
 
         if token.string == "with":
-            self.__handle_with(token)
+            self.__handle_with(key_pos, token)
             return CONTINUE_LINE
         self.was_anonym_func = False
 
@@ -564,17 +564,19 @@ x
         raise JMCSyntaxException(
             "Unexpected number", token, self.tokenizer, display_col_length=False)
 
-    def __handle_with(self, token: Token) -> None:
+    def __handle_with(self, key_pos: int, token: Token) -> None:
         if not self.was_anonym_func:
             first_section, second_section = self.command_strings.pop().split(" run ")
             append_commands(
                 self.__commands,
                 f"{first_section} run {self.lexer.datapack.add_private_function('anonymous', second_section, force_create_func=True)}")
-            append_commands(self.__commands, "with")
+            if self.command[key_pos + 1].token_type != TokenType.PAREN_CURLY:
+                append_commands(self.__commands, "with")
             return
         self.lexer.datapack.version.require(16, token, self.tokenizer)
         append_commands(self.__commands, self.command_strings.pop())
-        append_commands(self.__commands, "with")
+        if self.command[key_pos + 1].token_type != TokenType.PAREN_CURLY:
+            append_commands(self.__commands, "with")
 
     def __handle_say(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) == 1:
