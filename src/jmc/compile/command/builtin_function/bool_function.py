@@ -61,7 +61,7 @@ class TimerIsOver(JMCFunction):
     call_string="String.isEqual",
     arg_type={
         "source": ArgType.STRING,
-        "path": ArgType.KEYWORD,
+        "path": ArgType.STRING,
         "string": ArgType.STRING
     },
     name="string_is_equal"
@@ -87,9 +87,9 @@ class StringIsEqual(JMCFunction):
     call_string="Object.isEqual",
     arg_type={
         "source1": ArgType.STRING,
-        "path1": ArgType.KEYWORD,
+        "path1": ArgType.STRING,
         "source2": ArgType.STRING,
-        "path2": ArgType.KEYWORD,
+        "path2": ArgType.STRING,
     },
     name="object_is_equal"
 )

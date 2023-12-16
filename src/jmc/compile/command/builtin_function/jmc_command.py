@@ -1262,7 +1262,7 @@ class JMCPython(JMCFunction):
     call_string="Array.forEach",
     name="array_for_each",
     arg_type={
-        "target": ArgType.KEYWORD,
+        "target": ArgType.STRING,
         "path": ArgType.STRING,
         "function": ArgType.ARROW_FUNC
     }
