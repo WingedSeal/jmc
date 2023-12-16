@@ -66,7 +66,7 @@ class PreFunction:
         for index, param in enumerate(params):
             if param in kwargs:
                 param_arg[param] = self.tokenizer.merge_tokens(
-                    kwargs[param]).string
+                    kwargs[param], use_full_string=True).string
                 del kwargs[param]
                 continue
 
@@ -74,7 +74,7 @@ class PreFunction:
                 raise JMCValueError(
                     f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}", error_token, self.tokenizer)
             param_arg[param] = self.tokenizer.merge_tokens(
-                args[index]).string
+                args[index], use_full_string=True).string
 
         if kwargs:
             raise JMCValueError(

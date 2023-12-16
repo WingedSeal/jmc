@@ -675,18 +675,20 @@ class Tokenizer:
         result.append(token_array)
         return result
 
-    def merge_tokens(self, tokens: list[Token]) -> Token:
+    def merge_tokens(self, tokens: list[Token],
+                     use_full_string: bool = False) -> Token:
         """
         Merge multiple token together
 
         :param tokens: List of tokens to merge
+        :param use_full_string: whether to use fullstring including quatation mark
         :return: A token with the same token type as the first token (Unless it's an operator, then the type will be keyword)
         """
         token_type = tokens[0].token_type
         if token_type == TokenType.OPERATOR:
             token_type = TokenType.KEYWORD
         return Token(token_type, tokens[0].line, tokens[0].col, "".join(
-            token.string for token in tokens))
+            token.get_full_string() if use_full_string else token.string for token in tokens))
 
     def __parse_func_arg(
             self, tokens: list[Token], is_kwargs: bool, is_nbt: bool = False) -> list[Token]:
