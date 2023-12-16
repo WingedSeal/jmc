@@ -29,6 +29,9 @@ def variable_operation(
     :return: Full minecraft command
     """
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+        if tokens[0].string[1] == DataPack.VARIABLE_SIGN:
+            raise JMCSyntaxException(
+                "Unexpected double variable sign", tokens[0], tokenizer)
         objective_name = DataPack.var_name
     elif is_obj_selector(tokens):
         merged_token = merge_obj_selector(
