@@ -73,8 +73,6 @@ class StringIsEqual(JMCFunction):
         bool_result = self.datapack.data.get_current_bool_result()
         source = self.args["source"]
         source_type = get_nbt_type(source)
-        if source_type == "storage" and ":" not in self.args["source"]:
-            source = f"{self.datapack.namespace}:{source}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
             f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {source_type} {source} {self.args['path']}",
@@ -102,10 +100,6 @@ class ObjectIsEqual(JMCFunction):
         source2 = self.args["source2"]
         type1 = get_nbt_type(source1)
         type2 = get_nbt_type(source2)
-        if type1 == "storage" and ":" not in self.args["source1"]:
-            source1 = f"{self.datapack.namespace}:{source1}"
-        if type2 == "storage" and ":" not in self.args["source2"]:
-            source2 = f"{self.datapack.namespace}:{source2}"
 
         return f"score {bool_result} {self.datapack.var_name} matches 0", IF, [
             f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} currentObject set from {type1} {source1} {self.args['path1']}",  # noqa
