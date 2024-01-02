@@ -1778,7 +1778,8 @@ class TextPropsNBT(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            output: SIMPLE_JSON_BODY = {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(
+            output: SIMPLE_JSON_BODY = {self.args["type"]: self.args["source"].replace(
+                self.args["indexString"], arg), "nbt": self.args["path"].replace(
                 self.args["indexString"], arg), "interpret": self.args["interpret"]}
             if self.args["separator"] != ", ":
                 output["separator"] = self.format_text(  # type: ignore # fmt: off
