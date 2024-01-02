@@ -84,6 +84,12 @@ In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/d
 pip install jmcfunction --pre
 ```
 
+*Latest unreleased build:*
+
+```bash
+pip install git+https://github.com/WingedSeal/jmc.git#subdirectory=src
+```
+
 ## Build
 
 ### Executable
