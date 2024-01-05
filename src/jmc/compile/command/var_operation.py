@@ -56,17 +56,13 @@ def variable_operation(
         tokens[2] = tokenizer.merge_tokens(tokens[2:4])
         del tokens[3]
 
-    if tokens[0].string.endswith(".get") and len(
-            tokens) > 1 and tokens[1].token_type == TokenType.PAREN_ROUND:
-        if len(tokens) > 2:
-            raise JMCSyntaxException(
-                "Unexpected token", tokens[2], tokenizer)
-
-        if tokens[1].string != "()":
+    if len(tokens) > 1 and tokens[-2].string.endswith(
+            ".get") and tokens[-1].token_type == TokenType.PAREN_ROUND:
+        if tokens[-1].string != "()":
             raise JMCSyntaxException(
                 "'get' method takes no arguments, expected empty bracket, `.get()`", tokens[1], tokenizer)
 
-        return f"scoreboard players get {tokens[0].string[:-4]} {objective_name}"
+        return f"scoreboard players get {tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
         raise JMCSyntaxException(
