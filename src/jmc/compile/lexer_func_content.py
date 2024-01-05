@@ -60,7 +60,7 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "title": {"title"},
     "item": {"summon"},
     "loot": {"loot", "give"},
-    "data": {"execute"},
+    "data": {"execute", "with"},
     "weather": {"playsound"},
     "item": {"particle"}
 }
