@@ -59,6 +59,7 @@ class Token:
     string: str
     """The string representation (including parentheses, excluding quotation mark)"""
     _macro_length: int = 0
+    quote: str = ""
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
     #     return super().__new__(cls)
@@ -96,7 +97,7 @@ class Token:
     def get_full_string(self) -> str:
         """Get self.string including quotation mark"""
         if self.token_type == TokenType.STRING:
-            if "\n" in self.string:
+            if self.quote == "`":
                 return "`\n" + repr(self.string)[1:-1] + "\n`"
             return repr(self.string)
         return self.string
@@ -255,10 +256,13 @@ class Tokenizer:
         if self.token_pos is None:
             raise ValueError(
                 "Tokenizer.token_pos() called but Tokenizer.token_pos is still None")
+        quote = ""
+        if self.quote == Quote.BACKTICK:
+            quote = self.quote
         new_token = Token(self.state,
                           self.token_pos.line,
                           self.token_pos.col,
-                          self.token_str)
+                          self.token_str, quote=quote)
         if new_token.token_type == TokenType.KEYWORD and new_token.string in header.macros:
             macro_factory, arg_count = header.macros[new_token.string]
             if arg_count == 0:

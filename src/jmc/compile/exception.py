@@ -100,7 +100,7 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
 {display_line}{" "*(max_space-len(str(display_line)))} |{line_.replace(TAB, "    ")}
 {" "*(col+max_space+3*tab_count+1)}{"^"*(display_col-col)}
 {display_line+1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
-    except IndexError as error:
+    except ValueError as error:
         logger.critical(
             f"Error happens at wrong file: {tokenizer.file_path=}, {line=}, {col=}")
         raise error
