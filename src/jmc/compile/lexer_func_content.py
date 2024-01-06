@@ -413,7 +413,7 @@ x
                 return SKIP_TO_NEXT_LINE
 
         if token.string == "$" and len(
-                self.command) > key_pos and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND:
+                self.command) > key_pos + 1 and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND:
             append_commands(self.__commands, token.string)
             return CONTINUE_LINE
 
@@ -682,6 +682,11 @@ x
                                     first_token.col + 1,
                                     first_token.string[1:],
                                     first_token._macro_length)
+            if not self.command[0].string:
+                del self.command[0]
+            if len(self.command) == 0:
+                raise JMCSyntaxException(
+                    "Unexpected variable without name (`$`)", first_token, self.tokenizer)
             try:
                 self.parse_self_command(0)
             except EXCEPTIONS as normal_error:

@@ -29,6 +29,11 @@ def variable_operation(
     :return: Full minecraft command
     """
     is_token_obj_selector = False
+    if len(tokens[0].string) == 1:
+        raise JMCSyntaxException(
+            "Unexpected variable without name (`$`)",
+            tokens[0],
+            tokenizer)
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         if tokens[0].string[1] == DataPack.VARIABLE_SIGN:
             raise JMCSyntaxException(
