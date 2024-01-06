@@ -28,12 +28,14 @@ def variable_operation(
     :param is_in_chain: Whether it's in `$a = $b = $c` and is not the most left handed in the chain
     :return: Full minecraft command
     """
+    is_token_obj_selector = False
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         if tokens[0].string[1] == DataPack.VARIABLE_SIGN:
             raise JMCSyntaxException(
                 "Unexpected double variable sign", tokens[0], tokenizer)
         objective_name = DataPack.var_name
     elif is_obj_selector(tokens):
+        is_token_obj_selector = True
         merged_token = merge_obj_selector(
             tokens,
             tokenizer,
@@ -56,8 +58,12 @@ def variable_operation(
         tokens[2] = tokenizer.merge_tokens(tokens[2:4])
         del tokens[3]
 
-    if len(tokens) > 1 and tokens[-2].string.endswith(
-            ".get") and tokens[-1].token_type == TokenType.PAREN_ROUND:
+    if (
+        (len(tokens) == 2 and tokens[0].string.endswith(".get"))
+        or
+        (len(tokens) == 3 and tokens[1].string.endswith(
+            ".get") and is_token_obj_selector)
+    ) and tokens[-1].token_type == TokenType.PAREN_ROUND:
         if tokens[-1].string != "()":
             raise JMCSyntaxException(
                 "'get' method takes no arguments, expected empty bracket, `.get()`", tokens[1], tokenizer)
