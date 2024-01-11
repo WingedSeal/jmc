@@ -84,7 +84,7 @@ def append_commands(commands: list[str], string: str) -> None:
     :param commands: Entire command(list of minecraft arguments) to add to
     :param string: A new argument to add
     """
-    if commands and commands[-1] == "run" and string.startswith("execute "):
+    if commands and commands[-1] == "run" and string.startswith("execute ") and commands[-2] != "return":
         commands[-1] = string[8:]  # len('execute ') = 8
     else:
         commands.append(string)
@@ -259,6 +259,7 @@ x
             token.string == "execute"
             and self.__commands[-1] == "run"
             and self.__commands[0] == "execute"
+            and self.__commands[-2] != "return"
         ):
             del self.__commands[-1]
             return True
