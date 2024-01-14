@@ -84,7 +84,8 @@ def append_commands(commands: list[str], string: str) -> None:
     :param commands: Entire command(list of minecraft arguments) to add to
     :param string: A new argument to add
     """
-    if commands and commands[-1] == "run" and string.startswith("execute ") and commands[-2] != "return":
+    if commands and commands[-1] == "run" and string.startswith(
+            "execute ") and commands[-2] != "return":
         commands[-1] = string[8:]  # len('execute ') = 8
     else:
         commands.append(string)
@@ -277,7 +278,7 @@ x
         :return: Whether to break out of the loop
         """
         if token.string == "run" and token.token_type == TokenType.KEYWORD:
-            if not self.is_execute and self.__commands[key_pos - 1] != "return":
+            if not self.is_execute and self.__commands[-1] != "return":
                 raise MinecraftSyntaxWarning(
                     "'run' keyword found outside 'execute' command", token, self.tokenizer)
             self.is_expect_command = True
@@ -368,6 +369,8 @@ x
         :return: Whether to break out of the loop
         """
         self.is_expect_command = False
+        if token.string == "execute":
+            self.is_execute = True
 
         # Handle Errors
         if token.token_type != TokenType.KEYWORD:
