@@ -288,22 +288,25 @@ x
                 self.is_expect_command = True
                 self.expanded_commands = []
 
+        __token_string = token.string
+        if __token_string.startswith("$"):
+            __token_string = __token_string[1:]
         __is_first_arg = (
-            token.string in FIRST_ARGUMENTS
+            __token_string in FIRST_ARGUMENTS
             or
-            token.string in Header().commands
-            or is_decorator(token.string)
+            __token_string in Header().commands
+            or is_decorator(__token_string)
         )
         __is_not_exception = (
             len(self.__commands) > command_pos and
             not (
-                token.string in FIRST_ARGUMENTS_EXCEPTION
+                __token_string in FIRST_ARGUMENTS_EXCEPTION
                 and
-                self.command[command_pos].string in FIRST_ARGUMENTS_EXCEPTION[token.string]
+                self.command[command_pos].string in FIRST_ARGUMENTS_EXCEPTION[__token_string]
             )
         )
         __is_not_connected = not is_connected(token, self.command[key_pos - 1])
-        __is_not_deleted = token.string not in Header().dels
+        __is_not_deleted = __token_string not in Header().dels
 
         if (
             token.token_type == TokenType.KEYWORD and
