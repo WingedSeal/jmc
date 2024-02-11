@@ -176,7 +176,7 @@ class MathRandom(JMCFunction):
                     f"scoreboard players add {self.var} {start.value}")
         else:
             run.append(
-                f"scoreboard players operation {self.var} -= {start.value[1]} {start.value[0]}")
+                f"scoreboard players operation {self.var} += {start.value[1]} {start.value[0]}")
 
         if self.is_execute:
             count = self.datapack.get_count(self.name)
