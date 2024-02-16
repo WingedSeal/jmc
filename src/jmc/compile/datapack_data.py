@@ -126,6 +126,7 @@ class Data:
         "item",
         "__item_id_count",
         "condition_count",
+        "switch_count",
         "__bool_result_count",
         "scoreboards",
         "teams",
@@ -137,6 +138,7 @@ class Data:
         self.item: dict[str, Item] = {}
         self.__item_id_count = 0
         self.condition_count = 0  # Used in condition.py
+        self.switch_count = -1  # Used in _flow_control.py
         self.__bool_result_count = -1  # Used in BOOL_FUNCTION
         self.scoreboards: dict[str, tuple[str, str, "Token"]] = {}
         self.teams: dict[str, tuple[str, "Token"]] = {}
@@ -170,3 +172,17 @@ class Data:
         """
         self.__bool_result_count += 1
         return f"__bool_result__{self.__bool_result_count}"
+
+    def get_current_switch(self) -> str:
+        """
+        Get switch string (variable) for pre-1.20.2 switch/case (starts at 0)
+
+        :return: __switch_n
+        .. example::
+        >>> data.get_current_switch()
+        "__switch__0"
+        >>> data.get_current_switch()
+        "__switch__1"
+        """
+        self.switch_count += 1
+        return f"__switch__{self.switch_count}"

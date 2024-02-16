@@ -31,6 +31,7 @@ execute if entity condition run say Hello World
         )
 
     def test_if_else(self):
+        self.maxDiff = None
         pack = JMCTestPack().set_jmc_file("""
 if (entity condition) {
     say "TRUE";
@@ -260,32 +261,33 @@ function askJob() {
 }
 > VIRTUAL/data/TEST/functions/askjob.mcfunction
 scoreboard players operation $job_id __variable__ = @s job_id
+scoreboard players operation __switch__0 __variable__ = $job_id __variable__
 function TEST:__private__/switch_case/0
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 > VIRTUAL/data/TEST/functions/__private__/switch_case/0.mcfunction
-execute if score $job_id __variable__ matches 1..3 run function TEST:__private__/switch_case/1
-execute if score $job_id __variable__ matches 4..6 run function TEST:__private__/switch_case/2
+execute if score __switch__0 __variable__ matches 1..3 run function TEST:__private__/switch_case/1
+execute if score __switch__0 __variable__ matches 4..6 run function TEST:__private__/switch_case/2
 > VIRTUAL/data/TEST/functions/__private__/switch_case/1.mcfunction
-execute if score $job_id __variable__ matches 1 run function TEST:__private__/switch_case/3
-execute if score $job_id __variable__ matches 2..3 run function TEST:__private__/switch_case/4
+execute if score __switch__0 __variable__ matches 1 run function TEST:__private__/switch_case/3
+execute if score __switch__0 __variable__ matches 2..3 run function TEST:__private__/switch_case/4
 > VIRTUAL/data/TEST/functions/__private__/switch_case/3.mcfunction
 tellraw @s "You are a lumberjack."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/4.mcfunction
-execute if score $job_id __variable__ matches 2 run function TEST:__private__/switch_case/5
-execute if score $job_id __variable__ matches 3 run function TEST:__private__/switch_case/6
+execute if score __switch__0 __variable__ matches 2 run function TEST:__private__/switch_case/5
+execute if score __switch__0 __variable__ matches 3 run function TEST:__private__/switch_case/6
 > VIRTUAL/data/TEST/functions/__private__/switch_case/5.mcfunction
 tellraw @s "You are a policeman."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/6.mcfunction
 tellraw @s "You are a soldier."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/2.mcfunction
-execute if score $job_id __variable__ matches 4 run function TEST:__private__/switch_case/7
-execute if score $job_id __variable__ matches 5..6 run function TEST:__private__/switch_case/8
+execute if score __switch__0 __variable__ matches 4 run function TEST:__private__/switch_case/7
+execute if score __switch__0 __variable__ matches 5..6 run function TEST:__private__/switch_case/8
 > VIRTUAL/data/TEST/functions/__private__/switch_case/7.mcfunction
 tellraw @s "You are a doctor."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/8.mcfunction
-execute if score $job_id __variable__ matches 5 run function TEST:__private__/switch_case/9
-execute if score $job_id __variable__ matches 6 run function TEST:__private__/switch_case/10
+execute if score __switch__0 __variable__ matches 5 run function TEST:__private__/switch_case/9
+execute if score __switch__0 __variable__ matches 6 run function TEST:__private__/switch_case/10
 > VIRTUAL/data/TEST/functions/__private__/switch_case/9.mcfunction
 tellraw @s "You are a pilot."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/10.mcfunction

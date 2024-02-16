@@ -1,4 +1,5 @@
 """Utility for compiling"""
+from copy import deepcopy
 import functools
 from random import Random
 import re
@@ -198,7 +199,7 @@ kwargs={dumps(kwargs, indent=4, cls=JSONUniversalEncoder)}
     return wrapper
 
 
-def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
+def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer", prefix: str,
                          is_make_lower: bool = True, substr: tuple[int, int] | None = None, custom_string: str | None = None) -> str:
     """
     Turns JMC function/predicate name syntax to vanilla's syntax
@@ -222,9 +223,16 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer",
         raise JMCSyntaxException("Name ended with '.'", token, tokenizer)
     if is_make_lower:
         string = string.lower()
+
+    if prefix and string.startswith("this."):
+        string = string.replace("this.", prefix.replace("/", "."), 1)
+
     if re.match('^[a-z0-9_\\.]+$', string) is None:
+        parens_hint: str | None = None
+        if string.endswith("()"):
+            parens_hint = f"If {string} is meant to be a function name, remove the parentheses"
         raise MinecraftSyntaxWarning(
-            f"Invalid character detected in '{string}'", token, tokenizer
+            f"Invalid character detected in '{string}'", token, tokenizer, suggestion=parens_hint
         )
     return string.replace(".", "/")
 
@@ -245,3 +253,22 @@ def get_mc_uuid(seed: Any) -> str:
 
 def is_decorator(string: str) -> bool:
     return (len(string) > 2 and string.startswith("@"))
+
+
+def deep_merge(first: dict, second: dict) -> dict:
+    """
+    Recursively merges two dictionaries together.
+    (i.e. it also merges any dicts inside of them)
+
+    :param first: The dictionary to merge stuff to
+    :param second: The dictionary being merged into the first
+    :return: A new dict that is the merger of both inputs
+    """
+    output = deepcopy(first)
+    for key in second:
+        if key in output and isinstance(
+                output[key], dict) and isinstance(second[key], dict):
+            output[key] = deep_merge(output[key], second[key])
+        else:
+            output[key] = second[key]
+    return output

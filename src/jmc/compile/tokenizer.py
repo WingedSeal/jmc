@@ -59,6 +59,7 @@ class Token:
     string: str
     """The string representation (including parentheses, excluding quotation mark)"""
     _macro_length: int = 0
+    quote: str = ""
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
     #     return super().__new__(cls)
@@ -96,7 +97,7 @@ class Token:
     def get_full_string(self) -> str:
         """Get self.string including quotation mark"""
         if self.token_type == TokenType.STRING:
-            if "\n" in self.string:
+            if self.quote == "`":
                 return "`\n" + repr(self.string)[1:-1] + "\n`"
             return repr(self.string)
         return self.string
@@ -255,10 +256,13 @@ class Tokenizer:
         if self.token_pos is None:
             raise ValueError(
                 "Tokenizer.token_pos() called but Tokenizer.token_pos is still None")
+        quote = ""
+        if self.quote == Quote.BACKTICK:
+            quote = self.quote
         new_token = Token(self.state,
                           self.token_pos.line,
                           self.token_pos.col,
-                          self.token_str)
+                          self.token_str, quote=quote)
         if new_token.token_type == TokenType.KEYWORD and new_token.string in header.macros:
             macro_factory, arg_count = header.macros[new_token.string]
             if arg_count == 0:
@@ -453,6 +457,19 @@ class Tokenizer:
         elif self.is_escaped:
             self.is_escaped = False
 
+    def __should_terminate_line(self, start_at: int = 0) -> bool:
+        return self.keywords[start_at].string in TERMINATE_LINE or (
+            self.keywords[start_at].string == "execute" and self.keywords[-2].string in {
+                "run", "expand"}
+        ) or is_decorator(self.keywords[start_at].string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
+
+    def __is_shorten_if(self) -> bool:
+        return self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
+            self.keywords[2].string != "expand"
+            and
+            self.keywords[2].token_type != TokenType.PAREN_CURLY
+        )
+
     def __parse_paren(self, char: str, expect_semicolon: bool) -> bool:
         self.token_str += char
         if self.is_string:
@@ -478,17 +495,8 @@ class Tokenizer:
             elif self.paren == Paren.L_SQUARE:
                 self.state = TokenType.PAREN_SQUARE
             self.append_token()
-            if is_paren and expect_semicolon and (
-                self.keywords[0].string in TERMINATE_LINE or (
-                    self.keywords[0].string == "execute" and self.keywords[-2].string in {
-                        "run", "expand"}
-                ) or is_decorator(self.keywords[0].string)
-            ):
-                if self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
-                   self.keywords[2].string != "expand"
-                   and
-                   self.keywords[2].token_type != TokenType.PAREN_CURLY
-                   ):
+            if is_paren and expect_semicolon and self.__should_terminate_line():
+                if self.__is_shorten_if() and not self.__should_terminate_line(start_at=2):
                     return True
                 self.append_keywords()
             return True
@@ -671,18 +679,20 @@ class Tokenizer:
         result.append(token_array)
         return result
 
-    def merge_tokens(self, tokens: list[Token]) -> Token:
+    def merge_tokens(self, tokens: list[Token],
+                     use_full_string: bool = False) -> Token:
         """
         Merge multiple token together
 
         :param tokens: List of tokens to merge
+        :param use_full_string: whether to use fullstring including quatation mark
         :return: A token with the same token type as the first token (Unless it's an operator, then the type will be keyword)
         """
         token_type = tokens[0].token_type
         if token_type == TokenType.OPERATOR:
             token_type = TokenType.KEYWORD
         return Token(token_type, tokens[0].line, tokens[0].col, "".join(
-            token.string for token in tokens))
+            token.get_full_string() if use_full_string else token.string for token in tokens))
 
     def __parse_func_arg(
             self, tokens: list[Token], is_kwargs: bool, is_nbt: bool = False) -> list[Token]:
@@ -796,11 +806,49 @@ class Tokenizer:
 
         return args, kwargs
 
+    def parse_param(self, token: Token) -> list[str]:
+        """
+        Parse user's parameters for lazy function
+
+        :param token: paren_round token containing parameters
+        :return: list of parameters in string
+        """
+        assert token.token_type == TokenType.PAREN_ROUND
+
+        if token.string == "()":
+            return []
+
+        keywords = self.parse(token.string[1:-
+                                           1], line=token.line, col=token.col +
+                              1, expect_semicolon=False)[0]
+        is_expect_comma = False  # Whether to expect comma token
+        params: list[str] = []
+
+        for token_ in keywords:
+            if token_.token_type == TokenType.COMMA:
+                if not is_expect_comma:
+                    raise JMCSyntaxException(
+                        "Unexpected duplicated comma(,)", token_, self)
+                is_expect_comma = False
+                continue
+
+            if is_expect_comma:
+                raise JMCSyntaxException(
+                    "Expect comma(,)", token_, self)
+
+            if token_.token_type != TokenType.KEYWORD:
+                raise JMCSyntaxException(
+                    f"Expected keyword in parameters (got {token_.token_type.value})", token_, self)
+            params.append(token_.string)
+            is_expect_comma = True
+
+        return params
+
     def parse_list(self, token: Token) -> list[Token]:
         """
         Parse list
 
-        :param token: paren_curly token containing JS object
+        :param token: paren_square token containing list
         :return: Dictionary of key(string) and Token
         """
         if token.token_type != TokenType.PAREN_SQUARE:

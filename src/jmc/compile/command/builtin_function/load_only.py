@@ -63,7 +63,7 @@ class RightClickSetup(EventMixin):
     def call(self) -> str:
         # self.rc_obj = "__rc__" + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
-            self.raw_args["functionMap"].token, self.tokenizer)
+            self.raw_args["functionMap"].token, self.tokenizer, self.prefix)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         id_name = self.args["idName"]
@@ -94,7 +94,7 @@ class RightClickSetup(EventMixin):
 
             main_func.append(
                 f"""execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {parse_switch(ScoreboardPlayer(
-                    PlayerType.SCOREBOARD, (self.tag_id_var, "@s")), func_contents, self.datapack, name=self.name)}""")
+                    PlayerType.SCOREBOARD, (DataPack.var_name, self.tag_id_var)), func_contents, self.datapack, name=self.name)}""")
         else:
             main_func.append(
                 f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, main_count)}")
@@ -377,7 +377,7 @@ class PlayerOnEvent(EventMixin):
 class TriggerSetup(JMCFunction):
     def call(self) -> str:
         func_map = self.datapack.parse_func_map(
-            self.raw_args["triggers"].token, self.tokenizer)
+            self.raw_args["triggers"].token, self.tokenizer, self.prefix)
         is_switch = sorted(func_map) == list(range(1, len(func_map) + 1))
 
         obj = self.args["objective"]
@@ -651,7 +651,7 @@ class GUITemplate(JMCFunction):
         template, _ = self.datapack.parse_list(
             self.raw_args["template"].token, self.tokenizer, TokenType.STRING)
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         mode_str = self.args["mode"]
         if mode_str not in self.MODE_MAP:
             raise JMCValueError(
@@ -709,7 +709,7 @@ class GUITemplate(JMCFunction):
 class GUIRegisters(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -831,7 +831,7 @@ class GUIRegisters(ItemMixin):
 class GUIRegister(ItemMixin):
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -905,7 +905,7 @@ class GUICreate(JMCFunction):
 
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -1054,7 +1054,7 @@ class TextPropClickCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1097,7 +1097,7 @@ class TextPropsClickCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1143,7 +1143,7 @@ class TextPropSuggestCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1186,7 +1186,7 @@ class TextPropsSuggestCommand(JMCFunction):
     def call(self) -> str:
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token,
-            self.tokenizer)
+            self.tokenizer, self.prefix)
         if not command:
             raise JMCValueError(
                 "Unexpected empty arrow function",
@@ -1778,7 +1778,8 @@ class TextPropsNBT(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            output: SIMPLE_JSON_BODY = {self.args["type"]: self.args["source"], "nbt": self.args["path"].replace(
+            output: SIMPLE_JSON_BODY = {self.args["type"]: self.args["source"].replace(
+                self.args["indexString"], arg), "nbt": self.args["path"].replace(
                 self.args["indexString"], arg), "interpret": self.args["interpret"]}
             if self.args["separator"] != ", ":
                 output["separator"] = self.format_text(  # type: ignore # fmt: off

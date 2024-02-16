@@ -191,12 +191,13 @@ def custom_condition(
                 "Unexpected token", tokens[2], tokenizer, display_col_length=False)
 
         return Condition(
-            *matched_function(tokens[1], tokens[0], datapack, tokenizer).call_bool())
+            *matched_function(tokens[1], tokens[0], datapack, tokenizer, prefix="").call_bool())
     # End
 
     conditions: list[str] = []
     if tokens[0].string not in {"biome", "block", "blocks",
-                                "data", "dimension", "entity", "loaded", "predicate", "score"}:
+                                "data", "dimension", "entity",
+                                "loaded", "predicate", "score"}:
         raise JMCValueError(
             f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],

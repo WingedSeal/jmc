@@ -33,7 +33,7 @@ class PackVersion:
         :param tokenizer: token's Tokenizer
         :param suggestion: error suggestion, defaults to None
         """
-        if self._pack_format < pack_format:
+        if self._pack_format != -1 and self._pack_format < pack_format:
             raise MinecraftVersionTooLow(
                 pack_format, token, tokenizer, suggestion=suggestion)
 

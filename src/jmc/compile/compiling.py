@@ -1,5 +1,6 @@
 """Module responsibile for all compiling in jmc"""
 from json import JSONDecodeError, dump, dumps, loads
+import os.path
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, Any
@@ -272,19 +273,25 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
     minecraft_folder = output_folder / "data" / "minecraft"
+    overrides_folders = {output_folder / "data" / namespace
+                         for namespace in header.namespace_overrides}
     functions_tags_folder = output_folder / \
         "data" / "minecraft" / "tags" / "functions"
 
     if is_delete:
         statics = Header().statics
-        if statics:
-            rmtree(namespace_folder, statics)
-        else:
-            try:
-                shutil.rmtree(namespace_folder)
-            except OSError as error:
-                raise JMCBuildError(
-                    "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+        for folder in {namespace_folder} | overrides_folders:
+            if not os.path.isdir(folder):
+                continue
+
+            if statics:
+                rmtree(folder, statics)
+            else:
+                try:
+                    shutil.rmtree(folder)
+                except OSError as error:
+                    raise JMCBuildError(
+                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
         if minecraft_folder.is_dir():
             try:
                 shutil.rmtree(minecraft_folder)

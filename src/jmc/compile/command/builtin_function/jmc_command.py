@@ -45,9 +45,11 @@ class TimerSet(JMCFunction):
     """
 
     def call(self) -> str:
-        if self.raw_args["tick"].arg_type == ArgType.INTEGER:
+        tick_arg = find_scoreboard_player_type(
+            self.raw_args["tick"].token, self.tokenizer)
+        if isinstance(tick_arg.value, int):
             return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
-        return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {self.args["tick"]}'
+        return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
 
 
 @func_property(
@@ -891,6 +893,34 @@ class ScoreboardAdd(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Team.prefix",
+    arg_type={
+        "team": ArgType.KEYWORD,
+        "prefix": ArgType.STRING,
+    },
+    name="team_prefix"
+)
+class TeamPrefix(JMCFunction):
+    def call(self) -> str:
+        return f"team modify {self.args['team']} prefix {self.format_text('prefix', is_allow_score_selector=False)}"
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Team.suffix",
+    arg_type={
+        "team": ArgType.KEYWORD,
+        "suffix": ArgType.STRING,
+    },
+    name="team_suffix"
+)
+class TeamSuffix(JMCFunction):
+    def call(self) -> str:
+        return f"team modify {self.args['team']} suffix {self.format_text('suffix', is_allow_score_selector=False)}"
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.add",
     arg_type={
         "id": ArgType.KEYWORD,
@@ -913,6 +943,20 @@ class BossbarAdd(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
+    call_string="Bossbar.setName",
+    arg_type={
+        "id": ArgType.KEYWORD,
+        "name": ArgType.STRING
+    },
+    name="bossbar_set_name"
+)
+class BossbarSetName(JMCFunction):
+    def call(self) -> str:
+        return f'bossbar set {self.args["id"]} name {self.format_text("name")}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
     call_string="GUI.run",
     arg_type={
         "name": ArgType.KEYWORD,
@@ -923,7 +967,7 @@ class GUIRun(JMCFunction):
 
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer)
+            self.raw_args["name"].token, self.tokenizer, self.prefix)
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
@@ -1211,3 +1255,30 @@ class JMCPython(JMCFunction):
                 "An exception occured in JMC.python",
                 self.raw_args["pythonCode"].token,
                 self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="Array.forEach",
+    name="array_for_each",
+    arg_type={
+        "target": ArgType.STRING,
+        "path": ArgType.STRING,
+        "function": ArgType.ARROW_FUNC
+    }
+)
+class ArrayForEach(JMCFunction):
+    def call(self) -> str:
+        length = "__length__"
+        current = "__current__"
+        count = self.datapack.get_count("array")
+        loop_func = self.datapack.add_raw_private_function("array", [
+            self.args["function"],
+            f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
+            f"data remove storage {self.args['target']} {self.args['path']}[0]",
+            f"scoreboard players add {current} {self.datapack.var_name} 1",
+            f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array', count)}"
+        ], count)
+        return f"""execute store result score {length} {self.datapack.var_name} run data get storage {self.args["target"]} {self.args["path"]}
+scoreboard players set {current} {self.datapack.var_name} 0
+execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {loop_func}"""

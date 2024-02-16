@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 
 from .decorator_parse import DECORATORS
 from .header import Header
-from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning
+from .exception import JMCDecodeJSONError, JMCFileNotFoundError, JMCSyntaxException, MinecraftSyntaxWarning, relative_file_name
 from .tokenizer import Tokenizer, Token, TokenType
-from .datapack import DataPack, Function
+from .datapack import DataPack, Function, PreFunction
 from .log import Logger
-from .utils import convention_jmc_to_mc, is_decorator, search_to_string
+from .utils import convention_jmc_to_mc, deep_merge, is_decorator, search_to_string
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -188,7 +188,7 @@ class Lexer:
 
                     new_paths = folder.glob("**/*.jmc")
                     for new_path in new_paths:
-                        self.parse_file(file_path=new_path)
+                        self.parse_file(file_path=new_path.resolve())
                         self.__update_load(file_path_str, raw_string)
                     continue
                 try:
@@ -231,19 +231,88 @@ class Lexer:
         else:
             function_commands = command[1:]
             args = None
-        jmc_function, func_path = self.parse_func(
+        pre_function = self.parse_func_tokens(
             tokenizer,
             function_commands,
             file_path_str,
             prefix,
-            is_save_to_datapack=False)
+            is_save_to_datapack=jmc_decorator.is_save_to_datapack)
+        func_object = None
+        if jmc_decorator.is_save_to_datapack:
+            func_object = pre_function.parse()
+            self.datapack.functions[pre_function.func_path] = func_object
         jmc_decorator(
             tokenizer,
+            command,
             self.datapack,
+            prefix,
             args).modify(
-            jmc_function,
-            func_path)
-        self.datapack.functions[func_path] = jmc_function
+            pre_function, func_object)
+
+    def parse_func_tokens(self, tokenizer: Tokenizer,
+                          command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> PreFunction:
+        """
+        Parse a function definition in form of list of token
+
+        :param tokenizer: Tokenizer
+        :param command: List of token inside a function definition
+        :param file_path_str: File path to current JMC function as string
+        :param prefix: Prefix of function(for Class feature), defaults to ''
+        :param is_save_to_datapack: Whether to save the result function into the datapack, defaults to True
+        :return: func_content, file_path_str, line, col, file_string, func_path
+        :raises JMCSyntaxException: Function name isn't keyword token
+        :raises JMCSyntaxException: Function name is not followed by paren_round token
+        :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
+        :raises JMCSyntaxException: Start function name with JMC's PRIVATE_NAME
+        :raises JMCSyntaxException: Duplicate function declaration
+        :raises JMCSyntaxException: Define load function
+        :raises JMCSyntaxException: Define private function
+        """
+        logger.debug(f"Parsing function, prefix = {prefix!r}")
+        if len(command) < 2:
+            raise JMCSyntaxException(
+                "Expected keyword(function's name)", command[0], tokenizer, display_col_length=True, col_length=True)
+        if command[1].token_type != TokenType.KEYWORD:
+            raise JMCSyntaxException(
+                "Expected keyword(function's name)", command[1], tokenizer)
+        if len(command) < 3:
+            raise JMCSyntaxException(
+                "Expected round bracket, `()`", command[1], tokenizer, display_col_length=True, col_length=True)
+        if is_save_to_datapack and command[2].string != "()":
+            raise JMCSyntaxException(
+                "Expected empty round bracket, `()`", command[2], tokenizer)
+        if len(command) < 4:
+            raise JMCSyntaxException(
+                "Expected {", command[2], tokenizer, display_col_length=True, col_length=True)
+        if command[3].token_type != TokenType.PAREN_CURLY:
+            raise JMCSyntaxException(
+                "Expected {", command[3], tokenizer, display_col_length=False)
+        if len(command) > 4:
+            raise JMCSyntaxException(
+                "Unexpected token", command[4], tokenizer)
+
+        func_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        if func_path.startswith(DataPack.private_name + "/"):
+            raise JMCSyntaxException(
+                f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
+        logger.debug(f"Function: {func_path}")
+        func_content = command[3].string[1:-1]
+        if func_path == self.datapack.load_name:
+            raise JMCSyntaxException(
+                "Load function is defined", command[1], tokenizer)
+        if func_path in self.datapack.functions:
+            old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
+                func_path]
+            raise JMCSyntaxException(
+                f"Duplicate function declaration({func_path})", command[1], tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}")
+        if func_path == self.datapack.private_name:
+            raise JMCSyntaxException(
+                "Private function is defined", command[1], tokenizer, display_col_length=False)
+        self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
+        return PreFunction(func_content, file_path_str,
+                           command[3].line, command[3].col, tokenizer.file_string, func_path, command[1], command[2], self, tokenizer, prefix)
 
     def parse_func(self, tokenizer: Tokenizer,
                    command: list[Token], file_path_str: str, prefix: str = '', is_save_to_datapack: bool = True) -> tuple[Function, str]:
@@ -264,58 +333,19 @@ class Lexer:
         :raises JMCSyntaxException: Define load function
         :raises JMCSyntaxException: Define private function
         """
-        logger.debug(f"Parsing function, prefix = {prefix!r}")
-        if len(command) < 2:
-            raise JMCSyntaxException(
-                "Expected keyword(function's name)", command[0], tokenizer, display_col_length=True, col_length=True)
-        if command[1].token_type != TokenType.KEYWORD:
-            raise JMCSyntaxException(
-                "Expected keyword(function's name)", command[1], tokenizer)
-        if len(command) < 3:
-            raise JMCSyntaxException(
-                "Expected empty round bracket, `()`", command[1], tokenizer, display_col_length=True, col_length=True)
-        if command[2].string != "()":
-            raise JMCSyntaxException(
-                "Expected empty round bracket, `()`", command[2], tokenizer)
-        if len(command) < 4:
-            raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, display_col_length=True, col_length=True)
-        if command[3].token_type != TokenType.PAREN_CURLY:
-            raise JMCSyntaxException(
-                "Expected {", command[3], tokenizer, display_col_length=False)
-        if len(command) > 4:
-            raise JMCSyntaxException(
-                "Unexpected token", command[4], tokenizer)
-
-        func_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
-        if func_path.startswith(DataPack.private_name + "/"):
-            raise JMCSyntaxException(
-                f"Function({func_path}) may override private function of JMC", command[1], tokenizer, suggestion=f"Please avoid starting function's path with {DataPack.private_name}")
-        logger.debug(f"Function: {func_path}")
-        func_content = command[3].string[1:-1]
-        if func_path == self.datapack.load_name:
-            raise JMCSyntaxException(
-                "Load function is defined", command[1], tokenizer)
-        if func_path in self.datapack.functions:
-            old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
-                func_path]
-            raise JMCSyntaxException(
-                f"Duplicate function declaration({func_path})", command[1], tokenizer,
-                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
-        if func_path == self.datapack.private_name:
-            raise JMCSyntaxException(
-                "Private function is defined", command[1], tokenizer, display_col_length=False)
-        self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
-        return_value = Function(self.parse_func_content(
-            func_content, file_path_str, line=command[3].line, col=command[3].col, file_string=tokenizer.file_string))
+        pre_function = self.parse_func_tokens(
+            tokenizer, command, file_path_str, prefix, is_save_to_datapack)
+        return_value = pre_function.parse()
         if is_save_to_datapack:
-            self.datapack.functions[func_path] = return_value
-        return return_value, func_path
+            self.datapack.functions[pre_function.func_path] = return_value
+        return return_value, pre_function.func_path
 
     def _is_vanilla_func(self, command: list[Token]) -> bool:
         """
         Whether command is in vanilla function syntax
         """
+        if len(command) == 2 and command[1].token_type == TokenType.STRING:
+            return True
         if not (
             len(command) >= 4 and
             command[1].token_type == TokenType.KEYWORD and
@@ -367,6 +397,7 @@ class Lexer:
         :raises JMCDecodeJSONError: Invalid JSON
         """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
+        has_extends_arg = False
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)", command[0], tokenizer, col_length=True)
@@ -385,13 +416,18 @@ class Lexer:
         if len(command) < 4:
             raise JMCSyntaxException(
                 "Expected { or [", command[2], tokenizer, col_length=True)
-        if command[3].token_type not in {
+        if command[3].string == "extends":
+            if command[4].token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxException(
+                    "Expected (", command[3], tokenizer)
+            has_extends_arg = True
+        elif command[3].token_type not in {
                 TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             raise JMCSyntaxException(
                 "Expected { or [", command[3], tokenizer)
 
         json_type = convention_jmc_to_mc(
-            command[1], tokenizer, is_make_lower=False)
+            command[1], tokenizer, is_make_lower=False, prefix="")
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
@@ -401,11 +437,11 @@ class Lexer:
                 json_type = json_type.replace("tag/", "tags/")
             else:
                 raise MinecraftSyntaxWarning(
-                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer
+                    f"Unrecognized JSON file's type({json_type})", command[1], tokenizer, suggestion="The 'minecraft.' prefix is supposed to go *inside* the parentheses." if json_type.startswith("minecraft") else None
                 )
 
         json_name = prefix + convention_jmc_to_mc(
-            command[2], tokenizer, is_make_lower=False, substr=(1, -1))
+            command[2], tokenizer, is_make_lower=False, substr=(1, -1), prefix="")
 
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
@@ -424,7 +460,7 @@ class Lexer:
                 f"JSON({json_path}) may override private function of JMC", command[2], tokenizer, suggestion=f"Please avoid starting JSON's path with {DataPack.private_name}")
 
         logger.debug(f"JSON: {json_type}({json_path})")
-        json_content = command[3].string
+        json_content = command[-1].string
         if json_path in self.datapack.jsons:
             old_json_token, old_json_tokenizer = self.datapack.defined_file_pos[
                 json_path]
@@ -435,10 +471,30 @@ class Lexer:
         try:
             json: dict[str, str] = loads(json_content, strict=False)
         except JSONDecodeError as error:
-            raise JMCDecodeJSONError(error, command[3], tokenizer) from error
+            raise JMCDecodeJSONError(error, command[-1], tokenizer) from error
         if not json:
             raise JMCSyntaxException(
-                "JSON content cannot be empty", command[3], tokenizer)
+                "JSON content cannot be empty", command[-1], tokenizer)
+
+        if has_extends_arg:
+            super_name = convention_jmc_to_mc(
+                command[4], tokenizer, prefix="", is_make_lower=False, substr=(1, -1))
+            if namespace in Header().namespace_overrides:
+                super_path = namespace + "/" + json_type + \
+                    "/" + super_name[len(namespace) + 1:]
+            else:
+                super_path = json_type + "/" + super_name
+
+            try:
+                super_json = self.datapack.jsons[super_path]
+            except KeyError:
+                raise JMCSyntaxException(
+                    f"Invalid JSON({super_path})", command[2], tokenizer,
+                    suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly")
+
+            assert isinstance(super_json, dict)
+            json = deep_merge(super_json, json)
+
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json
 
@@ -470,7 +526,8 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected {", command[2], tokenizer)
 
-        class_path = prefix + convention_jmc_to_mc(command[1], tokenizer)
+        class_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
         class_content = command[2].string[1:-1]
         self.parse_class_content(class_path + "/",
                                  class_content, file_path_str, line=command[2].line, col=command[2].col, file_string=tokenizer.file_string)
@@ -484,10 +541,11 @@ class Lexer:
         :return: List of commands(string)
         """
         tokenizer = self.load_tokenizer
-        return self._parse_func_content(tokenizer, programs, is_load=True)
+        return self._parse_func_content(
+            tokenizer, programs, prefix="", is_load=True)
 
     def parse_line(self, tokens: list[Token],
-                   tokenizer: Tokenizer) -> list[str]:
+                   tokenizer: Tokenizer, prefix: str) -> list[str]:
         """
         Parse just a line of command(List of arguments(Token))
 
@@ -495,11 +553,12 @@ class Lexer:
         :param tokenizer: Tokenizer
         :return: List of minecraft commands
         """
-        return self._parse_func_content(tokenizer, [tokens], is_load=False)
+        return self._parse_func_content(
+            tokenizer, [tokens], prefix, is_load=False)
 
     def parse_func_content(self,
                            func_content: str, file_path_str: str,
-                           line: int, col: int, file_string: str) -> list[str]:
+                           line: int, col: int, file_string: str, prefix: str) -> list[str]:
         """
         Parse function's content
 
@@ -513,10 +572,11 @@ class Lexer:
         tokenizer = Tokenizer(func_content, file_path_str,
                               line=line, col=col, file_string=file_string)
         programs = tokenizer.programs
-        return self._parse_func_content(tokenizer, programs, is_load=False)
+        return self._parse_func_content(
+            tokenizer, programs, prefix, is_load=False)
 
     def _parse_func_content(self, tokenizer: Tokenizer,
-                            programs: list[list[Token]], is_load: bool) -> list[str]:
+                            programs: list[list[Token]], prefix: str, is_load: bool) -> list[str]:
         """
         Parse a content inside function
         :param tokenizer: Tokenizer
@@ -526,7 +586,7 @@ class Lexer:
         :return: List of commands(String)
         """
 
-        return FuncContent(tokenizer, programs, is_load, self).parse()
+        return FuncContent(tokenizer, programs, is_load, self, prefix).parse()
 
     def parse_class_content(self, prefix: str, class_content: str,
                             file_path_str: str, line: int, col: int, file_string: str) -> None:
@@ -561,8 +621,8 @@ class Lexer:
                 raise JMCSyntaxException(
                     f"Expected 'function' or 'new' or 'class' (got {command[0].string})", command[0], tokenizer)
 
-    def parse_if_else(self, tokenizer: Tokenizer,
-                      name: str = "if_else", is_expand: bool = False) -> str:
+    def parse_if_else(self, tokenizer: Tokenizer, prefix: str,
+                      name: str = "if_else", is_expand: bool = False, is_macro: bool = False) -> str:
         """
         Parse if-else chain using if_else_box attribute
 
@@ -582,7 +642,7 @@ class Lexer:
 
         if is_expand:
             expanded_commands = self.datapack.parse_function_token(
-                if_else_box[0][1], tokenizer)
+                if_else_box[0][1], tokenizer, prefix)
             output = []
             for expanded_command in expanded_commands:
                 if "\n" in expanded_command:
@@ -599,7 +659,9 @@ class Lexer:
         # Case 1: `if` only
         if len(if_else_box) == 1:
             arrow_func = self.datapack.add_arrow_function(
-                name, if_else_box[0][1], tokenizer)
+                name, if_else_box[0][1], tokenizer, prefix)
+            if is_macro:
+                precommand = f"${precommand}"
             if arrow_func.startswith("execute "):
                 # len('execute ') = 8
                 return f"{precommand}execute {condition} {arrow_func[8:]}"
@@ -610,7 +672,7 @@ class Lexer:
         count_alt = self.datapack.get_count(name)
         output = [
             f"scoreboard players set {VAR} {DataPack.var_name} 0",
-            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
+            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, prefix, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
             f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"]
         del if_else_box[0]
 
@@ -637,7 +699,7 @@ class Lexer:
                     f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"
                 ], count_tmp)
 
-                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, postcommands=[
+                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, prefix, postcommands=[
                     f"scoreboard players set {VAR} {DataPack.var_name} 1"
                 ])
         # `else`
@@ -645,7 +707,7 @@ class Lexer:
             self.datapack.private_functions[name][count_tmp].delete(-1)
         else:
             self.datapack.add_custom_private_function(
-                name, else_, tokenizer, count_alt)
+                name, else_, tokenizer, count_alt, prefix)
         return "\n".join(output)
 
     def clean_up_paren_token(self, token: Token, tokenizer: Tokenizer,

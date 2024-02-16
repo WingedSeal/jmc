@@ -53,7 +53,7 @@ class JMCFunction:
     """
     __slots__ = ("token", "datapack", "tokenizer",
                  "is_execute", "var", "args",
-                 "raw_args", "self_token")
+                 "raw_args", "self_token", "prefix")
     # _decorated: bool = False
     # """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -93,13 +93,16 @@ class JMCFunction:
                   ] = defaultdict(dict)
     """:cvar: Dictionary of (Function type and according dictionary of funtion name and a subclass)"""
 
+    prefix: str
+    """String of function prefix, aka. class it's currently in"""
+
     def __new__(cls, *args, **kwargs):
         if cls is JMCFunction:
             raise TypeError(
                 f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, self_token: Token, datapack: DataPack, tokenizer: Tokenizer,
+    def __init__(self, token: Token, self_token: Token, datapack: DataPack, tokenizer: Tokenizer, prefix: str,
                  *, is_execute: bool | None = None, var: str | None = None) -> None:
         self.token = token
         self.self_token = self_token
@@ -107,10 +110,7 @@ class JMCFunction:
         self.tokenizer = tokenizer
         self.is_execute = is_execute
         self.var = var
-        # if not self._decorated:
-        #     raise NotImplementedError("Missing decorator")
-        # if self.func_type is None:
-        #     raise NotImplementedError("Missing func_type")
+        self.prefix = prefix
 
         args_Args = verify_args(self.arg_type,
                                 self.call_string, token, tokenizer)
@@ -132,10 +132,10 @@ class JMCFunction:
                     self.args[key] = f"function {arg.token.string}"
                 else:
                     self.args[
-                        key] = f"function {datapack.namespace}:{convention_jmc_to_mc(arg.token, self.tokenizer)}"
+                        key] = f"function {datapack.format_func_path(convention_jmc_to_mc(arg.token, self.tokenizer, self.prefix))}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = "\n".join(
-                    datapack.parse_function_token(arg.token, tokenizer))
+                    datapack.parse_function_token(arg.token, tokenizer, prefix))
             elif arg.arg_type == ArgType.FLOAT:
                 self.args[key] = str(float(arg.token.string))
             elif arg.arg_type in {ArgType.SCOREBOARD_INT, ArgType.SCOREBOARD}:

@@ -7,10 +7,11 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable
 
+from ..header import Header
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import convention_jmc_to_mc, is_number, is_float
+from ..utils import is_number, is_float, convention_jmc_to_mc
 
 
 class PlayerType(Enum):
@@ -500,6 +501,8 @@ class FormattedText:
             self.result[-1]["text"] += self.current_json["text"]  # type: ignore # fmt: off
             self.current_json = {"text": ""}
             return
+        if "color" in self.current_json and self.current_json["color"] == "reset":
+            del self.current_json["color"]
         self.result.append(self.current_json)
         self.current_json = {"text": ""}
 
@@ -651,6 +654,19 @@ class FormattedText:
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
 
+        if self.datapack.version >= 19:
+            for _type in {"score", "selector", "nbt", "keybind"}:
+                if _type in self.current_json:
+                    self.current_json["type"] = _type
+            if "__private_nbt_expand__" in self.current_json and self.datapack.version >= 21:
+                assert isinstance(self.current_json["__private_nbt_expand__"], dict)
+                self.current_json["type"] = "nbt"
+                for source in {"entity", "block", "storage"}:
+                    if source in self.current_json["__private_nbt_expand__"]:
+                        self.current_json["source"] = source
+            elif "type" not in self.current_json:
+                self.current_json["type"] = "text"
+
         if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json or "__private_nbt_expand__" in self.current_json:
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
@@ -661,17 +677,18 @@ class FormattedText:
             del self.current_json["text"]
 
             if "__private_nbt_expand__" in self.current_json:
-                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]  # type: ignore # fmt: off
+                assert isinstance(self.current_json["__private_nbt_expand__"], dict)
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]
                 self.current_json["interpret"] = \
-                    (self.current_json["__private_nbt_expand__"]["interpret"] == "true") # type: ignore # fmt: off
-                if "separator" in self.current_json["__private_nbt_expand__"].keys():  # type: ignore # fmt: off
-                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]  # type: ignore # fmt: off
-                if "storage" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]  # type: ignore # fmt: off
-                if "block" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]  # type: ignore # fmt: off
-                if "entity" in self.current_json["__private_nbt_expand__"]:  # type: ignore # fmt: off
-                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]  # type: ignore # fmt: off
+                    (self.current_json["__private_nbt_expand__"]["interpret"] == "true")
+                if "separator" in self.current_json["__private_nbt_expand__"].keys():
+                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]
+                if "storage" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]
+                if "block" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]
+                if "entity" in self.current_json["__private_nbt_expand__"]:
+                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]
                 del self.current_json["__private_nbt_expand__"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
@@ -679,6 +696,8 @@ class FormattedText:
                 if prop_ in {"bold", "italic", "underlined",
                              "strikethrough", "obfuscated", "color"}:
                     tmp_json[prop_] = value_
+            if "color" in self.current_json and self.current_json["color"] == "reset":
+                del self.current_json["color"]
             self.result.append(self.current_json)
             self.current_json = tmp_json
 
@@ -793,11 +812,6 @@ class FormattedText:
                 self.result[0]["italic"] = False
             return json.dumps(self.result[0], separators=(",", ":"))
 
-        if self.is_default_no_italic and (
-                "italic" not in self.result[0] or not self.result[0]["italic"]):
-            self.result[0]["italic"] = False
-            return json.dumps(self.result, separators=(",", ":"))
-
         return json.dumps(
             [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result, separators=(",", ":"))
 
@@ -841,3 +855,39 @@ def hash_string_to_string(string: str, length: int) -> str:
 
     return ''.join(str(digit) if 0 <= digit <= 9 else chr(
         digit - 10 + 97) for digit in digits)
+
+
+def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tokenizer) -> str:
+    count = 0
+    expression = ''
+    index = calc_pos
+    if len(string) < calc_pos + 14 or string[calc_pos + 13] != "(":
+        raise JMCSyntaxException(
+            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
+    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
+        index += 1
+        if char == "(":
+            count += 1
+        elif char == ")":
+            count -= 1
+
+        expression += char
+        if count == 0:
+            break
+
+    if count != 0:
+        raise JMCSyntaxException(
+            "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
+
+    for key, num in sorted(Header().number_macros.items(), key=lambda item: len(item[0]), reverse=True):
+        expression = expression.replace(key, num)
+
+    for char in expression:
+        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
+                        "8", "9", "+", "-", "*", "/", "\\", "%",
+                        " ", "\t", "\n", "(", ")"}:
+            raise JMCSyntaxException(
+                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
+
+    return string[:calc_pos] + \
+        eval_expr(expression.replace("\\", "//")) + string[index + 13:]
