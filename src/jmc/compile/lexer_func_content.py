@@ -135,22 +135,30 @@ class FuncContent:
         if self.command[0].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
                 f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
-        if self.command[0].string == "new":
-            raise JMCSyntaxException(
-                "'new' keyword found in function", self.command[0], self.tokenizer)
         if self.command[0].string == "class":
             raise JMCSyntaxException(
                 "'class' keyword found in function", self.command[0], self.tokenizer)
-        if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
-                self.command):
-            raise JMCSyntaxException(
-                "Function declaration found in function", self.command[0], self.tokenizer, suggestion="You might be trying to call a function with a wrong vanilla syntax")
         if is_decorator(self.command[0].string):
             raise JMCSyntaxException(
                 "Decorated function declaration found in function", self.command[0], self.tokenizer)
         if self.command[0].string == "import":
             raise JMCSyntaxException(
                 "Importing found in function", self.command[0], self.tokenizer)
+
+        if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
+                self.command):
+            self.lexer.parse_func(
+                self.tokenizer,
+                self.command,
+                self.tokenizer.file_path)
+            return
+        elif is_decorator(self.command[0].string):
+            self.lexer.parse_decorated_function(
+                self.tokenizer, self.command, self.tokenizer.file_path)
+            return
+        elif self.command[0].string == "new":
+            self.lexer.parse_new(self.tokenizer, self.command)
+            return
 
         # Boxes check
         if self.lexer.do_while_box is not None:
