@@ -97,6 +97,7 @@ def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
             path, length = merge_path(tokens[start_index + 2:])
             del tokens[start_index:length + 2]
         return nbt_type.value, target, " " + path if path else ""
+    raise NotImplementedError("Invalud nbt_type")
 
 
 def __str_slice(token: Token, tokenizer: Tokenizer) -> str:
