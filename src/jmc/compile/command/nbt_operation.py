@@ -12,10 +12,19 @@ if TYPE_CHECKING:
 
 
 class NBTType(Enum):
-    AUTO_STORAGE = "storage"
-    STORAGE = "storage"
-    BLOCK = "block"
-    ENTITY = "entity"
+    AUTO_STORAGE = auto()
+    STORAGE = auto()
+    BLOCK = auto()
+    ENTITY = auto()
+
+
+def get_nbt_string(nbt_type: "NBTType") -> str:
+    return {
+        NBTType.AUTO_STORAGE: "storage",
+        NBTType.STORAGE: "storage",
+        NBTType.BLOCK: "block",
+        NBTType.ENTITY: "entity"
+    }[nbt_type]
 
 
 def get_nbt_type(tokens: list[Token]) -> NBTType | None:
@@ -30,29 +39,51 @@ def get_nbt_type(tokens: list[Token]) -> NBTType | None:
         "@") and tokens[0].string[1] in "parse" and (tokens[1].string == "::" or (tokens[1].token_type == TokenType.PAREN_SQUARE and tokens[2].string == "::"))
     if __is_entity_nbt:
         return NBTType.ENTITY
+    elif __is_storage_nbt:
+        return NBTType.STORAGE
     elif __is_auto_storage_nbt:
         return NBTType.AUTO_STORAGE
     elif __is_full_auto_storage_nbt:
         return NBTType.AUTO_STORAGE
-    elif __is_storage_nbt:
-        return NBTType.STORAGE
     elif __is_block_nbt:
         return NBTType.BLOCK
     else:
         return None
 
 
-def merge_path(tokens: list[Token]) -> tuple[str, int]:
-    # todo
+def merge_path(tokens: list[Token], start_index: int,
+               tokenizer: Tokenizer, datapack: DataPack) -> str:
+    """
+    Merge tokens into an NBT path and delete it from the list
+
+    :param tokens: Tokens
+    :return: NBT Path string
+    """
     if not tokens:
-        return "", 0
-    return tokens[0].string, 1
+        return ""
+    if tokens[start_index].token_type in (
+            TokenType.PAREN_SQUARE, TokenType.PAREN_CURLY):
+        string = datapack.lexer.clean_up_paren_token(
+            tokens[start_index], tokenizer)
+    else:
+        string = tokens[start_index].string
+    del tokens[start_index]
+    for index, token in enumerate(tokens[start_index:]):
+        if token.string.startswith("."):
+            string += token.string
+        elif token.token_type in (TokenType.PAREN_SQUARE, TokenType.PAREN_CURLY):
+            string += datapack.lexer.clean_up_paren_token(token, tokenizer)
+        else:
+            del tokens[start_index:start_index + index]
+            break
+
+    return string
 
 
 def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
                 datapack: DataPack, nbt_type: NBTType, start_index: int = 0) -> tuple[str, str, str]:
     """
-    Merge objective:selector[] into one token
+    Extract nbt from tokens and delete it
 
     :param tokens: List of tokens
     :param tokenizer: Tokenizer
@@ -62,41 +93,47 @@ def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
     :return: Tuple of [block|storage|entity, target, path]
     """
     if nbt_type == NBTType.AUTO_STORAGE:
-        if tokens[start_index].string != "::":
-            target = tokens[start_index].string
-            path, length = merge_path(tokens[start_index + 2:])
-            del tokens[start_index:length + 2]
-            return nbt_type.value, datapack.namespace + \
-                ":" + target, " " + path if path else ""
-        else:
-            path, length = merge_path(tokens[start_index + 1:])
-            del tokens[start_index:length + 1]
-            return nbt_type.value, datapack.namespace + \
+        if tokens[start_index].string == "::":
+            path = merge_path(
+                tokens, start_index + 1, tokenizer, datapack)
+            del tokens[start_index:start_index + 1]
+            return get_nbt_string(nbt_type), datapack.namespace + \
                 ":" + datapack.namespace, " " + path if path else ""
+        else:
+            target = tokens[start_index].string
+            path = merge_path(
+                tokens, start_index + 2, tokenizer, datapack)
+            del tokens[start_index:start_index + 2]
+            return get_nbt_string(nbt_type), datapack.namespace + \
+                ":" + target, " " + path if path else ""
     elif nbt_type == NBTType.STORAGE:
         target = tokens[start_index].string + tokens[start_index +
                                                      1].string + tokens[start_index + 2].string
-        path, length = merge_path(tokens[start_index + 4:])
-        del tokens[start_index:length + 4]
-        return nbt_type.value, target, " " + path if path else ""
+        path = merge_path(
+            tokens, start_index + 4, tokenizer, datapack)
+        del tokens[start_index:start_index + 4]
+        return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.BLOCK:
         target = " ".join(
             _token.string for _token in tokenizer.parse_list(
                 tokens[start_index]))
-        path, length = merge_path(tokens[start_index + 2:])
-        del tokens[start_index:length + 2]
-        return nbt_type.value, target, " " + path if path else ""
+        path = merge_path(
+            tokens, start_index + 2, tokenizer, datapack)
+        del tokens[start_index:start_index + 2]
+        return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.ENTITY:
         if tokens[1].token_type == TokenType.PAREN_SQUARE:
             target = tokens[start_index].string + \
                 tokens[start_index + 1].string
-            path, length = merge_path(tokens[start_index + 3:])
-            del tokens[start_index:length + 3]
+            path = merge_path(
+                tokens, start_index + 3, tokenizer, datapack)
+            del tokens[start_index:start_index + 3]
         else:
             target = tokens[start_index].string
-            path, length = merge_path(tokens[start_index + 2:])
-            del tokens[start_index:length + 2]
-        return nbt_type.value, target, " " + path if path else ""
+            path = merge_path(
+                tokens, start_index + 2, tokenizer, datapack)
+            del tokens[start_index:start_index + 2]
+        return get_nbt_string(nbt_type), target, " " + path if path else ""
     raise NotImplementedError("Invalud nbt_type")
 
 
@@ -159,7 +196,7 @@ def nbt_operation(
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
-            return f"data modify {nbt_type_str} {target}{path} insert {index} value {tokens[0].string}"
+            return f"data modify {nbt_type_str} {target}{path} insert {index} value {tokens[0].get_full_string()}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type)
@@ -218,7 +255,7 @@ def nbt_operation(
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
-            return f"data modify {nbt_type_str} {target}{path} {full_operator} value {tokens[0].string}"
+            return f"data modify {nbt_type_str} {target}{path} {full_operator} value {tokens[0].get_full_string()}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type)
@@ -239,7 +276,7 @@ def nbt_operation(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
             if not path:
                 return f"data merge {nbt_type_str} {target} {tokens[0].string}"
-            return f"data modify {nbt_type_str} {target}{path} merge value {tokens[0].string}"
+            return f"data modify {nbt_type_str} {target}{path} merge value {tokens[0].get_full_string()}"
         else:
             if not path:
                 raise JMCSyntaxException(
