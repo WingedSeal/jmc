@@ -1,4 +1,5 @@
 """Module responsible for handling all Function Content parsing in Lexer"""
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 from json import dumps
 
@@ -11,6 +12,7 @@ from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS
+from .command.nbt_operation import get_nbt_type, NBTType, nbt_operation
 from .header import Header
 from .command import (FLOW_CONTROL_COMMANDS,
                       variable_operation,
@@ -67,14 +69,6 @@ FIRST_ARGUMENTS_EXCEPTION = {
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
 Example: `/effect clear` -> `"clear": {"effect"}`"""
-
-
-# ALLOW_KEYWORD_AFTER_CURLY_PAREN = {
-#     "give",
-#     "clear",
-#     "setblock"
-# }
-# """Set of vanilla command to stop JMC from terminating line from curly bracket (Allow number after curly bracket)"""
 
 
 def append_commands(commands: list[str], string: str) -> None:
@@ -137,7 +131,8 @@ x
         """
         Parse self.command
         """
-        if self.command[0].token_type != TokenType.KEYWORD:
+        if self.command[0].token_type != TokenType.KEYWORD and get_nbt_type(
+                self.command) != NBTType.BLOCK:
             raise JMCSyntaxException(
                 f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
         if self.command[0].string == "class":
@@ -383,8 +378,10 @@ x
         if token.string == "execute":
             self.is_execute = True
 
+        __nbt_type = get_nbt_type(self.command[key_pos:])
+
         # Handle Errors
-        if token.token_type != TokenType.KEYWORD:
+        if token.token_type != TokenType.KEYWORD and __nbt_type != NBTType.BLOCK:
             if not (token.token_type ==
                     TokenType.PAREN_CURLY and (self.is_execute or self.__commands[key_pos - 2] == "return")):
                 raise JMCSyntaxException(
@@ -435,6 +432,10 @@ x
         if token.string.startswith(DataPack.VARIABLE_SIGN):
             if self.__handle_startswith_var(key_pos):
                 return SKIP_TO_NEXT_LINE
+
+        if __nbt_type is not None:
+            self.__handle_startswith_nbt(key_pos, __nbt_type)
+            return SKIP_TO_NEXT_LINE
 
         if len(self.command[key_pos:]
                ) > 2 and self.command[key_pos + 1].string == ":":
@@ -678,6 +679,10 @@ x
             append_commands(self.__commands, self.command[key_pos + 2].string)
             return SKIP_TO_NEXT_LINE
         return CONTINUE_LINE
+
+    def __handle_startswith_nbt(self, key_pos: int, nbt_type: NBTType):
+        append_commands(self.__commands, nbt_operation(
+            self.command[key_pos:], self.tokenizer, self.lexer.datapack, nbt_type))
 
     def __handle_startswith_var(self, key_pos: int) -> bool:
         if self.command[0].string == "$if":

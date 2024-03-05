@@ -25,7 +25,8 @@ def variable_operation(
     :param tokenizer: Tokenizer
     :param datapack: Datapack object
     :param is_execute: Whether the statement/function is in `/execute`
-    :param is_in_chain: Whether it's in `$a = $b = $c` and is not the most left handed in the chain
+    :param FuncContent: Dependency injection of FuncConent class
+    :param first_arguments: Set of all vanilla commands and JMC custom syntax
     :return: Full minecraft command
     """
     is_token_obj_selector = False
@@ -76,8 +77,9 @@ def variable_operation(
         return f"scoreboard players get {tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
-        raise JMCSyntaxException(
-            "Expected operator after variable", tokens[0], tokenizer, col_length=True)
+        return f"scoreboard players get {tokens[0].string} {objective_name}"
+        # raise JMCSyntaxException(
+        #     "Expected operator after variable", tokens[0], tokenizer, col_length=True)
 
     if tokens[1].token_type != TokenType.OPERATOR:
         raise JMCSyntaxException(
