@@ -132,7 +132,7 @@ x
         Parse self.command
         """
         if self.command[0].token_type != TokenType.KEYWORD and get_nbt_type(
-                self.command) != NBTType.BLOCK:
+                self.command) is None:
             raise JMCSyntaxException(
                 f"Expected keyword (got {self.command[0].token_type.value})", self.command[0], self.tokenizer)
         if self.command[0].string == "class":
@@ -381,7 +381,7 @@ x
         __nbt_type = get_nbt_type(self.command[key_pos:])
 
         # Handle Errors
-        if token.token_type != TokenType.KEYWORD and __nbt_type != NBTType.BLOCK:
+        if token.token_type != TokenType.KEYWORD and __nbt_type is None:
             if not (token.token_type ==
                     TokenType.PAREN_CURLY and (self.is_execute or self.__commands[key_pos - 2] == "return")):
                 raise JMCSyntaxException(

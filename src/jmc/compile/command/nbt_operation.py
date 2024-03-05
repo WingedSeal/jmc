@@ -24,12 +24,15 @@ def get_nbt_type(tokens: list[Token]) -> NBTType | None:
     __is_storage_nbt = len(tokens) > 3 and tokens[0].token_type == TokenType.KEYWORD and tokens[
         1].string == ":" and tokens[2].token_type == TokenType.KEYWORD and tokens[3].string == "::"
     __is_auto_storage_nbt = tokens[0].token_type == TokenType.KEYWORD and tokens[1].string == "::"
+    __is_full_auto_storage_nbt = tokens[0].string == "::"
     __is_block_nbt = tokens[0].token_type == TokenType.PAREN_SQUARE and tokens[1].string == "::"
     __is_entity_nbt = tokens[0].string.startswith(
         "@") and tokens[0].string[1] in "parse" and (tokens[1].string == "::" or (tokens[1].token_type == TokenType.PAREN_SQUARE and tokens[2].string == "::"))
     if __is_entity_nbt:
         return NBTType.ENTITY
     elif __is_auto_storage_nbt:
+        return NBTType.AUTO_STORAGE
+    elif __is_full_auto_storage_nbt:
         return NBTType.AUTO_STORAGE
     elif __is_storage_nbt:
         return NBTType.STORAGE
@@ -59,11 +62,17 @@ def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
     :return: Tuple of [block|storage|entity, target, path]
     """
     if nbt_type == NBTType.AUTO_STORAGE:
-        target = tokens[start_index].string
-        path, length = merge_path(tokens[start_index + 2:])
-        del tokens[start_index:length + 2]
-        return nbt_type.value, datapack.namespace + \
-            ":" + target, " " + path if path else ""
+        if tokens[start_index].string != "::":
+            target = tokens[start_index].string
+            path, length = merge_path(tokens[start_index + 2:])
+            del tokens[start_index:length + 2]
+            return nbt_type.value, datapack.namespace + \
+                ":" + target, " " + path if path else ""
+        else:
+            path, length = merge_path(tokens[start_index + 1:])
+            del tokens[start_index:length + 1]
+            return nbt_type.value, datapack.namespace + \
+                ":" + datapack.namespace, " " + path if path else ""
     elif nbt_type == NBTType.STORAGE:
         target = tokens[start_index].string + tokens[start_index +
                                                      1].string + tokens[start_index + 2].string

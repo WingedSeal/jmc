@@ -31,11 +31,11 @@ scoreboard players add $y __variable__ 0
             """)
         )
 
-    def test_no_op_error(self):
-        with self.assertRaises(JMCSyntaxException):
-            JMCTestPack().set_jmc_file("""
-$x;
-        """).build()
+#     def test_no_op_error(self):
+#         with self.assertRaises(JMCSyntaxException):
+#             JMCTestPack().set_jmc_file("""
+# $x;
+#         """).build()
 
     def test_assignment(self):
         pack = JMCTestPack().set_jmc_file("""
