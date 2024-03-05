@@ -1,5 +1,6 @@
 
 from enum import Enum, auto
+import re
 from typing import TYPE_CHECKING
 
 from ..utils import is_float, is_number
@@ -71,12 +72,13 @@ def merge_path(tokens: list[Token], start_index: int,
     for index, token in enumerate(tokens[start_index:]):
         if token.string.startswith("."):
             string += token.string
-        elif token.token_type in (TokenType.PAREN_SQUARE, TokenType.PAREN_CURLY):
+        elif token.token_type == TokenType.PAREN_CURLY or (token.token_type == TokenType.PAREN_SQUARE and not re.match(r"-?\d+:-?\d*", token.string[1:-1])):
             string += datapack.lexer.clean_up_paren_token(token, tokenizer)
         else:
             del tokens[start_index:start_index + index]
             break
-
+    else:
+        del tokens[start_index:start_index + index + 1]
     return string
 
 
