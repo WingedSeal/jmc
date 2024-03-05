@@ -69,6 +69,10 @@ def merge_path(tokens: list[Token], start_index: int,
     else:
         string = tokens[start_index].string
     del tokens[start_index]
+
+    if len(tokens) <= start_index:
+        return string
+
     for index, token in enumerate(tokens[start_index:]):
         if token.string.startswith("."):
             string += token.string
@@ -77,8 +81,7 @@ def merge_path(tokens: list[Token], start_index: int,
         else:
             del tokens[start_index:start_index + index]
             break
-    else:
-        del tokens[start_index:start_index + index + 1]
+    del tokens[start_index:start_index + index + 1]
     return string
 
 

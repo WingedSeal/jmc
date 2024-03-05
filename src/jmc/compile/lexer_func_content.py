@@ -12,7 +12,7 @@ from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS
-from .command.nbt_operation import get_nbt_type, NBTType, nbt_operation
+from .command.nbt_operation import extract_nbt, get_nbt_type, NBTType, nbt_operation
 from .header import Header
 from .command import (FLOW_CONTROL_COMMANDS,
                       variable_operation,
@@ -403,7 +403,16 @@ x
 
         if token.string == "with":
             self.__handle_with(key_pos, token)
-            return CONTINUE_LINE
+            __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
+            if __with_nbt_type is None:
+                return CONTINUE_LINE
+            else:
+                nbt_type_str, target, path = extract_nbt(
+                    self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
+                append_commands(
+                    self.__commands,
+                    f"{nbt_type_str} {target}{path}")
+                return SKIP_TO_NEXT_LINE
         self.was_anonym_func = False
 
         if is_number(token.string) and key_pos == 0:
