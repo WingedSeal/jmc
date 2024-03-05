@@ -60,7 +60,10 @@ def merge_path(tokens: list[Token], start_index: int,
     :param tokens: Tokens
     :return: NBT Path string
     """
-    if not tokens:
+    if len(tokens) <= start_index:
+        return ""
+    if tokens[start_index].token_type != TokenType.KEYWORD or tokens[start_index].string.startswith(
+            "^"):
         return ""
     if tokens[start_index].token_type in (
             TokenType.PAREN_SQUARE, TokenType.PAREN_CURLY):
@@ -81,7 +84,7 @@ def merge_path(tokens: list[Token], start_index: int,
         else:
             del tokens[start_index:start_index + index]
             break
-    del tokens[start_index:start_index + index + 1]
+    del tokens[start_index:start_index + index]
     return string
 
 
@@ -139,7 +142,7 @@ def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
                 tokens, start_index + 2, tokenizer, datapack)
             del tokens[start_index:start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
-    raise NotImplementedError("Invalud nbt_type")
+    raise NotImplementedError("Invalid nbt_type")
 
 
 def __str_slice(token: Token, tokenizer: Tokenizer) -> str:
@@ -147,7 +150,7 @@ def __str_slice(token: Token, tokenizer: Tokenizer) -> str:
     if not slices or len(slices) > 2:
         raise JMCSyntaxException(
             "Expected operator after nbt", token, tokenizer)
-    if len(slices) == 1:
+    if not slices[1]:
         return slices[0].strip()
     return slices[0].strip() + " " + slices[1].strip()
 
@@ -216,7 +219,7 @@ def nbt_operation(
 
     if tokens[0].token_type != TokenType.OPERATOR:
         raise JMCSyntaxException(
-            "Expected operator after nbt", tokens[0], tokenizer)
+            f"Expected operator after nbt (got {tokens[0].token_type.value})", tokens[0], tokenizer)
 
     operator_token = tokens[0]
     operator = tokens[0].string
@@ -236,7 +239,8 @@ def nbt_operation(
                 tokens[0].string) and len(
                 tokens) > 1 and tokens[1].string == "*"
             or
-            tokens[0].token_type == TokenType.PAREN  # = (<type>) <command>
+            # = (<type>) <command>
+            tokens[0].token_type == TokenType.PAREN_ROUND
         ):
             type_, scale = __get_type_scale(tokens, tokenizer)
             func = FuncContent(tokenizer,
@@ -314,7 +318,7 @@ def nbt_operation(
         return f"execute store success {nbt_type_str} {target}{path} {type_} {scale} run {func_content[0]}"
 
     elif operator == "*":
-        return f"data get {nbt_type_str} {target}{path} {tokens[0]}"
+        return f"data get {nbt_type_str} {target}{path} {tokens[0].string}"
 
     raise JMCSyntaxException(
         f"Unrecognized operator ({operator})", operator_token, tokenizer)
