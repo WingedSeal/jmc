@@ -10,7 +10,7 @@ from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
 
 if TYPE_CHECKING:
-    from jmc.compile.lexer_func_content import FuncContent
+    from ..lexer_func_content import FuncContent
 
 VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
     FuncType.VARIABLE_OPERATION)

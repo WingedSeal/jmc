@@ -682,7 +682,7 @@ x
 
     def __handle_startswith_nbt(self, key_pos: int, nbt_type: NBTType):
         append_commands(self.__commands, nbt_operation(
-            self.command[key_pos:], self.tokenizer, self.lexer.datapack, nbt_type))
+            self.command[key_pos:], self.tokenizer, self.lexer.datapack, nbt_type, FuncContent, self.prefix))
 
     def __handle_startswith_var(self, key_pos: int) -> bool:
         if self.command[0].string == "$if":
