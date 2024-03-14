@@ -1,4 +1,5 @@
 """Module responsibile for all compiling in jmc"""
+
 from json import JSONDecodeError, dump, dumps, loads
 import os.path
 from pathlib import Path
@@ -90,12 +91,11 @@ def get_cert() -> dict[str, str]:
         "PRIVATE": DataPack.private_name,
         "VAR": DataPack.var_name,
         "INT": DataPack.int_name,
-        "STORAGE": DataPack.storage_name
+        "STORAGE": DataPack.storage_name,
     }
 
 
-def read_header(config: "Configuration",
-                _test_file: str | None = None) -> bool:
+def read_header(config: "Configuration", _test_file: str | None = None) -> bool:
     """
     Read the main header file
 
@@ -103,7 +103,7 @@ def read_header(config: "Configuration",
     :return: Whether the main header file was found
     """
     header = Header()
-    header_file = Path(config.target_str[:-len(".jmc")] + ".hjmc")
+    header_file = Path(config.target_str[: -len(".jmc")] + ".hjmc")
     parent_target = config.target.parent
     namespace_path = config.output / "data" / config.namespace
     if header_file.is_file() or _test_file is not None:
@@ -116,11 +116,8 @@ def read_header(config: "Configuration",
             header_str = _test_file
         logger.info(f"Parsing {header_file}")
         parse_header(
-            header_str,
-            header_file.as_posix(),
-            parent_target,
-            namespace_path,
-            config)
+            header_str, header_file.as_posix(), parent_target, namespace_path, config
+        )
         return True
 
     logger.info("Header file not found.")
@@ -149,32 +146,23 @@ def rmtree(path: Path, directory_exceptions: set[Path]) -> None:
         else:
             folders.append(path_)
 
-    sub_folders: list[Path] = []
-    for folder in folders:
-        for path_ in folder.glob("**/*"):
-            if path_.is_file():
-                files.append(path_)
-            else:
-                sub_folders.append(path_)
-    folders.extend(sub_folders)
-
-    for file in set(files):
+    for file in files:
         if file in exception_paths:
             continue
         file.unlink()
-<<<<<<< HEAD
 
-    for folder in set(folders):
-=======
     for folder in folders:
->>>>>>> parent of 70cd872 (Fix static path crashing)
         if folder in exception_paths:
             continue
-        folder.rmdir()
+        try:
+            folder.rmdir()
+        except OSError:
+            continue
 
 
-def read_cert(config: "Configuration", _test_file: str |
-              None = None) -> tuple[bool, dict[str, str], Path]:
+def read_cert(
+    config: "Configuration", _test_file: str | None = None
+) -> tuple[bool, dict[str, str], Path]:
     """
     Read Certificate(JMC.txt)
 
@@ -189,7 +177,8 @@ def read_cert(config: "Configuration", _test_file: str |
     if namespace_folder.is_dir() or _test_file is not None:
         if not cert_file.is_file() and _test_file is None:
             raise JMCBuildError(
-                f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself.")
+                f"{JMC_CERT_FILE_NAME} file not found in namespace folder.\n To prevent accidental overriding of your datapack please delete the namespace folder yourself."
+            )
         if _test_file is None:
             with cert_file.open("r", encoding="utf-8") as file:
                 cert_str = file.read()
@@ -199,18 +188,12 @@ def read_cert(config: "Configuration", _test_file: str |
             cert_config = string_to_cert_config(cert_str)
         except ValueError:
             cert_config = {}
-        DataPack.load_name = cert_config.get(
-            "LOAD", old_cert_config["LOAD"])
-        DataPack.tick_name = cert_config.get(
-            "TICK", old_cert_config["TICK"])
-        DataPack.private_name = cert_config.get(
-            "PRIVATE", old_cert_config["PRIVATE"])
-        DataPack.var_name = cert_config.get(
-            "VAR", old_cert_config["VAR"])
-        DataPack.int_name = cert_config.get(
-            "INT", old_cert_config["INT"])
-        DataPack.storage_name = cert_config.get(
-            "STORAGE", old_cert_config["STORAGE"])
+        DataPack.load_name = cert_config.get("LOAD", old_cert_config["LOAD"])
+        DataPack.tick_name = cert_config.get("TICK", old_cert_config["TICK"])
+        DataPack.private_name = cert_config.get("PRIVATE", old_cert_config["PRIVATE"])
+        DataPack.var_name = cert_config.get("VAR", old_cert_config["VAR"])
+        DataPack.int_name = cert_config.get("INT", old_cert_config["INT"])
+        DataPack.storage_name = cert_config.get("STORAGE", old_cert_config["STORAGE"])
         cert_config = get_cert()
         if _test_file is None:
             return True, cert_config, cert_file
@@ -237,13 +220,18 @@ def read_func_tag(path: Path, config: "Configuration") -> dict[str, Any]:
         try:
             json: dict[str, Any] = loads(content, strict=False)
             json["values"] = [
-                value for value in json["values"] if not value.startswith(config.namespace + ":")]
+                value
+                for value in json["values"]
+                if not value.startswith(config.namespace + ":")
+            ]
         except JSONDecodeError as error:
             raise JMCBuildError(
-                f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset.") from error
+                f"MalformedJsonException: Cannot parse {path.resolve().as_posix()}. Deleting the file to reset."
+            ) from error
         except KeyError as error:
             raise JMCBuildError(
-                f'"values" key not found in {path.resolve().as_posix()}. Delete the file to reset.') from error
+                f'"values" key not found in {path.resolve().as_posix()}. Delete the file to reset.'
+            ) from error
     else:
         json = {"values": []}
     return json
@@ -268,8 +256,14 @@ def post_process(string: str) -> str:
     return string
 
 
-def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_config: dict[str, str], cert_file: Path,
-          _is_virtual: bool = False) -> dict[Path, str] | None:
+def build(
+    datapack: DataPack,
+    config: "Configuration",
+    is_delete: bool,
+    cert_config: dict[str, str],
+    cert_file: Path,
+    _is_virtual: bool = False,
+) -> dict[Path, str] | None:
     """
     Build and write files for minecraft datapack
 
@@ -287,10 +281,10 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
     minecraft_folder = output_folder / "data" / "minecraft"
-    overrides_folders = {output_folder / "data" / namespace
-                         for namespace in header.namespace_overrides}
-    functions_tags_folder = output_folder / \
-        "data" / "minecraft" / "tags" / "functions"
+    overrides_folders = {
+        output_folder / "data" / namespace for namespace in header.namespace_overrides
+    }
+    functions_tags_folder = output_folder / "data" / "minecraft" / "tags" / "functions"
 
     if is_delete:
         statics = Header().statics
@@ -305,13 +299,15 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
                     shutil.rmtree(folder)
                 except OSError as error:
                     raise JMCBuildError(
-                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+                        "Something went wrong when deleting files, try deleting the namespace folder manually and try again."
+                    ) from error
         if minecraft_folder.is_dir():
             try:
                 shutil.rmtree(minecraft_folder)
             except OSError as error:
                 raise JMCBuildError(
-                    "Something went wrong when deleting files, try deleting the namespace folder manually and try again.") from error
+                    "Something went wrong when deleting files, try deleting the namespace folder manually and try again."
+                ) from error
 
     if not _is_virtual:
         make_cert(cert_config, cert_file)
@@ -321,21 +317,21 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     load_tag = functions_tags_folder / "load.json"
     tick_tag = functions_tags_folder / "tick.json"
 
-    load_json = {"values": []} if _is_virtual else read_func_tag(
-        load_tag, config)
-    tick_json = {"values": []} if _is_virtual else read_func_tag(
-        tick_tag, config)
+    load_json = {"values": []} if _is_virtual else read_func_tag(load_tag, config)
+    tick_json = {"values": []} if _is_virtual else read_func_tag(tick_tag, config)
 
-    load_json["values"].append(f'{config.namespace}:{DataPack.load_name}')
+    load_json["values"].append(f"{config.namespace}:{DataPack.load_name}")
     if _is_virtual:
         output[load_tag] = dumps(load_json, indent=4)
     else:
         with load_tag.open("w+", encoding="utf-8") as file:
             dump(load_json, file, indent=4)
 
-    if DataPack.tick_name in datapack.functions and datapack.functions[DataPack.tick_name]:
-        tick_json["values"].append(
-            f"{config.namespace}:{DataPack.tick_name}")
+    if (
+        DataPack.tick_name in datapack.functions
+        and datapack.functions[DataPack.tick_name]
+    ):
+        tick_json["values"].append(f"{config.namespace}:{DataPack.tick_name}")
         if _is_virtual:
             output[tick_tag] = dumps(tick_json, indent=4)
         else:
@@ -345,8 +341,13 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     for func_path, func in datapack.functions.items():
         namespace = func_path.split("/")[0]
         if namespace in header.namespace_overrides:
-            path = output_folder / "data" / namespace / "functions" / \
-                (func_path[len(namespace) + 1:] + ".mcfunction")
+            path = (
+                output_folder
+                / "data"
+                / namespace
+                / "functions"
+                / (func_path[len(namespace) + 1 :] + ".mcfunction")
+            )
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
@@ -361,8 +362,12 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
     for json_path, json in datapack.jsons.items():
         namespace = json_path.split("/")[0]
         if namespace in header.namespace_overrides:
-            path = output_folder / "data" / \
-                namespace / (json_path[len(namespace) + 1:] + ".json")
+            path = (
+                output_folder
+                / "data"
+                / namespace
+                / (json_path[len(namespace) + 1 :] + ".json")
+            )
         else:
             path = namespace_folder / (json_path + ".json")
         if json:
@@ -377,10 +382,14 @@ def build(datapack: DataPack, config: "Configuration", is_delete: bool, cert_con
 
     if not header.nometa:
         with (output_folder / "pack.mcmeta").open("w+", encoding="utf-8") as file:
-            dump({
-                "pack": {
-                    "pack_format": int(config.pack_format),
-                    "description": config.description
-                }
-            }, file, indent=4)
+            dump(
+                {
+                    "pack": {
+                        "pack_format": int(config.pack_format),
+                        "description": config.description,
+                    }
+                },
+                file,
+                indent=4,
+            )
     return None
