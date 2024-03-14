@@ -146,12 +146,21 @@ def rmtree(path: Path, directory_exceptions: set[Path]) -> None:
         else:
             folders.append(path_)
 
-    for file in files:
+    sub_folders: list[Path] = []
+    for folder in folders:
+        for path_ in folder.glob("**/*"):
+            if path_.is_file():
+                files.append(path_)
+            else:
+                sub_folders.append(path_)
+    folders.extend(sub_folders)
+
+    for file in set(files):
         if file in exception_paths:
             continue
         file.unlink()
 
-    for folder in folders:
+    for folder in set(folders):
         if folder in exception_paths:
             continue
         try:
