@@ -261,6 +261,8 @@ def nbt_operation(
             raise JMCSyntaxException(
                 f"NBT {full_operator} cannot be used with root nbt", left_nbt, tokenizer, suggestion="Put something after `::`")
         if right_nbt_type is None:
+            if tokens[0].string == "-":
+                tokens = [tokenizer.merge_tokens(tokens)]
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
