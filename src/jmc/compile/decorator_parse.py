@@ -113,3 +113,9 @@ class Lazy(JMCDecorator):
                 f"Duplicate function declaration({pre_func.func_path})", pre_func.self_token, pre_func.tokenizer,
                 suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
         self.datapack.lazy_func[pre_func.func_path] = pre_func
+
+
+@dec_property("root")
+class Root(JMCDecorator):
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
+        pre_func.prefix = ""
