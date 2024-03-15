@@ -83,8 +83,8 @@ def merge_path(tokens: list[Token], start_index: int,
             string += datapack.lexer.clean_up_paren_token(token, tokenizer)
         else:
             del tokens[start_index:start_index + index]
-            break
-    del tokens[start_index:start_index + index]
+            return string
+    del tokens[start_index:start_index + index + 1]
     return string
 
 
@@ -271,7 +271,7 @@ def nbt_operation(
             if tokens:
                 if tokens[0].token_type != TokenType.PAREN_SQUARE:
                     raise JMCSyntaxException(
-                        f"Unexpected token ({tokens[0]})", tokens[0], tokenizer)
+                        f"Unexpected token ({tokens[0].string})", tokens[0], tokenizer)
                 return f"""data modify {nbt_type_str} {target}{path} {full_operator} string {right_nbt_type_str} {right_target}{right_path} {
                             __str_slice(tokens[0], tokenizer)}"""
             else:
