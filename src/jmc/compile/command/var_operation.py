@@ -186,9 +186,23 @@ def variable_operation(
                 tokens, tokenizer, datapack, 2)
 
         if len(tokens) > 3:
-            if operator in {"=", "=="}:
-                return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments, prefix)}""".replace(
-                    "run execute store", "store")
+            if operator == "=":
+                try:
+                    return f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments, prefix)}""".replace(
+                        "run execute store", "store")
+                except Exception as error:
+                    try:
+                        func_content = FuncContent(tokenizer, [tokens[2:]],
+                                                   is_load=False, lexer=datapack.lexer, prefix=prefix).parse()
+                        if len(func_content) > 1:
+                            raise JMCSyntaxException(
+                                "Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
+                        if func_content[0].startswith("execute"):
+                            # len("execute ") = 8
+                            return f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}"
+                        return f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}"
+                    except Exception:
+                        raise error
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')", tokens[3], tokenizer, suggestion="Probably missing semicolon.")

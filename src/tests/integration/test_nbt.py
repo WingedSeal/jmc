@@ -93,6 +93,26 @@ data get entity @a[tag=test] my.path
             """)
         )
 
+    def test_interaction(self):
+        pack = JMCTestPack().set_jmc_file("""
+$var = storage::path[-1].int;
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute store result score $var __variable__ run data get storage TEST:storage path[-1].int
+            """)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
