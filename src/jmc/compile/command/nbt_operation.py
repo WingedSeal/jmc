@@ -79,7 +79,14 @@ def merge_path(tokens: list[Token], start_index: int,
     for index, token in enumerate(tokens[start_index:]):
         if token.string.startswith("."):
             string += token.string
-        elif token.token_type == TokenType.PAREN_CURLY or (token.token_type == TokenType.PAREN_SQUARE and not re.match(r"-?\d+:-?\d*", token.string[1:-1])):
+        elif (
+            token.token_type == TokenType.PAREN_CURLY
+            or
+            (token.token_type == TokenType.PAREN_SQUARE and not re.match(
+                r"-?\d+:-?\d*", token.string[1:-1]))
+            or
+            (token.token_type == TokenType.PAREN_ROUND and string.endswith("$"))
+        ):
             string += datapack.lexer.clean_up_paren_token(token, tokenizer)
         else:
             del tokens[start_index:start_index + index]
