@@ -293,8 +293,30 @@ def __parse_header(header_str: str, file_name: str,
             else:
                 header.credits.append("")
 
-        # #override
+        # #enum
+        elif directive_token.string == "enum":
+            if len(arg_tokens) < 2:
+                raise HeaderSyntaxException(
+                    f"Expected at least 2 arguments after '#enum' (got {len(arg_tokens)})", file_name, line, line_str)
+            class_name = arg_tokens[0].string
+            start = 0
+            if is_number(arg_tokens[1].string):
+                start = int(arg_tokens[1].string)
+                del arg_tokens[1]
+            if len(arg_tokens) < 2:
+                raise HeaderSyntaxException(
+                    f"Expected at least 1 item in enum (got {len(arg_tokens) - 1})", file_name, line, line_str)
+            for item in arg_tokens[1:]:
+                key = class_name + "." + item.string
+                header.macros[key] = __create_macro_factory(
+                    [Token(TokenType.KEYWORD, line, 0, str(start))], None, key, tokenizer, HeaderSyntaxException(
+                        "Invalid macro argument syntax", file_name, line, line_str))
+                num = arg_tokens[1].string
+                if is_number(num):
+                    header.number_macros[key] = num
+                start += 1
 
+        # #override
         elif directive_token.string == "override":
             if not arg_tokens or len(arg_tokens) != 1:
                 raise HeaderSyntaxException(
