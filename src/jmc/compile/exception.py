@@ -109,6 +109,15 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
     return msg
 
 
+class EvaluationException(FileNotFoundError):
+    """Header file not found"""
+
+    def __init__(self, string: str):
+        msg = f"Unable to evaluate expression '{string}'"
+        log(self, (msg, ))
+        super().__init__(msg)
+
+
 class HeaderFileNotFoundError(FileNotFoundError):
     """Header file not found"""
 
@@ -265,5 +274,6 @@ EXCEPTIONS = (
     JMCValueError,
     MinecraftSyntaxWarning,
     JMCBuildError,
-    MinecraftVersionTooLow
+    MinecraftVersionTooLow,
+    EvaluationException
 )

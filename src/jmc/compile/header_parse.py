@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .command.utils import hash_string_to_string
+from .command.utils import eval_expr, hash_string_to_string
 from .utils import is_connected, get_mc_uuid, is_number
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
-from .exception import HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
+from .exception import EvaluationException, HeaderDuplicatedMacro, HeaderFileNotFoundError, HeaderSyntaxException, JMCSyntaxException
 from .log import Logger
 
 if TYPE_CHECKING:
@@ -66,6 +66,22 @@ def __custom_macro_factory(
 
         return return_list
     return macro_factory, 0
+
+
+def __eval_macro_factory(
+        argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+    """Macro factory for EVAL binding"""
+    string = argument_tokens[0].string
+    header = Header()
+    for key, replaced in header.number_macros.items():
+        string.replace(key, replaced)
+    try:
+        number = eval_expr(string)
+    except TypeError:
+        raise EvaluationException(string)
+    new_token = Token(TokenType.KEYWORD, line=line, col=col,
+                      string=number, _macro_length=len(number))
+    return [new_token]
 
 
 def __create_macro_factory(
@@ -222,15 +238,19 @@ def __parse_header(header_str: str, file_name: str,
                         Token.empty(
                             get_mc_uuid(key),
                             TokenType.PAREN_SQUARE)]
+                elif binder == "EVAL":
+                    header.macros[key] = __eval_macro_factory, 1
+                    key = ""
                 else:
                     raise HeaderSyntaxException(
                         "Unrecognized binder for '#bind'", file_name, line, line_str, suggestion="All available binders are '__namespace__', '__namehash{number}__', '__UUID__'")
 
-                if key in header.macros:
-                    raise HeaderDuplicatedMacro(
-                        f"'{key}' macro is already defined", file_name, line, line_str)
-                header.macros[key] = __custom_macro_factory(
-                    replaced_tokens, key)
+                if key:
+                    if key in header.macros:
+                        raise HeaderDuplicatedMacro(
+                            f"'{key}' macro is already defined", file_name, line, line_str)
+                    header.macros[key] = __custom_macro_factory(
+                        replaced_tokens, key)
 
         # #include
         elif directive_token.string == "include":

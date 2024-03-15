@@ -288,9 +288,6 @@ class Tokenizer:
                         f"Macro factory arguments can only have a keyword token (got {arg_[0].token_type})", arg_[0], self)
                 if len(arg_) > 1:
                     arg_ = [self.merge_tokens(arg_)]
-                    # raise JMCSyntaxException(
-                    # f"Macro factory arguments can only have 1 token each (got
-                    # {len(arg_)})", arg_[1], self)
 
                 args.append(arg_[0])
             if kwargs:
