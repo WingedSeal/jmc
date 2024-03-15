@@ -150,7 +150,8 @@ x
             self.lexer.parse_func(
                 self.tokenizer,
                 self.command,
-                self.tokenizer.file_path)
+                self.tokenizer.file_path,
+                prefix=self.prefix)
             return
         elif is_decorator(self.command[0].string):
             self.lexer.parse_decorated_function(
