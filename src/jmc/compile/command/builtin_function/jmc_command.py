@@ -1246,10 +1246,31 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
     }
 )
 class JMCPython(JMCFunction):
+    def clear_indent(self, string: str, indent: str) -> str:
+        if not string:
+            return string
+        if string.startswith(indent):
+            return string[len(indent):]
+        raise JMCSyntaxException(
+            "Invalid indentation when trimming indentation",
+            self.raw_args["pythonCode"].token,
+            self.tokenizer, suggestion=string, col_length=False, display_col_length=False)
+
     def call(self) -> str:
+        if not self.args["pythonCode"]:
+            return ""
+
+        python_lines = self.args["pythonCode"].split("\n")
+        indent = python_lines[0][:len(
+            python_lines[0]) - len(python_lines[0].lstrip())]
+        if not indent:
+            python_code = self.args["pythonCode"]
+        else:
+            python_code = "\n".join(self.clear_indent(line, indent)
+                                    for line in python_lines)
         try:
             return ISOLATED_ENVIRONMENT.run(
-                self.args["pythonCode"], self.args["env"] if self.args["env"] else None)
+                python_code, self.args["env"] if self.args["env"] else None)
         except Exception as error:
             raise JMCValueError(
                 "An exception occured in JMC.python",
