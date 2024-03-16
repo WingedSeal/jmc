@@ -30,12 +30,12 @@ def variable_operation(
     :return: Full minecraft command
     """
     is_token_obj_selector = False
-    if len(tokens[0].string) == 1:
-        raise JMCSyntaxException(
-            "Unexpected variable without name (`$`)",
-            tokens[0],
-            tokenizer)
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
+        if len(tokens[0].string) == 1:
+            raise JMCSyntaxException(
+                "Unexpected variable without name (`$`)",
+                tokens[0],
+                tokenizer)
         if tokens[0].string[1] == DataPack.VARIABLE_SIGN:
             raise JMCSyntaxException(
                 "Unexpected double variable sign", tokens[0], tokenizer)
@@ -179,12 +179,12 @@ def variable_operation(
         # left_token.string operator right_token.string
 
         old_tokens = None
+
         if len(tokens) > 3 and is_obj_selector(
                 tokens, 2):  # If rvar is obj:selector
             old_tokens = tokens.copy()
             right_token = merge_obj_selector(
                 tokens, tokenizer, datapack, 2)
-
         if len(tokens) > 3:
             if operator == "=":
                 try:
