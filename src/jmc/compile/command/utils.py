@@ -352,7 +352,21 @@ def eval_expr(expr: str) -> str:
     :param expr: Expression string
     :return: String representation of result number
     """
-    return str(__eval(ast.parse(expr, mode="eval").body))
+    number = __eval(ast.parse(expr, mode="eval").body)
+    if isinstance(number, int):
+        return f"{number:d}"
+    if isinstance(number, float):
+        # return f"{number:.10f}".rstrip("0")
+        if abs(number) >= 1:
+            return f"{number:.2f}"
+        else:
+            string = f"{number:.12f}"
+            whole, decimal = string.split(".")
+            for i, char in enumerate(decimal):
+                if char != "0":
+                    break
+            return whole + "." + decimal[:i + 5].rstrip("0")
+    return str(number)
 
 
 OPERATORS: dict[type, Callable[..., Any]] = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
