@@ -356,8 +356,12 @@ def eval_expr(expr: str) -> str:
     if isinstance(number, int):
         return f"{number:d}"
     if isinstance(number, float):
-        if abs(number) >= 1:
+        if abs(number) >= 100:
             return f"{number:.2f}"
+        elif abs(number) >= 10:
+            return f"{number:.3f}"
+        elif abs(number) >= 1:
+            return f"{number:.3f}"
         string = f"{number:.12f}"
         whole, decimal = string.split(".")
         for i, char in enumerate(decimal):
