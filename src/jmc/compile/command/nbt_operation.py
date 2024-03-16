@@ -246,9 +246,12 @@ def nbt_operation(
 
     if operator in ("<<", ">>", "="):
         right_nbt_type = get_nbt_type(tokens)
+        __is_command = tokens[0].token_type == TokenType.KEYWORD and not is_float(
+            tokens[0].string) and not is_float(
+            tokens[0].string[:-1]) and tokens[0].string not in ("true", "false")
+
         if operator == "=" and right_nbt_type is None and (
-            tokens[0].token_type == TokenType.KEYWORD and not is_float(
-                tokens[0].string)  # = <command>
+            __is_command  # = <command>
             or
             # = <scale> * <command> / = <scale> * (<type>) <command>
             tokens[0].token_type == TokenType.KEYWORD and is_float(
