@@ -178,6 +178,15 @@ def __get_type_scale(tokens: list[Token],
     return type_, scale
 
 
+def __clean_token(token: Token, tokenizer: Tokenizer,
+                  datapack: DataPack) -> str:
+    if token.token_type in (TokenType.PAREN_CURLY,
+                            TokenType.PAREN_ROUND, TokenType.PAREN_SQUARE):
+        return datapack.lexer.clean_up_paren_token(
+            token, tokenizer, is_nbt=True)
+    return token.get_full_string()
+
+
 def nbt_operation(
         tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, nbt_type: NBTType, FuncContent: type["FuncContent"], prefix: str) -> str:
     left_nbt = tokens[0]
@@ -211,7 +220,7 @@ def nbt_operation(
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
-            return f"data modify {nbt_type_str} {target}{path} insert {index} value {tokens[0].get_full_string()}"
+            return f"data modify {nbt_type_str} {target}{path} insert {index} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type)
@@ -270,10 +279,11 @@ def nbt_operation(
         if right_nbt_type is None:
             if tokens[0].string == "-":
                 tokens = [tokenizer.merge_tokens(tokens)]
+
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
-            return f"data modify {nbt_type_str} {target}{path} {full_operator} value {tokens[0].get_full_string()}"
+            return f"data modify {nbt_type_str} {target}{path} {full_operator} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type)
@@ -294,7 +304,7 @@ def nbt_operation(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
             if not path:
                 return f"data merge {nbt_type_str} {target} {tokens[0].string}"
-            return f"data modify {nbt_type_str} {target}{path} merge value {tokens[0].get_full_string()}"
+            return f"data modify {nbt_type_str} {target}{path} merge value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             if not path:
                 raise JMCSyntaxException(
