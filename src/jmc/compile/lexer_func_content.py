@@ -407,13 +407,12 @@ x
             __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
             if __with_nbt_type is None:
                 return CONTINUE_LINE
-            else:
-                nbt_type_str, target, path = extract_nbt(
-                    self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
-                append_commands(
-                    self.__commands,
-                    f"{nbt_type_str} {target}{path}")
-                return SKIP_TO_NEXT_LINE
+            nbt_type_str, target, path = extract_nbt(
+                self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
+            append_commands(
+                self.__commands,
+                f"{nbt_type_str} {target}{path}")
+            return SKIP_TO_NEXT_LINE
         self.was_anonym_func = False
 
         if is_number(token.string) and key_pos == 0:
@@ -490,11 +489,12 @@ x
         return CONTINUE_LINE
 
     def __handle_function_call(self, key_pos: int, token: Token) -> bool:
-        if len(self.command[key_pos:]) > 2:
+        if len(self.command[key_pos:]) > 2:  # func_name() with ...
             if token.string == "unless":
                 raise JMCSyntaxException(
                     f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
-            if self.command[key_pos + 3].string == "with":
+
+            if self.command[key_pos + 2].string != "with":
                 raise JMCSyntaxException(
                     f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
 
@@ -506,7 +506,18 @@ x
             append_commands(self.__commands,
                             f"function {self.lexer.datapack.format_func_path(func)}")
             del self.command[key_pos + 1]  # delete ()
-            return CONTINUE_LINE
+
+            __with_nbt_type = get_nbt_type(self.command[key_pos + 2:])
+            if __with_nbt_type is None:
+                return CONTINUE_LINE
+
+            append_commands(self.__commands, "with")
+            nbt_type_str, target, path = extract_nbt(
+                self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 2)
+            append_commands(
+                self.__commands,
+                f"{nbt_type_str} {target}{path}")
+            return SKIP_TO_NEXT_LINE
 
         if self.command[key_pos + 1].string != "()":
             arg_token = self.command[key_pos + 1]
