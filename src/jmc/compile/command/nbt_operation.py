@@ -304,7 +304,7 @@ def nbt_operation(
         if right_nbt_type is None:
             if len(tokens) > 1:
                 raise JMCSyntaxException(
-                    f"Unexpected token ({tokens[1]})", tokens[1], tokenizer)
+                    f"Unexpected token ({tokens[1].string})", tokens[1], tokenizer)
             if not path:
                 return f"data merge {nbt_type_str} {target} {tokens[0].string}"
             return f"data modify {nbt_type_str} {target}{path} merge value {__clean_token(tokens[0], tokenizer, datapack)}"

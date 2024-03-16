@@ -38,19 +38,7 @@ def is_obj_selector(tokens: list[Token], start_index: int = 0) -> bool:
         tokens[start_index + 1].string == ":"
         and
         tokens[start_index + 2].token_type == TokenType.KEYWORD
-    )  # or (
-    #     len(tokens) >= start_index + 4
-    #     and
-    #     tokens[start_index].token_type == TokenType.KEYWORD
-    #     and
-    #     tokens[start_index + 1].token_type == TokenType.OPERATOR
-    #     and
-    #     tokens[start_index + 1].string == ":"
-    #     and
-    #     tokens[start_index + 2].token_type == TokenType.KEYWORD
-    #     and
-    #     tokens[start_index + 3].token_type == TokenType.PAREN_SQUARE
-    # )
+    )
 
 
 def merge_obj_selector(tokens: list[Token], tokenizer: Tokenizer,

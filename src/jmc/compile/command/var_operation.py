@@ -179,12 +179,12 @@ def variable_operation(
         # left_token.string operator right_token.string
 
         old_tokens = None
-
         if len(tokens) > 3 and is_obj_selector(
                 tokens, 2):  # If rvar is obj:selector
             old_tokens = tokens.copy()
             right_token = merge_obj_selector(
                 tokens, tokenizer, datapack, 2)
+
         if len(tokens) > 3:
             if operator == "=":
                 try:
@@ -192,7 +192,7 @@ def variable_operation(
                         "run execute store", "store")
                 except Exception as error:
                     try:
-                        func_content = FuncContent(tokenizer, [tokens[2:]],
+                        func_content = FuncContent(tokenizer, [old_tokens[2:] if old_tokens is not None else tokens[2:]],
                                                    is_load=False, lexer=datapack.lexer, prefix=prefix).parse()
                         if len(func_content) > 1:
                             raise JMCSyntaxException(
