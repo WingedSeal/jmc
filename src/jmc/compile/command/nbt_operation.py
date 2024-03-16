@@ -62,11 +62,10 @@ def merge_path(tokens: list[Token], start_index: int,
     """
     if len(tokens) <= start_index:
         return ""
-    if tokens[start_index].token_type != TokenType.KEYWORD or tokens[start_index].string.startswith(
+    if tokens[start_index].token_type not in (TokenType.KEYWORD, TokenType.PAREN_CURLY) or tokens[start_index].string.startswith(
             "^"):
         return ""
-    if tokens[start_index].token_type in (
-            TokenType.PAREN_SQUARE, TokenType.PAREN_CURLY):
+    if tokens[start_index].token_type == TokenType.PAREN_CURLY:
         string = datapack.lexer.clean_up_paren_token(
             tokens[start_index], tokenizer)
     else:
@@ -306,7 +305,7 @@ def nbt_operation(
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1].string})", tokens[1], tokenizer)
             if not path:
-                return f"data merge {nbt_type_str} {target} {tokens[0].string}"
+                return f"data merge {nbt_type_str} {target} {__clean_token(tokens[0], tokenizer, datapack)}"
             return f"data modify {nbt_type_str} {target}{path} merge value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             if not path:

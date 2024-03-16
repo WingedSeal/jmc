@@ -26,8 +26,8 @@ my_storage::my.path ?= $my_var;
 my_storage::my.path = $my_var;
 my_storage::my.path = (float) $my_var;
 my_storage::my.path = 2 * (float) $my_var;
-my_storage::my.path += {key:"value"};
-my_storage:: += {key:"value"};
+my_storage::my.path += {key: "value"};
+my_storage:: += {key: "value"};
 my_storage::my.path.del();
         """).build()
 
