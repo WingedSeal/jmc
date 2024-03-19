@@ -894,4 +894,4 @@ def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tok
                 f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
 
     return string[:calc_pos] + \
-        eval_expr(expression.replace("\\", "//")) + string[index + 13:]
+        eval_expr(expression) + string[index + 13:]
