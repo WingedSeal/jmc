@@ -138,7 +138,8 @@ def extract_nbt(tokens: list[Token], tokenizer: Tokenizer,
     elif nbt_type == NBTType.ENTITY:
         if tokens[1].token_type == TokenType.PAREN_SQUARE:
             target = tokens[start_index].string + \
-                tokens[start_index + 1].string
+                datapack.lexer.clean_up_paren_token(
+                    tokens[start_index + 1], tokenizer)
             path = merge_path(
                 tokens, start_index + 3, tokenizer, datapack)
             del tokens[start_index:start_index + 3]
