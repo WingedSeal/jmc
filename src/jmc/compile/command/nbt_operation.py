@@ -162,15 +162,21 @@ def __str_slice(token: Token, tokenizer: Tokenizer) -> str:
 
 
 def __get_type_scale(tokens: list[Token],
-                     tokenizer: Tokenizer) -> tuple[str, str]:
+                     tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     type_ = "int"
     scale = "1"
-    if is_float(tokens[0].string) and tokens[1].string == "*":
+    if tokens[0].string == "$":
+        tokens[0] = tokenizer.merge_tokens(
+            tokens[0:2], lexer_to_cleanup=datapack.lexer)
+        del tokens[1]
+    if (is_float(tokens[0].string) or tokens[0].string.startswith(
+            "$")) and tokens[1].string == "*":
         scale = tokens[0].string
         del tokens[:2]
     if tokens[0].token_type == TokenType.PAREN_ROUND:
         type_ = tokens[0].string[1:-1].strip()
-        if type_ not in ("byte", "short", "int", "long", "float", "double"):
+        if type_ not in ("byte", "short", "int", "long", "float",
+                         "double") and not type_.startswith("$"):
             raise JMCSyntaxException(
                 f"Unexpected data type ({type_})", tokens[0], tokenizer, suggestion="Available data types are 'bytes', 'short', 'int', 'long', 'float', 'double'")
         del tokens[0]
@@ -247,20 +253,25 @@ def nbt_operation(
         right_nbt_type = get_nbt_type(tokens)
         __is_command = tokens[0].token_type == TokenType.KEYWORD and not is_float(
             tokens[0].string) and not is_float(
-            tokens[0].string[:-1]) and tokens[0].string not in ("true", "false")
+            tokens[0].string[:-1]) and tokens[0].string not in ("true", "false") and tokens[0].string != "$"
 
         if operator == "=" and right_nbt_type is None and (
             __is_command  # = <command>
             or
             # = <scale> * <command> / = <scale> * (<type>) <command>
-            tokens[0].token_type == TokenType.KEYWORD and is_float(
+                (tokens[0].token_type == TokenType.KEYWORD and is_float(
                 tokens[0].string) and len(
-                tokens) > 1 and tokens[1].string == "*"
+                tokens) > 1 and tokens[1].string == "*")
+            or
+            # = $(scale) * <command>
+                (tokens[0].string == "$" and len(
+                tokens) > 2 and tokens[1].token_type == TokenType.PAREN_ROUND
+                and tokens[2].string == "*")
             or
             # = (<type>) <command>
             tokens[0].token_type == TokenType.PAREN_ROUND
         ):
-            type_, scale = __get_type_scale(tokens, tokenizer)
+            type_, scale = __get_type_scale(tokens, tokenizer, datapack)
             func = FuncContent(tokenizer,
                                [tokens],
                                is_load=False,
@@ -324,7 +335,7 @@ def nbt_operation(
                 return f"data modify {nbt_type_str} {target}{path} merge from {right_nbt_type_str} {right_target}{right_path}"
 
     elif operator == "?=":
-        type_, scale = __get_type_scale(tokens, tokenizer)
+        type_, scale = __get_type_scale(tokens, tokenizer, datapack)
         if len(tokens) == 0:
             raise JMCSyntaxException(
                 f"Expected command after operator{tokens[0].string} (got nothing)", tokens[1], tokenizer)

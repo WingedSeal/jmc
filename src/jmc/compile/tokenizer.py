@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from ast import literal_eval
 from enum import Enum
 import re
+from typing import TYPE_CHECKING
 
 
 from .utils import is_connected, is_decorator
@@ -10,6 +11,8 @@ from .header import MacroFactory, Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
 
+if TYPE_CHECKING:
+    from ..compile.lexer import Lexer
 
 logger = Logger(__name__)
 
@@ -677,7 +680,7 @@ class Tokenizer:
         return result
 
     def merge_tokens(self, tokens: list[Token],
-                     use_full_string: bool = False) -> Token:
+                     use_full_string: bool = False, lexer_to_cleanup: "Lexer | None" = None) -> Token:
         """
         Merge multiple token together
 
@@ -685,11 +688,19 @@ class Tokenizer:
         :param use_full_string: whether to use fullstring including quatation mark
         :return: A token with the same token type as the first token (Unless it's an operator, then the type will be keyword)
         """
+        def __handle_token(token: Token):
+            if lexer_to_cleanup is not None and token.token_type in (
+                    TokenType.PAREN_CURLY, TokenType.PAREN_ROUND, TokenType.PAREN_SQUARE):
+                return lexer_to_cleanup.clean_up_paren_token(token, self)
+            if use_full_string:
+                return token.get_full_string()
+            return token.string
+
         token_type = tokens[0].token_type
         if token_type == TokenType.OPERATOR:
             token_type = TokenType.KEYWORD
         return Token(token_type, tokens[0].line, tokens[0].col, "".join(
-            token.get_full_string() if use_full_string else token.string for token in tokens))
+            __handle_token(token) for token in tokens))
 
     def __parse_func_arg(
             self, tokens: list[Token], is_kwargs: bool, is_nbt: bool = False) -> list[Token]:
