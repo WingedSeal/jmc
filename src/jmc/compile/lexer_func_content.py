@@ -438,6 +438,10 @@ x
             append_commands(self.__commands, token.string)
             return CONTINUE_LINE
 
+        if token.string == "return":
+            self.__handle_return(key_pos)
+            return CONTINUE_LINE
+
         if token.string.startswith(DataPack.VARIABLE_SIGN):
             if self.__handle_startswith_var(key_pos):
                 return SKIP_TO_NEXT_LINE
@@ -600,6 +604,16 @@ x
 
         raise JMCSyntaxException(
             "Unexpected number", token, self.tokenizer, display_col_length=False)
+
+    def __handle_return(self, key_pos: int) -> None:
+        if self.command[key_pos + 1].string == "true":
+            append_commands(self.__commands, "return 1")
+            del self.command[key_pos + 1]
+        elif self.command[key_pos + 1].string == "false":
+            append_commands(self.__commands, "return 0")
+            del self.command[key_pos + 1]
+        else:
+            append_commands(self.__commands, "return")
 
     def __handle_with(self, key_pos: int, token: Token) -> None:
         if not self.was_anonym_func:
