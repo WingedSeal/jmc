@@ -166,11 +166,12 @@ def __get_type_scale(tokens: list[Token],
                      tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
     type_ = "int"
     scale = "1"
-    if tokens[0].string == "$":
+    if len(
+            tokens) > 1 and tokens[0].string == "$" and tokens[1].token_type == TokenType.PAREN_ROUND:
         tokens[0] = tokenizer.merge_tokens(
             tokens[0:2], lexer_to_cleanup=datapack.lexer)
         del tokens[1]
-    if (is_float(tokens[0].string) or tokens[0].string.startswith(
+    if len(tokens) > 1 and (is_float(tokens[0].string) or tokens[0].string.startswith(
             "$")) and tokens[1].string == "*":
         scale = tokens[0].string
         del tokens[:2]
