@@ -352,7 +352,7 @@ def eval_expr(expr: str) -> str:
     :param expr: Expression string
     :return: String representation of result number
     """
-    number = __eval(ast.parse(expr, mode="eval").body)
+    number = __eval(ast.parse(expr.replace("\\", "//"), mode="eval").body)
     if isinstance(number, int):
         return f"{number:d}"
     if isinstance(number, float):
