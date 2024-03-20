@@ -668,12 +668,8 @@ class Lexer:
             return f"{precommand}execute {condition} run {arrow_func}"
 
         # Case 2: Has `else` or `else if`
-        count = self.datapack.get_count(name)
-        count_alt = self.datapack.get_count(name)
-        output = [
-            f"scoreboard players set {VAR} {DataPack.var_name} 0",
-            f"{precommand}execute {condition} run {self.datapack.add_custom_private_function(name, if_else_box[0][1], tokenizer, count, prefix, postcommands=[f'scoreboard players set {VAR} {DataPack.var_name} 1'])}",
-            f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"]
+        conditions = [f"{precommand}execute {condition} run"]
+        command_tokens = [if_else_box[0][1]]
         del if_else_box[0]
 
         if if_else_box[-1][0] is None:
@@ -690,25 +686,43 @@ class Lexer:
                     raise ValueError("else_if[0] is None")
                 condition, precommand = parse_condition(
                     else_if[0], tokenizer, self.datapack)
-                count = self.datapack.get_count(name)
-                count_tmp = count_alt
-                count_alt = self.datapack.get_count(name)
+                conditions.append(f"{precommand}execute {condition} run")
+                command_tokens.append(else_if[1])
 
-                self.datapack.add_raw_private_function(name, [
-                    f"{precommand}execute {condition} run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count}",
-                    f"execute if score {VAR} {DataPack.var_name} matches 0 run function {self.datapack.namespace}:{DataPack.private_name}/{name}/{count_alt}"
-                ], count_tmp)
-
-                self.datapack.add_custom_private_function(name, else_if[1], tokenizer, count, prefix, postcommands=[
-                    f"scoreboard players set {VAR} {DataPack.var_name} 1"
-                ])
         # `else`
-        if else_ is None:
-            self.datapack.private_functions[name][count_tmp].delete(-1)
-        else:
-            self.datapack.add_custom_private_function(
-                name, else_, tokenizer, count_alt, prefix)
-        return "\n".join(output)
+        outputs = [[f"scoreboard players set {VAR} {DataPack.var_name} 0"]]
+        if else_ is None:  # no 'else'
+            for condition, command_token in list(
+                    zip(conditions, command_tokens))[:-1]:
+                outputs[-1].extend([
+                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix,postcommands=[
+                        f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
+                    f"execute if score {VAR} {DataPack.var_name} matches 0 run "
+                ])
+                outputs.append([])
+            del outputs[-1]
+            last_output = f"{conditions[-1]} {self.datapack.add_arrow_function(name, command_tokens[-1], tokenizer, prefix=prefix)}"
+        else:  # 'else'
+            for condition, command_token in zip(conditions, command_tokens):
+                outputs[-1].extend([
+                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix,postcommands=[
+                        f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
+                    f"execute if score {VAR} {DataPack.var_name} matches 0 run "
+                ])
+                outputs.append([])
+            del outputs[-1]
+            last_output = self.datapack.add_arrow_function(
+                name, else_, tokenizer, prefix=prefix)
+
+        outputs[-1][-1] += last_output
+        count = self.datapack.get_count(name)
+        self.datapack.add_private_function(name, "\n".join(outputs[-1]), count)
+        for output in reversed(outputs[1:-1]):
+            output[-1] += self.datapack.call_func(name, count)
+            count = self.datapack.get_count(name)
+            self.datapack.add_private_function(name, "\n".join(output), count)
+        outputs[0][-1] += self.datapack.call_func(name, count)
+        return "\n".join(outputs[0])
 
     def clean_up_paren_token(self, token: Token, tokenizer: Tokenizer,
                              is_nbt: bool = True) -> str:

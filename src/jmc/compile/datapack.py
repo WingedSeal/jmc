@@ -359,7 +359,7 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str, prefix: str,
+    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str | None = None, prefix: str = "",
                                     precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
         """
         Wrap custom commands around user's commands
@@ -380,6 +380,8 @@ class DataPack:
         commands = [*precommands,
                     *self.parse_function_token(token, tokenizer, prefix),
                     *postcommands]
+        if count is None:
+            count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
