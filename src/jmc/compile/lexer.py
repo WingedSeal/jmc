@@ -714,7 +714,8 @@ class Lexer:
             last_output = self.datapack.add_arrow_function(
                 name, else_, tokenizer, prefix=prefix)
 
-        outputs[-1][-1] += last_output
+        outputs[-1][-1] = (outputs[-1][-1] +
+                           last_output).replace("run execute ", "")
         count = self.datapack.get_count(name)
         self.datapack.add_private_function(name, "\n".join(outputs[-1]), count)
         for output in reversed(outputs[1:-1]):
