@@ -716,13 +716,16 @@ class Lexer:
 
         outputs[-1][-1] = (outputs[-1][-1] +
                            last_output).replace("run execute ", "")
-        count = self.datapack.get_count(name)
-        self.datapack.add_private_function(name, "\n".join(outputs[-1]), count)
-        for output in reversed(outputs[1:-1]):
-            output[-1] += self.datapack.call_func(name, count)
+        if len(outputs) > 1:
             count = self.datapack.get_count(name)
-            self.datapack.add_private_function(name, "\n".join(output), count)
-        outputs[0][-1] += self.datapack.call_func(name, count)
+            self.datapack.add_private_function(
+                name, "\n".join(outputs[-1]), count)
+            for output in reversed(outputs[1:-1]):
+                output[-1] += self.datapack.call_func(name, count)
+                count = self.datapack.get_count(name)
+                self.datapack.add_private_function(
+                    name, "\n".join(output), count)
+            outputs[0][-1] += self.datapack.call_func(name, count)
         return "\n".join(outputs[0])
 
     def clean_up_paren_token(self, token: Token, tokenizer: Tokenizer,
