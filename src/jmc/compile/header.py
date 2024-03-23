@@ -56,6 +56,8 @@ class Header(SingleTon):
     """Whether to allow jmc to take control over minecraft namespace"""
     commands: set[str]
     """List of extra command(first arguments) to allow"""
+    conditions: set[str]
+    """List of extra condition(`execute if` subcommands) to allow"""
     statics: set[Path]
     """All path that JMC will not remove"""
     dels: set[str]
@@ -85,6 +87,7 @@ class Header(SingleTon):
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
         obj.commands = set()
+        obj.conditions = set()
         obj.statics = set()
         obj.dels = set()
         obj.post_process = []

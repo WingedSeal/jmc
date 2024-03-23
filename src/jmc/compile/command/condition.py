@@ -11,6 +11,7 @@ from ..datapack import DataPack
 from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
 from .jmc_function import JMCFunction, FuncType
 from jmc.compile.vanilla_command import CONDITIONS as VANILLA_CONDITIONS
+from jmc.compile.header import Header
 
 from .builtin_function import bool_function
 
@@ -196,12 +197,13 @@ def custom_condition(
     # End
 
     conditions: list[str] = []
-    if tokens[0].string not in VANILLA_CONDITIONS:
+    valid_condition_kinds = VANILLA_CONDITIONS | Header().conditions
+    if tokens[0].string not in valid_condition_kinds:
         raise JMCValueError(
             f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],
             tokenizer,
-            suggestion=f"Consider using one of the following: {', '.join(sorted(VANILLA_CONDITIONS))}.")
+            suggestion=f"Consider using one of the following: {', '.join(sorted(valid_condition_kinds))}.")
 
     last_token = tokens[0]
     for token in tokens:
