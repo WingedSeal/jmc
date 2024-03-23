@@ -88,3 +88,15 @@ COMMANDS = {
     "whitelist"
 }
 """All vanilla command (first argument only)"""
+CONDITIONS = {
+    "biome", 
+    "block", 
+    "blocks",
+    "data", 
+    "dimension", 
+    "entity",
+    "function",
+    "loaded", 
+    "predicate", 
+    "score"
+}
