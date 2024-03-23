@@ -76,7 +76,10 @@ def merge_path(tokens: list[Token], start_index: int,
         return string
 
     for index, token in enumerate(tokens[start_index:]):
-        if token.string.startswith("."):
+        if token.string.startswith(
+                ".") or token.string == ":" or string.endswith(":"):
+            string += token.string
+        elif token.token_type == TokenType.STRING and string.endswith("."):
             string += token.string
         elif (
             token.token_type == TokenType.PAREN_CURLY
