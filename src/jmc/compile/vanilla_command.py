@@ -88,7 +88,8 @@ COMMANDS = {
     "whitelist"
 }
 """All vanilla command (first argument only)"""
-CONDITIONS = {
+
+VANILLA_CONDITIONS = {
     "biome", 
     "block", 
     "blocks",
@@ -100,3 +101,4 @@ CONDITIONS = {
     "predicate", 
     "score"
 }
+"""All vanilla arguments to `execute if`"""

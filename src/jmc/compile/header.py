@@ -4,6 +4,7 @@ from typing import Any, Callable, TYPE_CHECKING
 
 from .utils import SingleTon
 from .log import Logger
+from .vanilla_command import VANILLA_CONDITIONS
 
 if TYPE_CHECKING:
     from .tokenizer import Token
@@ -87,7 +88,7 @@ class Header(SingleTon):
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
         obj.commands = set()
-        obj.conditions = set()
+        obj.conditions = VANILLA_CONDITIONS
         obj.statics = set()
         obj.dels = set()
         obj.post_process = []
