@@ -88,7 +88,7 @@ class Header(SingleTon):
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
         obj.commands = set()
-        obj.conditions = VANILLA_CONDITIONS
+        obj.conditions = VANILLA_CONDITIONS.copy()
         obj.statics = set()
         obj.dels = set()
         obj.post_process = []
