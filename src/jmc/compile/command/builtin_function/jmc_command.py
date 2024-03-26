@@ -49,8 +49,10 @@ class TimerSet(JMCFunction):
         tick_arg = find_scoreboard_player_type(
             self.raw_args["tick"].token, self.tokenizer)
         if isinstance(tick_arg.value, int):
-            return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
-        return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
+            return f'scoreboard players set {self.args["selector"]} {
+                self.args["objective"]} {self.args["tick"]}'
+        return f'scoreboard players operation {self.args["selector"]} {
+            self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
 
 
 @func_property(
@@ -83,9 +85,11 @@ class ItemClear(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {
+                    self.call_string}"
             )
-        return f'clear {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
+        return f'clear {self.args["selector"]} {
+            self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
 
 
 @func_property(
@@ -112,9 +116,11 @@ class ItemGive(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {
+                    self.call_string}"
             )
-        return f'give {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
+        return f'give {self.args["selector"]} {
+            self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
 
 
 @func_property(
@@ -143,7 +149,8 @@ class ItemSummon(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {
+                    self.call_string}"
             )
         nbt = self.tokenizer.parse_js_obj(
             self.raw_args["nbt"].token) if self.args["nbt"] else {}
@@ -154,7 +161,8 @@ class ItemSummon(JMCFunction):
                 self.tokenizer,
                 suggestion="Remove `Item` in the nbt"
             )
-        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}{","+self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
+        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{
+            self.datapack.data.item[self.args["itemId"]].nbt}}}{"," + self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
 
 
 @func_property(
@@ -181,9 +189,11 @@ class ItemReplaceBlock(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {
+                    self.call_string}"
             )
-        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
+        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {
+            self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 @func_property(
@@ -210,9 +220,11 @@ class ItemReplaceEntity(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {
+                    self.call_string}"
             )
-        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
+        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {
+            self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 @func_property(
@@ -286,7 +298,8 @@ class Print(JMCFunction):
 )
 class TextTitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} title {self.format_text("message")}'
+        return f'title {self.args["selector"]} title {
+            self.format_text("message")}'
 
 
 @func_property(
@@ -300,7 +313,8 @@ class TextTitle(JMCFunction):
 )
 class TextSubtitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} subtitle {self.format_text("message")}'
+        return f'title {self.args["selector"]} subtitle {
+            self.format_text("message")}'
 
 
 @func_property(
@@ -314,7 +328,8 @@ class TextSubtitle(JMCFunction):
 )
 class TextActionbar(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} actionbar {self.format_text("message")}'
+        return f'title {self.args["selector"]} actionbar {
+            self.format_text("message")}'
 
 
 def __normalize_decimal(n: float):
@@ -878,11 +893,15 @@ class ParticleLine(JMCFunction):
 )
 class ScoreboardAdd(JMCFunction):
     def call(self) -> str:
-        command = f'scoreboard objectives add {self.args["objective"]} {self.args["criteria"]}'
+        command = f'scoreboard objectives add {
+            self.args["objective"]} {
+            self.args["criteria"]}'
         if self.args["objective"] in self.datapack.data.scoreboards:
             scoreboard = self.datapack.data.scoreboards[self.args["objective"]]
             raise JMCValueError(
-                f"Objective {self.args['objective']} was already defined as {scoreboard[1]}",
+                f"Objective {
+                    self.args['objective']} was already defined as {
+                    scoreboard[1]}",
                 self.raw_args["objective"].token,
                 self.tokenizer, suggestion=f"It was defined at line {scoreboard[2].line} col {scoreboard[2].col}")
         self.datapack.data.scoreboards[self.args["objective"]] = (
@@ -903,7 +922,8 @@ class ScoreboardAdd(JMCFunction):
 )
 class TeamPrefix(JMCFunction):
     def call(self) -> str:
-        return f"team modify {self.args['team']} prefix {self.format_text('prefix', is_allow_score_selector=False)}"
+        return f"team modify {self.args['team']} prefix {
+            self.format_text('prefix', is_allow_score_selector=False)}"
 
 
 @func_property(
@@ -917,7 +937,8 @@ class TeamPrefix(JMCFunction):
 )
 class TeamSuffix(JMCFunction):
     def call(self) -> str:
-        return f"team modify {self.args['team']} suffix {self.format_text('suffix', is_allow_score_selector=False)}"
+        return f"team modify {self.args['team']} suffix {
+            self.format_text('suffix', is_allow_score_selector=False)}"
 
 
 @func_property(
@@ -1099,14 +1120,16 @@ class AdvancementRevoke(JMCFunction):
             if not (
                     f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{
+                        namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
         elif advancement:
             if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{
+                        namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
@@ -1164,14 +1187,16 @@ class AdvancementGrant(JMCFunction):
             if not (
                     f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{
+                        namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
         elif advancement:
             if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{
+                        namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
                     self.tokenizer
                 )
@@ -1223,9 +1248,11 @@ class EntityLaunch(JMCFunction):
             self.datapack.add_raw_private_function(
                 self.name,
                 [f"execute positioned 0.0 0.0 0.0 run tp ^ ^ ^{self.args['power']}",
-                 f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} Motion set from entity @s Pos",
-                 "tp ~ ~ ~",
-                 f"data modify entity @s Motion set from storage {self.datapack.namespace}:{self.datapack.storage_name} Motion"],
+                 f"data modify storage {
+                    self.datapack.namespace}:{
+                    self.datapack.storage_name} Motion set from entity @s Pos",
+                    "tp ~ ~ ~",
+                    f"data modify entity @s Motion set from storage {self.datapack.namespace}:{self.datapack.storage_name} Motion"],
                 self.args["power"]
             )
         return self.datapack.call_func(self.name, self.args["power"])
@@ -1270,7 +1297,7 @@ class JMCPythonFile(JMCFunction):
         except Exception as error:
             raise JMCValueError(
                 "An exception occured in JMC.python",
-                self.raw_args["pythonCode"].token,
+                self.raw_args["pythonFile"].token,
                 self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
 
 
@@ -1336,10 +1363,21 @@ class ArrayForEach(JMCFunction):
         count = self.datapack.get_count("array")
         loop_func = self.datapack.add_raw_private_function("array", [
             self.args["function"],
-            f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
-            f"data remove storage {self.args['target']} {self.args['path']}[0]",
+            f"data modify storage {
+                self.args['target']} {
+                self.args['path']} append from storage {
+                self.args['target']} {
+                self.args['path']}[0]",
+            f"data remove storage {
+                self.args['target']} {
+                self.args['path']}[0]",
             f"scoreboard players add {current} {self.datapack.var_name} 1",
-            f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array', count)}"
+            f"execute if score {current} {
+                self.datapack.var_name} < {length} {
+                self.datapack.var_name} run {
+                self.datapack.call_func(
+                    'array',
+                    count)}"
         ], count)
         return f"""execute store result score {length} {self.datapack.var_name} run data get storage {self.args["target"]} {self.args["path"]}
 scoreboard players set {current} {self.datapack.var_name} 0

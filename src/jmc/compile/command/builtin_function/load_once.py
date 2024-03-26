@@ -54,11 +54,11 @@ class PlayerJoin(JMCFunction):
         self.datapack.add_tick_command(
             f"""execute as @a unless score @s {obj_name} = $__global__ {obj_name} run {
                 self.datapack.add_raw_private_function(self.name,
-                    [
-                        self.args["function"],
-                        f"scoreboard players operation @s {obj_name} = $__global__ {obj_name}"
-                    ]
-                , "main")}""")
+                                                       [
+                                                           self.args["function"],
+                                                           f"scoreboard players operation @s {
+                                                               obj_name} = $__global__ {obj_name}"
+                                                       ], "main")}""")
         return ""
 
 

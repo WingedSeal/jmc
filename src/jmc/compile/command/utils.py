@@ -187,12 +187,16 @@ class Arg:
         if verifier == ArgType.KEYWORD:
             if key_string.startswith("@"):
                 raise JMCValueError(
-                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SELECTOR.value}",
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        ArgType.SELECTOR.value}",
                     self.token,
                     tokenizer)
             if ":" in key_string:
                 raise JMCValueError(
-                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SCOREBOARD.value}",
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        ArgType.SCOREBOARD.value}",
                     self.token,
                     tokenizer)
         if verifier != self.arg_type:
@@ -230,14 +234,16 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
     if is_number(tokens[0].string):
         if len(tokens) > 1:
             raise JMCSyntaxException(
-                f"Unexpected {tokens[1].token_type.value} after integer in function argument",
+                f"Unexpected {
+                    tokens[1].token_type.value} after integer in function argument",
                 tokens[1],
                 tokenizer)
         return ArgType.INTEGER
     if is_float(tokens[0].string):
         if len(tokens) > 1:
             raise JMCSyntaxException(
-                f"Unexpected {tokens[1].token_type.value} after float/decimal in function argument",
+                f"Unexpected {
+                    tokens[1].token_type.value} after float/decimal in function argument",
                 tokens[1],
                 tokenizer)
         return ArgType.FLOAT
@@ -246,14 +252,16 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         if is_number(tokens[1].string):
             if len(tokens) > 2:
                 raise JMCSyntaxException(
-                    f"Unexpected {tokens[2].token_type.value} after integer in function argument",
+                    f"Unexpected {
+                        tokens[2].token_type.value} after integer in function argument",
                     tokens[2],
                     tokenizer)
             return ArgType.INTEGER
         if is_float(tokens[1].string):
             if len(tokens) > 1:
                 raise JMCSyntaxException(
-                    f"Unexpected {tokens[2].token_type.value} after float/decimal in function argument",
+                    f"Unexpected {
+                        tokens[2].token_type.value} after float/decimal in function argument",
                     tokens[2],
                     tokenizer)
             return ArgType.FLOAT
@@ -279,7 +287,8 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     suggestion="This can be a result from missing comma or missing quotation mark")
             return ArgType.SELECTOR
         raise JMCSyntaxException(
-            f"Expected '[' or nothing after target selector type (got {tokens[1].token_type})",
+            f"Expected '[' or nothing after target selector type (got {
+                tokens[1].token_type})",
             tokens[1],
             tokenizer)
 
@@ -332,7 +341,8 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
-                f"{feature_name} got unexpected keyword argument '{key}'", kwarg[-1], tokenizer,
+                f"{feature_name} got unexpected keyword argument '{
+                    key}'", kwarg[-1], tokenizer,
                 suggestion=f"""Available arguments are\n{', '.join(f"'{param}'" for param in params)}""")
         arg_type = find_arg_type(kwarg, tokenizer)
         kwarg_token = tokenizer.merge_tokens(kwarg)
@@ -384,8 +394,8 @@ def __eval(node):
     :raises TypeError: Invalid type of node
     :return: Result number
     """
-    if isinstance(node, ast.Num):  # <number>
-        return node.n
+    if isinstance(node, ast.Constant):  # <number>
+        return node.value
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return OPERATORS[type(node.op)](__eval(node.left), __eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1

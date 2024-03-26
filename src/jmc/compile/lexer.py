@@ -305,7 +305,8 @@ class Lexer:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
                 func_path]
             raise JMCSyntaxException(
-                f"Duplicate function declaration({func_path})", command[1], tokenizer,
+                f"Duplicate function declaration({
+                    func_path})", command[1], tokenizer,
                 suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}")
         if func_path == self.datapack.private_name:
             raise JMCSyntaxException(
@@ -695,19 +696,22 @@ class Lexer:
             for condition, command_token in list(
                     zip(conditions, command_tokens))[:-1]:
                 outputs[-1].extend([
-                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix,postcommands=[
+                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix, postcommands=[
                         f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
-                    f"execute if score {VAR} {DataPack.var_name} matches 0 run "
+                    f"execute if score {VAR} {
+                        DataPack.var_name} matches 0 run "
                 ])
                 outputs.append([])
             del outputs[-1]
-            last_output = f"{conditions[-1]} {self.datapack.add_arrow_function(name, command_tokens[-1], tokenizer, prefix=prefix)}"
+            last_output = f"{conditions[-1]} {self.datapack.add_arrow_function(
+                name, command_tokens[-1], tokenizer, prefix=prefix)}"
         else:  # 'else'
             for condition, command_token in zip(conditions, command_tokens):
                 outputs[-1].extend([
-                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix,postcommands=[
+                    f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix, postcommands=[
                         f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
-                    f"execute if score {VAR} {DataPack.var_name} matches 0 run "
+                    f"execute if score {VAR} {
+                        DataPack.var_name} matches 0 run "
                 ])
                 outputs.append([])
             del outputs[-1]

@@ -74,7 +74,8 @@ def variable_operation(
             raise JMCSyntaxException(
                 "'get' method takes no arguments, expected empty bracket, `.get()`", tokens[1], tokenizer)
 
-        return f"scoreboard players get {tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
+        return f"scoreboard players get {
+            tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
         return f"scoreboard players get {tokens[0].string} {objective_name}"
@@ -96,15 +97,18 @@ def variable_operation(
                 "Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
-            return f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}"
-        return f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}"
+            return f"execute store result score {tokens[0].string} {
+                objective_name} {func_content[0][8:]}"
+        return f"execute store result score {tokens[0].string} {
+            objective_name} run {func_content[0]}"
 
     if operator == "=" and len(
             tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
         if len(tokens) > 3:
             raise JMCSyntaxException(
                 f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
-        return f"scoreboard players set {tokens[0].string} {objective_name} {'1' if tokens[2].string == 'true' else '0'}"
+        return f"scoreboard players set {tokens[0].string} {
+            objective_name} {'1' if tokens[2].string == 'true' else '0'}"
 
     if operator == "??=" and len(
             tokens) > 2 and tokens[2].token_type == TokenType.KEYWORD and tokens[2].string in {"true", "false"}:
@@ -112,18 +116,22 @@ def variable_operation(
             raise JMCSyntaxException(
                 f"Unexpected token ('{tokens[3].string}') after '{tokens[2].string}'", tokens[3], tokenizer, suggestion="Probably missing semicolon.")
         if tokens[2].string == 'true':
-            return f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1"
+            return f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {
+                objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1"
         elif tokens[2].string == 'false':
-            return f"scoreboard players add {tokens[0].string} {objective_name} 0"
+            return f"scoreboard players add {
+                tokens[0].string} {objective_name} 0"
 
     if operator in {"++", "--"}:
         if len(tokens) > 2:
             raise JMCSyntaxException(
                 f"Unexpected token ('{tokens[2].string}') after '{tokens[1].string}'", tokens[2], tokenizer)
         if operator == "++":
-            return f"scoreboard players add {tokens[0].string} {objective_name} 1"
+            return f"scoreboard players add {
+                tokens[0].string} {objective_name} 1"
         if operator == "--":
-            return f"scoreboard players remove {tokens[0].string} {objective_name} 1"
+            return f"scoreboard players remove {
+                tokens[0].string} {objective_name} 1"
     elif operator == "?=":
         if len(tokens) == 2:
             raise JMCSyntaxException(
@@ -135,8 +143,10 @@ def variable_operation(
                 "Operator '?=' does not support command that return multiple commands", tokens[2], tokenizer)
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
-            return f"execute store success score {tokens[0].string} {objective_name} {func_content[0][8:]}"
-        return f"execute store success score {tokens[0].string} {objective_name} run {func_content[0]}"
+            return f"execute store success score {tokens[0].string} {
+                objective_name} {func_content[0][8:]}"
+        return f"execute store success score {tokens[0].string} {
+            objective_name} run {func_content[0]}"
     elif operator in {"+=", "-=", "*=", "/=", "%=", "++", "--", "><", "->", ">", "<", "=", "??="}:
         if len(tokens) == 2:
             raise JMCSyntaxException(
@@ -172,7 +182,8 @@ def variable_operation(
             if len(func) > 1:
                 raise JMCSyntaxException(
                     f"Multiple commands (got {len(func)}) cannot be assigned to a variable", tokens[2], tokenizer)
-            return f"""execute store result score {tokens[0].string} {objective_name} run {func[0]}"""
+            return f"""execute store result score {
+                tokens[0].string} {objective_name} run {func[0]}"""
 
         left_token = tokens[0]
         right_token = tokens[2]
@@ -199,8 +210,10 @@ def variable_operation(
                                 "Operator '=' does not support command that return multiple commands", tokens[2], tokenizer)
                         if func_content[0].startswith("execute"):
                             # len("execute ") = 8
-                            return f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}"
-                        return f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}"
+                            return f"execute store result score {tokens[0].string} {
+                                objective_name} {func_content[0][8:]}"
+                        return f"execute store result score {tokens[0].string} {
+                            objective_name} run {func_content[0]}"
                     except Exception:
                         raise error
             else:
@@ -217,37 +230,48 @@ def variable_operation(
             if isinstance(scoreboard_player.value, int):
                 raise ValueError("scoreboard_player.value is int")
 
-            return f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {left_token.string} {objective_name}"
+            return f"scoreboard players operation {scoreboard_player.value[1]} {
+                scoreboard_player.value[0]} = {left_token.string} {objective_name}"
 
         if scoreboard_player.player_type == PlayerType.INTEGER:
             if operator == "+=":
                 if scoreboard_player.value < 0:  # type: ignore
-                    return f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value*-1}"
-                return f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value}"
+                    return f"scoreboard players remove {left_token.string} {
+                        objective_name} {scoreboard_player.value * -1}"
+                return f"scoreboard players add {left_token.string} {
+                    objective_name} {scoreboard_player.value}"
             if operator == "-=":
                 if scoreboard_player.value < 0:  # type: ignore
-                    return f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value*-1}"
-                return f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value}"
+                    return f"scoreboard players add {left_token.string} {
+                        objective_name} {scoreboard_player.value * -1}"
+                return f"scoreboard players remove {left_token.string} {
+                    objective_name} {scoreboard_player.value}"
             if operator == "=":
-                return f"scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}"
+                return f"scoreboard players set {left_token.string} {
+                    objective_name} {scoreboard_player.value}"
             if operator == "??=":
                 if scoreboard_player.value == 0:
-                    return f"scoreboard players add {left_token.string} {objective_name} 0"
+                    return f"scoreboard players add {
+                        left_token.string} {objective_name} 0"
                 else:
-                    return f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}"
+                    return f"execute unless score {left_token.string} {objective_name} = {left_token.string} {
+                        objective_name} run scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}"
 
             if not isinstance(scoreboard_player.value, int):
                 raise ValueError("scoreboard_player.value is not int")
             datapack.add_int(scoreboard_player.value)
-            return f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value} {DataPack.int_name}"
+            return f"scoreboard players operation {left_token.string} {objective_name} {
+                operator} {scoreboard_player.value} {DataPack.int_name}"
 
         if isinstance(scoreboard_player.value, int):
             raise ValueError("scoreboard_player.value is int")
 
         if operator == "??=":
-            return f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players operation {left_token.string} {objective_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+            return f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players operation {
+                left_token.string} {objective_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
         else:
-            return f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+            return f"scoreboard players operation {left_token.string} {objective_name} {
+                operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
 
     raise JMCSyntaxException(
         f"Unrecognized operator ({operator})", tokens[1], tokenizer)

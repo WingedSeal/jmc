@@ -99,7 +99,7 @@ def __parse_to_string(
         key = key.strip()
         if extras:
             raise JMCSyntaxException(
-                f"Too many '=' found in .toString argument (got {len(extras)+1})", token, tokenizer)
+                f"Too many '=' found in .toString argument (got {len(extras) + 1})", token, tokenizer)
         if value in {'""', "''"}:
             raise JMCSyntaxException(
                 ".toString function accepts keyword as arguments, not string", token, tokenizer, suggestion="Do not use empty string as argument")
@@ -230,7 +230,8 @@ def convention_jmc_to_mc(token: "Token", tokenizer: "Tokenizer", prefix: str,
     if re.match('^[a-z0-9_\\.]+$', string) is None:
         parens_hint: str | None = None
         if string.endswith("()"):
-            parens_hint = f"If {string} is meant to be a function name, remove the parentheses"
+            parens_hint = f"If {
+                string} is meant to be a function name, remove the parentheses"
         raise MinecraftSyntaxWarning(
             f"Invalid character detected in '{string}'", token, tokenizer, suggestion=parens_hint
         )
@@ -248,7 +249,8 @@ def get_mc_uuid(seed: Any) -> str:
 
     def rand_java_int() -> int:
         return random_instance.randint(-2147483648, 2147483647)
-    return f"[I;{rand_java_int()},{rand_java_int()},{rand_java_int()},{rand_java_int()}]"
+    return f"[I;{rand_java_int()},{rand_java_int()},{
+        rand_java_int()},{rand_java_int()}]"
 
 
 def is_decorator(string: str) -> bool:

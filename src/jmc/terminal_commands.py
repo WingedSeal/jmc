@@ -63,7 +63,7 @@ def compile_(debug: str = "") -> None:
         finished_compiled_time = Header().finished_compiled_time
         stop_time = perf_counter()
         pprint(
-            f"Compiled successfully in {finished_compiled_time-start_time:.5f} seconds, datapack built in {stop_time-finished_compiled_time:.5f} seconds", Colors.INFO)
+            f"Compiled successfully in {finished_compiled_time - start_time:.5f} seconds, datapack built in {stop_time - finished_compiled_time:.5f} seconds", Colors.INFO)
     except EXCEPTIONS as error:
         logger.debug(format_exc())
         error_report(error)

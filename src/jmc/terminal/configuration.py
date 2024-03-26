@@ -66,7 +66,8 @@ def get_pack_format(string: str) -> str:
     string_split = string.split(".")
     if not 2 <= len(string_split) <= 3:
         pprint(
-            f"Invalid Minecraft version: Expect 1 or 2 dot (got {len(string_split)-1}).",
+            f"Invalid Minecraft version: Expect 1 or 2 dot (got {
+                len(string_split) - 1}).",
             Colors.FAIL)
         return ""
 
@@ -83,7 +84,8 @@ def get_pack_format(string: str) -> str:
             return pack_format
 
     pprint(
-        f"Invalid Minecraft version: Version {current_version} does not support datapack.",
+        f"Invalid Minecraft version: Version {
+            current_version} does not support datapack.",
         Colors.FAIL)
     return ""
 
@@ -152,12 +154,14 @@ class Configuration:
             self.is_configed = True
         except JSONDecodeError as error:
             pprint(
-                f"Invalid JSON syntax in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
+                f"Invalid JSON syntax in {
+                    self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
             )
             raise error from error
         except KeyError as error:
             pprint(
-                f"Invalid JSON data in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
+                f"Invalid JSON data in {
+                    self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.", Colors.FAIL
             )
             raise error from error
 
@@ -166,7 +170,8 @@ class Configuration:
         Save configuration to file
         """
         pprint(
-            f"Your configuration has been saved to {self.global_data.CONFIG_FILE_NAME}", Colors.INFO
+            f"Your configuration has been saved to {
+                self.global_data.CONFIG_FILE_NAME}", Colors.INFO
         )
         with (self.global_data.cwd / self.global_data.CONFIG_FILE_NAME).open("w", encoding="utf-8") as file:
             dump(self.toJSON(), file, indent=4)
@@ -176,7 +181,8 @@ class Configuration:
         Ask for configuration from user(tell user that configuration is not set), and if user successfully finish the configuration, save it
         """
         pprint(
-            f"No config file found, generating {self.global_data.CONFIG_FILE_NAME}...", Colors.INFO
+            f"No config file found, generating {
+                self.global_data.CONFIG_FILE_NAME}...", Colors.INFO
         )
         self.ask_config()
         if self.is_configed:
@@ -194,7 +200,8 @@ class Configuration:
                 continue
             if namespace == "":
                 pprint(
-                    f"Configuration canceled.{' Using backup configuration.' if self.is_configed else ''}", Colors.FAIL
+                    f"Configuration canceled.{
+                        ' Using backup configuration.' if self.is_configed else ''}", Colors.FAIL
                 )
                 return
             if not namespace.islower():
@@ -326,7 +333,7 @@ def add_command(
         :return: the same function
         """
         logger.debug(
-            f"Terminal command added: {func.__name__}{' as'+rename if rename else ''}")
+            f"Terminal command added: {func.__name__}{' as' + rename if rename else ''}")
         if rename:
             func.__name__ = rename
         GlobalData().add_command(func, usage)

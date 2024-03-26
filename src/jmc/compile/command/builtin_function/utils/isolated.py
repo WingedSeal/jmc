@@ -1,5 +1,6 @@
 import ast
 from dataclasses import dataclass, field
+import sys
 from typing import Any
 
 
@@ -29,15 +30,9 @@ class Content:
         return content
 
 
-ALLOWED_MODULE = {
-    "itertools",
-    "collections",
-    "copy",
-    "functools",
-    "math",
-    "random",
-    "abc"
-}
+ALLOWED_MODULE = sys.stdlib_module_names - \
+    {"os", "sys", "fileinput", "pathlib", "filecmp",
+        "tempfile", "glob", "fnmatch", "shutil", "urllib"}
 """Set of string of module that's allowed"""
 
 

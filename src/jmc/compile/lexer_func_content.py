@@ -458,7 +458,7 @@ x
         if self.__is_jmc_function(key_pos, token):
             if len(self.command[key_pos:]) > 2:
                 raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+                    f"Unexpected token({self.command[key_pos + 2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
             return SKIP_TO_NEXT_LINE
 
         if self.__is_flow_control_command(key_pos, token):
@@ -496,11 +496,11 @@ x
         if len(self.command[key_pos:]) > 2:  # func_name() with ...
             if token.string == "unless":
                 raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
+                    f"Unexpected token({self.command[key_pos + 2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True, suggestion="Did you mean `if (!...`? ('unless' is not a keyword)")
 
             if self.command[key_pos + 2].string != "with":
                 raise JMCSyntaxException(
-                    f"Unexpected token({self.command[key_pos+2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
+                    f"Unexpected token({self.command[key_pos + 2].string}) after function call. Expected semicolon(;)", self.command[key_pos + 1], self.tokenizer, col_length=True)
 
             if self.command[key_pos + 1].string != "()":
                 raise JMCSyntaxException(
@@ -552,7 +552,8 @@ x
                         f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
                 if args[0][0].token_type != TokenType.PAREN_CURLY:
                     raise JMCSyntaxException(
-                        f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
+                        f"Expected curly parenthesis({{}}) (got {
+                            args[0][0].token_type.value}) in positional argument syntax",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')
@@ -646,7 +647,7 @@ x
             raise JMCSyntaxException(
                 "Unexpected newline in say command", self.command[key_pos + 1], self.tokenizer, suggestion=r"Use '\\n' instead of '\n'")
         append_commands(
-            self.__commands, f"say {self.command[key_pos+1].string}")
+            self.__commands, f"say {self.command[key_pos + 1].string}")
 
     def __handle_schedule(self, key_pos: int) -> bool:
         if len(self.command) < key_pos + 3:

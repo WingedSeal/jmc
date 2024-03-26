@@ -128,13 +128,13 @@ def custom_condition(
                         f'{compared} {scoreboard_player.value}..', IF)
                 if operator == ">":
                     return Condition(
-                        f'{compared} {scoreboard_player.value+1}..', IF)
+                        f'{compared} {scoreboard_player.value + 1}..', IF)
                 if operator == "<=":
                     return Condition(
                         f'{compared} ..{scoreboard_player.value}', IF)
                 if operator == "<":
                     return Condition(
-                        f'{compared} ..{scoreboard_player.value-1}', IF)
+                        f'{compared} ..{scoreboard_player.value - 1}', IF)
                 raise JMCSyntaxException(
                     f"Unrecognized operator ({operator})", operator_token, tokenizer)
 

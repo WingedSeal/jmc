@@ -74,7 +74,8 @@ class HardcodeRepeat(JMCFunction):
                     string, self.args["indexString"], str(
                         i), self.token, self.tokenizer
                 ))
-                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                error.msg = f"WARNING: This error happens inside {
+                    self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return "\n".join(commands)
@@ -114,7 +115,8 @@ class HardcodeRepeatList(JMCFunction):
                 error.reinit(lambda string: _hardcode_process(
                     string, self.args["indexString"], i, self.token, self.tokenizer
                 ))
-                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                error.msg = f"WARNING: This error happens inside {
+                    self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return "\n".join(commands)
@@ -141,7 +143,9 @@ class HardcodeRepeatLists(JMCFunction):
             self.raw_args["stringLists"].token, self.tokenizer, TokenType.STRING)
         if len(index_strings) != len(string_lists):
             raise JMCValueError(
-                f"Size of indexStrings({len(index_strings)}) doesn't match the size of stringLists({len(string_lists)})",
+                f"Size of indexStrings({
+                    len(index_strings)}) doesn't match the size of stringLists({
+                    len(string_lists)})",
                 self.raw_args["indexStrings"].token,
                 self.tokenizer)
         string_lists_count = [len(string_list) for string_list in string_lists]
@@ -170,7 +174,8 @@ class HardcodeRepeatLists(JMCFunction):
                     string, index_strings, [
                         string_list[index] for string_list in string_lists], self.token, self.tokenizer
                 ))
-                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                error.msg = f"WARNING: This error happens inside {
+                    self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return "\n".join(commands)
@@ -223,7 +228,8 @@ class HardcodeSwitch(JMCFunction):
                     string, self.args["indexString"], str(
                         i), self.token, self.tokenizer
                 ))
-                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                error.msg = f"WARNING: This error happens inside {
+                    self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
 
         return parse_switch(scoreboard_player, func_contents,
@@ -352,24 +358,52 @@ class RaycastSimple(JMCFunction):
         if is_stop_entity:
             collide = self.datapack.add_raw_private_function(
                 f"{self.name}/collide", [
-                    f"scoreboard players set {current_iter} {self.datapack.var_name} -1",
+                    f"scoreboard players set {current_iter} {
+                        self.datapack.var_name} -1",
                     self.args["onHit"]
                 ])
         else:
             collide = self.args["onHit"]
 
         if box_size == 0:
-            check_colide = f"execute as {target} positioned ~-1 ~-1 ~-1 if entity @s[dx=0] run {collide}"
+            check_colide = f"execute as {
+                target} positioned ~-1 ~-1 ~-1 if entity @s[dx=0] run {collide}"
         elif box_size <= 0.01:
-            check_colide = f"execute as {target} positioned ~-{1-box_size} ~-{1-box_size} ~-{1-box_size} if entity @s[dx=0] positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} run {collide}"
+            check_colide = f"execute as {target} positioned ~-{1 -
+                                                               box_size} ~-{1 -
+                                                                            box_size} ~-{1 -
+                                                                                         box_size} if entity @s[dx=0] positioned ~{1 -
+                                                                                                                                   box_size} ~{1 -
+                                                                                                                                               box_size} ~{1 -
+                                                                                                                                                           box_size} run {collide}"
         elif box_size < 1:
-            check_colide = f"execute positioned ~-{(1-box_size/2)} ~-{(1-box_size/2)} ~-{(1-box_size/2)} as {target} positioned ~{1-box_size} ~{1-box_size} ~{1-box_size} if entity @s[dx=0] positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"
+            check_colide = f"execute positioned ~-{(1 -
+                                                    box_size /
+                                                    2)} ~-{(1 -
+                                                            box_size /
+                                                            2)} ~-{(1 -
+                                                                    box_size /
+                                                                    2)} as {target} positioned ~{1 -
+                                                                                                 box_size} ~{1 -
+                                                                                                             box_size} ~{1 -
+                                                                                                                         box_size} if entity @s[dx=0] positioned ~{box_size /
+                                                                                                                                                                   2} ~{box_size /
+                                                                                                                                                                        2} ~{box_size /
+                                                                                                                                                                             2} run {collide}"
         else:
-            check_colide = f"execute positioned ~-{box_size/2} ~-{box_size/2} ~-{box_size/2} as {target} positioned ~{box_size/2} ~{box_size/2} ~{box_size/2} run {collide}"
+            check_colide = f"execute positioned ~-{box_size /
+                                                   2} ~-{box_size /
+                                                         2} ~-{box_size /
+                                                               2} as {target} positioned ~{box_size /
+                                                                                           2} ~{box_size /
+                                                                                                2} ~{box_size /
+                                                                                                     2} run {collide}"
 
         loop_commands = [
             check_colide,
-            f"execute if score {current_iter} {self.datapack.var_name} matches 1.. run scoreboard players remove {current_iter} {self.datapack.var_name} 1"
+            f"execute if score {current_iter} {
+                self.datapack.var_name} matches 1.. run scoreboard players remove {current_iter} {
+                self.datapack.var_name} 1"
         ]
         if is_stop_block:
             loop_commands.append(
@@ -399,7 +433,8 @@ class RaycastSimple(JMCFunction):
                     lambda string: string.replace(
                         self.args["overideString"],
                         raycast_loop))
-                error.msg = f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n" + error.msg
+                error.msg = f"WARNING: This error happens inside {
+                    self.call_string}, error position might not be accurate\n\n" + error.msg
                 raise error
         else:
             modify_execute_before_step = self.args["modifyExecuteBeforeStep"] + \
@@ -417,9 +452,11 @@ class RaycastSimple(JMCFunction):
             count=count)
 
         if "maxIter" not in self.raw_args or self.raw_args["maxIter"].arg_type == ArgType.INTEGER:
-            set_iter_command = f"scoreboard players set {current_iter} {self.datapack.var_name} {self.args['maxIter']}"
+            set_iter_command = f"scoreboard players set {current_iter} {
+                self.datapack.var_name} {self.args['maxIter']}"
         else:
-            set_iter_command = f"scoreboard players operation {current_iter} {self.datapack.var_name} = {self.args['maxIter']}"
+            set_iter_command = f"scoreboard players operation {current_iter} {
+                self.datapack.var_name} = {self.args['maxIter']}"
 
         return_command = f"""tag @s add {caster_tag}
 {set_iter_command}

@@ -88,18 +88,18 @@ def error_msg(message: str, token: "Token|None", tokenizer: "Tokenizer", col_len
             tab_count = line_.count(TAB)
             msg = f"""In {relative_file_name(tokenizer.file_path, line)}
 {message} at line {line}.
-{display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2].replace(TAB, "    ") if display_line > 1 else ""}
-{display_line}{" "*(max_space-len(str(display_line)))} |{line_.replace(TAB, "    ")}
-{" "*(col+max_space+3*tab_count+1)}{"^"*(len(line_)-col+1)}
-{display_line+1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
+{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[display_line - 2].replace(TAB, "    ") if display_line > 1 else ""}
+{display_line}{" " * (max_space - len(str(display_line)))} |{line_.replace(TAB, "    ")}
+{" " * (col + max_space + 3 * tab_count + 1)}{"^" * (len(line_) - col + 1)}
+{display_line + 1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
         else:
             tab_count = line_[:col - 1].count(TAB)
             msg = f"""In {relative_file_name(tokenizer.file_path, line, col)}
 {message} at line {line} col {col}.
-{display_line-1}{" "*(max_space-len(str(display_line - 1)))} |{msgs_[display_line-2].replace(TAB, "    ") if display_line > 1 else ""}
-{display_line}{" "*(max_space-len(str(display_line)))} |{line_.replace(TAB, "    ")}
-{" "*(col+max_space+3*tab_count+1)}{"^"*(display_col-col)}
-{display_line+1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
+{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[display_line - 2].replace(TAB, "    ") if display_line > 1 else ""}
+{display_line}{" " * (max_space - len(str(display_line)))} |{line_.replace(TAB, "    ")}
+{" " * (col + max_space + 3 * tab_count + 1)}{"^" * (display_col - col)}
+{display_line + 1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
     except ValueError as error:
         logger.critical(
             f"Error happens at wrong file: {tokenizer.file_path=}, {line=}, {col=}")
@@ -131,7 +131,8 @@ class HeaderDuplicatedMacro(ValueError):
     """Define same macro twice"""
 
     def __init__(self, message: str, file_name: str, line: int, line_str: str):
-        msg = f"In {relative_file_name(file_name, line)}\n{message} at line {line}\n{line_str}"
+        msg = f"In {relative_file_name(file_name, line)}\n{
+            message} at line {line}\n{line_str}"
         log(self, (msg, ))
         super().__init__(msg)
 
@@ -141,7 +142,8 @@ class HeaderSyntaxException(SyntaxError):
 
     def __init__(self, message: str, file_name: str, line: int,
                  line_str: str, suggestion: str | None = None):
-        msg = f"In {relative_file_name(file_name, line)}\n{message} at line {line}\n{line_str}"
+        msg = f"In {relative_file_name(file_name, line)}\n{
+            message} at line {line}\n{line_str}"
         if suggestion is not None:
             msg += "\n" + suggestion
         log(self, (message, ))
@@ -233,7 +235,8 @@ class JMCDecodeJSONError(ValueError):
         col = token.col + error.colno - 1 \
             if token.line == line else error.colno
 
-        msg = f"In {tokenizer.file_path}\n{error.msg} at line {line} col {col}.\n{tokenizer.file_string.split(NEW_LINE)[line-1][:col-1]} <-"
+        msg = f"In {tokenizer.file_path}\n{error.msg} at line {line} col {
+            col}.\n{tokenizer.file_string.split(NEW_LINE)[line - 1][:col - 1]} <-"
 
         log(self, (msg, ))
         super().__init__(msg)
