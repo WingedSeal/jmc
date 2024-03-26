@@ -1,6 +1,7 @@
 """Module containing JMCFunction subclasses for custom JMC function"""
 
 import math
+from pathlib import Path
 from typing import Iterator
 
 from ....compile.utils import convention_jmc_to_mc
@@ -1231,6 +1232,46 @@ class EntityLaunch(JMCFunction):
 
 
 ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.pythonFile",
+    name="jmc_python_file",
+    arg_type={
+        "pythonFile": ArgType.STRING,
+        "env": ArgType.STRING
+    },
+    defaults={
+        "env": ""
+    }
+)
+class JMCPythonFile(JMCFunction):
+    def call(self) -> str:
+        try:
+            file_path = Path(self.tokenizer.file_path)
+            new_path = Path(
+                (file_path.parent / self.args["pythonFile"]).resolve()
+            )
+            if new_path.suffix != ".py":
+                new_path = Path(
+                    (file_path.parent /
+                        (self.args["pythonFile"] + ".py")).resolve()
+                )
+            with new_path.open("r") as file:
+                python_code = file.read()
+
+        except Exception as error:
+            raise JMCSyntaxException(
+                f"Unexpected invalid path ({new_path})", self.raw_args["pythonFile"].token, self.tokenizer) from error
+        try:
+            return ISOLATED_ENVIRONMENT.run(
+                python_code, self.args["env"] if self.args["env"] else None)
+        except Exception as error:
+            raise JMCValueError(
+                "An exception occured in JMC.python",
+                self.raw_args["pythonCode"].token,
+                self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
 
 
 @func_property(
