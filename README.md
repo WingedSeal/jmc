@@ -22,8 +22,8 @@ function varOperations() {
     // this variable x is equal to the number of items in hand ;
     $x = data get entity @s SelectedItem.Count;
     $y = 100; // this is the second variable
-    $z = @s::SelectedItem.Count;
-    $random_int = Math.random($x, $y); // the same as $x
+    $z = @s::SelectedItem.Count; // the same as $x
+    $random_int = Math.random($x, $y);
     Text.tellraw(@a, "random number from &<$x> to 100: &<$random_int>");
 }
 class folder {
