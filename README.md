@@ -22,7 +22,8 @@ function varOperations() {
     // this variable x is equal to the number of items in hand ;
     $x = data get entity @s SelectedItem.Count;
     $y = 100; // this is the second variable
-    $random_int = Math.random($x, $y);
+    $z = @s::SelectedItem.Count;
+    $random_int = Math.random($x, $y); // the same as $x
     Text.tellraw(@a, "random number from &<$x> to 100: &<$random_int>");
 }
 class folder {
@@ -30,9 +31,9 @@ class folder {
         if ($x < $y && $random_int <= 50) {
             printf("X is less than Y and random number is less than or equal to 50");
         } else if ($y > $x || $x == 69) {
-            printf("X is greater than Y or X is equal to 69");
+            printf("X is greater than Y or X is equal to 69 ($x is &<$x>)");
         } else {
-            printf("other cases"); // "printf" is shortcut for "tellraw @a"
+            printf("&6other cases"); // "printf" is shortcut for "tellraw @a" but works with custom formatting
         }
     }
 }
