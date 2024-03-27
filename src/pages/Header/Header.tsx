@@ -115,6 +115,11 @@ const Header = () => {
                             expression that works with <code>#define</code>.
                             Example: <code>EVAL(CONST + 1)</code>
                         </li>
+                        <li>
+                            <code>__namehash16__</code>: Hash namespace to a
+                            string with length of 16 (This number can be any
+                            number)
+                        </li>
                     </ul>
                     <p>
                         <Tab />
