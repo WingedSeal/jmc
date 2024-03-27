@@ -319,7 +319,7 @@ const NBT = () => {
                     <CodeText type="param">to</CodeText>
                     <CodeText type="operator">.</CodeText>
                     <CodeText type="param">element</CodeText>{" "}
-                    <CodeText type="operator">?=</CodeText> {"<command>"};
+                    <CodeText type="operator">?=</CodeText> {"<command>"};{" "}
                     <CodeText type="comment">
                         {"//"} execute store success
                     </CodeText>
@@ -337,7 +337,7 @@ const NBT = () => {
                     <CodeText type="param">element</CodeText>{" "}
                     <CodeText type="operator">=</CodeText> (
                     <CodeText type="class">float</CodeText>){" "}
-                    <CodeText type="variable">$var</CodeText> ;
+                    <CodeText type="variable">$var</CodeText>;{" "}
                     <CodeText type="comment">
                         {"//"} execute store result storage namespace:namespace
                         path.to.element float 1 run scoreboard players get $var
