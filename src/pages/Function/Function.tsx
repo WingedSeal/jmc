@@ -260,6 +260,36 @@ const Function = () => {
                         </CodeText>
                         ();
                     </CodeBlock>
+                    <p>
+                        <Tab />
+                        <code>this</code> keyword can also be used to call
+                        function in the same class.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="keyword">class</CodeText>{" "}
+                        <CodeText type="class">folder_one.folder_two</CodeText>{" "}
+                        <br />
+                        {"{"}
+                        <br />
+                        <Tab />
+                        <CodeText type="function">function_name</CodeText>
+                        ();{" "}
+                        <CodeText type="comment">
+                            {"// function namespace:function_name"}
+                        </CodeText>
+                        <br />
+                        <Tab />
+                        <CodeText type="keyword">this</CodeText>
+                        <CodeText type="function">.function_name</CodeText>
+                        ();{" "}
+                        <CodeText type="comment">
+                            {
+                                "// function namespace:folder_one/folder_two/function_name"
+                            }
+                        </CodeText>
+                        <br />
+                        {"}"}
+                    </CodeBlock>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Vanilla Function Macro (Minecraft 1.20+)
