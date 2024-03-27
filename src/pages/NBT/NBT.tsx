@@ -138,7 +138,7 @@ const NBT = () => {
                         <code>{">>"}</code> Prepend: Prepend to an array
                     </li>
                     <li>
-                        <code>+=</code> Merge: Merge an NBT compounds(JSObject)
+                        <code>+=</code> Merge: Merge an NBT compound(JSObject)
                         with another
                     </li>
                     <li>
