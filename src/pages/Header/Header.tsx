@@ -108,7 +108,12 @@ const Header = () => {
                         </li>
                         <li>
                             <code>__namespace__</code>: Namespace of the
-                            datapack
+                            datapack.
+                        </li>
+                        <li>
+                            <code>EVAL</code>: Macro factory to evaluate
+                            expression that works with <code>#define</code>.
+                            Example: <code>EVAL(CONST + 1)</code>
                         </li>
                     </ul>
                     <p>
