@@ -19,7 +19,7 @@ function myFunc() { // function
     }
 }
 function varOperations() {
-    // this variable x is equal to the number of items in hand ;
+    // this variable x is equal to the number of items in hand
     $x = data get entity @s SelectedItem.Count;
     $y = 100; // this is the second variable
     $z = @s::SelectedItem.Count; // the same as $x
