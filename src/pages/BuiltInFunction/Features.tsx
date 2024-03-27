@@ -7,7 +7,11 @@ import { Tab } from "../../components/CodeBlock/CodeBlock";
 const BuildinFeatures = [
     howTo,
     formattedText,
-    <Feature id="print" summary="print()" keywords="variable printf tellraw announce">
+    <Feature
+        id="print"
+        summary="print()"
+        keywords="variable printf tellraw announce"
+    >
         <p>Print a variable for all players in chat.</p>
         <Command
             name="print"
@@ -15,8 +19,15 @@ const BuildinFeatures = [
             params={[{ key: "value", type: "Scoreboard" }]}
         />
     </Feature>,
-    <Feature id="printf" summary="printf()" keywords="variable tellraw announce">
-        <p>Print a text for all players in chat. Works the same as <code>Text.tellraw(@a, text);</code></p>
+    <Feature
+        id="printf"
+        summary="printf()"
+        keywords="variable tellraw announce"
+    >
+        <p>
+            Print a text for all players in chat. Works the same as{" "}
+            <code>Text.tellraw(@a, text);</code>
+        </p>
         <Command
             name="printf"
             type="JMCFunction"
@@ -389,7 +400,11 @@ const BuildinFeatures = [
             type="VariableOperation"
             params={[
                 { key: "min", type: "ScoreboardInteger", default: "1" },
-                { key: "max", type: "ScoreboardInteger", default: "2147483647" },
+                {
+                    key: "max",
+                    type: "ScoreboardInteger",
+                    default: "2147483647",
+                },
             ]}
         />
     </Feature>,
@@ -1211,8 +1226,15 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="bossbar_setName" summary="Bossbar.setName()" keywords="vanilla">
-        <p>Change the name of existing bossbar, an alternative to vanilla syntax</p>
+    <Feature
+        id="bossbar_setName"
+        summary="Bossbar.setName()"
+        keywords="vanilla"
+    >
+        <p>
+            Change the name of existing bossbar, an alternative to vanilla
+            syntax
+        </p>
         <Command
             name="Bossbar.setName"
             type="JMCFunction"
@@ -1255,6 +1277,26 @@ const BuildinFeatures = [
             name="Entity.launch"
             type="JMCFunction"
             params={[{ key: "power", type: "float", default: "1" }]}
+        />
+    </Feature>,
+    <Feature
+        id="array_for_each"
+        summary="Array.forEach()"
+        keywords="for loop list iterate iteration"
+    >
+        <p>
+            Iterate over an NBT Array. To access each element simply use the
+            path to the array followed by <code>[0]</code> (Essentially, getting
+            the first element of that array).
+        </p>
+        <Command
+            name="Array.forEach"
+            type="JMCFunction"
+            params={[
+                { key: "target", type: "string" },
+                { key: "path", type: "string" },
+                { key: "function", type: "Function" },
+            ]}
         />
     </Feature>,
     <Feature
@@ -1761,7 +1803,11 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
-    <Feature id="tag_update" summary="Tag.update()" keywords="filter specific entities">
+    <Feature
+        id="tag_update"
+        summary="Tag.update()"
+        keywords="filter specific entities"
+    >
         <p>
             Simply remove the tag from <code>removeFrom</code> and add it back
             to <code>selector</code>.
