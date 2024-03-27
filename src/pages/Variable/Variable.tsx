@@ -229,7 +229,7 @@ const Variable = () => {
                         <CodeText type="param">@s</CodeText> Motion[
                         <CodeText type="number">0</CodeText>] double{" "}
                         <CodeText type="number">0.01</CodeText> run{" "}
-                        <CodeText type="variable">$var</CodeText>
+                        <CodeText type="variable">$var</CodeText>;
                     </CodeBlock>
                 </div>
                 <section id="convert_to_string" />

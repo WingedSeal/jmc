@@ -138,7 +138,8 @@ const NBT = () => {
                         <code>{">>"}</code> Prepend: Prepend to an array
                     </li>
                     <li>
-                        <code>+=</code> Merge: Merge an NBT with another
+                        <code>+=</code> Merge: Merge an NBT compounds(JSObject)
+                        with another
                     </li>
                     <li>
                         <code>^5</code> Insert: Insert an element into an array
@@ -281,7 +282,7 @@ const NBT = () => {
                     <CodeText type="param">to</CodeText>
                     <CodeText type="operator">.</CodeText>
                     <CodeText type="param">element</CodeText>{" "}
-                    <CodeText type="operator">=</CodeText> {"<command>"}{" "}
+                    <CodeText type="operator">=</CodeText> {"<command>"};{" "}
                     <CodeText type="comment">
                         {"//"} execute store result ... int 1
                     </CodeText>
@@ -293,7 +294,7 @@ const NBT = () => {
                     <CodeText type="operator">.</CodeText>
                     <CodeText type="param">element</CodeText>{" "}
                     <CodeText type="operator">=</CodeText> (
-                    <CodeText type="class">{"<type>"}</CodeText>) {"<command>"}{" "}
+                    <CodeText type="class">{"<type>"}</CodeText>) {"<command>"};{" "}
                     <CodeText type="comment">
                         {"//"} execute store result ... type 1
                     </CodeText>
@@ -307,7 +308,7 @@ const NBT = () => {
                     <CodeText type="operator">=</CodeText>{" "}
                     <CodeText type="number">{"<scale>"}</CodeText>{" "}
                     <CodeText type="operator">*</CodeText> (
-                    <CodeText type="class">{"<type>"}</CodeText>) {"<command>"}{" "}
+                    <CodeText type="class">{"<type>"}</CodeText>) {"<command>"};{" "}
                     <CodeText type="comment">
                         {"//"} execute store result ... type scale
                     </CodeText>
@@ -318,7 +319,7 @@ const NBT = () => {
                     <CodeText type="param">to</CodeText>
                     <CodeText type="operator">.</CodeText>
                     <CodeText type="param">element</CodeText>{" "}
-                    <CodeText type="operator">?=</CodeText> {"<command>"}
+                    <CodeText type="operator">?=</CodeText> {"<command>"};
                     <CodeText type="comment">
                         {"//"} execute store success
                     </CodeText>
@@ -336,7 +337,7 @@ const NBT = () => {
                     <CodeText type="param">element</CodeText>{" "}
                     <CodeText type="operator">=</CodeText> (
                     <CodeText type="class">float</CodeText>){" "}
-                    <CodeText type="variable">$var</CodeText>{" "}
+                    <CodeText type="variable">$var</CodeText> ;
                     <CodeText type="comment">
                         {"//"} execute store result storage namespace:namespace
                         path.to.element float 1 run scoreboard players get $var
