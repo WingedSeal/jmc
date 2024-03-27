@@ -10,6 +10,7 @@ from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
 from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
 from .jmc_function import JMCFunction, FuncType
+from jmc.compile.header import Header
 
 from .builtin_function import bool_function
 
@@ -195,14 +196,13 @@ def custom_condition(
     # End
 
     conditions: list[str] = []
-    if tokens[0].string not in {"biome", "block", "blocks",
-                                "data", "dimension", "entity",
-                                "loaded", "predicate", "score"}:
+    valid_condition_kinds = Header().conditions
+    if tokens[0].string not in valid_condition_kinds:
         raise JMCValueError(
             f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],
             tokenizer,
-            suggestion="Consider using 'block' or 'blocks' or 'data' or 'entity' or 'predicate' or 'score'.")
+            suggestion=f"Consider using one of the following: {', '.join(sorted(valid_condition_kinds))}.")
 
     last_token = tokens[0]
     for token in tokens:

@@ -4,6 +4,7 @@ from typing import Any, Callable, TYPE_CHECKING
 
 from .utils import SingleTon
 from .log import Logger
+from .vanilla_command import VANILLA_CONDITIONS
 
 if TYPE_CHECKING:
     from .tokenizer import Token
@@ -56,6 +57,8 @@ class Header(SingleTon):
     """Whether to allow jmc to take control over minecraft namespace"""
     commands: set[str]
     """List of extra command(first arguments) to allow"""
+    conditions: set[str]
+    """List of extra condition(`execute if` subcommands) to allow"""
     statics: set[Path]
     """All path that JMC will not remove"""
     dels: set[str]
@@ -85,6 +88,7 @@ class Header(SingleTon):
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
         obj.commands = set()
+        obj.conditions = VANILLA_CONDITIONS.copy()
         obj.statics = set()
         obj.dels = set()
         obj.post_process = []

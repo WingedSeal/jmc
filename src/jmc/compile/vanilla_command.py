@@ -88,3 +88,17 @@ COMMANDS = {
     "whitelist"
 }
 """All vanilla command (first argument only)"""
+
+VANILLA_CONDITIONS = {
+    "biome", 
+    "block", 
+    "blocks",
+    "data", 
+    "dimension", 
+    "entity",
+    "function",
+    "loaded", 
+    "predicate", 
+    "score"
+}
+"""All vanilla arguments to `execute if`"""

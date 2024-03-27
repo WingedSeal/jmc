@@ -325,7 +325,9 @@ def __parse_header(header_str: str, file_name: str,
 
         # #command
         elif directive_token.string == "command":
-            if not arg_tokens or len(arg_tokens) != 1:
+            if len(arg_tokens) == 3 and (arg_tokens[0].string, arg_tokens[1].string) == ("execute", "if"):
+                header.conditions.add(arg_tokens[2].string)
+            elif not arg_tokens or len(arg_tokens) != 1:
                 raise HeaderSyntaxException(
                     f"Expected 1 arguments after '#command' (got {len(arg_tokens)})", file_name, line, line_str)
             if arg_tokens[0].token_type != TokenType.KEYWORD:
