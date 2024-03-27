@@ -225,6 +225,13 @@ const getDocsPages = (
                     searchValue={searchValue}
                     hash="lazy"
                 />,
+                <DocsLink
+                    name="Root"
+                    keyword="noclass global ignore"
+                    page="decorator"
+                    searchValue={searchValue}
+                    hash="root"
+                />,
             ]}
         />,
         <DocsLink
