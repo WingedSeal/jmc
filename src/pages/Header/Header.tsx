@@ -230,16 +230,16 @@ const Header = () => {
                         as a folder.
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">
-                            #override namespace_name
-                        </CodeText>
+                        <CodeText type="operator">#override</CodeText>{" "}
+                        <CodeText type="class">namespace_name</CodeText>
                     </CodeBlock>
                     <p>
                         <Tab />
                         Example
                     </p>
                     <CodeBlock>
-                        <CodeText type="operator">#override minecraft</CodeText>
+                        <CodeText type="operator">#override</CodeText>{" "}
+                        <CodeText type="class">minecraft</CodeText>
                     </CodeBlock>
                     <CodeBlock>
                         <CodeText type="keyword">new</CodeText>{" "}
@@ -317,6 +317,53 @@ const Header = () => {
                     </p>
                     <CodeBlock>
                         <CodeText type="operator">#nometa</CodeText>
+                    </CodeBlock>
+                </div>
+                <section id="enum" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Enumeration
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        Automatically define elements which restricted range of
+                        value. (
+                        <a
+                            href="https://en.wikipedia.org/wiki/Enumerated_type"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            enumeration
+                        </a>
+                        )
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="operator">#enum</CodeText>{" "}
+                        <CodeText type="class">MyClass</CodeText> A B C D E
+                        <br />
+                        <CodeText type="operator">#enum</CodeText>{" "}
+                        <CodeText type="class">Other</CodeText> 11 A B C D E
+                    </CodeBlock>
+                    <p>is equivalent to</p>
+                    <CodeBlock>
+                        <CodeText type="operator">#define</CodeText> MyClass.A 0
+                        <br />
+                        <CodeText type="operator">#define</CodeText> MyClass.B 1
+                        <br />
+                        <CodeText type="operator">#define</CodeText> MyClass.C 2
+                        <br />
+                        <CodeText type="operator">#define</CodeText> MyClass.D 3
+                        <br />
+                        <CodeText type="operator">#define</CodeText> MyClass.E 4
+                        <br />
+                        <CodeText type="operator">#define</CodeText> Other.A 11
+                        <br />
+                        <CodeText type="operator">#define</CodeText> Other.B 12
+                        <br />
+                        <CodeText type="operator">#define</CodeText> Other.C 13
+                        <br />
+                        <CodeText type="operator">#define</CodeText> Other.D 14
+                        <br />
+                        <CodeText type="operator">#define</CodeText> Other.E 15
                     </CodeBlock>
                 </div>
             </section>
