@@ -1264,6 +1264,28 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
+    <Feature id="team_prefix" summary="Team.prefix()" keywords="vanilla">
+        <p>Modify team's prefix, an alternative to vanilla syntax</p>
+        <Command
+            name="Team.prefix"
+            type="JMCFunction"
+            params={[
+                { key: "team", type: "Keyword" },
+                { key: "prefix", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
+    <Feature id="team_suffix" summary="Team.suffix()" keywords="vanilla">
+        <p>Modify team's suffix, an alternative to vanilla syntax</p>
+        <Command
+            name="Team.suffix"
+            type="JMCFunction"
+            params={[
+                { key: "team", type: "Keyword" },
+                { key: "suffix", type: "FormattedString" },
+            ]}
+        />
+    </Feature>,
     <Feature
         id="entity_launch"
         summary="Entity.launch()"
