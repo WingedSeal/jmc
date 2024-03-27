@@ -213,7 +213,7 @@ const Variable = () => {
                         <code>
                             <CodeText type="function">.get</CodeText>()
                         </code>{" "}
-                        method
+                        method. Or simply use the variable itself
                     </p>
                     <CodeBlock>
                         execute store result entity{" "}
@@ -223,6 +223,13 @@ const Variable = () => {
                         <CodeText type="variable">$var</CodeText>
                         <CodeText type="operator">.</CodeText>
                         <CodeText type="function">get</CodeText>();
+                    </CodeBlock>
+                    <CodeBlock>
+                        execute store result entity{" "}
+                        <CodeText type="param">@s</CodeText> Motion[
+                        <CodeText type="number">0</CodeText>] double{" "}
+                        <CodeText type="number">0.01</CodeText> run{" "}
+                        <CodeText type="variable">$var</CodeText>
                     </CodeBlock>
                 </div>
                 <section id="convert_to_string" />
