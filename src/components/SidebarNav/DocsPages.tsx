@@ -310,6 +310,13 @@ const getDocsPages = (
                     searchValue={searchValue}
                     hash="nometa"
                 />,
+                <DocsLink
+                    name="Enumeration"
+                    keyword=""
+                    page="header"
+                    searchValue={searchValue}
+                    hash="enum"
+                />,
             ]}
         />,
         <DocsLink
