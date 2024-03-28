@@ -552,8 +552,7 @@ x
                         f"Unexpected token after `{{}}` in positional argument syntax", arg_token, self.tokenizer, suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax')
                 if args[0][0].token_type != TokenType.PAREN_CURLY:
                     raise JMCSyntaxException(
-                        f"Expected curly parenthesis({{}}) (got {
-                            args[0][0].token_type.value}) in positional argument syntax",
+                        f"Expected curly parenthesis({{}}) (got {args[0][0].token_type.value}) in positional argument syntax",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it')

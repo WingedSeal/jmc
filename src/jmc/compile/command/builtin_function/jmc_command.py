@@ -11,8 +11,9 @@ from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
 
 
-def drange(start: float | int, stop: float | int,
-           step: float | int) -> Iterator[float | int]:
+def drange(
+    start: float | int, stop: float | int, step: float | int
+) -> Iterator[float | int]:
     """
     Similar to built-in range() function but with float
 
@@ -33,9 +34,9 @@ def drange(start: float | int, stop: float | int,
     arg_type={
         "objective": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
-        "tick": ArgType.SCOREBOARD_INT
+        "tick": ArgType.SCOREBOARD_INT,
     },
-    name="timer_set"
+    name="timer_set",
 )
 class TimerSet(JMCFunction):
     """
@@ -47,12 +48,11 @@ class TimerSet(JMCFunction):
 
     def call(self) -> str:
         tick_arg = find_scoreboard_player_type(
-            self.raw_args["tick"].token, self.tokenizer)
+            self.raw_args["tick"].token, self.tokenizer
+        )
         if isinstance(tick_arg.value, int):
-            return f'scoreboard players set {self.args["selector"]} {
-                self.args["objective"]} {self.args["tick"]}'
-        return f'scoreboard players operation {self.args["selector"]} {
-            self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
+            return f'scoreboard players set {self.args["selector"]} {self.args["objective"]} {self.args["tick"]}'
+        return f'scoreboard players operation {self.args["selector"]} {self.args["objective"]} = {tick_arg.value[1]} {tick_arg.value[0]}'
 
 
 @func_property(
@@ -61,13 +61,10 @@ class TimerSet(JMCFunction):
     arg_type={
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
-        "amount": ArgType.INTEGER
+        "amount": ArgType.INTEGER,
     },
     name="item_clear",
-    defaults={
-        "selector": "@s",
-        "amount": "-1"
-    }
+    defaults={"selector": "@s", "amount": "-1"},
 )
 class ItemClear(JMCFunction):
     def call(self) -> str:
@@ -76,8 +73,9 @@ class ItemClear(JMCFunction):
             self.args["amount"] = ""
         elif numerical_amount < 0:
             raise JMCValueError(
-                f'\'amount\' parameter must be greater than or equal to 0', self.raw_args[
-                    "amount"].token, self.tokenizer,
+                f"'amount' parameter must be greater than or equal to 0",
+                self.raw_args["amount"].token,
+                self.tokenizer,
             )
 
         if self.args["itemId"] not in self.datapack.data.item:
@@ -85,11 +83,9 @@ class ItemClear(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {
-                    self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
-        return f'clear {self.args["selector"]} {
-            self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
+        return f'clear {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
 
 
 @func_property(
@@ -98,16 +94,11 @@ class ItemClear(JMCFunction):
     arg_type={
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
-        "amount": ArgType.INTEGER
+        "amount": ArgType.INTEGER,
     },
     name="item_give",
-    defaults={
-        "selector": "@s",
-        "amount": "1"
-    },
-    number_type={
-        "amount": NumberType.ZERO_POSITIVE
-    }
+    defaults={"selector": "@s", "amount": "1"},
+    number_type={"amount": NumberType.ZERO_POSITIVE},
 )
 class ItemGive(JMCFunction):
     def call(self) -> str:
@@ -116,11 +107,9 @@ class ItemGive(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {
-                    self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
-        return f'give {self.args["selector"]} {
-            self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
+        return f'give {self.args["selector"]} {self.datapack.data.item[self.args["itemId"]]} {self.args["amount"]}'
 
 
 @func_property(
@@ -130,17 +119,11 @@ class ItemGive(JMCFunction):
         "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "count": ArgType.INTEGER,
-        "nbt": ArgType.JS_OBJECT
+        "nbt": ArgType.JS_OBJECT,
     },
     name="item_summon",
-    defaults={
-        "pos": "~ ~ ~",
-        "count": "1",
-        "nbt": ""
-    },
-    number_type={
-        "count": NumberType.POSITIVE
-    }
+    defaults={"pos": "~ ~ ~", "count": "1", "nbt": ""},
+    number_type={"count": NumberType.POSITIVE},
 )
 class ItemSummon(JMCFunction):
     def call(self) -> str:
@@ -149,20 +132,21 @@ class ItemSummon(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {
-                    self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
-        nbt = self.tokenizer.parse_js_obj(
-            self.raw_args["nbt"].token) if self.args["nbt"] else {}
+        nbt = (
+            self.tokenizer.parse_js_obj(self.raw_args["nbt"].token)
+            if self.args["nbt"]
+            else {}
+        )
         if "Item" in nbt:
             raise JMCValueError(
-                '`Item` key found inside Item.summon nbt argument.',
+                "`Item` key found inside Item.summon nbt argument.",
                 self.token,
                 self.tokenizer,
-                suggestion="Remove `Item` in the nbt"
+                suggestion="Remove `Item` in the nbt",
             )
-        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{
-            self.datapack.data.item[self.args["itemId"]].nbt}}}{"," + self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
+        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}{"," + self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
 
 
 @func_property(
@@ -172,15 +156,11 @@ class ItemSummon(JMCFunction):
         "itemId": ArgType.KEYWORD,
         "pos": ArgType.STRING,
         "slot": ArgType.STRING,
-        "count": ArgType.INTEGER
+        "count": ArgType.INTEGER,
     },
     name="item_replace_block",
-    defaults={
-        "count": "1"
-    },
-    number_type={
-        "count": NumberType.POSITIVE
-    }
+    defaults={"count": "1"},
+    number_type={"count": NumberType.POSITIVE},
 )
 class ItemReplaceBlock(JMCFunction):
     def call(self) -> str:
@@ -189,11 +169,9 @@ class ItemReplaceBlock(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {
-                    self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
-        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {
-            self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
+        return f'item replace block {self.args["pos"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 @func_property(
@@ -203,15 +181,11 @@ class ItemReplaceBlock(JMCFunction):
         "itemId": ArgType.KEYWORD,
         "selector": ArgType.SELECTOR,
         "slot": ArgType.STRING,
-        "count": ArgType.INTEGER
+        "count": ArgType.INTEGER,
     },
     name="item_replace_entity",
-    defaults={
-        "count": "1"
-    },
-    number_type={
-        "count": NumberType.POSITIVE
-    }
+    defaults={"count": "1"},
+    number_type={"count": NumberType.POSITIVE},
 )
 class ItemReplaceEntity(JMCFunction):
     def call(self) -> str:
@@ -220,11 +194,9 @@ class ItemReplaceEntity(JMCFunction):
                 f'Item id: \'{self.args["itemId"]}\' is not defined.',
                 self.raw_args["itemId"].token,
                 self.tokenizer,
-                suggestion=f"Use Item.create to make this item BEFORE using {
-                    self.call_string}"
+                suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
-        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {
-            self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
+        return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
 
 
 @func_property(
@@ -278,7 +250,8 @@ class Printf(JMCFunction):
 class Print(JMCFunction):
     def call(self) -> str:
         scoreboard_player = find_scoreboard_player_type(
-            self.raw_args["value"].token, self.tokenizer)
+            self.raw_args["value"].token, self.tokenizer
+        )
         if isinstance(scoreboard_player.value, int):
             raise ValueError("value is int")
         name = scoreboard_player.value[1]
@@ -298,8 +271,7 @@ class Print(JMCFunction):
 )
 class TextTitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} title {
-            self.format_text("message")}'
+        return f'title {self.args["selector"]} title {self.format_text("message")}'
 
 
 @func_property(
@@ -313,8 +285,7 @@ class TextTitle(JMCFunction):
 )
 class TextSubtitle(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} subtitle {
-            self.format_text("message")}'
+        return f'title {self.args["selector"]} subtitle {self.format_text("message")}'
 
 
 @func_property(
@@ -328,8 +299,7 @@ class TextSubtitle(JMCFunction):
 )
 class TextActionbar(JMCFunction):
     def call(self) -> str:
-        return f'title {self.args["selector"]} actionbar {
-            self.format_text("message")}'
+        return f'title {self.args["selector"]} actionbar {self.format_text("message")}'
 
 
 def __normalize_decimal(n: float):
@@ -344,8 +314,14 @@ def __normalize_decimal(n: float):
     return stripped
 
 
-def points_to_commands(points: list[tuple[float, float, float]], particle: str,
-                       speed: str, count: str, mode: str, notation: str = "^") -> list[str]:
+def points_to_commands(
+    points: list[tuple[float, float, float]],
+    particle: str,
+    speed: str,
+    count: str,
+    mode: str,
+    notation: str = "^",
+) -> list[str]:
     """
     Parse list of points(x,y,z position) into particle commands
 
@@ -360,7 +336,8 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
     commands = []
     for x_pos, y_pos, z_pos in points:
         commands.append(
-            f"particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}")
+            f"particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}"
+        )
     return commands
 
 
@@ -385,8 +362,8 @@ def points_to_commands(points: list[tuple[float, float, float]], particle: str,
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleCircle(JMCFunction):
     def draw(self, radius: float,
@@ -407,18 +384,22 @@ class ParticleCircle(JMCFunction):
     def call(self) -> str:
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    float(self.args["radius"]),
-                    int(self.args["spread"])),
+                    float(
+                        self.args["radius"]), int(
+                        self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -444,8 +425,8 @@ class ParticleCircle(JMCFunction):
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleSphere(JMCFunction):
     def draw(self, radius: float,
@@ -462,31 +443,33 @@ class ParticleSphere(JMCFunction):
         for theta in drange(0, spread, angle):
             for phi in drange(0, spread, angle):
                 points.append(
-                    (radius *
-                     math.sin(theta) *
-                        math.cos(phi),
-                        radius *
-                        math.cos(theta),
-                        radius *
-                        math.sin(theta) *
-                        math.sin(phi)))
+                    (
+                        radius * math.sin(theta) * math.cos(phi),
+                        radius * math.cos(theta),
+                        radius * math.sin(theta) * math.sin(phi),
+                    )
+                )
         return points
 
     def call(self) -> str:
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    float(self.args["radius"]),
-                    int(self.args["spread"])),
+                    float(
+                        self.args["radius"]), int(
+                        self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -504,22 +487,18 @@ class ParticleSphere(JMCFunction):
         "mode": ArgType.KEYWORD,
     },
     name="particle_square",
-    defaults={
-        "speed": "1",
-        "count": "1",
-        "align": "corner",
-        "mode": "normal"
-    },
+    defaults={"speed": "1", "count": "1", "align": "corner", "mode": "normal"},
     number_type={
         "spread": NumberType.POSITIVE,
         "length": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleSquare(JMCFunction):
-    def draw(self, length: float, spread: int,
-             align: str) -> list[tuple[float, float, float]]:
+    def draw(
+        self, length: float, spread: int, align: str
+    ) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -548,11 +527,17 @@ class ParticleSquare(JMCFunction):
     def call(self) -> str:
         if self.args["align"] not in {"corner", "center"}:
             raise JMCSyntaxException(
-                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -560,11 +545,12 @@ class ParticleSquare(JMCFunction):
                 self.draw(
                     float(self.args["length"]),
                     int(self.args["spread"]),
-                    str(self.args["align"])),
+                    str(self.args["align"]),
+                ),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -582,22 +568,18 @@ class ParticleSquare(JMCFunction):
         "mode": ArgType.KEYWORD,
     },
     name="particle_cube",
-    defaults={
-        "speed": "1",
-        "count": "1",
-        "align": "corner",
-        "mode": "normal"
-    },
+    defaults={"speed": "1", "count": "1", "align": "corner", "mode": "normal"},
     number_type={
         "spread": NumberType.POSITIVE,
         "length": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleCube(JMCFunction):
-    def draw(self, length: float, spread: int,
-             align: str) -> list[tuple[float, float, float]]:
+    def draw(
+        self, length: float, spread: int, align: str
+    ) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -636,11 +618,17 @@ class ParticleCube(JMCFunction):
     def call(self) -> str:
         if self.args["align"] not in {"corner", "center"}:
             raise JMCSyntaxException(
-                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized alignment, '{self.args['align']}' Available alignments are 'corner' and 'center'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -648,11 +636,12 @@ class ParticleCube(JMCFunction):
                 self.draw(
                     float(self.args["length"]),
                     int(self.args["spread"]),
-                    str(self.args["align"])),
+                    str(self.args["align"]),
+                ),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -679,12 +668,13 @@ class ParticleCube(JMCFunction):
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
         "height": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleSpiral(JMCFunction):
-    def draw(self, radius: float, height: float,
-             spread: int) -> list[tuple[float, float, float]]:
+    def draw(
+        self, radius: float, height: float, spread: int
+    ) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -697,16 +687,19 @@ class ParticleSpiral(JMCFunction):
         angle = 2 * math.pi / spread
         d_y = height / spread
         for i in range(spread):
-            points.append((
-                radius * math.cos(i * angle),
-                i * d_y,
-                radius * math.sin(i * angle)))
+            points.append(
+                (radius * math.cos(i * angle), i *
+                 d_y, radius * math.sin(i * angle))
+            )
         return points
 
     def call(self) -> str:
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -714,11 +707,12 @@ class ParticleSpiral(JMCFunction):
                 self.draw(
                     float(self.args["radius"]),
                     float(self.args["height"]),
-                    int(self.args["spread"])),
+                    int(self.args["spread"]),
+                ),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -745,8 +739,8 @@ class ParticleSpiral(JMCFunction):
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
         "height": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleHelix(ParticleSpiral):
     pass
@@ -777,12 +771,13 @@ class ParticleHelix(ParticleSpiral):
         "radius": NumberType.POSITIVE,
         "height": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleCylinder(JMCFunction):
-    def draw(self, radius: float, height: float, spread_xz: int,
-             spread_y: int) -> list[tuple[float, float, float]]:
+    def draw(
+        self, radius: float, height: float, spread_xz: int, spread_y: int
+    ) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -804,7 +799,10 @@ class ParticleCylinder(JMCFunction):
     def call(self) -> str:
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
@@ -813,11 +811,12 @@ class ParticleCylinder(JMCFunction):
                     float(self.args["radius"]),
                     float(self.args["height"]),
                     int(self.args["spreadXZ"]),
-                    int(self.args["spreadY"])),
+                    int(self.args["spreadY"]),
+                ),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -843,8 +842,8 @@ class ParticleCylinder(JMCFunction):
         "spread": NumberType.POSITIVE,
         "distance": NumberType.POSITIVE,
         "count": NumberType.POSITIVE,
-        "speed": NumberType.ZERO_POSITIVE
-    }
+        "speed": NumberType.ZERO_POSITIVE,
+    },
 )
 class ParticleLine(JMCFunction):
     def draw(self, distance: float,
@@ -861,18 +860,22 @@ class ParticleLine(JMCFunction):
     def call(self) -> str:
         if self.args["mode"] not in {"force", "normal"}:
             raise JMCSyntaxException(
-                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'", self.raw_args["mode"].token, self.tokenizer)
+                f"Unrecognized mode, '{self.args['mode']}' Available modes are 'force' and 'normal'",
+                self.raw_args["mode"].token,
+                self.tokenizer,
+            )
 
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
                 self.draw(
-                    float(self.args["distance"]),
-                    int(self.args["spread"])),
+                    float(
+                        self.args["distance"]), int(
+                        self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
-                self.args["mode"]
+                self.args["mode"],
             ),
         )
 
@@ -886,28 +889,26 @@ class ParticleLine(JMCFunction):
         "displayName": ArgType.STRING,
     },
     name="scoreboard_add",
-    defaults={
-        "criteria": "dummy",
-        "displayName": ""
-    }
+    defaults={"criteria": "dummy", "displayName": ""},
 )
 class ScoreboardAdd(JMCFunction):
     def call(self) -> str:
-        command = f'scoreboard objectives add {
-            self.args["objective"]} {
-            self.args["criteria"]}'
+        command = f'scoreboard objectives add {self.args["objective"]} {self.args["criteria"]}'
         if self.args["objective"] in self.datapack.data.scoreboards:
             scoreboard = self.datapack.data.scoreboards[self.args["objective"]]
             raise JMCValueError(
-                f"Objective {
-                    self.args['objective']} was already defined as {
-                    scoreboard[1]}",
+                f"Objective {self.args['objective']} was already defined as {scoreboard[1]}",
                 self.raw_args["objective"].token,
-                self.tokenizer, suggestion=f"It was defined at line {scoreboard[2].line} col {scoreboard[2].col}")
+                self.tokenizer,
+                suggestion=f"It was defined at line {scoreboard[2].line} col {scoreboard[2].col}",
+            )
         self.datapack.data.scoreboards[self.args["objective"]] = (
-            self.args["criteria"], self.args["displayName"], self.raw_args["objective"].token)
+            self.args["criteria"],
+            self.args["displayName"],
+            self.raw_args["objective"].token,
+        )
         if self.args["displayName"]:
-            command += ' ' + self.format_text("displayName")
+            command += " " + self.format_text("displayName")
         return command
 
 
@@ -918,12 +919,11 @@ class ScoreboardAdd(JMCFunction):
         "team": ArgType.KEYWORD,
         "prefix": ArgType.STRING,
     },
-    name="team_prefix"
+    name="team_prefix",
 )
 class TeamPrefix(JMCFunction):
     def call(self) -> str:
-        return f"team modify {self.args['team']} prefix {
-            self.format_text('prefix', is_allow_score_selector=False)}"
+        return f"team modify {self.args['team']} prefix {self.format_text('prefix', is_allow_score_selector=False)}"
 
 
 @func_property(
@@ -933,22 +933,18 @@ class TeamPrefix(JMCFunction):
         "team": ArgType.KEYWORD,
         "suffix": ArgType.STRING,
     },
-    name="team_suffix"
+    name="team_suffix",
 )
 class TeamSuffix(JMCFunction):
     def call(self) -> str:
-        return f"team modify {self.args['team']} suffix {
-            self.format_text('suffix', is_allow_score_selector=False)}"
+        return f"team modify {self.args['team']} suffix {self.format_text('suffix', is_allow_score_selector=False)}"
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.add",
-    arg_type={
-        "id": ArgType.KEYWORD,
-        "name": ArgType.STRING
-    },
-    name="bossbar_add"
+    arg_type={"id": ArgType.KEYWORD, "name": ArgType.STRING},
+    name="bossbar_add",
 )
 class BossbarAdd(JMCFunction):
     def call(self) -> str:
@@ -957,20 +953,21 @@ class BossbarAdd(JMCFunction):
             raise JMCValueError(
                 f"Bossbar {self.args['id']} was already defined",
                 self.raw_args["id"].token,
-                self.tokenizer, suggestion=f"It was defined at line {bossbar[1].line} col {bossbar[1].col}")
+                self.tokenizer,
+                suggestion=f"It was defined at line {bossbar[1].line} col {bossbar[1].col}",
+            )
         self.datapack.data.bossbars[self.args["id"]] = (
-            self.args["name"], self.raw_args["id"].token)
+            self.args["name"],
+            self.raw_args["id"].token,
+        )
         return f'bossbar add {self.args["id"]} {self.format_text("name")}'
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Bossbar.setName",
-    arg_type={
-        "id": ArgType.KEYWORD,
-        "name": ArgType.STRING
-    },
-    name="bossbar_set_name"
+    arg_type={"id": ArgType.KEYWORD, "name": ArgType.STRING},
+    name="bossbar_set_name",
 )
 class BossbarSetName(JMCFunction):
     def call(self) -> str:
@@ -983,28 +980,34 @@ class BossbarSetName(JMCFunction):
     arg_type={
         "name": ArgType.KEYWORD,
     },
-    name="gui_run"
+    name="gui_run",
 )
 class GUIRun(JMCFunction):
 
     def call(self) -> str:
         name = convention_jmc_to_mc(
-            self.raw_args["name"].token, self.tokenizer, self.prefix)
+            self.raw_args["name"].token, self.tokenizer, self.prefix
+        )
         if name not in self.datapack.data.guis:
             raise JMCValueError(
                 f"GUI Template '{name}' was never defined",
                 self.raw_args["name"].token,
-                self.tokenizer)
+                self.tokenizer,
+            )
         gui = self.datapack.data.guis[name]
         if not gui.is_created:
             raise JMCValueError(
                 f"GUI Template '{name}' was never created",
                 self.raw_args["name"].token,
-                self.tokenizer, suggestion="Use GUI.create BEFORE running")
+                self.tokenizer,
+                suggestion="Use GUI.create BEFORE running",
+            )
 
         if self.is_never_used():
             self.datapack.add_tick_command(
-                "kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{}}}}]", is_after=True)
+                "kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{}}}}]",
+                is_after=True,
+            )
 
         return self.datapack.call_func(f"gui/{name}", "run")
 
@@ -1090,7 +1093,7 @@ MINECRAFT_ADVANCEMENTS = {
     "story/enchant_item",
     "story/cure_zombie_villager",
     "story/follow_ender_eye",
-    "story/enter_the_end"
+    "story/enter_the_end",
 }
 
 
@@ -1102,36 +1105,37 @@ MINECRAFT_ADVANCEMENTS = {
         "target": ArgType.SELECTOR,
         "type": ArgType.KEYWORD,
         "advancement": ArgType.KEYWORD,
-        "namespace": ArgType.KEYWORD
+        "namespace": ArgType.KEYWORD,
     },
-    defaults={
-        "advancement": "",
-        "namespace": ""
-    }
+    defaults={"advancement": "", "namespace": ""},
 )
 class AdvancementRevoke(JMCFunction):
     def call(self) -> str:
         advancement = self.args["advancement"]
         target = self.args["target"]
         type_ = self.args["type"]
-        namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
+        namespace = (
+            self.datapack.namespace
+            if self.args["namespace"] == ""
+            else self.args["namespace"]
+        )
 
         if namespace == "minecraft":
             if not (
-                    f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
+                f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS
+                or f"minecraft/advancements/{advancement}" in self.datapack.jsons
+            ):
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{
-                        namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
-                    self.tokenizer
+                    self.tokenizer,
                 )
         elif advancement:
             if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{
-                        namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
-                    self.tokenizer
+                    self.tokenizer,
                 )
 
         if type_ not in {"everything", "from", "only", "through", "until"}:
@@ -1139,25 +1143,26 @@ class AdvancementRevoke(JMCFunction):
                 f"'{type_}' is not an valid argument",
                 self.raw_args["type"].token,
                 self.tokenizer,
-                suggestion="valid arguments are: everything,from,only,through,until"
+                suggestion="valid arguments are: everything,from,only,through,until",
             )
 
         if type_ == "everything" and advancement:
             raise JMCValueError(
                 "Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
-                self.tokenizer
+                self.tokenizer,
             )
 
         elif type_ != "everything" and not advancement:
             raise JMCValueError(
                 "Missing argument 'advancement'",
                 self.raw_args["advancement"].token,
-                self.tokenizer
+                self.tokenizer,
             )
 
-        resource_location = f" {namespace}:{advancement}" if (
-            type_ != "everything") else ""
+        resource_location = (
+            f" {namespace}:{advancement}" if (type_ != "everything") else ""
+        )
         return f"advancement revoke {target} {type_}{resource_location}"
 
 
@@ -1169,36 +1174,37 @@ class AdvancementRevoke(JMCFunction):
         "target": ArgType.SELECTOR,
         "type": ArgType.KEYWORD,
         "advancement": ArgType.KEYWORD,
-        "namespace": ArgType.KEYWORD
+        "namespace": ArgType.KEYWORD,
     },
-    defaults={
-        "advancement": "",
-        "namespace": ""
-    }
+    defaults={"advancement": "", "namespace": ""},
 )
 class AdvancementGrant(JMCFunction):
     def call(self) -> str:
         advancement = self.args["advancement"]
         target = self.args["target"]
         type_ = self.args["type"]
-        namespace = self.datapack.namespace if self.args["namespace"] == "" else self.args["namespace"]
+        namespace = (
+            self.datapack.namespace
+            if self.args["namespace"] == ""
+            else self.args["namespace"]
+        )
 
         if namespace == "minecraft":
             if not (
-                    f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS or f"minecraft/advancements/{advancement}" in self.datapack.jsons):
+                f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS
+                or f"minecraft/advancements/{advancement}" in self.datapack.jsons
+            ):
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{
-                        namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
-                    self.tokenizer
+                    self.tokenizer,
                 )
         elif advancement:
             if f"advancements/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
-                    f"'{advancement}' advancement in '{
-                        namespace}' is not defined or missing",
+                    f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
-                    self.tokenizer
+                    self.tokenizer,
                 )
 
         if type_ not in {"everything", "from", "only", "through", "until"}:
@@ -1206,54 +1212,49 @@ class AdvancementGrant(JMCFunction):
                 f"'{type_}' is not an valid argument",
                 self.raw_args["type"].token,
                 self.tokenizer,
-                suggestion="valid arguments are: everything,from,only,through,until"
+                suggestion="valid arguments are: everything,from,only,through,until",
             )
 
         if type_ == "everything" and advancement:
             raise JMCValueError(
                 "Extra argument: 'advancement'",
                 self.raw_args["advancement"].token,
-                self.tokenizer
+                self.tokenizer,
             )
 
         elif type_ != "everything" and not advancement:
             raise JMCValueError(
                 "Missing argument: 'advancement'",
                 self.raw_args["advancement"].token,
-                self.tokenizer
+                self.tokenizer,
             )
 
-        resource_location = f" {namespace}:{advancement}" if (
-            type_ != "everything") else ""
+        resource_location = (
+            f" {namespace}:{advancement}" if (type_ != "everything") else ""
+        )
         return f"advancement grant {target} {type_}{resource_location}"
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="Entity.launch",
-    arg_type={
-        "power": ArgType.FLOAT
-    },
+    arg_type={"power": ArgType.FLOAT},
     name="entity_launch",
-    defaults={
-        "power": "1"
-    },
-    number_type={
-        "power": NumberType.NON_ZERO
-    }
+    defaults={"power": "1"},
+    number_type={"power": NumberType.NON_ZERO},
 )
 class EntityLaunch(JMCFunction):
     def call(self) -> str:
         if self.is_never_used(self.name, [self.args["power"]]):
             self.datapack.add_raw_private_function(
                 self.name,
-                [f"execute positioned 0.0 0.0 0.0 run tp ^ ^ ^{self.args['power']}",
-                 f"data modify storage {
-                    self.datapack.namespace}:{
-                    self.datapack.storage_name} Motion set from entity @s Pos",
+                [
+                    f"execute positioned 0.0 0.0 0.0 run tp ^ ^ ^{self.args['power']}",
+                    f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} Motion set from entity @s Pos",
                     "tp ~ ~ ~",
-                    f"data modify entity @s Motion set from storage {self.datapack.namespace}:{self.datapack.storage_name} Motion"],
-                self.args["power"]
+                    f"data modify entity @s Motion set from storage {self.datapack.namespace}:{self.datapack.storage_name} Motion",
+                ],
+                self.args["power"],
             )
         return self.datapack.call_func(self.name, self.args["power"])
 
@@ -1265,53 +1266,50 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.pythonFile",
     name="jmc_python_file",
-    arg_type={
-        "pythonFile": ArgType.STRING,
-        "env": ArgType.STRING
-    },
-    defaults={
-        "env": ""
-    }
+    arg_type={"pythonFile": ArgType.STRING, "env": ArgType.STRING},
+    defaults={"env": ""},
 )
 class JMCPythonFile(JMCFunction):
     def call(self) -> str:
         try:
             file_path = Path(self.tokenizer.file_path)
             new_path = Path(
-                (file_path.parent / self.args["pythonFile"]).resolve()
-            )
+                (file_path.parent / self.args["pythonFile"]).resolve())
             if new_path.suffix != ".py":
                 new_path = Path(
                     (file_path.parent /
-                        (self.args["pythonFile"] + ".py")).resolve()
+                     (self.args["pythonFile"] + ".py")).resolve()
                 )
             with new_path.open("r") as file:
                 python_code = file.read()
 
         except Exception as error:
             raise JMCSyntaxException(
-                f"Unexpected invalid path ({new_path})", self.raw_args["pythonFile"].token, self.tokenizer) from error
+                f"Unexpected invalid path ({new_path})",
+                self.raw_args["pythonFile"].token,
+                self.tokenizer,
+            ) from error
         try:
             return ISOLATED_ENVIRONMENT.run(
-                python_code, self.args["env"] if self.args["env"] else None)
+                python_code, self.args["env"] if self.args["env"] else None
+            )
         except Exception as error:
             raise JMCValueError(
                 "An exception occured in JMC.python",
                 self.raw_args["pythonFile"].token,
-                self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
+                self.tokenizer,
+                suggestion=str(error),
+                col_length=False,
+                display_col_length=False,
+            )
 
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.python",
     name="jmc_python",
-    arg_type={
-        "pythonCode": ArgType.STRING,
-        "env": ArgType.STRING
-    },
-    defaults={
-        "env": ""
-    }
+    arg_type={"pythonCode": ArgType.STRING, "env": ArgType.STRING},
+    defaults={"env": ""},
 )
 class JMCPython(JMCFunction):
     def clear_indent(self, string: str, indent: str) -> str:
@@ -1322,28 +1320,38 @@ class JMCPython(JMCFunction):
         raise JMCSyntaxException(
             "Invalid indentation when trimming indentation",
             self.raw_args["pythonCode"].token,
-            self.tokenizer, suggestion=string, col_length=False, display_col_length=False)
+            self.tokenizer,
+            suggestion=string,
+            col_length=False,
+            display_col_length=False,
+        )
 
     def call(self) -> str:
         if not self.args["pythonCode"]:
             return ""
 
         python_lines = self.args["pythonCode"].split("\n")
-        indent = python_lines[0][:len(
+        indent = python_lines[0][: len(
             python_lines[0]) - len(python_lines[0].lstrip())]
         if not indent:
             python_code = self.args["pythonCode"]
         else:
-            python_code = "\n".join(self.clear_indent(line, indent)
-                                    for line in python_lines)
+            python_code = "\n".join(
+                self.clear_indent(line, indent) for line in python_lines
+            )
         try:
             return ISOLATED_ENVIRONMENT.run(
-                python_code, self.args["env"] if self.args["env"] else None)
+                python_code, self.args["env"] if self.args["env"] else None
+            )
         except Exception as error:
             raise JMCValueError(
                 "An exception occured in JMC.python",
                 self.raw_args["pythonCode"].token,
-                self.tokenizer, suggestion=str(error), col_length=False, display_col_length=False)
+                self.tokenizer,
+                suggestion=str(error),
+                col_length=False,
+                display_col_length=False,
+            )
 
 
 @func_property(
@@ -1353,32 +1361,25 @@ class JMCPython(JMCFunction):
     arg_type={
         "target": ArgType.STRING,
         "path": ArgType.STRING,
-        "function": ArgType.ARROW_FUNC
-    }
+        "function": ArgType.ARROW_FUNC,
+    },
 )
 class ArrayForEach(JMCFunction):
     def call(self) -> str:
         length = "__length__"
         current = "__current__"
         count = self.datapack.get_count("array")
-        loop_func = self.datapack.add_raw_private_function("array", [
-            self.args["function"],
-            f"data modify storage {
-                self.args['target']} {
-                self.args['path']} append from storage {
-                self.args['target']} {
-                self.args['path']}[0]",
-            f"data remove storage {
-                self.args['target']} {
-                self.args['path']}[0]",
-            f"scoreboard players add {current} {self.datapack.var_name} 1",
-            f"execute if score {current} {
-                self.datapack.var_name} < {length} {
-                self.datapack.var_name} run {
-                self.datapack.call_func(
-                    'array',
-                    count)}"
-        ], count)
+        loop_func = self.datapack.add_raw_private_function(
+            "array",
+            [
+                self.args["function"],
+                f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
+                f"data remove storage {self.args['target']} {self.args['path']}[0]",
+                f"scoreboard players add {current} {self.datapack.var_name} 1",
+                f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array',count)}",
+            ],
+            count,
+        )
         return f"""execute store result score {length} {self.datapack.var_name} run data get storage {self.args["target"]} {self.args["path"]}
 scoreboard players set {current} {self.datapack.var_name} 0
 execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {loop_func}"""

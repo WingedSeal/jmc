@@ -1,4 +1,5 @@
 """Module containing vanilla commands"""
+
 COMMANDS = {
     # OP Level 0-2
     "advancement",
@@ -85,20 +86,20 @@ COMMANDS = {
     "pardon",
     "pardon-ip",
     "setidletimeout",
-    "whitelist"
+    "whitelist",
 }
 """All vanilla command (first argument only)"""
 
 VANILLA_CONDITIONS = {
-    "biome", 
-    "block", 
+    "biome",
+    "block",
     "blocks",
-    "data", 
-    "dimension", 
+    "data",
+    "dimension",
     "entity",
     "function",
-    "loaded", 
-    "predicate", 
-    "score"
+    "loaded",
+    "predicate",
+    "score",
 }
 """All vanilla arguments to `execute if`"""
