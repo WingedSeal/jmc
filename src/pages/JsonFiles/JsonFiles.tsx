@@ -91,6 +91,27 @@ const JsonFiles = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Extends
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        Merge one json files to another with the same file type
+                        similar to inheritance in classes.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="keyword">new</CodeText>{" "}
+                        <CodeText type="class">file_type</CodeText>
+                        (folder_name.file_name){" "}
+                        <CodeText type="keyword">extends</CodeText>{" "}
+                        (other_folder.other_file) {"{"}
+                        <br />
+                        <Tab />
+                        JSON content
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );

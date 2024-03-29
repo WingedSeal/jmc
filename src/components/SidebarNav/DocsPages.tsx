@@ -225,6 +225,13 @@ const getDocsPages = (
                     searchValue={searchValue}
                     hash="lazy"
                 />,
+                <DocsLink
+                    name="Root"
+                    keyword="noclass global ignore"
+                    page="decorator"
+                    searchValue={searchValue}
+                    hash="root"
+                />,
             ]}
         />,
         <DocsLink
@@ -302,6 +309,56 @@ const getDocsPages = (
                     page="header"
                     searchValue={searchValue}
                     hash="nometa"
+                />,
+                <DocsLink
+                    name="Enumeration"
+                    keyword=""
+                    page="header"
+                    searchValue={searchValue}
+                    hash="enum"
+                />,
+            ]}
+        />,
+        <DocsLink
+            name="NBT Operations"
+            keyword="element named binary tag array dictionary data execute"
+            page="nbt"
+            searchValue={searchValue}
+            sections={[
+                <DocsLink
+                    name="NBT Assignment"
+                    keyword="= equal set initialize scale"
+                    page="nbt"
+                    hash="nbt_assignment"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="NBT Operation"
+                    keyword="append merge prepend insert >> << += ^"
+                    page="nbt"
+                    hash="nbt_assignment"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Get Nbt"
+                    keyword="data get scoreboard variable"
+                    page="nbt"
+                    hash="get_nbt"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Remove Nbt"
+                    keyword="delete .del()"
+                    page="nbt"
+                    hash="remove_nbt"
+                    searchValue={searchValue}
+                />,
+                <DocsLink
+                    name="Execute Store"
+                    keyword="?= result success nbt scoreboard variable scale value"
+                    page="nbt"
+                    hash="execute_store"
+                    searchValue={searchValue}
                 />,
             ]}
         />,

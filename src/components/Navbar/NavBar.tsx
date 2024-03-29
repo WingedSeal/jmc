@@ -242,6 +242,9 @@ const NavBar = () => {
                         >
                             Header
                         </LinkItem>
+                        <LinkItem to="/documentation/nbt" ulRefs={ulRefsMobile}>
+                            NBT Operations
+                        </LinkItem>
                     </ul>
                 </li>
                 <li className="mr-5 ml-auto mt-3">
@@ -388,6 +391,9 @@ const NavBar = () => {
                         </LinkItem>
                         <LinkItem to="/documentation/header" ulRefs={ulRefs}>
                             Header
+                        </LinkItem>
+                        <LinkItem to="/documentation/nbt" ulRefs={ulRefs}>
+                            NBT Operations
                         </LinkItem>
                     </ul>
                 </li>

@@ -32,6 +32,7 @@ import Function from "./pages/Function";
 import Header from "./pages/Header";
 import TryOut from "./pages/TryOut";
 import SidebarNav from "./components/SidebarNav";
+import NBT from "./pages/NBT";
 
 const DocsLayout = () => {
     return (
@@ -112,6 +113,7 @@ function App() {
                             path="/documentation/header"
                             element={<Header />}
                         />
+                        <Route path="/documentation/nbt" element={<NBT />} />
                     </Route>
                     <Route path="/examples/basics" element={<Basics />} />
                     <Route path="/examples/advanced" element={<Advanced />} />

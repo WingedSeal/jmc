@@ -82,6 +82,48 @@ const Decorator = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="root" />
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Root
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Ignore the class the function is in and directly add it
+                        to root.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="keyword">class</CodeText>{" "}
+                        <CodeText type="class">MyClass</CodeText> {"{"}
+                        <br />
+                        <Tab />
+                        <CodeText type="param">@root</CodeText>
+                        <br />
+                        <Tab />
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        <CodeText type="function">func</CodeText>
+                        () {"{"} <br />
+                        <Tab />
+                        <Tab />
+                        say{" "}
+                        <CodeText type="string">
+                            "data/namespace/functions/func.mcfunction"
+                        </CodeText>
+                        <br />
+                        <Tab />
+                        <Tab />
+                        <CodeText type="comment">
+                            {"//"} NOT
+                            data/namespace/functions/myclass/func.mcfunction
+                        </CodeText>
+                        ;
+                        <br />
+                        <Tab />
+                        {"}"}
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                </div>
             </section>
         </>
     );
