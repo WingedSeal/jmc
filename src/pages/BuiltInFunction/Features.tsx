@@ -7,7 +7,11 @@ import { Tab } from "../../components/CodeBlock/CodeBlock";
 const BuildinFeatures = [
     howTo,
     formattedText,
-    <Feature id="print" summary="print()" keywords="variable printf tellraw announce">
+    <Feature
+        id="print"
+        summary="print()"
+        keywords="variable printf tellraw announce"
+    >
         <p>Print a variable for all players in chat.</p>
         <Command
             name="print"
@@ -15,8 +19,15 @@ const BuildinFeatures = [
             params={[{ key: "value", type: "Scoreboard" }]}
         />
     </Feature>,
-    <Feature id="printf" summary="printf()" keywords="variable tellraw announce">
-        <p>Print a text for all players in chat. Works the same as <code>Text.tellraw(@a, text);</code></p>
+    <Feature
+        id="printf"
+        summary="printf()"
+        keywords="variable tellraw announce"
+    >
+        <p>
+            Print a text for all players in chat. Works the same as{" "}
+            <code>Text.tellraw(@a, text);</code>
+        </p>
         <Command
             name="printf"
             type="JMCFunction"
@@ -389,7 +400,11 @@ const BuildinFeatures = [
             type="VariableOperation"
             params={[
                 { key: "min", type: "ScoreboardInteger", default: "1" },
-                { key: "max", type: "ScoreboardInteger", default: "2147483647" },
+                {
+                    key: "max",
+                    type: "ScoreboardInteger",
+                    default: "2147483647",
+                },
             ]}
         />
     </Feature>,
@@ -1022,7 +1037,6 @@ const BuildinFeatures = [
             name="String.isEqual"
             type="Boolean"
             params={[
-                { key: "type", type: "Keyword" },
                 { key: "source", type: "string" },
                 { key: "path", type: "Keyword" },
                 { key: "string", type: "string" },
@@ -1042,10 +1056,8 @@ const BuildinFeatures = [
             name="Object.isEqual"
             type="Boolean"
             params={[
-                { key: "type1", type: "Keyword" },
                 { key: "source1", type: "string" },
                 { key: "path1", type: "Keyword" },
-                { key: "type2", type: "Keyword" },
                 { key: "source2", type: "string" },
                 { key: "path2", type: "Keyword" },
             ]}
@@ -1211,8 +1223,15 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="bossbar_setName" summary="Bossbar.setName()" keywords="vanilla">
-        <p>Change the name of existing bossbar, an alternative to vanilla syntax</p>
+    <Feature
+        id="bossbar_setName"
+        summary="Bossbar.setName()"
+        keywords="vanilla"
+    >
+        <p>
+            Change the name of existing bossbar, an alternative to vanilla
+            syntax
+        </p>
         <Command
             name="Bossbar.setName"
             type="JMCFunction"
@@ -1761,7 +1780,11 @@ const BuildinFeatures = [
             newline
         />
     </Feature>,
-    <Feature id="tag_update" summary="Tag.update()" keywords="filter specific entities">
+    <Feature
+        id="tag_update"
+        summary="Tag.update()"
+        keywords="filter specific entities"
+    >
         <p>
             Simply remove the tag from <code>removeFrom</code> and add it back
             to <code>selector</code>.
