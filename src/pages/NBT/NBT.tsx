@@ -103,21 +103,6 @@ const NBT = () => {
                     <CodeText type="operator">.</CodeText>
                     <CodeText type="param">other_element</CodeText>;
                 </CodeBlock>
-                <CodeBlock>
-                    <CodeText type="operator">::</CodeText>
-                    <CodeText type="param">path</CodeText>
-                    <CodeText type="operator">.</CodeText>
-                    <CodeText type="param">to</CodeText>
-                    <CodeText type="operator">.</CodeText>
-                    <CodeText type="param">element</CodeText>{" "}
-                    <CodeText type="operator">=</CodeText>{" "}
-                    <CodeText type="operator">::</CodeText>
-                    <CodeText type="param">path</CodeText>
-                    <CodeText type="operator">.</CodeText>
-                    <CodeText type="param">to</CodeText>
-                    <CodeText type="operator">.</CodeText>
-                    <CodeText type="param">other_element</CodeText>;
-                </CodeBlock>
             </div>
             <section id="nbt_operation" />
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
