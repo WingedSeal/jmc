@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Iterator
 
 from ....compile.utils import convention_jmc_to_mc
-from ...exception import JMCSyntaxException, JMCValueError
+from ....compile.tokenizer import Token, TokenType
+from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError
 from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
@@ -1266,7 +1267,8 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.pythonFile",
     name="jmc_python_file",
-    arg_type={"pythonFile": ArgType.STRING, "env": ArgType.STRING},
+    arg_type={"pythonFile": ArgType.STRING, "env": ArgType.STRING,
+              "jmc": ArgType.KEYWORD},
     defaults={"env": ""},
 )
 class JMCPythonFile(JMCFunction):
@@ -1290,7 +1292,7 @@ class JMCPythonFile(JMCFunction):
                 self.tokenizer,
             ) from error
         try:
-            return ISOLATED_ENVIRONMENT.run(
+            output = ISOLATED_ENVIRONMENT.run(
                 python_code, self.args["env"] if self.args["env"] else None
             )
         except Exception as error:
@@ -1303,12 +1305,40 @@ class JMCPythonFile(JMCFunction):
                 display_col_length=False,
             )
 
+        if self.check_bool("jmc"):
+            try:
+                return "\n".join(self.datapack.parse_function_token(
+                    Token(
+                        TokenType.PAREN_CURLY,
+                        0,
+                        0,
+                        f"{{\n{output}\n}}"
+                    ),
+                    self.tokenizer,
+                    self.prefix,
+                ))
+            except EXCEPTIONS as error:
+                raise JMCValueError(
+                    "A JMC exception occured in JMC.python when parsing jmc",
+                    self.raw_args["pythonFile"].token,
+                    self.tokenizer,
+                    suggestion="\n".join(str(error).split("|")[
+                                         0].split("\n")[:-1]),
+                    col_length=False,
+                    display_col_length=False,
+                )
+        else:
+            return output
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.python",
     name="jmc_python",
-    arg_type={"pythonCode": ArgType.STRING, "env": ArgType.STRING},
+    arg_type={
+        "pythonCode": ArgType.STRING,
+        "env": ArgType.STRING,
+        "jmc": ArgType.KEYWORD},
     defaults={"env": ""},
 )
 class JMCPython(JMCFunction):
@@ -1340,7 +1370,7 @@ class JMCPython(JMCFunction):
                 self.clear_indent(line, indent) for line in python_lines
             )
         try:
-            return ISOLATED_ENVIRONMENT.run(
+            output = ISOLATED_ENVIRONMENT.run(
                 python_code, self.args["env"] if self.args["env"] else None
             )
         except Exception as error:
@@ -1352,6 +1382,31 @@ class JMCPython(JMCFunction):
                 col_length=False,
                 display_col_length=False,
             )
+
+        if self.check_bool("jmc"):
+            try:
+                return "\n".join(self.datapack.parse_function_token(
+                    Token(
+                        TokenType.PAREN_CURLY,
+                        0,
+                        0,
+                        f"{{\n{output}\n}}"
+                    ),
+                    self.tokenizer,
+                    self.prefix,
+                ))
+            except EXCEPTIONS as error:
+                raise JMCValueError(
+                    "A JMC exception occured in JMC.python when parsing jmc",
+                    self.raw_args["pythonCode"].token,
+                    self.tokenizer,
+                    suggestion="\n".join(str(error).split("|")[
+                                         0].split("\n")[:-1]),
+                    col_length=False,
+                    display_col_length=False,
+                )
+        else:
+            return output
 
 
 @func_property(
