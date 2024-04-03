@@ -1122,7 +1122,7 @@ class AdvancementRevoke(JMCFunction):
 
         if namespace == "minecraft":
             if not (
-                f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS
+                advancement in MINECRAFT_ADVANCEMENTS
                 or f"minecraft/advancements/{advancement}" in self.datapack.jsons
             ):
                 raise JMCValueError(
@@ -1192,7 +1192,7 @@ class AdvancementGrant(JMCFunction):
         if namespace == "minecraft":
             if not (
                 f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS
-                or f"minecraft/advancements/{advancement}" in self.datapack.jsons
+                or advancement in self.datapack.jsons
             ):
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
