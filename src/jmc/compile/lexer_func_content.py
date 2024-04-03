@@ -53,7 +53,7 @@ FIRST_ARGUMENTS = {
 
 FIRST_ARGUMENTS_EXCEPTION = {
     "give": {"effect", "recipe", "give", "loot"},
-    "clear": {"effect", "schedule"},
+    "clear": {"effect", "schedule", "weather"},
     "if": {"execute"},
     "summon": {"execute"},
     "function": {"schedule"},
