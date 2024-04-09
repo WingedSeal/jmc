@@ -909,19 +909,20 @@ const BuildinFeatures = [
                 <code>target</code> is acceptable target for collision.
             </li>
             <li>
-                <code>startAtEye</code> is wheter to start at the entity's eyes.
-                If set to false it'll use the current position of the command.
+                <code>startAtEye</code> is whether to start at the entity's
+                eyes. If set to false it'll use the current position of the
+                command.
             </li>
             <li>
-                <code>stopAtEntity</code> is wheter to stop the raycast when
+                <code>stopAtEntity</code> is whether to stop the raycast when
                 colliding with the entity.
             </li>
             <li>
-                <code>stopAtBlock</code> is wheter to stop the raycast when
+                <code>stopAtBlock</code> is whether to stop the raycast when
                 colliding with a block.
             </li>
             <li>
-                <code>runAtEnd</code> is wheter to run <code>onHit</code>{" "}
+                <code>runAtEnd</code> is whether to run <code>onHit</code>{" "}
                 function even if doesn't collide with entity. (It'll run as the
                 caster in this case.)
             </li>
@@ -1289,7 +1290,7 @@ const BuildinFeatures = [
         keywords="motion shoot"
     >
         <p>
-            Launch the entity running the command foward(the direction the
+            Launch the entity running the command forward(the direction the
             command is running). Usually used with <code>execute</code>.
         </p>
         <Command
