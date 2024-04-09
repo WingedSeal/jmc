@@ -276,7 +276,8 @@ def nbt_operation(
             del tokens[1]
         if not is_number(index):
             raise JMCSyntaxException(
-                f"Expect a number after `^` for NBT insert, got {tokens[1].string}",
+                f"Expect a number after `^` for NBT insert, got {
+                    tokens[1].string}",
                 tokens[0],
                 tokenizer,
             )
@@ -295,7 +296,8 @@ def nbt_operation(
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer
                 )
-            return f"data modify {nbt_type_str} {target}{path} insert {index} value {__clean_token(tokens[0], tokenizer, datapack)}"
+            return f"data modify {nbt_type_str} {target}{path} insert {
+                index} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type
@@ -308,7 +310,8 @@ def nbt_operation(
                 return f"""data modify {nbt_type_str} {target}{path} insert {index} string {right_nbt_type_str} {right_target}{right_path} {
                     __str_slice(tokens[0], tokenizer)}"""
             else:
-                return f"data modify {nbt_type_str} {target}{path} insert {index} from {right_nbt_type_str} {right_target}{right_path}"
+                return f"data modify {nbt_type_str} {target}{path} insert {
+                    index} from {right_nbt_type_str} {right_target}{right_path}"
 
     if tokens[0].token_type != TokenType.OPERATOR:
         raise JMCSyntaxException(
@@ -367,7 +370,8 @@ def nbt_operation(
             ).parse()
             if len(func) > 1:
                 raise JMCSyntaxException(
-                    f"Multiple commands (got {len(func)}) cannot be assigned to nbt",
+                    f"Multiple commands (got {
+                        len(func)}) cannot be assigned to nbt",
                     tokens[0],
                     tokenizer,
                 )
@@ -384,12 +388,14 @@ def nbt_operation(
         if right_nbt_type is None:
             if tokens[0].string == "-":
                 tokens = [tokenizer.merge_tokens(tokens)]
-
+            if tokens[0].string == "$" and tokens[1].token_type == TokenType.PAREN_ROUND:  # Vanilla macro
+                tokens = [tokenizer.merge_tokens(tokens)]
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer
                 )
-            return f"data modify {nbt_type_str} {target}{path} {full_operator} value {__clean_token(tokens[0], tokenizer, datapack)}"
+            return f"data modify {nbt_type_str} {target}{path} {
+                full_operator} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
             right_nbt_type_str, right_target, right_path = extract_nbt(
                 tokens, tokenizer, datapack, right_nbt_type
@@ -397,23 +403,28 @@ def nbt_operation(
             if tokens:
                 if tokens[0].token_type != TokenType.PAREN_SQUARE:
                     raise JMCSyntaxException(
-                        f"Unexpected token ({tokens[0].string})", tokens[0], tokenizer
+                        f"Unexpected token ({
+                            tokens[0].string})", tokens[0], tokenizer
                     )
                 return f"""data modify {nbt_type_str} {target}{path} {full_operator} string {right_nbt_type_str} {right_target}{right_path} {
                     __str_slice(tokens[0], tokenizer)}"""
             else:
-                return f"data modify {nbt_type_str} {target}{path} {full_operator} from {right_nbt_type_str} {right_target}{right_path}"
+                return f"data modify {nbt_type_str} {target}{path} {
+                    full_operator} from {right_nbt_type_str} {right_target}{right_path}"
 
     elif operator == "+=":
         right_nbt_type = get_nbt_type(tokens)
         if right_nbt_type is None:
             if len(tokens) > 1:
                 raise JMCSyntaxException(
-                    f"Unexpected token ({tokens[1].string})", tokens[1], tokenizer
+                    f"Unexpected token ({
+                        tokens[1].string})", tokens[1], tokenizer
                 )
             if not path:
-                return f"data merge {nbt_type_str} {target} {__clean_token(tokens[0], tokenizer, datapack)}"
-            return f"data modify {nbt_type_str} {target}{path} merge value {__clean_token(tokens[0], tokenizer, datapack)}"
+                return f"data merge {nbt_type_str} {target} {
+                    __clean_token(tokens[0], tokenizer, datapack)}"
+            return f"data modify {nbt_type_str} {target}{path} merge value {
+                __clean_token(tokens[0], tokenizer, datapack)}"
         else:
             if not path:
                 raise JMCSyntaxException(
@@ -433,13 +444,15 @@ def nbt_operation(
                 return f"""data modify {nbt_type_str} {target}{path} merge string {right_nbt_type_str} {right_target}{right_path} {
                     __str_slice(tokens[0], tokenizer)}"""
             else:
-                return f"data modify {nbt_type_str} {target}{path} merge from {right_nbt_type_str} {right_target}{right_path}"
+                return f"data modify {nbt_type_str} {target}{path} merge from {
+                    right_nbt_type_str} {right_target}{right_path}"
 
     elif operator == "?=":
         type_, scale = __get_type_scale(tokens, tokenizer, datapack)
         if len(tokens) == 0:
             raise JMCSyntaxException(
-                f"Expected command after operator{tokens[0].string} (got nothing)",
+                f"Expected command after operator{
+                    tokens[0].string} (got nothing)",
                 tokens[1],
                 tokenizer,
             )
@@ -454,8 +467,10 @@ def nbt_operation(
             )
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
-            return f"execute store success {nbt_type_str} {target}{path} {type_} {scale} {func_content[0][8:]}"
-        return f"execute store success {nbt_type_str} {target}{path} {type_} {scale} run {func_content[0]}"
+            return f"execute store success {nbt_type_str} {target}{
+                path} {type_} {scale} {func_content[0][8:]}"
+        return f"execute store success {nbt_type_str} {target}{
+            path} {type_} {scale} run {func_content[0]}"
 
     elif operator == "*":
         return f"data get {nbt_type_str} {target}{path} {tokens[0].string}"
