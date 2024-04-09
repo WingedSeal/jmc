@@ -156,7 +156,7 @@ class ItemCreate(ItemMixin, EventMixin):
             if self.is_never_used():
                 self.add_events("used:" + self.args["itemType"], [
                     f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
-                    f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name,'found')}"
+                    f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
                 ]
                 )
                 self.datapack.add_raw_private_function(self.name, [], "found")

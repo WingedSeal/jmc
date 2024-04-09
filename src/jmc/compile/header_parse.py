@@ -74,10 +74,10 @@ def __eval_macro_factory(
     string = argument_tokens[0].string
     header = Header()
     for key, replaced in header.number_macros.items():
-        string.replace(key, replaced)
+        string = string.replace(key, replaced)
     try:
         number = eval_expr(string)
-    except TypeError:
+    except (TypeError, SyntaxError):
         raise EvaluationException(string)
     new_token = Token(TokenType.KEYWORD, line=line, col=col,
                       string=number, _macro_length=len(number))
@@ -325,7 +325,8 @@ def __parse_header(header_str: str, file_name: str,
 
         # #command
         elif directive_token.string == "command":
-            if len(arg_tokens) == 3 and (arg_tokens[0].string, arg_tokens[1].string) == ("execute", "if"):
+            if len(arg_tokens) == 3 and (
+                    arg_tokens[0].string, arg_tokens[1].string) == ("execute", "if"):
                 header.conditions.add(arg_tokens[2].string)
             elif not arg_tokens or len(arg_tokens) != 1:
                 raise HeaderSyntaxException(

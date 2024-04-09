@@ -871,7 +871,7 @@ class Lexer:
                 outputs[-1].extend(
                     [
                         f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix, postcommands=[
-                        f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
+                            f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
                         f"execute if score {VAR} {DataPack.var_name} matches 0 run ",
                     ]
                 )
@@ -883,7 +883,7 @@ class Lexer:
                 outputs[-1].extend(
                     [
                         f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix, postcommands=[
-                        f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
+                            f'scoreboard players set {VAR} {DataPack.var_name} 1'])}""",
                         f"execute if score {VAR} {DataPack.var_name} matches 0 run ",
                     ]
                 )

@@ -286,9 +286,10 @@ class Tokenizer:
             args: list[Token] = []
             args_, kwargs = deepcopy(self).parse_func_args(new_token)
             for arg_ in args_:
-                if arg_[0].token_type != TokenType.KEYWORD:
-                    raise JMCSyntaxException(
-                        f"Macro factory arguments can only have a keyword token (got {arg_[0].token_type})", arg_[0], self)
+                # if arg_[0].token_type != TokenType.KEYWORD:
+                #     raise JMCSyntaxException(
+                # f"Macro factory arguments can only have a keyword token (got
+                # {arg_[0].token_type})", arg_[0], self)
                 if len(arg_) > 1:
                     arg_ = [self.merge_tokens(arg_)]
 
@@ -712,7 +713,7 @@ class Tokenizer:
         :param is_nbt: Whether it is an NBT/JSobject (If false, it's a function argument)
         :return: Tokens to be pushed to 'args' or 'kwargs'
         """
-        where = "function argument" if is_nbt else "JSObject/NBT"
+        where = "JSObject/NBT" if is_nbt else "function argument"
         if tokens[0].token_type in {TokenType.KEYWORD, TokenType.OPERATOR} and len(
                 tokens) != 1:
             return tokens
@@ -732,6 +733,9 @@ class Tokenizer:
                 token_ = tokens[2]
                 return [Token(
                     string=token_.string, line=token_.line, col=token_.col + 1, token_type=TokenType.FUNC)]
+
+            if tokens[0].token_type == TokenType.PAREN_ROUND and tokens[1].token_type == TokenType.OPERATOR:
+                return tokens
 
             raise JMCSyntaxException(
                 f"Unexpected {tokens[1].token_type.value} after {tokens[0].token_type.value} in {where}",

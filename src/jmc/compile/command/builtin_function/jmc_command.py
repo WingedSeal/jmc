@@ -1431,7 +1431,7 @@ class ArrayForEach(JMCFunction):
                 f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
                 f"data remove storage {self.args['target']} {self.args['path']}[0]",
                 f"scoreboard players add {current} {self.datapack.var_name} 1",
-                f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array',count)}",
+                f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array', count)}",
             ],
             count,
         )

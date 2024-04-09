@@ -97,9 +97,9 @@ def find_scoreboard_player_type(
     if len(splits) == 1:
         if allow_integer:
             raise JMCSyntaxException(
-                "Expected integer, variable, or objective:selector", token, tokenizer, suggestion="Did you mean ")
+                f"Expected integer, variable, or objective:selector (got '{splits[0]}')", token, tokenizer)
         raise JMCSyntaxException(
-            "Expected variable or objective:selector", token, tokenizer)
+            f"Expected variable or objective:selector (got '{splits[0]}')", token, tokenizer)
     return ScoreboardPlayer(
         player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
 
@@ -356,6 +356,8 @@ def eval_expr(expr: str) -> str:
     if isinstance(number, int):
         return f"{number:d}"
     if isinstance(number, float):
+        if int(number) == number:
+            return f"{int(number):d}"
         if abs(number) >= 100:
             return f"{number:.2f}"
         elif abs(number) >= 10:

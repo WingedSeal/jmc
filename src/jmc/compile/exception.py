@@ -120,7 +120,7 @@ def error_msg(
     return msg
 
 
-class EvaluationException(FileNotFoundError):
+class EvaluationException(SyntaxError):
     """Header file not found"""
 
     def __init__(self, string: str):

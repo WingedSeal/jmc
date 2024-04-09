@@ -181,7 +181,8 @@ class HardcodeRepeatLists(JMCFunction):
                 self.tokenizer,
             )
         string_lists_count = [len(string_list) for string_list in string_lists]
-        if string_lists_count.count(string_lists_count[0]) != len(string_lists_count):
+        if string_lists_count.count(
+                string_lists_count[0]) != len(string_lists_count):
             raise JMCValueError(
                 "Not all of list in stringLists have equal size",
                 self.raw_args["stringLists"].token,
@@ -199,7 +200,8 @@ class HardcodeRepeatLists(JMCFunction):
                             _hardcode_processes(
                                 self.raw_args["function"].token.string,
                                 index_strings,
-                                [string_list[index] for string_list in string_lists],
+                                [string_list[index]
+                                    for string_list in string_lists],
                                 self.token,
                                 self.tokenizer,
                             ),
@@ -435,7 +437,7 @@ class RaycastSimple(JMCFunction):
         elif box_size <= 0.01:
             check_colide = f"execute as {target} positioned ~-{1 - box_size} ~-{1 - box_size} ~-{1 - box_size} if entity @s[dx=0] positioned ~{1 - box_size} ~{1 - box_size} ~{1 - box_size} run {collide}"
         elif box_size < 1:
-            check_colide = f"execute positioned ~-{(1 - box_size / 2)} ~-{(1 - box_size / 2)} ~-{(1 - box_size / 2)} as {target} positioned ~{1 - box_size} ~{1 - box_size} ~{1 -box_size} if entity @s[dx=0] positioned ~{box_size / 2} ~{box_size / 2} ~{box_size /  2} run {collide}"
+            check_colide = f"execute positioned ~-{(1 - box_size / 2)} ~-{(1 - box_size / 2)} ~-{(1 - box_size / 2)} as {target} positioned ~{1 - box_size} ~{1 - box_size} ~{1 - box_size} if entity @s[dx=0] positioned ~{box_size / 2} ~{box_size / 2} ~{box_size / 2} run {collide}"
         else:
             check_colide = f"execute positioned ~-{box_size / 2} ~-{box_size / 2} ~-{box_size / 2} as {target} positioned ~{box_size / 2} ~{box_size / 2} ~{box_size / 2} run {collide}"
 
@@ -539,4 +541,5 @@ class TagUpdate(JMCFunction):
         selector = self.args["selector"]
         tag = self.args["tag"]
         remove_from = self.args["removeFrom"]
-        return f"tag {remove_from} remove {tag}\n" + f"tag {selector} add {tag}"
+        return f"tag {remove_from} remove {tag}\n" + \
+            f"tag {selector} add {tag}"
