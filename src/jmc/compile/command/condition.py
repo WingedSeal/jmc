@@ -96,9 +96,27 @@ def custom_condition(
             if tokens[2].string == "-":
                 tokens[2] = tokenizer.merge_tokens(tokens[2:4])
                 del tokens[3]
+            elif tokens[3].string == "-":
+                tokens[3] = tokenizer.merge_tokens(tokens[3:5])
+                del tokens[4]
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+
+        if len(tokens) > 3:
+            if tokens[3].string == "-":
+                tokens[3] = tokenizer.merge_tokens(tokens[3:5])
+                del tokens[4]
+            elif len(tokens) > 3 and tokens[2].string.endswith(".."):
+                tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+                del tokens[3]
+            else:
+                raise JMCSyntaxException(
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+
+        if len(tokens) > 3 and tokens[2].string.endswith(".."):
+            tokens[2] = tokenizer.merge_tokens(tokens[2:4])
+            del tokens[3]
 
         first_token, operator_token, second_token = tokens
         if operator_token.token_type == TokenType.OPERATOR:

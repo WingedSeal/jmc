@@ -166,6 +166,36 @@ execute if score $i __variable__ matches 1 run say Hello World
             """)
         )
 
+    def test_range(self):
+        pack = JMCTestPack().set_jmc_file("""
+if ($i matches -1..1) {
+    say "Hello World";
+}
+if ($i matches -2..-1) {
+    say "Hello World";
+}
+if ($i matches 1..2) {
+    say "Hello World";
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute if score $i __variable__ matches -1..1 run say Hello World
+execute if score $i __variable__ matches -2..-1 run say Hello World
+execute if score $i __variable__ matches 1..2 run say Hello World
+            """)
+        )
+
     def test_logic_gate(self):
         pack = JMCTestPack().set_jmc_file("""
 if (!entity @s[type=skeleton] || (entity @s[type=zombie] && $deathCount>5)) {
