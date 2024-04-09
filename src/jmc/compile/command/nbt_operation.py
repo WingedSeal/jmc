@@ -326,6 +326,9 @@ def nbt_operation(
     del tokens[0]
 
     if operator in ("<<", ">>", "="):
+        if len(tokens) > 1 and tokens[0].string == "-":
+            tokens[0] = tokenizer.merge_tokens(tokens[:2])
+            del tokens[1]
         right_nbt_type = get_nbt_type(tokens)
         __is_command = (
             tokens[0].token_type == TokenType.KEYWORD
