@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Union
 
 
-from ...compile.utils import is_connected
+from ...compile.utils import is_connected, is_number
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
@@ -186,8 +186,19 @@ def custom_condition(
                 raise JMCSyntaxException(
                     "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead")
 
-            first_int = int(match_tokens[0][0].string)
-            second_int = int(match_tokens[1][0].string)
+            header = Header()
+            first = match_tokens[0][0].string
+            second = match_tokens[1][0].string
+            first = header.number_macros.get(first, first)
+            second = header.number_macros.get(second, second)
+            if not is_number(first):
+                raise JMCSyntaxException(
+                    f"Expected integer after 'matches' (got '{first}')", match_tokens[0][0], tokenizer)
+            if not is_number(second):
+                raise JMCSyntaxException(
+                    f"Expected integer after '..' (got '{second}')", match_tokens[1][0], tokenizer)
+            first_int = int(first)
+            second_int = int(second)
             if first_int == second_int:
                 raise JMCSyntaxException(
                     "First integer must not equal second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead")
@@ -196,7 +207,7 @@ def custom_condition(
                     "First integer must be less than second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?")
 
             return Condition(
-                f'score {first_token.string} {objective} matches {tokens[2].string}', IF)
+                f'score {first_token.string} {objective} matches {first_int}..{second_int}', IF)
 
         else:
             raise JMCSyntaxException(
