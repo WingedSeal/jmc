@@ -359,13 +359,13 @@ def build(
         else:
             path = namespace_folder / "functions" / (func_path + ".mcfunction")
         content = post_process(func.content)
-        if content:
-            if _is_virtual:
-                output[path] = content
-            else:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                with path.open("w+", encoding="utf-8") as file:
-                    file.write(content)
+
+        if _is_virtual:
+            output[path] = content
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("w+", encoding="utf-8") as file:
+                file.write(content)
 
     for json_path, json in datapack.jsons.items():
         namespace = json_path.split("/")[0]
