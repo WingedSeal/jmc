@@ -28,6 +28,8 @@ def get_nbt_string(nbt_type: "NBTType") -> str:
 
 
 def get_nbt_type(tokens: list[Token]) -> NBTType | None:
+    if len(tokens) == 1 and tokens[0].string == "::":
+        return NBTType.AUTO_STORAGE
     if len(tokens) < 2:
         return None
     __is_storage_nbt = (
