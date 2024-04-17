@@ -606,6 +606,10 @@ x
             "Unexpected number", token, self.tokenizer, display_col_length=False)
 
     def __handle_return(self, key_pos: int) -> None:
+        if len(self.command) <= key_pos + 1:
+            append_commands(self.__commands, "return 0")
+            return
+
         if self.command[key_pos + 1].string == "true":
             append_commands(self.__commands, "return 1")
             del self.command[key_pos + 1]

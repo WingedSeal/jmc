@@ -43,7 +43,7 @@ INT=__int__"""
             GlobalData(),
             namespace=namespace,
             description="__THIS_IS_FOR_TESTING__",
-            pack_format="10",
+            pack_format="-1",
             target=Path("main.jmc"),
             output=Path(output)
         )
