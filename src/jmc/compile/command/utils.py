@@ -301,6 +301,41 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         "Unknown argument type", tokens[-1], tokenizer)
 
 
+def verify_list(expected_arg_type: ArgType, token: Token,
+                tokenizer: Tokenizer) -> list[Arg]:
+    """
+    Verify list types of a paren_square token
+
+    :param expected_arg_type: ArgType every element in list is expected to be
+    :param token: paren_square token
+    :param tokenizer: token's tokenizer
+    :return: List of Arg
+    """
+    results = []
+    args, kwargs = tokenizer.parse_func_args(token, TokenType.PAREN_SQUARE)
+    if kwargs:
+        for key, kwarg in kwargs.items():
+            raise JMCValueError(
+                f"Unexpected keyword argument in a list '{key}'", kwarg[-1], tokenizer)
+    for arg in args:
+        arg_type = find_arg_type(arg, tokenizer)
+        arg_token = tokenizer.merge_tokens(arg)
+        try:
+            results.append(Arg(
+                arg_token,
+                arg_type).verify(
+                expected_arg_type,
+                tokenizer,
+                'list'
+            ))
+        except JMCValueError as error:
+            raise JMCValueError(
+                f"In the list, expected {expected_arg_type.value}, got {arg_type.value}",
+                arg_token,
+                tokenizer) from error
+    return results
+
+
 def verify_args(params: dict[str, ArgType], feature_name: str,
                 token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
     """

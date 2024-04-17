@@ -6,7 +6,7 @@ from json import dumps
 
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
-from .command.utils import hardcode_parse_calc, verify_args
+from .command.utils import ArgType, find_scoreboard_player_type, hardcode_parse_calc, verify_args, verify_list
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
@@ -403,16 +403,13 @@ x
         # End Handle Errors
 
         if token.string == "with":
-            self.__handle_with(key_pos, token)
-            __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
-            if __with_nbt_type is None:
-                return CONTINUE_LINE
-            nbt_type_str, target, path = extract_nbt(
-                self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
-            append_commands(
-                self.__commands,
-                f"{nbt_type_str} {target}{path}")
-            return SKIP_TO_NEXT_LINE
+            self.__handle_with_anon(key_pos, token)
+            if len(self.command) <= key_pos + 1:
+                raise JMCSyntaxException(
+                    f"Expected a token after 'with'", token, self.tokenizer)
+            if self.__handle_with(key_pos, token):
+                return SKIP_TO_NEXT_LINE
+
         self.was_anonym_func = False
 
         if is_number(token.string) and key_pos == 0:
@@ -511,17 +508,7 @@ x
                             f"function {self.lexer.datapack.format_func_path(func)}")
             del self.command[key_pos + 1]  # delete ()
 
-            __with_nbt_type = get_nbt_type(self.command[key_pos + 2:])
-            if __with_nbt_type is None:
-                return CONTINUE_LINE
-
-            append_commands(self.__commands, "with")
-            nbt_type_str, target, path = extract_nbt(
-                self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 2)
-            append_commands(
-                self.__commands,
-                f"{nbt_type_str} {target}{path}")
-            return SKIP_TO_NEXT_LINE
+            return self.__handle_with(key_pos + 1, token)
 
         if self.command[key_pos + 1].string != "()":
             arg_token = self.command[key_pos + 1]
@@ -619,8 +606,10 @@ x
         else:
             append_commands(self.__commands, "return")
 
-    def __handle_with(self, key_pos: int, token: Token) -> None:
+    def __handle_with_anon(self, key_pos: int, token: Token) -> None:
         if not self.was_anonym_func:
+            if not self.command_strings or "run function" not in self.command_strings[-1]:
+                return
             first_section, second_section = self.command_strings.pop().split(" run ")
             append_commands(
                 self.__commands,
@@ -632,6 +621,35 @@ x
         append_commands(self.__commands, self.command_strings.pop())
         if self.command[key_pos + 1].token_type != TokenType.PAREN_CURLY:
             append_commands(self.__commands, "with")
+
+    def __handle_with(self, key_pos: int, token: Token) -> bool:
+        if self.command[key_pos + 1].token_type == TokenType.PAREN_SQUARE:
+            if len(self.command) > key_pos + 2:
+                raise JMCSyntaxException(
+                    f"Unexpected token after square parenthesis ({self.command[key_pos + 2]})", token, self.tokenizer)
+            args = verify_list(ArgType.SCOREBOARD,
+                               self.command[key_pos + 1],
+                               self.tokenizer)
+            for i, arg in enumerate(args):
+                scoreboard_player = find_scoreboard_player_type(
+                    arg.token, self.tokenizer, allow_integer=False)
+                assert isinstance(scoreboard_player.value, tuple)
+                self.command_strings.append(
+                    f"execute store result storage {self.lexer.datapack.namespace}:{self.lexer.datapack.private_name} global.{i} int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}")
+            append_commands(
+                self.__commands,
+                f"storage {self.lexer.datapack.namespace}:{self.lexer.datapack.private_name} global")
+            return SKIP_TO_NEXT_LINE
+
+        __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
+        if __with_nbt_type is None:
+            return CONTINUE_LINE
+        nbt_type_str, target, path = extract_nbt(
+            self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
+        append_commands(
+            self.__commands,
+            f"{nbt_type_str} {target}{path}")
+        return SKIP_TO_NEXT_LINE
 
     def __handle_say(self, key_pos: int, token: Token) -> None:
         if len(self.command[key_pos:]) == 1:

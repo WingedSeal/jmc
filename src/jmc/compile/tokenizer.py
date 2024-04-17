@@ -750,14 +750,16 @@ class Tokenizer:
         return tokens
 
     def parse_func_args(
-            self, token: Token) -> tuple[list[list[Token]], dict[str, list[Token]]]:
+            self, token: Token, token_type: TokenType = TokenType.PAREN_ROUND) -> tuple[list[list[Token]], dict[str, list[Token]]]:
         """
         Parse arguments of custom JMC function (Do NOT validate the arguments)
 
         :param token: paren_round token containing arguments for custom JMC function
+        :param token_type: Type of parenthesis
+
         :return: Tuple of arguments(list of list of tokens) and keyword arguments(dictionary of key(string) and list of token)
         """
-        if token.token_type != TokenType.PAREN_ROUND:
+        if token.token_type != token_type:
             raise JMCSyntaxException(
                 "Expected (", token, self, display_col_length=False)
         _keywords = self.parse(
