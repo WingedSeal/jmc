@@ -479,6 +479,12 @@ def async_(command: list[Token], datapack: DataPack,
     """
     Parse `async while` and `async for`
     """
+    if len(command) == 1:
+        raise JMCSyntaxException(
+            "Expected 'for' or 'while' after 'async'", command[0], tokenizer, col_length=True)
+    if command[1].token_type != TokenType.KEYWORD:
+        raise JMCSyntaxException(
+            f"Expected 'for' or 'while' after 'async' (got '{command[1].token_type.value}')", command[1], tokenizer)
     if command[1].string == "for":
         if len(command) == 4:
             raise JMCSyntaxException(
@@ -569,4 +575,4 @@ def async_(command: list[Token], datapack: DataPack,
         return call_check_func
 
     raise JMCSyntaxException(
-        "Expected 'for' or 'while' after 'async'", command[1], tokenizer)
+        f"Expected 'for' or 'while' after 'async' (got '{command[1].string}')", command[1], tokenizer)
