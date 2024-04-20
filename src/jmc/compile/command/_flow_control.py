@@ -1,5 +1,6 @@
 """Module for parsing flow controls (if-e;se, while, etc.), called from command/flow_control.py"""
 
+import re
 from typing import Literal
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
@@ -398,6 +399,35 @@ def for_(command: list[Token], datapack: DataPack,
     """
     Parse `for`
     """
+    precommand, condition, first_statement, last_statement = __handle_for(
+        command, datapack, tokenizer, prefix)
+
+    count = datapack.get_count(FOR_NAME)
+    call_func = f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+    datapack.add_custom_private_function(
+        FOR_NAME,
+        command[2],
+        tokenizer,
+        count,
+        prefix,
+        postcommands=[
+            *last_statement,
+            call_func
+        ]
+    )
+
+    return "\n".join([
+        *first_statement,
+        call_func
+    ])
+
+
+def __handle_for(command: list[Token], datapack: DataPack,
+                 tokenizer: Tokenizer, prefix: str, *, allow_true: bool = False) -> tuple[str, str, list[str], list[str]]:
+    """
+    Parse a for loop
+    :return: precommand, condition, first_statement, last_statement
+    """
     if len(command) == 1:
         raise JMCSyntaxException(
             "Expected (", command[0], tokenizer, col_length=True)
@@ -424,40 +454,107 @@ def for_(command: list[Token], datapack: DataPack,
         raise JMCSyntaxException(
             f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
 
-    _first_statement = statements[0]
-    # if not (_first_statement[0].string.startswith(
-    #         DataPack.VARIABLE_SIGN) and _first_statement[0].token_type == TokenType.KEYWORD):
-    #     raise JMCSyntaxException(
-    #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion="Please use $<variable> = <integer|$variable>|<objective>:<selector>")
+    first_statement_tokens = statements[0]
 
     first_statement = datapack.lexer.parse_line(
-        _first_statement, tokenizer, prefix)
-
-    # if not (_first_statement[1].string ==
-    #         "=" and _first_statement[1].token_type == TokenType.OPERATOR):
-    #     raise JMCSyntaxException(
-    #         "First statement in for loop must be variable assignment", _first_statement[0], tokenizer, suggestion=f"{_first_statement[1].string} operator is not supported")
-
-    condition, precommand = parse_condition(statements[1], tokenizer, datapack)
+        first_statement_tokens, tokenizer, prefix)
+    if allow_true and len(
+            statements[1]) == 1 and statements[1][0].string == "true":
+        condition = "true"
+        precommand = ""
+    else:
+        condition, precommand = parse_condition(
+            statements[1], tokenizer, datapack)
     last_statement = datapack.lexer.parse_line(
         statements[2], tokenizer, prefix)
 
-    count = datapack.get_count(FOR_NAME)
-    call_func = f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+    return precommand, condition, first_statement, last_statement
 
-    datapack.add_custom_private_function(
-        FOR_NAME,
-        command[2],
-        tokenizer,
-        count,
-        prefix,
-        postcommands=[
-            *last_statement,
-            call_func
-        ]
-    )
 
-    return "\n".join([
-        *first_statement,
-        call_func
-    ])
+ASYNC_NAME = "async"
+
+
+def async_(command: list[Token], datapack: DataPack,
+           tokenizer: Tokenizer, prefix: str) -> str:
+    """
+    Parse `async while` and `async for`
+    """
+    if command[1].string == "for":
+        if len(command) == 4:
+            raise JMCSyntaxException(
+                "Expected delay", command[3], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+        if len(command) > 5:
+            raise JMCSyntaxException(
+                "Unexpected token", command[5], tokenizer, )
+        if command[4].token_type != TokenType.KEYWORD:
+            raise JMCSyntaxException(
+                f"Expected a keyword as delay (got {command[4].token_type.value})", command[4], tokenizer)
+        if not re.compile(r"^[0-9]+[dst]$").match(command[4].string):
+            raise JMCSyntaxException(
+                "Expected delay in form of '<number><unit>'", command[4], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+
+        precommand, condition, first_statement, last_statement = __handle_for(
+            command[1:-1], datapack, tokenizer, prefix, allow_true=True)
+
+        count = datapack.get_count(FOR_NAME)
+        if condition == "true":
+            call_check_func = datapack.call_func(FOR_NAME, count)
+        else:
+            call_check_func = datapack.add_private_function(
+                ASYNC_NAME,
+                f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}", force_create_func=True)
+
+        datapack.add_custom_private_function(
+            FOR_NAME,
+            command[3],
+            tokenizer,
+            count,
+            prefix,
+            postcommands=[
+                *last_statement,
+                "schedule " + call_check_func + " " + command[4].string
+            ]
+        )
+
+        return "\n".join([
+            *first_statement,
+            call_check_func
+        ])
+
+    elif command[1].string == "while":
+        if len(command) < 3:
+            raise JMCSyntaxException(
+                "Expected (", command[1], tokenizer, col_length=True)
+        if command[2].token_type != TokenType.PAREN_ROUND:
+            raise JMCSyntaxException(
+                "Expected (", command[2], tokenizer, display_col_length=False)
+        if len(command) < 4:
+            raise JMCSyntaxException(
+                "Expected {", command[2], tokenizer, col_length=True)
+        if command[2].token_type != TokenType.PAREN_ROUND:
+            raise JMCSyntaxException(
+                "Expected {", command[3], tokenizer, display_col_length=False)
+
+        if command[2].string[1:-1].strip() == "true":
+            condition = "true"
+            precommand = ""
+        else:
+            condition, precommand = parse_condition(
+                command[2], tokenizer, datapack)
+
+        count = datapack.get_count(WHILE_NAME)
+        if condition == "true":
+            call_check_func = datapack.call_func(WHILE_NAME, count)
+        else:
+            call_check_func = datapack.add_private_function(
+                ASYNC_NAME, f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}", force_create_func=True)
+
+        datapack.add_custom_private_function(
+            WHILE_NAME, command[3], tokenizer, count, prefix, postcommands=[
+                "schedule " + call_check_func + " " + command[4].string
+            ]
+        )
+        return call_check_func
+
+    raise JMCSyntaxException(
+        "Expected 'for' or 'while' after 'async'", command[1], tokenizer)

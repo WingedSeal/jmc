@@ -6,7 +6,8 @@ from ._flow_control import (
     while_,
     do,
     switch,
-    for_
+    for_,
+    async_
 )
 
 from ..tokenizer import Token, Tokenizer
@@ -26,4 +27,5 @@ FLOW_CONTROL_COMMANDS: dict[str, Callable[
     "else": else_,
     "switch": switch,
     "for": for_,
+    "async": async_,
 }
