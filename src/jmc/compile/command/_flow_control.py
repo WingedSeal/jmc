@@ -491,7 +491,7 @@ def async_(command: list[Token], datapack: DataPack,
                 f"Expected a keyword as delay (got {command[4].token_type.value})", command[4], tokenizer)
         if not re.compile(r"^[0-9]+[dst]$").match(command[4].string):
             raise JMCSyntaxException(
-                "Expected delay in form of '<number><unit>'", command[4], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+                "Expected delay in form of '<number><unit>'", command[4], tokenizer, suggestion="Example: `1s`, `1t`, `1d`")
 
         precommand, condition, first_statement, last_statement = __handle_for(
             command[1:-1], datapack, tokenizer, prefix, allow_true=True)
@@ -534,6 +534,18 @@ def async_(command: list[Token], datapack: DataPack,
         if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
                 "Expected {", command[3], tokenizer, display_col_length=False)
+        if len(command) == 4:
+            raise JMCSyntaxException(
+                "Expected delay", command[3], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+        if len(command) > 5:
+            raise JMCSyntaxException(
+                "Unexpected token", command[5], tokenizer, )
+        if command[4].token_type != TokenType.KEYWORD:
+            raise JMCSyntaxException(
+                f"Expected a keyword as delay (got {command[4].token_type.value})", command[4], tokenizer)
+        if not re.compile(r"^[0-9]+[dst]$").match(command[4].string):
+            raise JMCSyntaxException(
+                "Expected delay in form of '<number><unit>'", command[4], tokenizer, suggestion="Example: `1s`, `1t`, `1d`")
 
         if command[2].string[1:-1].strip() == "true":
             condition = "true"
