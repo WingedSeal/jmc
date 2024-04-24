@@ -1,3 +1,0 @@
-Nuitka==1.1.4
-ordered-set==4.1.0
-zstandard==0.18.0
