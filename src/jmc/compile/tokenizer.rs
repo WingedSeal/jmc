@@ -111,7 +111,7 @@ impl Token {
 
     /// Edit string and _length according to macros(`#define something`) defined
     fn post_init(&self) {
-        if self.token_type == TokenType::ParenCurly {
+        if self.token_type != TokenType::ParenCurly {
             return;
         };
         if !self.string.starts_with("{") || !self.string.ends_with("}") {
