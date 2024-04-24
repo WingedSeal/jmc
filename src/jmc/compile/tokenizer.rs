@@ -12,7 +12,7 @@ const OPERATORS: &[&'static str] = &[
     "+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&", "?",
 ];
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum TokenType {
     Keyword,
     Operator,
@@ -43,6 +43,7 @@ impl TokenType {
     }
 }
 
+#[derive(Debug)]
 pub struct Token {
     pub token_type: TokenType,
     pub line: u32,
@@ -145,21 +146,21 @@ impl Token {
         repr(&self.string)
     }
 }
-
+#[derive(Debug)]
 struct Pos {
     pub line: u32,
     pub col: u32,
 }
 
 mod re {
-    pub const NEW_LINE: &str = "\n";
-    pub const BACKSLASH: &str = "\\";
+    pub const NEW_LINE: char = '\n';
+    pub const BACKSLASH: char = '\\';
     pub const WHITESPACE: &str = r"\s+";
     pub const KEYWORD: &str = r"[a-zA-Z0-9_\.\/\^\~]";
-    pub const SEMICOLON: &str = ";";
-    pub const COMMA: &str = ",";
-    pub const HASH: &str = "#";
-    pub const SLASH: &str = "/";
+    pub const SEMICOLON: char = ';';
+    pub const COMMA: char = ',';
+    pub const HASH: char = '#';
+    pub const SLASH: char = '/';
 }
 
 mod quote {
@@ -185,7 +186,7 @@ pub fn get_paren_pair(left_paren: char) -> Result<char, ()> {
         _ => Err(()),
     }
 }
-
+#[derive(Debug)]
 struct MacroFactoryInfo {
     name: String,
     macro_factory: String, // TODO: Change to MacroFactory
@@ -193,7 +194,7 @@ struct MacroFactoryInfo {
     arg_count: u32,
     pos: Pos,
 }
-
+#[derive(Debug)]
 /// A class for converting string into tokens
 pub struct Tokenizer {
     /// List of lines(list of tokens)
@@ -255,7 +256,7 @@ impl Tokenizer {
         file_string: Option<String>,
         expect_semicolon: bool,
         allow_semicolon: bool,
-    ) -> Self {
+    ) -> Result<Self, JMCError> {
         let mut tokenizer = Self {
             programs: vec![],
             line: 0,
@@ -278,8 +279,15 @@ impl Tokenizer {
             allow_semicolon,
             macro_factory: None,
         };
-        tokenizer.parse(expect_semicolon);
-        tokenizer
+        tokenizer.parse(expect_semicolon, false)?;
+        Ok(tokenizer)
+    }
+
+    pub fn get_file_string(&self) -> &str {
+        match &self.file_string {
+            Some(file_string) => &file_string,
+            None => &self.raw_string,
+        }
     }
 
     /// Parse string
@@ -287,10 +295,14 @@ impl Tokenizer {
     /// * `string` - String to parse
     /// * `listne` - Current line
     /// * `costl` - Current column
-    /// * `exstpect_semicolon` - Whether to expect a semicolon at the end
+    /// * `expect_semicolon` - Whether to expect a semicolon at the end
     /// * `allow_last_missing_semicolon` - Whether to allow last missing last semicolon, defaults to False
     /// * return - List of keywords(list of tokens)
-    fn parse(&mut self, expect_semicolon: bool) -> Result<Vec<Vec<Token>>, JMCError> {
+    fn parse(
+        &mut self,
+        expect_semicolon: bool,
+        allow_last_missing_semicolon: bool,
+    ) -> Result<&Vec<Vec<Token>>, JMCError> {
         self.parse_chars(expect_semicolon)?;
 
         match self.state {
@@ -308,8 +320,12 @@ impl Tokenizer {
                 ));
             }
             Some(TokenType::Paren) => {
-                assert!(self.token_pos != None);
-                let paren: String = match self.left_paren {
+                let token_pos = match &self.token_pos {
+                    Some(token_pos) => token_pos,
+                    None => panic!("token_pos is None"),
+                };
+                assert!(!self.token_pos.is_none());
+                let paren: String = match &self.left_paren {
                     Some(left_paren) => left_paren.to_string(),
                     None => "".to_owned(),
                 };
@@ -317,31 +333,143 @@ impl Tokenizer {
                     "Bracket was never closed".to_owned(),
                     Some(&Token::new(
                         TokenType::Keyword,
-                        self.token_pos.unwrap().line,
-                        self.token_pos.unwrap().col,
+                        token_pos.line,
+                        token_pos.col,
                         paren,
                         None,
                         None,
                     )),
-                    tokenizer,
-                    is_length_include_col,
-                    is_display_col_length,
-                    is_entire_line,
-                    suggestion,
+                    self,
+                    false,
+                    true,
+                    false,
+                    Some("This can be the result of unclosed string as well".to_owned()),
                 ));
             }
+            _ => {}
         }
+        if expect_semicolon && (!self.keywords.is_empty() || !self.token_str.is_empty()) {
+            if !self.token_str.is_empty() {
+                self.append_token();
+            }
+            if allow_last_missing_semicolon {
+                self.append_keywords();
+            }
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected semicolon(;)".to_owned(),
+                Some(&self.keywords[self.keywords.len() - 1]),
+                &self,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        if !expect_semicolon {
+            if !self.token_str.is_empty() {
+                self.append_token();
+            }
+            if !self.keywords.is_empty() {
+                self.append_keywords();
+            }
+        }
+        Ok(&self.list_of_keywords)
+    }
+
+    fn parse_chars(&mut self, expect_semicolon: bool) -> Result<(), JMCError> {
+        let mut skip: u8 = 0;
+        let raw_string = self.raw_string.clone();
+        for (i, ch) in raw_string.chars().enumerate() {
+            // TODO: Try to implement this without cloning string
+            if skip > 0 {
+                skip -= 1;
+                continue;
+            }
+            self.col += 1;
+            if ch == re::SEMICOLON && self.state.is_none() && !expect_semicolon {
+                return Err(JMCError::jmc_syntax_exception(
+                    "Unexpected semicolon(;)".to_owned(),
+                    None,
+                    &self,
+                    false,
+                    true,
+                    false,
+                    None,
+                ));
+            }
+
+            if ch == re::NEW_LINE {
+                self.parse_newline(ch)?;
+                continue;
+            }
+
+            if ch == re::SLASH
+                && raw_string.chars().nth(i + 1).unwrap() == re::SLASH
+                && self.state != Some(TokenType::Paren)
+                && self.state != Some(TokenType::String)
+            {
+                skip = 1;
+                if !self.token_str.is_empty() {
+                    self.append_token();
+                }
+                self.state = Some(TokenType::Comment);
+                continue;
+            }
+
+            match self.state {
+                Some(TokenType::Keyword) | Some(TokenType::Operator) => {
+                    if self.parse_keyword_and_operator(ch, expect_semicolon)? {
+                        continue;
+                    }
+                }
+                Some(TokenType::Paren) => {
+                    if self.parse_paren(ch, expect_semicolon)? {
+                        continue;
+                    }
+                }
+                Some(TokenType::String) => self.parse_string(ch)?,
+                Some(TokenType::Comment) => self.parse_comment(ch)?,
+                None => self.parse_none(ch)?,
+                _ => panic!("Invalid state"),
+            }
+        }
+        Ok(())
+    }
+
+    fn parse_newline(&mut self, ch: char) -> Result<(), JMCError> {
         todo!()
     }
 
-    fn parse_chars(&self, expect_semicolon: bool) -> Result<(), JMCError> {
+    fn parse_string(&mut self, ch: char) -> Result<(), JMCError> {
         todo!()
     }
 
-    pub fn get_file_string(&self) -> &str {
-        match &self.file_string {
-            Some(file_string) => &file_string,
-            None => &self.raw_string,
-        }
+    fn parse_comment(&mut self, ch: char) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_keyword_and_operator(
+        &mut self,
+        ch: char,
+        expect_semicolon: bool,
+    ) -> Result<bool, JMCError> {
+        todo!()
+    }
+
+    fn parse_paren(&mut self, ch: char, expect_semicolon: bool) -> Result<bool, JMCError> {
+        todo!()
+    }
+
+    fn parse_none(&mut self, ch: char) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn append_token(&mut self) {
+        todo!()
+    }
+
+    fn append_keywords(&mut self) {
+        todo!()
     }
 }

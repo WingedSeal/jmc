@@ -225,6 +225,11 @@ impl JMCError {
         }
     }
 
+    /// Invalid syntax for JMC
+    ///
+    /// * `is_length_include_col` - should defaults to `false``
+    /// * `is_display_col_length` - should defaults to `true``
+    /// * `is_entire_line` - should defaults to `false``
     pub fn jmc_syntax_exception(
         message: String,
         token: Option<&Token>,
