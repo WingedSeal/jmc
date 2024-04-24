@@ -1,0 +1,1 @@
+c:\Users\User\Desktop\jmc_rust\jmc\target\debug\jmc.exe: c:\Users\User\Desktop\jmc_rust\jmc\src\jmc\compile\mod.rs c:\Users\User\Desktop\jmc_rust\jmc\src\jmc\compile\tokenizer.rs c:\Users\User\Desktop\jmc_rust\jmc\src\jmc\mod.rs c:\Users\User\Desktop\jmc_rust\jmc\src\main.rs
