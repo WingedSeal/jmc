@@ -8,8 +8,8 @@ use JMCErrorType::*;
 
 fn create_error_msg(
     message: String,
-    token: Option<Token>,
-    tokenizer: Tokenizer,
+    token: Option<&Token>,
+    tokenizer: &Tokenizer,
     is_length_include_col: bool,
     is_display_col_length: bool,
     is_entire_line: bool,
@@ -28,7 +28,7 @@ fn create_error_msg(
             line = token.line as usize;
         }
         None => {
-            string = "".to_string();
+            string = "".to_owned();
             length = 1;
             col = tokenizer.col as usize;
             line = tokenizer.line as usize;
@@ -60,7 +60,7 @@ fn create_error_msg(
         display_col += 1;
     }
 
-    let msgs: Vec<&str> = tokenizer.get_file_string().split('\n').collect();
+    let msgs: Vec<&str> = tokenizer.get_file_string().lines().collect();
     let max_space = (display_line + 1).to_string().len();
     let line_;
     match overide_file_str {
@@ -86,7 +86,7 @@ fn create_error_msg(
             if display_line > 1 {
                 msgs[display_line - 2].replace('\t', "    ")
             } else {
-                "".to_string()
+                "".to_owned()
             },
             display_line,
             " ".repeat(max_space - (display_line).to_string().len()),
@@ -97,7 +97,7 @@ fn create_error_msg(
             if display_line < msgs.len() {
                 msgs[display_line].replace('\t', "    ")
             } else {
-                "".to_string()
+                "".to_owned()
             }
         )
     } else {
@@ -120,7 +120,7 @@ fn create_error_msg(
             if display_line > 1 {
                 msgs[display_line - 2].replace('\t', "    ")
             } else {
-                "".to_string()
+                "".to_owned()
             },
             display_line,
             " ".repeat(max_space - (display_line).to_string().len()),
@@ -131,7 +131,7 @@ fn create_error_msg(
             if display_line < msgs.len() {
                 msgs[display_line].replace('\t', "    ")
             } else {
-                "".to_string()
+                "".to_owned()
             }
         )
     }
@@ -145,14 +145,14 @@ fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> S
     let file_path = PathBuf::from(file_name);
     let cwd = std::env::current_dir().expect("Current directory should not fail");
     if file_path.starts_with(&cwd) {
-        return file_name.to_string();
+        return file_name.to_owned();
     }
-    let mut file_name = file_path
+    let mut file_name: String = file_path
         .strip_prefix(&cwd)
         .unwrap()
         .to_str()
         .unwrap()
-        .to_string();
+        .to_owned();
     if let Some(line) = line {
         file_name.push_str(format!(":{line}").as_str());
     }
@@ -175,21 +175,21 @@ pub struct JMCError {
     msg: String,
 }
 impl JMCError {
-    fn evaluation_exception(string: String) -> Self {
+    pub fn evaluation_exception(string: String) -> Self {
         let msg = format!("Unable to evaluate expression '{string}'");
         Self {
             error_type: EvaluationException,
             msg,
         }
     }
-    fn header_file_not_found_error(path: PathBuf) -> Self {
+    pub fn header_file_not_found_error(path: &PathBuf) -> Self {
         let msg = format!("Header file not found: {0}", path.to_str().unwrap());
         Self {
             error_type: HeaderFileNotFoundError,
             msg,
         }
     }
-    fn header_duplicated_macro(
+    pub fn header_duplicated_macro(
         message: String,
         file_name: String,
         line: u32,
@@ -205,7 +205,7 @@ impl JMCError {
         }
     }
 
-    fn header_syntax_exception(
+    pub fn header_syntax_exception(
         message: String,
         file_name: String,
         line: u32,
@@ -225,10 +225,10 @@ impl JMCError {
         }
     }
 
-    fn jmc_syntax_exception(
+    pub fn jmc_syntax_exception(
         message: String,
-        token: Option<Token>,
-        tokenizer: Tokenizer,
+        token: Option<&Token>,
+        tokenizer: &Tokenizer,
         is_length_include_col: bool,
         is_display_col_length: bool,
         is_entire_line: bool,

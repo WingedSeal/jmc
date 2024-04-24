@@ -130,7 +130,7 @@ impl Token {
     /// Get self.string including quotation mark
     pub fn get_full_string(&self) -> String {
         if self.token_type != TokenType::String {
-            return self.string.to_string();
+            return self.string.to_owned();
         }
         if self.quote != '`' {
             let string: String = repr(&self.string);
@@ -282,10 +282,54 @@ impl Tokenizer {
         tokenizer
     }
 
+    /// Parse string
+    ///
+    /// * `string` - String to parse
+    /// * `listne` - Current line
+    /// * `costl` - Current column
+    /// * `exstpect_semicolon` - Whether to expect a semicolon at the end
+    /// * `allow_last_missing_semicolon` - Whether to allow last missing last semicolon, defaults to False
+    /// * return - List of keywords(list of tokens)
     fn parse(&mut self, expect_semicolon: bool) -> Result<Vec<Vec<Token>>, JMCError> {
         self.parse_chars(expect_semicolon)?;
-        if let Some(TokenType::String) = self.state {
-            todo!()
+
+        match self.state {
+            Some(TokenType::String) => {
+                return Err(JMCError::jmc_syntax_exception(
+                    "String literal contains an unescaped linebreak".to_owned(),
+                    None,
+                    self,
+                    true,
+                    false,
+                    true,
+                    Some(
+                        "If you intended to use multiple line, try multiline string '`'".to_owned(),
+                    ),
+                ));
+            }
+            Some(TokenType::Paren) => {
+                assert!(self.token_pos != None);
+                let paren: String = match self.left_paren {
+                    Some(left_paren) => left_paren.to_string(),
+                    None => "".to_owned(),
+                };
+                return Err(JMCError::jmc_syntax_exception(
+                    "Bracket was never closed".to_owned(),
+                    Some(&Token::new(
+                        TokenType::Keyword,
+                        self.token_pos.unwrap().line,
+                        self.token_pos.unwrap().col,
+                        paren,
+                        None,
+                        None,
+                    )),
+                    tokenizer,
+                    is_length_include_col,
+                    is_display_col_length,
+                    is_entire_line,
+                    suggestion,
+                ));
+            }
         }
         todo!()
     }
@@ -294,7 +338,7 @@ impl Tokenizer {
         todo!()
     }
 
-    pub fn get_file_string(&self) -> &String {
+    pub fn get_file_string(&self) -> &str {
         match &self.file_string {
             Some(file_string) => &file_string,
             None => &self.raw_string,
