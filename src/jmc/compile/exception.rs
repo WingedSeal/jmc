@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::fmt::Write;
 use std::path::PathBuf;
 
 use super::tokenizer::Token;
@@ -137,7 +136,7 @@ fn create_error_msg(
         )
     }
     if let Some(suggestion) = suggestion {
-        final_msg.write_str(&suggestion).unwrap();
+        final_msg.push_str(&suggestion);
     }
     final_msg
 }
@@ -155,10 +154,10 @@ fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> S
         .unwrap()
         .to_string();
     if let Some(line) = line {
-        file_name.write_fmt(format_args!(":{line}")).unwrap();
+        file_name.push_str(format!(":{line}").as_str());
     }
     if let Some(col) = col {
-        file_name.write_fmt(format_args!(":{col}")).unwrap();
+        file_name.push_str(format!(":{col}").as_str());
     }
     file_name
 }
@@ -218,7 +217,7 @@ impl JMCError {
             relative_file_name(&file_name, Some(line), None)
         );
         if let Some(suggestion) = suggestion {
-            msg.write_str(suggestion.as_str()).unwrap();
+            msg.push_str(suggestion.as_str());
         }
         Self {
             error_type: HeaderSyntaxException,
