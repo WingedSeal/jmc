@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::exception::JMCError;
-use std::fmt::Debug;
+use std::fmt::{format, Debug};
 use std::rc::Rc;
 
 /// Array of string that, if a line starts with, should automatically terminate line on `{}` without semicolons
@@ -154,10 +154,12 @@ struct Pos {
 }
 
 mod re {
+    use regex::bytes::Regex;
+
     pub const NEW_LINE: char = '\n';
     pub const BACKSLASH: char = '\\';
-    pub const WHITESPACE: &str = r"\s+";
-    pub const KEYWORD: &str = r"[a-zA-Z0-9_\.\/\^\~]";
+    pub const WHITESPACE: Regex = Regex::new(r"\s+").unwrap();
+    pub const KEYWORD: Regex = Regex::new(r"[a-zA-Z0-9_\.\/\^\~]").unwrap();
     pub const SEMICOLON: char = ';';
     pub const COMMA: char = ',';
     pub const HASH: char = '#';
@@ -475,6 +477,7 @@ impl Tokenizer {
         match ch {
             'n' => Ok('\n'),
             't' => Ok('\t'),
+            '?' => todo!(),
             _ => Err(()),
         }
     }
@@ -512,7 +515,64 @@ impl Tokenizer {
     }
 
     fn validate_multiline_string(&mut self) -> Result<(), JMCError> {
-        todo!()
+        let first_newline = self.raw_string.find('\n');
+        let last_newline = self.raw_string.rfind('\n');
+        let first_line: &str;
+        let last_line: &str;
+        match (first_newline, last_newline) {
+            (None, None) => Err(JMCError::jmc_syntax_exception(
+                "Expected newline after open backtick(`) for multiline string".to_owned(),
+                None,
+                self,
+                false,
+                false,
+                false,
+                None,
+            )),
+            (Some(first_newline), Some(last_newline)) => {
+                if first_newline == last_newline {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "Expected newline before close backtick(`) for multiline string".to_owned(),
+                        None,
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                first_line = &self.raw_string[..first_newline];
+                last_line = &self.raw_string[last_newline + 1..];
+                if !first_line.is_empty() && !re::WHITESPACE.is_match(first_line) {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!(
+                            "Expected whitespaces line after open backtick(`) (got {first_line:?})"
+                        ),
+                        None,
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                if !last_line.is_empty() && !re::WHITESPACE.is_match(last_line) {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!(
+                            "Expected whitespaces line before open backtick(`) (got {last_line:?})"
+                        ),
+                        None,
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                Ok(())
+            }
+            _ => panic!("Unreachable"),
+        }
     }
 
     fn parse_comment(&mut self, ch: char) -> Result<(), JMCError> {
