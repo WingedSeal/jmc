@@ -243,6 +243,7 @@ pub struct Tokenizer {
     allow_semicolon: bool,
     /// JMC macro factory
     macro_factory: Option<MacroFactoryInfo>,
+    skip: usize,
 }
 
 impl Tokenizer {
@@ -278,6 +279,7 @@ impl Tokenizer {
             is_comment: false,
             allow_semicolon,
             macro_factory: None,
+            skip: 0,
         };
         tokenizer.parse(expect_semicolon, false)?;
         Ok(tokenizer)
@@ -378,12 +380,12 @@ impl Tokenizer {
     }
 
     fn parse_chars(&mut self, expect_semicolon: bool) -> Result<(), JMCError> {
-        let mut skip: u8 = 0;
+        self.skip = 0;
         let raw_string = self.raw_string.clone();
         for (i, ch) in raw_string.chars().enumerate() {
             // TODO: Try to implement this without cloning string
-            if skip > 0 {
-                skip -= 1;
+            if self.skip > 0 {
+                self.skip -= 1;
                 continue;
             }
             self.col += 1;
@@ -409,7 +411,7 @@ impl Tokenizer {
                 && self.state != Some(TokenType::Paren)
                 && self.state != Some(TokenType::String)
             {
-                skip = 1;
+                self.skip = 1;
                 if !self.token_str.is_empty() {
                     self.append_token();
                 }
@@ -470,6 +472,15 @@ impl Tokenizer {
     }
 
     fn parse_string(&mut self, ch: char) -> Result<(), JMCError> {
+        if ch == re::BACKSLASH {
+            self.skip = 2;
+            todo!("ESCAPE STUFF")
+        }
+        self.token_str.push(ch);
+        if Some(ch) != self.quote {
+            return Ok(());
+        }
+
         todo!()
     }
 
