@@ -418,7 +418,7 @@ impl Tokenizer {
             }
 
             match self.state {
-                Some(TokenType::Keyword) | Some(TokenType::Operator) => {
+                Some(TokenType::Keyword | TokenType::Operator) => {
                     if self.parse_keyword_and_operator(ch, expect_semicolon)? {
                         continue;
                     }
@@ -438,7 +438,35 @@ impl Tokenizer {
     }
 
     fn parse_newline(&mut self, ch: char) -> Result<(), JMCError> {
-        todo!()
+        self.is_comment = false;
+        match self.state {
+            Some(TokenType::String) => {
+                if self.quote == Some(quote::BACKTICK) {
+                    self.token_str.push(ch);
+                } else {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "String literal contains unescaped line break".to_owned(),
+                        None,
+                        self,
+                        false,
+                        false,
+                        true,
+                        None,
+                    ));
+                }
+            }
+            Some(TokenType::Comment) => self.state = None,
+            Some(TokenType::Keyword | TokenType::Operator) => {
+                self.append_token();
+            }
+            Some(TokenType::Paren) => {
+                self.token_str.push(ch);
+            }
+            _ => {}
+        }
+        self.line += 1;
+        self.col = 0;
+        Ok(())
     }
 
     fn parse_string(&mut self, ch: char) -> Result<(), JMCError> {
