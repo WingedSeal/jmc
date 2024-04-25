@@ -2,6 +2,7 @@
 
 use super::exception::JMCError;
 use std::fmt::Debug;
+use std::rc::Rc;
 
 /// Array of string that, if a line starts with, should automatically terminate line on `{}` without semicolons
 const TERMINATE_LINE: [&'static str; 10] = [
@@ -215,7 +216,7 @@ pub struct Tokenizer {
     list_of_keywords: Vec<Vec<Token>>,
 
     /// Raw string read from file/given from another tokenizer
-    raw_string: String,
+    raw_string: Rc<String>,
     /// Entire string read from current file
     file_string: Option<String>,
     /// File path to current JMC function as string
@@ -267,7 +268,7 @@ impl Tokenizer {
             token_pos: None,
             keywords: vec![],
             list_of_keywords: vec![],
-            raw_string,
+            raw_string: Rc::new(raw_string),
             file_string,
             file_path_str,
             quote: None,
@@ -381,7 +382,7 @@ impl Tokenizer {
 
     fn parse_chars(&mut self, expect_semicolon: bool) -> Result<(), JMCError> {
         self.skip = 0;
-        let raw_string = self.raw_string.clone();
+        let raw_string = Rc::clone(&self.raw_string);
         for (i, ch) in raw_string.chars().enumerate() {
             // TODO: Try to implement this without cloning string
             if self.skip > 0 {
@@ -430,7 +431,7 @@ impl Tokenizer {
                         continue;
                     }
                 }
-                Some(TokenType::String) => self.parse_string(ch)?,
+                Some(TokenType::String) => self.parse_string(i, ch)?,
                 Some(TokenType::Comment) => self.parse_comment(ch)?,
                 None => self.parse_none(ch)?,
                 _ => panic!("Invalid state"),
@@ -470,17 +471,47 @@ impl Tokenizer {
         self.col = 0;
         Ok(())
     }
-
-    fn parse_string(&mut self, ch: char) -> Result<(), JMCError> {
-        if ch == re::BACKSLASH {
-            self.skip = 2;
-            todo!("ESCAPE STUFF")
+    fn unescape(ch: char) -> Result<char, ()> {
+        match ch {
+            'n' => Ok('\n'),
+            't' => Ok('\t'),
+            _ => Err(()),
         }
-        self.token_str.push(ch);
-        if Some(ch) != self.quote {
+    }
+    fn parse_string(&mut self, i: usize, ch: char) -> Result<(), JMCError> {
+        if ch == re::BACKSLASH {
+            if i >= self.raw_string.len() {
+                return Err(JMCError::jmc_syntax_exception(
+                    "String literal contains unescaped line break".to_owned(),
+                    None,
+                    self,
+                    false,
+                    false,
+                    true,
+                    None,
+                ));
+            }
+            self.skip = 1;
+            match Self::unescape(self.raw_string.chars().nth(i + 1).unwrap()) {
+                Ok(unescaped) => self.token_str.push(unescaped),
+                Err(_) => {
+                    self.token_str.push('\\');
+                    self.token_str.push(ch)
+                }
+            }
             return Ok(());
         }
+        if Some(ch) != self.quote {
+            self.token_str.push(ch);
+            return Ok(());
+        }
+        if ch == quote::BACKTICK {
+            self.validate_multiline_string()?;
+        }
+        Ok(())
+    }
 
+    fn validate_multiline_string(&mut self) -> Result<(), JMCError> {
         todo!()
     }
 
