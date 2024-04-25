@@ -2,6 +2,7 @@
 
 use super::exception::JMCError;
 use std::fmt::Debug;
+use std::iter::Peekable;
 use std::rc::Rc;
 
 /// Array of string that, if a line starts with, should automatically terminate line on `{}` without semicolons
@@ -54,10 +55,6 @@ pub struct Token {
     pub quote: char,
 }
 
-fn repr(value: impl Debug) -> String {
-    format!("{0:?}", value)
-}
-
 impl Token {
     /// A dataclass containing information for Token for Lexical Analysis
     ///
@@ -89,7 +86,10 @@ impl Token {
             _macro_length,
             quote,
         };
-        token.post_init();
+        debug_assert!(
+            token.token_type != TokenType::ParenCurly
+                || (token.string.starts_with("{") && token.string.ends_with("}"))
+        );
         token
     }
 
@@ -107,24 +107,19 @@ impl Token {
             _macro_length: 0,
             quote: '"',
         };
-        token.post_init();
+        debug_assert!(
+            token.token_type != TokenType::ParenCurly
+                || (token.string.starts_with("{") && token.string.ends_with("}"))
+        );
         token
-    }
-
-    /// Edit string and _length according to macros(`#define something`) defined
-    fn post_init(&self) {
-        if self.token_type != TokenType::ParenCurly {
-            return;
-        };
-        if !self.string.starts_with("{") || !self.string.ends_with("}") {
-            panic!("ParenCurly Token created but string doesn't start and end with the parenthesis")
-        }
     }
 
     /// Getting the length of the string in token(including quotation mark)
     pub fn length(&self) -> usize {
         match self.token_type {
-            TokenType::String => repr(&self.string).len(),
+            TokenType::String => {
+                Tokenizer::unescape_str_force_quote(&self.string, self.quote).len()
+            }
             _ => self.string.len(),
         }
     }
@@ -134,17 +129,17 @@ impl Token {
         if self.token_type != TokenType::String {
             return self.string.to_owned();
         }
-        if self.quote != '`' {
-            let string: String = repr(&self.string);
-            return format!("`\n{0}\n`", &string[1..string.len() - 1]);
-        }
-        repr(&self.string)
+        Tokenizer::unescape_str(&self.string, quote::SINGLE)
     }
 
-    /// Get self.string including quotation mark (Raise error when the token_type is not TokenType.STRING)
-    pub fn add_quotation(&self) -> String {
-        assert!(self.token_type == TokenType::String);
-        repr(&self.string)
+    /// Get original self.string including quotation mark
+    pub fn get_original_string(&self) -> String {
+        assert_eq!(self.token_type, TokenType::String);
+        let string: String = Tokenizer::unescape_str(&self.string, self.quote);
+        if self.quote == quote::BACKTICK {
+            return format!("`\n{0}\n`", &string[1..string.len() - 1]);
+        }
+        string
     }
 }
 #[derive(Debug)]
@@ -205,7 +200,7 @@ struct MacroFactoryInfo {
 /// A class for converting string into tokens
 pub struct Tokenizer {
     /// List of lines(list of tokens)
-    programs: Vec<Vec<Token>>,
+    pub programs: Vec<Vec<Token>>,
     /// Starts at 1
     pub line: u32,
     /// Starts at 1
@@ -250,14 +245,13 @@ pub struct Tokenizer {
     allow_semicolon: bool,
     /// JMC macro factory
     macro_factory: Option<MacroFactoryInfo>,
-    skip: usize,
 }
 
 impl Tokenizer {
     /// * `raw_string` - Raw string read from file/given from another tokenizer
     /// * `file_path_str` - Entire string read from current file
-    /// * `expect_semicolon` - Whether to expect a semicolon at the end
-    /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to False
+    /// * `expect_semicolon` - Whether to expect a semicolon at the end, defaults to `true`
+    /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn new(
         raw_string: String,
         file_path_str: String,
@@ -286,7 +280,6 @@ impl Tokenizer {
             is_comment: false,
             allow_semicolon,
             macro_factory: None,
-            skip: 0,
         };
         tokenizer.parse(expect_semicolon, false)?;
         Ok(tokenizer)
@@ -333,7 +326,7 @@ impl Tokenizer {
                     Some(token_pos) => token_pos,
                     None => panic!("token_pos is None"),
                 };
-                assert!(!self.token_pos.is_none());
+                debug_assert!(!self.token_pos.is_none());
                 let paren: String = match &self.left_paren {
                     Some(left_paren) => left_paren.to_string(),
                     None => "".to_owned(),
@@ -387,13 +380,9 @@ impl Tokenizer {
     }
 
     fn parse_chars(&mut self, expect_semicolon: bool) -> Result<(), JMCError> {
-        self.skip = 0;
-        let raw_string = Rc::clone(&self.raw_string);
-        for (i, ch) in raw_string.chars().enumerate() {
-            if self.skip > 0 {
-                self.skip -= 1;
-                continue;
-            }
+        let raw_string_rc = Rc::clone(&self.raw_string);
+        let mut raw_string_iter = raw_string_rc.chars().peekable();
+        while let Some(ch) = raw_string_iter.next() {
             self.col += 1;
             if ch == re::SEMICOLON && self.state.is_none() && !expect_semicolon {
                 return Err(JMCError::jmc_syntax_exception(
@@ -413,11 +402,11 @@ impl Tokenizer {
             }
 
             if ch == re::SLASH
-                && raw_string.chars().nth(i + 1) == Some(re::SLASH)
+                && raw_string_iter.peek() == Some(&re::SLASH)
                 && self.state != Some(TokenType::Paren)
                 && self.state != Some(TokenType::String)
             {
-                self.skip = 1;
+                raw_string_iter.next();
                 if !self.token_str.is_empty() {
                     self.append_token();
                 }
@@ -436,7 +425,7 @@ impl Tokenizer {
                         continue;
                     }
                 }
-                Some(TokenType::String) => self.parse_string(i, ch)?,
+                Some(TokenType::String) => self.parse_string(&mut raw_string_iter, ch)?,
                 Some(TokenType::Comment) => self.parse_comment(ch)?,
                 None => self.parse_none(ch)?,
                 _ => panic!("Invalid state"),
@@ -476,6 +465,7 @@ impl Tokenizer {
         self.col = 0;
         Ok(())
     }
+
     fn escape(ch: char) -> Result<char, ()> {
         match ch {
             'n' => Ok('\n'),
@@ -488,25 +478,85 @@ impl Tokenizer {
             _ => Err(()),
         }
     }
-    fn parse_string(&mut self, i: usize, ch: char) -> Result<(), JMCError> {
-        if ch == re::BACKSLASH {
-            if i >= self.raw_string.len() {
-                return Err(JMCError::jmc_syntax_exception(
-                    "String literal contains unescaped line break".to_owned(),
-                    None,
-                    self,
-                    false,
-                    false,
-                    true,
-                    Some("You are currently trying to escape(\\) nothing.".to_owned()),
-                ));
+
+    /// Unescape string and surround it by the most suited quote, prefering `prefered_quote` then return that with the prefered quote
+    pub fn unescape_str(string: &str, prefered_quote: char) -> String {
+        let choosen_quote;
+        let single_quote_count = string.matches('\'').count();
+        let double_quote_count = string.matches('\"').count();
+        if single_quote_count > double_quote_count {
+            choosen_quote = '"';
+        } else if single_quote_count < double_quote_count {
+            choosen_quote = '\'';
+        } else {
+            choosen_quote = prefered_quote
+        }
+        Self::unescape_str_force_quote(string, choosen_quote)
+    }
+
+    /// Unescape string and surround it by the chosen `forced_quote`
+    fn unescape_str_force_quote(string: &str, mut forced_quote: char) -> String {
+        if !['\'', '"'].contains(&forced_quote) {
+            forced_quote = '"'
+        }
+        let mut unescaped_string = forced_quote.to_string();
+        for ch in string.chars().into_iter() {
+            match Self::unescape(ch, forced_quote) {
+                Some(unescaped_str) => unescaped_string.push_str(unescaped_str),
+                None => unescaped_string.push(ch),
             }
-            self.skip = 1;
-            match Self::escape(
-                self.raw_string.chars().nth(i + 1).expect(
-                    "i + 1 should be a valid due to recent `i >= self.raw_string.len()` check",
-                ),
-            ) {
+        }
+        unescaped_string.push(forced_quote);
+        unescaped_string
+    }
+
+    fn unescape(ch: char, prefered_quote: char) -> Option<&'static str> {
+        match ch {
+            '\n' => Some("\\n"),
+            '\r' => Some("\\r"),
+            '\t' => Some("\\t"),
+            '\\' => Some("\\\\"),
+            '\0' => Some("\\0"),
+            '\'' => {
+                if prefered_quote == quote::SINGLE {
+                    Some("\\'")
+                } else {
+                    Some("'")
+                }
+            }
+            '"' => {
+                if prefered_quote == quote::DOUBLE {
+                    Some("\\\"")
+                } else {
+                    Some("\"")
+                }
+            }
+            _ => None,
+        }
+    }
+
+    fn parse_string(
+        &mut self,
+        raw_string_iter: &mut Peekable<impl Iterator<Item = char>>,
+        ch: char,
+    ) -> Result<(), JMCError> {
+        if ch == re::BACKSLASH {
+            let next_char: char = match raw_string_iter.peek() {
+                Some(next_char) => *next_char,
+                None => {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "String literal contains unescaped line break".to_owned(),
+                        None,
+                        self,
+                        false,
+                        false,
+                        true,
+                        Some("You are currently trying to escape(\\) nothing.".to_owned()),
+                    ));
+                }
+            };
+            raw_string_iter.next();
+            match Self::escape(next_char) {
                 Ok(unescaped) => self.token_str.push(unescaped),
                 Err(_) => {
                     self.token_str.push('\\');
@@ -612,5 +662,85 @@ impl Tokenizer {
 
     fn append_keywords(&mut self) {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod token_tests {
+    use super::*;
+
+    #[test]
+    fn test_get_full_string() {
+        assert_eq!(
+            Token::new(
+                TokenType::Keyword,
+                1,
+                1,
+                "KEYWORD_TOKEN".to_owned(),
+                None,
+                None,
+            )
+            .get_full_string(),
+            "KEYWORD_TOKEN"
+        );
+        assert_eq!(
+            Token::new(
+                TokenType::String,
+                1,
+                1,
+                "STRING_TOKEN".to_owned(),
+                None,
+                Some('"'),
+            )
+            .get_full_string(),
+            "'STRING_TOKEN'"
+        );
+        assert_eq!(
+            Token::new(
+                TokenType::String,
+                1,
+                1,
+                "'STRING_TOKEN'".to_owned(),
+                None,
+                Some('"'),
+            )
+            .get_full_string(),
+            "\"'STRING_TOKEN'\""
+        );
+        assert_eq!(
+            Token::empty(TokenType::Keyword, "KEYWORD_TOKEN".to_owned()).get_full_string(),
+            "KEYWORD_TOKEN"
+        );
+    }
+}
+
+#[cfg(test)]
+mod tokenizer_tests {
+    use super::*;
+
+    #[test]
+    fn test_unescape_string() {
+        assert_eq!(
+            Tokenizer::unescape_str("\n\t\r TEST \"\"'''", '\''),
+            r#""\n\t\r TEST \"\"'''""#
+        )
+    }
+
+    #[test]
+    #[ignore = "waiting for tokenizer"]
+    fn test_escape() {
+        assert_eq!(
+            Tokenizer::new(
+                r#""\n\t\r TEST \"\"'''""#.to_owned(),
+                String::new(),
+                None,
+                true,
+                false
+            )
+            .unwrap()
+            .programs[0][0]
+                .string,
+            "\n\t\r TEST \"\"'''"
+        )
     }
 }

@@ -166,6 +166,7 @@ fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> S
     file_name
 }
 
+#[derive(Debug)]
 enum JMCErrorType {
     EvaluationException,
     HeaderFileNotFoundError,
@@ -174,6 +175,7 @@ enum JMCErrorType {
     JMCSyntaxException,
 }
 
+#[derive(Debug)]
 pub struct JMCError {
     error_type: JMCErrorType,
     msg: String,
