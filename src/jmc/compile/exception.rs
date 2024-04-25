@@ -37,12 +37,16 @@ fn create_error_msg(
     let mut display_line = line;
     let mut display_col = col;
     let newline_count = string.matches('\n').count();
-    let right_newline_count = length - string.rfind('\n').unwrap();
+    let char_count_since_last_newline = length
+        - match string.rfind('\n') {
+            Some(count) => count,
+            None => length,
+        };
 
     if is_length_include_col {
         if string.contains('\n') {
             line += newline_count;
-            col = right_newline_count;
+            col = char_count_since_last_newline;
         } else {
             col += length;
         }
@@ -52,7 +56,7 @@ fn create_error_msg(
     if is_display_col_length {
         if string.contains('\n') {
             display_line += newline_count;
-            display_col = right_newline_count + 1;
+            display_col = char_count_since_last_newline + 1;
         } else {
             display_col += length;
         }
@@ -144,14 +148,14 @@ fn create_error_msg(
 fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> String {
     let file_path = PathBuf::from(file_name);
     let cwd = std::env::current_dir().expect("Current directory should not fail");
-    if file_path.starts_with(&cwd) {
+    if !file_path.starts_with(&cwd) {
         return file_name.to_owned();
     }
     let mut file_name: String = file_path
         .strip_prefix(&cwd)
-        .unwrap()
+        .expect("file_name should be relative to cwd due to recent starts_with check")
         .to_str()
-        .unwrap()
+        .expect("file should have valid unicode")
         .to_owned();
     if let Some(line) = line {
         file_name.push_str(format!(":{line}").as_str());
@@ -183,7 +187,10 @@ impl JMCError {
         }
     }
     pub fn header_file_not_found_error(path: &PathBuf) -> Self {
-        let msg = format!("Header file not found: {0}", path.to_str().unwrap());
+        let msg = format!(
+            "Header file not found: {0}",
+            path.to_str().expect("path should have valid unicode")
+        );
         Self {
             error_type: HeaderFileNotFoundError,
             msg,

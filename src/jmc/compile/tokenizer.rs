@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::exception::JMCError;
-use std::fmt::{format, Debug};
+use std::fmt::Debug;
 use std::rc::Rc;
 
 /// Array of string that, if a line starts with, should automatically terminate line on `{}` without semicolons
@@ -154,12 +154,16 @@ struct Pos {
 }
 
 mod re {
-    use regex::bytes::Regex;
-
+    use once_cell::sync::Lazy;
+    use regex::Regex;
     pub const NEW_LINE: char = '\n';
+
     pub const BACKSLASH: char = '\\';
-    pub const WHITESPACE: Regex = Regex::new(r"\s+").unwrap();
-    pub const KEYWORD: Regex = Regex::new(r"[a-zA-Z0-9_\.\/\^\~]").unwrap();
+    pub static WHITESPACE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"\s+").expect("the regex should not fail to compile"));
+    pub static KEYWORD: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"[a-zA-Z0-9_\.\/\^\~]").expect("the regex should not fail to compile")
+    });
     pub const SEMICOLON: char = ';';
     pub const COMMA: char = ',';
     pub const HASH: char = '#';
@@ -386,7 +390,6 @@ impl Tokenizer {
         self.skip = 0;
         let raw_string = Rc::clone(&self.raw_string);
         for (i, ch) in raw_string.chars().enumerate() {
-            // TODO: Try to implement this without cloning string
             if self.skip > 0 {
                 self.skip -= 1;
                 continue;
@@ -410,7 +413,7 @@ impl Tokenizer {
             }
 
             if ch == re::SLASH
-                && raw_string.chars().nth(i + 1).unwrap() == re::SLASH
+                && raw_string.chars().nth(i + 1) == Some(re::SLASH)
                 && self.state != Some(TokenType::Paren)
                 && self.state != Some(TokenType::String)
             {
@@ -473,11 +476,15 @@ impl Tokenizer {
         self.col = 0;
         Ok(())
     }
-    fn unescape(ch: char) -> Result<char, ()> {
+    fn escape(ch: char) -> Result<char, ()> {
         match ch {
             'n' => Ok('\n'),
+            'r' => Ok('\r'),
             't' => Ok('\t'),
-            '?' => todo!(),
+            '\\' => Ok('\\'),
+            '0' => Ok('\0'),
+            '\'' => Ok('\''),
+            '"' => Ok('"'),
             _ => Err(()),
         }
     }
@@ -491,11 +498,15 @@ impl Tokenizer {
                     false,
                     false,
                     true,
-                    None,
+                    Some("You are currently trying to escape(\\) nothing.".to_owned()),
                 ));
             }
             self.skip = 1;
-            match Self::unescape(self.raw_string.chars().nth(i + 1).unwrap()) {
+            match Self::escape(
+                self.raw_string.chars().nth(i + 1).expect(
+                    "i + 1 should be a valid due to recent `i >= self.raw_string.len()` check",
+                ),
+            ) {
                 Ok(unescaped) => self.token_str.push(unescaped),
                 Err(_) => {
                     self.token_str.push('\\');
@@ -571,7 +582,7 @@ impl Tokenizer {
                 }
                 Ok(())
             }
-            _ => panic!("Unreachable"),
+            _ => panic!("first_newline and last_line have to be both None or Some"),
         }
     }
 
