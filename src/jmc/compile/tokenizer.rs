@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::exception::JMCError;
-use std::fmt::{format, Debug};
+use std::fmt::Debug;
 use std::iter::Peekable;
 use std::rc::Rc;
 
@@ -18,12 +18,10 @@ const OPERATORS: [char; 13] = [
 pub enum TokenType {
     Keyword,
     Operator,
-    Paren,
     ParenRound,
     ParenSquare,
     ParenCurly,
     String,
-    Comment,
     Comma,
     Func,
 }
@@ -33,6 +31,9 @@ enum StateType {
     Keyword,
     Operator,
     Paren,
+    ParenRound,
+    ParenSquare,
+    ParenCurly,
     String,
     Comment,
     Comma,
@@ -44,12 +45,12 @@ impl TokenType {
         match self {
             TokenType::Keyword => "Keyword",
             TokenType::Operator => "Operator",
-            TokenType::Paren => "PAREN",
+            // TokenType::Paren => "PAREN",
             TokenType::ParenRound => "RoundParentheses",
             TokenType::ParenSquare => "SquareParentheses",
             TokenType::ParenCurly => "CurlyParentheses",
             TokenType::String => "StringLiteral",
-            TokenType::Comment => "Comment",
+            // TokenType::Comment => "Comment",
             TokenType::Comma => "Comma",
             TokenType::Func => "Function",
         }
@@ -430,7 +431,7 @@ impl Tokenizer {
                 }
             }
             match self.state {
-                StateType::Paren => self.parse_paren(ch, expect_semicolon)?,
+                StateType::Paren => self.parse_paren(&mut raw_string_iter, ch, expect_semicolon)?,
                 StateType::String => self.parse_string(&mut raw_string_iter, ch)?,
                 StateType::Comment => continue,
                 StateType::None => self.parse_none(ch)?,
@@ -710,7 +711,90 @@ impl Tokenizer {
         ))
     }
 
-    fn parse_paren(&mut self, ch: char, expect_semicolon: bool) -> Result<(), JMCError> {
+    fn parse_paren(
+        &mut self,
+        raw_string_iter: &mut Peekable<impl Iterator<Item = char>>,
+        ch: char,
+        expect_semicolon: bool,
+    ) -> Result<(), JMCError> {
+        self.token_str.push(ch);
+        if self.is_string {
+            match ch {
+                re::BACKSLASH => {
+                    match raw_string_iter.next() {
+                        Some(next) => self.token_str.push(next),
+                        None => return Err(JMCError::jmc_syntax_exception(
+                            "String literal contains an unescaped linebreak".to_owned(),
+                            None,
+                            self,
+                            true,
+                            false,
+                            true,
+                            Some(
+                                "If you intended to use multiple line, try multiline string '`'"
+                                    .to_owned(),
+                            ),
+                        )),
+                    }
+                }
+                re::NEW_LINE => {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "String literal contains an unescaped linebreak".to_owned(),
+                        None,
+                        self,
+                        true,
+                        false,
+                        true,
+                        Some(
+                            "If you intended to use multiple line, try multiline string '`'"
+                                .to_owned(),
+                        ),
+                    ));
+                }
+                _ if Some(ch) == self.quote => {
+                    self.is_string = false;
+                }
+                _ => {}
+            }
+            return Ok(());
+        }
+        if self.is_comment {
+            return Ok(());
+        }
+
+        match ch {
+            _ if Some(ch) == self.left_paren => self.paren_count += 1,
+            _ if Some(ch) == self.right_paren => {
+                if self.paren_count != 0 {
+                    self.paren_count -= 1;
+                    return Ok(());
+                }
+                let mut is_paren_curly = false;
+                match self.left_paren {
+                    Some(paren::L_CURLY) => {
+                        self.state = StateType::ParenCurly;
+                        is_paren_curly = true;
+                    }
+                    Some(paren::L_ROUND) => self.state = StateType::ParenRound,
+                    Some(paren::L_SQUARE) => self.state = StateType::ParenRound,
+                    _ => panic!("self.left_paren shouldn't be None at this point"),
+                }
+                if is_paren_curly
+                    && expect_semicolon
+                    && self.should_terminate_line(0)
+                    && (!self.is_shorten_if() || self.should_terminate_line(2))
+                {
+                    self.append_keywords()
+                }
+            }
+            quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
+                self.is_string = true;
+                self.quote = Some(ch);
+            }
+            re::SLASH if raw_string_iter.peek() == Some(&re::SLASH) => self.is_comment = true,
+            re::HASH if self.keywords.is_empty() => self.is_comment = true,
+            _ => {}
+        }
         todo!()
     }
 
@@ -785,6 +869,14 @@ impl Tokenizer {
     }
 
     fn append_keywords(&mut self) {
+        todo!()
+    }
+
+    fn should_terminate_line(&self, start_at: u32) -> bool {
+        todo!()
+    }
+
+    fn is_shorten_if(&self) -> bool {
         todo!()
     }
 
