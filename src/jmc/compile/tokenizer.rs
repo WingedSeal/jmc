@@ -364,7 +364,7 @@ impl Tokenizer {
         }
         if expect_semicolon && (!self.keywords.is_empty() || !self.token_str.is_empty()) {
             if !self.token_str.is_empty() {
-                self.append_token();
+                self.append_token()?;
             }
             if allow_last_missing_semicolon {
                 self.append_keywords();
@@ -382,7 +382,7 @@ impl Tokenizer {
 
         if !expect_semicolon {
             if !self.token_str.is_empty() {
-                self.append_token();
+                self.append_token()?;
             }
             if !self.keywords.is_empty() {
                 self.append_keywords();
@@ -420,7 +420,7 @@ impl Tokenizer {
             {
                 raw_string_iter.next();
                 if !self.token_str.is_empty() {
-                    self.append_token();
+                    self.append_token()?;
                 }
                 self.state = StateType::Comment;
                 continue;
@@ -461,7 +461,7 @@ impl Tokenizer {
             }
             StateType::Comment => self.state = StateType::None,
             StateType::Keyword | StateType::Operator => {
-                self.append_token();
+                self.append_token()?;
             }
             StateType::Paren => {
                 self.token_str.push(ch);
@@ -665,11 +665,11 @@ impl Tokenizer {
         }
         let is_operator = OPERATORS.contains(&ch);
         if self.state == StateType::Keyword && is_operator {
-            self.append_token();
+            self.append_token()?;
             self.token_pos = Some(self.get_pos());
             self.state = StateType::Operator;
         } else if self.state == StateType::Operator && !is_operator && ch != re::SEMICOLON {
-            self.append_token();
+            self.append_token()?;
             self.token_pos = Some(self.get_pos());
             self.state = StateType::Keyword;
         }
@@ -679,7 +679,7 @@ impl Tokenizer {
             return Ok(true);
         }
         if expect_semicolon {
-            self.append_token();
+            self.append_token()?;
             return Ok(false);
         }
         if !self.allow_semicolon {
@@ -847,7 +847,7 @@ impl Tokenizer {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
                 self.state = StateType::Comma;
-                self.append_token();
+                self.append_token()?;
             }
             _ if OPERATORS.contains(&ch) => {
                 self.token_str.push(ch);
@@ -864,7 +864,7 @@ impl Tokenizer {
         Ok(())
     }
 
-    fn append_token(&mut self) {
+    fn append_token(&mut self) -> Result<(), JMCError> {
         todo!()
     }
 
