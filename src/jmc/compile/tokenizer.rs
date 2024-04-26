@@ -28,6 +28,17 @@ pub enum TokenType {
     Func,
 }
 
+#[derive(Eq, PartialEq, Debug)]
+enum StateType {
+    Keyword,
+    Operator,
+    Paren,
+    String,
+    Comment,
+    Comma,
+    None,
+}
+
 impl TokenType {
     fn value(&self) -> &'static str {
         match self {
@@ -169,7 +180,6 @@ mod quote {
     pub const SINGLE: char = '\'';
     pub const DOUBLE: char = '"';
     pub const BACKTICK: char = '`';
-    pub const QUOTES: [char; 3] = [SINGLE, DOUBLE, BACKTICK];
 }
 
 mod paren {
@@ -207,7 +217,7 @@ pub struct Tokenizer {
     /// Starts at 1
     pub col: u32,
     /// Current TokenType
-    state: Option<TokenType>,
+    state: StateType,
     /// Current string for token
     token_str: String,
     /// Position for creating token
@@ -264,7 +274,7 @@ impl Tokenizer {
             programs: vec![],
             line: 0,
             col: 0,
-            state: None,
+            state: StateType::None,
             token_str: String::new(),
             token_pos: None,
             keywords: vec![],
@@ -309,7 +319,7 @@ impl Tokenizer {
         self.parse_chars(expect_semicolon)?;
 
         match self.state {
-            Some(TokenType::String) => {
+            StateType::String => {
                 return Err(JMCError::jmc_syntax_exception(
                     "String literal contains an unescaped linebreak".to_owned(),
                     None,
@@ -322,7 +332,7 @@ impl Tokenizer {
                     ),
                 ));
             }
-            Some(TokenType::Paren) => {
+            StateType::Paren => {
                 let token_pos = match &self.token_pos {
                     Some(token_pos) => token_pos,
                     None => panic!("token_pos is None"),
@@ -385,7 +395,7 @@ impl Tokenizer {
         let mut raw_string_iter = raw_string_rc.chars().peekable();
         while let Some(ch) = raw_string_iter.next() {
             self.col += 1;
-            if ch == re::SEMICOLON && self.state.is_none() && !expect_semicolon {
+            if ch == re::SEMICOLON && self.state == StateType::None && !expect_semicolon {
                 return Err(JMCError::jmc_syntax_exception(
                     "Unexpected semicolon(;)".to_owned(),
                     None,
@@ -404,26 +414,26 @@ impl Tokenizer {
 
             if ch == re::SLASH
                 && raw_string_iter.peek() == Some(&re::SLASH)
-                && self.state != Some(TokenType::Paren)
-                && self.state != Some(TokenType::String)
+                && self.state != StateType::Paren
+                && self.state != StateType::String
             {
                 raw_string_iter.next();
                 if !self.token_str.is_empty() {
                     self.append_token();
                 }
-                self.state = Some(TokenType::Comment);
+                self.state = StateType::Comment;
                 continue;
             }
-            if let Some(TokenType::Keyword | TokenType::Operator) = self.state {
+            if let StateType::Keyword | StateType::Operator = self.state {
                 if self.parse_keyword_and_operator(ch, expect_semicolon)? {
                     continue;
                 }
             }
             match self.state {
-                Some(TokenType::Paren) => self.parse_paren(ch, expect_semicolon)?,
-                Some(TokenType::String) => self.parse_string(&mut raw_string_iter, ch)?,
-                Some(TokenType::Comment) => continue,
-                None => self.parse_none(ch)?,
+                StateType::Paren => self.parse_paren(ch, expect_semicolon)?,
+                StateType::String => self.parse_string(&mut raw_string_iter, ch)?,
+                StateType::Comment => continue,
+                StateType::None => self.parse_none(ch)?,
                 _ => panic!("invalid state"),
             }
         }
@@ -433,7 +443,7 @@ impl Tokenizer {
     fn parse_newline(&mut self, ch: char) -> Result<(), JMCError> {
         self.is_comment = false;
         match self.state {
-            Some(TokenType::String) => {
+            StateType::String => {
                 if self.quote == Some(quote::BACKTICK) {
                     self.token_str.push(ch);
                 } else {
@@ -448,11 +458,11 @@ impl Tokenizer {
                     ));
                 }
             }
-            Some(TokenType::Comment) => self.state = None,
-            Some(TokenType::Keyword | TokenType::Operator) => {
+            StateType::Comment => self.state = StateType::None,
+            StateType::Keyword | StateType::Operator => {
                 self.append_token();
             }
-            Some(TokenType::Paren) => {
+            StateType::Paren => {
                 self.token_str.push(ch);
             }
             _ => {}
@@ -633,17 +643,71 @@ impl Tokenizer {
         }
     }
 
-    fn parse_comment(&mut self, ch: char) -> Result<(), JMCError> {
-        todo!()
-    }
-
     /// Return `false` if it's not a keyword/operator anymore and the current char should be checked further
     fn parse_keyword_and_operator(
         &mut self,
         ch: char,
         expect_semicolon: bool,
     ) -> Result<bool, JMCError> {
-        todo!()
+        const NON_KEYWORD: [char; 7] = [
+            quote::SINGLE,
+            quote::DOUBLE,
+            quote::BACKTICK,
+            paren::L_CURLY,
+            paren::L_ROUND,
+            paren::L_SQUARE,
+            re::COMMA,
+        ];
+        if ch.is_whitespace() || NON_KEYWORD.contains(&ch) {
+            self.append_keywords();
+            return Ok(false);
+        }
+        let is_operator = OPERATORS.contains(&ch);
+        if self.state == StateType::Keyword && is_operator {
+            self.append_token();
+            self.token_pos = Some(self.get_pos());
+            self.state = StateType::Operator;
+        } else if self.state == StateType::Operator && !is_operator && ch != re::SEMICOLON {
+            self.append_token();
+            self.token_pos = Some(self.get_pos());
+            self.state = StateType::Keyword;
+        }
+
+        if ch != re::SEMICOLON {
+            self.token_str.push(ch);
+            return Ok(true);
+        }
+        if expect_semicolon {
+            self.append_token();
+            return Ok(false);
+        }
+        if !self.allow_semicolon {
+            return Err(JMCError::jmc_syntax_exception(
+                "Unexpected semicolon(;)".to_owned(),
+                None,
+                self,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        self.allow_semicolon = false;
+
+        const MINECRAFT_ARRAY_TYPE: [&'static str; 3] = ["I", "B", "L"];
+        if MINECRAFT_ARRAY_TYPE.contains(&self.token_str.as_str()) {
+            self.token_str.push(ch);
+            return Ok(true);
+        }
+        Err(JMCError::jmc_syntax_exception(
+            "Unexpected semicolon(;)".to_owned(),
+            None,
+            self,
+            false,
+            true,
+            false,
+            None,
+        ))
     }
 
     fn parse_paren(&mut self, ch: char, expect_semicolon: bool) -> Result<(), JMCError> {
@@ -655,7 +719,7 @@ impl Tokenizer {
             quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
-                self.state = Some(TokenType::String);
+                self.state = StateType::String;
                 self.quote = Some(ch);
             }
             re::SEMICOLON => match &self.macro_factory {
@@ -678,7 +742,7 @@ impl Tokenizer {
             paren::L_CURLY | paren::L_ROUND | paren::L_SQUARE => {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
-                self.state = Some(TokenType::Paren);
+                self.state = StateType::Paren;
                 self.left_paren = Some(ch);
                 self.right_paren =
                     Some(get_paren_pair(ch).expect("should only pair when it's paren"))
@@ -694,23 +758,23 @@ impl Tokenizer {
                     None,
                 ));
             }
-            re::HASH if self.keywords.is_empty() => self.state = Some(TokenType::Comment),
+            re::HASH if self.keywords.is_empty() => self.state = StateType::Comment,
             re::COMMA => {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
-                self.state = Some(TokenType::Comma);
+                self.state = StateType::Comma;
                 self.append_token();
             }
             _ if OPERATORS.contains(&ch) => {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
-                self.state = Some(TokenType::Operator);
+                self.state = StateType::Operator;
             }
             // _ if ch.is_whitespace() => return Ok(()),
             _ => {
                 self.token_str.push(ch);
                 self.token_pos = Some(self.get_pos());
-                self.state = Some(TokenType::Keyword);
+                self.state = StateType::Keyword;
             }
         }
         Ok(())
