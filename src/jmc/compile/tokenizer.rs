@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::exception::JMCError;
-use std::fmt::Debug;
+use std::fmt::{format, Debug};
 use std::iter::Peekable;
 use std::rc::Rc;
 
@@ -10,8 +10,8 @@ const TERMINATE_LINE: [&'static str; 10] = [
     "function", "class", "new", "schedule", "if", "else", "do", "while", "for", "switch",
 ];
 
-const OPERATORS: &[&'static str] = &[
-    "+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&", "?",
+const OPERATORS: [char; 13] = [
+    '+', '-', '*', '/', '>', '<', '=', '%', ':', '!', '|', '&', '?',
 ];
 
 #[derive(Eq, PartialEq, Debug)]
@@ -169,6 +169,7 @@ mod quote {
     pub const SINGLE: char = '\'';
     pub const DOUBLE: char = '"';
     pub const BACKTICK: char = '`';
+    pub const QUOTES: [char; 3] = [SINGLE, DOUBLE, BACKTICK];
 }
 
 mod paren {
@@ -180,7 +181,7 @@ mod paren {
     pub const R_CURLY: char = '}';
 }
 
-pub fn get_paren_pair(left_paren: char) -> Result<char, ()> {
+fn get_paren_pair(left_paren: char) -> Result<char, ()> {
     match left_paren {
         paren::L_ROUND => Ok(paren::R_ROUND),
         paren::L_SQUARE => Ok(paren::R_SQUARE),
@@ -413,22 +414,17 @@ impl Tokenizer {
                 self.state = Some(TokenType::Comment);
                 continue;
             }
-
+            if let Some(TokenType::Keyword | TokenType::Operator) = self.state {
+                if self.parse_keyword_and_operator(ch, expect_semicolon)? {
+                    continue;
+                }
+            }
             match self.state {
-                Some(TokenType::Keyword | TokenType::Operator) => {
-                    if self.parse_keyword_and_operator(ch, expect_semicolon)? {
-                        continue;
-                    }
-                }
-                Some(TokenType::Paren) => {
-                    if self.parse_paren(ch, expect_semicolon)? {
-                        continue;
-                    }
-                }
+                Some(TokenType::Paren) => self.parse_paren(ch, expect_semicolon)?,
                 Some(TokenType::String) => self.parse_string(&mut raw_string_iter, ch)?,
-                Some(TokenType::Comment) => self.parse_comment(ch)?,
+                Some(TokenType::Comment) => continue,
                 None => self.parse_none(ch)?,
-                _ => panic!("Invalid state"),
+                _ => panic!("invalid state"),
             }
         }
         Ok(())
@@ -496,7 +492,8 @@ impl Tokenizer {
 
     /// Unescape string and surround it by the chosen `forced_quote`
     fn unescape_str_force_quote(string: &str, mut forced_quote: char) -> String {
-        if !['\'', '"'].contains(&forced_quote) {
+        const QUOTES: [char; 2] = ['\'', '"'];
+        if !QUOTES.contains(&forced_quote) {
             forced_quote = '"'
         }
         let mut unescaped_string = forced_quote.to_string();
@@ -640,6 +637,7 @@ impl Tokenizer {
         todo!()
     }
 
+    /// Return `false` if it's not a keyword/operator anymore and the current char should be checked further
     fn parse_keyword_and_operator(
         &mut self,
         ch: char,
@@ -648,12 +646,74 @@ impl Tokenizer {
         todo!()
     }
 
-    fn parse_paren(&mut self, ch: char, expect_semicolon: bool) -> Result<bool, JMCError> {
+    fn parse_paren(&mut self, ch: char, expect_semicolon: bool) -> Result<(), JMCError> {
         todo!()
     }
 
     fn parse_none(&mut self, ch: char) -> Result<(), JMCError> {
-        todo!()
+        match ch {
+            quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
+                self.token_str.push(ch);
+                self.token_pos = Some(self.get_pos());
+                self.state = Some(TokenType::String);
+                self.quote = Some(ch);
+            }
+            re::SEMICOLON => match &self.macro_factory {
+                Some(macro_factory) => {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!(
+                            "Expected a round bracket after macro factory({0})",
+                            macro_factory.name
+                        ),
+                        None,
+                        self,
+                        false,
+                        true,
+                        false,
+                        Some("Macro factory is a macro that acts like a function (requires parameter(s))".to_owned()),
+                    ));
+                }
+                None => self.append_keywords(),
+            },
+            paren::L_CURLY | paren::L_ROUND | paren::L_SQUARE => {
+                self.token_str.push(ch);
+                self.token_pos = Some(self.get_pos());
+                self.state = Some(TokenType::Paren);
+                self.left_paren = Some(ch);
+                self.right_paren =
+                    Some(get_paren_pair(ch).expect("should only pair when it's paren"))
+            }
+            paren::R_CURLY | paren::R_ROUND | paren::R_SQUARE => {
+                return Err(JMCError::jmc_syntax_exception(
+                    format!("Unexpected closing bracket ({ch})"),
+                    None,
+                    self,
+                    false,
+                    false,
+                    false,
+                    None,
+                ));
+            }
+            re::HASH if self.keywords.is_empty() => self.state = Some(TokenType::Comment),
+            re::COMMA => {
+                self.token_str.push(ch);
+                self.token_pos = Some(self.get_pos());
+                self.state = Some(TokenType::Comma);
+                self.append_token();
+            }
+            _ if OPERATORS.contains(&ch) => {
+                self.token_str.push(ch);
+                self.token_pos = Some(self.get_pos());
+                self.state = Some(TokenType::Operator);
+            }
+            // _ if ch.is_whitespace() => return Ok(()),
+            _ => {
+                self.token_str.push(ch);
+                self.token_pos = Some(self.get_pos());
+                self.state = Some(TokenType::Keyword);
+            }
+        }
+        Ok(())
     }
 
     fn append_token(&mut self) {
@@ -662,6 +722,14 @@ impl Tokenizer {
 
     fn append_keywords(&mut self) {
         todo!()
+    }
+
+    #[inline]
+    fn get_pos(&self) -> Pos {
+        Pos {
+            line: self.line,
+            col: self.col,
+        }
     }
 }
 
