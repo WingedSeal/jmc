@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 use super::exception::JMCError;
+use super::header::{Header, MacroFactory};
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::rc::Rc;
@@ -14,7 +16,7 @@ const OPERATORS: [char; 13] = [
     '+', '-', '*', '/', '>', '<', '=', '%', ':', '!', '|', '&', '?',
 ];
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy)]
 pub enum TokenType {
     Keyword,
     Operator,
@@ -39,6 +41,30 @@ enum StateType {
     Comma,
     None,
 }
+impl StateType {
+    pub fn is_none(&self) -> bool {
+        *self == Self::None
+    }
+    pub fn to_token_type(&self) -> TokenType {
+        macro_rules! match_to_token_type {
+            ($($x:ident), *) => {
+                match self {
+                    $(&Self::$x => TokenType::$x,)*
+                    _ => panic!("invalid StateType")
+                }
+            };
+        }
+        match_to_token_type!(
+            Keyword,
+            Operator,
+            ParenRound,
+            ParenSquare,
+            ParenCurly,
+            String,
+            Comma
+        )
+    }
+}
 
 impl TokenType {
     fn value(&self) -> &'static str {
@@ -57,7 +83,7 @@ impl TokenType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub token_type: TokenType,
     pub line: u32,
@@ -154,7 +180,7 @@ impl Token {
         string
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct Pos {
     pub line: u32,
     pub col: u32,
@@ -202,11 +228,11 @@ fn get_paren_pair(left_paren: char) -> Result<char, ()> {
 }
 #[derive(Debug)]
 struct MacroFactoryInfo {
-    name: String,
-    macro_factory: String, // TODO: Change to MacroFactory
+    pub name: String,
+    pub macro_factory: Rc<MacroFactory>,
     /// Argument count
-    arg_count: u32,
-    pos: Pos,
+    pub arg_count: usize,
+    pub pos: Pos,
 }
 #[derive(Debug)]
 /// A class for converting string into tokens
@@ -222,7 +248,7 @@ pub struct Tokenizer {
     /// Current string for token
     token_str: String,
     /// Position for creating token
-    token_pos: Option<Pos>,
+    token_pos: Pos,
     /// Current list of tokens
     keywords: Vec<Token>,
     /// List of keywords(list_of_tokens)
@@ -231,7 +257,7 @@ pub struct Tokenizer {
     /// Raw string read from file/given from another tokenizer
     raw_string: Rc<String>,
     /// Entire string read from current file
-    file_string: Option<String>,
+    file_string: Option<Rc<String>>,
     /// File path to current JMC function as string
     pub file_path_str: String,
 
@@ -256,31 +282,48 @@ pub struct Tokenizer {
     /// Whether to allow semicolon at the next char(For minecraft array `[I;int, ...]`)
     allow_semicolon: bool,
     /// JMC macro factory
-    macro_factory: Option<MacroFactoryInfo>,
+    macro_factory_info: Option<MacroFactoryInfo>,
+    /// Header shared between compilation
+    header: Rc<Header>,
+}
+
+impl Clone for Tokenizer {
+    fn clone(&self) -> Self {
+        let file_string = match &self.file_string {
+            Some(file_string) => Some(Rc::clone(&file_string)),
+            None => None,
+        };
+        Self::new(
+            &self.header,
+            Rc::clone(&self.raw_string),
+            self.file_path_str.clone(),
+            file_string,
+            self.allow_semicolon,
+        )
+    }
 }
 
 impl Tokenizer {
     /// * `raw_string` - Raw string read from file/given from another tokenizer
     /// * `file_path_str` - Entire string read from current file
-    /// * `expect_semicolon` - Whether to expect a semicolon at the end, defaults to `true`
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn new(
-        raw_string: String,
+        header: &Rc<Header>,
+        raw_string: Rc<String>,
         file_path_str: String,
-        file_string: Option<String>,
-        expect_semicolon: bool,
+        file_string: Option<Rc<String>>,
         allow_semicolon: bool,
-    ) -> Result<Self, JMCError> {
-        let mut tokenizer = Self {
+    ) -> Self {
+        Self {
             programs: vec![],
             line: 0,
             col: 0,
             state: StateType::None,
             token_str: String::new(),
-            token_pos: None,
+            token_pos: Pos::default(),
             keywords: vec![],
             list_of_keywords: vec![],
-            raw_string: Rc::new(raw_string),
+            raw_string,
             file_string,
             file_path_str,
             quote: None,
@@ -291,10 +334,9 @@ impl Tokenizer {
             is_string: false,
             is_comment: false,
             allow_semicolon,
-            macro_factory: None,
-        };
-        tokenizer.parse(expect_semicolon, false)?;
-        Ok(tokenizer)
+            macro_factory_info: None,
+            header: Rc::clone(header),
+        }
     }
 
     pub fn get_file_string(&self) -> &str {
@@ -306,13 +348,10 @@ impl Tokenizer {
 
     /// Parse string
     ///
-    /// * `string` - String to parse
-    /// * `listne` - Current line
-    /// * `costl` - Current column
     /// * `expect_semicolon` - Whether to expect a semicolon at the end
     /// * `allow_last_missing_semicolon` - Whether to allow last missing last semicolon, defaults to False
     /// * return - List of keywords(list of tokens)
-    fn parse(
+    pub fn parse(
         &mut self,
         expect_semicolon: bool,
         allow_last_missing_semicolon: bool,
@@ -334,11 +373,6 @@ impl Tokenizer {
                 ));
             }
             StateType::Paren => {
-                let token_pos = match &self.token_pos {
-                    Some(token_pos) => token_pos,
-                    None => panic!("token_pos is None"),
-                };
-                debug_assert!(!self.token_pos.is_none());
                 let paren: String = match &self.left_paren {
                     Some(left_paren) => left_paren.to_string(),
                     None => "".to_owned(),
@@ -347,8 +381,8 @@ impl Tokenizer {
                     "Bracket was never closed".to_owned(),
                     Some(&Token::new(
                         TokenType::Keyword,
-                        token_pos.line,
-                        token_pos.col,
+                        self.token_pos.line,
+                        self.token_pos.col,
                         paren,
                         None,
                         None,
@@ -666,11 +700,11 @@ impl Tokenizer {
         let is_operator = OPERATORS.contains(&ch);
         if self.state == StateType::Keyword && is_operator {
             self.append_token()?;
-            self.token_pos = Some(self.get_pos());
+            self.token_pos = self.get_pos();
             self.state = StateType::Operator;
         } else if self.state == StateType::Operator && !is_operator && ch != re::SEMICOLON {
             self.append_token()?;
-            self.token_pos = Some(self.get_pos());
+            self.token_pos = self.get_pos();
             self.state = StateType::Keyword;
         }
 
@@ -802,11 +836,11 @@ impl Tokenizer {
         match ch {
             quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
                 self.token_str.push(ch);
-                self.token_pos = Some(self.get_pos());
+                self.token_pos = self.get_pos();
                 self.state = StateType::String;
                 self.quote = Some(ch);
             }
-            re::SEMICOLON => match &self.macro_factory {
+            re::SEMICOLON => match &self.macro_factory_info {
                 Some(macro_factory) => {
                     return Err(JMCError::jmc_syntax_warning(
                         format!(
@@ -825,7 +859,7 @@ impl Tokenizer {
             },
             paren::L_CURLY | paren::L_ROUND | paren::L_SQUARE => {
                 self.token_str.push(ch);
-                self.token_pos = Some(self.get_pos());
+                self.token_pos = self.get_pos();
                 self.state = StateType::Paren;
                 self.left_paren = Some(ch);
                 self.right_paren =
@@ -845,19 +879,19 @@ impl Tokenizer {
             re::HASH if self.keywords.is_empty() => self.state = StateType::Comment,
             re::COMMA => {
                 self.token_str.push(ch);
-                self.token_pos = Some(self.get_pos());
+                self.token_pos = self.get_pos();
                 self.state = StateType::Comma;
                 self.append_token()?;
             }
             _ if OPERATORS.contains(&ch) => {
                 self.token_str.push(ch);
-                self.token_pos = Some(self.get_pos());
+                self.token_pos = self.get_pos();
                 self.state = StateType::Operator;
             }
             // _ if ch.is_whitespace() => return Ok(()),
             _ => {
                 self.token_str.push(ch);
-                self.token_pos = Some(self.get_pos());
+                self.token_pos = self.get_pos();
                 self.state = StateType::Keyword;
             }
         }
@@ -865,7 +899,7 @@ impl Tokenizer {
     }
 
     /// Append keywords into list_of_keywords
-    fn append_token(&mut self) -> Result<(), JMCError> {
+    fn append_keywords(&mut self) -> Result<(), JMCError> {
         if self.keywords.len() == 0 {
             Err(JMCError::jmc_syntax_warning(
                 "Unnecessary semicolon(;)".to_owned(),
@@ -883,8 +917,127 @@ impl Tokenizer {
         }
     }
 
-    fn append_keywords(&mut self) -> Result<(), JMCError> {
-        todo!()
+    /// Append the current token into self.keywords
+    fn append_token(&mut self) -> Result<(), JMCError> {
+        debug_assert!(!self.state.is_none());
+        let new_token = Token::new(
+            self.state.to_token_type(),
+            self.token_pos.line,
+            self.token_pos.col,
+            std::mem::take(&mut self.token_str),
+            None,
+            self.quote,
+        );
+        let token_pos = std::mem::take(&mut self.token_pos);
+        let is_macro = new_token.token_type == TokenType::Keyword
+            && self.header.macros.contains_key(&new_token.string);
+        if is_macro {
+            let (macro_factory, arg_count) = self
+                .header
+                .macros
+                .get(&new_token.string)
+                .expect("should exist in macro due to contains_key check");
+            if *arg_count == 0 {
+                self.keywords
+                    .append(&mut macro_factory.call(&[], token_pos.line, token_pos.col))
+            } else {
+                self.macro_factory_info = Some(MacroFactoryInfo {
+                    name: new_token.string,
+                    macro_factory: Rc::clone(macro_factory),
+                    arg_count: *arg_count,
+                    pos: token_pos,
+                })
+            }
+        } else if self.macro_factory_info.is_some() {
+            let macro_factory_info = std::mem::replace(&mut self.macro_factory_info, None)
+                .expect("macro_factory_info shouldn't be none, it was checked with is_some");
+            if new_token.token_type != TokenType::ParenRound {
+                return Err(JMCError::jmc_syntax_warning(
+                    format!(
+                        "Expect round bracket after macro factory({})",
+                        macro_factory_info.name
+                    ),
+                    Some(&new_token),
+                    self,
+                    false,
+                    false,
+                    false,
+                    Some(format!(
+                        "Macro factory({0}) requires {1} argument. Try '{0}({2})'",
+                        macro_factory_info.name,
+                        macro_factory_info.arg_count,
+                        (1..macro_factory_info.arg_count + 1)
+                            .map(|i| format!("arg{i}"))
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )),
+                ));
+            }
+            let mut arg_tokens: Vec<Token> = vec![];
+            let (args, kwargs) = self.clone().parse_func_args_round(&new_token);
+            for arg in args {
+                if arg.len() > 1 {
+                    arg_tokens.push(arg[0].clone())
+                } else {
+                    arg_tokens.push(self.merge_tokens(&arg[0], &arg[1..]))
+                }
+            }
+            if !kwargs.is_empty() {
+                return Err(JMCError::jmc_syntax_warning(
+                    format!(
+                        "Macro factory does not support keyword argument ({}=)",
+                        kwargs
+                            .keys()
+                            .next()
+                            .expect("kwargs shouldn't be empty due to is_empty check")
+                    ),
+                    Some(&new_token),
+                    self,
+                    true,
+                    false,
+                    true,
+                    None,
+                ));
+            }
+            if arg_tokens.len() != macro_factory_info.arg_count {
+                return Err(JMCError::jmc_syntax_warning(
+                    format!(
+                        "This Macro factory ({0}) expect {1} arguments (got {2})",
+                        macro_factory_info.name,
+                        macro_factory_info.arg_count,
+                        arg_tokens.len()
+                    ),
+                    Some(&new_token),
+                    self,
+                    true,
+                    false,
+                    true,
+                    None,
+                ));
+            }
+            self.keywords
+                .append(&mut macro_factory_info.macro_factory.call(
+                    &arg_tokens,
+                    token_pos.line,
+                    token_pos.col,
+                ))
+        } else {
+            self.keywords.push(new_token);
+        }
+        self.state = StateType::None;
+        Ok(())
+    }
+
+    fn merge_tokens(&self, token: &Token, other_tokens: &[Token]) -> Token {
+        let token_type = match token.token_type {
+            TokenType::Operator => TokenType::Keyword,
+            other => other,
+        };
+        let mut string = token.string.clone();
+        for other_token in other_tokens {
+            string.push_str(&other_token.string)
+        }
+        Token::new(token_type, token.line, token.col, string, None, None)
     }
 
     fn should_terminate_line(&self, start_at: u32) -> bool {
@@ -892,6 +1045,21 @@ impl Tokenizer {
     }
 
     fn is_shorten_if(&self) -> bool {
+        todo!()
+    }
+
+    fn parse_func_args_round(
+        &mut self,
+        token: &Token,
+    ) -> (Vec<Vec<Token>>, HashMap<String, Vec<Token>>) {
+        self.parse_func_args(token, TokenType::ParenRound)
+    }
+
+    fn parse_func_args(
+        &mut self,
+        token: &Token,
+        token_type: TokenType,
+    ) -> (Vec<Vec<Token>>, HashMap<String, Vec<Token>>) {
         todo!()
     }
 
@@ -970,13 +1138,12 @@ mod tokenizer_tests {
     fn test_escape() {
         assert_eq!(
             Tokenizer::new(
-                r#""\n\t\r TEST \"\"'''""#.to_owned(),
+                &Rc::new(Header::default()),
+                Rc::new(r#""\n\t\r TEST \"\"'''""#.to_owned()),
                 String::new(),
                 None,
-                true,
                 false
             )
-            .unwrap()
             .programs[0][0]
                 .string,
             "\n\t\r TEST \"\"'''"
