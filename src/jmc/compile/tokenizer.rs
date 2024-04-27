@@ -346,12 +346,35 @@ impl Tokenizer {
         }
     }
 
+    /// * `raw_string` - Raw string read from file/given from another tokenizer
+    /// * `file_path_str` - Entire string read from current file
+    /// * `expect_semicolon` - Whether to expect a semicolon at the end
+    /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
+    pub fn parse_raw_string(
+        header: &Rc<Header>,
+        raw_string: Rc<String>,
+        file_path_str: String,
+        file_string: Option<Rc<String>>,
+        expect_semicolon: bool,
+        allow_semicolon: bool,
+    ) -> Result<Self, JMCError> {
+        let mut tokenizer = Self::new(
+            header,
+            raw_string,
+            file_path_str,
+            file_string,
+            allow_semicolon,
+        );
+        tokenizer.parse(expect_semicolon, false)?;
+        Ok(tokenizer)
+    }
+
     /// Parse string
     ///
     /// * `expect_semicolon` - Whether to expect a semicolon at the end
     /// * `allow_last_missing_semicolon` - Whether to allow last missing last semicolon, defaults to False
     /// * return - List of keywords(list of tokens)
-    pub fn parse(
+    fn parse(
         &mut self,
         expect_semicolon: bool,
         allow_last_missing_semicolon: bool,
