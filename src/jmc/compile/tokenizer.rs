@@ -367,7 +367,7 @@ impl Tokenizer {
                 self.append_token()?;
             }
             if allow_last_missing_semicolon {
-                self.append_keywords();
+                self.append_keywords()?;
             }
             return Err(JMCError::jmc_syntax_exception(
                 "Expected semicolon(;)".to_owned(),
@@ -385,7 +385,7 @@ impl Tokenizer {
                 self.append_token()?;
             }
             if !self.keywords.is_empty() {
-                self.append_keywords();
+                self.append_keywords()?;
             }
         }
         Ok(&self.list_of_keywords)
@@ -660,7 +660,7 @@ impl Tokenizer {
             re::COMMA,
         ];
         if ch.is_whitespace() || NON_KEYWORD.contains(&ch) {
-            self.append_keywords();
+            self.append_keywords()?;
             return Ok(false);
         }
         let is_operator = OPERATORS.contains(&ch);
@@ -784,7 +784,7 @@ impl Tokenizer {
                     && self.should_terminate_line(0)
                     && (!self.is_shorten_if() || self.should_terminate_line(2))
                 {
-                    self.append_keywords()
+                    self.append_keywords()?;
                 }
             }
             quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
@@ -795,7 +795,7 @@ impl Tokenizer {
             re::HASH if self.keywords.is_empty() => self.is_comment = true,
             _ => {}
         }
-        todo!()
+        Ok(())
     }
 
     fn parse_none(&mut self, ch: char) -> Result<(), JMCError> {
@@ -808,7 +808,7 @@ impl Tokenizer {
             }
             re::SEMICOLON => match &self.macro_factory {
                 Some(macro_factory) => {
-                    return Err(JMCError::jmc_syntax_exception(
+                    return Err(JMCError::jmc_syntax_warning(
                         format!(
                             "Expected a round bracket after macro factory({0})",
                             macro_factory.name
@@ -821,7 +821,7 @@ impl Tokenizer {
                         Some("Macro factory is a macro that acts like a function (requires parameter(s))".to_owned()),
                     ));
                 }
-                None => self.append_keywords(),
+                None => self.append_keywords()?,
             },
             paren::L_CURLY | paren::L_ROUND | paren::L_SQUARE => {
                 self.token_str.push(ch);
@@ -864,11 +864,26 @@ impl Tokenizer {
         Ok(())
     }
 
+    /// Append keywords into list_of_keywords
     fn append_token(&mut self) -> Result<(), JMCError> {
-        todo!()
+        if self.keywords.len() == 0 {
+            Err(JMCError::jmc_syntax_warning(
+                "Unnecessary semicolon(;)".to_owned(),
+                None,
+                self,
+                false,
+                true,
+                false,
+                None,
+            ))
+        } else {
+            self.list_of_keywords
+                .push(std::mem::replace(&mut self.keywords, vec![]));
+            Ok(())
+        }
     }
 
-    fn append_keywords(&mut self) {
+    fn append_keywords(&mut self) -> Result<(), JMCError> {
         todo!()
     }
 
