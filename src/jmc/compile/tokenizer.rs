@@ -1082,7 +1082,13 @@ impl Tokenizer {
     }
 
     fn is_shorten_if(&self) -> bool {
-        todo!()
+        if self.keywords.len() < 3 {
+            return false;
+        }
+        let is_if = self.keywords[0].string.as_str() == "if";
+        let is_not_expand = self.keywords[2].string != "expand"
+            && self.keywords[2].token_type != TokenType::ParenCurly;
+        is_if && is_not_expand
     }
 
     fn parse_func_args_round(
