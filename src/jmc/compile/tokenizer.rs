@@ -5,7 +5,7 @@ use crate::jmc::compile::utils::is_decorator;
 use super::exception::JMCError;
 use super::header::{Header, MacroFactory};
 use std::collections::HashMap;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::iter::Peekable;
 use std::rc::Rc;
 
@@ -68,19 +68,17 @@ impl StateType {
     }
 }
 
-impl TokenType {
-    fn value(&self) -> &'static str {
+impl Display for TokenType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            TokenType::Keyword => "Keyword",
-            TokenType::Operator => "Operator",
-            // TokenType::Paren => "PAREN",
-            TokenType::ParenRound => "RoundParentheses",
-            TokenType::ParenSquare => "SquareParentheses",
-            TokenType::ParenCurly => "CurlyParentheses",
-            TokenType::String => "StringLiteral",
-            // TokenType::Comment => "Comment",
-            TokenType::Comma => "Comma",
-            TokenType::Func => "Function",
+            TokenType::Keyword => write!(f, "Keyword"),
+            TokenType::Operator => write!(f, "Operator"),
+            TokenType::ParenRound => write!(f, "Round-Parentheses"),
+            TokenType::ParenSquare => write!(f, "Square-Parentheses"),
+            TokenType::ParenCurly => write!(f, "Curly-Parentheses"),
+            TokenType::String => write!(f, "String Literal"),
+            TokenType::Comma => write!(f, "Comma"),
+            TokenType::Func => write!(f, "Function"),
         }
     }
 }
@@ -367,21 +365,23 @@ impl Tokenizer {
             file_string,
             allow_semicolon,
         );
-        tokenizer.parse(expect_semicolon, false)?;
+        tokenizer.parse(&Rc::clone(&tokenizer.raw_string), expect_semicolon, false)?;
         Ok(tokenizer)
     }
 
     /// Parse string
     ///
+    /// * `string` - String to parse
     /// * `expect_semicolon` - Whether to expect a semicolon at the end
     /// * `allow_last_missing_semicolon` - Whether to allow last missing last semicolon, defaults to False
     /// * return - List of keywords(list of tokens)
     fn parse(
         &mut self,
+        string: &str,
         expect_semicolon: bool,
         allow_last_missing_semicolon: bool,
     ) -> Result<&Vec<Vec<Token>>, JMCError> {
-        self.parse_chars(expect_semicolon)?;
+        self.parse_chars(string, expect_semicolon)?;
 
         match self.state {
             StateType::String => {
@@ -450,10 +450,9 @@ impl Tokenizer {
         Ok(&self.list_of_keywords)
     }
 
-    fn parse_chars(&mut self, expect_semicolon: bool) -> Result<(), JMCError> {
-        let raw_string_rc = Rc::clone(&self.raw_string);
-        let mut raw_string_iter = raw_string_rc.chars().peekable();
-        while let Some(ch) = raw_string_iter.next() {
+    fn parse_chars(&mut self, string: &str, expect_semicolon: bool) -> Result<(), JMCError> {
+        let mut string_iter = string.chars().peekable();
+        while let Some(ch) = string_iter.next() {
             self.col += 1;
             if ch == re::SEMICOLON && self.state == StateType::None && !expect_semicolon {
                 return Err(JMCError::jmc_syntax_exception(
@@ -473,11 +472,11 @@ impl Tokenizer {
             }
 
             if ch == re::SLASH
-                && raw_string_iter.peek() == Some(&re::SLASH)
+                && string_iter.peek() == Some(&re::SLASH)
                 && self.state != StateType::Paren
                 && self.state != StateType::String
             {
-                raw_string_iter.next();
+                string_iter.next();
                 if !self.token_str.is_empty() {
                     self.append_token()?;
                 }
@@ -490,8 +489,8 @@ impl Tokenizer {
                 }
             }
             match self.state {
-                StateType::Paren => self.parse_paren(&mut raw_string_iter, ch, expect_semicolon)?,
-                StateType::String => self.parse_string(&mut raw_string_iter, ch)?,
+                StateType::Paren => self.parse_paren(&mut string_iter, ch, expect_semicolon)?,
+                StateType::String => self.parse_string(&mut string_iter, ch)?,
                 StateType::Comment => continue,
                 StateType::None => self.parse_none(ch)?,
                 _ => panic!("invalid state"),
@@ -999,7 +998,7 @@ impl Tokenizer {
                 ));
             }
             let mut arg_tokens: Vec<Token> = vec![];
-            let (args, kwargs) = self.clone().parse_func_args_round(&new_token);
+            let (args, kwargs) = self.clone().parse_func_args_round(&new_token)?;
             for arg in args {
                 if arg.len() > 1 {
                     arg_tokens.push(arg[0].clone())
@@ -1094,7 +1093,7 @@ impl Tokenizer {
     fn parse_func_args_round(
         &mut self,
         token: &Token,
-    ) -> (Vec<Vec<Token>>, HashMap<String, Vec<Token>>) {
+    ) -> Result<(Vec<Vec<Token>>, HashMap<String, Vec<Token>>), JMCError> {
         self.parse_func_args(token, TokenType::ParenRound)
     }
 
@@ -1102,7 +1101,39 @@ impl Tokenizer {
         &mut self,
         token: &Token,
         token_type: TokenType,
-    ) -> (Vec<Vec<Token>>, HashMap<String, Vec<Token>>) {
+    ) -> Result<(Vec<Vec<Token>>, HashMap<String, Vec<Token>>), JMCError> {
+        if token.token_type != token_type {
+            return Err(JMCError::jmc_syntax_exception(
+                format!("Expected {token_type} (got {0})", token.token_type),
+                Some(token),
+                self,
+                false,
+                false,
+                false,
+                None,
+            ));
+        }
+        self.line = token.line;
+        self.col = token.col + 1;
+        self.parse(&token.string, false, false)?;
+        let keywords = std::mem::take(&mut self.programs[0]);
+        let args: Vec<Vec<Token>> = vec![];
+        let kwargs: HashMap<String, Vec<Token>> = HashMap::new();
+        let comma_separated_tokens = Self::find_token(keywords, ",", false);
+        todo!()
+    }
+
+    /// Split list of tokens by token that match the string
+    ///
+    /// * `tokens` - List of token
+    /// * `string` - String to match for splitting
+    /// * `allow_string_token` - Whether to allow string token, defaults to `false`
+    /// * return - List of list of tokens
+    ///
+    /// # Examples
+    ///
+    /// `find_token([a,b,c,d], b.string) == [[a],[c,d]]`
+    fn find_token(tokens: Vec<Token>, string: &str, allow_string_token: bool) -> Vec<Vec<Token>> {
         todo!()
     }
 
