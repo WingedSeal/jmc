@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use crate::jmc::compile::utils::is_decorator;
+
 use super::exception::JMCError;
 use super::header::{Header, MacroFactory};
 use std::collections::HashMap;
@@ -947,7 +949,7 @@ impl Tokenizer {
             self.state.to_token_type(),
             self.token_pos.line,
             self.token_pos.col,
-            std::mem::take(&mut self.token_str),
+            std::mem::take(&mut self.token_str), // FIXME: Does this copy the string?
             None,
             self.quote,
         );
@@ -1063,8 +1065,20 @@ impl Tokenizer {
         Token::new(token_type, token.line, token.col, string, None, None)
     }
 
-    fn should_terminate_line(&self, start_at: u32) -> bool {
-        todo!()
+    fn should_terminate_line(&self, start_at: usize) -> bool {
+        if self.keywords.len() < 2 {
+            return false;
+        }
+        let keyword = self.keywords[start_at].string.as_str();
+        let is_in_terminate_line = TERMINATE_LINE.contains(&keyword);
+        const RUN_EXPAND: [&'static str; 2] = ["run", "expand"];
+        let is_run_expand = keyword == "execute"
+            && RUN_EXPAND.contains(&self.keywords[self.keywords.len() - 2].string.as_str());
+        let is_a_decorator = is_decorator(keyword);
+        let is_return_run = keyword.len() > 3
+            && self.keywords[self.keywords.len() - 3].string.as_str() == "return"
+            && self.keywords[self.keywords.len() - 2].string.as_str() == "run";
+        is_in_terminate_line || is_run_expand || is_a_decorator || is_return_run
     }
 
     fn is_shorten_if(&self) -> bool {
