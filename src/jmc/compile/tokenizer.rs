@@ -1116,7 +1116,7 @@ impl Tokenizer {
         self.line = token.line;
         self.col = token.col + 1;
         self.parse(&token.string, false, false)?;
-        let keywords = std::mem::take(&mut self.programs[0]);
+        let keywords: Vec<Token> = std::mem::take(&mut self.programs[0]);
         let args: Vec<Vec<Token>> = vec![];
         let kwargs: HashMap<String, Vec<Token>> = HashMap::new();
         let comma_separated_tokens = Self::find_token(keywords, ",", false);
