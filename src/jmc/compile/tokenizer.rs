@@ -4,7 +4,7 @@ use crate::jmc::compile::utils::is_decorator;
 
 use super::exception::JMCError;
 use super::header::{Header, MacroFactory};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Display};
 use std::iter::Peekable;
 use std::rc::Rc;
@@ -18,8 +18,9 @@ const OPERATORS: [char; 13] = [
     '+', '-', '*', '/', '>', '<', '=', '%', ':', '!', '|', '&', '?',
 ];
 
-#[derive(Eq, PartialEq, Debug, Clone, Copy)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy, Default)]
 pub enum TokenType {
+    #[default]
     Keyword,
     Operator,
     ParenRound,
@@ -83,7 +84,7 @@ impl Display for TokenType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Token {
     pub token_type: TokenType,
     pub line: u32,
@@ -948,7 +949,7 @@ impl Tokenizer {
             self.state.to_token_type(),
             self.token_pos.line,
             self.token_pos.col,
-            std::mem::take(&mut self.token_str), // FIXME: Does this copy the string?
+            std::mem::take(&mut self.token_str),
             None,
             self.quote,
         );
@@ -1116,25 +1117,209 @@ impl Tokenizer {
         self.line = token.line;
         self.col = token.col + 1;
         self.parse(&token.string, false, false)?;
-        let keywords: Vec<Token> = std::mem::take(&mut self.programs[0]);
+        let keywords: Vec<Token> = self.programs.swap_remove(0);
         let args: Vec<Vec<Token>> = vec![];
         let kwargs: HashMap<String, Vec<Token>> = HashMap::new();
-        let comma_separated_tokens = Self::find_token(keywords, ",", false);
+        let (comma_separated_tokens, comma_tokens) = Self::find_token(keywords, ",", false);
+        if comma_separated_tokens[comma_separated_tokens.len() - 1].is_empty() {
+            return Err(JMCError::jmc_syntax_exception(
+                "Unexpected comma at the end of function arguments".to_owned(),
+                Some(&comma_tokens[comma_tokens.len() - 1]),
+                self,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        // List of tokens between commas
+        for (i, mut comma_separated_token) in comma_separated_tokens.into_iter().enumerate() {
+            let mut comma_separated_token = VecDeque::from(comma_separated_token);
+            if comma_separated_token.is_empty() {
+                return Err(JMCError::jmc_syntax_exception(
+                    "Unexpected comma in function arguments".to_owned(),
+                    Some(&comma_tokens[i]),
+                    self,
+                    false,
+                    true,
+                    false,
+                    None,
+                ));
+            }
+            if comma_separated_token.len() > 1
+                && ["=", "=+", "=-"].contains(&comma_separated_token[1].string.as_str())
+            {
+                let key = comma_separated_token
+                    .pop_front()
+                    .expect("comma_separated_token should have a length of 2 or more");
+                let equal_token = comma_separated_token
+                    .pop_front()
+                    .expect("comma_separated_token should have a length of 2 or more");
+                if comma_separated_token.len() == 2 {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "Expected keyword argument after '=' in function arguments".to_owned(),
+                        Some(&equal_token),
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                let value: Vec<Token> =
+                    self.parse_func_arg(Vec::from(comma_separated_token), false, false)?;
+            }
+        }
         todo!()
     }
 
-    /// Split list of tokens by token that match the string
+    /// Parse an argument in function arguments (Used in parse_func_args)
+    ///
+    /// * `tokens` - List of tokens
+    /// * `is_kwargs` - Boolean of Kwargs to check if it should throw an error
+    /// * `is_nbt` - Whether it is an NBT/JSobject (If false, it's a function argument), defaults to `false`
+    /// * return - Tokens to be pushed to 'args' or 'kwargs'
+    fn parse_func_arg(
+        &self,
+        tokens: Vec<Token>,
+        is_kwargs: bool,
+        is_nbt: bool,
+    ) -> Result<Vec<Token>, JMCError> {
+        if let TokenType::Keyword | TokenType::Operator = tokens[0].token_type {
+            if tokens.len() != 1 {
+                return Ok(tokens);
+            }
+        }
+        // TODO: change .contains to if let
+        let where_ = if is_nbt {
+            "JSObject/NBT"
+        } else {
+            "function argument"
+        };
+        if tokens.len() > 1 {
+            if tokens[0].string == "()" && tokens[1].string == "=>" {
+                if tokens.len() < 3 {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "Expected curly bracket after '()=>' (got nothing)".to_owned(),
+                        Some(&tokens[1]),
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                if tokens[2].token_type != TokenType::ParenCurly {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!(
+                            "Expected curly bracket after '()=>' (got {0})",
+                            tokens[2].token_type
+                        ),
+                        Some(&tokens[2]),
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                if tokens.len() > 3 {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "Unexpected token after arrow function '()=>{}'".to_owned(),
+                        Some(&tokens[3]),
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                let new_token = tokens[2];
+                return Ok(vec![Token::new(
+                    TokenType::Func,
+                    new_token.line,
+                    new_token.col + 1,
+                    new_token.string,
+                    Some(new_token._macro_length),
+                    Some(new_token.quote),
+                )]);
+            }
+            if tokens[0].token_type == TokenType::ParenRound
+                && tokens[0].token_type == TokenType::Operator
+            {
+                return Ok(tokens);
+            }
+            return Err(JMCError::jmc_syntax_exception(
+                format!(
+                    "Unexpected {} after {} in {where_}",
+                    tokens[1].token_type, tokens[0].token_type
+                ),
+                Some(&tokens[1]),
+                self,
+                false,
+                true,
+                false,
+                Some("You may have missed a comma".to_owned()),
+            ));
+        }
+        if tokens[0].string == (if is_nbt { ":" } else { "=" }) {
+            return Err(JMCError::jmc_syntax_exception(
+                format!("Empty key in {where_}"),
+                Some(&tokens[0]),
+                self,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if is_kwargs {
+            return Err(JMCError::jmc_syntax_exception(
+                "Positional argument follows keyword argument".to_owned(),
+                Some(&tokens[0]),
+                self,
+                false,
+                true,
+                false,
+                Some("There's no way to tell which value belong to which key, try rearranging arguments. Arguments without '=' should come first.".to_owned()),
+            ));
+        }
+        Ok(tokens)
+    }
+
+    /// Split list of tokens by token that match the string.
     ///
     /// * `tokens` - List of token
     /// * `string` - String to match for splitting
     /// * `allow_string_token` - Whether to allow string token, defaults to `false`
-    /// * return - List of list of tokens
+    /// * return - List of list of tokens and List of comma tokens
     ///
     /// # Examples
     ///
-    /// `find_token([a,b,c,d], b.string) == [[a],[c,d]]`
-    fn find_token(tokens: Vec<Token>, string: &str, allow_string_token: bool) -> Vec<Vec<Token>> {
-        todo!()
+    /// `find_token([a,b,c,d], b.string) == ([[a],[c,d]], [b])`
+    fn find_token(
+        tokens: Vec<Token>,
+        string: &str,
+        allow_string_token: bool,
+    ) -> (Vec<Vec<Token>>, Vec<Token>) {
+        let mut result: Vec<Vec<Token>> = vec![];
+        let mut token_array: Vec<Token> = vec![];
+        let mut splitter_array: Vec<Token> = vec![];
+        for token in tokens {
+            let is_append_result: bool;
+            if allow_string_token {
+                is_append_result = token.string == string;
+            } else {
+                is_append_result = token.string == string && token.token_type != TokenType::String;
+            }
+            if is_append_result {
+                splitter_array.push(token);
+                result.push(std::mem::take(&mut token_array));
+            } else {
+                token_array.push(token)
+            }
+        }
+        (result, splitter_array)
     }
 
     #[inline]
