@@ -1119,7 +1119,7 @@ impl Tokenizer {
         self.parse(&token.string, false, false)?;
         let keywords: Vec<Token> = self.programs.swap_remove(0);
         let args: Vec<Vec<Token>> = vec![];
-        let kwargs: HashMap<String, Vec<Token>> = HashMap::new();
+        let mut kwargs: HashMap<String, Vec<Token>> = HashMap::new();
         let (comma_separated_tokens, comma_tokens) = Self::find_token(keywords, ",", false);
         if comma_separated_tokens[comma_separated_tokens.len() - 1].is_empty() {
             return Err(JMCError::jmc_syntax_exception(
@@ -1133,8 +1133,8 @@ impl Tokenizer {
             ));
         }
         // List of tokens between commas
-        for (i, mut comma_separated_token) in comma_separated_tokens.into_iter().enumerate() {
-            let mut comma_separated_token = VecDeque::from(comma_separated_token);
+        for (i, comma_separated_token) in comma_separated_tokens.into_iter().enumerate() {
+            let mut comma_separated_token = VecDeque::from(comma_separated_token); // TODO: FIND IF IT'S BETTER THAN REMOVE(0)
             if comma_separated_token.is_empty() {
                 return Err(JMCError::jmc_syntax_exception(
                     "Unexpected comma in function arguments".to_owned(),
@@ -1166,8 +1166,35 @@ impl Tokenizer {
                         None,
                     ));
                 }
-                let value: Vec<Token> =
+                let mut value: Vec<Token> =
                     self.parse_func_arg(Vec::from(comma_separated_token), false, false)?;
+                if let "=+" | "=-" = equal_token.string.as_str() {
+                    let mut tmp_value = VecDeque::from(value);
+                    let mut string = equal_token.string;
+                    string.remove(0); // TODO
+                    tmp_value.push_front(Token::new(
+                        equal_token.token_type,
+                        equal_token.line,
+                        equal_token.col + 1,
+                        string,
+                        Some(equal_token._macro_length),
+                        Some(equal_token.quote),
+                    ));
+                    value = Vec::from(tmp_value);
+                }
+                if kwargs.contains_key(&key.string) {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!("Duplicated key({})", key.string),
+                        Some(&key),
+                        self,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ));
+                }
+                kwargs.insert(key.string, value);
+                continue;
             }
         }
         todo!()
@@ -1234,7 +1261,10 @@ impl Tokenizer {
                         None,
                     ));
                 }
-                let new_token = tokens[2];
+                let new_token: Token = tokens
+                    .into_iter()
+                    .nth(2)
+                    .expect("tokens.len() should be larger than 2");
                 return Ok(vec![Token::new(
                     TokenType::Func,
                     new_token.line,
