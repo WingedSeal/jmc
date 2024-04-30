@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::jmc::compile::utils::is_decorator;
 
 use super::exception::JMCError;

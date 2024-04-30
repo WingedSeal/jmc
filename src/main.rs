@@ -1,10 +1,7 @@
-use std::collections::VecDeque;
-use std::rc::Rc;
-
+#![allow(dead_code)]
 use jmc::compile::header::Header;
-use jmc::compile::tokenizer::Token;
-use jmc::compile::tokenizer::TokenType;
 use jmc::compile::tokenizer::Tokenizer;
+use std::rc::Rc;
 
 mod jmc;
 
