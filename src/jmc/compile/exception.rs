@@ -167,7 +167,7 @@ fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> S
 }
 
 #[derive(Debug)]
-enum JMCErrorType {
+pub enum JMCErrorType {
     EvaluationException,
     HeaderFileNotFoundError,
     HeaderDuplicatedMacro,
@@ -178,8 +178,8 @@ enum JMCErrorType {
 
 #[derive(Debug)]
 pub struct JMCError {
-    error_type: JMCErrorType,
-    msg: String,
+    pub error_type: JMCErrorType,
+    pub msg: String,
 }
 impl JMCError {
     pub fn evaluation_exception(string: String) -> Self {

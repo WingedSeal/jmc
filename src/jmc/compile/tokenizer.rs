@@ -317,8 +317,8 @@ impl Tokenizer {
     ) -> Self {
         Self {
             programs: vec![],
-            line: 0,
-            col: 0,
+            line: 1,
+            col: 1,
             state: StateType::None,
             token_str: String::new(),
             token_pos: Pos::default(),
@@ -366,7 +366,8 @@ impl Tokenizer {
             file_string,
             allow_semicolon,
         );
-        tokenizer.parse(&Rc::clone(&tokenizer.raw_string), expect_semicolon, false)?;
+        tokenizer.programs =
+            tokenizer.parse(&Rc::clone(&tokenizer.raw_string), expect_semicolon, false)?;
         Ok(tokenizer)
     }
 
@@ -381,7 +382,7 @@ impl Tokenizer {
         string: &str,
         expect_semicolon: bool,
         allow_last_missing_semicolon: bool,
-    ) -> Result<&Vec<Vec<Token>>, JMCError> {
+    ) -> Result<Vec<Vec<Token>>, JMCError> {
         self.parse_chars(string, expect_semicolon)?;
 
         match self.state {
@@ -448,7 +449,7 @@ impl Tokenizer {
                 self.append_keywords()?;
             }
         }
-        Ok(&self.list_of_keywords)
+        Ok(std::mem::take(&mut self.list_of_keywords))
     }
 
     fn parse_chars(&mut self, string: &str, expect_semicolon: bool) -> Result<(), JMCError> {
@@ -608,8 +609,8 @@ impl Tokenizer {
         ch: char,
     ) -> Result<(), JMCError> {
         if ch == re::BACKSLASH {
-            let next_char: char = match raw_string_iter.peek() {
-                Some(next_char) => *next_char,
+            let next_char: char = match raw_string_iter.next() {
+                Some(next_char) => next_char,
                 None => {
                     return Err(JMCError::jmc_syntax_exception(
                         "String literal contains unescaped line break".to_owned(),
@@ -622,7 +623,6 @@ impl Tokenizer {
                     ));
                 }
             };
-            raw_string_iter.next();
             match Self::escape(next_char) {
                 Ok(unescaped) => self.token_str.push(unescaped),
                 Err(_) => {
@@ -639,7 +639,7 @@ impl Tokenizer {
         if ch == quote::BACKTICK {
             self.validate_multiline_string()?;
         }
-        Ok(())
+        self.append_token()
     }
 
     fn validate_multiline_string(&mut self) -> Result<(), JMCError> {
@@ -854,13 +854,13 @@ impl Tokenizer {
             re::HASH if self.keywords.is_empty() => self.is_comment = true,
             _ => {}
         }
+
         Ok(())
     }
 
     fn parse_none(&mut self, ch: char) -> Result<(), JMCError> {
         match ch {
             quote::SINGLE | quote::DOUBLE | quote::BACKTICK => {
-                self.token_str.push(ch);
                 self.token_pos = self.get_pos();
                 self.state = StateType::String;
                 self.quote = Some(ch);
@@ -1421,16 +1421,17 @@ mod tokenizer_tests {
     }
 
     #[test]
-    #[ignore = "waiting for tokenizer"]
     fn test_escape() {
         assert_eq!(
-            Tokenizer::new(
+            Tokenizer::parse_raw_string(
                 &Rc::new(Header::default()),
                 Rc::new(r#""\n\t\r TEST \"\"'''""#.to_owned()),
                 String::new(),
                 None,
+                false,
                 false
             )
+            .unwrap()
             .programs[0][0]
                 .string,
             "\n\t\r TEST \"\"'''"

@@ -1,4 +1,4 @@
 pub mod exception;
-mod header;
+pub mod header;
 pub mod tokenizer;
 mod utils;
