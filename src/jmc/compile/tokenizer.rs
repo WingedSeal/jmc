@@ -1118,7 +1118,7 @@ impl Tokenizer {
         self.col = token.col + 1;
         self.parse(&token.string, false, false)?;
         let keywords: Vec<Token> = self.programs.swap_remove(0);
-        let args: Vec<Vec<Token>> = vec![];
+        let mut args: Vec<Vec<Token>> = vec![];
         let mut kwargs: HashMap<String, Vec<Token>> = HashMap::new();
         let (comma_separated_tokens, comma_tokens) = Self::find_token(keywords, ",", false);
         if comma_separated_tokens[comma_separated_tokens.len() - 1].is_empty() {
@@ -1133,8 +1133,8 @@ impl Tokenizer {
             ));
         }
         // List of tokens between commas
-        for (i, comma_separated_token) in comma_separated_tokens.into_iter().enumerate() {
-            let mut comma_separated_token = VecDeque::from(comma_separated_token); // TODO: FIND IF IT'S BETTER THAN REMOVE(0)
+        for (i, mut comma_separated_token) in comma_separated_tokens.into_iter().enumerate() {
+            // TODO: find if remove(0) or vecdeque is faster?
             if comma_separated_token.is_empty() {
                 return Err(JMCError::jmc_syntax_exception(
                     "Unexpected comma in function arguments".to_owned(),
@@ -1149,12 +1149,10 @@ impl Tokenizer {
             if comma_separated_token.len() > 1
                 && ["=", "=+", "=-"].contains(&comma_separated_token[1].string.as_str())
             {
-                let key = comma_separated_token
-                    .pop_front()
-                    .expect("comma_separated_token should have a length of 2 or more");
-                let equal_token = comma_separated_token
-                    .pop_front()
-                    .expect("comma_separated_token should have a length of 2 or more");
+                let key = comma_separated_token.remove(0);
+                // .expect("comma_separated_token should have a length of 2 or more");
+                let equal_token = comma_separated_token.remove(0);
+                // .expect("comma_separated_token should have a length of 2 or more");
                 if comma_separated_token.len() == 2 {
                     return Err(JMCError::jmc_syntax_exception(
                         "Expected keyword argument after '=' in function arguments".to_owned(),
@@ -1196,20 +1194,21 @@ impl Tokenizer {
                 kwargs.insert(key.string, value);
                 continue;
             }
+            args.push(self.parse_func_arg(comma_separated_token, !kwargs.is_empty(), false)?)
         }
-        todo!()
+        Ok((args, kwargs))
     }
 
     /// Parse an argument in function arguments (Used in parse_func_args)
     ///
     /// * `tokens` - List of tokens
-    /// * `is_kwargs` - Boolean of Kwargs to check if it should throw an error
+    /// * `has_kwargs` - Whether Kwargs is empty to see if it should return an error
     /// * `is_nbt` - Whether it is an NBT/JSobject (If false, it's a function argument), defaults to `false`
     /// * return - Tokens to be pushed to 'args' or 'kwargs'
     fn parse_func_arg(
         &self,
         tokens: Vec<Token>,
-        is_kwargs: bool,
+        has_kwargs: bool,
         is_nbt: bool,
     ) -> Result<Vec<Token>, JMCError> {
         if let TokenType::Keyword | TokenType::Operator = tokens[0].token_type {
@@ -1303,7 +1302,7 @@ impl Tokenizer {
                 None,
             ));
         }
-        if is_kwargs {
+        if has_kwargs {
             return Err(JMCError::jmc_syntax_exception(
                 "Positional argument follows keyword argument".to_owned(),
                 Some(&tokens[0]),
