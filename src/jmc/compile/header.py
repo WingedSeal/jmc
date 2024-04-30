@@ -51,7 +51,7 @@ class Header(SingleTon):
     """Dictionary of text to replace and number to replace with, used in Hardcode.calc"""
     credits: list[str]
     """Dictionary of string to replace and what to replace it with"""
-    is_enable_macro: bool
+    is_enable_macro: bool  # ??? WAT IS THIS USED FOR ???
     """Whether to enable macro at the time of creating a token"""
     namespace_overrides: set[str]
     """Whether to allow jmc to take control over minecraft namespace"""
