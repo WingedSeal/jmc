@@ -1410,6 +1410,27 @@ mod token_tests {
 mod tokenizer_tests {
     use super::*;
 
+    impl Tokenizer {
+        pub fn test_parse_token(string: &str) -> Token {
+            Self::parse_raw_string(
+                &Rc::new(Header::default()),
+                Rc::new(string.to_owned()),
+                String::new(),
+                None,
+                false,
+                false,
+            )
+            .unwrap()
+            .programs
+            .into_iter()
+            .nth(0)
+            .unwrap()
+            .into_iter()
+            .nth(0)
+            .unwrap()
+        }
+    }
+
     #[test]
     fn test_unescape_string() {
         assert_eq!(
@@ -1421,17 +1442,7 @@ mod tokenizer_tests {
     #[test]
     fn test_escape() {
         assert_eq!(
-            Tokenizer::parse_raw_string(
-                &Rc::new(Header::default()),
-                Rc::new(r#""\n\t\r TEST \"\"'''""#.to_owned()),
-                String::new(),
-                None,
-                false,
-                false
-            )
-            .unwrap()
-            .programs[0][0]
-                .string,
+            Tokenizer::test_parse_token(r#""\n\t\r TEST \"\"'''""#).string,
             "\n\t\r TEST \"\"'''"
         )
     }
