@@ -115,7 +115,7 @@ impl Token {
         };
         let quote: char = match quote {
             Some(value) => value,
-            None => '"',
+            None => '?',
         };
         let token = Self {
             token_type,
@@ -562,9 +562,9 @@ impl Tokenizer {
 
     /// Unescape string and surround it by the chosen `forced_quote`
     fn unescape_str_force_quote(string: &str, mut forced_quote: char) -> String {
-        const QUOTES: [char; 2] = ['\'', '"'];
-        if !QUOTES.contains(&forced_quote) {
-            forced_quote = '"'
+        match forced_quote {
+            '\'' | '"' => {}
+            _ => forced_quote = '"',
         }
         let mut unescaped_string = forced_quote.to_string();
         for ch in string.chars().into_iter() {
@@ -1216,7 +1216,6 @@ impl Tokenizer {
                 return Ok(tokens);
             }
         }
-        // TODO: change .contains to if let
         let where_ = if is_nbt {
             "JSObject/NBT"
         } else {
