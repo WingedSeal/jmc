@@ -943,6 +943,22 @@ impl Tokenizer {
     /// Append the current token into self.keywords
     fn append_token(&mut self) -> Result<(), JMCError> {
         debug_assert!(!self.state.is_none());
+
+        // If it is vanilla macro, update the old string instead
+        if self.state == StateType::ParenRound
+            && !self.keywords.is_empty()
+            && self.keywords[self.keywords.len() - 1].string.ends_with("$")
+        {
+            let length = self.keywords.len();
+            self.keywords[length - 1]
+                .string
+                .push_str(self.token_str.as_str());
+            self.token_str = String::new();
+            self.token_pos = Pos::default();
+            self.state = StateType::None;
+            return Ok(());
+        }
+
         let new_token = Token::new(
             self.state.to_token_type(),
             self.token_pos.line,
