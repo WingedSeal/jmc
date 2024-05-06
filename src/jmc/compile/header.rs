@@ -21,7 +21,7 @@ impl MacroFactory {
 /// Struct containing all information shared in a compilation
 pub struct Header {
     /// Set of files that was already read (to prevent reading the same file multiple times
-    pub file_read: HashSet<String>,
+    pub file_read: HashSet<PathBuf>,
     /// Map of keyword to replace and tuple of (macro factory function and its amount of argument
     pub macros: HashMap<String, (Rc<MacroFactory>, usize)>,
     /// Map of text to replace and number to replace with, used in Hardcode.calc, EVAL, etc.
@@ -44,4 +44,18 @@ pub struct Header {
     pub finished_compiled_time: Option<SystemTime>,
     /// Whether hand pack.mcmeta to user
     pub nometa: bool,
+}
+
+impl Header {
+    /// Add path to file_read
+    #[inline]
+    pub fn add_file_read(&mut self, path: PathBuf) {
+        self.file_read.insert(path);
+    }
+
+    #[inline]
+    /// Check if header is already in file_read
+    pub fn is_header_already_exist(&self, path: &PathBuf) -> bool {
+        self.file_read.contains(path)
+    }
 }

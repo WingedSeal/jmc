@@ -155,7 +155,7 @@ fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> S
         .strip_prefix(&cwd)
         .expect("file_name should be relative to cwd due to recent starts_with check")
         .to_str()
-        .expect("file should have valid unicode")
+        .expect("path is read from a jmc file which must be a UTF-8 since it's a valid rust String")
         .to_owned();
     if let Some(line) = line {
         file_name.push_str(format!(":{line}").as_str());
@@ -189,10 +189,13 @@ impl JMCError {
             msg,
         }
     }
+
     pub fn header_file_not_found_error(path: &PathBuf) -> Self {
         let msg = format!(
             "Header file not found: {0}",
-            path.to_str().expect("path should have valid unicode")
+            path.to_str().expect(
+                "path is read from a jmc file which must be a UTF-8 since it's a valid rust String"
+            )
         );
         Self {
             error_type: HeaderFileNotFoundError,
