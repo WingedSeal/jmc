@@ -4,6 +4,7 @@ use super::{
 };
 
 pub type PackFormat = u32;
+pub type MinecraftVersion = (u16, u16, u16);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 /// Class containing information about pack_format
@@ -16,7 +17,17 @@ impl PackVersion {
         Self { pack_format }
     }
 
-    /// Raise MinecraftVersionTooLow when pack_format is too low
+    /// Convert from MinecraftVersion to PackVersion, fails if the version is so low that datapack didn't exist.
+    pub fn try_from(minecraft_version: MinecraftVersion) -> Result<Self, ()> {
+        for (minecraft_version_thresold, pack_format) in PACK_VERSIONS {
+            if minecraft_version > minecraft_version_thresold {
+                return Ok(Self { pack_format });
+            }
+        }
+        Err(())
+    }
+
+    /// Return MinecraftVersionTooLow when pack_format is too low
     ///
     /// * `pack_format` - required(minimum) pack_format
     /// * `token` - Token to raise error
@@ -43,3 +54,19 @@ impl PackVersion {
         Ok(())
     }
 }
+
+/// https://minecraft.wiki/w/Data_pack#Pack_format
+const PACK_VERSIONS: [(MinecraftVersion, PackFormat); 12] = [
+    ((1, 20, 5), 41),
+    ((1, 20, 3), 26),
+    ((1, 20, 2), 18),
+    ((1, 20, 0), 15),
+    ((1, 19, 4), 12),
+    ((1, 19, 0), 10),
+    ((1, 18, 2), 9),
+    ((1, 18, 0), 8),
+    ((1, 17, 0), 7),
+    ((1, 16, 2), 6),
+    ((1, 15, 0), 5),
+    ((1, 13, 0), 4),
+];
