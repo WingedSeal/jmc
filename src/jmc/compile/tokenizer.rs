@@ -186,14 +186,14 @@ struct Pos {
 }
 
 mod re {
-    use once_cell::sync::Lazy;
+    use once_cell::unsync::Lazy;
     use regex::Regex;
     pub const NEW_LINE: char = '\n';
 
     pub const BACKSLASH: char = '\\';
-    pub static WHITESPACE: Lazy<Regex> =
+    pub const WHITESPACE: Lazy<Regex> =
         Lazy::new(|| Regex::new(r"\s+").expect("the regex should not fail to compile"));
-    pub static KEYWORD: Lazy<Regex> = Lazy::new(|| {
+    pub const KEYWORD: Lazy<Regex> = Lazy::new(|| {
         Regex::new(r"[a-zA-Z0-9_\.\/\^\~]").expect("the regex should not fail to compile")
     });
     pub const SEMICOLON: char = ';';

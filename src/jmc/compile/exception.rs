@@ -174,6 +174,7 @@ pub enum JMCErrorType {
     HeaderSyntaxException,
     JMCSyntaxException,
     JMCSyntaxWarning,
+    MinecraftSyntaxWarning,
 }
 
 #[derive(Debug)]
@@ -294,6 +295,36 @@ impl JMCError {
         );
         Self {
             error_type: JMCSyntaxWarning,
+            msg,
+        }
+    }
+
+    /// Warning about JMC syntax but still get treated like an error
+    ///
+    /// * `is_length_include_col` - should defaults to `false`
+    /// * `is_display_col_length` - should defaults to `true`
+    /// * `is_entire_line` - should defaults to `false`
+    pub fn minecraft_syntax_warning(
+        message: String,
+        token: Option<&Token>,
+        tokenizer: &Tokenizer,
+        is_length_include_col: bool,
+        is_display_col_length: bool,
+        is_entire_line: bool,
+        suggestion: Option<String>,
+    ) -> Self {
+        let msg = create_error_msg(
+            message,
+            token,
+            tokenizer,
+            is_length_include_col,
+            is_display_col_length,
+            is_entire_line,
+            suggestion,
+            None,
+        );
+        Self {
+            error_type: MinecraftSyntaxWarning,
             msg,
         }
     }
