@@ -175,6 +175,7 @@ pub enum JMCErrorType {
     JMCSyntaxException,
     JMCSyntaxWarning,
     MinecraftSyntaxWarning,
+    MinecraftVersionTooLow,
 }
 
 #[derive(Debug)]
@@ -299,7 +300,7 @@ impl JMCError {
         }
     }
 
-    /// Warning about JMC syntax but still get treated like an error
+    /// Warning about minecraft syntax but still get treated like an error
     ///
     /// * `is_length_include_col` - should defaults to `false`
     /// * `is_display_col_length` - should defaults to `true`
@@ -325,6 +326,29 @@ impl JMCError {
         );
         Self {
             error_type: MinecraftSyntaxWarning,
+            msg,
+        }
+    }
+
+    /// pack_format is too low for the feature
+    pub fn minecraft_version_too_low(
+        pack_format: super::pack_version::PackFormat,
+        token: Option<&Token>,
+        tokenizer: &Tokenizer,
+        suggestion: Option<String>,
+    ) -> Self {
+        let msg = create_error_msg(
+            format!("Datapack's pack_format is too outdated for this feature. Expected pack_format of {pack_format} or higher"), 
+            token, 
+            tokenizer, 
+            false, 
+            true, 
+            false, 
+            suggestion, 
+            None,
+        );
+        Self {
+            error_type: MinecraftVersionTooLow,
             msg,
         }
     }

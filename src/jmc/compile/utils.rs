@@ -1,6 +1,6 @@
 use super::{
     exception::JMCError,
-    tokenizer::{self, Token, TokenType, Tokenizer},
+    tokenizer::{Token, Tokenizer},
 };
 
 #[inline]
