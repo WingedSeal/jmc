@@ -83,7 +83,7 @@ const TryOut = () => {
         pyodide.runPython(
             `
 try:
-    BUILT = JMCTestPack(namespace=NAMESPACE, output=".").set_jmc_file(JMC_FILE).set_header_file(HEADER_FILE).built
+    BUILT = JMCTestPack(namespace=NAMESPACE, output=".").set_pack_format(-1).set_jmc_file(JMC_FILE).set_header_file(HEADER_FILE).built
 except EXCEPTIONS as error:
     BUILT = {}
     ERROR = type(error).__name__ + "\\n" + str(error)`

@@ -35,17 +35,19 @@ const Import = () => {
                     This is the folder structure for the import.
                 </p>
                 <CodeBlock>
-                    ¦<Tab />
+                    │
+                    <br />
+                    │<Tab />
                     JMC.exe
                     <br />
-                    ¦<Tab />
+                    │<Tab />
                     jmc_config.json
                     <br />
-                    ¦<Tab />
+                    │<Tab />
                     main.jmc
                     <br />
-                    ¦ <br />
-                    +---folder_name
+                    │ <br />
+                    └───folder_name
                     <br />
                     <Tab />
                     <Tab />
