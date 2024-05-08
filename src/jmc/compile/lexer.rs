@@ -55,22 +55,22 @@ type ConditionToken = Token;
 type CodeBlockToken = Token;
 
 #[derive(Debug)]
-pub struct Lexer<'header> {
+pub struct Lexer<'header, 'config> {
     if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
     do_while_box: Option<CodeBlockToken>,
     /// Tokenizer for load function
     load_tokenizer: Option<Tokenizer<'header>>,
     /// Set of path that's already imported
     imports: HashSet<PathBuf>,
-    config: Rc<Configuration>,
+    config: &'config Configuration,
     datapack: Datapack,
     /// Header shared between compilation
     header: &'header Header,
     load_function: Vec<Vec<Token>>,
 }
 
-impl<'header> Lexer<'header> {
-    pub fn new(config: Rc<Configuration>, header: &'header Header) -> Self {
+impl<'header, 'config> Lexer<'header, 'config> {
+    pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
         let datapack = Datapack::new();
         Self {
             if_else_box: vec![],
@@ -86,7 +86,7 @@ impl<'header> Lexer<'header> {
 
     /// Parse a jmc file
     pub fn parse_file(
-        config: Rc<Configuration>,
+        config: &'config Configuration,
         file_path: &PathBuf,
         is_load: bool,
         header: &'header Header,
