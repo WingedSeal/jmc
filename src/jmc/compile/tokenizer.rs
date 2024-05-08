@@ -235,7 +235,7 @@ struct MacroFactoryInfo {
 }
 #[derive(Debug)]
 /// A class for converting string into tokens
-pub struct Tokenizer {
+pub struct Tokenizer<'header> {
     /// List of lines(list of tokens)
     pub programs: Vec<Vec<Token>>,
     /// Starts at 1
@@ -283,17 +283,17 @@ pub struct Tokenizer {
     /// JMC macro factory
     macro_factory_info: Option<MacroFactoryInfo>,
     /// Header shared between compilation
-    header: Rc<Header>,
+    header: &'header Header,
 }
 
-impl Clone for Tokenizer {
+impl<'header> Clone for Tokenizer<'header> {
     fn clone(&self) -> Self {
         let file_string = match &self.file_string {
             Some(file_string) => Some(Rc::clone(&file_string)),
             None => None,
         };
         Self::new(
-            Rc::clone(&self.header),
+            self.header,
             Rc::clone(&self.raw_string),
             self.file_path_str.clone(),
             file_string,
@@ -302,12 +302,12 @@ impl Clone for Tokenizer {
     }
 }
 
-impl Tokenizer {
+impl<'header> Tokenizer<'header> {
     /// * `raw_string` - Raw string read from file/given from another tokenizer
     /// * `file_path_str` - Entire string read from current file
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn new(
-        header: Rc<Header>,
+        header: &'header Header,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -351,7 +351,7 @@ impl Tokenizer {
     /// * `expect_semicolon` - Whether to expect a semicolon at the end, defailts to `true`
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn parse_raw_string(
-        header: Rc<Header>,
+        header: &'header Header,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -1427,10 +1427,10 @@ mod token_tests {
 mod tokenizer_tests {
     use super::*;
 
-    impl Tokenizer {
+    impl<'header> Tokenizer<'header> {
         pub fn test_parse_token(string: &str) -> Token {
-            Self::parse_raw_string(
-                Rc::new(Header::default()),
+            Tokenizer::parse_raw_string(
+                &Header::default(),
                 Rc::new(string.to_owned()),
                 String::new(),
                 None,
