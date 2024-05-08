@@ -8,7 +8,7 @@ pub type MinecraftVersion = (u16, u16, u16);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 /// Class containing information about pack_format
-struct PackVersion {
+pub struct PackVersion {
     pack_format: PackFormat,
 }
 
