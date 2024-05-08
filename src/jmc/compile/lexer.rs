@@ -55,7 +55,7 @@ type ConditionToken = Token;
 type CodeBlockToken = Token;
 
 #[derive(Debug)]
-pub struct Lexer<'header, 'config> {
+pub struct Lexer<'header, 'config, 'lexer> {
     if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
     do_while_box: Option<CodeBlockToken>,
     /// Tokenizer for load function
@@ -63,13 +63,13 @@ pub struct Lexer<'header, 'config> {
     /// Set of path that's already imported
     imports: HashSet<PathBuf>,
     config: &'config Configuration,
-    datapack: Datapack,
+    datapack: Datapack<'header, 'config, 'lexer>,
     /// Header shared between compilation
     header: &'header Header,
     load_function: Vec<Vec<Token>>,
 }
 
-impl<'header, 'config> Lexer<'header, 'config> {
+impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
         let datapack = Datapack::new();
         Self {
@@ -130,7 +130,7 @@ impl<'header, 'config> Lexer<'header, 'config> {
         )?;
 
         if is_load {
-            self.load_tokenizer = Some(tokenizer.clone());
+            self.load_tokenizer = Some(tokenizer.clone()); // FIXME: avoid cloning this
         }
 
         // FIXME: I have no idea what the `__update_load` is actually doing, so I'm omitting it for now.
@@ -164,9 +164,9 @@ impl<'header, 'config> Lexer<'header, 'config> {
                 }
                 _ => self.load_function.push(command),
             }
+            self.parse_current_load()?;
         }
-
-        todo!()
+        Ok(())
     }
 
     fn is_vanilla_func(&self, command: &Vec<Token>) -> bool {
@@ -175,6 +175,9 @@ impl<'header, 'config> Lexer<'header, 'config> {
 
     /// Parse current load function that's in self.load_function and clear it
     fn parse_current_load(&self) -> Result<(), JMCError> {
+        if self.load_function.is_empty() {
+            return Ok(());
+        }
         todo!()
     }
 
