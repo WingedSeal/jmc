@@ -226,9 +226,9 @@ fn get_paren_pair(left_paren: char) -> Result<char, ()> {
     }
 }
 #[derive(Debug)]
-struct MacroFactoryInfo {
+struct MacroFactoryInfo<'header> {
     pub name: String,
-    pub macro_factory: Rc<MacroFactory>,
+    pub macro_factory: &'header MacroFactory,
     /// Argument count
     pub arg_count: usize,
     pub pos: Pos,
@@ -281,7 +281,7 @@ pub struct Tokenizer<'header> {
     /// Whether to allow semicolon at the next char(For minecraft array `[I;int, ...]`)
     allow_semicolon: bool,
     /// JMC macro factory
-    macro_factory_info: Option<MacroFactoryInfo>,
+    macro_factory_info: Option<MacroFactoryInfo<'header>>,
     /// Header shared between compilation
     header: &'header Header,
 }
@@ -983,7 +983,7 @@ impl<'header> Tokenizer<'header> {
             } else {
                 self.macro_factory_info = Some(MacroFactoryInfo {
                     name: new_token.string,
-                    macro_factory: Rc::clone(macro_factory),
+                    macro_factory: macro_factory,
                     arg_count: *arg_count,
                     pos: token_pos,
                 })

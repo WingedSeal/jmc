@@ -23,7 +23,7 @@ pub struct Header {
     /// Set of files that was already read (to prevent reading the same file multiple times
     pub file_read: HashSet<PathBuf>,
     /// Map of keyword to replace and tuple of (macro factory function and its amount of argument
-    pub macros: HashMap<String, (Rc<MacroFactory>, usize)>,
+    pub macros: HashMap<String, (MacroFactory, usize)>,
     /// Map of text to replace and number to replace with, used in Hardcode.calc, EVAL, etc.
     pub number_macros: HashMap<String, String>,
     /// List of mcfunction comments to be placed at the end of files
