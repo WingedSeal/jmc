@@ -254,9 +254,9 @@ pub struct Tokenizer {
     list_of_keywords: Vec<Vec<Token>>,
 
     /// Raw string read from file/given from another tokenizer
-    raw_string: Rc<String>,
+    pub raw_string: Rc<String>,
     /// Entire string read from current file
-    file_string: Option<Rc<String>>,
+    pub file_string: Option<Rc<String>>,
     /// File path to current JMC function as string
     pub file_path_str: String,
 
@@ -293,7 +293,7 @@ impl Clone for Tokenizer {
             None => None,
         };
         Self::new(
-            &self.header,
+            Rc::clone(&self.header),
             Rc::clone(&self.raw_string),
             self.file_path_str.clone(),
             file_string,
@@ -307,7 +307,7 @@ impl Tokenizer {
     /// * `file_path_str` - Entire string read from current file
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn new(
-        header: &Rc<Header>,
+        header: Rc<Header>,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -334,7 +334,7 @@ impl Tokenizer {
             is_comment: false,
             allow_semicolon,
             macro_factory_info: None,
-            header: Rc::clone(header),
+            header: header,
         }
     }
 
@@ -347,10 +347,11 @@ impl Tokenizer {
 
     /// * `raw_string` - Raw string read from file/given from another tokenizer
     /// * `file_path_str` - Entire string read from current file
-    /// * `expect_semicolon` - Whether to expect a semicolon at the end
+    /// * `file_string` - Entire string read from current file, defaults to `None`
+    /// * `expect_semicolon` - Whether to expect a semicolon at the end, defailts to `true`
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn parse_raw_string(
-        header: &Rc<Header>,
+        header: Rc<Header>,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -1429,7 +1430,7 @@ mod tokenizer_tests {
     impl Tokenizer {
         pub fn test_parse_token(string: &str) -> Token {
             Self::parse_raw_string(
-                &Rc::new(Header::default()),
+                Rc::new(Header::default()),
                 Rc::new(string.to_owned()),
                 String::new(),
                 None,

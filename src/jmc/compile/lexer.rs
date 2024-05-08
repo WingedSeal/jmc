@@ -1,3 +1,5 @@
+use std::fs;
+use std::rc::Rc;
 use std::{collections::HashSet, path::PathBuf};
 
 use phf::{phf_map, phf_set};
@@ -5,7 +7,10 @@ use phf::{phf_map, phf_set};
 use super::super::terminal::configuration::Configuration;
 
 use super::datapack::Datapack;
+use super::exception::JMCError;
+use super::header::Header;
 use super::tokenizer::{Token, Tokenizer};
+use super::utils::is_decorator;
 
 /// List of all possible vanilla json file types
 static JSON_FILE_TYPES: phf::Set<&'static str> = phf_set! {
@@ -54,13 +59,162 @@ pub struct Lexer {
     if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
     do_while_box: Option<CodeBlockToken>,
     /// Tokenizer for load function
-    load_tokenizer: Tokenizer,
+    load_tokenizer: Option<Tokenizer>,
     /// Set of path that's already imported
     imports: HashSet<PathBuf>,
-    config: Configuration,
+    config: Rc<Configuration>,
     datapack: Datapack,
+    /// Header shared between compilation
+    header: Rc<Header>,
+    load_function: Vec<Vec<Token>>,
 }
 
 impl Lexer {
-    pub fn new(config: Configuration) {}
+    pub fn new(config: Rc<Configuration>, header: Rc<Header>) -> Self {
+        let datapack = Datapack::new();
+        Self {
+            if_else_box: vec![],
+            do_while_box: None,
+            load_tokenizer: None,
+            imports: HashSet::new(),
+            config,
+            datapack,
+            header,
+            load_function: vec![],
+        }
+    }
+
+    /// Parse a jmc file
+    pub fn parse_file(
+        config: Rc<Configuration>,
+        file_path: &PathBuf,
+        is_load: bool,
+        header: Rc<Header>,
+    ) -> Result<Self, JMCError> {
+        let mut lexer = Self::new(config, header);
+        if lexer.imports.contains(file_path) {
+            return Ok(lexer);
+        }
+        let file_path_str = file_path
+            .to_str()
+            .expect("file_path is read from jmc file which is valid UTF-8")
+            .to_owned();
+        let raw_string = match fs::read_to_string(file_path) {
+            Ok(raw_string) => raw_string,
+            Err(_) => {
+                return Err(JMCError::jmc_file_not_found(format!(
+                    "JMC file not found: {file_path_str}"
+                )))
+            }
+        };
+        lexer.parse(Rc::new(raw_string), file_path_str, is_load)?;
+        Ok(lexer)
+    }
+
+    /// Parse string read from JMC file
+    ///
+    /// * `is_load` - Whether the file is for load function, defaults to False
+    pub fn parse(
+        &mut self,
+        file_string: Rc<String>,
+        file_path_str: String,
+        is_load: bool,
+    ) -> Result<(), JMCError> {
+        let mut tokenizer = Tokenizer::parse_raw_string(
+            Rc::clone(&self.header),
+            file_string,
+            file_path_str,
+            None,
+            true,
+            false,
+        )?;
+
+        if is_load {
+            self.load_tokenizer = Some(tokenizer.clone());
+        }
+
+        // FIXME: I have no idea what the `__update_load` is actually doing, so I'm omitting it for now.
+        // python version line 162: self.__update_load(file_path_str, raw_string)
+        let programs = std::mem::take(&mut tokenizer.programs);
+        for command in programs {
+            match command[0].string.as_str() {
+                "function" if !self.is_vanilla_func(&command) => {
+                    self.parse_current_load()?;
+                    self.parse_func(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                }
+                "new" => {
+                    self.parse_current_load()?;
+                    self.parse_new(&tokenizer, &command)?;
+                }
+                "class" => {
+                    self.parse_current_load()?;
+                    self.parse_class(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                }
+                "import" => {
+                    self.parse_current_load()?;
+                    self.parse_import(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                }
+                decorator if is_decorator(decorator) => {
+                    self.parse_current_load()?;
+                    self.parse_decorated_func(
+                        &tokenizer,
+                        &command,
+                        tokenizer.file_path_str.as_str(),
+                    )?;
+                }
+                _ => self.load_function.push(command),
+            }
+        }
+
+        todo!()
+    }
+
+    fn is_vanilla_func(&self, command: &Vec<Token>) -> bool {
+        todo!()
+    }
+
+    /// Parse current load function that's in self.load_function and clear it
+    fn parse_current_load(&self) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_func(
+        &self,
+        tokenizer: &Tokenizer,
+        command: &Vec<Token>,
+        file_path_str: &str,
+    ) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_decorated_func(
+        &self,
+        tokenizer: &Tokenizer,
+        command: &Vec<Token>,
+        file_path_str: &str,
+    ) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_new(&self, tokenizer: &Tokenizer, command: &Vec<Token>) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_class(
+        &self,
+        tokenizer: &Tokenizer,
+        command: &Vec<Token>,
+        file_path_str: &str,
+    ) -> Result<(), JMCError> {
+        todo!()
+    }
+
+    fn parse_import(
+        &self,
+        tokenizer: &Tokenizer,
+        command: &Vec<Token>,
+        file_path_str: &str,
+    ) -> Result<(), JMCError> {
+        todo!()
+    }
 }

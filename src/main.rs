@@ -7,7 +7,7 @@ mod jmc;
 
 fn main() {
     match Tokenizer::parse_raw_string(
-        &Rc::new(Header::default()),
+        Rc::new(Header::default()),
         Rc::new(r#""\n\t\r TEST \"\"'''""#.to_owned()),
         String::new(),
         None,

@@ -176,6 +176,7 @@ pub enum JMCErrorType {
     JMCSyntaxWarning,
     MinecraftSyntaxWarning,
     MinecraftVersionTooLow,
+    JMCFileNotFound
 }
 
 #[derive(Debug)]
@@ -188,6 +189,13 @@ impl JMCError {
         let msg = format!("Unable to evaluate expression '{string}'");
         Self {
             error_type: EvaluationException,
+            msg,
+        }
+    }
+
+    pub fn jmc_file_not_found(msg: String) -> Self {
+        Self {
+            error_type: JMCFileNotFound,
             msg,
         }
     }
