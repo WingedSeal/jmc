@@ -88,7 +88,7 @@ pub struct Token {
     pub line: u32,
     pub col: u32,
     pub string: String,
-    pub _macro_length: u32,
+    pub _macro_length: u16,
     pub quote: char,
 }
 
@@ -104,10 +104,10 @@ impl Token {
         line: u32,
         col: u32,
         string: String,
-        _macro_length: Option<u32>,
+        _macro_length: Option<u16>,
         quote: Option<char>,
     ) -> Self {
-        let _macro_length: u32 = match _macro_length {
+        let _macro_length: u16 = match _macro_length {
             Some(value) => value,
             None => 0,
         };
