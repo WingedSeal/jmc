@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 use std::rc::Rc;
 use std::{collections::HashSet, path::PathBuf};
 
@@ -107,7 +108,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 )))
             }
         };
-        lexer.parse(Rc::new(raw_string), file_path_str, is_load)?;
+        lexer.parse(Rc::new(raw_string), file_path, file_path_str, is_load)?;
         Ok(lexer)
     }
 
@@ -117,6 +118,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     pub fn parse(
         &mut self,
         file_string: Rc<String>,
+        file_path: &PathBuf,
         file_path_str: String,
         is_load: bool,
     ) -> Result<(), JMCError> {
@@ -152,7 +154,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 }
                 "import" => {
                     self.parse_current_load()?;
-                    self.parse_import(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                    self.parse_import(&tokenizer, &command, file_path)?;
                 }
                 decorator if is_decorator(decorator) => {
                     self.parse_current_load()?;
@@ -250,8 +252,73 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         &self,
         tokenizer: &Tokenizer,
         command: &Vec<Token>,
-        file_path_str: &str,
+        file_path: &PathBuf,
     ) -> Result<(), JMCError> {
-        todo!()
+        if command.len() < 2 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected string after 'import'".to_owned(),
+                Some(&command[0]),
+                tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[1].token_type != TokenType::String {
+            return Err(JMCError::jmc_syntax_exception(
+                format!(
+                    "Expected string after 'import' (got {0})",
+                    command[1].token_type
+                ),
+                Some(&command[1]),
+                tokenizer,
+                false,
+                false,
+                false,
+                None,
+            ));
+        }
+        if command.len() > 2 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Unexpected token".to_owned(),
+                Some(&command[2]),
+                tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        if command[1].string.starts_with("/*") || command[1].string.ends_with("\\*") {
+            let path_string = command[1].string.as_str();
+            let path_string = &path_string[..path_string.len() - 2];
+            let directory = Path::new(path_string);
+            if !directory.is_dir() {
+                return Err(JMCError::jmc_file_not_found(format!(
+                    "Directory(folder) not found: {0}",
+                    directory.to_string_lossy()
+                )));
+            }
+            let pattern: PathBuf = [&directory.to_string_lossy(), "**", "*.jmc"]
+                .iter()
+                .collect();
+            let paths =
+                glob::glob(&pattern.to_string_lossy()).expect("glob should have valid pattern");
+            for path in paths {
+                let path = path.expect("glob should have valid pattern");
+                Self::parse_file(self.config, &path, false, self.header)?;
+            }
+            return Ok(());
+        }
+        let mut path = file_path.clone();
+        let mut path_string = command[1].string.clone();
+        if !path_string.ends_with(".jmc") {
+            path_string.push_str(".jmc");
+        }
+        path.push(path_string);
+        Self::parse_file(self.config, &path, false, self.header)?;
+        Ok(())
     }
 }
