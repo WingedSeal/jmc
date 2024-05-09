@@ -9,7 +9,7 @@ use super::super::terminal::configuration::Configuration;
 use super::datapack::Datapack;
 use super::exception::JMCError;
 use super::header::Header;
-use super::tokenizer::{Token, Tokenizer};
+use super::tokenizer::{Token, TokenType, Tokenizer};
 use super::utils::is_decorator;
 
 /// List of all possible vanilla json file types
@@ -169,8 +169,42 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         Ok(())
     }
 
+    /// Whether command is in vanilla function syntax
     fn is_vanilla_func(&self, command: &Vec<Token>) -> bool {
-        todo!()
+        let length = command.len();
+        if length == 2 && command[1].token_type == TokenType::String {
+            return true;
+        }
+        if !(length == 4
+            && command[1].token_type == TokenType::Keyword
+            && command[2].token_type == TokenType::Operator
+            && command[2].string == ":"
+            && command[3].token_type == TokenType::Keyword)
+        {
+            return false;
+        }
+        // Amount of tokens that is ignored
+        let mut ignored_count = 0;
+        // Clear paths
+        if length > 4 {
+            for token_pair in command[4..].windows(2).step_by(2) {
+                if token_pair[0].string == "/" {
+                    ignored_count += 1;
+                }
+            }
+        }
+        let length = length - ignored_count;
+        if length == 4 {
+            return true;
+        }
+        if length == 5 && command[command.len() - 1].token_type == TokenType::ParenCurly {
+            return true;
+        }
+        if length >= 5 && command[4].string == "with" {
+            // FIXME: make sure this works
+            return true;
+        }
+        return false;
     }
 
     /// Parse current load function that's in self.load_function and clear it
