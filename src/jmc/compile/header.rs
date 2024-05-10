@@ -1,7 +1,7 @@
 use std::{
+    cell::UnsafeCell,
     collections::{HashMap, HashSet},
     path::PathBuf,
-    rc::Rc,
     time::SystemTime,
 };
 
@@ -17,9 +17,24 @@ impl MacroFactory {
     }
 }
 
+/// Struct containing all information shared in a compilation
+#[derive(Debug, Default)]
+pub struct Header {
+    inner: UnsafeCell<HeaderInner>,
+}
+
+impl Header {
+    pub fn get(&self) -> &mut HeaderInner {
+        unsafe { &mut *self.inner.get() }
+    }
+    pub fn into_inner(self) -> HeaderInner {
+        self.inner.into_inner()
+    }
+}
+
 #[derive(Debug, Default)]
 /// Struct containing all information shared in a compilation
-pub struct Header {
+pub struct HeaderInner {
     /// Set of files that was already read (to prevent reading the same file multiple times
     pub file_read: HashSet<PathBuf>,
     /// Map of keyword to replace and tuple of (macro factory function and its amount of argument
@@ -46,7 +61,7 @@ pub struct Header {
     pub nometa: bool,
 }
 
-impl Header {
+impl HeaderInner {
     /// Add path to file_read
     #[inline]
     pub fn add_file_read(&mut self, path: PathBuf) {

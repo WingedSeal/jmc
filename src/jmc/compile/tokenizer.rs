@@ -970,10 +970,11 @@ impl<'header> Tokenizer<'header> {
         );
         let token_pos = std::mem::take(&mut self.token_pos);
         let is_macro = new_token.token_type == TokenType::Keyword
-            && self.header.macros.contains_key(&new_token.string);
+            && self.header.get().macros.contains_key(&new_token.string);
         if is_macro {
             let (macro_factory, arg_count) = self
                 .header
+                .get()
                 .macros
                 .get(&new_token.string)
                 .expect("should exist in macro due to contains_key check");
