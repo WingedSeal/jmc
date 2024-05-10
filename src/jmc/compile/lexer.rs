@@ -1,3 +1,4 @@
+use std::cell::UnsafeCell;
 use std::fs;
 use std::path::Path;
 use std::rc::Rc;
@@ -57,34 +58,32 @@ type CodeBlockToken = Token;
 
 #[derive(Debug)]
 pub struct Lexer<'header, 'config, 'lexer> {
-    if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
-    do_while_box: Option<CodeBlockToken>,
-    /// Tokenizer for load function
-    load_tokenizer: Option<Tokenizer<'header>>,
-    /// Set of path that's already imported
-    imports: HashSet<PathBuf>,
-    config: &'config Configuration,
-    datapack: Datapack<'header, 'config, 'lexer>,
-    /// Header shared between compilation
-    header: &'header Header,
-    load_function: Vec<Vec<Token>>,
+    inner: UnsafeCell<LexerInner<'header, 'config, 'lexer>>,
 }
 
 impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
+    pub fn get(&self) -> &mut LexerInner<'header, 'config, 'lexer> {
+        unsafe { &mut *self.inner.get() }
+    }
+    pub fn into_inner(self) -> LexerInner<'header, 'config, 'lexer> {
+        self.inner.into_inner()
+    }
+
     pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
         let datapack = Datapack::new();
         Self {
-            if_else_box: vec![],
-            do_while_box: None,
-            load_tokenizer: None,
-            imports: HashSet::new(),
-            config,
-            datapack,
-            header,
-            load_function: vec![],
+            inner: UnsafeCell::new(LexerInner {
+                if_else_box: vec![],
+                do_while_box: None,
+                load_tokenizer: None,
+                imports: HashSet::new(),
+                config,
+                datapack,
+                header,
+                load_function: vec![],
+            }),
         }
     }
-
     /// Parse a jmc file
     pub fn parse_file(
         config: &'config Configuration,
@@ -92,8 +91,8 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         is_load: bool,
         header: &'header Header,
     ) -> Result<Self, JMCError> {
-        let mut lexer = Self::new(config, header);
-        if lexer.imports.contains(file_path) {
+        let lexer = Self::new(config, header);
+        if lexer.get().imports.contains(file_path) {
             return Ok(lexer);
         }
         let file_path_str = file_path
@@ -108,10 +107,29 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 )))
             }
         };
-        lexer.parse(Rc::new(raw_string), file_path, file_path_str, is_load)?;
+        lexer
+            .get()
+            .parse(Rc::new(raw_string), file_path, file_path_str, is_load)?;
         Ok(lexer)
     }
+}
 
+#[derive(Debug)]
+struct LexerInner<'header, 'config, 'lexer> {
+    if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
+    do_while_box: Option<CodeBlockToken>,
+    /// Tokenizer for load function
+    load_tokenizer: Option<Tokenizer<'header>>,
+    /// Set of path that's already imported
+    imports: HashSet<PathBuf>,
+    config: &'config Configuration,
+    datapack: Datapack<'header, 'config, 'lexer>,
+    /// Header shared between compilation
+    header: &'header Header,
+    load_function: Vec<Vec<Token>>,
+}
+
+impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
     /// Parse string read from JMC file
     ///
     /// * `is_load` - Whether the file is for load function, defaults to False
@@ -308,7 +326,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 glob::glob(&pattern.to_string_lossy()).expect("glob should have valid pattern");
             for path in paths {
                 let path = path.expect("glob should have valid pattern");
-                Self::parse_file(self.config, &path, false, self.header)?;
+                Lexer::parse_file(self.config, &path, false, self.header)?;
             }
             return Ok(());
         }
@@ -318,7 +336,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             path_string.push_str(".jmc");
         }
         path.push(path_string);
-        Self::parse_file(self.config, &path, false, self.header)?;
+        Lexer::parse_file(self.config, &path, false, self.header)?;
         Ok(())
     }
 }
