@@ -12,6 +12,7 @@ mod jmc;
 fn main() {
     let config = Configuration {
         namespace: "namespace".to_owned(),
+        load_name: "__load__".to_owned(),
         pack_version: PackVersion::new(20),
     };
     let header = Header::default();

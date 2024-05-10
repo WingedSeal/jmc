@@ -70,7 +70,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     }
 
     pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
-        let datapack = Datapack::new(config.namespace.clone(), config.pack_version);
+        let datapack = Datapack::new(config);
         let inner = UnsafeCell::new(LexerInner {
             if_else_box: vec![],
             do_while_box: None,
@@ -234,10 +234,16 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
     }
 
     /// Parse current load function that's in self.load_function and clear it
-    fn parse_current_load(&self) -> Result<(), JMCError> {
+    fn parse_current_load(&mut self) -> Result<(), JMCError> {
         if self.load_function.is_empty() {
             return Ok(());
         }
+        let commands = self.parse_load_func_content()?;
+        self.datapack.functions[&self.datapack.config.load_name].extend(commands);
+        Ok(())
+    }
+
+    fn parse_load_func_content(&mut self) -> Result<Vec<String>, JMCError> {
         todo!()
     }
 

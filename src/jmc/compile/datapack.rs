@@ -3,6 +3,8 @@ use std::{
     rc::Rc,
 };
 
+use super::super::terminal::configuration::Configuration;
+
 use super::{
     datapack_data::Data,
     lexer::LexerInner,
@@ -23,6 +25,8 @@ type TokenInfo<'header> = (Token, Rc<Tokenizer<'header>>);
 pub struct Datapack<'header, 'config, 'lexer> {
     /// Datapack's version details
     pub version: PackVersion,
+
+    pub config: &'config Configuration,
     /// Set of integers going to be used in scoreboard
     pub ints: HashSet<i64>,
     /// Map of function name and a Function object
@@ -48,7 +52,7 @@ pub struct Datapack<'header, 'config, 'lexer> {
     /// Output list of token responsible for adding after_func
     pub after_func_token: HashMap<FunctionName, TokenInfo<'header>>,
     /// Datapack's namespace
-    pub namespace: String,
+    pub namespace: &'config str,
     /// Used JMC command that's for one time call only
     pub used_command: HashMap<String, String>,
     /// Lexer object
@@ -62,10 +66,11 @@ pub struct Datapack<'header, 'config, 'lexer> {
 }
 
 impl<'header, 'config, 'lexer> Datapack<'header, 'config, 'lexer> {
-    pub fn new(namespace: String, version: PackVersion) -> Self {
+    pub fn new(config: &'config Configuration) -> Self {
         Self {
-            version,
-            namespace,
+            version: config.pack_version,
+            namespace: &config.namespace,
+            config,
             // Lexer shall be a dangling reference, hence it must be initialzed
             // right after the initialization of Datapack. If you fail to do this,
             // you deserve whatever happens to you.
@@ -92,6 +97,12 @@ impl<'header, 'config, 'lexer> Datapack<'header, 'config, 'lexer> {
 
 #[derive(Debug)]
 pub struct McFunction {}
+
+impl McFunction {
+    pub fn extend(&self, command: Vec<String>) {
+        todo!()
+    }
+}
 
 #[derive(Debug)]
 pub struct PreMcFunction {}
