@@ -5,7 +5,7 @@ use std::{
 
 use super::{
     datapack_data::Data,
-    lexer::Lexer,
+    lexer::LexerInner,
     pack_version::PackVersion,
     tokenizer::{Token, Tokenizer},
 };
@@ -52,7 +52,7 @@ pub struct Datapack<'header, 'config, 'lexer> {
     /// Used JMC command that's for one time call only
     pub used_command: HashMap<String, String>,
     /// Lexer object
-    pub lexer: &'lexer Lexer<'header, 'config, 'lexer>,
+    pub lexer: Option<&'lexer mut LexerInner<'header, 'config, 'lexer>>,
     /// Extra information that can be shared across all JMC function
     pub data: Data,
     /// Map of mcfunction or json path and it's first defined token and tokenizer
@@ -62,8 +62,31 @@ pub struct Datapack<'header, 'config, 'lexer> {
 }
 
 impl<'header, 'config, 'lexer> Datapack<'header, 'config, 'lexer> {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(namespace: String, version: PackVersion) -> Self {
+        Self {
+            version,
+            namespace,
+            // Lexer shall be a dangling reference, hence it must be initialzed
+            // right after the initialization of Datapack. If you fail to do this,
+            // you deserve whatever happens to you.
+            lexer: None,
+            ints: HashSet::new(),
+            functions: HashMap::new(),
+            functions_called: HashMap::new(),
+            jsons: HashMap::new(),
+            private_functions: HashMap::new(),
+            scoreboards: HashMap::new(),
+            loads: vec![],
+            ticks: vec![],
+            after_loads: vec![],
+            after_ticks: vec![],
+            after_func: HashMap::new(),
+            after_func_token: HashMap::new(),
+            used_command: HashMap::new(),
+            data: Data::default(),
+            defined_file_pos: HashMap::new(),
+            lazy_func: HashMap::new(),
+        }
     }
 }
 

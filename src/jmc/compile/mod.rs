@@ -1,9 +1,10 @@
-mod datapack;
-mod datapack_data;
 pub mod exception;
 pub mod header;
-mod lexer;
-mod pack_version;
+pub mod lexer;
+pub mod pack_version;
 pub mod tokenizer;
+
+mod datapack;
+mod datapack_data;
 mod utils;
 mod vanilla_command;

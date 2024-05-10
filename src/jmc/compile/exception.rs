@@ -22,7 +22,7 @@ fn create_error_msg(
     let mut line: usize;
     match token {
         Some(token) => {
-            string = token.get_full_string();
+            string = token.get_original_string();
             length = token.length();
             col = token.col as usize;
             line = token.line as usize;
@@ -130,7 +130,7 @@ fn create_error_msg(
             " ".repeat(max_space - (display_line).to_string().len()),
             line_.replace('\t', "    "),
             " ".repeat(col + max_space + 3 * tab_count + 1),
-            "^".repeat(display_col),
+            "^".repeat(display_col - col),
             display_line + 1,
             if display_line < msgs.len() {
                 msgs[display_line].replace('\t', "    ")

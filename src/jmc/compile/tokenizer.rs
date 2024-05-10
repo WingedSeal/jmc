@@ -316,7 +316,7 @@ impl<'header> Tokenizer<'header> {
         Self {
             programs: vec![],
             line: 1,
-            col: 1,
+            col: 0,
             state: StateType::None,
             token_str: String::new(),
             token_pos: Pos::default(),
@@ -717,8 +717,9 @@ impl<'header> Tokenizer<'header> {
             paren::L_SQUARE,
             re::COMMA,
         ];
+
         if ch.is_whitespace() || NON_KEYWORD.contains(&ch) {
-            self.append_keywords()?;
+            self.append_token()?;
             return Ok(false);
         }
         let is_operator = OPERATORS.contains(&ch);
@@ -936,7 +937,7 @@ impl<'header> Tokenizer<'header> {
             ))
         } else {
             self.list_of_keywords
-                .push(std::mem::replace(&mut self.keywords, vec![]));
+                .push(std::mem::take(&mut self.keywords));
             Ok(())
         }
     }

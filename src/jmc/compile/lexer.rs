@@ -70,19 +70,24 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     }
 
     pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
-        let datapack = Datapack::new();
-        Self {
-            inner: UnsafeCell::new(LexerInner {
-                if_else_box: vec![],
-                do_while_box: None,
-                load_tokenizer: None,
-                imports: HashSet::new(),
-                config,
-                datapack,
-                header,
-                load_function: vec![],
-            }),
+        let datapack = Datapack::new(config.namespace.clone(), config.pack_version);
+        let inner = UnsafeCell::new(LexerInner {
+            if_else_box: vec![],
+            do_while_box: None,
+            load_tokenizer: None,
+            imports: HashSet::new(),
+            config,
+            datapack,
+            header,
+            load_function: vec![],
+        });
+        unsafe {
+            // datapack.lexer must be set right after the initialization
+            // of LexerInner, otherwise there'd be a dangling reference
+            (*inner.get()).datapack.lexer = Some(&mut *inner.get());
         }
+        let lexer = Self { inner };
+        lexer
     }
     /// Parse a jmc file
     pub fn parse_file(
@@ -95,27 +100,25 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         if lexer.get().imports.contains(file_path) {
             return Ok(lexer);
         }
-        let file_path_str = file_path
-            .to_str()
-            .expect("file_path is read from jmc file which is valid UTF-8")
-            .to_owned();
         let raw_string = match fs::read_to_string(file_path) {
             Ok(raw_string) => raw_string,
             Err(_) => {
+                let file_path_str = file_path
+                    .to_str()
+                    .expect("file_path is read from jmc file which is valid UTF-8")
+                    .to_owned();
                 return Err(JMCError::jmc_file_not_found(format!(
                     "JMC file not found: {file_path_str}"
-                )))
+                )));
             }
         };
-        lexer
-            .get()
-            .parse(Rc::new(raw_string), file_path, file_path_str, is_load)?;
+        lexer.get().parse(Rc::new(raw_string), file_path, is_load)?;
         Ok(lexer)
     }
 }
 
 #[derive(Debug)]
-struct LexerInner<'header, 'config, 'lexer> {
+pub struct LexerInner<'header, 'config, 'lexer> {
     if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
     do_while_box: Option<CodeBlockToken>,
     /// Tokenizer for load function
@@ -137,9 +140,12 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
         &mut self,
         file_string: Rc<String>,
         file_path: &PathBuf,
-        file_path_str: String,
         is_load: bool,
     ) -> Result<(), JMCError> {
+        let file_path_str = file_path
+            .to_str()
+            .expect("file_path is read from jmc file which is valid UTF-8")
+            .to_owned();
         let mut tokenizer = Tokenizer::parse_raw_string(
             self.header,
             file_string,
