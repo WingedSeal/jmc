@@ -508,6 +508,7 @@ x
                             f"function {self.lexer.datapack.format_func_path(func)}")
             del self.command[key_pos + 1]  # delete ()
 
+            append_commands(self.__commands, "with")
             return self.__handle_with(key_pos + 1, token)
 
         if self.command[key_pos + 1].string != "()":
