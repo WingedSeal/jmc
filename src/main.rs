@@ -15,8 +15,8 @@ fn main() {
         load_name: "__load__".to_owned(),
         pack_version: PackVersion::new(20),
     };
-    let header = Header::default();
-    let lexer = Lexer::new(&config, &header);
+    let mut header = Header::default();
+    let lexer = Lexer::new(&config, &mut header);
     println!(
         "{0}",
         lexer

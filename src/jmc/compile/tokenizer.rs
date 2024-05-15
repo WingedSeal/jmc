@@ -1,7 +1,7 @@
 use crate::jmc::compile::utils::is_decorator;
 
 use super::exception::JMCError;
-use super::header::{Header, MacroFactory};
+use super::header::{Header, MacroFactory, SharedMutableReference};
 use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Display};
 use std::iter::Peekable;
@@ -283,17 +283,17 @@ pub struct Tokenizer<'header> {
     /// JMC macro factory
     macro_factory_info: Option<MacroFactoryInfo<'header>>,
     /// Header shared between compilation
-    header: &'header Header,
+    header: &'header mut Header,
 }
 
-impl<'header> Clone for Tokenizer<'header> {
-    fn clone(&self) -> Self {
+impl<'header> Tokenizer<'header> {
+    fn clone(&mut self) -> Self {
         let file_string = match &self.file_string {
             Some(file_string) => Some(Rc::clone(&file_string)),
             None => None,
         };
         Self::new(
-            self.header,
+            self.header.share(),
             Rc::clone(&self.raw_string),
             self.file_path_str.clone(),
             file_string,
@@ -307,7 +307,7 @@ impl<'header> Tokenizer<'header> {
     /// * `file_path_str` - Entire string read from current file
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn new(
-        header: &'header Header,
+        header: &'header mut Header,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -351,7 +351,7 @@ impl<'header> Tokenizer<'header> {
     /// * `expect_semicolon` - Whether to expect a semicolon at the end, defailts to `true`
     /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
     pub fn parse_raw_string(
-        header: &'header Header,
+        header: &'header mut Header,
         raw_string: Rc<String>,
         file_path_str: String,
         file_string: Option<Rc<String>>,
@@ -971,11 +971,11 @@ impl<'header> Tokenizer<'header> {
         );
         let token_pos = std::mem::take(&mut self.token_pos);
         let is_macro = new_token.token_type == TokenType::Keyword
-            && self.header.get().macros.contains_key(&new_token.string);
+            && self.header.macros.contains_key(&new_token.string);
         if is_macro {
             let (macro_factory, arg_count) = self
                 .header
-                .get()
+                .share()
                 .macros
                 .get(&new_token.string)
                 .expect("should exist in macro due to contains_key check");
@@ -1432,7 +1432,7 @@ mod tokenizer_tests {
     impl<'header> Tokenizer<'header> {
         pub fn test_parse_token(string: &str) -> Token {
             Tokenizer::parse_raw_string(
-                &Header::default(),
+                &mut Header::default(),
                 Rc::new(string.to_owned()),
                 String::new(),
                 None,

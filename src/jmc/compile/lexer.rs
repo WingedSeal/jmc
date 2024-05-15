@@ -10,7 +10,7 @@ use super::super::terminal::configuration::Configuration;
 
 use super::datapack::Datapack;
 use super::exception::JMCError;
-use super::header::Header;
+use super::header::{Header, SharedMutableReference};
 use super::lexer_func_content::FuncContent;
 use super::tokenizer::{Token, TokenType, Tokenizer};
 use super::utils::is_decorator;
@@ -70,7 +70,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         self.inner.into_inner()
     }
 
-    pub fn new(config: &'config Configuration, header: &'header Header) -> Self {
+    pub fn new(config: &'config Configuration, header: &'header mut Header) -> Self {
         let datapack = Datapack::new(config);
         let inner = UnsafeCell::new(LexerInner {
             if_else_box: vec![],
@@ -99,7 +99,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         config: &'config Configuration,
         file_path: &PathBuf,
         is_load: bool,
-        header: &'header Header,
+        header: &'header mut Header,
     ) -> Result<Self, JMCError> {
         let lexer = Self::new(config, header);
         if lexer.get().imports.contains(file_path) {
@@ -133,7 +133,7 @@ pub struct LexerInner<'header, 'config, 'lexer> {
     config: &'config Configuration,
     datapack: Datapack<'header, 'config, 'lexer>,
     /// Header shared between compilation
-    header: &'header Header,
+    header: &'header mut Header,
     load_function: Vec<Vec<Token>>,
     lexer_outer: Option<*const Lexer<'header, 'config, 'lexer>>,
 }
@@ -152,8 +152,9 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
             .to_str()
             .expect("file_path is read from jmc file which is valid UTF-8")
             .to_owned();
+
         let mut tokenizer = Tokenizer::parse_raw_string(
-            self.header,
+            self.header.share(),
             file_string,
             file_path_str,
             None,
@@ -307,7 +308,7 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
     }
 
     fn parse_import(
-        &self,
+        &mut self,
         tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
         file_path: &PathBuf,
@@ -366,7 +367,7 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
                 glob::glob(&pattern.to_string_lossy()).expect("glob should have valid pattern");
             for path in paths {
                 let path = path.expect("glob should have valid pattern");
-                Lexer::parse_file(self.config, &path, false, self.header)?;
+                Lexer::parse_file(self.config, &path, false, self.header.share())?;
             }
             return Ok(());
         }
