@@ -7,7 +7,7 @@ use super::super::terminal::configuration::Configuration;
 
 use super::{
     datapack_data::Data,
-    lexer::LexerInner,
+    lexer::Lexer,
     pack_version::PackVersion,
     tokenizer::{Token, Tokenizer},
 };
@@ -56,7 +56,7 @@ pub struct Datapack<'header, 'config, 'lexer> {
     /// Used JMC command that's for one time call only
     pub used_command: HashMap<String, String>,
     /// Lexer object
-    pub lexer: Option<&'lexer mut LexerInner<'header, 'config, 'lexer>>,
+    pub lexer: Option<&'lexer mut Lexer<'header, 'config, 'lexer>>,
     /// Extra information that can be shared across all JMC function
     pub data: Data,
     /// Map of mcfunction or json path and it's first defined token and tokenizer

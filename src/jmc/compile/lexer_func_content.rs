@@ -2,13 +2,13 @@ use std::rc::Rc;
 
 use super::{
     exception::JMCError,
-    lexer::LexerInner,
+    lexer::Lexer,
     tokenizer::{Token, Tokenizer},
 };
 
 #[derive(Debug)]
 pub struct FuncContent<'header, 'config, 'lexer> {
-    lexer: &'lexer mut LexerInner<'header, 'config, 'lexer>,
+    lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
 }
 
 impl<'header, 'config, 'lexer> FuncContent<'header, 'config, 'lexer> {
@@ -16,7 +16,7 @@ impl<'header, 'config, 'lexer> FuncContent<'header, 'config, 'lexer> {
         tokenizer: Rc<Tokenizer>,
         programs: Vec<Vec<Token>>,
         is_load: bool,
-        lexer: &'lexer mut LexerInner<'header, 'config, 'lexer>,
+        lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
         prefix: String,
     ) -> Self {
         todo!()

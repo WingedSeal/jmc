@@ -101,3 +101,14 @@ pub fn convention_jmc_to_mc(
 
     Ok(string.replace(".", "/"))
 }
+
+/// Create a shared mutable reference. This is extremely UNSAFE.
+/// if the owner drops/destroys the value before every shared reference
+/// are done using them, it would practically create
+/// a dangling pointer problem.
+macro_rules! unsafe_share {
+    ($x: expr, $t: ty) => {
+        unsafe { &mut *($x as *mut $t) }
+    };
+}
+pub(crate) use unsafe_share;

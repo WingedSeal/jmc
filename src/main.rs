@@ -2,7 +2,6 @@
 use jmc::compile::header::Header;
 use jmc::compile::lexer::Lexer;
 use jmc::compile::pack_version::PackVersion;
-use jmc::compile::tokenizer::Tokenizer;
 use jmc::terminal::configuration::Configuration;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -16,11 +15,10 @@ fn main() {
         pack_version: PackVersion::new(20),
     };
     let mut header = Header::default();
-    let lexer = Lexer::new(&config, &mut header);
+    let mut lexer = Lexer::new(&config, &mut header);
     println!(
         "{0}",
         lexer
-            .get()
             .parse(
                 Rc::new(r#"say "Hello World";"#.to_owned()),
                 &PathBuf::from("~/Desktop/main.jmc"),

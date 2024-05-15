@@ -1,7 +1,7 @@
-use crate::jmc::compile::utils::is_decorator;
+use crate::jmc::compile::utils::{is_decorator, unsafe_share};
 
 use super::exception::JMCError;
-use super::header::{Header, MacroFactory, SharedMutableReference};
+use super::header::{Header, MacroFactory};
 use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Display};
 use std::iter::Peekable;
@@ -293,7 +293,7 @@ impl<'header> Tokenizer<'header> {
             None => None,
         };
         Self::new(
-            self.header.share(),
+            unsafe_share!(self.header, Header),
             Rc::clone(&self.raw_string),
             self.file_path_str.clone(),
             file_string,
@@ -973,9 +973,7 @@ impl<'header> Tokenizer<'header> {
         let is_macro = new_token.token_type == TokenType::Keyword
             && self.header.macros.contains_key(&new_token.string);
         if is_macro {
-            let (macro_factory, arg_count) = self
-                .header
-                .share()
+            let (macro_factory, arg_count) = unsafe_share!(self.header, Header)
                 .macros
                 .get(&new_token.string)
                 .expect("should exist in macro due to contains_key check");

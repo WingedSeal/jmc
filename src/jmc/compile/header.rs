@@ -16,14 +16,6 @@ impl MacroFactory {
     }
 }
 
-pub trait SharedMutableReference {
-    fn share(&mut self) -> &'static mut Self {
-        unsafe { &mut *(self as *mut Self) }
-    }
-}
-
-impl SharedMutableReference for Header {}
-
 #[derive(Debug, Default)]
 /// Struct containing all information shared in a compilation
 pub struct Header {
