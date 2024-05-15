@@ -11,6 +11,7 @@ use super::super::terminal::configuration::Configuration;
 use super::datapack::Datapack;
 use super::exception::JMCError;
 use super::header::Header;
+use super::lexer_func_content::FuncContent;
 use super::tokenizer::{Token, TokenType, Tokenizer};
 use super::utils::is_decorator;
 
@@ -80,6 +81,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             datapack,
             header,
             load_function: vec![],
+            lexer_outer: None,
         });
         unsafe {
             // datapack.lexer must be set right after the initialization
@@ -87,6 +89,9 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             (*inner.get()).datapack.lexer = Some(&mut *inner.get());
         }
         let lexer = Self { inner };
+        unsafe {
+            (*lexer.inner.get()).lexer_outer = Some(&lexer as *const Lexer);
+        }
         lexer
     }
     /// Parse a jmc file
@@ -122,7 +127,7 @@ pub struct LexerInner<'header, 'config, 'lexer> {
     if_else_box: Vec<(Option<ConditionToken>, Vec<CodeBlockToken>)>,
     do_while_box: Option<CodeBlockToken>,
     /// Tokenizer for load function
-    load_tokenizer: Option<Tokenizer<'header>>,
+    load_tokenizer: Option<Rc<Tokenizer<'header>>>,
     /// Set of path that's already imported
     imports: HashSet<PathBuf>,
     config: &'config Configuration,
@@ -130,6 +135,7 @@ pub struct LexerInner<'header, 'config, 'lexer> {
     /// Header shared between compilation
     header: &'header Header,
     load_function: Vec<Vec<Token>>,
+    lexer_outer: Option<*const Lexer<'header, 'config, 'lexer>>,
 }
 
 impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
@@ -154,39 +160,40 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
             true,
             false,
         )?;
+        let programs = std::mem::take(&mut tokenizer.programs);
 
+        let tokenizer = Rc::new(tokenizer);
         if is_load {
-            self.load_tokenizer = Some(tokenizer.clone()); // FIXME: avoid cloning this
+            self.load_tokenizer = Some(Rc::clone(&tokenizer)); // FIXME: avoid cloning this
         }
 
         // FIXME: I have no idea what the `__update_load` is actually doing, so I'm omitting it for now.
         // python version line 162: self.__update_load(file_path_str, raw_string)
-        let programs = std::mem::take(&mut tokenizer.programs);
         for command in programs {
+            let tokenizer = Rc::clone(&tokenizer);
             match command[0].string.as_str() {
                 "function" if !self.is_vanilla_func(&command) => {
                     self.parse_current_load()?;
-                    self.parse_func(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                    let file_path_str = tokenizer.file_path_str.clone();
+                    self.parse_func(tokenizer, &command, file_path_str)?;
                 }
                 "new" => {
                     self.parse_current_load()?;
-                    self.parse_new(&tokenizer, &command)?;
+                    self.parse_new(tokenizer, &command)?;
                 }
                 "class" => {
                     self.parse_current_load()?;
-                    self.parse_class(&tokenizer, &command, tokenizer.file_path_str.as_str())?;
+                    let file_path_str = tokenizer.file_path_str.clone();
+                    self.parse_class(tokenizer, &command, file_path_str)?;
                 }
                 "import" => {
                     self.parse_current_load()?;
-                    self.parse_import(&tokenizer, &command, file_path)?;
+                    self.parse_import(tokenizer, &command, file_path)?;
                 }
                 decorator if is_decorator(decorator) => {
                     self.parse_current_load()?;
-                    self.parse_decorated_func(
-                        &tokenizer,
-                        &command,
-                        tokenizer.file_path_str.as_str(),
-                    )?;
+                    let file_path_str = tokenizer.file_path_str.clone();
+                    self.parse_decorated_func(tokenizer, &command, file_path_str)?;
                 }
                 _ => self.load_function.push(command),
             }
@@ -243,44 +250,65 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
         Ok(())
     }
 
+    /// Parse content inside load function
     fn parse_load_func_content(&mut self) -> Result<Vec<String>, JMCError> {
-        todo!()
+        let programs: Vec<Vec<Token>> = std::mem::take(&mut self.load_function);
+        let load_tokenizer = Rc::clone(&self.load_tokenizer.as_ref().expect("load_tokenizer"));
+        self.parse_func_content(load_tokenizer, programs, "".to_owned(), true)
+    }
+
+    /// Parse a content inside function
+    ///
+    /// * `is_load` - Whether the function is a load function
+    /// * return - List of commands(string)
+    fn parse_func_content(
+        &mut self,
+        tokenizer: Rc<Tokenizer>,
+        programs: Vec<Vec<Token>>,
+        prefix: String,
+        is_load: bool,
+    ) -> Result<Vec<String>, JMCError> {
+        let lexer: &mut LexerInner;
+        unsafe {
+            lexer = &mut *(self as *mut LexerInner);
+        }
+        FuncContent::new(tokenizer, programs, is_load, lexer, prefix).parse()
     }
 
     fn parse_func(
         &self,
-        tokenizer: &Tokenizer,
+        tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: &str,
+        file_path_str: String,
     ) -> Result<(), JMCError> {
         todo!()
     }
 
     fn parse_decorated_func(
         &self,
-        tokenizer: &Tokenizer,
+        tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: &str,
+        file_path_str: String,
     ) -> Result<(), JMCError> {
         todo!()
     }
 
-    fn parse_new(&self, tokenizer: &Tokenizer, command: &Vec<Token>) -> Result<(), JMCError> {
+    fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: &Vec<Token>) -> Result<(), JMCError> {
         todo!()
     }
 
     fn parse_class(
         &self,
-        tokenizer: &Tokenizer,
+        tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: &str,
+        file_path_str: String,
     ) -> Result<(), JMCError> {
         todo!()
     }
 
     fn parse_import(
         &self,
-        tokenizer: &Tokenizer,
+        tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
         file_path: &PathBuf,
     ) -> Result<(), JMCError> {
@@ -288,7 +316,7 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
             return Err(JMCError::jmc_syntax_exception(
                 "Expected string after 'import'".to_owned(),
                 Some(&command[0]),
-                tokenizer,
+                &tokenizer,
                 true,
                 true,
                 false,
@@ -302,7 +330,7 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
                     command[1].token_type
                 ),
                 Some(&command[1]),
-                tokenizer,
+                &tokenizer,
                 false,
                 false,
                 false,
@@ -313,7 +341,7 @@ impl<'header, 'config, 'lexer> LexerInner<'header, 'config, 'lexer> {
             return Err(JMCError::jmc_syntax_exception(
                 "Unexpected token".to_owned(),
                 Some(&command[2]),
-                tokenizer,
+                &tokenizer,
                 false,
                 true,
                 false,

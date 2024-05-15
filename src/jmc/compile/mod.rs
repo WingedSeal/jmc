@@ -6,5 +6,6 @@ pub mod tokenizer;
 
 mod datapack;
 mod datapack_data;
+mod lexer_func_content;
 mod utils;
 mod vanilla_command;
