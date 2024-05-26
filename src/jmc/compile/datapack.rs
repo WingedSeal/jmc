@@ -3,7 +3,7 @@ use std::{
     rc::Rc,
 };
 
-use super::super::terminal::configuration::Configuration;
+use super::{super::terminal::configuration::Configuration, tokenizer};
 
 use super::{
     datapack_data::Data,
@@ -106,3 +106,20 @@ impl McFunction {
 
 #[derive(Debug)]
 pub struct PreMcFunction {}
+
+impl PreMcFunction {
+    pub fn new<'header, 'config, 'lexer>(
+        func_content: String,
+        jmc_file_path: String,
+        line: u32,
+        col: u32,
+        func_path: String,
+        self_token: Token,
+        params: Token,
+        lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
+        tokenizer: Rc<Tokenizer>,
+        prefix: String,
+    ) -> Self {
+        todo!()
+    }
+}

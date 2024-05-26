@@ -17,7 +17,7 @@ impl<'header, 'config, 'lexer> FuncContent<'header, 'config, 'lexer> {
         programs: Vec<Vec<Token>>,
         is_load: bool,
         lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
-        prefix: String,
+        prefix: &str,
     ) -> Self {
         todo!()
     }

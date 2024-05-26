@@ -145,7 +145,7 @@ fn create_error_msg(
     final_msg
 }
 
-fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> String {
+pub fn relative_file_name(file_name: &str, line: Option<u32>, col: Option<u32>) -> String {
     let file_path = PathBuf::from(file_name);
     let cwd = std::env::current_dir().expect("Current directory should not fail");
     if !file_path.starts_with(&cwd) {

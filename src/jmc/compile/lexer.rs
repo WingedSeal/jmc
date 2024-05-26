@@ -6,13 +6,12 @@ use std::{collections::HashSet, path::PathBuf};
 use phf::{phf_map, phf_set};
 
 use super::super::terminal::configuration::Configuration;
-
-use super::datapack::Datapack;
-use super::exception::JMCError;
+use super::datapack::{Datapack, PreMcFunction};
+use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
 use super::tokenizer::{Token, TokenType, Tokenizer};
-use super::utils::{is_decorator, unsafe_share};
+use super::utils::{convention_jmc_to_mc, is_decorator, unsafe_share};
 
 /// List of all possible vanilla json file types
 static JSON_FILE_TYPES: phf::Set<&'static str> = phf_set! {
@@ -213,7 +212,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 "function" if !self.is_vanilla_func(&command) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_func(tokenizer, &command, file_path_str)?;
+                    self.parse_func(tokenizer, &command, &file_path_str, "", true)?;
                 }
                 "new" => {
                     self.parse_current_load()?;
@@ -222,16 +221,16 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 "class" => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_class(tokenizer, &command, file_path_str)?;
+                    self.parse_class(tokenizer, &command, &file_path_str)?;
                 }
                 "import" => {
                     self.parse_current_load()?;
-                    self.parse_import(tokenizer, &command, file_path)?;
+                    self.parse_import(tokenizer, &command, &file_path)?;
                 }
                 decorator if is_decorator(decorator) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_decorated_func(tokenizer, &command, file_path_str)?;
+                    self.parse_decorated_func(tokenizer, &command, &file_path_str)?;
                 }
                 _ => self.load_function.push(command),
             }
@@ -292,7 +291,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     fn parse_load_func_content(&mut self) -> Result<Vec<String>, JMCError> {
         let programs: Vec<Vec<Token>> = std::mem::take(&mut self.load_function);
         let load_tokenizer = Rc::clone(&self.load_tokenizer.as_ref().expect("load_tokenizer"));
-        self.parse_func_content(load_tokenizer, programs, "".to_owned(), true)
+        self.parse_func_content(load_tokenizer, programs, "", true)
     }
 
     /// Parse a content inside function
@@ -303,27 +302,231 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         &mut self,
         tokenizer: Rc<Tokenizer>,
         programs: Vec<Vec<Token>>,
-        prefix: String,
+        prefix: &str,
         is_load: bool,
     ) -> Result<Vec<String>, JMCError> {
-        let lexer = unsafe { &mut *(self as *mut Self) };
+        let lexer = unsafe_share!(self, Self);
         FuncContent::new(tokenizer, programs, is_load, lexer, prefix).parse()
     }
 
+    /// Parse a function definition in form of list of token
+    ///
+    /// * `tokenizer` - Tokenizer
+    /// * `command` - List of token inside a function definition
+    /// * `file_path_str` - File path to current JMC function as string
+    /// * `prefix` - Prefix of function(for Class feature), defaults to `''`
+    /// * `is_save_to_datapack` - Whether to save the result function into the datapack, defaults to `true`
     fn parse_func(
         &self,
         tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: String,
+        file_path_str: &str,
+        prefix: &str,
+        is_save_to_datapack: bool,
     ) -> Result<(), JMCError> {
+        // let pre_function = self.parse_func_tokens();
         todo!()
+    }
+
+    /// Parse a function definition in form of list of token
+    ///
+    /// * `tokenizer` - Tokenizer
+    /// * `command` - List of token inside a function definition
+    /// * `file_path_str` - File path to current JMC function as string
+    /// * `prefix` Prefix of function(for Class feature), defaults to `''``
+    /// * `is_save_to_datapack` - Whether to save the result function into the datapack, defaults to `true`
+    /// * return - PreMcFunction
+    fn parse_func_tokens(
+        &mut self,
+        tokenizer: Rc<Tokenizer<'header>>,
+        command: Vec<Token>,
+        file_path_str: &str,
+        prefix: &str,
+        is_save_to_datapack: bool,
+    ) -> Result<PreMcFunction, JMCError> {
+        if command.len() < 2 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected keyword(function's name)".to_owned(),
+                Some(&command[0]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[1].token_type != TokenType::Keyword {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected keyword(function's name)".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command.len() < 3 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected round bracket, `()`".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if is_save_to_datapack && command[2].string != "()" {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected empty round bracket, `()`".to_owned(),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command.len() < 4 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected {".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[3].token_type != TokenType::ParenCurly {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected {".to_owned(),
+                Some(&command[3]),
+                &tokenizer,
+                false,
+                false,
+                false,
+                None,
+            ));
+        }
+        if command.len() > 4 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Unexpected token".to_owned(),
+                Some(&command[4]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        let func_path = prefix.to_owned()
+            + &convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", true)?;
+        if func_path.starts_with(&format!("{0}/", self.datapack.config.private_name)) {
+            // FIXME: find a better way to do this
+            return Err(JMCError::jmc_syntax_warning(
+                format!("Function({func_path}) may override private function of JMC"),
+                Some(&command[1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                Some(format!(
+                    "Please avoid starting function's path with {0}",
+                    self.datapack.config.private_name
+                )),
+            ));
+        }
+        let mut command_iter = command.into_iter();
+        command_iter.next();
+        let mcfunction_name_token = command_iter
+            .next()
+            .expect("command should have a length of 3 or more");
+        let params_token = command_iter
+            .next()
+            .expect("command should have a length of 3 or more");
+        let mcfunction_content_token = command_iter
+            .next()
+            .expect("command should have a length of 3 or more");
+
+        let func_content = &mcfunction_content_token.string;
+        let func_content = &func_content[1..func_content.len() - 1];
+        if func_path == self.datapack.config.load_name {
+            return Err(JMCError::jmc_syntax_warning(
+                "Load function is defined".to_owned(),
+                Some(&mcfunction_name_token),
+                &tokenizer,
+                false,
+                true,
+                false,
+                Some(format!(
+                    "JMC needs to reserve '{0}' name for load function.",
+                    self.datapack.config.load_name
+                )),
+            ));
+        }
+        if self.datapack.functions.contains_key(&func_path) {
+            let (old_function_token, old_function_tokenizer) =
+                &self.datapack.defined_file_pos[&func_path];
+            return Err(JMCError::jmc_syntax_warning(
+                format!("Duplicate function declaration({func_path})"),
+                Some(&mcfunction_name_token),
+                &tokenizer,
+                false,
+                true,
+                false,
+                Some(format!(
+                    "This function was already defined at line {0} col {1} in {2}",
+                    old_function_token.line,
+                    old_function_token.col,
+                    relative_file_name(
+                        &old_function_tokenizer.file_path_str,
+                        Some(old_function_token.line),
+                        Some(old_function_token.col)
+                    )
+                )),
+            ));
+        }
+        if func_path == self.datapack.config.private_name {
+            return Err(JMCError::jmc_syntax_warning(
+                "Private function is defined".to_owned(),
+                Some(&mcfunction_name_token),
+                &tokenizer,
+                false,
+                false,
+                false,
+                Some(format!(
+                    "JMC needs to reserve '{0}' name for private function.",
+                    self.datapack.config.private_name
+                )),
+            ));
+        }
+
+        self.datapack.defined_file_pos.insert(
+            func_path.clone(),
+            (mcfunction_name_token.clone(), Rc::clone(&tokenizer)),
+        );
+
+        return Ok(PreMcFunction::new(
+            func_content.to_owned(),
+            file_path_str.to_owned(),
+            mcfunction_content_token.line,
+            mcfunction_content_token.col,
+            func_path,
+            mcfunction_name_token,
+            params_token,
+            unsafe_share!(self, Self),
+            tokenizer,
+            prefix.to_owned(),
+        ));
     }
 
     fn parse_decorated_func(
         &self,
         tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: String,
+        file_path_str: &str,
     ) -> Result<(), JMCError> {
         todo!()
     }
@@ -336,7 +539,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         &self,
         tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
-        file_path_str: String,
+        file_path_str: &str,
     ) -> Result<(), JMCError> {
         todo!()
     }

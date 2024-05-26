@@ -5,4 +5,5 @@ pub struct Configuration {
     pub namespace: String,
     pub pack_version: PackVersion,
     pub load_name: String,
+    pub private_name: String,
 }

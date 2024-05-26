@@ -12,6 +12,7 @@ fn main() {
     let config = Configuration {
         namespace: "namespace".to_owned(),
         load_name: "__load__".to_owned(),
+        private_name: "__private__".to_owned(),
         pack_version: PackVersion::new(20),
     };
     let mut header = Header::default();
