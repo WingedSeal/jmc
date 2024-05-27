@@ -101,5 +101,6 @@ VANILLA_CONDITIONS = {
     "loaded",
     "predicate",
     "score",
+    "items",
 }
 """All vanilla arguments to `execute if`"""

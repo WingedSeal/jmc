@@ -1,4 +1,4 @@
-"""Module for parsing flow controls (if-e;se, while, etc.), called from command/flow_control.py"""
+"""Module for parsing flow controls (if-else, while, etc.), called from command/flow_control.py"""
 
 import re
 from typing import Literal
