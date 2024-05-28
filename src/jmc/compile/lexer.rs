@@ -350,7 +350,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         file_path_str: &str,
         prefix: &str,
         is_save_to_datapack: bool,
-    ) -> Result<PreMcFunction, JMCError> {
+    ) -> Result<PreMcFunction<'header, 'config, 'lexer>, JMCError> {
         if command.len() < 2 {
             return Err(JMCError::jmc_syntax_exception(
                 "Expected keyword(function's name)".to_owned(),
@@ -514,8 +514,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             func_path.clone(),
             (mcfunction_name_token.clone(), Rc::clone(&tokenizer)),
         );
-
-        return Ok(PreMcFunction::new(
+        Ok(PreMcFunction::new(
             func_content.to_owned(),
             file_path_str.to_owned(),
             mcfunction_content_token.line,
@@ -526,7 +525,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             unsafe_share!(self, Self),
             tokenizer,
             prefix.to_owned(),
-        ));
+        ))
     }
 
     fn parse_decorated_func(
