@@ -3,7 +3,10 @@ use std::{
     rc::Rc,
 };
 
-use super::{super::terminal::configuration::Configuration, tokenizer};
+use super::{
+    super::terminal::configuration::Configuration, exception::JMCError, header::Header, tokenizer,
+    utils::unsafe_share,
+};
 
 use super::{
     datapack_data::Data,
@@ -62,7 +65,7 @@ pub struct Datapack<'header, 'config, 'lexer> {
     /// Map of mcfunction or json path and it's first defined token and tokenizer
     pub defined_file_pos: HashMap<String, TokenInfo<'header>>,
     /// Map of lazy function name and PreFunction object
-    pub lazy_func: HashMap<FunctionName, PreMcFunction>,
+    pub lazy_func: HashMap<FunctionName, PreMcFunction<'header, 'config, 'lexer>>,
 }
 
 impl<'header, 'config, 'lexer> Datapack<'header, 'config, 'lexer> {
@@ -96,19 +99,30 @@ impl<'header, 'config, 'lexer> Datapack<'header, 'config, 'lexer> {
 }
 
 #[derive(Debug)]
-pub struct McFunction {}
+pub struct McFunction {
+    commands: Vec<String>,
+}
 
 impl McFunction {
+    pub fn from(commands: Vec<String>) -> Self {
+        Self { commands }
+    }
     pub fn extend(&self, command: Vec<String>) {
         todo!()
     }
 }
 
 #[derive(Debug)]
-pub struct PreMcFunction {}
+pub struct PreMcFunction<'header, 'config, 'lexer> {
+    func_content: String,
+    jmc_file_path: String,
+    tokenizer: Rc<Tokenizer<'header>>,
+    lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
+    prefix: String,
+}
 
-impl PreMcFunction {
-    pub fn new<'header, 'config, 'lexer>(
+impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
+    pub fn new(
         func_content: String,
         jmc_file_path: String,
         line: u32,
@@ -121,5 +135,27 @@ impl PreMcFunction {
         prefix: String,
     ) -> Self {
         todo!()
+    }
+
+    pub fn parse(mut self) -> Result<McFunction, JMCError> {
+        let file_string = match &self.tokenizer.file_string {
+            Some(fs) => Some(Rc::clone(fs)),
+            None => None,
+        };
+        let mut tokenizer = Tokenizer::parse_raw_string(
+            unsafe_share!(self.lexer.header, Header),
+            Rc::from(self.func_content),
+            self.jmc_file_path,
+            file_string,
+            true,
+            false,
+        )?;
+        let programs = std::mem::take(&mut tokenizer.programs);
+        Ok(McFunction::from(self.lexer.parse_func_content(
+            Rc::from(tokenizer),
+            programs,
+            &self.prefix,
+            false,
+        )?))
     }
 }

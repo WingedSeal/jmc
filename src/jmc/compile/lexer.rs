@@ -131,7 +131,7 @@ pub struct Lexer<'header, 'config, 'lexer> {
     config: &'config Configuration,
     datapack: Datapack<'header, 'config, 'lexer>,
     /// Header shared between compilation
-    header: &'header mut Header,
+    pub header: &'header mut Header,
     load_function: Vec<Vec<Token>>,
 }
 
@@ -212,7 +212,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 "function" if !self.is_vanilla_func(&command) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_func(tokenizer, &command, &file_path_str, "", true)?;
+                    self.parse_func(tokenizer, command, &file_path_str, "", true)?;
                 }
                 "new" => {
                     self.parse_current_load()?;
@@ -298,7 +298,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     ///
     /// * `is_load` - Whether the function is a load function
     /// * return - List of commands(string)
-    fn parse_func_content(
+    pub fn parse_func_content(
         &mut self,
         tokenizer: Rc<Tokenizer>,
         programs: Vec<Vec<Token>>,
@@ -317,14 +317,21 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     /// * `prefix` - Prefix of function(for Class feature), defaults to `''`
     /// * `is_save_to_datapack` - Whether to save the result function into the datapack, defaults to `true`
     fn parse_func(
-        &self,
-        tokenizer: Rc<Tokenizer>,
-        command: &Vec<Token>,
+        &mut self,
+        tokenizer: Rc<Tokenizer<'header>>,
+        command: Vec<Token>,
         file_path_str: &str,
         prefix: &str,
         is_save_to_datapack: bool,
     ) -> Result<(), JMCError> {
-        // let pre_function = self.parse_func_tokens();
+        let pre_function = self.parse_func_tokens(
+            tokenizer,
+            command,
+            file_path_str,
+            prefix,
+            is_save_to_datapack,
+        )?;
+        // let mcfunction =  pre_function.parse()
         todo!()
     }
 
