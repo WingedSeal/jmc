@@ -221,7 +221,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 "class" => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_class(tokenizer, &command, &file_path_str)?;
+                    self.parse_class(tokenizer, &command, &file_path_str, "")?;
                 }
                 "import" => {
                     self.parse_current_load()?;
@@ -543,7 +543,57 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         tokenizer: Rc<Tokenizer>,
         command: &Vec<Token>,
         file_path_str: &str,
+        prefix: &str,
     ) -> Result<(), JMCError> {
+        if command.len() < 2 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected class name after keyword 'class'".to_owned(),
+                Some(&command[0]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[1].token_type != TokenType::Keyword {
+            return Err(JMCError::jmc_syntax_exception(
+                format!(
+                    "Expected class name after keyword 'class' (got {0})",
+                    command[1].token_type
+                ),
+                Some(&command[1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        if command.len() < 3 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected '{' after class name".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        let class_path = format!(
+            "{prefix}{0}",
+            convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", true)?
+        );
+        let string = &command[2].string;
+        let class_content = &string[1..string.len() - 1];
+
+        todo!()
+    }
+
+    fn parse_class_content(&self, prefix: &str, class_content: &str, file_path_str: &str) {
         todo!()
     }
 
