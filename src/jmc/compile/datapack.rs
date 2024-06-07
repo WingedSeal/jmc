@@ -119,6 +119,7 @@ pub struct PreMcFunction<'header, 'config, 'lexer> {
     tokenizer: Rc<Tokenizer<'header>>,
     lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
     prefix: String,
+    pub func_path: String, // TODO
 }
 
 impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
@@ -137,7 +138,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         todo!()
     }
 
-    pub fn parse(mut self) -> Result<McFunction, JMCError> {
+    pub fn parse(self) -> Result<(McFunction, String), JMCError> {
         let file_string = match &self.tokenizer.file_string {
             Some(fs) => Some(Rc::clone(fs)),
             None => None,
@@ -151,11 +152,14 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
             false,
         )?;
         let programs = std::mem::take(&mut tokenizer.programs);
-        Ok(McFunction::from(self.lexer.parse_func_content(
-            Rc::from(tokenizer),
-            programs,
-            &self.prefix,
-            false,
-        )?))
+        Ok((
+            McFunction::from(self.lexer.parse_func_content(
+                Rc::from(tokenizer),
+                programs,
+                &self.prefix,
+                false,
+            )?),
+            self.func_path,
+        ))
     }
 }

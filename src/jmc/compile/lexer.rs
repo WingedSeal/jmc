@@ -6,7 +6,7 @@ use std::{collections::HashSet, path::PathBuf};
 use phf::{phf_map, phf_set};
 
 use super::super::terminal::configuration::Configuration;
-use super::datapack::{Datapack, PreMcFunction};
+use super::datapack::{Datapack, McFunction, PreMcFunction};
 use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
@@ -212,7 +212,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 "function" if !self.is_vanilla_func(&command) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_func(tokenizer, command, &file_path_str, "", true)?;
+                    self.parse_func(tokenizer, command, &file_path_str, "")?;
                 }
                 "new" => {
                     self.parse_current_load()?;
@@ -322,17 +322,14 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         command: Vec<Token>,
         file_path_str: &str,
         prefix: &str,
-        is_save_to_datapack: bool,
     ) -> Result<(), JMCError> {
-        let pre_function = self.parse_func_tokens(
-            tokenizer,
-            command,
-            file_path_str,
-            prefix,
-            is_save_to_datapack,
-        )?;
-        // let mcfunction =  pre_function.parse()
-        todo!()
+        let mut pre_function =
+            self.parse_func_tokens(tokenizer, command, file_path_str, prefix, true)?;
+        let (mcfunction, func_path) = pre_function.parse()?;
+        self.datapack
+            .functions
+            .insert(func_path.clone(), mcfunction);
+        Ok(())
     }
 
     /// Parse a function definition in form of list of token
