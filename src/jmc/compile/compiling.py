@@ -278,6 +278,11 @@ def build(
     output: dict[Path, str] = {}
     header = Header()
 
+    if datapack.version >= 48:
+        function_folder = "function"
+    else:
+        function_folder = "functions"
+
     logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
     Header().finished_compiled_time = perf_counter()
@@ -287,8 +292,9 @@ def build(
     overrides_folders = {
         output_folder / "data" / namespace for namespace in header.namespace_overrides
     }
+
     functions_tags_folder = output_folder / \
-        "data" / "minecraft" / "tags" / "functions"
+        "data" / "minecraft" / "tags" / function_folder
 
     if is_delete:
         statics = Header().statics
@@ -353,11 +359,12 @@ def build(
                 output_folder
                 / "data"
                 / namespace
-                / "functions"
+                / function_folder
                 / (func_path[len(namespace) + 1:] + ".mcfunction")
             )
         else:
-            path = namespace_folder / "functions" / (func_path + ".mcfunction")
+            path = namespace_folder / function_folder / \
+                (func_path + ".mcfunction")
         content = post_process(func.content)
 
         if _is_virtual:
