@@ -530,8 +530,9 @@ class Lexer:
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith(
                 "tags/"):
-            if json_type in JMC_JSON_FILE_TYPES and self.datapack.version < 48:
-                json_type = JMC_JSON_FILE_TYPES[json_type]
+            if json_type in JMC_JSON_FILE_TYPES:
+                if self.datapack.version < 48:
+                    json_type = JMC_JSON_FILE_TYPES[json_type]
             elif json_type.startswith("tag/"):
                 json_type = json_type.replace("tag/", "tags/")
             else:
