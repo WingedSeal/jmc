@@ -216,21 +216,21 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 }
                 "new" => {
                     self.parse_current_load()?;
-                    self.parse_new(tokenizer, &command)?;
+                    self.parse_new(tokenizer, command)?;
                 }
                 "class" => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_class(tokenizer, &command, &file_path_str, "")?;
+                    self.parse_class(tokenizer, command, &file_path_str, "")?;
                 }
                 "import" => {
                     self.parse_current_load()?;
-                    self.parse_import(tokenizer, &command, &file_path)?;
+                    self.parse_import(tokenizer, command, &file_path)?;
                 }
                 decorator if is_decorator(decorator) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_decorated_func(tokenizer, &command, &file_path_str)?;
+                    self.parse_decorated_func(tokenizer, command, &file_path_str)?;
                 }
                 _ => self.load_function.push(command),
             }
@@ -453,9 +453,11 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         let mcfunction_content_token = command_iter
             .next()
             .expect("command should have a length of 3 or more");
-
-        let func_content = &mcfunction_content_token.string;
-        let func_content = &func_content[1..func_content.len() - 1];
+        let line = mcfunction_content_token.line;
+        let col = mcfunction_content_token.col;
+        let mut func_content = mcfunction_content_token.string;
+        func_content.remove(0);
+        func_content.pop();
         if func_path == self.datapack.config.load_name {
             return Err(JMCError::jmc_syntax_warning(
                 "Load function is defined".to_owned(),
@@ -514,8 +516,8 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         Ok(PreMcFunction::new(
             func_content.to_owned(),
             file_path_str.to_owned(),
-            mcfunction_content_token.line,
-            mcfunction_content_token.col,
+            line,
+            col,
             func_path,
             mcfunction_name_token,
             params_token,
@@ -528,20 +530,20 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     fn parse_decorated_func(
         &self,
         tokenizer: Rc<Tokenizer>,
-        command: &Vec<Token>,
+        command: Vec<Token>,
         file_path_str: &str,
     ) -> Result<(), JMCError> {
         todo!()
     }
 
-    fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: &Vec<Token>) -> Result<(), JMCError> {
+    fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: Vec<Token>) -> Result<(), JMCError> {
         todo!()
     }
 
     fn parse_class(
-        &self,
+        &mut self,
         tokenizer: Rc<Tokenizer>,
-        command: &Vec<Token>,
+        command: Vec<Token>,
         file_path_str: &str,
         prefix: &str,
     ) -> Result<(), JMCError> {
@@ -587,22 +589,28 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             "{prefix}{0}/",
             convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", true)?
         );
-        let mut class_content = command[2].string;
+        let line = command[2].line;
+        let col = command[2].col;
+        let mut class_content = command
+            .into_iter()
+            .nth(2)
+            .expect("command should have length of 3 or more")
+            .string;
         class_content.remove(0);
         class_content.pop();
         self.parse_class_content(
             &class_path,
             Rc::new(class_content),
             file_path_str,
-            command[2].line,
-            command[2].col,
+            line,
+            col,
             tokenizer.file_string.clone(),
         )?;
         return Ok(());
     }
 
     fn parse_class_content(
-        &self,
+        &mut self,
         prefix: &str,
         class_content: Rc<String>,
         file_path_str: &str,
@@ -611,7 +619,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         file_string: Option<Rc<String>>,
     ) -> Result<(), JMCError> {
         let tokenizer = Tokenizer::parse_raw_string_col_line(
-            self.header,
+            unsafe_share!(self.header, Header),
             class_content,
             file_path_str.to_owned(),
             file_string,
@@ -626,7 +634,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     fn parse_import(
         &mut self,
         tokenizer: Rc<Tokenizer>,
-        command: &Vec<Token>,
+        command: Vec<Token>,
         file_path: &PathBuf,
     ) -> Result<(), JMCError> {
         if command.len() < 2 {

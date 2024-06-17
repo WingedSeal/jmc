@@ -298,6 +298,8 @@ impl<'header> Tokenizer<'header> {
             self.file_path_str.clone(),
             file_string,
             self.allow_semicolon,
+            self.line,
+            self.col,
         )
     }
 }
