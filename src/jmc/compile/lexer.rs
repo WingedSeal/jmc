@@ -10,7 +10,7 @@ use super::datapack::{Datapack, McFunction, PreMcFunction};
 use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
-use super::tokenizer::{Token, TokenType, Tokenizer};
+use super::tokenizer::{self, Token, TokenType, Tokenizer};
 use super::utils::{convention_jmc_to_mc, is_decorator, unsafe_share};
 
 /// List of all possible vanilla json file types
@@ -584,16 +584,42 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         }
 
         let class_path = format!(
-            "{prefix}{0}",
+            "{prefix}{0}/",
             convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", true)?
         );
-        let string = &command[2].string;
-        let class_content = &string[1..string.len() - 1];
-
-        todo!()
+        let mut class_content = command[2].string;
+        class_content.remove(0);
+        class_content.pop();
+        self.parse_class_content(
+            &class_path,
+            Rc::new(class_content),
+            file_path_str,
+            command[2].line,
+            command[2].col,
+            tokenizer.file_string.clone(),
+        )?;
+        return Ok(());
     }
 
-    fn parse_class_content(&self, prefix: &str, class_content: &str, file_path_str: &str) {
+    fn parse_class_content(
+        &self,
+        prefix: &str,
+        class_content: Rc<String>,
+        file_path_str: &str,
+        line: u32,
+        col: u32,
+        file_string: Option<Rc<String>>,
+    ) -> Result<(), JMCError> {
+        let tokenizer = Tokenizer::parse_raw_string_col_line(
+            self.header,
+            class_content,
+            file_path_str.to_owned(),
+            file_string,
+            true,
+            false,
+            line,
+            col,
+        );
         todo!()
     }
 

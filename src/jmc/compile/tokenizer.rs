@@ -312,11 +312,13 @@ impl<'header> Tokenizer<'header> {
         file_path_str: String,
         file_string: Option<Rc<String>>,
         allow_semicolon: bool,
+        line: u32,
+        col: u32,
     ) -> Self {
         Self {
             programs: vec![],
-            line: 1,
-            col: 0,
+            line: line,
+            col: col,
             state: StateType::None,
             token_str: String::new(),
             token_pos: Pos::default(),
@@ -364,6 +366,37 @@ impl<'header> Tokenizer<'header> {
             file_path_str,
             file_string,
             allow_semicolon,
+            1,
+            0,
+        );
+        tokenizer.programs =
+            tokenizer.parse(&Rc::clone(&tokenizer.raw_string), expect_semicolon, false)?;
+        Ok(tokenizer)
+    }
+
+    /// * `raw_string` - Raw string read from file/given from another tokenizer
+    /// * `file_path_str` - Entire string read from current file
+    /// * `file_string` - Entire string read from current file, defaults to `None`
+    /// * `expect_semicolon` - Whether to expect a semicolon at the end, defailts to `true`
+    /// * `allow_semicolon` - Whether to allow last missing last semicolon, defaults to `false`
+    pub fn parse_raw_string_col_line(
+        header: &'header mut Header,
+        raw_string: Rc<String>,
+        file_path_str: String,
+        file_string: Option<Rc<String>>,
+        expect_semicolon: bool,
+        allow_semicolon: bool,
+        line: u32,
+        col: u32,
+    ) -> Result<Self, JMCError> {
+        let mut tokenizer = Self::new(
+            header,
+            raw_string,
+            file_path_str,
+            file_string,
+            allow_semicolon,
+            line,
+            col,
         );
         tokenizer.programs =
             tokenizer.parse(&Rc::clone(&tokenizer.raw_string), expect_semicolon, false)?;
