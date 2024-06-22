@@ -7,6 +7,7 @@ use phf::{phf_map, phf_set};
 
 use super::super::terminal::configuration::Configuration;
 use super::datapack::{Datapack, PreMcFunction};
+use super::decorator_parse::DECORATORS;
 use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
@@ -533,7 +534,36 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         command: Vec<Token>,
         file_path_str: &str,
     ) -> Result<(), JMCError> {
-        #![allow(unused_variables)]
+        let decorator_name = &command[0].string[1..];
+        let decorator = DECORATORS.get(decorator_name);
+        if decorator.is_none() {
+            return Err(JMCError::jmc_syntax_exception(
+                format!("Unrecognized decorator '{decorator_name}'"),
+                Some(&command[0]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                if decorator_name == "import" {
+                    Some("Did you mean to use 'import' (without @) instead?".to_owned())
+                } else {
+                    None
+                },
+            ));
+        }
+        let decorator = decorator.expect("decorator can't be None due to guard clause");
+        if command.len() < 5 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Function decorator syntax usage is '@decorator_name function name() {}' or '@decorator_name() function name() {}'".to_owned(),
+                Some(&command[0]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None
+            ));
+        }
+
         todo!()
     }
 
