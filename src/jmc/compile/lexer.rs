@@ -5,6 +5,8 @@ use std::{collections::HashSet, path::PathBuf};
 
 use phf::{phf_map, phf_set};
 
+use crate::jmc::compile::decorator_parse::ModifyMcFunction;
+
 use super::super::terminal::configuration::Configuration;
 use super::datapack::{Datapack, PreMcFunction};
 use super::decorator_parse::DECORATORS;
@@ -231,7 +233,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 decorator if is_decorator(decorator) => {
                     self.parse_current_load()?;
                     let file_path_str = tokenizer.file_path_str.clone();
-                    self.parse_decorated_func(tokenizer, command, &file_path_str)?;
+                    self.parse_decorated_func(tokenizer, command, &file_path_str, "")?;
                 }
                 _ => self.load_function.push(command),
             }
@@ -529,10 +531,11 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
     }
 
     fn parse_decorated_func(
-        &self,
-        tokenizer: Rc<Tokenizer>,
+        &mut self,
+        tokenizer: Rc<Tokenizer<'header>>,
         command: Vec<Token>,
         file_path_str: &str,
+        prefix: &str,
     ) -> Result<(), JMCError> {
         let decorator_name = &command[0].string[1..];
         let decorator = DECORATORS.get(decorator_name);
@@ -563,8 +566,41 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 None
             ));
         }
-
-        todo!()
+        let token_type = command[1].token_type;
+        let mut function_commands = command;
+        let args: Option<Token>;
+        if token_type == TokenType::ParenRound {
+            args = function_commands.drain(..1).nth(1);
+        } else {
+            function_commands.remove(0);
+            args = None;
+        }
+        let pre_mcfunction = self.parse_func_tokens(
+            Rc::clone(&tokenizer),
+            function_commands,
+            file_path_str,
+            prefix,
+            decorator.is_save_to_datapack(),
+        )?;
+        match decorator.modify_mcfunction {
+            ModifyMcFunction::Save(modify) => {
+                modify(
+                    decorator.call(&tokenizer, prefix, args),
+                    &pre_mcfunction,
+                    &self.datapack,
+                );
+                let (_mcfunction, func_path) = pre_mcfunction.parse()?;
+                self.datapack.functions.insert(func_path, _mcfunction);
+            }
+            ModifyMcFunction::NoSave(modify) => {
+                modify(
+                    decorator.call(&tokenizer, prefix, args),
+                    pre_mcfunction,
+                    &self.datapack,
+                );
+            }
+        }
+        Ok(())
     }
 
     fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: Vec<Token>) -> Result<(), JMCError> {
@@ -680,7 +716,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                     ))
                 }
                 decorator if is_decorator(decorator) => {
-                    self.parse_decorated_func(tokenizer, command, file_path_str)?
+                    self.parse_decorated_func(tokenizer, command, file_path_str, "")?
                 }
                 string => {
                     return Err(JMCError::jmc_syntax_exception(

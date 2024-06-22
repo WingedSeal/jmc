@@ -140,6 +140,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         todo!()
     }
 
+    /// Returns MCFunction and function path
     pub fn parse(self) -> Result<(McFunction, String), JMCError> {
         let file_string = match &self.tokenizer.file_string {
             Some(fs) => Some(Rc::clone(fs)),
@@ -147,7 +148,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         };
         let mut tokenizer = Tokenizer::parse_raw_string(
             unsafe_share!(self.lexer.header, Header),
-            Rc::from(self.func_content),
+            Rc::new(self.func_content),
             self.jmc_file_path,
             file_string,
             true,
@@ -156,7 +157,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         let programs = std::mem::take(&mut tokenizer.programs);
         Ok((
             McFunction::from(self.lexer.parse_func_content(
-                Rc::from(tokenizer),
+                Rc::new(tokenizer),
                 programs,
                 &self.prefix,
                 false,
