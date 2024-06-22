@@ -123,6 +123,7 @@ pub struct PreMcFunction<'header, 'config, 'lexer> {
     pub func_path: String, // TODO
 }
 
+type McFunctionPath = String;
 impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
     pub fn new(
         func_content: String,
@@ -140,8 +141,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         todo!()
     }
 
-    /// Returns MCFunction and function path
-    pub fn parse(self) -> Result<(McFunction, String), JMCError> {
+    pub fn parse(self) -> Result<(McFunction, McFunctionPath), JMCError> {
         let file_string = match &self.tokenizer.file_string {
             Some(fs) => Some(Rc::clone(fs)),
             None => None,
