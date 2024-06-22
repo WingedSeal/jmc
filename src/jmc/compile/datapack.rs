@@ -4,7 +4,7 @@ use std::{
 };
 
 use super::{
-    super::terminal::configuration::Configuration, exception::JMCError, header::Header, tokenizer,
+    super::terminal::configuration::Configuration, exception::JMCError, header::Header,
     utils::unsafe_share,
 };
 
@@ -108,6 +108,7 @@ impl McFunction {
         Self { commands }
     }
     pub fn extend(&self, command: Vec<String>) {
+        #![allow(unused_variables)]
         todo!()
     }
 }
@@ -135,6 +136,7 @@ impl<'header, 'config, 'lexer> PreMcFunction<'header, 'config, 'lexer> {
         tokenizer: Rc<Tokenizer>,
         prefix: String,
     ) -> Self {
+        #![allow(unused_variables)]
         todo!()
     }
 

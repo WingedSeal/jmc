@@ -6,11 +6,11 @@ use std::{collections::HashSet, path::PathBuf};
 use phf::{phf_map, phf_set};
 
 use super::super::terminal::configuration::Configuration;
-use super::datapack::{Datapack, McFunction, PreMcFunction};
+use super::datapack::{Datapack, PreMcFunction};
 use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
-use super::tokenizer::{self, Token, TokenType, Tokenizer};
+use super::tokenizer::{Token, TokenType, Tokenizer};
 use super::utils::{convention_jmc_to_mc, is_decorator, unsafe_share};
 
 /// List of all possible vanilla json file types
@@ -323,7 +323,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         file_path_str: &str,
         prefix: &str,
     ) -> Result<(), JMCError> {
-        let mut pre_function =
+        let pre_function =
             self.parse_func_tokens(tokenizer, command, file_path_str, prefix, true)?;
         let (mcfunction, func_path) = pre_function.parse()?;
         self.datapack
@@ -533,10 +533,12 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         command: Vec<Token>,
         file_path_str: &str,
     ) -> Result<(), JMCError> {
+        #![allow(unused_variables)]
         todo!()
     }
 
     fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: Vec<Token>) -> Result<(), JMCError> {
+        #![allow(unused_variables)]
         todo!()
     }
 
@@ -618,7 +620,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         col: u32,
         file_string: Option<Rc<String>>,
     ) -> Result<(), JMCError> {
-        let tokenizer = Tokenizer::parse_raw_string_col_line(
+        let mut tokenizer = Tokenizer::parse_raw_string_col_line(
             unsafe_share!(self.header, Header),
             class_content,
             file_path_str.to_owned(),
@@ -627,8 +629,43 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             false,
             line,
             col,
-        );
-        todo!()
+        )?;
+        let programs = std::mem::take(&mut tokenizer.programs);
+        let tokenizer = Rc::new(tokenizer);
+        for command in programs {
+            let tokenizer = Rc::clone(&tokenizer);
+            match command[0].string.as_str() {
+                "function" => self.parse_func(tokenizer, command, file_path_str, prefix)?,
+                "new" => self.parse_new(tokenizer, command)?,
+                "class" => self.parse_class(tokenizer, command, file_path_str, prefix)?,
+                "import" => {
+                    return Err(JMCError::jmc_syntax_exception(
+                        "Importing is not supported in class".to_owned(),
+                        Some(&command[0]),
+                        &tokenizer,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ))
+                }
+                decorator if is_decorator(decorator) => {
+                    self.parse_decorated_func(tokenizer, command, file_path_str)?
+                }
+                string => {
+                    return Err(JMCError::jmc_syntax_exception(
+                        format!("Expected 'function' or 'new' or 'class' (got {})", string),
+                        Some(&command[0]),
+                        &tokenizer,
+                        false,
+                        true,
+                        false,
+                        None,
+                    ))
+                }
+            }
+        }
+        Ok(())
     }
 
     fn parse_import(

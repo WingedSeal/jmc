@@ -19,6 +19,7 @@ impl<'header, 'config, 'lexer> FuncContent<'header, 'config, 'lexer> {
         lexer: &'lexer mut Lexer<'header, 'config, 'lexer>,
         prefix: &str,
     ) -> Self {
+        #![allow(unused_variables)]
         todo!()
     }
 

@@ -12,6 +12,7 @@ pub struct MacroFactory {}
 
 impl MacroFactory {
     pub fn call(&self, tokens: &[Token], line: u32, col: u32) -> Vec<Token> {
+        #![allow(unused_variables)]
         todo!()
     }
 }
