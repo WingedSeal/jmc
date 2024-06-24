@@ -644,6 +644,7 @@ x
 
         __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
         if __with_nbt_type is None:
+            self.__commands.pop()
             return CONTINUE_LINE
         nbt_type_str, target, path = extract_nbt(
             self.command, self.tokenizer, self.lexer.datapack, __with_nbt_type, start_index=key_pos + 1)
