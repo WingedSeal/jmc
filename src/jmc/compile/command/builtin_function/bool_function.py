@@ -14,7 +14,7 @@ def is_uuid(source: str) -> bool:
     Tells whether source of the data is minecraft UUID or not
 
     :param source: Source of the data
-    :return: True | Whether the source is in a minecraft UUID format is much better
+    :return: Whether the source is in a minecraft UUID format
     """
     parts = source.split('-')
     return len(parts) == 5 and all(len(part) in (
