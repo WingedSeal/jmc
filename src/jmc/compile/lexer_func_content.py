@@ -206,8 +206,14 @@ x
         if self.__commands:
             if self.expanded_commands is not None:
                 for expanded_command in self.expanded_commands:
-                    self.command_strings.append(
-                        " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
+                    if expanded_command.startswith("execute"):
+                        expanded_command = expanded_command[len(
+                            "execute") + 1:]
+                        self.command_strings.append(
+                            " ".join(self.__commands[:-1]) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
+                    else:
+                        self.command_strings.append(
+                            " ".join(self.__commands) + " " + (expanded_command if "\n" not in expanded_command else self.lexer.datapack.add_private_function('expand', expanded_command)))
             else:
                 self.command_strings.append(" ".join(self.__commands))
             self.__commands = []
