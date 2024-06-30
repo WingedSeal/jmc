@@ -322,6 +322,8 @@ class DataPack:
         :param name: Name of the private json
         :param json: Dictionary object
         """
+        if self.version >= 48 and json_type.endswith("s"):
+            json_type = json_type[:-1]
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 
     def add_json(self, json_type: str, name: str,
