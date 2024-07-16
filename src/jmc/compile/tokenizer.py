@@ -734,7 +734,8 @@ class Tokenizer:
                 return [Token(
                     string=token_.string, line=token_.line, col=token_.col + 1, token_type=TokenType.FUNC)]
 
-            if tokens[0].token_type == TokenType.PAREN_ROUND and tokens[1].token_type == TokenType.OPERATOR:
+            if tokens[0].token_type == TokenType.PAREN_ROUND and (
+                    tokens[1].token_type == TokenType.OPERATOR or tokens[1].string == "\\"):
                 return tokens
 
             raise JMCSyntaxException(
