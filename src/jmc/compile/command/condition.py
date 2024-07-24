@@ -1,7 +1,7 @@
 """Module for parsing conditions (statements that return boolean), called from command/_flow_control.py and lexer.py"""
 
 from dataclasses import dataclass, field
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 
 from ...compile.utils import is_connected, is_number
@@ -10,9 +10,10 @@ from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
 from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
 from .jmc_function import JMCFunction, FuncType
-from jmc.compile.header import Header
+from ...compile.header import Header
 
-from .builtin_function import bool_function
+if TYPE_CHECKING:
+    from ...compile.lexer_func_content import FuncContent
 
 AND_OPERATOR = "&&"
 OR_OPERATOR = "||"
@@ -23,6 +24,10 @@ UNLESS = False
 
 VAR = "__logic__"
 BOOL_FUNCTIONS = JMCFunction.get_subclasses(FuncType.BOOL_FUNCTION)
+# The uglist hack ever written by mankind
+# `lexer_func_content`` will fill this list with the class after it finishes
+# initializing.
+FUNC_CONTENT: list[type["FuncContent"]] = []
 
 
 @dataclass(eq=False, repr=True, slots=True)
@@ -224,7 +229,6 @@ def custom_condition(
             *matched_function(tokens[1], tokens[0], datapack, tokenizer, prefix="").call_bool())
     # End
 
-    conditions: list[str] = []
     valid_condition_kinds = Header().conditions
     if tokens[0].string not in valid_condition_kinds:
         raise JMCValueError(
@@ -233,19 +237,27 @@ def custom_condition(
             tokenizer,
             suggestion=f"Consider using one of the following: {', '.join(sorted(valid_condition_kinds))}.")
 
-    last_token = tokens[0]
-    for token in tokens:
-        if token.token_type == TokenType.PAREN_SQUARE:
-            if not conditions:
-                raise JMCSyntaxException(
-                    "Unexpected square bracket, `[]`", token, tokenizer)
-            conditions[-1] += token.string
-        elif is_connected(
-                token, last_token):
-            conditions[-1] += token.string
-        else:
-            conditions.append(token.string)
-        last_token = token
+    conditions: list[str] = FUNC_CONTENT[0](
+        tokenizer,
+        [tokens],
+        False,
+        datapack.lexer,
+        "",
+        _bypass_checks=True).parse()
+    # conditions: list[str] = []
+    # last_token = tokens[0]
+    # for token in tokens:
+    #     if token.token_type == TokenType.PAREN_SQUARE:
+    #         if not conditions:
+    #             raise JMCSyntaxException(
+    #                 "Unexpected square bracket, `[]`", token, tokenizer)
+    #         conditions[-1] += token.string
+    #     elif is_connected(
+    #             token, last_token):
+    #         conditions[-1] += token.string
+    #     else:
+    #         conditions.append(token.string)
+    #     last_token = token
     return Condition(" ".join(conditions), IF)
 
 

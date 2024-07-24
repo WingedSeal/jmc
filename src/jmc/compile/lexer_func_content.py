@@ -11,7 +11,7 @@ from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import convention_jmc_to_mc, is_decorator, is_number, is_connected, search_to_string
 from .datapack import DataPack
-from .command.condition import BOOL_FUNCTIONS
+from .command.condition import BOOL_FUNCTIONS, FUNC_CONTENT
 from .command.nbt_operation import extract_nbt, get_nbt_type, NBTType, nbt_operation
 from .header import Header
 from .command import (FLOW_CONTROL_COMMANDS,
@@ -105,7 +105,8 @@ x
         "lexer",
         "expanded_commands",
         "was_anonym_func",
-        "prefix")
+        "prefix",
+        "_bypass_checks")
 
     command: list[Token]
     is_expect_command: bool
@@ -115,7 +116,7 @@ x
     """Whether the last command function, this is implement for using `with` with anonymous function."""
 
     def __init__(self, tokenizer: Tokenizer,
-                 programs: list[list[Token]], is_load: bool, lexer: "Lexer", prefix: str) -> None:
+                 programs: list[list[Token]], is_load: bool, lexer: "Lexer", prefix: str, _bypass_checks: bool = False) -> None:
 
         self.tokenizer = tokenizer
         self.programs = programs
@@ -126,6 +127,7 @@ x
         self.expanded_commands = None
         self.was_anonym_func = False
         self.prefix = prefix
+        self._bypass_checks = _bypass_checks
 
     def parse_self_command(self, current_line: int):
         """
@@ -482,13 +484,14 @@ x
                                                              1].token_type == TokenType.PAREN_ROUND:
             return self.__handle_function_call(key_pos, token)
 
-        if token.string not in VANILLA_COMMANDS and token.string not in Header(
-        ).commands:
-            if not self.command_strings:
+        if not self._bypass_checks:
+            if token.string not in VANILLA_COMMANDS and token.string not in Header(
+            ).commands:
+                if not self.command_strings:
+                    raise JMCSyntaxException(
+                        f"Unrecognized command ({token.string})", token, self.tokenizer)
                 raise JMCSyntaxException(
                     f"Unrecognized command ({token.string})", token, self.tokenizer)
-            raise JMCSyntaxException(
-                f"Unrecognized command ({token.string})", token, self.tokenizer)
 
         if self.__optimize(token):
             return CONTINUE_LINE
@@ -861,3 +864,6 @@ x
         :return: The JMCFunction's subclass
         """
         return command_functions.get(token.string, None)
+
+
+FUNC_CONTENT.append(FuncContent)
