@@ -211,7 +211,7 @@ def __parse_header(header_str: str, file_name: str,
 
             binder = arg_tokens[0].string
             if len(arg_tokens) == 1:
-                #  #bind BINDINDER
+                #  #bind BINDER
                 keys = [binder]
             else:
                 #  #bind BINDER TOKEN
