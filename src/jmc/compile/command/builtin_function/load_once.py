@@ -49,8 +49,8 @@ class PlayerJoin(JMCFunction):
             f"""execute as @a unless score @s {obj_name} = $__global__ {obj_name} run {
                 self.datapack.add_raw_private_function(self.name,
                                                        [
-                                                           self.args["function"],
-                                                           f"scoreboard players operation @s {obj_name} = $__global__ {obj_name}"
+                                                           f"scoreboard players operation @s {obj_name} = $__global__ {obj_name}",
+                                                           self.args["function"]
                                                        ], "main")}"""
         )
         return ""
