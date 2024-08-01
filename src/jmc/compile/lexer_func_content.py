@@ -848,7 +848,7 @@ x
         if flow_control_command is not None:
             if self.is_execute:
                 raise JMCSyntaxException(
-                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer)
+                    f"This feature({token.string}) cannot be used with 'execute'", token, self.tokenizer, suggestion="Try wrapping it in {}")
             return_value = flow_control_command(
                 self.command[key_pos:], self.lexer.datapack, self.tokenizer, self.prefix)
             if return_value is not None:
