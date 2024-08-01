@@ -459,10 +459,13 @@ class Tokenizer:
             self.is_escaped = False
 
     def __should_terminate_line(self, start_at: int = 0) -> bool:
-        return self.keywords[start_at].string in TERMINATE_LINE or (
-            self.keywords[start_at].string == "execute" and self.keywords[-2].string in {
+        string = self.keywords[start_at].string
+        if string.startswith("$"):
+            string = string[1:]
+        return string in TERMINATE_LINE or (
+            string == "execute" and self.keywords[-2].string in {
                 "run", "expand"}
-        ) or is_decorator(self.keywords[start_at].string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
+        ) or is_decorator(string) or (len(self.keywords) >= 3 and self.keywords[-2].string == "run" and self.keywords[-3].string == "return")
 
     def __is_shorten_if(self) -> bool:
         return self.keywords[0].string == "if" and len(self.keywords) >= 3 and (
