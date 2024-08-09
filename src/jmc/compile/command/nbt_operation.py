@@ -48,7 +48,7 @@ def get_nbt_type(tokens: list[Token]) -> NBTType | None:
     )
     __is_entity_nbt = (
         tokens[0].string.startswith("@")
-        and tokens[0].string[1] in "parse"
+        and tokens[0].string[1] in "parsen"
         and (
             tokens[1].string == "::"
             or (
