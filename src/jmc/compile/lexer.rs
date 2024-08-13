@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::rc::Rc;
@@ -540,6 +541,51 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
 
     fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: Vec<Token>) -> Result<(), JMCError> {
         #![allow(unused_variables)]
+        let mut has_extends = false;
+        if command.len() < 2 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected keyword(JSON file's type)".to_owned(),
+                Some(&command[0]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[1].token_type != TokenType::Keyword {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected keyword(JSON file's type)".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command.len() < 3 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected round bracket(JSON file's path)".to_owned(),
+                Some(&command[1]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[2].string == "()" {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected JSON file's path in the bracket".to_owned(),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
         todo!()
     }
 
