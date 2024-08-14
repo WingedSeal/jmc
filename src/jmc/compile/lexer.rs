@@ -586,6 +586,54 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 None,
             ));
         }
+        if command[2].token_type != TokenType::ParenRound {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected (".to_owned(),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command.len() < 4 {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected { or [".to_owned(),
+                Some(&command[2]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        if command[3].string == "extends" {
+            if command[4].token_type != TokenType::ParenRound {
+                return Err(JMCError::jmc_syntax_exception(
+                    "Expected (".to_owned(),
+                    Some(&command[3]),
+                    &tokenizer,
+                    false,
+                    true,
+                    false,
+                    None,
+                ));
+            }
+            has_extends = true;
+        } else if [TokenType::ParenSquare, TokenType::ParenCurly].contains(&command[3].token_type) {
+            return Err(JMCError::jmc_syntax_exception(
+                "Expected { or [".to_owned(),
+                Some(&command[3]),
+                &tokenizer,
+                true,
+                true,
+                false,
+                None,
+            ));
+        }
+        let json_type =
+            convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", false);
         todo!()
     }
 

@@ -32,7 +32,7 @@ pub fn is_vanilla_macro(string: &str) -> bool {
 /// # Examples
 /// ```
 /// let token = Token.empty("hello.World");
-/// assert_eq!(convention_jmc_to_mc(token.string, &token, tokenizer, "class", true), "hello/world")
+/// assert_eq!(convention_jmc_to_mc(&token.string, &token, tokenizer, "class", true), "hello/world")
 /// ```
 pub fn convention_jmc_to_mc(
     string: &str,
