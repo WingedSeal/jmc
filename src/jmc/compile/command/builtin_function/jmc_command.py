@@ -1121,10 +1121,12 @@ class AdvancementRevoke(JMCFunction):
             else self.args["namespace"]
         )
 
+        advancement_folder_name = "advancements" if self.datapack.version < 48 else "advancement"
+
         if namespace == "minecraft":
             if not (
                 advancement in MINECRAFT_ADVANCEMENTS
-                or f"minecraft/advancements/{advancement}" in self.datapack.jsons
+                or f"minecraft/{advancement_folder_name}/{advancement}" in self.datapack.jsons
             ):
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
@@ -1132,7 +1134,7 @@ class AdvancementRevoke(JMCFunction):
                     self.tokenizer,
                 )
         elif advancement:
-            if f"advancements/{advancement}" not in self.datapack.jsons:
+            if f"{advancement_folder_name}/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
@@ -1190,9 +1192,11 @@ class AdvancementGrant(JMCFunction):
             else self.args["namespace"]
         )
 
+        advancement_folder_name = "advancements" if self.datapack.version < 48 else "advancement"
+
         if namespace == "minecraft":
             if not (
-                f"minecraft/advancements/{advancement}" in MINECRAFT_ADVANCEMENTS
+                f"minecraft/{advancement_folder_name}/{advancement}" in MINECRAFT_ADVANCEMENTS
                 or advancement in self.datapack.jsons
             ):
                 raise JMCValueError(
@@ -1201,7 +1205,7 @@ class AdvancementGrant(JMCFunction):
                     self.tokenizer,
                 )
         elif advancement:
-            if f"advancements/{advancement}" not in self.datapack.jsons:
+            if f"{advancement_folder_name}/{advancement}" not in self.datapack.jsons:
                 raise JMCValueError(
                     f"'{advancement}' advancement in '{namespace}' is not defined or missing",
                     self.raw_args["advancement"].token,
