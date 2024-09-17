@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::rc::Rc;
@@ -155,7 +154,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 }
                 "new" => {
                     self.parse_current_load()?;
-                    self.parse_new(tokenizer, command)?;
+                    self.parse_new(tokenizer, command, "")?;
                 }
                 "class" => {
                     self.parse_current_load()?;
@@ -539,7 +538,12 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
         Ok(())
     }
 
-    fn parse_new(&self, tokenizer: Rc<Tokenizer>, command: Vec<Token>) -> Result<(), JMCError> {
+    fn parse_new(
+        &self,
+        tokenizer: Rc<Tokenizer>,
+        command: Vec<Token>,
+        prefix: &str,
+    ) -> Result<(), JMCError> {
         #![allow(unused_variables)]
         let mut has_extends = false;
         if command.len() < 2 {
@@ -632,8 +636,116 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
                 None,
             ));
         }
-        let json_type =
-            convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", false);
+        let mut json_type: String =
+            convention_jmc_to_mc(&command[1].string, &command[1], &tokenizer, "", false)?;
+
+        if JSON_FILE_TYPES.contains(&json_type) && !json_type.starts_with("tags/") {
+            if JMC_JSON_FILE_TYPES.contains_key(&json_type) {
+                if self.datapack.version.pack_format < 48 {
+                    json_type = JMC_JSON_FILE_TYPES[&json_type].to_owned();
+                }
+            } else if json_type.starts_with("tag/") {
+                json_type = json_type.replace("tag/", "tags/");
+            } else {
+                let suggestion = if json_type.starts_with("minecraft") {
+                    Some(
+                        "The minecraft.' prefix is supposed to go *inside* the parenthesis."
+                            .to_owned(),
+                    )
+                } else {
+                    None
+                };
+                return Err(JMCError::minecraft_syntax_warning(
+                    format!("Unrecognized JSON file's type({0})", json_type),
+                    Some(&command[1]),
+                    &tokenizer,
+                    false,
+                    true,
+                    false,
+                    suggestion,
+                ));
+            }
+        }
+
+        let string_ = &command[2].string;
+        let json_name = prefix.to_owned()
+            + &convention_jmc_to_mc(
+                &string_[1..&string_.len() - 1],
+                &command[2],
+                &tokenizer,
+                "",
+                false,
+            )?;
+
+        let namespace = json_name
+            .split("/")
+            .nth(0)
+            .expect("json_name should contains namespace");
+        let json_path: String = if self.header.namespace_overrides.contains(namespace) {
+            format!(
+                "{}/{}/{}",
+                namespace,
+                json_type,
+                &json_name[namespace.len()..]
+            )
+        } else {
+            format!("{}/{}", json_type, json_name)
+        };
+
+        if !json_path.chars().all(|c| c.is_lowercase()) {
+            return Err(JMCError::minecraft_syntax_warning(
+                format!("Uppercase letter found in JSON file's path({})", json_path).to_owned(),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        if json_path.starts_with(&format!("{}/", self.config.private_name)) {
+            return Err(JMCError::jmc_syntax_exception(
+                format!("JSON({}) may override private function of JMC", json_path),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        }
+
+        let json_content = &command[command.len() - 1].string;
+
+        if self.datapack.jsons.contains_key(&json_path) {
+            let (old_json_token, old_json_tokenizer) = &self.datapack.defined_file_pos[&json_path];
+
+            return Err(JMCError::jmc_syntax_exception(
+                format!("Duplicate JSON({})", json_path),
+                Some(&command[2]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                Some(format!(
+                    "This JSON was already defined at line {}, col {} in {}",
+                    old_json_token.line, old_json_token.col, old_json_tokenizer.file_path_str
+                )),
+            ));
+        }
+
+        let json: serde_json::Value = match serde_json::from_str(&json_content) {
+            Ok(content) => content,
+            Err(error) => {
+                return Err(JMCError::jmc_decode_json_error(
+                    error,
+                    &command[command.len() - 1],
+                    &tokenizer,
+                ))
+            }
+        };
+
         todo!()
     }
 
@@ -731,7 +843,7 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             let tokenizer = Rc::clone(&tokenizer);
             match command[0].string.as_str() {
                 "function" => self.parse_func(tokenizer, command, file_path_str, prefix)?,
-                "new" => self.parse_new(tokenizer, command)?,
+                "new" => self.parse_new(tokenizer, command, prefix)?,
                 "class" => self.parse_class(tokenizer, command, file_path_str, prefix)?,
                 "import" => {
                     return Err(JMCError::jmc_syntax_exception(

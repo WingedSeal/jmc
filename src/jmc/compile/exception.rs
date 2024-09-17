@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
+use std::error::Error;
 use std::path::PathBuf;
+use std::ptr::NonNull;
 
 use super::tokenizer::Token;
 use super::tokenizer::Tokenizer;
@@ -176,7 +178,8 @@ pub enum JMCErrorType {
     JMCSyntaxWarning,
     MinecraftSyntaxWarning,
     MinecraftVersionTooLow,
-    JMCFileNotFound
+    JMCFileNotFound,
+    JMCDecodeJSONError,
 }
 
 #[derive(Debug)]
@@ -360,4 +363,25 @@ impl JMCError {
             msg,
         }
     }
+
+    pub fn jmc_decode_json_error(
+        error: serde_json::Error,
+        token: &Token,
+        tokenizer: &Tokenizer
+    ) -> Self {
+        let line = token.line + error.line() as u32 - 1;
+        let col = if token.line == line {
+            token.col + error.column() as u32 - 1
+        } else {
+            error.column() as u32
+        };
+        
+        let msg = create_error_msg(error.to_string(), Some(token), tokenizer, false, true, false, None, None);
+        // FIXME: figure out how to handle the error msg
+        Self {
+            error_type: JMCDecodeJSONError,
+            msg,
+        }
+    }
+
 }

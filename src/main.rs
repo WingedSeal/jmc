@@ -9,6 +9,19 @@ use std::rc::Rc;
 mod jmc;
 
 fn main() {
+    let a: serde_json::Value = serde_json::from_str("[]").unwrap();
+    match a {
+        serde_json::Value::Null => {
+            println!("UWU")
+        }
+        serde_json::Value::Object(bruh) => {
+            println!("{:?}", bruh);
+        }
+        _ => {}
+    }
+}
+
+fn main2() {
     let config = Configuration {
         namespace: "namespace".to_owned(),
         load_name: "__load__".to_owned(),
