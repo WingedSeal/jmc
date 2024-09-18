@@ -1,4 +1,4 @@
-use std::fs;
+use std::{clone, fs};
 use std::path::Path;
 use std::rc::Rc;
 use std::{collections::HashSet, path::PathBuf};
@@ -14,7 +14,7 @@ use super::exception::{relative_file_name, JMCError};
 use super::header::Header;
 use super::lexer_func_content::FuncContent;
 use super::tokenizer::{Token, TokenType, Tokenizer};
-use super::utils::{convention_jmc_to_mc, is_decorator, unsafe_share};
+use super::utils::{convention_jmc_to_mc, is_decorator, unsafe_share, merge_json};
 
 /// List of all possible vanilla json file types
 static JSON_FILE_TYPES: phf::Set<&'static str> = phf_set! {
@@ -746,7 +746,58 @@ impl<'header, 'config, 'lexer> Lexer<'header, 'config, 'lexer> {
             }
         };
 
-        todo!()
+        if match json {
+            serde_json::Value::Array(arr) => arr.is_empty(),
+            serde_json::Value::Object(obj) => obj.is_empty(),
+            _ => true,
+        } {
+            return Err(JMCError::jmc_syntax_exception(
+                "JSON content cannot be empty".to_owned(),
+                Some(&command[command.len() - 1]),
+                &tokenizer,
+                false,
+                true,
+                false,
+                None,
+            ));
+        };
+
+        let str_ = &command[4].string;
+        if has_extends {
+            let super_name =
+                convention_jmc_to_mc(&str_[1..str_.len() - 1], &command[4], &tokenizer, "", true)?;
+            let super_path = if self.header.namespace_overrides.contains(namespace) {
+                format!(
+                    "{}/{}/{}",
+                    namespace,
+                    json_type,
+                    &super_name[namespace.len() + 1..]
+                )
+            } else {
+                format!("{}/{}", json_type, super_name)
+            };
+            if !self.datapack.jsons.contains_key(&super_path) {
+                return Err(JMCError::jmc_syntax_exception(
+                        format!("JSON {} was never defined", super_path), 
+                        Some(&command[2]), 
+                        &tokenizer, 
+                        false, 
+                        true, 
+                        false, 
+                        Some("Make sure previous JSON file was propery created at this path and the name is correct spelled.".to_owned())
+                ));
+            }
+            let mut super_json = self.datapack.jsons[&super_path].clone();
+            merge_json(&mut super_json, json);
+            json = super_json;
+        }
+
+        self.datapack.defined_file_pos.insert(
+            json_path,
+            (command[1], Rc::clone(&tokenizer)),
+        );
+        self.datapack.jsons.insert(json_path, json);
+        Ok(())
     }
 
     fn parse_class(

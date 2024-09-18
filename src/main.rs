@@ -10,15 +10,9 @@ mod jmc;
 
 fn main() {
     let a: serde_json::Value = serde_json::from_str("[]").unwrap();
-    match a {
-        serde_json::Value::Null => {
-            println!("UWU")
-        }
-        serde_json::Value::Object(bruh) => {
-            println!("{:?}", bruh);
-        }
-        _ => {}
-    }
+    if a.into() {
+        println!("test");
+    };
 }
 
 fn main2() {

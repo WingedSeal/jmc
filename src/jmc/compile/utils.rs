@@ -111,4 +111,18 @@ macro_rules! unsafe_share {
         unsafe { &mut *($x as *mut $t) }
     };
 }
+use serde_json::Value;
 pub(crate) use unsafe_share;
+
+/// Merge JSON `b` into JSON `a` by modifying `a`
+pub fn merge_json(a: &mut Value, b: Value) {
+    match (a, b) {
+        (a @ &mut Value::Object(_), Value::Object(b)) => {
+            let a = a.as_object_mut().unwrap();
+            for (k, v) in b {
+                merge_json(a.entry(k).or_insert(Value::Null), v);
+            }
+        }
+        (a, b) => *a = b,
+    }
+}
