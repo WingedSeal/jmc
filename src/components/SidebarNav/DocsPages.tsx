@@ -8,7 +8,7 @@ const getDocsPages = (
         <DocsLink
             name="Multiline Command"
             keyword=""
-            page="multiline-command multiple"
+            page="multiline-command"
             searchValue={searchValue}
         />,
         <DocsLink
