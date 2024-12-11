@@ -462,6 +462,9 @@ def nbt_operation(
         return f"execute store success {nbt_type_str} {target}{path} {type_} {scale} run {func_content[0]}"
 
     elif operator == "*":
+        if (tokens[0].string == "-"):
+            tokens[0] = tokenizer.merge_tokens(tokens[0:2])
+            del tokens[1]
         return f"data get {nbt_type_str} {target}{path} {tokens[0].string}"
 
     raise JMCSyntaxException(

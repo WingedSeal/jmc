@@ -15,6 +15,7 @@ class TestNBT(unittest.TestCase):
         pack = JMCTestPack().set_jmc_file("""
 my_storage::my.path;
 my_storage::my.path * 2;
+my_storage::my.path * -2;
 my_storage::my.path = "Hello World";
 my_storage::my.path = my_storage::other.path;
 my_storage::my.path = my_storage::other.path[2:];
@@ -44,6 +45,7 @@ my_storage::my.path.del();
 scoreboard objectives add __variable__ dummy
 data get storage TEST:my_storage my.path
 data get storage TEST:my_storage my.path 2
+data get storage TEST:my_storage my.path -2
 data modify storage TEST:my_storage my.path set value 'Hello World'
 data modify storage TEST:my_storage my.path set from storage TEST:my_storage other.path
 data modify storage TEST:my_storage my.path set string storage TEST:my_storage other.path 2
@@ -96,6 +98,7 @@ data get entity @a[tag=test] my.path
     def test_interaction(self):
         pack = JMCTestPack().set_jmc_file("""
 $var = storage::path[-1].int;
+$var = storage::path[-1].int * -10;
         """).build()
 
         self.assertDictEqual(
@@ -110,6 +113,7 @@ $var = storage::path[-1].int;
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute store result score $var __variable__ run data get storage TEST:storage path[-1].int
+execute store result score $var __variable__ run data get storage TEST:storage path[-1].int -10
             """)
         )
 
