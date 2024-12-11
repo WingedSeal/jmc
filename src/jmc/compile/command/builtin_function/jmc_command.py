@@ -1269,7 +1269,7 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
     name="jmc_python_file",
     arg_type={"pythonFile": ArgType.STRING, "env": ArgType.STRING,
               "jmc": ArgType.KEYWORD},
-    defaults={"env": ""},
+    defaults={"env": "", "jmc": "false"},
 )
 class JMCPythonFile(JMCFunction):
     def call(self) -> str:
@@ -1339,7 +1339,7 @@ class JMCPythonFile(JMCFunction):
         "pythonCode": ArgType.STRING,
         "env": ArgType.STRING,
         "jmc": ArgType.KEYWORD},
-    defaults={"env": ""},
+    defaults={"env": "", "jmc": "false"},
 )
 class JMCPython(JMCFunction):
     def clear_indent(self, string: str, indent: str) -> str:
