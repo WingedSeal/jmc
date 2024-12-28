@@ -633,6 +633,8 @@ x
             append_commands(self.__commands, "with")
 
     def __handle_with(self, key_pos: int, token: Token) -> bool:
+        if not self.__commands:
+            return CONTINUE_LINE
         if self.command[key_pos + 1].token_type == TokenType.PAREN_SQUARE:
             if len(self.command) > key_pos + 2:
                 raise JMCSyntaxException(
@@ -854,7 +856,9 @@ x
                 self.command[key_pos:], self.lexer.datapack, self.tokenizer, self.prefix)
             if return_value is not None:
                 append_commands(self.__commands, return_value)
-            return True
+            if token.string == "switch":
+                self.was_anonym_func = True
+            return SKIP_TO_NEXT_LINE
         return CONTINUE_LINE
 
     def get_function(self, token: Token,

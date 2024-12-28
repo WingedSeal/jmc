@@ -386,7 +386,6 @@ def switch(command: list[Token], datapack: DataPack,
 
     if case_start is None:
         raise ValueError("case_start is None")
-
     return parse_switch(scoreboard_player, func_contents,
                         datapack, start_at=case_start, case_numbers=case_numbers)
 
