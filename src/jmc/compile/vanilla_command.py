@@ -41,6 +41,7 @@ COMMANDS = {
     "recipe",
     "reload",
     "return",
+    "rotate",
     "say",
     "schedule",
     "scoreboard",
