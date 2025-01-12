@@ -1119,7 +1119,7 @@ class AdvancementRevoke(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = self.datapack.version >= 48 and "advancement" or "advancements"
+        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
         if namespace == "minecraft":
             if not (
                 advancement in MINECRAFT_ADVANCEMENTS
@@ -1188,7 +1188,7 @@ class AdvancementGrant(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = self.datapack.version >= 48 and "advancement" or "advancements"
+        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
         if namespace == "minecraft":
             if not (
                 f"minecraft/{ADVANCEMENT}/{advancement}" in MINECRAFT_ADVANCEMENTS

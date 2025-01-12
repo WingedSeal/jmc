@@ -627,7 +627,7 @@ class DataPack:
         :param token_dict: Dictionary of string and Token
         :return: String that looks like object
         """
-        pairs = []
+        pairs: list[str] = []
         for key, token in token_dict.items():
             if token.token_type == TokenType.STRING:
                 pairs.append(f"{key}:{token.add_quotation()}")
@@ -646,7 +646,7 @@ class DataPack:
         :param token_dict: Dictionary of string and Token
         :return: String that looks like object
         """
-        pairs = []
+        pairs: list[str] = []
         for key, token in token_dict.items():
             if not key.startswith("minecraft:"):
                 key = "minecraft:" + key
