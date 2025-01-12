@@ -34,8 +34,13 @@ class ItemMixin(JMCFunction):
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
             nbt
         )
-
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
+                    lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
+        if self.datapack.version >= 48:
+            return self.create_item_modern(item_type_param, display_name_param, lore_param, nbt_param, modify_nbt)
+        else:
+            return self.create_item_old(item_type_param, display_name_param, lore_param, nbt_param, modify_nbt)
+    def create_item_old(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
                     lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
         """
         Create new item from arguments given in the JMCFunction
@@ -97,6 +102,63 @@ class ItemMixin(JMCFunction):
         return Item(
             item_type,
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt
+        )
+    
+    def create_item_modern(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
+                    lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
+        
+        if modify_nbt is None:
+            modify_nbt = {}
+
+        item_type = self.args[item_type_param]
+        if item_type.startswith("minecraft:"):
+            item_type = item_type[10:]
+        if self.args[lore_param]:
+            lores, _ = self.datapack.parse_list(
+                self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
+        else:
+            lores = []
+        nbt = self.tokenizer.parse_js_obj(
+            self.raw_args[nbt_param].token) if self.args[nbt_param] else {}
+
+        for key, value_token in modify_nbt.items():
+            if key in nbt:
+                raise JMCValueError(
+                    f"{key} is already inside the nbt",
+                    value_token,
+                    self.tokenizer)
+
+            nbt[key] = value_token
+
+        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                         for lore in lores])
+
+        if self.args[display_name_param]:
+            if "minecraft:custom_name" in nbt:
+                raise JMCValueError(
+                    "minecraft:custom_name is already inside the nbt",
+                    self.token,
+                    self.tokenizer)
+            
+            if "minecraft:lore" in nbt:
+                raise JMCValueError(
+                    "minecraft:lore is already inside the nbt",
+                    self.token,
+                    self.tokenizer)
+
+            name_ = self.format_text(
+                display_name_param,
+                is_default_no_italic=True,
+                is_allow_score_selector=False)
+            if name_:
+                nbt["minecraft:custom_name"] = Token.empty(repr(name_))
+            if lore_:
+                nbt["minecraft:lore"] = Token.empty(f"""[{lore_}]""")
+
+        return Item(
+            item_type,
+            self.datapack.token_dict_to_raw_js_object_modern(nbt, self.tokenizer),
             nbt
         )
 

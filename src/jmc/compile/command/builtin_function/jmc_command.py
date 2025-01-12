@@ -11,7 +11,6 @@ from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
 
-
 def drange(
     start: float | int, stop: float | int, step: float | int
 ) -> Iterator[float | int]:
@@ -1120,7 +1119,7 @@ class AdvancementRevoke(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
+        ADVANCEMENT = self.datapack.version >= 48 and "advancement" or "advancements"
         if namespace == "minecraft":
             if not (
                 advancement in MINECRAFT_ADVANCEMENTS
@@ -1189,7 +1188,7 @@ class AdvancementGrant(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
+        ADVANCEMENT = self.datapack.version >= 48 and "advancement" or "advancements"
         if namespace == "minecraft":
             if not (
                 f"minecraft/{ADVANCEMENT}/{advancement}" in MINECRAFT_ADVANCEMENTS
