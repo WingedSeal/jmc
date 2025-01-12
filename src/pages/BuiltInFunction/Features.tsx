@@ -856,7 +856,7 @@ const BuildinFeatures = [
             <code>center</code>.
         </p>
         <Command
-            name="Particle.square"
+            name="Particle.cube"
             type="JMCFunction"
             params={[
                 { key: "particle", type: "string" },
