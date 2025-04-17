@@ -33,6 +33,12 @@ class MinecraftVersion:
 
 
 PACK_VERSION = {
+    MinecraftVersion(1, 21, 5): "71",
+    MinecraftVersion(1, 21, 4): "61",
+    MinecraftVersion(1, 21, 2): "57",
+    MinecraftVersion(1, 21): "48",
+    MinecraftVersion(1, 20, 5): "41",
+    MinecraftVersion(1, 20, 3): "26",
     MinecraftVersion(1, 20, 2): "18",
     MinecraftVersion(1, 20): "15",
     MinecraftVersion(1, 19, 4): "12",
