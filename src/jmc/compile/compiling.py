@@ -278,10 +278,7 @@ def build(
     output: dict[Path, str] = {}
     header = Header()
 
-    if datapack.version >= 48:
-        function_folder = "function"
-    else:
-        function_folder = "functions"
+    function_folder = datapack.version >= 48 and "function" or "functions"
 
     logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
