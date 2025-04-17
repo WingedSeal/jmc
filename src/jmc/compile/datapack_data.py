@@ -114,7 +114,7 @@ class GUI:
 
 
 SIMPLE_JSON_BODY = str | bool | dict[
-    str, str | bool
+    str, str | bool | int
 ]
 
 
