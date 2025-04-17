@@ -271,7 +271,7 @@ class ItemCreateSpawnEgg(EventMixin):
 class ItemCreateSign(JMCFunction):
     _VARIANTS = {"oak", "spruce", "birch", "jungle",
                  "acacia", "dark_oak", "crimson", "warped",
-                 "mangrove", "bamboo", "cherry"}
+                 "mangrove", "bamboo", "cherry", "pale_oak"}
 
     def call(self) -> str:
         variant = self.args["variant"]
@@ -321,9 +321,13 @@ class ItemCreateSign(JMCFunction):
         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text, text_token in zip(texts, texts_tokens)]
         if on_click:
+            if self.datapack.version < 62:
+                outer_key, inner_key = "clickEvent", "value"
+            else:
+                outer_key, inner_key = "click_event", "command"
             formatted_texts_[0].add_key(
-                "clickEvent", {
-                    "action": "run_command", "value": on_click})
+                outer_key, {
+                    "action": "run_command", inner_key: on_click})
             if not formatted_texts_[0]:
                 formatted_texts_[0].add_key("text", "")
 
