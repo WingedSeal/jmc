@@ -16,17 +16,12 @@ def handle_command(given_command: str) -> None:
     if not given_command:
         return
     command_name, *arguments = given_command.split()
-    command_func, usage = global_data.commands.get(
-        command_name, (unknown_command, ""))
+    command_func, usage = global_data.commands.get(command_name, (unknown_command, ""))
     try:
         command_func(*arguments)
     except TypeError as error:
         msg: str = error.args[0]
-        msg = msg.replace(
-            "()",
-            " command").replace(
-            "positional argument",
-            "argument")
+        msg = msg.replace("()", " command").replace("positional argument", "argument")
         pprint(msg, Colors.FAIL)
         pprint(f"Usage: {usage}", Colors.FAIL)
 
@@ -43,8 +38,6 @@ def start() -> None:
     if global_data.config:
         pprint("To compile, type `compile`. For help, type `help`", Colors.INFO)
     else:
-        pprint(
-            "To setup workspace, type `config`. For help, type `help`",
-            Colors.INFO)
+        pprint("To setup workspace, type `config`. For help, type `help`", Colors.INFO)
     while True:
         handle_command(get_input())
