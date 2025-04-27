@@ -113,7 +113,7 @@ class GUI:
         return commands
 
 
-SIMPLE_JSON_BODY = str | bool | dict[
+SIMPLE_JSON_BODY = str | bool | int | dict[
     str, str | bool | int
 ]
 

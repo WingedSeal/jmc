@@ -146,7 +146,8 @@ class ItemCreate(ItemMixin, EventMixin):
         if on_click and item_type not in {
                 "carrot_on_a_stick", "warped_fungus_on_a_stick"}:
             raise JMCValueError(
-                f"on_click can only be used with carrot_on_a_stick or warped_fungus_on_a_stick or in {self.call_string}",
+                f"on_click can only be used with carrot_on_a_stick or warped_fungus_on_a_stick or in {
+                    self.call_string}",
                 self.raw_args["onClick"].token,
                 self.tokenizer,
                 suggestion="Change item_type to carrot_on_a_stick or warped_fungus_on_a_stick")
@@ -155,8 +156,16 @@ class ItemCreate(ItemMixin, EventMixin):
             item_id = self.datapack.data.get_item_id()
             if self.is_never_used():
                 self.add_events("used:" + self.args["itemType"], [
-                    f"execute store result score {self.tag_id_var} {DataPack.var_name} run data get entity @s SelectedItem.tag.{self.id_name}",
-                    f"execute if score {self.tag_id_var} {DataPack.var_name} matches 1.. run {self.datapack.call_func(self.name, 'found')}"
+                    f"execute store result score {
+                        self.tag_id_var} {
+                        DataPack.var_name} run data get entity @s SelectedItem.tag.{
+                        self.id_name}",
+                    f"execute if score {
+                        self.tag_id_var} {
+                        DataPack.var_name} matches 1.. run {
+                        self.datapack.call_func(
+                            self.name,
+                            'found')}"
                 ]
                 )
                 self.datapack.add_raw_private_function(self.name, [], "found")
@@ -492,7 +501,7 @@ class TriggerAdd(JMCFunction):
         return ""
 
 
-@ func_property(
+@func_property(
     func_type=FuncType.LOAD_ONLY,
     call_string="Timer.add",
     arg_type={
@@ -622,8 +631,14 @@ class RecipeTable(JMCFunction):
             [
                 f"clear @s {base_item} 1",
                 result_command,
-                f"recipe take @s {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
-                f"advancement revoke @s only {self.datapack.namespace}:{DataPack.private_name}/{self.name}/{count}",
+                f"recipe take @s {
+                    self.datapack.namespace}:{
+                    DataPack.private_name}/{
+                    self.name}/{count}",
+                f"advancement revoke @s only {
+                    self.datapack.namespace}:{
+                    DataPack.private_name}/{
+                    self.name}/{count}",
                 self.args["onCraft"]
             ],
             count
@@ -677,9 +692,19 @@ class GUITemplate(JMCFunction):
         self.datapack.add_raw_private_function(f"gui/{name}", [
             f"""execute if entity @p[distance=..8] run {
                 self.datapack.add_raw_private_function(f"gui/{name}", [
-                    f"data modify storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items set from {mode.value[1]} {mode.value[2]}",
-                    f"execute store result score __gui__.item_count {self.datapack.var_name} if data storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items[].tag.__gui__",
-                    f'execute if score __gui__.item_count {self.datapack.var_name} matches 0 run {self.datapack.call_func(f"gui/{name}", "reset")}'
+                    f"data modify storage {
+                        self.datapack.namespace}:{
+                        self.datapack.storage_name} GUI.Items set from {
+                        mode.value[1]} {
+                        mode.value[2]}",
+                    f"execute store result score __gui__.item_count {
+                        self.datapack.var_name} if data storage {
+                        self.datapack.namespace}:{
+                        self.datapack.storage_name} GUI.Items[].tag.__gui__",
+                    f'execute if score __gui__.item_count {
+                        self.datapack.var_name} matches 0 run {
+                        self.datapack.call_func(
+                            f"gui/{name}", "reset")}'
                 ], "active")
             }""",
             "execute if block ~ ~-1 ~ hopper run data merge block ~ ~-1 ~ {TransferCooldown:20d}" if mode ==
@@ -748,7 +773,8 @@ class GUIRegisters(ItemMixin):
                         f'Item id: \'{item_str}\' is not defined.',
                         self.raw_args["items"].token,
                         self.tokenizer,
-                        suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                        suggestion=f"Use Item.create to make this item BEFORE using {
+                            self.call_string}"
                     )
                 items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
                     "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}, error_token=item_str_token))
@@ -768,7 +794,8 @@ class GUIRegisters(ItemMixin):
                         f'Item id: \'{item_str}\' is not defined.',
                         self.raw_args["items"].token,
                         self.tokenizer,
-                        suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}"
+                        suggestion=f"Use Item.create to make this item BEFORE using {
+                            self.call_string}"
                     )
                 items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
                     "__gui__": Token.empty(f"{{name:{repr(name)}}}")}, error_token=item_str_token))
@@ -958,7 +985,9 @@ class GUICreate(JMCFunction):
             f'execute unless score __gui__.item_count {self.datapack.var_name} matches 0 unless score __gui__.item_count {self.datapack.var_name} matches {gui.length} run {self.datapack.call_func(f"gui/{name}", "container_changed")}')
         self.datapack.add_private_json(
             "tags/items", f"gui/{name}", {"values": list(gui.item_types)})
-        item_tags = f"#{self.datapack.namespace}:{self.datapack.private_name}/gui/{name}"
+        item_tags = f"#{
+            self.datapack.namespace}:{
+            self.datapack.private_name}/gui/{name}"
 
         reset_commands = gui.get_reset_commands()
         # reset_commands.append("kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{name:%s}}}}]" % repr(
@@ -971,9 +1000,13 @@ class GUICreate(JMCFunction):
                 continue
             on_change = self.datapack.add_raw_private_function(
                 f"gui/{name}/container_changed", [
-                    f"execute store result score $is_item {GUI_OBJ_NAME} if data storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items[{{Slot:{index}b}}]",
+                    f"execute store result score $is_item {GUI_OBJ_NAME} if data storage {
+                        self.datapack.namespace}:{
+                        self.datapack.storage_name} GUI.Items[{{Slot:{index}b}}]",
                     # Find player with gui item
-                    f"execute as @a[distance=..10] store result score @s {GUI_OBJ_NAME} run clear @s {item_tags}{{__gui__:{{name:{repr(name)}}}}}",
+                    # fmt: off
+                    f"execute as @a[distance=..10] store result score @s {GUI_OBJ_NAME} run clear @s {item_tags}{{__gui__: {{name: {repr(name)}}}}}",
+                    # fmt: on
                     # Tag player with gui item as clicker
                     f"tag @p[scores={{{GUI_OBJ_NAME}=1..}}] add __gui__.clicker",
                     # Check if clicker is found
@@ -985,7 +1018,9 @@ class GUICreate(JMCFunction):
                     # Summon dummy item
                     'execute if score $is_item %s matches 1 run summon item ~ ~256 ~ {Item: {id:"minecraft:stone",Count:1b},Tags:["__gui__.%s.dropped_item"]}' % (
                         GUI_OBJ_NAME, name),
-                    f"data modify entity @e[limit=1,type=item,tag=__gui__.{name}.dropped_item] Item set from storage {self.datapack.namespace}:{self.datapack.storage_name} GUI.Items[{{Slot:{index}b}}]",
+                    f"data modify entity @e[limit=1,type=item,tag=__gui__.{name}.dropped_item] Item set from storage {
+                        self.datapack.namespace}:{
+                        self.datapack.storage_name} GUI.Items[{{Slot:{index}b}}]",
                     f"execute if score $is_item {GUI_OBJ_NAME} matches 1 as @e[limit=1,type=item,tag=__gui__.{name}.dropped_item] run {return_item}",
                     f"""execute as @p[tag=__gui__.clicker] at @s run {
                         template_item.on_click}""" if template_item.interactive_id is not None else "",
@@ -1034,7 +1069,9 @@ class TeamAdd(JMCFunction):
         properties = self.tokenizer.parse_js_obj(
             self.raw_args["properties"].token) if self.args["properties"] else {}
         for key, value in properties.items():
-            command += f"\nteam modify {self.args['team']} {key} {value.string}"
+            command += f"\nteam modify {
+                self.args['team']} {key} {
+                value.string}"
 
         return command
 
@@ -1067,7 +1104,9 @@ class TextPropClickCommand(JMCFunction):
                 self.tokenizer)
         if len(command) > 1:
             raise JMCValueError(
-                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                f"'{
+                    self.call_string}' only allows 1 command (got {
+                    len(command)})",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if command[0].startswith("say"):
@@ -1075,7 +1114,7 @@ class TextPropClickCommand(JMCFunction):
                 f"'{self.call_string}' doesn't allow 'say' command",
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
-        
+
         if self.datapack.version < 62:
             outer_key, inner_key = "clickEvent", "value"
         else:
@@ -1115,7 +1154,9 @@ class TextPropsClickCommand(JMCFunction):
                 self.tokenizer)
         if len(command) > 1:
             raise JMCValueError(
-                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                f"'{
+                    self.call_string}' only allows 1 command (got {
+                    len(command)})",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if command[0].startswith("say"):
@@ -1166,7 +1207,9 @@ class TextPropSuggestCommand(JMCFunction):
                 self.tokenizer)
         if len(command) > 1:
             raise JMCValueError(
-                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                f"'{
+                    self.call_string}' only allows 1 command (got {
+                    len(command)})",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if command[0].startswith("say"):
@@ -1174,7 +1217,7 @@ class TextPropSuggestCommand(JMCFunction):
                 f"'{self.call_string}' doesn't allow 'say' command",
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
-        
+
         if self.datapack.version < 62:
             outer_key, inner_key = "clickEvent", "value"
         else:
@@ -1215,7 +1258,9 @@ class TextPropsSuggestCommand(JMCFunction):
                 self.tokenizer)
         if len(command) > 1:
             raise JMCValueError(
-                f"'{self.call_string}' only allows 1 command (got {len(command)})",
+                f"'{
+                    self.call_string}' only allows 1 command (got {
+                    len(command)})",
                 self.raw_args["function"].token,
                 self.tokenizer)
         if command[0].startswith("say"):
@@ -1259,7 +1304,7 @@ class TextPropClickURL(JMCFunction):
                 "Unexpected empty URL",
                 self.raw_args["url"].token,
                 self.tokenizer)
-        
+
         if self.datapack.version < 62:
             outer_key, inner_key = "clickEvent", "value"
         else:
@@ -1293,7 +1338,7 @@ class TextPropsClickURL(JMCFunction):
                 "Unexpected empty URL",
                 self.raw_args["url"].token,
                 self.tokenizer)
-        
+
         if self.datapack.version < 62:
             outer_key, inner_key = "clickEvent", "value"
         else:
@@ -1335,10 +1380,12 @@ class TextPropClickPage(JMCFunction):
 
         if self.datapack.version < 62:
             key = "clickEvent"
-            body = {"action": "change_page", "value": self.args["page"]}
+            body: dict[str, str | int] = {
+                "action": "change_page", "value": self.args["page"]}
         else:
             key = "click_event"
-            body = {"action": "change_page", "page": int(self.args["page"])}
+            body = {
+                "action": "change_page", "page": int(self.args["page"])}
 
         self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
@@ -1362,7 +1409,7 @@ class TextPropsClickPage(JMCFunction):
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             if self.datapack.version < 62:
-                return {"action": "change_page", "value": arg}  
+                return {"action": "change_page", "value": arg}
             else:
                 return {"action": "change_page", "page": int(arg)}
         self.add_formatted_text_prop(
@@ -1454,7 +1501,7 @@ class TextPropHoverText(JMCFunction):
                 self.tokenizer)
 
         text_to_show = json.loads(self.format_text("text"))
-        
+
         if self.datapack.version < 62:
             outer_key, inner_key = "hoverEvent", "contents"
         elif self.datapack.version == 62:
@@ -1497,10 +1544,12 @@ class TextPropsHoverText(JMCFunction):
             outer_key, inner_key = "hover_event", "text"
         else:
             outer_key, inner_key = "hover_event", "value"
-            
+
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            text_to_show = json.loads(self.format_text("text").replace(self.args["indexString"], arg))
+            text_to_show = json.loads(
+                self.format_text("text").replace(
+                    self.args["indexString"], arg))
             return {"action": "show_text", inner_key: text_to_show}
         self.add_formatted_text_prop(
             outer_key, inner, self.check_bool("local"))
@@ -1534,7 +1583,7 @@ class TextPropHoverItem(JMCFunction):
         if self.datapack.version < 62:
             key = "hoverEvent"
             body = {
-                "action": "show_item", 
+                "action": "show_item",
                 "contents": item_to_show
             }
         else:
@@ -1543,7 +1592,7 @@ class TextPropHoverItem(JMCFunction):
                 "action": "show_item",
                 **item_to_show
             }
-            
+
         self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
 
@@ -1573,19 +1622,22 @@ class TextPropsHoverItem(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            item_to_show = json.loads(self.args["item"].replace(self.args["indexString"], arg))
-            
-            if self.datapack.version < 62: 
+            item_to_show = json.loads(
+                self.args["item"].replace(
+                    self.args["indexString"], arg))
+
+            if self.datapack.version < 62:
                 return {"action": "show_item", "contents": item_to_show}
-            else: 
+            else:
                 return {"action": "show_item", **item_to_show}
-            
+
         self.add_formatted_text_prop(
-            "hoverEvent" if self.datapack.version < 62 else "hover_event", 
-            inner, 
+            "hoverEvent" if self.datapack.version < 62 else "hover_event",
+            inner,
             self.check_bool("local")
         )
         return ""
+
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
@@ -1614,7 +1666,7 @@ class TextPropHoverEntity(JMCFunction):
         if self.datapack.version < 62:
             key = "hoverEvent"
             body = {
-                "action": "show_entity", 
+                "action": "show_entity",
                 "contents": entity_to_show
             }
         else:
@@ -1623,7 +1675,7 @@ class TextPropHoverEntity(JMCFunction):
                 "action": "show_entity",
                 **entity_to_show
             }
-            
+
         self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
 
@@ -1653,16 +1705,18 @@ class TextPropsHoverEntity(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            entity_to_show = json.loads(self.args["entity"].replace(self.args["indexString"], arg))
-            
-            if self.datapack.version < 62: 
+            entity_to_show = json.loads(
+                self.args["entity"].replace(
+                    self.args["indexString"], arg))
+
+            if self.datapack.version < 62:
                 return {"action": "show_entity", "contents": entity_to_show}
-            else: 
+            else:
                 return {"action": "show_entity", **entity_to_show}
-            
+
         self.add_formatted_text_prop(
-            "hoverEvent" if self.datapack.version < 62 else "hover_event", 
-            inner, 
+            "hoverEvent" if self.datapack.version < 62 else "hover_event",
+            inner,
             self.check_bool("local")
         )
         return ""

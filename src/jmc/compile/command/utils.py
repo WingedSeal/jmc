@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable
 
+from ...compile.datapack_data import SIMPLE_JSON_BODY
+
 from ..header import Header
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -187,12 +189,16 @@ class Arg:
         if verifier == ArgType.KEYWORD:
             if key_string.startswith("@"):
                 raise JMCValueError(
-                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SELECTOR.value}",
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        ArgType.SELECTOR.value}",
                     self.token,
                     tokenizer)
             if ":" in key_string:
                 raise JMCValueError(
-                    f"For '{key_string}' key, expected {verifier.value}, got {ArgType.SCOREBOARD.value}",
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        ArgType.SCOREBOARD.value}",
                     self.token,
                     tokenizer)
         if verifier != self.arg_type:
@@ -230,14 +236,16 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
     if is_number(tokens[0].string):
         if len(tokens) > 1:
             raise JMCSyntaxException(
-                f"Unexpected {tokens[1].token_type.value} after integer in function argument",
+                f"Unexpected {
+                    tokens[1].token_type.value} after integer in function argument",
                 tokens[1],
                 tokenizer)
         return ArgType.INTEGER
     if is_float(tokens[0].string):
         if len(tokens) > 1:
             raise JMCSyntaxException(
-                f"Unexpected {tokens[1].token_type.value} after float/decimal in function argument",
+                f"Unexpected {
+                    tokens[1].token_type.value} after float/decimal in function argument",
                 tokens[1],
                 tokenizer)
         return ArgType.FLOAT
@@ -246,14 +254,16 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         if is_number(tokens[1].string):
             if len(tokens) > 2:
                 raise JMCSyntaxException(
-                    f"Unexpected {tokens[2].token_type.value} after integer in function argument",
+                    f"Unexpected {
+                        tokens[2].token_type.value} after integer in function argument",
                     tokens[2],
                     tokenizer)
             return ArgType.INTEGER
         if is_float(tokens[1].string):
             if len(tokens) > 1:
                 raise JMCSyntaxException(
-                    f"Unexpected {tokens[2].token_type.value} after float/decimal in function argument",
+                    f"Unexpected {
+                        tokens[2].token_type.value} after float/decimal in function argument",
                     tokens[2],
                     tokenizer)
             return ArgType.FLOAT
@@ -279,7 +289,8 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     suggestion="This can be a result from missing comma or missing quotation mark")
             return ArgType.SELECTOR
         raise JMCSyntaxException(
-            f"Expected '[' or nothing after target selector type (got {tokens[1].token_type})",
+            f"Expected '[' or nothing after target selector type (got {
+                tokens[1].token_type})",
             tokens[1],
             tokenizer)
 
@@ -330,7 +341,9 @@ def verify_list(expected_arg_type: ArgType, token: Token,
             ))
         except JMCValueError as error:
             raise JMCValueError(
-                f"In the list, expected {expected_arg_type.value}, got {arg_type.value}",
+                f"In the list, expected {
+                    expected_arg_type.value}, got {
+                    arg_type.value}",
                 arg_token,
                 tokenizer) from error
     return results
@@ -433,8 +446,8 @@ def __eval(node):
 
 SIMPLE_JSON_TYPE = dict[
     str,
-    str | bool | dict[
-        str, str | bool
+    str | bool | int | dict[
+        str, str | bool | int
     ]
 ]
 
@@ -503,8 +516,7 @@ class FormattedText:
         self.current_color = ""
         self.__parse()
 
-    def add_key(self, key: str, value: str | bool |
-                dict[str, str | bool]) -> None:
+    def add_key(self, key: str, value: SIMPLE_JSON_BODY) -> None:
         """
         Add json to result
 
