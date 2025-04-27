@@ -1019,12 +1019,51 @@ const BuildinFeatures = [
             variables/functions declared earlier (By default, it generates new
             environment)
         </p>
+        <p>
+            Set <code>jmc</code> to <code>true</code> pipe the output through
+            JMC compiler again. So you can emit JMC code.
+        </p>
         <Command
             name="JMC.python"
             type="JMCFunction"
             params={[
                 { key: "pythonCode", type: "string" },
-                { key: "env", type: "string ", default: '""' },
+                { key: "env", type: "string", default: '""' },
+                { key: "jmc", type: "boolean", default: "false" },
+            ]}
+        />
+    </Feature>,
+    <Feature
+        id="jmc_python_file"
+        summary="JMC.pythonFile()"
+        keywords="code program javascript run"
+        examples={[
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAEwKYBmABAM5QCGAtmgJQBcWAkAUgE5ED6RAlika%2BRQBzPGgCMABnpNGeStzhoARCXIwiACTwAbbUiIB1NtpxKaWDABoiSyuV5mA3Fiyr1SgzoDGSSniJw%2BngAHlRQ2nhKzqCQsIiomK4U1OZWNnYONI5AA",
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAEwKYBmABAUkmnHgB5wCUAXFgJB4C2AlnGgQEQDOAQxhEA3pRoBfHrSylyPAEYCATtKwZaAbixZQkWIlSZchEmQrU6jFhy69BwnOwIE8yvCjijxcKTLloiipqGppAA",
+            "jmc=FIWQwgdADgngLgCwPYDsAUADAUAMyUgAgF4CAiAZwEMYCBGUrDAGjIFMUA3egSgG4tQkWIlSZc%2BYmSo0ATA2ZtOcvgPDR4ydNlYBbAJZw0eJN0YtS7LqT5A",
+        ]}
+    >
+        <p>
+            Allow you to use python code directly inside jmc, use{" "}
+            <code>emit()</code> function to return one or more command. The
+            python file imported is relative to the .jmc file which calls it.
+        </p>
+        <p>
+            Use the same <code>env</code> to continue using old
+            variables/functions declared earlier (By default, it generates new
+            environment)
+        </p>
+        <p>
+            Set <code>jmc</code> to <code>true</code> pipe the output through
+            JMC compiler again. So you can emit JMC code.
+        </p>
+        <Command
+            name="JMC.pythonFile"
+            type="JMCFunction"
+            params={[
+                { key: "pythonFile", type: "string" },
+                { key: "env", type: "string", default: '""' },
+                { key: "jmc", type: "boolean", default: "false" },
             ]}
         />
     </Feature>,
