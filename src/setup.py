@@ -32,9 +32,8 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
@@ -44,7 +43,7 @@ setup(
             "jmc=jmc.__main__:main",
         ]
     },
-    python_requires=">=3.10",
+    python_requires=">=3.12",
     project_urls={
         "Documentation": "https://jmc.wingedseal.com/",
         "Repository": "https://github.com/WingedSeal/jmc",
