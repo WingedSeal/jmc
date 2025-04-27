@@ -185,6 +185,13 @@ const getDocsPages = (
                     hash="for"
                 />,
                 <DocsLink
+                    name="async"
+                    keyword="loop for while schedule interval delay"
+                    page="flow-controls"
+                    searchValue={searchValue}
+                    hash="async"
+                />,
+                <DocsLink
                     name="Switch Case"
                     keyword="optimization optimize binary search tree performance break default match"
                     page="flow-controls"

@@ -373,6 +373,44 @@ const FlowControls = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="async" />
+                <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Async Loop
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Use <code>/schedule</code> to create an interval delay
+                        between each iteration of a loop. It works on{" "}
+                        <code>for</code> loop and <code>while</code> loop.{" "}
+                        <span className="text-warning">
+                            Since it is a schedule. Command will lose its
+                            context such as the entity running it and its
+                            position.
+                        </span>
+                    </p>
+                    <span className="text-warning">
+                        Since it is a schedule. Command will lose its context
+                        such as the entity running it and its position.
+                    </span>
+                    <CodeBlock>
+                        <CodeText type="keyword">async</CodeText>{" "}
+                        <CodeText type="keyword">for</CodeText> (
+                        <CodeText type="operator">$</CodeText>i
+                        <CodeText type="operator">=</CodeText>
+                        <CodeText type="number">0</CodeText>;
+                        <CodeText type="operator">$</CodeText>i
+                        <CodeText type="operator">{"<"}</CodeText>
+                        <CodeText type="number">10</CodeText>;
+                        <CodeText type="operator">$</CodeText>i
+                        <CodeText type="operator">++</CodeText>) {"{"}
+                        <br />
+                        <Tab />
+                        say <CodeText type="string">"Code Example"</CodeText>;
+                        <br />
+                        {"}"} <CodeText type="number">10t</CodeText>;
+                    </CodeBlock>
+                </div>
                 <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case (pre-Minecraft 1.20.2)
@@ -485,37 +523,45 @@ const FlowControls = () => {
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
-                        If you are using a <code>pack_format</code> of 18 or higher, the switch case statement is more powerful due to{" "}
+                        If you are using a <code>pack_format</code> of 18 or
+                        higher, the switch case statement is more powerful due
+                        to{" "}
                         <a
                             href="https://minecraft.wiki/w/Function_(Java_Edition)#Macros"
                             target="_blank"
                             rel="noreferrer"
                         >
                             vanilla function macros
-                        </a>, and most of the restrictions are removed.
+                        </a>
+                        , and most of the restrictions are removed.
                     </p>
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
-                        <li> Performance is now as fast as <code>O(1)</code> time, using the macros to create a{" "}
-                        <a
-                            href="https://en.wikipedia.org/wiki/Branch_table"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            jump table
-                        </a>{" "}
-                        that can go directly to the case function without checking a bunch of conditions. 
-                        Also applies to <code>Hardcode.switch()</code>.
+                        <li>
+                            {" "}
+                            Performance is now as fast as <code>O(1)</code>{" "}
+                            time, using the macros to create a{" "}
+                            <a
+                                href="https://en.wikipedia.org/wiki/Branch_table"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                jump table
+                            </a>{" "}
+                            that can go directly to the case function without
+                            checking a bunch of conditions. Also applies to{" "}
+                            <code>Hardcode.switch()</code>.
                         </li>
                         <li>
                             Case numbers no longer need to be consecutive{";"}{" "}
-                            you can use any numbers you want as long as they are integers.
+                            you can use any numbers you want as long as they are
+                            integers.
                         </li>
                         <li>
-                            Default case is now allowed and {" "}
-                            will run when nothing matches.
+                            Default case is now allowed and will run when
+                            nothing matches.
                         </li>
                         <li>
-                            You still need to {" "}
+                            You still need to{" "}
                             <a
                                 href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/break"
                                 target="_blank"
@@ -523,7 +569,8 @@ const FlowControls = () => {
                             >
                                 break
                             </a>{" "}
-                            out of switch statements like before. (There is no "fallthrough".){" "}
+                            out of switch statements like before. (There is no
+                            "fallthrough".){" "}
                         </li>
                     </ul>
                     <CodeBlock>
@@ -548,8 +595,8 @@ const FlowControls = () => {
                         <br />
                         <Tab />
                         <Tab />
-                        say{" "}
-                        <CodeText type="string">"Today is Sunday"</CodeText>;
+                        say <CodeText type="string">"Today is Sunday"</CodeText>
+                        ;
                         <br />
                         <Tab />
                         <CodeText type="keyword">default</CodeText>
@@ -558,7 +605,10 @@ const FlowControls = () => {
                         <Tab />
                         <Tab />
                         say{" "}
-                        <CodeText type="string">"Looking forward to the weekend..."</CodeText>;
+                        <CodeText type="string">
+                            "Looking forward to the weekend..."
+                        </CodeText>
+                        ;
                         <br />
                         {"}"}
                     </CodeBlock>

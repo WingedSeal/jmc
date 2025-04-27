@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { loadPyodide, PyodideInterface } from "pyodide";
 import CodeBlock from "../../components/CodeBlock";
+import { PyodideInterface } from "../../types/pyodide";
 import { useSearchParams } from "react-router-dom";
 import lzString from "lz-string";
 import useScrollToHash from "../../utils/scrollToHash";
 const getPyodide = async () => {
-    const pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
+    const pyodide = await window.loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/",
     });
     // const consoleLog = console.log;
     // console.log = () => {};
