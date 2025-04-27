@@ -271,7 +271,7 @@ class ItemCreateSpawnEgg(EventMixin):
 class ItemCreateSign(JMCFunction):
     _VARIANTS = {"oak", "spruce", "birch", "jungle",
                  "acacia", "dark_oak", "crimson", "warped",
-                 "mangrove", "bamboo", "cherry"}
+                 "mangrove", "bamboo", "cherry", "pale_oak"}
 
     def call(self) -> str:
         variant = self.args["variant"]
@@ -321,9 +321,13 @@ class ItemCreateSign(JMCFunction):
         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text, text_token in zip(texts, texts_tokens)]
         if on_click:
+            if self.datapack.version < 62:
+                outer_key, inner_key = "clickEvent", "value"
+            else:
+                outer_key, inner_key = "click_event", "command"
             formatted_texts_[0].add_key(
-                "clickEvent", {
-                    "action": "run_command", "value": on_click})
+                outer_key, {
+                    "action": "run_command", inner_key: on_click})
             if not formatted_texts_[0]:
                 formatted_texts_[0].add_key("text", "")
 
@@ -1071,9 +1075,14 @@ class TextPropClickCommand(JMCFunction):
                 f"'{self.call_string}' doesn't allow 'say' command",
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
+        
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "command"
         self.add_formatted_text_prop(
-            "clickEvent", {
-                "action": "run_command", "value": "/" + command[0]}, self.check_bool("local"))
+            outer_key, {
+                "action": "run_command", inner_key: "/" + command[0]}, self.check_bool("local"))
         return ""
 
 
@@ -1115,12 +1124,17 @@ class TextPropsClickCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "command"
+
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             return {
-                "action": "run_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
+                "action": "run_command", inner_key: "/" + command[0].replace(self.args["indexString"], arg)}
         self.add_formatted_text_prop(
-            "clickEvent", inner, self.check_bool("local"))
+            outer_key, inner, self.check_bool("local"))
         return ""
 
 
@@ -1160,9 +1174,15 @@ class TextPropSuggestCommand(JMCFunction):
                 f"'{self.call_string}' doesn't allow 'say' command",
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
+        
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "command"
+
         self.add_formatted_text_prop(
-            "clickEvent", {
-                "action": "suggest_command", "value": "/" + command[0]}, self.check_bool("local"))
+            outer_key, {
+                "action": "suggest_command", inner_key: "/" + command[0]}, self.check_bool("local"))
         return ""
 
 
@@ -1204,12 +1224,17 @@ class TextPropsSuggestCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "command"
+
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             return {
-                "action": "suggest_command", "value": "/" + command[0].replace(self.args["indexString"], arg)}
+                "action": "suggest_command", inner_key: "/" + command[0].replace(self.args["indexString"], arg)}
         self.add_formatted_text_prop(
-            "clickEvent", inner, self.check_bool("local"))
+            outer_key, inner, self.check_bool("local"))
         return ""
 
 
@@ -1234,10 +1259,15 @@ class TextPropClickURL(JMCFunction):
                 "Unexpected empty URL",
                 self.raw_args["url"].token,
                 self.tokenizer)
+        
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "url"
 
         self.add_formatted_text_prop(
-            "clickEvent", {
-                "action": "open_url", "value": self.args["url"]}, self.check_bool("local"))
+            outer_key, {
+                "action": "open_url", inner_key: self.args["url"]}, self.check_bool("local"))
         return ""
 
 
@@ -1263,13 +1293,18 @@ class TextPropsClickURL(JMCFunction):
                 "Unexpected empty URL",
                 self.raw_args["url"].token,
                 self.tokenizer)
+        
+        if self.datapack.version < 62:
+            outer_key, inner_key = "clickEvent", "value"
+        else:
+            outer_key, inner_key = "click_event", "url"
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
             return {
-                "action": "open_url", "value": self.args["url"].replace(self.args["indexString"], arg)}
+                "action": "open_url", inner_key: self.args["url"].replace(self.args["indexString"], arg)}
         self.add_formatted_text_prop(
-            "clickEvent", inner, self.check_bool("local"))
+            outer_key, inner, self.check_bool("local"))
         return ""
 
 
@@ -1298,9 +1333,14 @@ class TextPropClickPage(JMCFunction):
                 self.raw_args["page"].token,
                 self.tokenizer)
 
-        self.add_formatted_text_prop(
-            "clickEvent", {
-                "action": "change_page", "value": self.args["page"]}, self.check_bool("local"))
+        if self.datapack.version < 62:
+            key = "clickEvent"
+            body = {"action": "change_page", "value": self.args["page"]}
+        else:
+            key = "click_event"
+            body = {"action": "change_page", "page": int(self.args["page"])}
+
+        self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
 
 
@@ -1321,10 +1361,13 @@ class TextPropsClickPage(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {
-                "action": "change_page", "value": arg}
+            if self.datapack.version < 62:
+                return {"action": "change_page", "value": arg}  
+            else:
+                return {"action": "change_page", "page": int(arg)}
         self.add_formatted_text_prop(
-            "clickEvent", inner, self.check_bool("local"))
+            "clickEvent" if self.datapack.version < 62 else "click_event",
+            inner, self.check_bool("local"))
         return ""
 
 
@@ -1410,9 +1453,18 @@ class TextPropHoverText(JMCFunction):
                 self.raw_args["text"].token,
                 self.tokenizer)
 
+        text_to_show = json.loads(self.format_text("text"))
+        
+        if self.datapack.version < 62:
+            outer_key, inner_key = "hoverEvent", "contents"
+        elif self.datapack.version == 62:
+            outer_key, inner_key = "hover_event", "text"
+        else:
+            outer_key, inner_key = "hover_event", "value"
+
         self.add_formatted_text_prop(
-            "hoverEvent", {
-                "action": "show_text", "contents": json.loads(self.format_text("text"))}, self.check_bool("local"))
+            outer_key, {
+                "action": "show_text", inner_key: text_to_show}, self.check_bool("local"))
         return ""
 
 
@@ -1439,12 +1491,19 @@ class TextPropsHoverText(JMCFunction):
                 self.raw_args["text"].token,
                 self.tokenizer)
 
+        if self.datapack.version < 62:
+            outer_key, inner_key = "hoverEvent", "contents"
+        elif self.datapack.version == 62:
+            outer_key, inner_key = "hover_event", "text"
+        else:
+            outer_key, inner_key = "hover_event", "value"
+            
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {
-                "action": "show_text", "contents": json.loads(self.format_text("text").replace(self.args["indexString"], arg))}
+            text_to_show = json.loads(self.format_text("text").replace(self.args["indexString"], arg))
+            return {"action": "show_text", inner_key: text_to_show}
         self.add_formatted_text_prop(
-            "hoverEvent", inner, self.check_bool("local"))
+            outer_key, inner, self.check_bool("local"))
         return ""
 
 
@@ -1470,9 +1529,22 @@ class TextPropHoverItem(JMCFunction):
                 self.raw_args["item"].token,
                 self.tokenizer)
 
-        self.add_formatted_text_prop(
-            "hoverEvent", {
-                "action": "show_item", "contents": json.loads(self.args["item"])}, self.check_bool("local"))
+        item_to_show = json.loads(self.args["item"])
+
+        if self.datapack.version < 62:
+            key = "hoverEvent"
+            body = {
+                "action": "show_item", 
+                "contents": item_to_show
+            }
+        else:
+            key = "hover_event"
+            body = {
+                "action": "show_item",
+                **item_to_show
+            }
+            
+        self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
 
 
@@ -1501,12 +1573,19 @@ class TextPropsHoverItem(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {
-                "action": "show_item", "contents": json.loads(self.args["item"].replace(self.args["indexString"], arg))}
+            item_to_show = json.loads(self.args["item"].replace(self.args["indexString"], arg))
+            
+            if self.datapack.version < 62: 
+                return {"action": "show_item", "contents": item_to_show}
+            else: 
+                return {"action": "show_item", **item_to_show}
+            
         self.add_formatted_text_prop(
-            "hoverEvent", inner, self.check_bool("local"))
+            "hoverEvent" if self.datapack.version < 62 else "hover_event", 
+            inner, 
+            self.check_bool("local")
+        )
         return ""
-
 
 @func_property(
     func_type=FuncType.LOAD_ONLY,
@@ -1530,9 +1609,22 @@ class TextPropHoverEntity(JMCFunction):
                 self.raw_args["entity"].token,
                 self.tokenizer)
 
-        self.add_formatted_text_prop(
-            "hoverEvent", {
-                "action": "show_entity", "contents": json.loads(self.args["entity"])}, self.check_bool("local"))
+        entity_to_show = json.loads(self.args["entity"])
+
+        if self.datapack.version < 62:
+            key = "hoverEvent"
+            body = {
+                "action": "show_entity", 
+                "contents": entity_to_show
+            }
+        else:
+            key = "hover_event"
+            body = {
+                "action": "show_entity",
+                **entity_to_show
+            }
+            
+        self.add_formatted_text_prop(key, body, self.check_bool("local"))
         return ""
 
 
@@ -1561,10 +1653,18 @@ class TextPropsHoverEntity(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            return {
-                "action": "show_entity", "contents": json.loads(self.args["entity"].replace(self.args["indexString"], arg))}
+            entity_to_show = json.loads(self.args["entity"].replace(self.args["indexString"], arg))
+            
+            if self.datapack.version < 62: 
+                return {"action": "show_entity", "contents": entity_to_show}
+            else: 
+                return {"action": "show_entity", **entity_to_show}
+            
         self.add_formatted_text_prop(
-            "hoverEvent", inner, self.check_bool("local"))
+            "hoverEvent" if self.datapack.version < 62 else "hover_event", 
+            inner, 
+            self.check_bool("local")
+        )
         return ""
 
 
