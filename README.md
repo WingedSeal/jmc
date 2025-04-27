@@ -1,4 +1,4 @@
-# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://github.com/WingedSeal/jmc/blob/main/LICENSE) [![release](https://badgen.net/badge/release/v1.2.17/blue/)](https://github.com/WingedSeal/jmc/releases/latest) [![build-passing](https://badgen.net/badge/build/passing/green/)](https://wingedseal.github.io/jmc/#/) [![discord-invite](https://badgen.net/badge/discord/Official-Server/blue/?icon=discord)](https://discord.gg/PNWKpwdzD3)
+# JMC &middot; [![license-mit](https://badgen.net/badge/license/MIT/blue/)](https://github.com/WingedSeal/jmc/blob/main/LICENSE) [![release](https://badgen.net/badge/release/v1.2.18/blue/)](https://github.com/WingedSeal/jmc/releases/latest) [![build-passing](https://badgen.net/badge/build/passing/green/)](https://wingedseal.github.io/jmc/#/) [![discord-invite](https://badgen.net/badge/discord/Official-Server/blue/?icon=discord)](https://discord.gg/PNWKpwdzD3)
 
 ## (JavaScript-like Minecraft Function)
 
@@ -85,7 +85,7 @@ In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/d
 pip install jmcfunction --pre
 ```
 
-*Latest unreleased build:*
+_Latest unreleased build:_
 
 ```bash
 pip install git+https://github.com/WingedSeal/jmc.git#subdirectory=src
