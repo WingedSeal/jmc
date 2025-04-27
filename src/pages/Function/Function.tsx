@@ -294,7 +294,7 @@ const Function = () => {
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Vanilla Function Macro (Minecraft 1.20+)
                 </div>
-                <section id="class" />
+                <section id="macro" />
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
@@ -313,6 +313,53 @@ const Function = () => {
                         <br />
                         <CodeText type="function">function_name</CodeText>
                         () with <CodeText type="operator">...</CodeText>;
+                    </CodeBlock>
+                    <code>with</code> works with storage, entity and block too.
+                    <CodeBlock>
+                        <CodeText type="function">function_name</CodeText>
+                        () with {"{"}
+                        <CodeText type="string">"key"</CodeText>
+                        <CodeText type="operator">:</CodeText>
+                        <CodeText type="string">"value"</CodeText>
+                        {"}"}
+                        ;
+                        <br />
+                        <CodeText type="function">function_name</CodeText>
+                        () with <CodeText type="class">my_storage</CodeText>
+                        <CodeText type="operator">::</CodeText>
+                        <CodeText type="param">path</CodeText>
+                        <CodeText type="operator">.</CodeText>
+                        <CodeText type="param">to</CodeText>
+                        <CodeText type="operator">.</CodeText>
+                        <CodeText type="param">element</CodeText>
+                        ;
+                        <br />
+                        <CodeText type="function">function_name</CodeText>
+                        () with <CodeText type="param">@a[tag=jmc]</CodeText>
+                        ;
+                        <br />
+                        <CodeText type="function">function_name</CodeText>
+                        () with <CodeText type="number">~ 10 ~</CodeText>;
+                    </CodeBlock>
+                    <p>
+                        It also has a special feature that automatically convert
+                        variables into nbt storage for macro usage. Simply use
+                        it with a list of variable. Then use <code>$(n)</code>{" "}
+                        to access item n, starting with 0.
+                    </p>
+                    <CodeBlock>
+                        execute run {"{"}
+                        <br />
+                        <Tab />
+                        <CodeText type="operator">$</CodeText>tp{" "}
+                        <CodeText type="param">@s</CodeText>{" "}
+                        <CodeText type="number">$(0) $(1) $(2)</CodeText>;
+                        <br />
+                        {"}"} with [<CodeText type="variable">$x</CodeText>
+                        <CodeText type="operator">,</CodeText>{" "}
+                        <CodeText type="variable">$y</CodeText>
+                        <CodeText type="operator">,</CodeText>{" "}
+                        <CodeText type="variable">$z</CodeText>];
                     </CodeBlock>
                 </div>
             </section>
