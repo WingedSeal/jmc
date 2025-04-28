@@ -79,7 +79,7 @@ In "datapacks" folder of your world file (Usually `.minecraft/saves/world_name/d
 
 ![Installation](https://github.com/WingedSeal/jmc/blob/webpage/src/assets/image/installation/file_location.png?raw=true)
 
--   **Python 3.10+**
+-   **Python 3.12+**
 
 ```bash
 pip install jmcfunction --pre
