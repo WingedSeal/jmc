@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 from typing import Iterator
 
+from ....compile.datapack import DataPack
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
 from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError
@@ -198,6 +199,21 @@ class ItemReplaceEntity(JMCFunction):
                 suggestion=f"Use Item.create to make this item BEFORE using {self.call_string}",
             )
         return f'item replace entity {self.args["selector"]} {self.args["slot"]} with {self.datapack.data.item[self.args["itemId"]]} {self.args["count"]}'
+
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.call",
+    arg_type={"function": ArgType.FUNC},
+    name="jmc_call",
+)
+class JMCCall(JMCFunction):
+    def call(self) -> str:
+        count = self.datapack.get_count(self.name)
+        function_call = self.datapack.add_private_function(
+            self.name, self.args["function"], count
+        )
+        return function_call
 
 
 @func_property(
