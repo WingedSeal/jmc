@@ -1,4 +1,6 @@
 """Module handling datapack"""
+
+from ast import arg
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
@@ -7,7 +9,12 @@ from json import JSONEncoder, dumps
 from .pack_version import PackVersion
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
-from .exception import JMCSyntaxException, JMCSyntaxWarning, JMCValueError, JMCMissingValueError
+from .exception import (
+    JMCSyntaxException,
+    JMCSyntaxWarning,
+    JMCValueError,
+    JMCMissingValueError,
+)
 from .log import Logger
 from .header import Header
 
@@ -35,11 +42,35 @@ class PreFunction:
     """
     A class representation of a row function yet to be parsed
     """
-    __slots__ = ("func_content", "jmc_file_path",
-                 "line", "col", "file_string", "func_path", "self_token", "params", "lexer", "tokenizer", "prefix")
 
-    def __init__(self, func_content: str, jmc_file_path: str,
-                 line: int, col: int, file_string: str, func_path: str, self_token: Token, params: Token, lexer: "Lexer", tokenizer: Tokenizer, prefix: str) -> None:
+    __slots__ = (
+        "func_content",
+        "jmc_file_path",
+        "line",
+        "col",
+        "file_string",
+        "func_path",
+        "self_token",
+        "params",
+        "lexer",
+        "tokenizer",
+        "prefix",
+    )
+
+    def __init__(
+        self,
+        func_content: str,
+        jmc_file_path: str,
+        line: int,
+        col: int,
+        file_string: str,
+        func_path: str,
+        self_token: Token,
+        params: Token,
+        lexer: "Lexer",
+        tokenizer: Tokenizer,
+        prefix: str,
+    ) -> None:
         self.func_content = func_content
         self.self_token = self_token
         self.params = params
@@ -53,39 +84,69 @@ class PreFunction:
         self.prefix = prefix
 
     def parse(self, func_content: str | None = None) -> "Function":
-        return Function(self.lexer.parse_func_content(
-            (self.func_content if func_content is None else func_content), self.jmc_file_path, self.line, self.col, self.file_string, self.prefix))
+        return Function(
+            self.lexer.parse_func_content(
+                (self.func_content if func_content is None else func_content),
+                self.jmc_file_path,
+                self.line,
+                self.col,
+                self.file_string,
+                self.prefix,
+            )
+        )
 
-    def handle_lazy(self, args: list[list[Token]],
-                    kwargs: dict[str, list[Token]], error_token: Token, hardcode_parse_calc: Callable[[int, str, Token, Tokenizer], str]) -> str:
+    def handle_lazy(
+        self,
+        args: list[list[Token]],
+        kwargs: dict[str, list[Token]],
+        error_token: Token,
+        hardcode_parse_calc: Callable[[int, str, Token, Tokenizer], str],
+    ) -> str:
         param_arg: dict[str, str] = {}
         params = self.tokenizer.parse_param(self.params)
         if len(args) > len(params):
             raise JMCValueError(
-                f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}", self.tokenizer.merge_tokens(args[-1]), self.tokenizer)
+                f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}",
+                self.tokenizer.merge_tokens(args[-1]),
+                self.tokenizer,
+            )
         for index, param in enumerate(params):
             if param in kwargs:
                 param_arg[param] = self.tokenizer.merge_tokens(
-                    kwargs[param], use_full_string=True).string
+                    kwargs[param], use_full_string=True
+                ).string
                 del kwargs[param]
                 continue
 
             if len(args) <= index:
                 raise JMCValueError(
-                    f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}", error_token, self.tokenizer)
+                    f"{self.self_token.string}() takes {len(params)} positional arguments, got {len(args)}",
+                    error_token,
+                    self.tokenizer,
+                )
+            if args[index] and args[index][0].token_type == TokenType.FUNC:
+                token = args[index][0]
+                args[index].insert(
+                    0, Token(token.token_type, token.line, token.col, "()=>")
+                )
             param_arg[param] = self.tokenizer.merge_tokens(
-                args[index], use_full_string=True).string
+                args[index], use_full_string=True
+            ).string
 
         if kwargs:
             raise JMCValueError(
-                f"{self.self_token.string}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'", self.tokenizer.merge_tokens(list(kwargs.values())[-1]), self.tokenizer)
+                f"{self.self_token.string}() got an unexpected keyword argument '{list(kwargs.keys())[-1]}'",
+                self.tokenizer.merge_tokens(list(kwargs.values())[-1]),
+                self.tokenizer,
+            )
 
         func_content = None
         for _param, _arg in sorted(
-                param_arg.items(), key=lambda item: len(item[0]), reverse=True):
+            param_arg.items(), key=lambda item: len(item[0]), reverse=True
+        ):
             func_content = (
-                self.func_content if func_content is None else func_content).replace(
-                "$" + _param, _arg)
+                self.func_content if func_content is None else func_content
+            ).replace("$" + _param, _arg)
         if func_content is None:
             func_content = self.func_content
         while True:
@@ -93,7 +154,9 @@ class PreFunction:
             if calc_pos == -1:
                 break
             func_content = hardcode_parse_calc(
-                calc_pos, func_content, self.self_token, self.tokenizer)
+                calc_pos, func_content, self.self_token, self.tokenizer
+            )
+
         return "\n".join(self.parse(func_content).commands)
 
 
@@ -103,7 +166,8 @@ class Function:
 
     :param commands: List of minecraft commands(string), defaults to empty list
     """
-    __slots__ = ("commands", )
+
+    __slots__ = ("commands",)
     commands: list[str]
 
     def __init__(self, commands: list[str] | None = None) -> None:
@@ -116,7 +180,7 @@ class Function:
         """
         Add empty line at the end of the function
         """
-        self.commands.append('')
+        self.commands.append("")
 
     def append(self, command: str) -> None:
         """
@@ -194,8 +258,7 @@ class Function:
         :param strings: minecraft commands(strings),each string can have multiple lines
         :return: minecraft commands(strings),each string can have only a single line
         """
-        return [
-            line for string in strings for line in string.split("\n") if line]
+        return [line for string in strings for line in string.split("\n") if line]
 
 
 class DataPack:
@@ -205,13 +268,27 @@ class DataPack:
     :param namespace: Datapack's namespace
     :param lexer: Lexer object
     """
-    __slot__ = ("data", "ints",
-                "functions", "load_function", "jsons",
-                "private_functions", "private_function_count",
-                "_scoreboards", "loads", "ticks", "namespace",
-                "used_command", "lexer", "defined_file_pos",
-                "after_ticks", "after_loads", "version",
-                "after_func")
+
+    __slot__ = (
+        "data",
+        "ints",
+        "functions",
+        "load_function",
+        "jsons",
+        "private_functions",
+        "private_function_count",
+        "_scoreboards",
+        "loads",
+        "ticks",
+        "namespace",
+        "used_command",
+        "lexer",
+        "defined_file_pos",
+        "after_ticks",
+        "after_loads",
+        "version",
+        "after_func",
+    )
     private_name = "__private__"
     load_name = "__load__"
     tick_name = "__tick__"
@@ -221,8 +298,7 @@ class DataPack:
     VARIABLE_SIGN = "$"
     """Data read from header file(s)"""
 
-    def __init__(self, namespace: str, pack_format: int,
-                 lexer: "Lexer") -> None:
+    def __init__(self, namespace: str, pack_format: int, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
         self.version: PackVersion = PackVersion(pack_format)
         """Datapack's version details"""
@@ -236,14 +312,11 @@ class DataPack:
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
         """Dictionary of json name and a dictionary(jsobject)"""
-        self.private_functions: dict[str,
-                                     dict[str, Function]] = defaultdict(dict)
+        self.private_functions: dict[str, dict[str, Function]] = defaultdict(dict)
         """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
-        self.scoreboards: dict[str, str] = {
-            self.var_name: "dummy"
-        }
+        self.scoreboards: dict[str, str] = {self.var_name: "dummy"}
         """Minecraft scoreboards that are going to be created"""
 
         self.loads: list[str] = []
@@ -289,7 +362,8 @@ class DataPack:
         """
         if objective in self.scoreboards and self.scoreboards[objective] != criteria:
             raise ValueError(
-                f"Conflict on adding scoreboard, '{objective}' objective with '{self.scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria.")
+                f"Conflict on adding scoreboard, '{objective}' objective with '{self.scoreboards[objective]}' criteria already exist.\nGot same objective with '{criteria}' criteria."
+            )
         self.scoreboards[objective] = criteria
 
     def get_count(self, name: str) -> str:
@@ -313,8 +387,9 @@ class DataPack:
         """
         return f"function {self.namespace}:{self.private_name}/{name}/{count}"
 
-    def add_private_json(self, json_type: str, name: str,
-                         json: dict[str, Any] | list[Any]) -> None:
+    def add_private_json(
+        self, json_type: str, name: str, json: dict[str, Any] | list[Any]
+    ) -> None:
         """
         Add new private json to datapack
 
@@ -326,8 +401,9 @@ class DataPack:
             json_type = json_type[:-1]
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 
-    def add_json(self, json_type: str, name: str,
-                 json: dict[str, Any] | list[Any]) -> None:
+    def add_json(
+        self, json_type: str, name: str, json: dict[str, Any] | list[Any]
+    ) -> None:
         """
         Add new private json to datapack
 
@@ -337,8 +413,14 @@ class DataPack:
         """
         self.jsons[f"{json_type}/{name}"] = json
 
-    def add_arrow_function(self, name: str, token: Token | list[Token],
-                           tokenizer: Tokenizer, prefix: str, force_create_func: bool = False) -> str:
+    def add_arrow_function(
+        self,
+        name: str,
+        token: Token | list[Token],
+        tokenizer: Tokenizer,
+        prefix: str,
+        force_create_func: bool = False,
+    ) -> str:
         """
         Add private function for user (arrow function)
 
@@ -350,19 +432,27 @@ class DataPack:
         """
         if not isinstance(token, list) and token.string == "{}":
             raise JMCSyntaxWarning(
-                "Unexpected empty function content.", token, tokenizer)
+                "Unexpected empty function content.", token, tokenizer
+            )
 
         commands = self.parse_function_token(token, tokenizer, prefix)
-        if not force_create_func and len(
-                commands) == 1 and NEW_LINE not in commands[0]:
+        if not force_create_func and len(commands) == 1 and NEW_LINE not in commands[0]:
             return commands[0]
 
         count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def add_custom_private_function(self, name: str, token: Token | list[Token], tokenizer: Tokenizer, count: str | None = None, prefix: str = "",
-                                    precommands: list[str] | None = None, postcommands: list[str] | None = None) -> str:
+    def add_custom_private_function(
+        self,
+        name: str,
+        token: Token | list[Token],
+        tokenizer: Tokenizer,
+        count: str | None = None,
+        prefix: str = "",
+        precommands: list[str] | None = None,
+        postcommands: list[str] | None = None,
+    ) -> str:
         """
         Wrap custom commands around user's commands
 
@@ -379,9 +469,11 @@ class DataPack:
         if postcommands is None:
             postcommands = []
 
-        commands = [*precommands,
-                    *self.parse_function_token(token, tokenizer, prefix),
-                    *postcommands]
+        commands = [
+            *precommands,
+            *self.parse_function_token(token, tokenizer, prefix),
+            *postcommands,
+        ]
         if count is None:
             count = self.get_count(name)
         self.private_functions[name][count] = Function(commands)
@@ -397,8 +489,13 @@ class DataPack:
 
         self.functions[name] = Function(commands)
 
-    def add_private_function(self, name: str, command: str,
-                             count: str | None = None, force_create_func: bool = False) -> str:
+    def add_private_function(
+        self,
+        name: str,
+        command: str,
+        count: str | None = None,
+        force_create_func: bool = False,
+    ) -> str:
         """
         Add private function but don't create new function unless it's neccessary
 
@@ -417,7 +514,8 @@ class DataPack:
         return self.call_func(name, count)
 
     def add_raw_private_function(
-            self, name: str, commands: list[str], count: str | None = None) -> str:
+        self, name: str, commands: list[str], count: str | None = None
+    ) -> str:
         """
         Add private function for JMC as is
 
@@ -431,8 +529,9 @@ class DataPack:
         self.private_functions[name][count] = Function(commands)
         return self.call_func(name, count)
 
-    def parse_function_token(self, token: Token | list[Token],
-                             tokenizer: Tokenizer, prefix: str) -> list[str]:
+    def parse_function_token(
+        self, token: Token | list[Token], tokenizer: Tokenizer, prefix: str
+    ) -> list[str]:
         """
         "Parse a paren_curly token into a list of commands(string)
 
@@ -442,9 +541,16 @@ class DataPack:
         """
         if isinstance(token, list):
             return self.lexer._parse_func_content(
-                tokenizer, [token], prefix, is_load=False)
+                tokenizer, [token], prefix, is_load=False
+            )
         return self.lexer.parse_func_content(
-            token.string[1:-1], tokenizer.file_path, token.line, token.col, tokenizer.file_string, prefix)
+            token.string[1:-1],
+            tokenizer.file_path,
+            token.line,
+            token.col,
+            tokenizer.file_string,
+            prefix,
+        )
 
     def format_func_path(self, func: str) -> str:
         """
@@ -460,8 +566,7 @@ class DataPack:
             return f"{first_folder}:{rest_of_name}"
         return f"{self.namespace}:{func}"
 
-    def add_tick_command(self, command: str, *,
-                         is_after: bool = False) -> None:
+    def add_tick_command(self, command: str, *, is_after: bool = False) -> None:
         """
         Add command to self.ticks or self.after_ticks
 
@@ -473,8 +578,7 @@ class DataPack:
         else:
             self.ticks.append(command)
 
-    def add_load_command(self, command: str, *,
-                         is_after: bool = False) -> None:
+    def add_load_command(self, command: str, *, is_after: bool = False) -> None:
         """
         Add command to self.loads or self.after_loads
 
@@ -504,8 +608,10 @@ class DataPack:
         if self.ints:
             self.add_objective(self.int_name)
         self.loads[0:0] = [
-            *[f"scoreboard objectives add {objective} {criteria}" for objective,
-                criteria in self.scoreboards.items()],
+            *[
+                f"scoreboard objectives add {objective} {criteria}"
+                for objective, criteria in self.scoreboards.items()
+            ],
             *[f"scoreboard players set {n} {self.int_name} {n}" for n in self.ints],
         ]
         if self.loads:
@@ -519,35 +625,45 @@ class DataPack:
                 self.functions[self.tick_name] = Function(self.ticks)
         if self.after_ticks:
             if self.tick_name in self.functions:
-                self.functions[self.tick_name].extend(
-                    self.after_ticks)
+                self.functions[self.tick_name].extend(self.after_ticks)
             else:
                 self.functions[self.tick_name] = Function(self.after_ticks)
         for _func_path, _commands in self.after_func.items():
             if _func_path not in self.functions:
                 raise JMCValueError(
-                    f"Function '{_func_path}' was not defined", self.after_func_token[_func_path][0], self.after_func_token[_func_path][1])
+                    f"Function '{_func_path}' was not defined",
+                    self.after_func_token[_func_path][0],
+                    self.after_func_token[_func_path][1],
+                )
             self.functions[_func_path].extend(_commands)
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
 
-        for function_called, (token,
-                              tokenizer) in self.functions_called.items():
-            if function_called not in self.functions and function_called.split(
-                    "/")[0].strip() not in Header().namespace_overrides:
+        for function_called, (token, tokenizer) in self.functions_called.items():
+            if (
+                function_called not in self.functions
+                and function_called.split("/")[0].strip()
+                not in Header().namespace_overrides
+            ):
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
-                        f"Lazy function '{function_called}' used before definition.", token, tokenizer, suggestion="Lazy function has to be defined BEFORE using.")
+                        f"Lazy function '{function_called}' used before definition.",
+                        token,
+                        tokenizer,
+                        suggestion="Lazy function has to be defined BEFORE using.",
+                    )
                 raise JMCValueError(
-                    f"Function '{function_called}' was not defined", token, tokenizer)
+                    f"Function '{function_called}' was not defined", token, tokenizer
+                )
 
         self.private_functions = {}
         self.loads = []
         self.ticks = []
 
-    def parse_func_map(self, token: Token,
-                       tokenizer: Tokenizer, prefix: str) -> dict[int, tuple[str, bool]]:
+    def parse_func_map(
+        self, token: Token, tokenizer: Tokenizer, prefix: str
+    ) -> dict[int, tuple[str, bool]]:
         """
         Parse JMC function hashmap
 
@@ -562,20 +678,25 @@ class DataPack:
                 num = int(key)
             except ValueError as error:
                 raise JMCValueError(
-                    f"Expected number as key (got {key})", token, tokenizer) from error
+                    f"Expected number as key (got {key})", token, tokenizer
+                ) from error
 
             if value.token_type == TokenType.KEYWORD:
                 func_map[num] = value.string, False
             elif value.token_type == TokenType.FUNC:
-                func_map[num] = "\n".join(
-                    self.parse_function_token(value, tokenizer, prefix)), True
+                func_map[num] = (
+                    "\n".join(self.parse_function_token(value, tokenizer, prefix)),
+                    True,
+                )
             else:
                 raise JMCValueError(
-                    f"Expected function, got {value.token_type.value}", token, tokenizer)
+                    f"Expected function, got {value.token_type.value}", token, tokenizer
+                )
         return func_map
 
-    def parse_list(self, token: Token,
-                   tokenizer: Tokenizer, list_of: TokenType) -> tuple[list[str], list[Token]]:
+    def parse_list(
+        self, token: Token, tokenizer: Tokenizer, list_of: TokenType
+    ) -> tuple[list[str], list[Token]]:
         """
         Parse paren_square token into list of strings
 
@@ -592,11 +713,15 @@ class DataPack:
                 if token_.token_type == TokenType.PAREN_SQUARE:
                     token_type = "list"
                 raise JMCValueError(
-                    f"Expected list/array of {list_of.value}, got list/array of {token_type}", token, tokenizer)
+                    f"Expected list/array of {list_of.value}, got list/array of {token_type}",
+                    token,
+                    tokenizer,
+                )
         return [token_.string for token_ in token_list], token_list
 
-    def parse_lists(self, token: Token,
-                    tokenizer: Tokenizer, list_of: TokenType) -> tuple[list[list[str]], list[list[Token]]]:
+    def parse_lists(
+        self, token: Token, tokenizer: Tokenizer, list_of: TokenType
+    ) -> tuple[list[list[str]], list[list[Token]]]:
         """
         Parse paren_square token into list of list of strings
 
@@ -612,15 +737,18 @@ class DataPack:
         for token_ in token_list:
             if token_.token_type != TokenType.PAREN_SQUARE:
                 raise JMCValueError(
-                    f"Expected list/array of list/array of {list_of.value}, got list/array of {token_.token_type}", token, tokenizer)
-            result_string, result_token = self.parse_list(
-                token_, tokenizer, list_of)
+                    f"Expected list/array of list/array of {list_of.value}, got list/array of {token_.token_type}",
+                    token,
+                    tokenizer,
+                )
+            result_string, result_token = self.parse_list(token_, tokenizer, list_of)
             result_strings.append(result_string)
             result_tokens.append(result_token)
         return result_strings, result_tokens
 
     def token_dict_to_raw_js_object(
-            self, token_dict: dict[str, Token], tokenizer: Tokenizer) -> str:
+        self, token_dict: dict[str, Token], tokenizer: Tokenizer
+    ) -> str:
         """
         Turns a dictionary of key and token to a string in form of Object
 
@@ -631,9 +759,14 @@ class DataPack:
         for key, token in token_dict.items():
             if token.token_type == TokenType.STRING:
                 pairs.append(f"{key}:{token.add_quotation()}")
-            elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_ROUND, TokenType.PAREN_SQUARE}:
+            elif token.token_type in {
+                TokenType.PAREN_CURLY,
+                TokenType.PAREN_ROUND,
+                TokenType.PAREN_SQUARE,
+            }:
                 pairs.append(
-                    f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}")
+                    f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                )
             else:
                 pairs.append(f"{key}:{token.string}")
         return "{" + ",".join(pairs) + "}"

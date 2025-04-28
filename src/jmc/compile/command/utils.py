@@ -1,4 +1,5 @@
 """Untility for commands"""
+
 import ast
 import json
 import operator as op
@@ -32,19 +33,16 @@ class ScoreboardPlayer:
 def is_obj_selector(tokens: list[Token], start_index: int = 0) -> bool:
     return (
         len(tokens) >= start_index + 3
-        and
-        tokens[start_index].token_type == TokenType.KEYWORD
-        and
-        tokens[start_index + 1].token_type == TokenType.OPERATOR
-        and
-        tokens[start_index + 1].string == ":"
-        and
-        tokens[start_index + 2].token_type == TokenType.KEYWORD
+        and tokens[start_index].token_type == TokenType.KEYWORD
+        and tokens[start_index + 1].token_type == TokenType.OPERATOR
+        and tokens[start_index + 1].string == ":"
+        and tokens[start_index + 2].token_type == TokenType.KEYWORD
     )
 
 
-def merge_obj_selector(tokens: list[Token], tokenizer: Tokenizer,
-                       datapack: DataPack, start_index: int = 0) -> Token:
+def merge_obj_selector(
+    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, start_index: int = 0
+) -> Token:
     """
     Merge objective:selector[] into one token
 
@@ -55,25 +53,34 @@ def merge_obj_selector(tokens: list[Token], tokenizer: Tokenizer,
     :raises ValueError: Impossible tokens array length (merge_obj_selector used without is_obj_selector)
     :return: Merged token
     """
-    if len(tokens) >= start_index + \
-            4 and tokens[start_index + 3].token_type == TokenType.PAREN_SQUARE:
-        tokens[start_index + 3] = Token(tokens[start_index + 3].token_type, tokens[start_index + 3].line, tokens[start_index + 3].col, datapack.lexer.clean_up_paren_token(
-            tokens[start_index + 3], tokenizer))
+    if (
+        len(tokens) >= start_index + 4
+        and tokens[start_index + 3].token_type == TokenType.PAREN_SQUARE
+    ):
+        tokens[start_index + 3] = Token(
+            tokens[start_index + 3].token_type,
+            tokens[start_index + 3].line,
+            tokens[start_index + 3].col,
+            datapack.lexer.clean_up_paren_token(
+                tokens[start_index + 3], tokenizer),
+        )
         return_value = tokenizer.merge_tokens(
-            tokens[start_index:start_index + 4])
-        del tokens[start_index + 1:start_index + 4]
+            tokens[start_index: start_index + 4])
+        del tokens[start_index + 1: start_index + 4]
         return return_value
     elif len(tokens) >= start_index + 3:
         return_value = tokenizer.merge_tokens(
-            tokens[start_index:start_index + 3])
-        del tokens[start_index + 1:start_index + 3]
+            tokens[start_index: start_index + 3])
+        del tokens[start_index + 1: start_index + 3]
         return return_value
     raise ValueError(
-        "Impossible tokens array length (merge_obj_selector used without is_obj_selector)")
+        "Impossible tokens array length (merge_obj_selector used without is_obj_selector)"
+    )
 
 
 def find_scoreboard_player_type(
-        token: Token, tokenizer: Tokenizer, allow_integer: bool = True) -> ScoreboardPlayer:
+    token: Token, tokenizer: Tokenizer, allow_integer: bool = True
+) -> ScoreboardPlayer:
     """
     Generate ScoreboardPlayer including its type from a keyword token
 
@@ -84,12 +91,13 @@ def find_scoreboard_player_type(
     :return: ScoreboardPlayer
     """
     if token.token_type != TokenType.KEYWORD:
-        raise JMCSyntaxException(
-            "Expected keyword", token, tokenizer)
+        raise JMCSyntaxException("Expected keyword", token, tokenizer)
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
-        return ScoreboardPlayer(player_type=PlayerType.VARIABLE, value=(
-            DataPack.var_name, token.string))
+        return ScoreboardPlayer(
+            player_type=PlayerType.VARIABLE, value=(
+                DataPack.var_name, token.string)
+        )
 
     if is_number(token.string):
         return ScoreboardPlayer(
@@ -99,11 +107,19 @@ def find_scoreboard_player_type(
     if len(splits) == 1:
         if allow_integer:
             raise JMCSyntaxException(
-                f"Expected integer, variable, or objective:selector (got '{splits[0]}')", token, tokenizer)
+                f"Expected integer, variable, or objective:selector (got '{
+                    splits[0]}')",
+                token,
+                tokenizer,
+            )
         raise JMCSyntaxException(
-            f"Expected variable or objective:selector (got '{splits[0]}')", token, tokenizer)
+            f"Expected variable or objective:selector (got '{splits[0]}')",
+            token,
+            tokenizer,
+        )
     return ScoreboardPlayer(
-        player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1]))
+        player_type=PlayerType.SCOREBOARD, value=(splits[0], splits[1])
+    )
 
 
 class NumberType(Enum):
@@ -155,7 +171,12 @@ class Arg:
                     ":") == 1:
                 return self
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+            )
         if verifier == ArgType.SCOREBOARD:
             if self.arg_type == ArgType.SCOREBOARD:
                 return self
@@ -164,12 +185,22 @@ class Arg:
                 self.arg_type = ArgType.SCOREBOARD
                 return self
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+            )
         if verifier == ArgType.FLOAT:
             if self.arg_type in {ArgType.FLOAT, ArgType.INTEGER}:
                 return self
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+            )
         if verifier == ArgType.FUNC:
             if self.arg_type == ArgType.ARROW_FUNC:
                 return self
@@ -177,7 +208,12 @@ class Arg:
                 self.arg_type = ArgType._FUNC_CALL
                 return self
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+            )
         if verifier == ArgType.SELECTOR:
             if self.arg_type == ArgType.SELECTOR:
                 return self
@@ -185,7 +221,12 @@ class Arg:
                 self.arg_type = ArgType.SELECTOR
                 return self
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+            )
         if verifier == ArgType.KEYWORD:
             if key_string.startswith("@"):
                 raise JMCValueError(
@@ -193,20 +234,28 @@ class Arg:
                         verifier.value}, got {
                         ArgType.SELECTOR.value}",
                     self.token,
-                    tokenizer)
+                    tokenizer,
+                )
             if ":" in key_string:
                 raise JMCValueError(
                     f"For '{key_string}' key, expected {
                         verifier.value}, got {
                         ArgType.SCOREBOARD.value}",
                     self.token,
-                    tokenizer)
+                    tokenizer,
+                )
         if verifier != self.arg_type:
             suggestion = None
             if verifier == ArgType.STRING:
                 suggestion = f"Did you mean: ' \"{self.token.string}\" '"
             raise JMCValueError(
-                f"For '{key_string}' key, expected {verifier.value}, got {self.arg_type.value}", self.token, tokenizer, suggestion=suggestion)
+                f"For '{key_string}' key, expected {
+                    verifier.value}, got {
+                    self.arg_type.value}",
+                self.token,
+                tokenizer,
+                suggestion=suggestion,
+            )
         return self
 
 
@@ -239,7 +288,8 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                 f"Unexpected {
                     tokens[1].token_type.value} after integer in function argument",
                 tokens[1],
-                tokenizer)
+                tokenizer,
+            )
         return ArgType.INTEGER
     if is_float(tokens[0].string):
         if len(tokens) > 1:
@@ -247,17 +297,19 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                 f"Unexpected {
                     tokens[1].token_type.value} after float/decimal in function argument",
                 tokens[1],
-                tokenizer)
+                tokenizer,
+            )
         return ArgType.FLOAT
 
-    if tokens[0].string in {'-', '+'} and len(tokens) > 1:
+    if tokens[0].string in {"-", "+"} and len(tokens) > 1:
         if is_number(tokens[1].string):
             if len(tokens) > 2:
                 raise JMCSyntaxException(
                     f"Unexpected {
                         tokens[2].token_type.value} after integer in function argument",
                     tokens[2],
-                    tokenizer)
+                    tokenizer,
+                )
             return ArgType.INTEGER
         if is_float(tokens[1].string):
             if len(tokens) > 1:
@@ -265,16 +317,14 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     f"Unexpected {
                         tokens[2].token_type.value} after float/decimal in function argument",
                     tokens[2],
-                    tokenizer)
+                    tokenizer,
+                )
             return ArgType.FLOAT
 
     if (
         len(tokens) == 3
-        and
-        tokens[0].string.startswith(
-            DataPack.VARIABLE_SIGN)
-        and
-        tokens[1].string == ':'
+        and tokens[0].string.startswith(DataPack.VARIABLE_SIGN)
+        and tokens[1].string == ":"
     ):
         return ArgType.SCOREBOARD
     if tokens[0].string.startswith("@"):
@@ -286,13 +336,15 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     "Unexpected token after target selector",
                     tokens[2],
                     tokenizer,
-                    suggestion="This can be a result from missing comma or missing quotation mark")
+                    suggestion="This can be a result from missing comma or missing quotation mark",
+                )
             return ArgType.SELECTOR
         raise JMCSyntaxException(
             f"Expected '[' or nothing after target selector type (got {
                 tokens[1].token_type})",
             tokens[1],
-            tokenizer)
+            tokenizer,
+        )
 
     if tokens[0].token_type == TokenType.KEYWORD:
         if len(tokens) == 1:
@@ -305,15 +357,16 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                     "2 keywords are next to each other in function argument",
                     token,
                     tokenizer,
-                    suggestion="This can be a result from missing comma or missing quotation mark")
+                    suggestion="This can be a result from missing comma or missing quotation mark",
+                )
         return ArgType.KEYWORD
 
-    raise JMCValueError(
-        "Unknown argument type", tokens[-1], tokenizer)
+    raise JMCValueError("Unknown argument type", tokens[-1], tokenizer)
 
 
-def verify_list(expected_arg_type: ArgType, token: Token,
-                tokenizer: Tokenizer) -> list[Arg]:
+def verify_list(
+    expected_arg_type: ArgType, token: Token, tokenizer: Tokenizer
+) -> list[Arg]:
     """
     Verify list types of a paren_square token
 
@@ -327,30 +380,30 @@ def verify_list(expected_arg_type: ArgType, token: Token,
     if kwargs:
         for key, kwarg in kwargs.items():
             raise JMCValueError(
-                f"Unexpected keyword argument in a list '{key}'", kwarg[-1], tokenizer)
+                f"Unexpected keyword argument in a list '{key}'", kwarg[-1], tokenizer
+            )
     for arg in args:
         arg_type = find_arg_type(arg, tokenizer)
         arg_token = tokenizer.merge_tokens(arg)
         try:
-            results.append(Arg(
-                arg_token,
-                arg_type).verify(
-                expected_arg_type,
-                tokenizer,
-                'list'
-            ))
+            results.append(
+                Arg(arg_token, arg_type).verify(
+                    expected_arg_type, tokenizer, "list")
+            )
         except JMCValueError as error:
             raise JMCValueError(
                 f"In the list, expected {
                     expected_arg_type.value}, got {
                     arg_type.value}",
                 arg_token,
-                tokenizer) from error
+                tokenizer,
+            ) from error
     return results
 
 
-def verify_args(params: dict[str, ArgType], feature_name: str,
-                token: Token, tokenizer: Tokenizer) -> dict[str, Arg | None]:
+def verify_args(
+    params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer
+) -> dict[str, Arg | None]:
     """
     Verify argument types of a paren_round token
 
@@ -367,7 +420,12 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
     key_list = list(params)
     if len(args) > len(key_list):
         raise JMCValueError(
-            f"{feature_name} takes {len(key_list)} positional arguments, got {len(args)}", token, tokenizer)
+            f"{feature_name} takes {
+                len(key_list)} positional arguments, got {
+                len(args)}",
+            token,
+            tokenizer,
+        )
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
         arg_token = tokenizer.merge_tokens(arg)
@@ -380,8 +438,13 @@ def verify_args(params: dict[str, ArgType], feature_name: str,
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
-                f"{feature_name} got unexpected keyword argument '{key}'", kwarg[-1], tokenizer,
-                suggestion=f"""Available arguments are\n{', '.join(f"'{param}'" for param in params)}""")
+                f"{feature_name} got unexpected keyword argument '{key}'",
+                kwarg[-1],
+                tokenizer,
+                suggestion=f"""Available arguments are\n{
+                    ', '.join(
+                        f"'{param}'" for param in params)}""",
+            )
         arg_type = find_arg_type(kwarg, tokenizer)
         kwarg_token = tokenizer.merge_tokens(kwarg)
         result[key] = Arg(
@@ -417,13 +480,20 @@ def eval_expr(expr: str) -> str:
         for i, char in enumerate(decimal):
             if char != "0":
                 break
-        return whole + "." + decimal[:i + 5].rstrip("0")
+        return whole + "." + decimal[: i + 5].rstrip("0")
     return str(number)
 
 
-OPERATORS: dict[type, Callable[..., Any]] = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-                                             ast.Div: op.truediv, ast.FloorDiv: op.floordiv, ast.Mod: op.mod,
-                                             ast.Pow: op.pow, ast.USub: op.neg}
+OPERATORS: dict[type, Callable[..., Any]] = {
+    ast.Add: op.add,
+    ast.Sub: op.sub,
+    ast.Mult: op.mul,
+    ast.Div: op.truediv,
+    ast.FloorDiv: op.floordiv,
+    ast.Mod: op.mod,
+    ast.Pow: op.pow,
+    ast.USub: op.neg,
+}
 
 
 def __eval(node):
@@ -444,12 +514,7 @@ def __eval(node):
     raise TypeError(node)
 
 
-SIMPLE_JSON_TYPE = dict[
-    str,
-    str | bool | int | dict[
-        str, str | bool | int
-    ]
-]
+SIMPLE_JSON_TYPE = dict[str, str | bool | int | dict[str, str | bool | int]]
 
 
 class FormattedText:
@@ -469,10 +534,19 @@ class FormattedText:
     >>> str(FormattedText("&<red,bold>Name", token, tokenizer, is_default_no_italic=True))
     '{"text":"Name", "color":"red", "bold":true, "italic":false}'
     """
-    __slots__ = ("raw_text", "current_json", "result",
-                 "bracket_content", "token", "tokenizer",
-                 "current_color", "is_default_no_italic", "datapack",
-                 "is_allow_score_selector")
+
+    __slots__ = (
+        "raw_text",
+        "current_json",
+        "result",
+        "bracket_content",
+        "token",
+        "tokenizer",
+        "current_color",
+        "is_default_no_italic",
+        "datapack",
+        "is_allow_score_selector",
+    )
 
     SIGN = "&"
     OPEN_BRACKET = "<"
@@ -502,8 +576,16 @@ class FormattedText:
         "r": "reset",
     }
 
-    def __init__(self, raw_text: str, token: Token,
-                 tokenizer: Tokenizer, datapack: DataPack, *, is_default_no_italic: bool = False, is_allow_score_selector: bool = True) -> None:
+    def __init__(
+        self,
+        raw_text: str,
+        token: Token,
+        tokenizer: Tokenizer,
+        datapack: DataPack,
+        *,
+        is_default_no_italic: bool = False,
+        is_allow_score_selector: bool = True,
+    ) -> None:
         self.raw_text = raw_text
         self.token = token
         self.tokenizer = tokenizer
@@ -534,14 +616,14 @@ class FormattedText:
         Whether current_json and result[-1] can merge
         """
         return (
-            bool(self.result) and
-            len(self.result[-1]) == 2 and
-            "text" in self.result[-1] and
-            "color" in self.result[-1] and
-            len(self.current_json) == 2 and
-            "text" in self.current_json and
-            "color" in self.current_json and
-            self.result[-1]["color"] == self.current_json["color"]
+            bool(self.result)
+            and len(self.result[-1]) == 2
+            and "text" in self.result[-1]
+            and "color" in self.result[-1]
+            and len(self.current_json) == 2
+            and "text" in self.current_json
+            and "color" in self.current_json
+            and self.result[-1]["color"] == self.current_json["color"]
         )
 
     def __push(self) -> None:
@@ -593,71 +675,96 @@ class FormattedText:
             }:
                 if "color" in self.current_json:
                     raise JMCValueError(
-                        f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
+                        f"color({prop}) used twice in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
 
                 self.current_json["color"] = prop
                 self.current_color = prop
                 if not value:
                     raise JMCValueError(
-                        f"Color({prop}) cannot be false", self.token, self.tokenizer)
+                        f"Color({prop}) cannot be false", self.token, self.tokenizer
+                    )
                 continue
 
-            if prop in {"bold", "italic", "underlined",
-                        "strikethrough", "obfuscated"}:
+            if prop in {"bold", "italic", "underlined", "strikethrough", "obfuscated"}:
                 self.current_json[prop] = value
                 continue
 
             if prop.startswith("#") and len(prop) == 7:
                 if "color" in self.current_json:
                     raise JMCValueError(
-                        f"color({prop}) used twice in formatted text", self.token, self.tokenizer)
+                        f"color({prop}) used twice in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
 
                 self.current_json["color"] = prop
                 if not value:
                     raise JMCValueError(
-                        f"Color({prop}) cannot be false", self.token, self.tokenizer)
+                        f"Color({prop}) cannot be false", self.token, self.tokenizer
+                    )
                 continue
 
             if prop.startswith(DataPack.VARIABLE_SIGN):
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with score in formatted text", self.token, self.tokenizer)
+                        "selector used with score in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        "score used twice in formatted text", self.token, self.tokenizer)
+                        "score used twice in formatted text", self.token, self.tokenizer
+                    )
                 self.current_json["score"] = {
-                    "name": prop, "objective": self.datapack.var_name}
+                    "name": prop,
+                    "objective": self.datapack.var_name,
+                }
                 if not value:
                     raise JMCValueError(
-                        "Score cannot be false", self.token, self.tokenizer)
+                        "Score cannot be false", self.token, self.tokenizer
+                    )
                 continue
 
             if prop.count(":") == 1:
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with score in formatted text", self.token, self.tokenizer)
+                        "selector used with score in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        "score used twice in formatted text", self.token, self.tokenizer)
+                        "score used twice in formatted text", self.token, self.tokenizer
+                    )
                 objective, name = prop.split(":")
-                self.current_json["score"] = {
-                    "name": name, "objective": objective}
+                self.current_json["score"] = {"name": name, "objective": objective}
                 if not value:
                     raise JMCValueError(
-                        "Score cannot be false", self.token, self.tokenizer)
+                        "Score cannot be false", self.token, self.tokenizer
+                    )
                 continue
 
             if prop.startswith("@"):
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        "score used with selector in formatted text", self.token, self.tokenizer)
+                        "score used with selector in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with selector in formatted text", self.token, self.tokenizer)
+                        "selector used with selector in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
                 self.current_json["selector"] = prop
                 if not value:
                     raise JMCValueError(
-                        "Selector cannot be false", self.token, self.tokenizer)
+                        "Selector cannot be false", self.token, self.tokenizer
+                    )
                 continue
 
             if prop.endswith(")"):
@@ -666,9 +773,10 @@ class FormattedText:
                 prop_ = prop[:open_paren_index]
                 if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
-                        f"Unknown property '{prop_}'", self.token, self.tokenizer)
+                        f"Unknown property '{prop_}'", self.token, self.tokenizer
+                    )
                 key, json_body, is_local = self.datapack.data.formatted_text_prop[prop_]
-                if isinstance(json_body, dict) and 'nbt' in json_body.keys():
+                if isinstance(json_body, dict) and "nbt" in json_body.keys():
                     self.current_json[key] = {}
                     self.current_json[key]["nbt"] = json_body["nbt"](arg)  # type: ignore # fmt: off
                     if "separator" in json_body.keys():
@@ -682,10 +790,17 @@ class FormattedText:
                         self.current_json[key]["storage"] = json_body["storage"]  # type: ignore # fmt: off
                 elif not callable(json_body):
                     raise JMCValueError(
-                        f"Custom property '{prop_}' expected no argument", self.token, self.tokenizer, suggestion="Remove '()'")
+                        f"Custom property '{prop_}' expected no argument",
+                        self.token,
+                        self.tokenizer,
+                        suggestion="Remove '()'",
+                    )
                 elif not arg:
                     raise JMCValueError(
-                        f"Expected value inside parenthesis of property '{prop_}' (got nothing)", self.token, self.tokenizer)
+                        f"Expected value inside parenthesis of property '{prop_}' (got nothing)",
+                        self.token,
+                        self.tokenizer,
+                    )
                 else:
                     self.current_json[key] = json_body(arg)
                 if is_local:
@@ -694,11 +809,15 @@ class FormattedText:
 
             if prop not in self.datapack.data.formatted_text_prop:
                 raise JMCValueError(
-                    f"Unknown property '{prop}'", self.token, self.tokenizer)
+                    f"Unknown property '{prop}'", self.token, self.tokenizer
+                )
             key, json_body, is_local = self.datapack.data.formatted_text_prop[prop]
             if callable(json_body):
                 raise JMCValueError(
-                    f"Custom property '{prop}' expected an argument (got 0)", self.token, self.tokenizer)
+                    f"Custom property '{prop}' expected an argument (got 0)",
+                    self.token,
+                    self.tokenizer,
+                )
             self.current_json[key] = json_body
             if is_local:
                 del self.datapack.data.formatted_text_prop[prop]
@@ -711,7 +830,10 @@ class FormattedText:
             for _type in {"score", "selector", "nbt", "keybind"}:
                 if _type in self.current_json:
                     self.current_json["type"] = _type
-            if "__private_nbt_expand__" in self.current_json and self.datapack.version >= 21:
+            if (
+                "__private_nbt_expand__" in self.current_json
+                and self.datapack.version >= 21
+            ):
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
                 self.current_json["type"] = "nbt"
                 for source in {"entity", "block", "storage"}:
@@ -720,34 +842,62 @@ class FormattedText:
             elif "type" not in self.current_json:
                 self.current_json["type"] = "text"
 
-        if "score" in self.current_json or "selector" in self.current_json or "keybind" in self.current_json or "__private_nbt_expand__" in self.current_json:
+        if (
+            "score" in self.current_json
+            or "selector" in self.current_json
+            or "keybind" in self.current_json
+            or "__private_nbt_expand__" in self.current_json
+        ):
             if not self.is_allow_score_selector:
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        "score is not allowed in this context in formatted text", self.token, self.tokenizer)
+                        "score is not allowed in this context in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
                 raise JMCValueError(
-                    "selector is not allowed in this context in formatted text", self.token, self.tokenizer)
+                    "selector is not allowed in this context in formatted text",
+                    self.token,
+                    self.tokenizer,
+                )
             del self.current_json["text"]
 
             if "__private_nbt_expand__" in self.current_json:
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
-                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"]["nbt"]
-                self.current_json["interpret"] = \
-                    (self.current_json["__private_nbt_expand__"]["interpret"] == "true")
+                self.current_json["nbt"] = self.current_json["__private_nbt_expand__"][
+                    "nbt"
+                ]
+                self.current_json["interpret"] = (
+                    self.current_json["__private_nbt_expand__"]["interpret"] == "true"
+                )
                 if "separator" in self.current_json["__private_nbt_expand__"].keys():
-                    self.current_json["separator"] = self.current_json["__private_nbt_expand__"]["separator"]
+                    self.current_json["separator"] = self.current_json[
+                        "__private_nbt_expand__"
+                    ]["separator"]
                 if "storage" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["storage"] = self.current_json["__private_nbt_expand__"]["storage"]
+                    self.current_json["storage"] = self.current_json[
+                        "__private_nbt_expand__"
+                    ]["storage"]
                 if "block" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["block"] = self.current_json["__private_nbt_expand__"]["block"]
+                    self.current_json["block"] = self.current_json[
+                        "__private_nbt_expand__"
+                    ]["block"]
                 if "entity" in self.current_json["__private_nbt_expand__"]:
-                    self.current_json["entity"] = self.current_json["__private_nbt_expand__"]["entity"]
+                    self.current_json["entity"] = self.current_json[
+                        "__private_nbt_expand__"
+                    ]["entity"]
                 del self.current_json["__private_nbt_expand__"]
 
             tmp_json: SIMPLE_JSON_TYPE = {"text": ""}
             for prop_, value_ in self.current_json.items():
-                if prop_ in {"bold", "italic", "underlined",
-                             "strikethrough", "obfuscated", "color"}:
+                if prop_ in {
+                    "bold",
+                    "italic",
+                    "underlined",
+                    "strikethrough",
+                    "obfuscated",
+                    "color",
+                }:
                     tmp_json[prop_] = value_
             if "color" in self.current_json and self.current_json["color"] == "reset":
                 del self.current_json["color"]
@@ -762,8 +912,7 @@ class FormattedText:
         """
         prop = self.PROPS.get(char, None)
         if prop is None:
-            JMCValueError(
-                f"Unknown code format '{char}'", self.token, self.tokenizer)
+            JMCValueError(f"Unknown code format '{char}'", self.token, self.tokenizer)
 
         if prop in {
             "dark_red",
@@ -831,16 +980,20 @@ class FormattedText:
 
         if is_bracket_format:
             raise JMCValueError(
-                "'<' was never closed in formatted text", self.token, self.tokenizer)
+                "'<' was never closed in formatted text", self.token, self.tokenizer
+            )
         self.__push()
 
         if is_expect_color_code:
             raise JMCValueError(
-                f"Unexpected trailing '{self.SIGN}'", self.token, self.tokenizer, suggestion=f"Remove last '{self.SIGN}'")
+                f"Unexpected trailing '{self.SIGN}'",
+                self.token,
+                self.tokenizer,
+                suggestion=f"Remove last '{self.SIGN}'",
+            )
 
     @classmethod
-    def empty(cls, tokenizer: Tokenizer,
-              datapack: DataPack) -> "FormattedText":
+    def empty(cls, tokenizer: Tokenizer, datapack: DataPack) -> "FormattedText":
         """
         Generate an empty FormattedText with empty Token
 
@@ -848,7 +1001,7 @@ class FormattedText:
         :param datapack: Datapack
         :return: FormattedText
         """
-        return cls('', Token.empty(), tokenizer, datapack)
+        return cls("", Token.empty(), tokenizer, datapack)
 
     def __bool__(self) -> bool:
         return bool(self.result) and ("text" in self.result[0])
@@ -857,7 +1010,11 @@ class FormattedText:
         if not self.result:
             return '""'
 
-        if len(self.result) == 1 and len(self.result[0]) == 1 and "text" in self.result[0]:
+        if (
+            len(self.result) == 1
+            and len(self.result[0]) == 1
+            and "text" in self.result[0]
+        ):
             return json.dumps(self.result[0]["text"])
 
         if len(self.result) == 1:
@@ -866,7 +1023,10 @@ class FormattedText:
             return json.dumps(self.result[0], separators=(",", ":"))
 
         return json.dumps(
-            [{"text": "", "italic": False} if self.is_default_no_italic else ""] + self.result, separators=(",", ":"))
+            [{"text": "", "italic": False} if self.is_default_no_italic else ""]
+            + self.result,
+            separators=(",", ":"),
+        )
 
     def __repr__(self) -> str:
         return f"FormattedText(raw_text={repr(self.raw_text)}, result={repr(json.dumps(self.result))})"
@@ -906,17 +1066,21 @@ def hash_string_to_string(string: str, length: int) -> str:
             number //= ZERO_TO_Z_LENGTH
         digits = digits[::-1]
 
-    return ''.join(str(digit) if 0 <= digit <= 9 else chr(
-        digit - 10 + 97) for digit in digits)
+    return "".join(
+        str(digit) if 0 <= digit <= 9 else chr(digit - 10 + 97) for digit in digits
+    )
 
 
-def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tokenizer) -> str:
+def hardcode_parse_calc(
+    calc_pos: int, string: str, token: Token, tokenizer: Tokenizer
+) -> str:
     count = 0
-    expression = ''
+    expression = ""
     index = calc_pos
     if len(string) < calc_pos + 14 or string[calc_pos + 13] != "(":
         raise JMCSyntaxException(
-            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False)
+            "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False
+        )
     for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
         index += 1
         if char == "(":
@@ -930,17 +1094,46 @@ def hardcode_parse_calc(calc_pos: int, string: str, token: Token, tokenizer: Tok
 
     if count != 0:
         raise JMCSyntaxException(
-            "Invalid syntax in Hardcode.calc", token, tokenizer, display_col_length=False)
+            "Invalid syntax in Hardcode.calc",
+            token,
+            tokenizer,
+            display_col_length=False,
+        )
 
-    for key, num in sorted(Header().number_macros.items(), key=lambda item: len(item[0]), reverse=True):
+    for key, num in sorted(
+        Header().number_macros.items(), key=lambda item: len(item[0]), reverse=True
+    ):
         expression = expression.replace(key, num)
 
     for char in expression:
-        if char not in {"0", "1", "2", "3", "4", "5", "6", "7",
-                        "8", "9", "+", "-", "*", "/", "\\", "%",
-                        " ", "\t", "\n", "(", ")"}:
+        if char not in {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "+",
+            "-",
+            "*",
+            "/",
+            "\\",
+            "%",
+            " ",
+            "\t",
+            "\n",
+            "(",
+            ")",
+        }:
             raise JMCSyntaxException(
-                f"Invalid character({char}) in Hardcode.calc", token, tokenizer, display_col_length=False)
+                f"Invalid character({char}) in Hardcode.calc",
+                token,
+                tokenizer,
+                display_col_length=False,
+            )
 
-    return string[:calc_pos] + \
-        eval_expr(expression) + string[index + 13:]
+    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
