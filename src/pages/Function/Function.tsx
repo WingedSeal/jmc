@@ -292,7 +292,7 @@ const Function = () => {
                     </CodeBlock>
                 </div>
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
-                    Vanilla Function Macro (Minecraft 1.20+)
+                    Vanilla Function Macro (Minecraft 1.20.2+)
                 </div>
                 <section id="macro" />
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">

@@ -389,10 +389,6 @@ const FlowControls = () => {
                             position.
                         </span>
                     </p>
-                    <span className="text-warning">
-                        Since it is a schedule. Command will lose its context
-                        such as the entity running it and its position.
-                    </span>
                     <CodeBlock>
                         <CodeText type="keyword">async</CodeText>{" "}
                         <CodeText type="keyword">for</CodeText> (
