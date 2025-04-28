@@ -892,6 +892,11 @@ class FuncContent:
                     self.command[key_pos + 2],
                     self.tokenizer,
                 )
+            if self.was_anonym_func:
+                return self.__handle_switch_with(
+                    self.lexer.clean_up_paren_token(
+                        self.command[key_pos + 1], self.tokenizer, True
+                    ))
 
             append_commands(
                 self.__commands,
@@ -907,7 +912,18 @@ class FuncContent:
             __with_nbt_type,
             start_index=key_pos + 1,
         )
+        if self.was_anonym_func:
+            return self.__handle_switch_with(
+                f"{nbt_type_str} {target}{path}"
+            )
+
         append_commands(self.__commands, f"{nbt_type_str} {target}{path}")
+        return SKIP_TO_NEXT_LINE
+
+    def __handle_switch_with(self, with_str: str) -> bool:
+        # @Nicoder
+        print(f"{with_str=}")
+        print(self.__commands)
         return SKIP_TO_NEXT_LINE
 
     def __handle_say(self, key_pos: int, token: Token) -> None:
