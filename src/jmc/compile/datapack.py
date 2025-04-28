@@ -13,7 +13,6 @@ from .exception import (
     JMCSyntaxException,
     JMCSyntaxWarning,
     JMCValueError,
-    JMCMissingValueError,
 )
 from .log import Logger
 from .header import Header
@@ -307,7 +306,7 @@ class DataPack:
         self.functions: dict[str, Function] = {}
         """Dictionary of function name and a Function object"""
         self.functions_called: dict[str, tuple[Token, Tokenizer]] = {}
-        """Dictionary of of function name that is called by user and its coresponding token and tokenizer"""
+        """Dictionary of function name that is called by user and its coresponding token and tokenizer"""
         self.load_function: list[list[Token]] = []
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)

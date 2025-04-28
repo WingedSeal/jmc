@@ -5,7 +5,15 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from ..utils import convention_jmc_to_mc, is_float
 from ..datapack_data import Item, SIMPLE_JSON_BODY
-from .utils import ArgType, FormattedText, NumberType, find_scoreboard_player_type, hash_string_to_string, verify_args, Arg
+from .utils import (
+    ArgType,
+    FormattedText,
+    NumberType,
+    find_scoreboard_player_type,
+    hash_string_to_string,
+    verify_args,
+    Arg,
+)
 from ..datapack import DataPack, Function
 from ..exception import JMCDecodeJSONError, JMCMissingValueError, JMCValueError
 from ..tokenizer import Token, TokenType, Tokenizer
@@ -51,9 +59,18 @@ class JMCFunction:
     :raises JMCValueError: Missing required positional argument
     :raises NotImplementedError: Call function not implemented
     """
-    __slots__ = ("token", "datapack", "tokenizer",
-                 "is_execute", "var", "args",
-                 "raw_args", "self_token", "prefix")
+
+    __slots__ = (
+        "token",
+        "datapack",
+        "tokenizer",
+        "is_execute",
+        "var",
+        "args",
+        "raw_args",
+        "self_token",
+        "prefix",
+    )
     # _decorated: bool = False
     # """A private attribute that will be changed by a decorator to check for missing decorator (Set by decorator)"""
     arg_type: dict[str, ArgType]
@@ -89,8 +106,7 @@ class JMCFunction:
     raw_args: dict[str, Arg]
     """Dictionary containing parameter and given argument as Arg object"""
 
-    _subcls: dict[FuncType, dict[str, type["JMCFunction"]]
-                  ] = defaultdict(dict)
+    _subcls: dict[FuncType, dict[str, type["JMCFunction"]]] = defaultdict(dict)
     """:cvar: Dictionary of (Function type and according dictionary of funtion name and a subclass)"""
 
     prefix: str
@@ -98,12 +114,20 @@ class JMCFunction:
 
     def __new__(cls, *args, **kwargs):
         if cls is JMCFunction:
-            raise TypeError(
-                f"Only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
-    def __init__(self, token: Token, self_token: Token, datapack: DataPack, tokenizer: Tokenizer, prefix: str,
-                 *, is_execute: bool | None = None, var: str | None = None) -> None:
+    def __init__(
+        self,
+        token: Token,
+        self_token: Token,
+        datapack: DataPack,
+        tokenizer: Tokenizer,
+        prefix: str,
+        *,
+        is_execute: bool | None = None,
+        var: str | None = None,
+    ) -> None:
         self.token = token
         self.self_token = self_token
         self.datapack = datapack
@@ -112,8 +136,7 @@ class JMCFunction:
         self.var = var
         self.prefix = prefix
 
-        args_Args = verify_args(self.arg_type,
-                                self.call_string, token, tokenizer)
+        args_Args = verify_args(self.arg_type, self.call_string, token, tokenizer)
         self.args = {}
         self.raw_args = {}
 
@@ -129,22 +152,30 @@ class JMCFunction:
                 pass
             elif arg.arg_type == ArgType._FUNC_CALL:
                 if ":" in arg.token.string:
+                    self.datapack.functions_called[arg.token.string] = (
+                        arg.token,
+                        self.tokenizer,
+                    )
                     self.args[key] = f"function {arg.token.string}"
                 else:
-                    self.args[
-                        key] = f"function {datapack.format_func_path(convention_jmc_to_mc(arg.token, self.tokenizer, self.prefix))}"
+                    func = convention_jmc_to_mc(arg.token, self.tokenizer, self.prefix)
+                    self.datapack.functions_called[func] = arg.token, self.tokenizer
+                    self.args[key] = f"function {datapack.format_func_path(func)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = "\n".join(
-                    datapack.parse_function_token(arg.token, tokenizer, prefix))
+                    datapack.parse_function_token(arg.token, tokenizer, prefix)
+                )
             elif arg.arg_type == ArgType.FLOAT:
                 self.args[key] = str(float(arg.token.string))
             elif arg.arg_type in {ArgType.SCOREBOARD_INT, ArgType.SCOREBOARD}:
-                scoreboard_player = find_scoreboard_player_type(
-                    arg.token, tokenizer)
+                scoreboard_player = find_scoreboard_player_type(arg.token, tokenizer)
                 if isinstance(scoreboard_player.value, int):
                     raise ValueError(
-                        "scoreboard_player.value is int for minecraft scorboard")
-                self.args[key] = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+                        "scoreboard_player.value is int for minecraft scorboard"
+                    )
+                self.args[key] = (
+                    f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+                )
             else:
                 self.args[key] = arg.token.string
 
@@ -153,8 +184,7 @@ class JMCFunction:
                 if not is_float(self.args[parameter]):
                     continue
 
-            elif self.arg_type[parameter] not in {
-                    ArgType.INTEGER, ArgType.FLOAT}:
+            elif self.arg_type[parameter] not in {ArgType.INTEGER, ArgType.FLOAT}:
                 raise ValueError(f"{parameter} paremeter is not number")
 
             if number_type == NumberType.POSITIVE:
@@ -162,20 +192,23 @@ class JMCFunction:
                     raise JMCValueError(
                         f"{parameter} can only be {number_type.value}",
                         self.raw_args[parameter].token,
-                        tokenizer)
+                        tokenizer,
+                    )
             elif number_type == NumberType.ZERO_POSITIVE:
                 if float(self.args[parameter]) < 0:
                     raise JMCValueError(
                         f"{parameter} can only be {number_type.value}",
                         self.raw_args[parameter].token,
-                        tokenizer)
+                        tokenizer,
+                    )
 
             elif number_type == NumberType.NON_ZERO:
                 if float(self.args[parameter]) == 0:
                     raise JMCValueError(
                         f"{parameter} can only be {number_type.value}",
                         self.raw_args[parameter].token,
-                        tokenizer)
+                        tokenizer,
+                    )
 
         self.__post__init__()
 
@@ -203,8 +236,7 @@ class JMCFunction:
         raise NotImplementedError("Call(boolean) function not implemented")
 
     @classmethod
-    def get_subclasses(
-            cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
+    def get_subclasses(cls, func_type: FuncType) -> dict[str, type["JMCFunction"]]:
         """
         Get dictionary of funtion name and a class matching function type
 
@@ -213,8 +245,9 @@ class JMCFunction:
         """
         return cls._subcls[func_type]
 
-    def is_never_used(self, call_string: str | None = None,
-                      parameters: list[str] | None = None) -> bool:
+    def is_never_used(
+        self, call_string: str | None = None, parameters: list[str] | None = None
+    ) -> bool:
         """
         Add current function to datapack.used_command and return whether it's not already there
 
@@ -225,7 +258,7 @@ class JMCFunction:
         if call_string is None:
             call_string = self.call_string
         if parameters is not None:
-            call_string = call_string + '/' + '/'.join(parameters)
+            call_string = call_string + "/" + "/".join(parameters)
         is_not_in = call_string not in self.datapack.used_command
         self.datapack.used_command.add(call_string)
         return is_not_in
@@ -239,8 +272,12 @@ class JMCFunction:
         """
         return self.datapack.private_functions[self.name][function_name]
 
-    def format_text(self, parameter: str, is_default_no_italic: bool = False,
-                    is_allow_score_selector: bool = True) -> str:
+    def format_text(
+        self,
+        parameter: str,
+        is_default_no_italic: bool = False,
+        is_allow_score_selector: bool = True,
+    ) -> str:
         """
         Get FormattedText string from an argument
 
@@ -256,7 +293,8 @@ class JMCFunction:
                 self.tokenizer,
                 self.datapack,
                 is_default_no_italic=is_default_no_italic,
-                is_allow_score_selector=is_allow_score_selector)
+                is_allow_score_selector=is_allow_score_selector,
+            )
         )
 
     def make_empty_private_function(self, function_name: str) -> Function:
@@ -266,8 +304,7 @@ class JMCFunction:
         :param function_name: Name of the function
         :return: Function object
         """
-        func = self.datapack.private_functions[
-            self.name][function_name] = Function()
+        func = self.datapack.private_functions[self.name][function_name] = Function()
         return func
 
     def load_arg_json(self, parameter: str) -> dict[str, Any]:
@@ -282,7 +319,8 @@ class JMCFunction:
             json = loads(self.args[parameter], strict=False)
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(
-                error, self.raw_args[parameter].token, self.tokenizer) from error
+                error, self.raw_args[parameter].token, self.tokenizer
+            ) from error
 
         return json
 
@@ -298,11 +336,17 @@ class JMCFunction:
             raise JMCValueError(
                 f"'{parameter}' only accepts true or false in {self.call_string}",
                 self.raw_args[parameter].token,
-                self.tokenizer)
+                self.tokenizer,
+            )
         return self.args[parameter] == "true"
 
-    def add_formatted_text_prop(self, key: str, body: SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY],
-                                is_local: bool, property_name="propertyName"):
+    def add_formatted_text_prop(
+        self,
+        key: str,
+        body: SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY],
+        is_local: bool,
+        property_name="propertyName",
+    ):
         """
         Add property of FormattedText to `datapack.data`
 
@@ -314,9 +358,14 @@ class JMCFunction:
         if self.args[property_name] in self.datapack.data.formatted_text_prop:
             raise JMCValueError(
                 f"Text's property '{self.args[property_name]}' was already defined",
-                self.raw_args["propertyName"].token, self.tokenizer)
+                self.raw_args["propertyName"].token,
+                self.tokenizer,
+            )
         self.datapack.data.formatted_text_prop[self.args[property_name]] = (
-            key, body, is_local)
+            key,
+            body,
+            is_local,
+        )
 
     def require(self, pack_format: int, suggestion: str | None = None):
         """
@@ -326,11 +375,19 @@ class JMCFunction:
         :param suggestion: error suggestion, defaults to None
         """
         self.datapack.version.require(
-            pack_format, self.self_token, self.tokenizer, suggestion=suggestion)
+            pack_format, self.self_token, self.tokenizer, suggestion=suggestion
+        )
 
 
-def func_property(func_type: FuncType, call_string: str, name: str, arg_type: dict[str, ArgType], defaults: dict[str, str] = {
-}, ignore: set[str] = set(), number_type: dict[str, NumberType] = {}) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+def func_property(
+    func_type: FuncType,
+    call_string: str,
+    name: str,
+    arg_type: dict[str, ArgType],
+    defaults: dict[str, str] = {},
+    ignore: set[str] = set(),
+    number_type: dict[str, NumberType] = {},
+) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -343,6 +400,7 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
     :param number_type: Dictionary containing some number parameter that need to be specific, defaults to {}
     :return: A decorator for JMCFunction class
     """
+
     def decorator(cls: type[JMCFunction]) -> type[JMCFunction]:
         """
         A decorator to set the class's attributes for setting JMC function's properties
@@ -364,4 +422,5 @@ def func_property(func_type: FuncType, call_string: str, name: str, arg_type: di
         # cls._decorated = True
         JMCFunction._subcls[func_type][call_string] = cls
         return cls
+
     return decorator

@@ -61,17 +61,14 @@ def merge_obj_selector(
             tokens[start_index + 3].token_type,
             tokens[start_index + 3].line,
             tokens[start_index + 3].col,
-            datapack.lexer.clean_up_paren_token(
-                tokens[start_index + 3], tokenizer),
+            datapack.lexer.clean_up_paren_token(tokens[start_index + 3], tokenizer),
         )
-        return_value = tokenizer.merge_tokens(
-            tokens[start_index: start_index + 4])
-        del tokens[start_index + 1: start_index + 4]
+        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 4])
+        del tokens[start_index + 1 : start_index + 4]
         return return_value
     elif len(tokens) >= start_index + 3:
-        return_value = tokenizer.merge_tokens(
-            tokens[start_index: start_index + 3])
-        del tokens[start_index + 1: start_index + 3]
+        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 3])
+        del tokens[start_index + 1 : start_index + 3]
         return return_value
     raise ValueError(
         "Impossible tokens array length (merge_obj_selector used without is_obj_selector)"
@@ -95,13 +92,11 @@ def find_scoreboard_player_type(
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
         return ScoreboardPlayer(
-            player_type=PlayerType.VARIABLE, value=(
-                DataPack.var_name, token.string)
+            player_type=PlayerType.VARIABLE, value=(DataPack.var_name, token.string)
         )
 
     if is_number(token.string):
-        return ScoreboardPlayer(
-            player_type=PlayerType.INTEGER, value=int(token.string))
+        return ScoreboardPlayer(player_type=PlayerType.INTEGER, value=int(token.string))
 
     splits = token.string.split(":", 1)
     if len(splits) == 1:
@@ -152,8 +147,7 @@ class Arg:
         self.token = token
         self.arg_type = arg_type
 
-    def verify(self, verifier: ArgType, tokenizer: Tokenizer,
-               key_string: str) -> "Arg":
+    def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
         """
         Verify if the argument is valid
 
@@ -167,8 +161,7 @@ class Arg:
         if verifier == ArgType.SCOREBOARD_INT:
             if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
-            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
-                    ":") == 1:
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(":") == 1:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {
@@ -180,8 +173,7 @@ class Arg:
         if verifier == ArgType.SCOREBOARD:
             if self.arg_type == ArgType.SCOREBOARD:
                 return self
-            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
-                    ":") == 1:
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(":") == 1:
                 self.arg_type = ArgType.SCOREBOARD
                 return self
             raise JMCValueError(
@@ -387,8 +379,7 @@ def verify_list(
         arg_token = tokenizer.merge_tokens(arg)
         try:
             results.append(
-                Arg(arg_token, arg_type).verify(
-                    expected_arg_type, tokenizer, "list")
+                Arg(arg_token, arg_type).verify(expected_arg_type, tokenizer, "list")
             )
         except JMCValueError as error:
             raise JMCValueError(
@@ -429,12 +420,7 @@ def verify_args(
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
         arg_token = tokenizer.merge_tokens(arg)
-        result[key] = Arg(
-            arg_token,
-            arg_type).verify(
-            params[key],
-            tokenizer,
-            key)
+        result[key] = Arg(arg_token, arg_type).verify(params[key], tokenizer, key)
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
@@ -447,12 +433,7 @@ def verify_args(
             )
         arg_type = find_arg_type(kwarg, tokenizer)
         kwarg_token = tokenizer.merge_tokens(kwarg)
-        result[key] = Arg(
-            kwarg_token,
-            arg_type).verify(
-            params[key],
-            tokenizer,
-            key)
+        result[key] = Arg(kwarg_token, arg_type).verify(params[key], tokenizer, key)
     return result
 
 
@@ -769,7 +750,7 @@ class FormattedText:
 
             if prop.endswith(")"):
                 open_paren_index = prop.find("(")
-                arg = prop[open_paren_index + 1:-1].strip()
+                arg = prop[open_paren_index + 1 : -1].strip()
                 prop_ = prop[:open_paren_index]
                 if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
@@ -1081,7 +1062,7 @@ def hardcode_parse_calc(
         raise JMCSyntaxException(
             "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False
         )
-    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
+    for char in string[calc_pos + 13 :]:  # len('Hardcode.calc') = 13
         index += 1
         if char == "(":
             count += 1
@@ -1136,4 +1117,4 @@ def hardcode_parse_calc(
                 display_col_length=False,
             )
 
-    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
+    return string[:calc_pos] + eval_expr(expression) + string[index + 13 :]
