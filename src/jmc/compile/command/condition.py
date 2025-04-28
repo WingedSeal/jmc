@@ -4,11 +4,16 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Union
 
 
-from ...compile.utils import is_connected, is_number
+from ...compile.utils import is_number
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException, JMCValueError
 from ..datapack import DataPack
-from .utils import find_scoreboard_player_type, PlayerType, is_obj_selector, merge_obj_selector
+from .utils import (
+    find_scoreboard_player_type,
+    PlayerType,
+    is_obj_selector,
+    merge_obj_selector,
+)
 from .jmc_function import JMCFunction, FuncType
 from ...compile.header import Header
 
@@ -35,6 +40,7 @@ class Condition:
     """
     Dataclass for condition containing string representation(excluding if/unless) and whether it's for `if` or `unless`
     """
+
     string: str
     if_unless: bool
     """`True` means 'if', `False` means 'unless'"""
@@ -48,9 +54,13 @@ class Condition:
         return f"{'if' if self.if_unless else 'unless'} {self.string}"
 
 
-AST_TYPE = dict[str,  # type: ignore
-                      Union[str, list["AST_TYPE"], "AST_TYPE"]  # type: ignore
-                ] | Condition
+AST_TYPE = (
+    dict[
+        str,  # type: ignore
+        Union[str, list["AST_TYPE"], "AST_TYPE"],  # type: ignore
+    ]
+    | Condition
+)
 
 
 def merge_condition(conditions: list[Condition]) -> tuple[str, list[str]]:
@@ -67,7 +77,8 @@ def merge_condition(conditions: list[Condition]) -> tuple[str, list[str]]:
 
 
 def custom_condition(
-        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> Condition:
+    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack
+) -> Condition:
     """
     Create a custom JMC condition from list of tokens representing statement
 
@@ -77,8 +88,7 @@ def custom_condition(
     :return: Condition object parsed from list of tokens
     """
 
-    if tokens[0].string.startswith(
-            DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
+    if tokens[0].string.startswith(DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
 
         objective = DataPack.var_name
         if is_obj_selector(tokens):
@@ -89,12 +99,13 @@ def custom_condition(
             del tokens[0]
 
         if len(tokens) == 1:
-            return Condition(
-                f"score {tokens[0].string} {objective} matches 1..", True)
+            return Condition(f"score {tokens[0].string} {objective} matches 1..", IF)
         if len(tokens) == 2:
             raise JMCSyntaxException(
-                f"Expected token after operator{tokens[1].string} in custom condition (got nothing)", tokens[0], tokenizer)
-
+                f"Expected token after operator{tokens[1].string} in custom condition (got nothing)",
+                tokens[0],
+                tokenizer,
+            )
         if len(tokens) > 2 and is_obj_selector(tokens[2:]):
             tokens[2] = merge_obj_selector(tokens, tokenizer, datapack, 2)
         if len(tokens) > 3:
@@ -106,7 +117,10 @@ def custom_condition(
                 del tokens[4]
             else:
                 raise JMCSyntaxException(
-                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition",
+                    tokens[3],
+                    tokenizer,
+                )
 
         if len(tokens) > 3:
             if tokens[3].string == "-":
@@ -117,7 +131,10 @@ def custom_condition(
                 del tokens[3]
             else:
                 raise JMCSyntaxException(
-                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition", tokens[3], tokenizer)
+                    f"Unexpected token ('{tokens[3].string}') after variable ('{tokens[2].string}') in condition",
+                    tokens[3],
+                    tokenizer,
+                )
 
         if len(tokens) > 3 and tokens[2].string.endswith(".."):
             tokens[2] = tokenizer.merge_tokens(tokens[2:4])
@@ -127,69 +144,90 @@ def custom_condition(
         if operator_token.token_type == TokenType.OPERATOR:
             if second_token.string == "true":
                 raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", second_token, tokenizer,
-                    suggestion=f"Did you mean `if ({first_token.string}) {{`?")
+                    "Expected integer, variable, or objective:selector",
+                    second_token,
+                    tokenizer,
+                    suggestion=f"Did you mean `if ({first_token.string}) {{`?",
+                )
             if second_token.string == "false":
                 raise JMCSyntaxException(
-                    "Expected integer, variable, or objective:selector", second_token, tokenizer,
-                    suggestion=f"Did you mean `if (!{first_token.string}) {{`?")
-            scoreboard_player = find_scoreboard_player_type(
-                second_token, tokenizer)
+                    "Expected integer, variable, or objective:selector",
+                    second_token,
+                    tokenizer,
+                    suggestion=f"Did you mean `if (!{first_token.string}) {{`?",
+                )
+            scoreboard_player = find_scoreboard_player_type(second_token, tokenizer)
             operator = operator_token.string
 
             if scoreboard_player.player_type == PlayerType.INTEGER:
                 if not isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is not int")
-                compared = f'score {first_token.string} {objective} matches'
+                compared = f"score {first_token.string} {objective} matches"
                 if operator in {"===", "==", "="}:
-                    return Condition(
-                        f'{compared} {scoreboard_player.value}', IF)
+                    return Condition(f"{compared} {scoreboard_player.value}", IF)
                 if operator in {"!=", "!=="}:
-                    return Condition(
-                        f'{compared} {scoreboard_player.value}', UNLESS)
+                    return Condition(f"{compared} {scoreboard_player.value}", UNLESS)
                 if operator == ">=":
-                    return Condition(
-                        f'{compared} {scoreboard_player.value}..', IF)
+                    return Condition(f"{compared} {scoreboard_player.value}..", IF)
                 if operator == ">":
-                    return Condition(
-                        f'{compared} {scoreboard_player.value + 1}..', IF)
+                    return Condition(f"{compared} {scoreboard_player.value + 1}..", IF)
                 if operator == "<=":
-                    return Condition(
-                        f'{compared} ..{scoreboard_player.value}', IF)
+                    return Condition(f"{compared} ..{scoreboard_player.value}", IF)
                 if operator == "<":
-                    return Condition(
-                        f'{compared} ..{scoreboard_player.value - 1}', IF)
+                    return Condition(f"{compared} ..{scoreboard_player.value - 1}", IF)
                 raise JMCSyntaxException(
-                    f"Unrecognized operator ({operator})", operator_token, tokenizer)
+                    f"Unrecognized operator ({operator})", operator_token, tokenizer
+                )
 
             else:
                 if operator == "!=":
                     if isinstance(scoreboard_player.value, int):
                         raise ValueError("scoreboard_player.value is int")
                     return Condition(
-                        f'score {first_token.string} {objective} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}', UNLESS)
+                        f"score {first_token.string} {objective} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}",
+                        UNLESS,
+                    )
 
                 if operator in {"===", "==", "="}:
-                    operator = '='
+                    operator = "="
 
                 if isinstance(scoreboard_player.value, int):
                     raise ValueError("scoreboard_player.value is int")
                 return Condition(
-                    f'score {first_token.string} {objective} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}', IF)
+                    f"score {first_token.string} {objective} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}",
+                    IF,
+                )
 
-        elif operator_token.token_type == TokenType.KEYWORD and operator_token.string == "matches":
+        elif (
+            operator_token.token_type == TokenType.KEYWORD
+            and operator_token.string == "matches"
+        ):
             match_tokens_ = tokenizer.split_keyword_token(tokens[2], "..")
             match_tokens = tokenizer.find_token(match_tokens_, "..")
-            if len(match_tokens) != 2 or len(
-                    match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
+            if (
+                len(match_tokens) != 2
+                or len(match_tokens[0]) > 1
+                or len(match_tokens[1]) > 1
+            ):
                 raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer)
+                    "Expected <integer>..<integer> after 'matches'",
+                    tokens[2],
+                    tokenizer,
+                )
             if not match_tokens[0]:
                 raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}<={match_tokens[1][0].string} instead")
+                    "Expected <integer>..<integer> after 'matches'",
+                    tokens[2],
+                    tokenizer,
+                    suggestion=f"Use {first_token.string}<={match_tokens[1][0].string} instead",
+                )
             if not match_tokens[1]:
                 raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead")
+                    "Expected <integer>..<integer> after 'matches'",
+                    tokens[2],
+                    tokenizer,
+                    suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead",
+                )
 
             header = Header()
             first = match_tokens[0][0].string
@@ -198,36 +236,64 @@ def custom_condition(
             second = header.number_macros.get(second, second)
             if not is_number(first):
                 raise JMCSyntaxException(
-                    f"Expected integer after 'matches' (got '{first}')", match_tokens[0][0], tokenizer)
+                    f"Expected integer after 'matches' (got '{first}')",
+                    match_tokens[0][0],
+                    tokenizer,
+                )
             if not is_number(second):
                 raise JMCSyntaxException(
-                    f"Expected integer after '..' (got '{second}')", match_tokens[1][0], tokenizer)
+                    f"Expected integer after '..' (got '{second}')",
+                    match_tokens[1][0],
+                    tokenizer,
+                )
             first_int = int(first)
             second_int = int(second)
             if first_int == second_int:
                 raise JMCSyntaxException(
-                    "First integer must not equal second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead")
+                    "First integer must not equal second integer after 'matches'",
+                    tokens[2],
+                    tokenizer,
+                    suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead",
+                )
             if first_int > second_int:
                 raise JMCSyntaxException(
-                    "First integer must be less than second integer after 'matches'", tokens[2], tokenizer, suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?")
+                    "First integer must be less than second integer after 'matches'",
+                    tokens[2],
+                    tokenizer,
+                    suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?",
+                )
 
             return Condition(
-                f'score {first_token.string} {objective} matches {first_int}..{second_int}', IF)
+                f"score {first_token.string} {objective} matches {first_int}..{second_int}",
+                IF,
+            )
 
         else:
             raise JMCSyntaxException(
-                f"Expected operator or 'matches' (got {tokens[1].token_type.value})", tokens[1], tokenizer)
+                f"Expected operator or 'matches' (got {tokens[1].token_type.value})",
+                tokens[1],
+                tokenizer,
+            )
 
-    matched_function = BOOL_FUNCTIONS.get(
-        tokens[0].string, None)
+    matched_function = BOOL_FUNCTIONS.get(tokens[0].string, None)
     if matched_function is not None:
         if len(tokens) > 2:
             raise JMCSyntaxException(
-                "Unexpected token", tokens[2], tokenizer, display_col_length=False)
+                "Unexpected token", tokens[2], tokenizer, display_col_length=False
+            )
 
         return Condition(
-            *matched_function(tokens[1], tokens[0], datapack, tokenizer, prefix="").call_bool())
+            *matched_function(
+                tokens[1], tokens[0], datapack, tokenizer, prefix=""
+            ).call_bool()
+        )
     # End
+
+    if len(tokens) == 2 and tokens[1].token_type == TokenType.PAREN_ROUND:
+        func_content = FUNC_CONTENT[0](
+            tokenizer, [tokens], is_load=False, lexer=datapack.lexer, prefix=""
+        ).parse()
+        return Condition(func_content[0], IF)
 
     valid_condition_kinds = Header().conditions
     if tokens[0].string not in valid_condition_kinds:
@@ -235,15 +301,12 @@ def custom_condition(
             f"Unrecognized condition '{tokens[0].string}'",
             tokens[0],
             tokenizer,
-            suggestion=f"Consider using one of the following: {', '.join(sorted(valid_condition_kinds))}.")
+            suggestion=f"Consider using one of the following: {', '.join(sorted(valid_condition_kinds))}.",
+        )
 
     conditions: list[str] = FUNC_CONTENT[0](
-        tokenizer,
-        [tokens],
-        False,
-        datapack.lexer,
-        "",
-        _bypass_checks=True).parse()
+        tokenizer, [tokens], False, datapack.lexer, "", _bypass_checks=True
+    ).parse()
     # conditions: list[str] = []
     # last_token = tokens[0]
     # for token in tokens:
@@ -261,8 +324,9 @@ def custom_condition(
     return Condition(" ".join(conditions), IF)
 
 
-def find_operator(_tokens: list[Token], operator: str,
-                  tokenizer: Tokenizer) -> list[list[Token]]:
+def find_operator(
+    _tokens: list[Token], operator: str, tokenizer: Tokenizer
+) -> list[list[Token]]:
     """
     Find sepecific operator in tokens and split them
 
@@ -275,11 +339,15 @@ def find_operator(_tokens: list[Token], operator: str,
     tokens: list[Token] = []
     if _tokens[0].token_type == TokenType.OPERATOR and _tokens[0].string == operator:
         raise JMCSyntaxException(
-            f"Unexpected operator ({operator})", _tokens[0], tokenizer)
+            f"Unexpected operator ({operator})", _tokens[0], tokenizer
+        )
 
-    elif _tokens[-1].token_type == TokenType.OPERATOR and _tokens[-1].string == operator:
+    elif (
+        _tokens[-1].token_type == TokenType.OPERATOR and _tokens[-1].string == operator
+    ):
         raise JMCSyntaxException(
-            f"Unexpected operator ({operator})", _tokens[-1], tokenizer)
+            f"Unexpected operator ({operator})", _tokens[-1], tokenizer
+        )
 
     for token in _tokens:
         if token.token_type == TokenType.OPERATOR and token.string == operator:
@@ -292,7 +360,8 @@ def find_operator(_tokens: list[Token], operator: str,
 
 
 def condition_to_ast(
-        tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack) -> AST_TYPE:
+    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack
+) -> AST_TYPE:
     """
     Turn condition in form of list of tokens to abstract syntax tree
 
@@ -305,31 +374,53 @@ def condition_to_ast(
     if len(tokens) == 1 and tokens[0].token_type == TokenType.PAREN_ROUND:
         if tokens[0].string == "()":
             raise JMCSyntaxException(
-                "Unexpected empty round bracket, `()`, inside condition", tokens[0], tokenizer)
+                "Unexpected empty round bracket, `()`, inside condition",
+                tokens[0],
+                tokenizer,
+            )
 
-        tokenizer = Tokenizer(tokens[0].string[1:-1], tokenizer.file_path,
-                              tokens[0].line, tokens[0].col + 1, tokenizer.file_string, expect_semicolon=False)
+        tokenizer = Tokenizer(
+            tokens[0].string[1:-1],
+            tokenizer.file_path,
+            tokens[0].line,
+            tokens[0].col + 1,
+            tokenizer.file_string,
+            expect_semicolon=False,
+        )
         tokens = tokenizer.programs[0]
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
-        return {"operator": OR_OPERATOR, "body": [
-            condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
+        return {
+            "operator": OR_OPERATOR,
+            "body": [
+                condition_to_ast(tokens, tokenizer, datapack)
+                for tokens in list_of_tokens
+            ],
+        }
 
     list_of_tokens = find_operator(tokens, AND_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
-        return {"operator": AND_OPERATOR, "body": [
-            condition_to_ast(tokens, tokenizer, datapack) for tokens in list_of_tokens]}
+        return {
+            "operator": AND_OPERATOR,
+            "body": [
+                condition_to_ast(tokens, tokenizer, datapack)
+                for tokens in list_of_tokens
+            ],
+        }
 
     # NotOperator should have a body as either dict or string and not list
     if tokens[0].token_type == TokenType.OPERATOR and tokens[0].string == NOT_OPERATOR:
-        return {"operator": NOT_OPERATOR, "body":
-                condition_to_ast(tokens[1:], tokenizer, datapack)}
+        return {
+            "operator": NOT_OPERATOR,
+            "body": condition_to_ast(tokens[1:], tokenizer, datapack),
+        }
 
     return custom_condition(tokens, tokenizer, datapack)
 
 
 def ast_to_commands(
-        ast: AST_TYPE, datapack: DataPack) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
+    ast: AST_TYPE, datapack: DataPack
+) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
     """
     Parse abstract syntax tree into list of conditions and list of commands that need to come before for it to works
 
@@ -350,8 +441,7 @@ def ast_to_commands(
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError(
-                'ast["body"] is a Condition instead of list in AND')
+            raise ValueError('ast["body"] is a Condition instead of list in AND')
         for and_body in ast["body"]:
             if isinstance(and_body, str):
                 raise ValueError('ast["body"] is string')
@@ -366,8 +456,7 @@ def ast_to_commands(
         datapack.data.condition_count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError(
-                'ast["body"] is a Condition instead of list in OR')
+            raise ValueError('ast["body"] is a Condition instead of list in OR')
         for or_body in ast["body"]:
             if isinstance(or_body, str):
                 raise ValueError('ast["body"] is string')
@@ -376,8 +465,9 @@ def ast_to_commands(
                 precommand_or.extend(precommand)
             precommand_or.append((conditions, _count))
 
-        return [Condition(
-            f"score {VAR}{_count} {DataPack.var_name} matches 1", IF)], precommand_or
+        return [
+            Condition(f"score {VAR}{_count} {DataPack.var_name} matches 1", IF)
+        ], precommand_or
 
     elif ast["operator"] == NOT_OPERATOR:
         if isinstance(ast["body"], Condition):
@@ -415,19 +505,24 @@ def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
             if conditions_and_count[1] > current_count:
                 current_count += 1
                 precommands.append(
-                    f"scoreboard players set {VAR}{current_count} {DataPack.var_name} 0")
+                    f"scoreboard players set {VAR}{current_count} {DataPack.var_name} 0"
+                )
                 merged_condition, merged_condition_pre_command = merge_condition(
-                    conditions_and_count[0])
+                    conditions_and_count[0]
+                )
                 precommands.extend(merged_condition_pre_command)
                 precommands.append(
-                    f"execute {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
+                    f"execute {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1"
+                )
                 continue
 
             merged_condition, merged_condition_pre_command = merge_condition(
-                conditions_and_count[0])
+                conditions_and_count[0]
+            )
             precommands.extend(merged_condition_pre_command)
             precommands.append(
-                f"execute unless score {VAR}{current_count} {DataPack.var_name} matches 1 {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1")
+                f"execute unless score {VAR}{current_count} {DataPack.var_name} matches 1 {merged_condition} run scoreboard players set {VAR}{current_count} {DataPack.var_name} 1"
+            )
         precommand = "\n".join(precommands)
 
     condition_string, precommands_ = merge_condition(conditions)
@@ -435,8 +530,9 @@ def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
     return condition_string, precommand
 
 
-def parse_condition(condition_token: Token |
-                    list[Token], tokenizer: Tokenizer, datapack: DataPack) -> tuple[str, str]:
+def parse_condition(
+    condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack
+) -> tuple[str, str]:
     """
     Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
     Example:
@@ -456,8 +552,7 @@ def parse_condition(condition_token: Token |
     :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
     datapack.data.condition_count = 0
-    tokens = condition_token if isinstance(
-        condition_token, list) else [condition_token]
+    tokens = condition_token if isinstance(condition_token, list) else [condition_token]
 
     ast = condition_to_ast(tokens, tokenizer, datapack)
     condition, precommand = ast_to_strings(ast, datapack)
