@@ -18,8 +18,7 @@ from .utils import (
 if TYPE_CHECKING:
     from ..lexer_func_content import FuncContent
 
-VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
-    FuncType.VARIABLE_OPERATION)
+VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(FuncType.VARIABLE_OPERATION)
 
 
 def variable_operation(
@@ -109,8 +108,7 @@ def variable_operation(
 
     operator = tokens[1].string
 
-    if operator == "=" and len(
-            tokens) > 2 and tokens[2].string in first_arguments:
+    if operator == "=" and len(tokens) > 2 and tokens[2].string in first_arguments:
         func_content = FuncContent(
             tokenizer, [tokens[2:]], is_load=False, lexer=datapack.lexer, prefix=prefix
         ).parse()
@@ -213,7 +211,10 @@ def variable_operation(
             )
 
         if tokens[2].token_type not in (
-                TokenType.KEYWORD, TokenType.OPERATOR, TokenType.PAREN_SQUARE):
+            TokenType.KEYWORD,
+            TokenType.OPERATOR,
+            TokenType.PAREN_SQUARE,
+        ):
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type.value})",
                 tokens[2],
@@ -243,8 +244,7 @@ def variable_operation(
                 )
 
             if len(tokens) > 4:
-                raise JMCSyntaxException(
-                    "Unexpected token", tokens[4], tokenizer)
+                raise JMCSyntaxException("Unexpected token", tokens[4], tokenizer)
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3],
@@ -283,8 +283,7 @@ def variable_operation(
         # left_token.string operator right_token.string
 
         old_tokens = None
-        if len(tokens) > 3 and is_obj_selector(
-                tokens, 2):  # If rvar is obj:selector
+        if len(tokens) > 3 and is_obj_selector(tokens, 2):  # If rvar is obj:selector
             old_tokens = tokens.copy()
             right_token = merge_obj_selector(tokens, tokenizer, datapack, 2)
 
@@ -315,6 +314,24 @@ def variable_operation(
                         return f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}"
                     except Exception:
                         raise error
+            elif operator == "??=":
+                func_content = FuncContent(
+                    tokenizer,
+                    [old_tokens[2:] if old_tokens is not None else tokens[2:]],
+                    is_load=False,
+                    lexer=datapack.lexer,
+                    prefix=prefix,
+                ).parse()
+                if len(func_content) > 1:
+                    raise JMCSyntaxException(
+                        "Operator '=' does not support command that return multiple commands",
+                        tokens[2],
+                        tokenizer,
+                    )
+                if func_content[0].startswith("execute"):
+                    # len("execute ") = 8
+                    return f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} {func_content[0][8:]}"
+                return f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} run {func_content[0]}"
             else:
                 raise JMCSyntaxException(
                     f"Unexpected token ('{tokens[3].string}') after variable/integer ('{tokens[2].string}')",
