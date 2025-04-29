@@ -89,13 +89,15 @@ except EXCEPTIONS as error:
     ERROR = type(error).__name__ + "\\n" + str(error)`
         );
         const built: Map<string, string> = pyodide.globals.get("BUILT").toJs();
-        if (built.size === 0) {
+        if (Object.keys(built).length === 0) {
             setIsError(true);
             setJMCError(
                 pyodide.globals
                     .get("ERROR")
                     .replace(new RegExp("/home/pyodide/", "g"), "")
             );
+            console.log("wtf");
+            console.log(JMCError);
         } else {
             setIsError(false);
             setJMCResult(built);
