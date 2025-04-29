@@ -96,8 +96,6 @@ except EXCEPTIONS as error:
                     .get("ERROR")
                     .replace(new RegExp("/home/pyodide/", "g"), "")
             );
-            console.log("wtf");
-            console.log(JMCError);
         } else {
             setIsError(false);
             setJMCResult(built);
