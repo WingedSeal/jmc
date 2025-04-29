@@ -53,6 +53,7 @@ JSON_FILE_TYPES = [
     "trim_pattern",
     "chat_type",
     "damage_type",
+    "enchantment",
 ]
 """List of all possible vanilla json file types"""
 
@@ -541,7 +542,7 @@ class Lexer:
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
             json_path = (
-                namespace + "/" + json_type + "/" + json_name[len(namespace) + 1:]
+                namespace + "/" + json_type + "/" + json_name[len(namespace) + 1 :]
             )
         else:
             json_path = json_type + "/" + json_name
@@ -588,7 +589,7 @@ class Lexer:
             )
             if namespace in Header().namespace_overrides:
                 super_path = (
-                    namespace + "/" + json_type + "/" + super_name[len(namespace) + 1:]
+                    namespace + "/" + json_type + "/" + super_name[len(namespace) + 1 :]
                 )
             else:
                 super_path = json_type + "/" + super_name
