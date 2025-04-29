@@ -386,7 +386,7 @@ class RaycastSimple(JMCFunction):
                         "minecraft:lava",
                         "minecraft:grass" if self.datapack.version < 26 else "minecraft:short_grass",
                         "#minecraft:small_flowers",
-                        "#minecraft:tall_flowers",
+                        *(["#minecraft:tall_flowers"] if self.datapack.version < 59 else []),
                         "#minecraft:small_dripleaf_placeable",
                         "minecraft:fern",
                         "minecraft:fire",
