@@ -33,6 +33,7 @@ from .command import (
     JMCFunction,
     FuncType,
 )
+from .command._flow_control import switch
 
 if TYPE_CHECKING:
     from .lexer import Lexer
@@ -940,6 +941,11 @@ class FuncContent:
         # @Nicoder
         print(f"{with_str=}")
         print(f"{self.switch_tokens=}")
+
+        assert self.switch_tokens is not None
+        switch_commands = switch(self.switch_tokens, self.lexer.datapack, self.tokenizer, prefix="", with_str=with_str)
+        append_commands(self.__commands, switch_commands)
+
         self.switch_tokens = None
         return SKIP_TO_NEXT_LINE
 
