@@ -157,10 +157,21 @@ class FuncContent:
         self.switch_tokens: list[Token] | None = None
         self._bypass_checks = _bypass_checks
 
-    def parse_self_command(self, current_line: int):
+    def parse_self_command(self, current_line: int, _is_switch: bool = False):
         """
         Parse self.command
         """
+        if (
+            self.switch_tokens is not None
+            and self.command[0].string != "with"
+            and not _is_switch
+        ):
+            _command = self.command
+            self.command = self.switch_tokens
+            self.parse_self_command(current_line - 1, _is_switch=True)
+            self.switch_tokens = None
+            self.command = _command
+
         if (
             self.command[0].token_type != TokenType.KEYWORD
             and get_nbt_type(self.command) is None
@@ -243,6 +254,12 @@ class FuncContent:
         for current_line, command in enumerate(self.programs):
             self.command = command
             self.parse_self_command(current_line)
+        if self.switch_tokens is not None:
+            _command = self.command
+            self.command = self.switch_tokens
+            self.parse_self_command(len(self.programs) - 1, _is_switch=True)
+            self.switch_tokens = None
+            self.command = _command
 
         # Boxes check
         if self.lexer.do_while_box is not None:
@@ -511,10 +528,6 @@ class FuncContent:
                 )
             if self.__handle_with(key_pos, token):
                 return SKIP_TO_NEXT_LINE
-        elif self.switch_tokens:
-            self.command = self.switch_tokens
-            self.parse_self_command(current_line - 1)
-            return SKIP_TO_NEXT_LINE
 
         self.was_anonym_func = False
 
@@ -838,7 +851,7 @@ class FuncContent:
             append_commands(self.__commands, "with")
 
     def __handle_with(self, key_pos: int, token: Token) -> bool:
-        if not self.__commands:
+        if not self.__commands and self.switch_tokens is None:
             return CONTINUE_LINE
         if self.command[key_pos + 1].token_type == TokenType.PAREN_SQUARE:
             if len(self.command) > key_pos + 2:
@@ -870,7 +883,7 @@ class FuncContent:
             )
             return SKIP_TO_NEXT_LINE
 
-        __with_nbt_type = get_nbt_type(self.command[key_pos + 1 :])
+        __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
         if __with_nbt_type is None:
             token_ = self.command[key_pos + 1]
             if token_.token_type != TokenType.PAREN_CURLY:
@@ -896,7 +909,7 @@ class FuncContent:
                     self.command[key_pos + 2],
                     self.tokenizer,
                 )
-            if self.switch_tokens:
+            if self.switch_tokens is not None:
                 return self.__handle_switch_with(
                     self.lexer.clean_up_paren_token(
                         self.command[key_pos + 1], self.tokenizer, True
@@ -917,7 +930,7 @@ class FuncContent:
             __with_nbt_type,
             start_index=key_pos + 1,
         )
-        if self.switch_tokens:
+        if self.switch_tokens is not None:
             return self.__handle_switch_with(f"{nbt_type_str} {target}{path}")
 
         append_commands(self.__commands, f"{nbt_type_str} {target}{path}")
@@ -926,8 +939,7 @@ class FuncContent:
     def __handle_switch_with(self, with_str: str) -> bool:
         # @Nicoder
         print(f"{with_str=}")
-        print(self.switch_tokens)
-        print(self.__commands)
+        print(f"{self.switch_tokens=}")
         self.switch_tokens = None
         return SKIP_TO_NEXT_LINE
 
@@ -1261,6 +1273,10 @@ class FuncContent:
         return CONTINUE_LINE
 
     def __is_flow_control_command(self, key_pos: int, token: Token) -> bool:
+        if self.switch_tokens is None and token.string == "switch":
+            self.switch_tokens = self.command
+            return SKIP_TO_NEXT_LINE
+
         flow_control_command = FLOW_CONTROL_COMMANDS.get(token.string, None)
         if flow_control_command is not None:
             if self.is_execute:
@@ -1276,8 +1292,6 @@ class FuncContent:
             )
             if return_value is not None:
                 append_commands(self.__commands, return_value)
-            if token.string == "switch":
-                self.switch_tokens = self.command
             return SKIP_TO_NEXT_LINE
         return CONTINUE_LINE
 
