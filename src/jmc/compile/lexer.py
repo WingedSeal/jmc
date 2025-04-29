@@ -1,7 +1,7 @@
 from copy import deepcopy
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 
 from .decorator_parse import DECORATORS
@@ -96,16 +96,13 @@ class Lexer:
     datapack: DataPack
     """Datapack object"""
 
-    def __init__(self, config: "Configuration",
-                 _test_file: str | None = None) -> None:
+    def __init__(self, config: "Configuration", _test_file: str | None = None) -> None:
         logger.debug("Initializing Lexer")
         self.do_while_box = None
         self.imports = set()
         self.if_else_box = []
         self.config = config
-        self.datapack = DataPack(
-            config.namespace, int(
-                config.pack_format), self)
+        self.datapack = DataPack(config.namespace, int(config.pack_format), self)
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
@@ -122,8 +119,7 @@ class Lexer:
         """Parse current load function that's in self.datapack.load_function and clear it"""
         if self.datapack.load_function:
             self.datapack.functions[self.datapack.load_name].extend(
-                self.parse_load_func_content(
-                    programs=self.datapack.load_function)
+                self.parse_load_func_content(programs=self.datapack.load_function)
             )
             self.datapack.load_function = []
 
@@ -164,14 +160,12 @@ class Lexer:
         self.__update_load(file_path_str, raw_string)
 
         for command in tokenizer.programs:
-            if command[0].string == "function" and not self._is_vanilla_func(
-                    command):
+            if command[0].string == "function" and not self._is_vanilla_func(command):
                 self.parse_current_load()
                 self.parse_func(tokenizer, command, file_path_str)
             elif is_decorator(command[0].string):
                 self.parse_current_load()
-                self.parse_decorated_function(
-                    tokenizer, command, file_path_str)
+                self.parse_decorated_function(tokenizer, command, file_path_str)
             elif command[0].string == "new":
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
@@ -220,12 +214,10 @@ class Lexer:
                         self.__update_load(file_path_str, raw_string)
                     continue
                 try:
-                    new_path = Path(
-                        (file_path.parent / command[1].string).resolve())
+                    new_path = Path((file_path.parent / command[1].string).resolve())
                     if new_path.suffix != ".jmc":
                         new_path = Path(
-                            (file_path.parent /
-                             (command[1].string + ".jmc")).resolve()
+                            (file_path.parent / (command[1].string + ".jmc")).resolve()
                         )
                 except Exception as error:
                     raise JMCSyntaxException(
@@ -352,8 +344,7 @@ class Lexer:
         if len(command) > 4:
             raise JMCSyntaxException("Unexpected token", command[4], tokenizer)
 
-        func_path = prefix + \
-            convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_path = prefix + convention_jmc_to_mc(command[1], tokenizer, prefix="")
         if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC",
@@ -364,8 +355,7 @@ class Lexer:
         logger.debug(f"Function: {func_path}")
         func_content = command[3].string[1:-1]
         if func_path == self.datapack.load_name:
-            raise JMCSyntaxException(
-                "Load function is defined", command[1], tokenizer)
+            raise JMCSyntaxException("Load function is defined", command[1], tokenizer)
         if func_path in self.datapack.functions:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
                 func_path
@@ -455,15 +445,13 @@ class Lexer:
 
         if len(command) == 4:
             return True
-        if len(
-                command) == 5 and command[4].token_type == TokenType.PAREN_CURLY:
+        if len(command) == 5 and command[4].token_type == TokenType.PAREN_CURLY:
             return True
         if len(command) >= 5 and command[4].string == "with":
             return True
         return False
 
-    def parse_new(self, tokenizer: Tokenizer,
-                  command: list[Token], prefix: str = ""):
+    def parse_new(self, tokenizer: Tokenizer, command: list[Token], prefix: str = ""):
         """
         Parse a new json definition in form of list of token
 
@@ -528,8 +516,7 @@ class Lexer:
             command[1], tokenizer, is_make_lower=False, prefix=""
         )
 
-        if json_type not in JSON_FILE_TYPES and not json_type.startswith(
-                "tags/"):
+        if json_type not in JSON_FILE_TYPES and not json_type.startswith("tags/"):
             if json_type in JMC_JSON_FILE_TYPES:
                 if self.datapack.version < 48:
                     json_type = JMC_JSON_FILE_TYPES[json_type]
@@ -554,8 +541,7 @@ class Lexer:
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
             json_path = (
-                namespace + "/" + json_type + "/" +
-                json_name[len(namespace) + 1:]
+                namespace + "/" + json_type + "/" + json_name[len(namespace) + 1:]
             )
         else:
             json_path = json_type + "/" + json_name
@@ -602,8 +588,7 @@ class Lexer:
             )
             if namespace in Header().namespace_overrides:
                 super_path = (
-                    namespace + "/" + json_type + "/" +
-                    super_name[len(namespace) + 1:]
+                    namespace + "/" + json_type + "/" + super_name[len(namespace) + 1:]
                 )
             else:
                 super_path = json_type + "/" + super_name
@@ -659,8 +644,7 @@ class Lexer:
         if command[2].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException("Expected {", command[2], tokenizer)
 
-        class_path = prefix + \
-            convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        class_path = prefix + convention_jmc_to_mc(command[1], tokenizer, prefix="")
         class_content = command[2].string[1:-1]
         self.parse_class_content(
             class_path + "/",
@@ -671,8 +655,7 @@ class Lexer:
             file_string=tokenizer.file_string,
         )
 
-    def parse_load_func_content(
-            self, programs: list[list[Token]]) -> list[str]:
+    def parse_load_func_content(self, programs: list[list[Token]]) -> list[str]:
         """
         Parse content inside load function
 
@@ -680,8 +663,7 @@ class Lexer:
         :return: List of commands(string)
         """
         tokenizer = self.load_tokenizer
-        return self._parse_func_content(
-            tokenizer, programs, prefix="", is_load=True)
+        return self._parse_func_content(tokenizer, programs, prefix="", is_load=True)
 
     def parse_line(
         self, tokens: list[Token], tokenizer: Tokenizer, prefix: str
@@ -693,8 +675,7 @@ class Lexer:
         :param tokenizer: Tokenizer
         :return: List of minecraft commands
         """
-        return self._parse_func_content(
-            tokenizer, [tokens], prefix, is_load=False)
+        return self._parse_func_content(tokenizer, [tokens], prefix, is_load=False)
 
     def parse_func_content(
         self,
@@ -719,8 +700,7 @@ class Lexer:
             func_content, file_path_str, line=line, col=col, file_string=file_string
         )
         programs = tokenizer.programs
-        return self._parse_func_content(
-            tokenizer, programs, prefix, is_load=False)
+        return self._parse_func_content(tokenizer, programs, prefix, is_load=False)
 
     def _parse_func_content(
         self,
@@ -768,8 +748,7 @@ class Lexer:
             if command[0].string == "function" and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
             elif is_decorator(command[0].string):
-                self.parse_decorated_function(
-                    tokenizer, command, file_path_str, prefix)
+                self.parse_decorated_function(tokenizer, command, file_path_str, prefix)
             elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":
@@ -869,8 +848,7 @@ class Lexer:
         # `else`
         outputs = [[f"scoreboard players set {VAR} {DataPack.var_name} 0"]]
         if else_ is None:  # no 'else'
-            for condition, command_token in list(
-                    zip(conditions, command_tokens))[:-1]:
+            for condition, command_token in list(zip(conditions, command_tokens))[:-1]:
                 outputs[-1].extend(
                     [
                         f"""{condition} {self.datapack.add_custom_private_function(name, command_token, tokenizer, prefix=prefix, postcommands=[
@@ -896,22 +874,24 @@ class Lexer:
                 name, else_, tokenizer, prefix=prefix
             )
 
-        outputs[-1][-1] = (outputs[-1][-1] +
-                           last_output).replace("run execute ", "")
+        outputs[-1][-1] = (outputs[-1][-1] + last_output).replace("run execute ", "")
         if len(outputs) > 1:
             count = self.datapack.get_count(name)
-            self.datapack.add_private_function(
-                name, "\n".join(outputs[-1]), count)
+            self.datapack.add_private_function(name, "\n".join(outputs[-1]), count)
             for output in reversed(outputs[1:-1]):
                 output[-1] += self.datapack.call_func(name, count)
                 count = self.datapack.get_count(name)
-                self.datapack.add_private_function(
-                    name, "\n".join(output), count)
+                self.datapack.add_private_function(name, "\n".join(output), count)
             outputs[0][-1] += self.datapack.call_func(name, count)
         return "\n".join(outputs[0])
 
     def clean_up_paren_token(
-        self, token: Token, tokenizer: Tokenizer, is_nbt: bool = True
+        self,
+        token: Token,
+        tokenizer: Tokenizer,
+        is_nbt: bool = True,
+        keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
+        is_space_between: bool = False,
     ) -> str:
         """
         Turn a paren token into a clean string
@@ -919,45 +899,75 @@ class Lexer:
         :param token: paren token
         :param tokenizer: token's Tokenizer
         :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
+        :param keyword_token_callback: A special function to modify any keyword token
+        :param is_space_between: Whether to add space between keyword/operator tokens
         :return: Clean string representing paren token for output
         """
-        if len(token.string) == 2:
-            return token.string
-        open_ = token.string[0]
-        close = token.string[-1]
-        tokenizer = Tokenizer(
-            token.string[1:-1],
-            tokenizer.file_path,
-            token.line,
-            token.col + 1,
-            tokenizer.file_string,
-            expect_semicolon=False,
-            allow_semicolon=token.token_type == TokenType.PAREN_SQUARE,
+        return clean_up_paren_token(
+            token, tokenizer, is_nbt, keyword_token_callback, is_space_between
         )
-        string = ""
-        if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
-            is_nbt = False
-        for token_ in tokenizer.programs[0]:
-            if token_.token_type == TokenType.PAREN_ROUND:
-                string, success = search_to_string(
-                    string, token_, DataPack.var_name, tokenizer
-                )
-                if success:
-                    _string = ""
-                else:
-                    _string = self.clean_up_paren_token(
-                        token_, tokenizer, is_nbt)
-            elif token_.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
-                _string = self.clean_up_paren_token(token_, tokenizer, is_nbt)
-            elif token_.token_type == TokenType.STRING:
-                if is_nbt:
-                    _string = repr(token_.string)
-                    if '"' not in _string:
-                        _string = f'"{_string[1:-1]}"'
-                else:
-                    _string = dumps(token_.string)
-            else:
-                _string = token_.string
-            string += _string
 
-        return open_ + string + close
+
+def clean_up_paren_token(
+    token: Token,
+    tokenizer: Tokenizer,
+    is_nbt: bool = True,
+    keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
+    is_space_between: bool = False,
+) -> str:
+    """
+    Turn a paren token into a clean string
+
+    :param token: paren token
+    :param tokenizer: token's Tokenizer
+    :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
+    :param keyword_token_callback: A special function to modify any keyword token
+    :param is_space_between: Whether to add space between keyword/operator tokens
+    :return: Clean string representing paren token for output
+    """
+    if len(token.string) == 2:
+        return token.string
+    open_ = token.string[0]
+    close = token.string[-1]
+    tokenizer = Tokenizer(
+        token.string[1:-1],
+        tokenizer.file_path,
+        token.line,
+        token.col + 1,
+        tokenizer.file_string,
+        expect_semicolon=False,
+        allow_semicolon=token.token_type == TokenType.PAREN_SQUARE,
+    )
+    string = ""
+    if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
+        is_nbt = False
+    for token_ in tokenizer.programs[0]:
+        if token_.token_type == TokenType.PAREN_ROUND:
+            string, success = search_to_string(
+                string, token_, DataPack.var_name, tokenizer
+            )
+            if success:
+                _string = ""
+            else:
+                _string = clean_up_paren_token(
+                    token_, tokenizer, is_nbt, keyword_token_callback, is_space_between
+                )
+        elif token_.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
+            _string = clean_up_paren_token(
+                token_, tokenizer, is_nbt, keyword_token_callback, is_space_between
+            )
+        elif token_.token_type == TokenType.STRING:
+            if is_nbt:
+                _string = repr(token_.string)
+                if '"' not in _string:
+                    _string = f'"{_string[1:-1]}"'
+            else:
+                _string = dumps(token_.string)
+        elif token_.token_type == TokenType.KEYWORD:
+            _string = (
+                " " if is_space_between and string else ""
+            ) + keyword_token_callback(token_)
+        else:
+            _string = (" " if is_space_between and string else "") + token_.string
+        string += _string
+    return open_ + string + close

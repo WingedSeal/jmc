@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from jmc.compile.lexer import clean_up_paren_token
+
 from .command.utils import eval_expr, hash_string_to_string
 from .utils import is_connected, get_mc_uuid, is_number
 from .header import Header, MacroFactory
@@ -179,19 +181,50 @@ def __create_macro_factory(
             template_tokens.append(token)
 
     def macro_factory(argument_tokens: list[Token], line: int, col: int) -> list[Token]:
+        def _replace_token(token: Token) -> str:
+            for index, parameter_token in enumerate(parameter_tokens):
+                if (
+                    token.token_type == parameter_token.token_type
+                    and token.string == parameter_token.string
+                ):
+                    return argument_tokens[index].string
+            return token.string
+
         return_list: list[Token] = []
         extra_col = 0
         for token_or_int in template_tokens:
             if isinstance(token_or_int, Token):
-                return_list.append(
-                    __copy_macro_token(
-                        token_or_int,
-                        line,
-                        col + extra_col,
-                        len(key),
-                        replaced_token_col,
+                if token_or_int.token_type in (
+                    TokenType.PAREN_CURLY,
+                    TokenType.PAREN_ROUND,
+                    TokenType.PAREN_SQUARE,
+                ):
+                    token = Tokenizer(
+                        clean_up_paren_token(
+                            token_or_int,
+                            tokenizer,
+                            is_nbt=False,
+                            keyword_token_callback=_replace_token,
+                            is_space_between=True,
+                        ),
+                        reapplier.file_name,
+                        line=line,
+                        col=col + extra_col,
+                        expect_semicolon=False,
+                        file_string=reapplier.header_str,
+                    ).programs[0][0]
+
+                    return_list.append(token)
+                else:
+                    return_list.append(
+                        __copy_macro_token(
+                            token_or_int,
+                            line,
+                            col + extra_col,
+                            len(key),
+                            replaced_token_col,
+                        )
                     )
-                )
             else:
                 return_list.append(
                     __copy_macro_token(

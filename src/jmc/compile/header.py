@@ -1,4 +1,5 @@
 """Module handling jmc's header"""
+
 from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 
@@ -29,6 +30,7 @@ class Header(SingleTon):
     """
     A SingleTon class containing all information from header
     """
+
     __slots__ = (
         "file_read",
         "macros",
@@ -40,7 +42,7 @@ class Header(SingleTon):
         "dels",
         "post_process",
         "finished_compiled_time",
-        "nometa"
+        "nometa",
     )
 
     file_read: set[str]
