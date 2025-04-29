@@ -258,7 +258,7 @@ class FuncContent:
             if self.expanded_commands is not None:
                 for expanded_command in self.expanded_commands:
                     if expanded_command.startswith("execute"):
-                        expanded_command = expanded_command[len("execute") + 1 :]
+                        expanded_command = expanded_command[len("execute") + 1:]
                         self.command_strings.append(
                             " ".join(self.__commands[:-1])
                             + " "
@@ -511,8 +511,10 @@ class FuncContent:
                 )
             if self.__handle_with(key_pos, token):
                 return SKIP_TO_NEXT_LINE
-        else:
-            print("HELP, HANDLE SWITCH")
+        elif self.switch_tokens:
+            self.command = self.switch_tokens
+            self.parse_self_command(current_line - 1)
+            return SKIP_TO_NEXT_LINE
 
         self.was_anonym_func = False
 
