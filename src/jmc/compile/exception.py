@@ -92,6 +92,7 @@ def error_msg(
         display_col += 1
     try:
         msgs_ = tokenizer.file_string.split(NEW_LINE)
+        msgs_.append("\n")
         max_space = len(str(display_line + 1))
         line_ = overide_file_str(msgs_[display_line - 1])
         if entire_line:
