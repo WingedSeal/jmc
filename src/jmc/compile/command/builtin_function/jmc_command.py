@@ -7,7 +7,7 @@ from typing import Iterator
 from ....compile.datapack import DataPack
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
-from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError
+from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError, relative_file_name
 from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
@@ -215,6 +215,30 @@ class JMCCall(JMCFunction):
         )
         return function_call
 
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.print",
+    arg_type={"text": ArgType.STRING},
+    name="jmc_print",
+)
+class JMCPrint(JMCFunction):
+    def call(self) -> str:
+        print(f"JMC.print: {self.args['text']}")
+        return ""
+
+@func_property(
+    func_type=FuncType.JMC_COMMAND,
+    call_string="JMC.todo",
+    arg_type={"text": ArgType.STRING},
+    name="jmc_todo",
+    defaults={
+        "text": ""
+    }
+)
+class JMCTodo(JMCFunction):
+    def call(self) -> str:
+        print(f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.token.line, self.token.col)}): {self.args['text']}")
+        return ""
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
