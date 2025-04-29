@@ -215,6 +215,7 @@ class JMCCall(JMCFunction):
         )
         return function_call
 
+
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.print",
@@ -225,6 +226,7 @@ class JMCPrint(JMCFunction):
     def call(self) -> str:
         print(f"JMC.print: {self.args['text']}")
         return ""
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
@@ -237,8 +239,10 @@ class JMCPrint(JMCFunction):
 )
 class JMCTodo(JMCFunction):
     def call(self) -> str:
-        print(f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.token.line, self.token.col)}): {self.args['text']}")
+        self.self_token
+        print(f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}")
         return ""
+
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
