@@ -140,7 +140,7 @@ def __create_macro_factory(
     key: str,
     tokenizer: Tokenizer,
     error: HeaderSyntaxException,
-    reapplier: MacroReapplier,
+    reapplier: MacroReapplier | None,
 ) -> tuple[MacroFactory, int]:
     if not replaced_tokens:
         return __empty_macro_factory, 0
@@ -194,7 +194,7 @@ def __create_macro_factory(
         extra_col = 0
         for token_or_int in template_tokens:
             if isinstance(token_or_int, Token):
-                if token_or_int.token_type in (
+                if reapplier is not None and token_or_int.token_type in (
                     TokenType.PAREN_CURLY,
                     TokenType.PAREN_ROUND,
                     TokenType.PAREN_SQUARE,
@@ -240,7 +240,10 @@ def __create_macro_factory(
                     argument_tokens[token_or_int[0]].length - token_or_int[1].length
                 )
 
-        return _reapply_defered_macro(return_list, reapplier)
+        if reapplier is None:
+            return return_list
+        else:
+            return _reapply_defered_macro(return_list, reapplier)
 
     return macro_factory, len(parameter_tokens)
 
@@ -269,9 +272,14 @@ def __parse_header(
                 "Expected directive after '#'", file_name, line, line_str
             )
 
-        # Defer other macros
-        _macros = header.macros
-        header.macros = {}
+        is_deepdefine = line_str.split(maxsplit=1)[0] == "#deepdefine"
+
+        if is_deepdefine:
+            # Defer other macros
+            _macros = header.macros
+            header.macros = {}
+        else:
+            _macros = None
         tokenizer = Tokenizer(
             line_str[1:],
             file_name,
@@ -280,8 +288,12 @@ def __parse_header(
             expect_semicolon=False,
             file_string=header_str,
         )
-        header.macros = _macros
-        reapplier = MacroReapplier(file_name, line, header_str)
+        if is_deepdefine:
+            assert _macros is not None
+            header.macros = _macros
+            reapplier = MacroReapplier(file_name, line, header_str)
+        else:
+            reapplier = None
         directive_and_args = tokenizer.programs[0]
         directive_token = directive_and_args[0]
         arg_tokens = directive_and_args[1:]
@@ -322,7 +334,7 @@ def __parse_header(
                     HeaderSyntaxException(
                         "Invalid macro argument syntax", file_name, line, line_str
                     ),
-                    reapplier,
+                    reapplier=None,
                 )
             else:
                 #  #define KEYWORD TOKEN
@@ -334,12 +346,56 @@ def __parse_header(
                     HeaderSyntaxException(
                         "Invalid macro argument syntax", file_name, line, line_str
                     ),
-                    reapplier,
+                    reapplier=None,
                 )
                 num = arg_tokens[1].string
                 if is_number(num):
                     header.number_macros[key] = num
 
+        # #deepdefine
+        elif directive_token.string == "deepdefine":
+            if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    "Expected keyword after '#define'", file_name, line, line_str
+                )
+
+            key = arg_tokens[0].string
+            if key in header.macros:
+                raise HeaderDuplicatedMacro(
+                    f"'{key}' macro is already defined", file_name, line, line_str
+                )
+
+            if len(arg_tokens) == 1:
+                #  #define KEYWORD
+                raise HeaderSyntaxException(
+                    "'#deepdefine' is useless for normal define, simply use '#define'",
+                    file_name,
+                    line,
+                    line_str,
+                )
+
+            #  #define KEYWORD(arg1, arg2)
+            elif arg_tokens[1].token_type == TokenType.PAREN_ROUND and is_connected(
+                arg_tokens[1], arg_tokens[0]
+            ):
+                header.macros[key] = __create_macro_factory(
+                    arg_tokens[2:],
+                    arg_tokens[1],
+                    key,
+                    tokenizer,
+                    HeaderSyntaxException(
+                        "Invalid macro argument syntax", file_name, line, line_str
+                    ),
+                    reapplier,
+                )
+            else:
+                #  #define KEYWORD TOKEN
+                raise HeaderSyntaxException(
+                    "'#deepdefine' is useless for normal define, simply use '#define'",
+                    file_name,
+                    line,
+                    line_str,
+                )
         # #bind
         elif directive_token.string == "bind":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
@@ -501,7 +557,7 @@ def __parse_header(
                     HeaderSyntaxException(
                         "Invalid macro argument syntax", file_name, line, line_str
                     ),
-                    reapplier,
+                    reapplier=None,
                 )
                 num = arg_tokens[1].string
                 if is_number(num):
