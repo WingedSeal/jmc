@@ -16,7 +16,13 @@ from .exception import (
 from .tokenizer import Tokenizer, Token, TokenType
 from .datapack import DataPack, Function, PreFunction
 from .log import Logger
-from .utils import convention_jmc_to_mc, deep_merge, is_decorator, search_to_string
+from .utils import (
+    convention_jmc_to_mc,
+    deep_merge,
+    is_connected,
+    is_decorator,
+    search_to_string,
+)
 from .command import parse_condition
 from .lexer_func_content import FuncContent
 
@@ -942,6 +948,19 @@ def clean_up_paren_token(
     string = ""
     if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
         is_nbt = False
+
+    def front_space(token_: Token, old_token_: Token | None, string: str) -> str:
+        if not is_space_between:
+            return ""
+        if not string:
+            return ""
+        if old_token_ is None:
+            return ""
+        if is_connected(token_, old_token_):
+            return ""
+        return " "
+
+    old_token_ = None
     for token_ in tokenizer.programs[0]:
         if token_.token_type == TokenType.PAREN_ROUND:
             string, success = search_to_string(
@@ -965,10 +984,11 @@ def clean_up_paren_token(
             else:
                 _string = dumps(token_.string)
         elif token_.token_type == TokenType.KEYWORD:
-            _string = (
-                " " if is_space_between and string else ""
-            ) + keyword_token_callback(token_)
+            _string = front_space(token_, old_token_, string) + keyword_token_callback(
+                token_
+            )
         else:
-            _string = (" " if is_space_between and string else "") + token_.string
+            _string = front_space(token_, old_token_, string) + token_.string
         string += _string
+        old_token_ = token_
     return open_ + string + close
