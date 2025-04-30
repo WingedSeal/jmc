@@ -898,7 +898,6 @@ class Lexer:
         tokenizer: Tokenizer,
         is_nbt: bool = True,
         keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
-        is_space_between: bool = False,
     ) -> str:
         """
         Turn a paren token into a clean string
@@ -907,11 +906,13 @@ class Lexer:
         :param tokenizer: token's Tokenizer
         :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
         :param keyword_token_callback: A special function to modify any keyword token
-        :param is_space_between: Whether to add space between keyword/operator tokens
         :return: Clean string representing paren token for output
         """
         return clean_up_paren_token(
-            token, tokenizer, is_nbt, keyword_token_callback, is_space_between
+            token,
+            tokenizer,
+            is_nbt,
+            keyword_token_callback,
         )
 
 
@@ -920,7 +921,6 @@ def clean_up_paren_token(
     tokenizer: Tokenizer,
     is_nbt: bool = True,
     keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
-    is_space_between: bool = False,
 ) -> str:
     """
     Turn a paren token into a clean string
@@ -929,7 +929,6 @@ def clean_up_paren_token(
     :param tokenizer: token's Tokenizer
     :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
     :param keyword_token_callback: A special function to modify any keyword token
-    :param is_space_between: Whether to add space between keyword/operator tokens
     :return: Clean string representing paren token for output
     """
     if len(token.string) == 2:
@@ -949,18 +948,6 @@ def clean_up_paren_token(
     if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
         is_nbt = False
 
-    def front_space(token_: Token, old_token_: Token | None, string: str) -> str:
-        if not is_space_between:
-            return ""
-        if not string:
-            return ""
-        if old_token_ is None:
-            return ""
-        if is_connected(token_, old_token_):
-            return ""
-        return " "
-
-    old_token_ = None
     for token_ in tokenizer.programs[0]:
         if token_.token_type == TokenType.PAREN_ROUND:
             string, success = search_to_string(
@@ -984,11 +971,8 @@ def clean_up_paren_token(
             else:
                 _string = dumps(token_.string)
         elif token_.token_type == TokenType.KEYWORD:
-            _string = front_space(token_, old_token_, string) + keyword_token_callback(
-                token_
-            )
+            _string = keyword_token_callback(token_)
         else:
-            _string = front_space(token_, old_token_, string) + token_.string
+            _string = token_.string
         string += _string
-        old_token_ = token_
     return open_ + string + close

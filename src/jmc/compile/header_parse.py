@@ -205,7 +205,6 @@ def __create_macro_factory(
                             tokenizer,
                             is_nbt=False,
                             keyword_token_callback=_replace_token,
-                            is_space_between=True,
                         ),
                         reapplier.file_name,
                         line=line,
