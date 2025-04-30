@@ -55,6 +55,7 @@ class Token:
     :param line: Which line it's found in
     :param col: Which column it's found in
     :param string: The string representation (including parentheses, excluding quotation mark)
+    :param _macro_length: Length of the original token before macro replace it
     """
 
     token_type: TokenType

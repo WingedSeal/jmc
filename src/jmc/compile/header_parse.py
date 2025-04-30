@@ -36,8 +36,22 @@ class MacroReapplier:
 def _reapply_defered_macro(
     tokens: list[Token], reapplier: MacroReapplier
 ) -> list[Token]:
+    total_string = ""
+    old_token: Token | None = None
+    for token in tokens:
+        print(token)
+        if not total_string:
+            total_string += token.get_full_string()
+        elif old_token is None:
+            total_string += token.get_full_string()
+        elif is_connected(token, old_token):
+            total_string += token.get_full_string()
+        else:
+            total_string += " " + token.get_full_string()
+        old_token = token
+    print(total_string)
     tokenizer = Tokenizer(
-        " ".join((token.get_full_string() for token in tokens)),
+        total_string,
         reapplier.file_name,
         line=reapplier.line,
         col=2,
@@ -199,7 +213,7 @@ def __create_macro_factory(
                     TokenType.PAREN_ROUND,
                     TokenType.PAREN_SQUARE,
                 ):
-                    token = Tokenizer(
+                    token_ = Tokenizer(
                         clean_up_paren_token(
                             token_or_int,
                             tokenizer,
@@ -207,13 +221,21 @@ def __create_macro_factory(
                             keyword_token_callback=_replace_token,
                         ),
                         reapplier.file_name,
-                        line=line,
-                        col=col + extra_col,
+                        line=token_or_int.line,
+                        col=token_or_int.col,
                         expect_semicolon=False,
                         file_string=reapplier.header_str,
                     ).programs[0][0]
+                    return_list.append(
+                        __copy_macro_token(
+                            token_,
+                            line,
+                            col + extra_col,
+                            len(key),
+                            replaced_token_col,
+                        )
+                    )
 
-                    return_list.append(token)
                 else:
                     return_list.append(
                         __copy_macro_token(
