@@ -19,7 +19,6 @@ from .log import Logger
 from .utils import (
     convention_jmc_to_mc,
     deep_merge,
-    is_connected,
     is_decorator,
     search_to_string,
 )
@@ -109,7 +108,8 @@ class Lexer:
         self.imports = set()
         self.if_else_box = []
         self.config = config
-        self.datapack = DataPack(config.namespace, int(config.pack_format), self)
+        self.datapack = DataPack(
+            config.namespace, int(config.pack_format), self)
         self.datapack.functions[self.datapack.load_name] = Function()
         self.parse_file(Path(self.config.target), _test_file, is_load=True)
 
@@ -126,7 +126,8 @@ class Lexer:
         """Parse current load function that's in self.datapack.load_function and clear it"""
         if self.datapack.load_function:
             self.datapack.functions[self.datapack.load_name].extend(
-                self.parse_load_func_content(programs=self.datapack.load_function)
+                self.parse_load_func_content(
+                    programs=self.datapack.load_function)
             )
             self.datapack.load_function = []
 
@@ -172,7 +173,8 @@ class Lexer:
                 self.parse_func(tokenizer, command, file_path_str)
             elif is_decorator(command[0].string):
                 self.parse_current_load()
-                self.parse_decorated_function(tokenizer, command, file_path_str)
+                self.parse_decorated_function(
+                    tokenizer, command, file_path_str)
             elif command[0].string == "new":
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
@@ -221,10 +223,12 @@ class Lexer:
                         self.__update_load(file_path_str, raw_string)
                     continue
                 try:
-                    new_path = Path((file_path.parent / command[1].string).resolve())
+                    new_path = Path(
+                        (file_path.parent / command[1].string).resolve())
                     if new_path.suffix != ".jmc":
                         new_path = Path(
-                            (file_path.parent / (command[1].string + ".jmc")).resolve()
+                            (file_path.parent /
+                             (command[1].string + ".jmc")).resolve()
                         )
                 except Exception as error:
                     raise JMCSyntaxException(
@@ -351,7 +355,8 @@ class Lexer:
         if len(command) > 4:
             raise JMCSyntaxException("Unexpected token", command[4], tokenizer)
 
-        func_path = prefix + convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
         if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC",
@@ -362,7 +367,8 @@ class Lexer:
         logger.debug(f"Function: {func_path}")
         func_content = command[3].string[1:-1]
         if func_path == self.datapack.load_name:
-            raise JMCSyntaxException("Load function is defined", command[1], tokenizer)
+            raise JMCSyntaxException(
+                "Load function is defined", command[1], tokenizer)
         if func_path in self.datapack.functions:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
                 func_path
@@ -548,7 +554,8 @@ class Lexer:
         namespace = json_name.split("/")[0]
         if namespace in Header().namespace_overrides:
             json_path = (
-                namespace + "/" + json_type + "/" + json_name[len(namespace) + 1 :]
+                namespace + "/" + json_type + "/" +
+                json_name[len(namespace) + 1:]
             )
         else:
             json_path = json_type + "/" + json_name
@@ -595,7 +602,8 @@ class Lexer:
             )
             if namespace in Header().namespace_overrides:
                 super_path = (
-                    namespace + "/" + json_type + "/" + super_name[len(namespace) + 1 :]
+                    namespace + "/" + json_type + "/" +
+                    super_name[len(namespace) + 1:]
                 )
             else:
                 super_path = json_type + "/" + super_name
@@ -651,7 +659,8 @@ class Lexer:
         if command[2].token_type != TokenType.PAREN_CURLY:
             raise JMCSyntaxException("Expected {", command[2], tokenizer)
 
-        class_path = prefix + convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        class_path = prefix + \
+            convention_jmc_to_mc(command[1], tokenizer, prefix="")
         class_content = command[2].string[1:-1]
         self.parse_class_content(
             class_path + "/",
@@ -755,7 +764,8 @@ class Lexer:
             if command[0].string == "function" and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
             elif is_decorator(command[0].string):
-                self.parse_decorated_function(tokenizer, command, file_path_str, prefix)
+                self.parse_decorated_function(
+                    tokenizer, command, file_path_str, prefix)
             elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":
@@ -840,7 +850,6 @@ class Lexer:
         else:
             else_ = None
 
-        count_tmp = ""
         # `else if`
         if if_else_box:
             for else_if in if_else_box:
@@ -881,14 +890,17 @@ class Lexer:
                 name, else_, tokenizer, prefix=prefix
             )
 
-        outputs[-1][-1] = (outputs[-1][-1] + last_output).replace("run execute ", "")
+        outputs[-1][-1] = (outputs[-1][-1] +
+                           last_output).replace("run execute ", "")
         if len(outputs) > 1:
             count = self.datapack.get_count(name)
-            self.datapack.add_private_function(name, "\n".join(outputs[-1]), count)
+            self.datapack.add_private_function(
+                name, "\n".join(outputs[-1]), count)
             for output in reversed(outputs[1:-1]):
                 output[-1] += self.datapack.call_func(name, count)
                 count = self.datapack.get_count(name)
-                self.datapack.add_private_function(name, "\n".join(output), count)
+                self.datapack.add_private_function(
+                    name, "\n".join(output), count)
             outputs[0][-1] += self.datapack.call_func(name, count)
         return "\n".join(outputs[0])
 
@@ -897,7 +909,8 @@ class Lexer:
         token: Token,
         tokenizer: Tokenizer,
         is_nbt: bool = True,
-        keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
+        keyword_token_callback: Callable[[
+            Token], str] = lambda token: token.string,
     ) -> str:
         """
         Turn a paren token into a clean string
@@ -920,7 +933,8 @@ def clean_up_paren_token(
     token: Token,
     tokenizer: Tokenizer,
     is_nbt: bool = True,
-    keyword_token_callback: Callable[[Token], str] = lambda token: token.string,
+    keyword_token_callback: Callable[[Token],
+                                     str] = lambda token: token.string,
 ) -> str:
     """
     Turn a paren token into a clean string
@@ -957,11 +971,11 @@ def clean_up_paren_token(
                 _string = ""
             else:
                 _string = clean_up_paren_token(
-                    token_, tokenizer, is_nbt, keyword_token_callback, is_space_between
+                    token_, tokenizer, is_nbt, keyword_token_callback
                 )
         elif token_.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             _string = clean_up_paren_token(
-                token_, tokenizer, is_nbt, keyword_token_callback, is_space_between
+                token_, tokenizer, is_nbt, keyword_token_callback
             )
         elif token_.token_type == TokenType.STRING:
             if is_nbt:
