@@ -268,9 +268,16 @@ const Function = () => {
                     <CodeBlock>
                         <CodeText type="keyword">class</CodeText>{" "}
                         <CodeText type="class">folder_one.folder_two</CodeText>{" "}
-                        <br />
                         {"{"}
                         <br />
+                        <Tab />
+                        <CodeText type="function">function_name</CodeText>
+                        () {"{}"}
+                        <br />
+                        <Tab />
+                        <CodeText type="function">random_function</CodeText>() {"{"}
+                        <br />
+                        <Tab />
                         <Tab />
                         <CodeText type="function">function_name</CodeText>
                         ();{" "}
@@ -278,6 +285,7 @@ const Function = () => {
                             {"// function namespace:function_name"}
                         </CodeText>
                         <br />
+                        <Tab />
                         <Tab />
                         <CodeText type="keyword">this</CodeText>
                         <CodeText type="function">.function_name</CodeText>
@@ -287,6 +295,9 @@ const Function = () => {
                                 "// function namespace:folder_one/folder_two/function_name"
                             }
                         </CodeText>
+                        <br />
+                        <Tab />
+                        {"}"}
                         <br />
                         {"}"}
                     </CodeBlock>
@@ -335,11 +346,24 @@ const Function = () => {
                         ;
                         <br />
                         <CodeText type="function">function_name</CodeText>
-                        () with <CodeText type="param">@a[tag=jmc]::my_path</CodeText>
+                        () with <CodeText type="param">@a</CodeText>
+                        [tag
+                        <CodeText type="operator">=</CodeText>
+                        jmc]
+                        <CodeText type="operator">::</CodeText>
+                        my_path
                         ;
                         <br />
                         <CodeText type="function">function_name</CodeText>
-                        () with <CodeText type="number">[~, 10, ~]::</CodeText>;
+                        () with [
+                        <CodeText type="number">~</CodeText>
+                        <CodeText type="operator">,</CodeText>{" "}
+                        <CodeText type="number">10</CodeText>
+                        <CodeText type="operator">,</CodeText>{" "}
+                        <CodeText type="number">~</CodeText>
+                        ]
+                        <CodeText type="operator">::</CodeText>
+                        ;
                     </CodeBlock>
                     <p>
                         It also has a special feature that automatically convert
