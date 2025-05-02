@@ -27,6 +27,7 @@ my_storage::my.path ?= $my_var;
 my_storage::my.path = $my_var;
 my_storage::my.path = (float) $my_var;
 my_storage::my.path = 2 * (float) $my_var;
+my_storage::my.path = -2 * (float) $my_var;
 my_storage::my.path += {key: "value"};
 my_storage:: += {key: "value"};
 my_storage::my.path.del();
@@ -57,6 +58,7 @@ execute store success storage TEST:my_storage my.path int 1 run scoreboard playe
 execute store result storage TEST:my_storage my.path int 1 run scoreboard players get $my_var __variable__
 execute store result storage TEST:my_storage my.path float 1 run scoreboard players get $my_var __variable__
 execute store result storage TEST:my_storage my.path float 2 run scoreboard players get $my_var __variable__
+execute store result storage TEST:my_storage my.path float -2 run scoreboard players get $my_var __variable__
 data modify storage TEST:my_storage my.path merge value {key:"value"}
 data merge storage TEST:my_storage {key:"value"}
 data remove storage TEST:my_storage my.path

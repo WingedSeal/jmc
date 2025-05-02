@@ -52,7 +52,8 @@ def get_nbt_type(tokens: list[Token]) -> NBTType | None:
         and (
             tokens[1].string == "::"
             or (
-                tokens[1].token_type == TokenType.PAREN_SQUARE
+                len(tokens) >= 3
+                and tokens[1].token_type == TokenType.PAREN_SQUARE
                 and tokens[2].string == "::"
             )
         )

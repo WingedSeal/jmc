@@ -1,5 +1,7 @@
 from types import ModuleType as __ModuleType
 from . import (test_flow_controls,
+               test_vanilla,
+               test_macro,
                test_function,
                test_header,
                test_jmc_function,
@@ -11,6 +13,8 @@ from . import (test_flow_controls,
                )
 
 ALL: tuple[__ModuleType, ...] = (test_flow_controls,
+                                 test_vanilla,
+                                 test_macro,
                                  test_function,
                                  test_header,
                                  test_jmc_function,

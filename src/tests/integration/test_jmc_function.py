@@ -14,7 +14,6 @@ class TestVarOperation(unittest.TestCase):
 $i = Math.sqrt($x);
 $i = Math.sqrt($i);//COMMENT_TEST
         """).build()
-        self.maxDiff = None
         self.assertDictEqual(
             pack.built,
             string_to_tree_dict("""

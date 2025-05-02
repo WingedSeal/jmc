@@ -250,6 +250,35 @@ execute if score $i __variable__ matches ..9 run function TEST:__private__/for_l
             """)
         )
 
+    def test_async_for(self):
+        pack = JMCTestPack().set_jmc_file("""
+async for ($i=0; $i < 10; $i++) {
+    printf("&<$i>");
+} 1s;
+        """).set_pack_format(57).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/function/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/function/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard players set $i __variable__ 0
+function TEST:__private__/async/0
+> VIRTUAL/data/TEST/function/__private__/async/0.mcfunction
+execute if score $i __variable__ matches ..9 run function TEST:__private__/for_loop/0
+> VIRTUAL/data/TEST/function/__private__/for_loop/0.mcfunction
+tellraw @a {"score":{"name":"$i","objective":"__variable__"},"type":"score"}
+scoreboard players add $i __variable__ 1
+schedule function TEST:__private__/async/0 1s
+            """)
+        )
+
 
 class TestSwitchCase(unittest.TestCase):
     def test_switch_case(self):
