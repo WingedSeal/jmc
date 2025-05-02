@@ -335,11 +335,11 @@ const Function = () => {
                         ;
                         <br />
                         <CodeText type="function">function_name</CodeText>
-                        () with <CodeText type="param">@a[tag=jmc]</CodeText>
+                        () with <CodeText type="param">@a[tag=jmc]::my_path</CodeText>
                         ;
                         <br />
                         <CodeText type="function">function_name</CodeText>
-                        () with <CodeText type="number">~ 10 ~</CodeText>;
+                        () with <CodeText type="number">[~, 10, ~]::</CodeText>;
                     </CodeBlock>
                     <p>
                         It also has a special feature that automatically convert
