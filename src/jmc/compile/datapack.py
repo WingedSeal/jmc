@@ -754,7 +754,7 @@ class DataPack:
         :param token_dict: Dictionary of string and Token
         :return: String that looks like object
         """
-        pairs = []
+        pairs: list[str] = []
         for key, token in token_dict.items():
             if token.token_type == TokenType.STRING:
                 pairs.append(f"{key}:{token.add_quotation()}")
@@ -769,6 +769,27 @@ class DataPack:
             else:
                 pairs.append(f"{key}:{token.string}")
         return "{" + ",".join(pairs) + "}"
+    
+    def token_dict_to_raw_js_object_modern(
+            self, token_dict: dict[str, Token], tokenizer: Tokenizer) -> str:
+        """
+        Turns a dictionary of key and token to a string in form of Object
+
+        :param token_dict: Dictionary of string and Token
+        :return: String that looks like object
+        """
+        pairs: list[str] = []
+        for key, token in token_dict.items():
+            if not key.startswith("minecraft:"):
+                key = "minecraft:" + key
+            if token.token_type == TokenType.STRING:
+                pairs.append(f"{key}={token.add_quotation()}")
+            elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_ROUND, TokenType.PAREN_SQUARE}:
+                pairs.append(
+                    f"{key}={self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}")
+            else:
+                pairs.append(f"{key}={token.string}")
+        return "[" + ",".join(pairs) + "]"
 
     def __repr__(self) -> str:
         return f"""DataPack(
