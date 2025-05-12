@@ -1,6 +1,7 @@
 """Module for parsing conditions (statements that return boolean), called from command/_flow_control.py and lexer.py"""
 
 from dataclasses import dataclass, field
+from sys import prefix
 from typing import TYPE_CHECKING, Union
 
 
@@ -77,7 +78,7 @@ def merge_condition(conditions: list[Condition]) -> tuple[str, list[str]]:
 
 
 def custom_condition(
-    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack
+    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, prefix: str
 ) -> Condition:
     """
     Create a custom JMC condition from list of tokens representing statement
@@ -85,9 +86,9 @@ def custom_condition(
     :param tokens: List of tokens representing statement for condition
     :param tokenizer: Tokenizer
     :param datapack: Datapack object
+    :param prefix: Prefix of function(for Class feature)
     :return: Condition object parsed from list of tokens
     """
-
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
 
         objective = DataPack.var_name
@@ -156,7 +157,8 @@ def custom_condition(
                     tokenizer,
                     suggestion=f"Did you mean `if (!{first_token.string}) {{`?",
                 )
-            scoreboard_player = find_scoreboard_player_type(second_token, tokenizer)
+            scoreboard_player = find_scoreboard_player_type(
+                second_token, tokenizer)
             operator = operator_token.string
 
             if scoreboard_player.player_type == PlayerType.INTEGER:
@@ -284,14 +286,14 @@ def custom_condition(
 
         return Condition(
             *matched_function(
-                tokens[1], tokens[0], datapack, tokenizer, prefix=""
+                tokens[1], tokens[0], datapack, tokenizer, prefix=prefix
             ).call_bool()
         )
     # End
 
     if len(tokens) == 2 and tokens[1].token_type == TokenType.PAREN_ROUND:
         func_content = FUNC_CONTENT[0](
-            tokenizer, [tokens], is_load=False, lexer=datapack.lexer, prefix=""
+            tokenizer, [tokens], is_load=False, lexer=datapack.lexer, prefix=prefix
         ).parse()
         return Condition(func_content[0], IF)
 
@@ -360,7 +362,7 @@ def find_operator(
 
 
 def condition_to_ast(
-    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack
+    tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, prefix: str
 ) -> AST_TYPE:
     """
     Turn condition in form of list of tokens to abstract syntax tree
@@ -368,6 +370,7 @@ def condition_to_ast(
     :param tokens: Condition in form of tokens
     :param tokenizer: Tokenizer
     :param datapack: Datapack object
+    :param prefix: Prefix of function(for Class feature)
     :raises JMCSyntaxException: Empty round bracket inside condition
     :return: Abstract syntax tree
     """
@@ -393,7 +396,7 @@ def condition_to_ast(
         return {
             "operator": OR_OPERATOR,
             "body": [
-                condition_to_ast(tokens, tokenizer, datapack)
+                condition_to_ast(tokens, tokenizer, datapack, prefix)
                 for tokens in list_of_tokens
             ],
         }
@@ -403,7 +406,7 @@ def condition_to_ast(
         return {
             "operator": AND_OPERATOR,
             "body": [
-                condition_to_ast(tokens, tokenizer, datapack)
+                condition_to_ast(tokens, tokenizer, datapack, prefix)
                 for tokens in list_of_tokens
             ],
         }
@@ -412,10 +415,9 @@ def condition_to_ast(
     if tokens[0].token_type == TokenType.OPERATOR and tokens[0].string == NOT_OPERATOR:
         return {
             "operator": NOT_OPERATOR,
-            "body": condition_to_ast(tokens[1:], tokenizer, datapack),
+            "body": condition_to_ast(tokens[1:], tokenizer, datapack, prefix),
         }
-
-    return custom_condition(tokens, tokenizer, datapack)
+    return custom_condition(tokens, tokenizer, datapack, prefix)
 
 
 def ast_to_commands(
@@ -441,7 +443,8 @@ def ast_to_commands(
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError('ast["body"] is a Condition instead of list in AND')
+            raise ValueError(
+                'ast["body"] is a Condition instead of list in AND')
         for and_body in ast["body"]:
             if isinstance(and_body, str):
                 raise ValueError('ast["body"] is string')
@@ -456,7 +459,8 @@ def ast_to_commands(
         datapack.data.condition_count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError('ast["body"] is a Condition instead of list in OR')
+            raise ValueError(
+                'ast["body"] is a Condition instead of list in OR')
         for or_body in ast["body"]:
             if isinstance(or_body, str):
                 raise ValueError('ast["body"] is string')
@@ -531,7 +535,7 @@ def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
 
 
 def parse_condition(
-    condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack
+    condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack, prefix: str
 ) -> tuple[str, str]:
     """
     Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
@@ -549,12 +553,14 @@ def parse_condition(
     :param condition_token: Token or List of tokens
     :param tokenizer: Tokenizer
     :param datapack: Datapack object
+  :param prefix: Prefix of function(for Class feature)
     :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
     datapack.data.condition_count = 0
-    tokens = condition_token if isinstance(condition_token, list) else [condition_token]
+    tokens = condition_token if isinstance(
+        condition_token, list) else [condition_token]
 
-    ast = condition_to_ast(tokens, tokenizer, datapack)
+    ast = condition_to_ast(tokens, tokenizer, datapack, prefix)
     condition, precommand = ast_to_strings(ast, datapack)
     precommand = precommand + "\n" if precommand else ""
     return condition, precommand

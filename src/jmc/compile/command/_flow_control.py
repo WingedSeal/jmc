@@ -135,7 +135,7 @@ def while_(command: list[Token], datapack: "DataPack",
                 "Expected {", command[2], tokenizer, display_col_length=False)
 
         condition, precommand = parse_condition(
-            command[1], tokenizer, datapack)
+            command[1], tokenizer, datapack, prefix)
         count = datapack.get_count(WHILE_NAME)
         call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"
         datapack.add_custom_private_function(
@@ -156,7 +156,7 @@ def while_(command: list[Token], datapack: "DataPack",
                 "Unexpected token", command[2], tokenizer, display_col_length=False)
 
         condition, precommand = parse_condition(
-            command[1], tokenizer, datapack)
+            command[1], tokenizer, datapack, prefix)
         count = datapack.get_count(WHILE_NAME)
         call_func = datapack.add_custom_private_function(
             WHILE_NAME, func_content, tokenizer, count, prefix, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"])
@@ -463,7 +463,7 @@ def __handle_for(command: list[Token], datapack: DataPack,
         precommand = ""
     else:
         condition, precommand = parse_condition(
-            statements[1], tokenizer, datapack)
+            statements[1], tokenizer, datapack, prefix)
     last_statement = datapack.lexer.parse_line(
         statements[2], tokenizer, prefix)
 
@@ -557,7 +557,7 @@ def async_(command: list[Token], datapack: DataPack,
             precommand = ""
         else:
             condition, precommand = parse_condition(
-                command[2], tokenizer, datapack)
+                command[2], tokenizer, datapack, prefix)
 
         count = datapack.get_count(WHILE_NAME)
         if condition == "true":

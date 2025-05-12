@@ -804,7 +804,7 @@ class Lexer:
         if if_else_box[0][0] is None:
             raise ValueError("if_else_box[0][0] is None")
         condition, precommand = parse_condition(
-            if_else_box[0][0], tokenizer, self.datapack
+            if_else_box[0][0], tokenizer, self.datapack, prefix
         )
 
         if is_expand:
@@ -856,7 +856,7 @@ class Lexer:
                 if else_if[0] is None:
                     raise ValueError("else_if[0] is None")
                 condition, precommand = parse_condition(
-                    else_if[0], tokenizer, self.datapack
+                    else_if[0], tokenizer, self.datapack, prefix
                 )
                 conditions.append(f"{precommand}execute {condition} run")
                 command_tokens.append(else_if[1])
