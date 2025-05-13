@@ -87,7 +87,7 @@ class ItemMixin(JMCFunction):
             nbt[key] = value_token
 
         if is_component:
-            repr_ = (lambda x: x) if self.datapack.version >= 71 else repr
+            repr_ = (lambda x: x) if self.datapack.version >= 62 else repr
             if self.args[display_name_param]:
                 if "custom_name" in nbt:
                     raise JMCValueError(
