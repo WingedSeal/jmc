@@ -287,6 +287,30 @@ class JMCBuildError(Exception):
         super().__init__(*args)
 
 
+class MinecraftVersionTooHigh(Exception):
+    """Pack format is too new"""
+
+    def __init__(
+        self,
+        pack_format: int,
+        token: "Token|None",
+        tokenizer: "Tokenizer",
+        *,
+        suggestion: str | None = None,
+    ) -> None:
+        msg = error_msg(
+            f"Datapack's pack_format is too recent for this feature. Expected pack_format lower than {pack_format}",
+            token,
+            tokenizer,
+            col_length=False,
+            display_col_length=True,
+            entire_line=False,
+            suggestion=suggestion,
+        )
+        log(self, (msg,))
+        super().__init__(msg)
+
+
 class MinecraftVersionTooLow(Exception):
     """Pack format is too outdated"""
 

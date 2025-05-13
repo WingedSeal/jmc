@@ -240,7 +240,8 @@ class JMCPrint(JMCFunction):
 class JMCTodo(JMCFunction):
     def call(self) -> str:
         self.self_token
-        print(f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}")
+        print(
+            f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}")
         return ""
 
 

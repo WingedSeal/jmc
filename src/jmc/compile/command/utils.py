@@ -254,7 +254,7 @@ class Arg:
                     self.token,
                     tokenizer,
                 )
-            if "=" not in key_string:
+            if "=" not in self.token.string:
                 raise JMCValueError(
                     f"For '{key_string}' key, expected {
                         verifier.value}, got {

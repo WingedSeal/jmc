@@ -12,9 +12,10 @@ class Item:
     item_type: str
     nbt: str
     raw_nbt: dict[str, "Token"]
+    is_component: bool
 
     def __str__(self) -> str:
-        return self.item_type + (self.nbt if self.nbt != "" else "")
+        return self.item_type + (self.nbt if self.raw_nbt else "")
 
 
 @dataclass(slots=True, frozen=False, eq=True)
@@ -66,7 +67,7 @@ class GUI:
         self.default_item = Item(
             "gray_stained_glass_pane",
             nbt="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(name),
-            raw_nbt={})
+            raw_nbt={}, is_component=False)
         self.name = name
         self.is_created = False
         self.template_map = defaultdict(list)

@@ -32,11 +32,12 @@ class ItemMixin(JMCFunction):
         return Item(
             item_type,
             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
-            nbt
+            nbt,
+            is_component=item.is_component
         )
 
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
-                    lore_param: str = "lore", nbt_param: str = "nbt", modify_nbt: dict[str, Token] | None = None) -> "Item":
+                    lore_param: str = "lore", nbt_param: str = "nbt", component_param: str = "component", modify_nbt: dict[str, Token] | None = None) -> "Item":
         """
         Create new item from arguments given in the JMCFunction
 
@@ -44,9 +45,16 @@ class ItemMixin(JMCFunction):
         :param display_name_param: Paramter to access `self.args`,defaults to "itemType"
         :param lore_param: Paramter to access `self.args`,defaults to "lore"
         :param nbt_param: Paramter to access `self.args`,defaults to "nbt"
+        :param component_param: Paramter to access `self.args`,defaults to "component"
         :param modify_nbt: NBT to modify, defaults to None
         :return: Item
         """
+        if self.args[component_param]:
+            self.datapack.version.require(
+                41, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 41, use nbt instead")
+        if self.args[nbt_param]:
+            self.datapack.version.require(
+                41, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 41, use component instead", is_lower=True)
         if modify_nbt is None:
             modify_nbt = {}
 
@@ -58,46 +66,77 @@ class ItemMixin(JMCFunction):
                 self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
-        nbt = self.tokenizer.parse_js_obj(
-            self.raw_args[nbt_param].token) if self.args[nbt_param] else {}
+        if self.args[nbt_param]:
+            nbt = self.tokenizer.parse_js_obj(
+                self.raw_args[nbt_param].token)
+        elif self.args[component_param]:
+            nbt = self.tokenizer.parse_component(
+                self.raw_args[component_param].token)
+        else:
+            nbt = {}
 
+        is_component = self.datapack.version >= 41
         for key, value_token in modify_nbt.items():
             if key in nbt:
                 raise JMCValueError(
-                    f"{key} is already inside the nbt",
+                    f"{key} is already inside the " +
+                    ("component" if is_component else "nbt"),
                     value_token,
                     self.tokenizer)
 
             nbt[key] = value_token
 
-        lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
-                         for lore in lores])
+        if is_component:
+            if self.args[display_name_param]:
+                if "custom_name" in nbt:
+                    raise JMCValueError(
+                        "custom_name is already inside the component",
+                        self.token,
+                        self.tokenizer)
+                name_ = self.format_text(
+                    display_name_param,
+                    is_default_no_italic=True,
+                    is_allow_score_selector=False)
+                nbt["custom_name"] = Token.empty(name_)
+            if self.args[lore_param]:
+                if "lore" in nbt:
+                    raise JMCValueError(
+                        "lore is already inside the component",
+                        self.token,
+                        self.tokenizer)
+                lore_ = ",".join([str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
+                                  for lore in lores])
+                nbt["lore"] = Token.empty(f"[{lore_}]")
 
-        if self.args[display_name_param]:
-            if "display" in nbt:
-                raise JMCValueError(
-                    "display is already inside the nbt",
-                    self.token,
-                    self.tokenizer)
+        else:
             new_token_string = "{"
-            name_ = self.format_text(
-                display_name_param,
-                is_default_no_italic=True,
-                is_allow_score_selector=False)
-            if name_:
+            if self.args[display_name_param]:
+                if "display" in nbt:
+                    raise JMCValueError(
+                        "display is already inside the nbt",
+                        self.token,
+                        self.tokenizer)
+                name_ = self.format_text(
+                    display_name_param,
+                    is_default_no_italic=True,
+                    is_allow_score_selector=False)
                 new_token_string += f"""Name:{repr(name_)}"""
-            if lore_:
-                if name_:
+            if self.args[lore_param]:
+                lore_ = ",".join([repr(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                                  for lore in lores])
+                if self.args[display_name_param]:
                     new_token_string += ","
                 new_token_string += f"""Lore:[{lore_}]"""
             new_token_string += "}"
-            if name_ or lore_:
+            if self.args[display_name_param] or self.args[lore_param]:
                 nbt["display"] = Token.empty(new_token_string)
 
         return Item(
             item_type,
-            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
-            nbt
+            self.datapack.token_dict_to_component(
+                nbt, self.tokenizer) if is_component else self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            nbt,
+            is_component
         )
 
 

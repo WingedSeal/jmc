@@ -311,7 +311,8 @@ class DataPack:
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
         """Dictionary of json name and a dictionary(jsobject)"""
-        self.private_functions: dict[str, dict[str, Function]] = defaultdict(dict)
+        self.private_functions: dict[str,
+                                     dict[str, Function]] = defaultdict(dict)
         """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
@@ -684,7 +685,8 @@ class DataPack:
                 func_map[num] = value.string, False
             elif value.token_type == TokenType.FUNC:
                 func_map[num] = (
-                    "\n".join(self.parse_function_token(value, tokenizer, prefix)),
+                    "\n".join(self.parse_function_token(
+                        value, tokenizer, prefix)),
                     True,
                 )
             else:
@@ -740,7 +742,8 @@ class DataPack:
                     token,
                     tokenizer,
                 )
-            result_string, result_token = self.parse_list(token_, tokenizer, list_of)
+            result_string, result_token = self.parse_list(
+                token_, tokenizer, list_of)
             result_strings.append(result_string)
             result_tokens.append(result_token)
         return result_strings, result_tokens
@@ -769,6 +772,31 @@ class DataPack:
             else:
                 pairs.append(f"{key}:{token.string}")
         return "{" + ",".join(pairs) + "}"
+
+    def token_dict_to_component(
+        self, token_dict: dict[str, Token], tokenizer: Tokenizer
+    ) -> str:
+        """
+        Turns a dictionary of key and token to a string in form of component
+
+        :param token_dict: Dictionary of string and Token
+        :return: String that looks like component
+        """
+        pairs = []
+        for key, token in token_dict.items():
+            if token.token_type == TokenType.STRING:
+                pairs.append(f"{key}={token.add_quotation()}")
+            elif token.token_type in {
+                TokenType.PAREN_CURLY,
+                TokenType.PAREN_ROUND,
+                TokenType.PAREN_SQUARE,
+            }:
+                pairs.append(
+                    f"{key}={self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                )
+            else:
+                pairs.append(f"{key}={token.string}")
+        return "[" + ",".join(pairs) + "]"
 
     def __repr__(self) -> str:
         return f"""DataPack(

@@ -1,4 +1,4 @@
-from .exception import MinecraftVersionTooLow
+from .exception import MinecraftVersionTooLow, MinecraftVersionTooHigh
 
 from .tokenizer import Token, Tokenizer
 
@@ -24,18 +24,25 @@ class PackVersion:
         """Datapack's pack_format"""
 
     def require(self, pack_format: int, token: Token,
-                tokenizer: Tokenizer, suggestion: str | None = None) -> None:
+                tokenizer: Tokenizer, suggestion: str | None = None, is_lower: bool = False) -> None:
         """
         Raise MinecraftVersionTooLow when pack_format is too low
+        Raise MinecraftVersionTooHigh when pack_format is too high
 
         :param pack_format: required pack_format
         :param token: Token to raise error
         :param tokenizer: token's Tokenizer
         :param suggestion: error suggestion, defaults to None
+        :param is_lower: Set to True when expecting pack_format lower than this
         """
-        if self._pack_format != -1 and self._pack_format < pack_format:
-            raise MinecraftVersionTooLow(
-                pack_format, token, tokenizer, suggestion=suggestion)
+        if is_lower:
+            if self._pack_format != -1 and self._pack_format >= pack_format:
+                raise MinecraftVersionTooHigh(
+                    pack_format, token, tokenizer, suggestion=suggestion)
+        else:
+            if self._pack_format != -1 and self._pack_format < pack_format:
+                raise MinecraftVersionTooLow(
+                    pack_format, token, tokenizer, suggestion=suggestion)
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, int):
