@@ -51,10 +51,10 @@ class ItemMixin(JMCFunction):
         """
         if self.args[component_param]:
             self.datapack.version.require(
-                41, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 41, use nbt instead")
+                33, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 33, use nbt instead")
         if self.args[nbt_param]:
             self.datapack.version.require(
-                41, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 41, use component instead", is_lower=True)
+                33, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 33, use component instead", is_lower=True)
         if modify_nbt is None:
             modify_nbt = {}
 
@@ -75,7 +75,7 @@ class ItemMixin(JMCFunction):
         else:
             nbt = {}
 
-        is_component = self.datapack.version >= 41
+        is_component = self.datapack.version >= 33
         for key, value_token in modify_nbt.items():
             if key in nbt:
                 raise JMCValueError(
