@@ -131,6 +131,7 @@ class NumberType(Enum):
 class ArgType(Enum):
     ARROW_FUNC = "arrow(anonymous) function"
     JS_OBJECT = "JavaScript object (dictionary)"
+    COMPONENT = "component"
     JSON = "JSON"
     SCOREBOARD = "variable or objective:selector"
     INTEGER = "integer"
@@ -164,7 +165,7 @@ class Arg:
         """
         if verifier == ArgType.ANY:
             return self
-        if verifier == ArgType.SCOREBOARD_INT:
+        elif verifier == ArgType.SCOREBOARD_INT:
             if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
             if self.arg_type == ArgType.KEYWORD and self.token.string.count(
@@ -177,7 +178,7 @@ class Arg:
                 self.token,
                 tokenizer,
             )
-        if verifier == ArgType.SCOREBOARD:
+        elif verifier == ArgType.SCOREBOARD:
             if self.arg_type == ArgType.SCOREBOARD:
                 return self
             if self.arg_type == ArgType.KEYWORD and self.token.string.count(
@@ -191,7 +192,7 @@ class Arg:
                 self.token,
                 tokenizer,
             )
-        if verifier == ArgType.FLOAT:
+        elif verifier == ArgType.FLOAT:
             if self.arg_type in {ArgType.FLOAT, ArgType.INTEGER}:
                 return self
             raise JMCValueError(
@@ -201,7 +202,7 @@ class Arg:
                 self.token,
                 tokenizer,
             )
-        if verifier == ArgType.FUNC:
+        elif verifier == ArgType.FUNC:
             if self.arg_type == ArgType.ARROW_FUNC:
                 return self
             if self.arg_type in {ArgType.KEYWORD, ArgType.SCOREBOARD}:
@@ -214,7 +215,7 @@ class Arg:
                 self.token,
                 tokenizer,
             )
-        if verifier == ArgType.SELECTOR:
+        elif verifier == ArgType.SELECTOR:
             if self.arg_type == ArgType.SELECTOR:
                 return self
             if self.arg_type == ArgType.KEYWORD:
@@ -227,7 +228,7 @@ class Arg:
                 self.token,
                 tokenizer,
             )
-        if verifier == ArgType.KEYWORD:
+        elif verifier == ArgType.KEYWORD:
             if key_string.startswith("@"):
                 raise JMCValueError(
                     f"For '{key_string}' key, expected {
@@ -244,6 +245,25 @@ class Arg:
                     self.token,
                     tokenizer,
                 )
+        elif verifier == ArgType.COMPONENT:
+            if self.arg_type != ArgType.LIST:
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        self.arg_type.value}",
+                    self.token,
+                    tokenizer,
+                )
+            if "=" not in key_string:
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        ArgType.LIST.value}",
+                    self.token,
+                    tokenizer,
+                )
+            self.arg_type = ArgType.COMPONENT
+            return self
         if verifier != self.arg_type:
             suggestion = None
             if verifier == ArgType.STRING:
