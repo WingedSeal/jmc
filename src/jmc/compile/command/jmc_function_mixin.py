@@ -87,6 +87,7 @@ class ItemMixin(JMCFunction):
             nbt[key] = value_token
 
         if is_component:
+            repr_ = (lambda x: x) if self.datapack.version >= 71 else repr
             if self.args[display_name_param]:
                 if "custom_name" in nbt:
                     raise JMCValueError(
@@ -97,15 +98,15 @@ class ItemMixin(JMCFunction):
                     display_name_param,
                     is_default_no_italic=True,
                     is_allow_score_selector=False)
-                nbt["custom_name"] = Token.empty(name_)
+                nbt["custom_name"] = Token.empty(repr_(name_))
             if self.args[lore_param]:
                 if "lore" in nbt:
                     raise JMCValueError(
                         "lore is already inside the component",
                         self.token,
                         self.tokenizer)
-                lore_ = ",".join([str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
-                                  for lore in lores])
+                lore_ = ",".join([repr_(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
+                                  for lore in lores)])
                 nbt["lore"] = Token.empty(f"[{lore_}]")
 
         else:
