@@ -2001,7 +2001,7 @@ class DebugWatch(JMCFunction):
 
     def call(self) -> str:
         if self.datapack.data.is_too_late_debug_watch:
-            raise JMCSyntaxException(f"At least 1 variable operation was performed before calling {self.call_string}", self.token, self.tokenizer)
+            raise JMCSyntaxException(f"At least 1 variable operation was performed before calling {self.call_string}", self.self_token, self.tokenizer)
         objective, player = self.args["variable"].split()
         self.datapack.data.watching.add((objective, player))
         return ""
