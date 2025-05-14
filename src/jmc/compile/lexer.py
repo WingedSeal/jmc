@@ -3,6 +3,8 @@ from pathlib import Path
 from json import loads, JSONDecodeError, dumps
 from typing import TYPE_CHECKING, Callable
 
+from jmc.compile.pack_version import PackVersionFeature
+
 
 from .decorator_parse import DECORATORS
 from .header import Header
@@ -531,7 +533,7 @@ class Lexer:
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith("tags/"):
             if json_type in JMC_JSON_FILE_TYPES:
-                if self.datapack.version < 48:
+                if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME:
                     json_type = JMC_JSON_FILE_TYPES[json_type]
             elif json_type.startswith("tag/"):
                 json_type = json_type.replace("tag/", "tags/")

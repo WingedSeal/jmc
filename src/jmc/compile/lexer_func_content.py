@@ -859,7 +859,8 @@ class FuncContent:
             append_commands(self.__commands, "with")
 
     def __handle_with(self, key_pos: int, token: Token) -> bool:
-        self.lexer.datapack.version.require(48, token, self.tokenizer)
+        self.lexer.datapack.version.require(
+            PackVersionFeature.LEGACY_FOLDER_RENAME, token, self.tokenizer)
         if not self.__commands and self.switch_tokens is None:
             return CONTINUE_LINE
         if (

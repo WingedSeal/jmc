@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
-from .pack_version import PackVersion
+from .pack_version import PackVersion, PackVersionFeature
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
 from .exception import (
@@ -396,7 +396,7 @@ class DataPack:
         :param name: Name of the private json
         :param json: Dictionary object
         """
-        if self.version >= 48 and json_type.endswith("s"):
+        if self.version >= PackVersionFeature.LEGACY_FOLDER_RENAME and json_type.endswith("s"):
             json_type = json_type[:-1]
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 

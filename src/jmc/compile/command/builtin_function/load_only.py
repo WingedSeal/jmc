@@ -1,6 +1,8 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 import json
 
+from jmc.compile.pack_version import PackVersionFeature
+
 from ...utils import convention_jmc_to_mc
 from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType
@@ -251,7 +253,7 @@ class ItemCreateSpawnEgg(EventMixin, ItemMixin):
             on_place
         ])}""")
 
-        if self.datapack.version >= 33:
+        if self.datapack.version >= PackVersionFeature.COMPONENT:
             modify_component = {"entity_data": Token.empty(
                 f"""id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]""")}
             self.datapack.data.item[self.args["itemId"]] = self.create_item(
@@ -339,7 +341,7 @@ class ItemCreateSpawnEgg(EventMixin, ItemMixin):
 #         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
 #                             for text, text_token in zip(texts, texts_tokens)]
 #         if on_click:
-#             if self.datapack.version < 62:
+#             if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
 #                 outer_key, inner_key = "clickEvent", "value"
 #             else:
 #                 outer_key, inner_key = "click_event", "command"
@@ -1124,7 +1126,7 @@ class TextPropClickCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "command"
@@ -1174,7 +1176,7 @@ class TextPropsClickCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "command"
@@ -1227,7 +1229,7 @@ class TextPropSuggestCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "command"
@@ -1278,7 +1280,7 @@ class TextPropsSuggestCommand(JMCFunction):
                 self.raw_args["function"].token,
                 self.tokenizer, suggestion="This is due to minecraft's limitation")
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "command"
@@ -1314,7 +1316,7 @@ class TextPropClickURL(JMCFunction):
                 self.raw_args["url"].token,
                 self.tokenizer)
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "url"
@@ -1348,7 +1350,7 @@ class TextPropsClickURL(JMCFunction):
                 self.raw_args["url"].token,
                 self.tokenizer)
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
         else:
             outer_key, inner_key = "click_event", "url"
@@ -1387,7 +1389,7 @@ class TextPropClickPage(JMCFunction):
                 self.raw_args["page"].token,
                 self.tokenizer)
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             key = "clickEvent"
             body: dict[str, str | int] = {
                 "action": "change_page", "value": self.args["page"]}
@@ -1417,12 +1419,12 @@ class TextPropsClickPage(JMCFunction):
 
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            if self.datapack.version < 62:
+            if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
                 return {"action": "change_page", "value": arg}
             else:
                 return {"action": "change_page", "page": int(arg)}
         self.add_formatted_text_prop(
-            "clickEvent" if self.datapack.version < 62 else "click_event",
+            "clickEvent" if self.datapack.version < PackVersionFeature.TEXT_COMPONENT else "click_event",
             inner, self.check_bool("local"))
         return ""
 
@@ -1511,9 +1513,9 @@ class TextPropHoverText(JMCFunction):
 
         text_to_show = json.loads(self.format_text("text"))
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "hoverEvent", "contents"
-        elif self.datapack.version == 62:
+        elif self.datapack.version == PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "hover_event", "text"
         else:
             outer_key, inner_key = "hover_event", "value"
@@ -1547,9 +1549,9 @@ class TextPropsHoverText(JMCFunction):
                 self.raw_args["text"].token,
                 self.tokenizer)
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "hoverEvent", "contents"
-        elif self.datapack.version == 62:
+        elif self.datapack.version == PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "hover_event", "text"
         else:
             outer_key, inner_key = "hover_event", "value"
@@ -1589,7 +1591,7 @@ class TextPropHoverItem(JMCFunction):
 
         item_to_show = json.loads(self.args["item"])
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             key = "hoverEvent"
             body = {
                 "action": "show_item",
@@ -1635,13 +1637,13 @@ class TextPropsHoverItem(JMCFunction):
                 self.args["item"].replace(
                     self.args["indexString"], arg))
 
-            if self.datapack.version < 62:
+            if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
                 return {"action": "show_item", "contents": item_to_show}
             else:
                 return {"action": "show_item", **item_to_show}
 
         self.add_formatted_text_prop(
-            "hoverEvent" if self.datapack.version < 62 else "hover_event",
+            "hoverEvent" if self.datapack.version < PackVersionFeature.TEXT_COMPONENT else "hover_event",
             inner,
             self.check_bool("local")
         )
@@ -1672,7 +1674,7 @@ class TextPropHoverEntity(JMCFunction):
 
         entity_to_show = json.loads(self.args["entity"])
 
-        if self.datapack.version < 62:
+        if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             key = "hoverEvent"
             body = {
                 "action": "show_entity",
@@ -1718,13 +1720,13 @@ class TextPropsHoverEntity(JMCFunction):
                 self.args["entity"].replace(
                     self.args["indexString"], arg))
 
-            if self.datapack.version < 62:
+            if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
                 return {"action": "show_entity", "contents": entity_to_show}
             else:
                 return {"action": "show_entity", **entity_to_show}
 
         self.add_formatted_text_prop(
-            "hoverEvent" if self.datapack.version < 62 else "hover_event",
+            "hoverEvent" if self.datapack.version < PackVersionFeature.TEXT_COMPONENT else "hover_event",
             inner,
             self.check_bool("local")
         )

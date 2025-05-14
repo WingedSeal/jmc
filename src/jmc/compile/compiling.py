@@ -6,6 +6,8 @@ from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
+from jmc.compile.pack_version import PackVersionFeature
+
 
 from .header import Header
 from .header_parse import parse_header
@@ -278,7 +280,7 @@ def build(
     output: dict[Path, str] = {}
     header = Header()
 
-    if datapack.version >= 48:
+    if datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME:
         function_folder = "function"
     else:
         function_folder = "functions"

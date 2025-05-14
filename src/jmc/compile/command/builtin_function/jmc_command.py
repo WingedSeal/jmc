@@ -4,6 +4,8 @@ import math
 from pathlib import Path
 from typing import Iterator
 
+from jmc.compile.pack_version import PackVersionFeature
+
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
 from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError, relative_file_name
@@ -1164,7 +1166,7 @@ class AdvancementRevoke(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
+        ADVANCEMENT = "advancement" if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME else "advancements"
         if namespace == "minecraft":
             if not (
                 advancement in MINECRAFT_ADVANCEMENTS
@@ -1233,7 +1235,7 @@ class AdvancementGrant(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= 48 else "advancements"
+        ADVANCEMENT = "advancement" if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME else "advancements"
         if namespace == "minecraft":
             if not (
                 f"minecraft/{ADVANCEMENT}/{advancement}" in MINECRAFT_ADVANCEMENTS
