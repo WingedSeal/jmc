@@ -178,7 +178,9 @@ class ItemCreateUse(ItemMixin, EventMixin):
         on_click = self.args["onClick"]
         if on_click and item_type not in self.rc_obj:
             raise JMCValueError(
-                f"on_click can only be used with {' or '.join(self.rc_obj.keys())}",
+                f"on_click can only be used with {
+                    ' or '.join(
+                        self.rc_obj.keys())}",
                 self.raw_args["onClick"].token,
                 self.tokenizer,
                 suggestion=f"Change item_type to on_click can only be used with {' or '.join(self.rc_obj.keys())}")
@@ -378,7 +380,8 @@ class ItemCreateSign(ItemMixin):
             back_texts_ = texts_[4:]
             del texts_[4:]
             back_glow = "has_glowing_text:1b," if is_back_glow else ""
-            back_text = f""",back_text:{{{back_glow}messages:[{','.join(back_texts_)}]}}"""
+            back_text = f""",back_text:{{{back_glow}messages:[{
+                ','.join(back_texts_)}]}}"""
         else:
             back_text = ""
         if self.datapack.version >= PackVersionFeature.COMPONENT:
@@ -2000,8 +2003,8 @@ class TextPropsNBT(JMCFunction):
     name="debug_watch"
 )
 class DebugWatch(JMCFunction):
-    scoreboard_prefix = "__debug_watch_"
     function_group_name = "__debug_watch__"
+    tmp = "__debug__.tmp"
 
     def call(self) -> str:
         is_src = self.check_bool("src")
@@ -2019,14 +2022,12 @@ class DebugWatch(JMCFunction):
             return return_command
 
         assert datapack.data.last_code_data is not None
-        scoreboard_name = cls.scoreboard_prefix + objective
-        datapack.add_objective(scoreboard_name)
         tellraw = 'tellraw @a ["",{"text":"[JMC] ","color":"gold","bold":true},'
         if objective != datapack.var_name:
             tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":":","color":"aqua"}},'
         tellraw += f'{{"text":"{player} ","color":"gold"}},'
         tellraw += '{"text":"| ","color":"aqua","bold":true},'
-        tellraw += f'{{"score":{{"name":"{player}","objective":"{scoreboard_name}"}}}},'
+        tellraw += f'{{"score":{{"name":"{cls.tmp}","objective":"{datapack.var_name}"}}}},'
         tellraw += '{"text":" -> ","color":"aqua","bold":true},'
         tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}},'
         if player.startswith("@"):
@@ -2039,37 +2040,50 @@ class DebugWatch(JMCFunction):
             tellraw += f'{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
         tellraw += ']'
         return datapack.add_raw_private_function(cls.function_group_name, [
+            f"scoreboard players operation {cls.tmp} {datapack.var_name} = {player} {objective}",
             return_command,
-            f'execute unless score {player} {objective} = {player} {scoreboard_name} run ' + tellraw,
-            f"scoreboard players operation {player} {scoreboard_name} = {player} {objective}"
+            f'execute unless score {player} {objective} = {cls.tmp} {datapack.var_name} run ' + tellraw
         ])
 
 
-# @ func_property(
-#     func_type=FuncType.load_only,
-#     call_string='Debug.track',
-#     arg_type={},
-#     name='debug_track'
-# )
-# class DebugTrack(JMCFunction):
-#     pass
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="Debug.history",
+    arg_type={
+        "variable": ArgType.SCOREBOARD,
+        "cache": ArgType.INTEGER
+    },
+    defaults={
+        "cache": "5"
+    },
+    number_type={
+        "cache": NumberType.POSITIVE
+    },
+    name="debug_history"
+)
+class DebugHistory(JMCFunction):
+    scoreboard_name = "debug_history"
+    current = "__debug__.current"
+    tmp = "__debug__.tmp"
+    def call(self) -> str:
+        if not self.is_never_used():
+            raise Exception("add error here")
+        cache = int(self.args["cache"])
+        if not self.is_never_used():
+            raise Exception("add error here")
 
-
-# @ func_property(
-#     func_type=FuncType.load_only,
-#     call_string='Debug.history',
-#     arg_type={},
-#     name='debug_history'
-# )
-# class DebugHistory(JMCFunction):
-#     pass
-
-
-# @ func_property(
-#     func_type=FuncType.load_only,
-#     call_string='Debug.cleanup',
-#     arg_type={},
-#     name='debug_cleanup'
-# )
-# class DebugCleanup(JMCFunction):
-#     pass
+        score, obj = self.args["variable"].split()
+        self.datapack.add_objective(self.scoreboard_name)
+        self.datapack.add_load_command(f'scoreboard objectives modify {self.scoreboard_name} displayname {{"text":"History of {obj}:{score}","color":"gold","bold":true}}')
+        record_call = self.datapack.add_raw_private_function(self.name, [
+            *(f"scoreboard players operation [{i+1}] {self.scoreboard_name} = [{i}] {self.scoreboard_name}"
+                for i in range(cache-1,0,-1)),
+            f"scoreboard players operation [1] {self.scoreboard_name} = [CURRENT] {self.scoreboard_name}",
+            f"scoreboard players operation [CURRENT] {self.scoreboard_name} = {self.current} {self.datapack.var_name}",
+        ], "record")
+        self.datapack.add_tick_command(self.datapack.add_raw_private_function(self.name, [
+            f"scoreboard players operation {self.current} {self.datapack.var_name} = {self.args["variable"]}",
+            f"execute unless score {self.current} {self.datapack.var_name} = {self.tmp} {self.datapack.var_name} run {record_call}",
+            f"scoreboard players operation {self.tmp} {self.datapack.var_name} = {self.current} {self.datapack.var_name}"
+        ], "main"))
+        return ""
