@@ -121,7 +121,8 @@ class ItemMixin(JMCFunction):
             component[key] = value_token
 
         if is_component:
-            repr_ = (lambda x: x) if self.datapack.version >= 62 else repr
+            repr_ = (
+                lambda x: x) if self.datapack.version >= PackVersionFeature.TEXT_COMPONENT else repr
             if self.args[display_name_param]:
                 if "custom_name" in component:
                     raise JMCValueError(
