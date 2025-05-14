@@ -229,7 +229,10 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, name: str = SWITCH_CASE_NAME, start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None) -> str:
+                 func_contents: list[list[str]], datapack: DataPack, 
+                 name: str = SWITCH_CASE_NAME, 
+                 start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None,
+                 with_str: str | None = None) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -252,10 +255,13 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
                     f"scoreboard players set __found_case__ {datapack.var_name} 1")
             datapack.add_raw_private_function(
                 name, case_body, f"{str(func_count)}/{case_label}")
+            
+        macro_function_call = f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
+        if with_str is not None:
+            macro_function_call = f"{macro_function_call} with {with_str}"
+
         datapack.add_raw_private_function(
-            name, [
-                f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
-            ], f"{str(func_count)}/select")
+            name, [macro_function_call], f"{str(func_count)}/select")
         return (
             (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
             f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
@@ -282,7 +288,8 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
 
 
 def switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer, prefix: str) -> str:
+           tokenizer: Tokenizer, prefix: str, 
+           with_str: str | None = None) -> str:
     """
     Parse `switch`
     """
@@ -390,7 +397,7 @@ def switch(command: list[Token], datapack: DataPack,
     if case_start is None:
         raise ValueError("case_start is None")
     return parse_switch(scoreboard_player, func_contents,
-                        datapack, start_at=case_start, case_numbers=case_numbers)
+                        datapack, start_at=case_start, case_numbers=case_numbers, with_str=with_str)
 
 
 FOR_NAME = "for_loop"
