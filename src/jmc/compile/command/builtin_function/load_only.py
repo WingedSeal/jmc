@@ -324,6 +324,19 @@ class ItemCreateSign(ItemMixin):
         else:
             texts = []
             texts_tokens = []
+
+        if is_front_glow and len(texts) == 0:
+            raise JMCValueError(
+                f"'isFrontGlow' is 'true' but there's no text in front of the sign",
+                self.raw_args["isFrontGlow"].token,
+                self.tokenizer,
+            )
+        if is_back_glow and len(texts) <= 4:
+            raise JMCValueError(
+                f"'isBackGlow' is 'true' but there's no text in the back of the sign",
+                self.raw_args["isBackGlow"].token,
+                self.tokenizer,
+            )
         if self.datapack.version >= PackVersionFeature.SIGN_BACK_TEXT:
             if len(texts) > 8:
                 raise JMCValueError(
