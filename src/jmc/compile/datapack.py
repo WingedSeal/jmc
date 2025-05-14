@@ -695,7 +695,7 @@ class DataPack:
         return func_map
 
     def parse_list(
-        self, token: Token, tokenizer: Tokenizer, list_of: TokenType
+        self, token: Token, tokenizer: Tokenizer, list_of: TokenType, paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]")
     ) -> tuple[list[str], list[Token]]:
         """
         Parse paren_square token into list of strings
@@ -703,14 +703,15 @@ class DataPack:
         :param token: paren_square token
         :param tokenizer: token's Tokenizer
         :param list_of: TokenType of elements in the list for verification
+        :param paren: TokenType of the list itself and its empty example, defaults to (TokenType.PAREN_SQUARE, "[]")
         :raises JMCValueError: Wrong TokenType
         :return: List of strings and List of tokens
         """
-        token_list = tokenizer.parse_list(token)
+        token_list = tokenizer.parse_list(token, paren)
         for token_ in token_list:
             if token_.token_type != list_of:
                 token_type = token_.token_type.value
-                if token_.token_type == TokenType.PAREN_SQUARE:
+                if token_.token_type == paren[0]:
                     token_type = "list"
                 raise JMCValueError(
                     f"Expected list/array of {list_of.value}, got list/array of {token_type}",

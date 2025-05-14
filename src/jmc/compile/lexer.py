@@ -1,11 +1,9 @@
 from copy import deepcopy
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
-from jmc.compile.pack_version import PackVersionFeature
-
-
+from .pack_version import PackVersionFeature
 from .decorator_parse import DECORATORS
 from .header import Header
 from .exception import (
@@ -517,16 +515,22 @@ class Lexer:
                 "Expected { or [", command[2], tokenizer, col_length=True
             )
         extends_from = ""
-        stringify_paths = []
+        stringify_paths: list[str] = []
+        stringify_paths_tokens: list[Token] = []
+        _expected_stringify_index = 3
         if command[3].string == "extends":
             if command[4].token_type != TokenType.PAREN_ROUND:
-                raise JMCSyntaxException("Expected (", command[3], tokenizer)
+                raise JMCSyntaxException("Expected (", command[4], tokenizer)
             extends_from = convention_jmc_to_mc(
                 command[4], tokenizer, prefix="", is_make_lower=False, substr=(1, -1)
             )
-        elif command[3].string == "stringify":
-            if command[4].token_type != TokenType.PAREN_ROUND:
-                raise JMCSyntaxException("Expected (", command[3], tokenizer)
+            _expected_stringify_index += 2
+        elif command[_expected_stringify_index].string == "stringify":
+            if command[_expected_stringify_index + 1].token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxException(
+                    "Expected (", command[_expected_stringify_index + 1], tokenizer)
+            stringify_paths, stringify_paths_tokens = self.datapack.parse_list(
+                command[_expected_stringify_index + 1], tokenizer, TokenType.KEYWORD, (TokenType.PAREN_ROUND, "()"))
         elif command[3].token_type not in {
             TokenType.PAREN_CURLY,
             TokenType.PAREN_SQUARE,
@@ -596,7 +600,8 @@ class Lexer:
             )
 
         try:
-            json: dict[str, str] = loads(json_content, strict=False)
+            print(json_content)
+            json: dict | list = loads(json_content, strict=False)
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(error, command[-1], tokenizer) from error
         if not json:
@@ -615,21 +620,48 @@ class Lexer:
 
             if super_path not in self.datapack.jsons:
                 raise JMCSyntaxException(
-                    f"JSON path doesn't exist ({super_path})",
-                    command[2],
-                    tokenizer,
-                    suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly",
+                    f"Extending ({json_path}) from path doesn't exist ({super_path})",
+                    command[4],
+                    tokenizer
                 )
             super_json = self.datapack.jsons[super_path]
 
+            if not isinstance(json, dict):
+                raise JMCSyntaxException(
+                    f"Extending path that isn't JSON ({json})",
+                    command[4],
+                    tokenizer,
+                    suggestion=f"{super_path} is a list.",
+                )
             if not isinstance(super_json, dict):
                 raise JMCSyntaxException(
-                    f"Invalid JSON({super_path})",
-                    command[2],
+                    f"Extending ({json_path}) from path that isn't JSON ({super_path})",
+                    command[4],
                     tokenizer,
-                    suggestion=f"This JSON is list not a JSON",
+                    suggestion=f"{super_path} is a list.",
                 )
             json = deep_merge(super_json, json)
+
+        if stringify_paths:
+            for stringify_path, stringify_path_token in zip(stringify_paths, stringify_paths_tokens):
+                json_: Any = json
+                indexes = stringify_path.split(".")
+                last_index = indexes.pop()
+                for index in indexes:
+                    if index not in json_:
+                        raise JMCSyntaxException(
+                            f"Stringifying path({stringify_path}) doesn't exist in JSON({json_path})",
+                            stringify_path_token,
+                            tokenizer
+                        )
+                    json_ = json_[index]
+                if last_index not in json_:
+                    raise JMCSyntaxException(
+                        f"Stringifying path({stringify_path}) doesn't exist in JSON({json_path})",
+                        stringify_path_token,
+                        tokenizer
+                    )
+                json_[last_index] = dumps(json_[last_index])
 
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
         self.datapack.jsons[json_path] = json

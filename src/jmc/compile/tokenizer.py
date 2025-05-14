@@ -1018,19 +1018,20 @@ class Tokenizer:
 
         return params
 
-    def parse_list(self, token: Token) -> list[Token]:
+    def parse_list(self, token: Token, paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]")) -> list[Token]:
         """
         Parse list
 
         :param token: paren_square token containing list
+        :param paren: TokenType of the list itself and its empty example, defaults to (TokenType.PAREN_SQUARE, "[]")
         :return: Dictionary of key(string) and Token
         """
-        if token.token_type != TokenType.PAREN_SQUARE:
+        if token.token_type != paren[0]:
             raise JMCSyntaxException(
-                "Expected list/array", token, self, suggestion="Expected ["
+                "Expected list/array", token, self, suggestion="Expected " + paren[1][0]
             )
 
-        if token.string == "[]":
+        if token.string == paren[1]:
             return []
 
         keywords = self.parse(
