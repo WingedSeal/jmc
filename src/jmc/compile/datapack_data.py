@@ -1,10 +1,12 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
 
 if TYPE_CHECKING:
     from ..compile.tokenizer import Token
+    from ..compile.datapack import DataPack
 
 
 @dataclass(slots=True, frozen=True, eq=True)
@@ -134,7 +136,10 @@ class Data:
         "teams",
         "bossbars",
         "guis",
-        "formatted_text_prop")
+        "formatted_text_prop",
+        "watching",
+        "is_too_late_debug_watch",
+        "hashed_command")
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
@@ -149,8 +154,31 @@ class Data:
         self.formatted_text_prop: dict[str,
                                        tuple[str, SIMPLE_JSON_BODY | Callable[[str], SIMPLE_JSON_BODY], bool]] = {}
         """
-        Dictionary of property and (key("clickEvent", etc.) and json body and wheter to delete it after use)
+        Dictionary of property and (key("clickEvent", etc.) and json body and whether to delete it after use)
         """
+        self.watching: set[tuple[str, str]] = set()
+        """Set of player and objective name from Debug.watch"""
+        self.is_too_late_debug_watch = False
+        """Whether it is too late to do Debug.watch() because some operation already compile"""
+        self.hashed_command: dict[str, str] = {}
+        """Dictionary of hash and its command"""
+
+    def hash_command(self, intput_command: str, datapack: "DataPack", first_time_callback: Callable[[str], Any], hash_string_to_string: Callable[[str, int], str]) -> str:
+        """
+        Hash a command, run the callback if it has never been hashed before then return the correct hash. It has collision prevention.
+        """
+        hashed = hash_string_to_string(intput_command, 32)
+        if hashed in datapack.data.hashed_command:
+            while True:
+                if hashed not in datapack.data.hashed_command:
+                    break
+                if datapack.data.hashed_command[hashed] == intput_command:
+                    break
+                hashed += "_"
+        if hashed not in datapack.data.hashed_command:
+            datapack.data.hashed_command[hashed] = intput_command
+            first_time_callback(hashed)
+        return hashed
 
     def get_item_id(self) -> str:
         """

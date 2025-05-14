@@ -1,7 +1,7 @@
 from collections import defaultdict
 from enum import Enum, auto
 from json import JSONDecodeError, loads
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from ..utils import convention_jmc_to_mc, is_float
 from ..datapack_data import Item, SIMPLE_JSON_BODY
@@ -114,7 +114,8 @@ class JMCFunction:
 
     def __new__(cls, *args, **kwargs):
         if cls is JMCFunction:
-            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(
+                f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls)
 
     def __init__(
@@ -136,7 +137,8 @@ class JMCFunction:
         self.var = var
         self.prefix = prefix
 
-        args_Args = verify_args(self.arg_type, self.call_string, token, tokenizer)
+        args_Args = verify_args(
+            self.arg_type, self.call_string, token, tokenizer)
         self.args = {}
         self.raw_args = {}
 
@@ -158,7 +160,8 @@ class JMCFunction:
                     )
                     self.args[key] = f"function {arg.token.string}"
                 else:
-                    func = convention_jmc_to_mc(arg.token, self.tokenizer, self.prefix)
+                    func = convention_jmc_to_mc(
+                        arg.token, self.tokenizer, self.prefix)
                     self.datapack.functions_called[func] = arg.token, self.tokenizer
                     self.args[key] = f"function {datapack.format_func_path(func)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
@@ -168,7 +171,8 @@ class JMCFunction:
             elif arg.arg_type == ArgType.FLOAT:
                 self.args[key] = str(float(arg.token.string))
             elif arg.arg_type in {ArgType.SCOREBOARD_INT, ArgType.SCOREBOARD}:
-                scoreboard_player = find_scoreboard_player_type(arg.token, tokenizer)
+                scoreboard_player = find_scoreboard_player_type(
+                    arg.token, tokenizer)
                 if isinstance(scoreboard_player.value, int):
                     raise ValueError(
                         "scoreboard_player.value is int for minecraft scorboard"
@@ -304,7 +308,8 @@ class JMCFunction:
         :param function_name: Name of the function
         :return: Function object
         """
-        func = self.datapack.private_functions[self.name][function_name] = Function()
+        func = self.datapack.private_functions[self.name][function_name] = Function(
+        )
         return func
 
     def load_arg_json(self, parameter: str) -> dict[str, Any]:
@@ -379,6 +384,9 @@ class JMCFunction:
         )
 
 
+T = TypeVar('T', bound='JMCFunction')
+
+
 def func_property(
     func_type: FuncType,
     call_string: str,
@@ -387,7 +395,7 @@ def func_property(
     defaults: dict[str, str] = {},
     ignore: set[str] = set(),
     number_type: dict[str, NumberType] = {},
-) -> Callable[[type[JMCFunction]], type[JMCFunction]]:
+) -> Callable[[type[T]], type[T]]:
     """
     Decorator factory for setting property of custom JMC function
 
@@ -401,7 +409,7 @@ def func_property(
     :return: A decorator for JMCFunction class
     """
 
-    def decorator(cls: type[JMCFunction]) -> type[JMCFunction]:
+    def decorator(cls: type[T]) -> type[T]:
         """
         A decorator to set the class's attributes for setting JMC function's properties
 

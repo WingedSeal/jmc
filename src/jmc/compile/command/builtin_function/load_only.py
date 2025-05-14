@@ -8,7 +8,7 @@ from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
-from ..utils import ArgType, FormattedText, NumberType, PlayerType, ScoreboardPlayer
+from ..utils import ArgType, FormattedText, NumberType, PlayerType, ScoreboardPlayer, hash_string_to_string
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 
@@ -1985,6 +1985,42 @@ class TextPropsNBT(JMCFunction):
         self.add_formatted_text_prop(
             "__private_nbt_expand__", inner, self.check_bool("local"))
         return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="Debug.watch",
+    arg_type={
+        "variable": ArgType.SCOREBOARD
+    },
+    name="debug_watch"
+)
+class DebugWatch(JMCFunction):
+    scoreboard_name = "__debug__"
+    function_group_name = "__debug_watch__"
+
+    def call(self) -> str:
+        if self.datapack.data.is_too_late_debug_watch:
+            raise JMCSyntaxException(f"At least 1 variable operation was performed before calling {self.call_string}", self.token, self.tokenizer)
+        objective, player = self.args["variable"].split()
+        self.datapack.data.watching.add((objective, player))
+        if self.is_never_used():
+            self.datapack.add_objective(self.scoreboard_name)
+        return ""
+
+    @classmethod
+    def variable_operation_wrapper(cls, return_command: str, player: str, objective: str, datapack: "DataPack") -> str:
+        if (player, objective) not in datapack.data.watching:
+            return return_command
+
+        def callback(hashed):
+            datapack.add_raw_private_function(cls.function_group_name, [
+                return_command,
+                f"execute unless score {objective} {player} = {cls.scoreboard_name} {objective}#{player} run tellraw @a 'IS IT WORKING?'",
+                f"scoreboard players operation {cls.scoreboard_name} {objective}#{player} = {objective} {player}"
+            ], hashed)
+        hashed = datapack.data.hash_command(return_command, datapack, callback, hash_string_to_string)
+        return datapack.call_func(cls.function_group_name, hashed)
 
 
 # @ func_property(

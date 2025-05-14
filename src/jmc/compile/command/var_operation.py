@@ -2,8 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from jmc.compile.utils import convention_jmc_to_mc
-
+from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
@@ -18,7 +17,8 @@ from .utils import (
 if TYPE_CHECKING:
     from ..lexer_func_content import FuncContent
 
-VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(FuncType.VARIABLE_OPERATION)
+VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
+    FuncType.VARIABLE_OPERATION)
 
 
 def variable_operation(
@@ -41,6 +41,7 @@ def variable_operation(
     :param first_arguments: Set of all vanilla commands and JMC custom syntax
     :return: Full minecraft command
     """
+    datapack.data.is_too_late_debug_watch = True
     is_token_obj_selector = False
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         if len(tokens[0].string) == 1:
@@ -164,7 +165,7 @@ def variable_operation(
                 tokenizer,
             )
         if operator == "++":
-            return f"scoreboard players add {tokens[0].string} {objective_name} 1"
+            return DebugWatch.variable_operation_wrapper(f"scoreboard players add {tokens[0].string} {objective_name} 1", tokens[0].string, objective_name, datapack)
         if operator == "--":
             return f"scoreboard players remove {tokens[0].string} {objective_name} 1"
     elif operator == "?=":
@@ -244,7 +245,8 @@ def variable_operation(
                 )
 
             if len(tokens) > 4:
-                raise JMCSyntaxException("Unexpected token", tokens[4], tokenizer)
+                raise JMCSyntaxException(
+                    "Unexpected token", tokens[4], tokenizer)
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3],

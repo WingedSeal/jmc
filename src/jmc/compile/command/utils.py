@@ -1019,9 +1019,9 @@ class FormattedText:
         """
         Generate an empty FormattedText with empty Token
 
-       :param tokenizer: Tokenizer
-       :param datapack: Datapack
-       :return: FormattedText
+        :param tokenizer: Tokenizer
+        :param datapack: Datapack
+        :return: FormattedText
         """
         return cls("", Token.empty(), tokenizer, datapack)
 
@@ -1057,16 +1057,18 @@ class FormattedText:
 ZERO_TO_Z_LENGTH = 36
 
 
-def __custom_hash(text: str) -> int:
+def __custom_hash(text: str, modulo: int) -> int:
     """
     Custom hash to use for hashing string to string
 
-   :param text: String to hash
-   :return: Hashed string
+    :param text: String to hash
+    :return: Hashed string
     """
     hashed = 0
+    prime1, prime2 = 151453061923, 419152777567
     for ch in text:
-        hashed = (hashed * 281 ^ ord(ch) * 997) & 0xFFFFFFFF
+        hashed = ((hashed ^ ord(ch)) * prime1) % modulo
+        hashed = (hashed + (ord(ch) * prime2)) % modulo
     return hashed
 
 
@@ -1074,11 +1076,11 @@ def hash_string_to_string(string: str, length: int) -> str:
     """
     Hash a string into another string with fixed length
 
-   :param string: String to hash
-   :param length: Length of the result string
-   :return: Result string
+    :param string: String to hash
+    :param length: Length of the result string
+    :return: Result string
     """
-    number: int = __custom_hash(string) % (ZERO_TO_Z_LENGTH**length)
+    number: int = __custom_hash(string, ZERO_TO_Z_LENGTH**length)
     if number == 0:
         digits: list[int] = [0]
     else:

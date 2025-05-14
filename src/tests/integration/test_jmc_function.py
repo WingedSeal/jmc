@@ -512,11 +512,11 @@ Player.rejoin(()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add on_event_15djdg7 custom:leave_game
+scoreboard objectives add on_event_md16oge custom:leave_game
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={on_event_15djdg7=1..}] at @s run function TEST:__private__/on_event/custom_leave_game
+execute as @a[scores={on_event_md16oge=1..}] at @s run function TEST:__private__/on_event/custom_leave_game
 > VIRTUAL/data/TEST/functions/__private__/on_event/custom_leave_game.mcfunction
-scoreboard players set @s on_event_15djdg7 0
+scoreboard players set @s on_event_md16oge 0
 tellraw @s "Welcome!"
             """)
         )
@@ -606,11 +606,11 @@ RightClick.setup(
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add on_event_1mqyp2x used:carrot_on_a_stick
+scoreboard objectives add on_event_4gjev5i used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={on_event_1mqyp2x=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
+execute as @a[scores={on_event_4gjev5i=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__private__/on_event/used_carrot_on_a_stick.mcfunction
-scoreboard players set @s on_event_1mqyp2x 0
+scoreboard players set @s on_event_4gjev5i 0
 function TEST:__private__/right_click_setup/main
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/main.mcfunction
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.custom_id
@@ -653,11 +653,11 @@ Player.onEvent(used:carrot_on_a_stick, ()=>{
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add on_event_1mqyp2x used:carrot_on_a_stick
+scoreboard objectives add on_event_4gjev5i used:carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={on_event_1mqyp2x=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
+execute as @a[scores={on_event_4gjev5i=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__private__/on_event/used_carrot_on_a_stick.mcfunction
-scoreboard players set @s on_event_1mqyp2x 0
+scoreboard players set @s on_event_4gjev5i 0
 say Hello World
 say Hello World 2
             """)
@@ -922,12 +922,12 @@ execute as @a run Item.give(veryCoolSword);
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-scoreboard objectives add on_event_1mqyp2x used:carrot_on_a_stick
+scoreboard objectives add on_event_4gjev5i used:carrot_on_a_stick
 execute as @a run give @s carrot_on_a_stick{CustomModelData:100,__item_id__:1,display:{Name:'{"text":"A very cool sword","color":"gold","bold":true,"italic":false}',Lore:['{"text":"It is, indeed, very cool.","color":"red","italic":false}','{"text":"Right click to be cool.","color":"red","italic":false}']}} 1
 > VIRTUAL/data/TEST/functions/__tick__.mcfunction
-execute as @a[scores={on_event_1mqyp2x=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
+execute as @a[scores={on_event_4gjev5i=1..}] at @s run function TEST:__private__/on_event/used_carrot_on_a_stick
 > VIRTUAL/data/TEST/functions/__private__/on_event/used_carrot_on_a_stick.mcfunction
-scoreboard players set @s on_event_1mqyp2x 0
+scoreboard players set @s on_event_4gjev5i 0
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.__item_id__
 execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/item_create_use/found
 > VIRTUAL/data/TEST/functions/__private__/item_create_use/found.mcfunction
