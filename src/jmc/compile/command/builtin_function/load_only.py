@@ -2008,7 +2008,6 @@ class DebugWatch(JMCFunction):
 
     @classmethod
     def variable_operation_wrapper(cls, return_command: str, player: str, objective: str, datapack: "DataPack") -> str:
-        print(player, objective)
         if (player, objective) not in datapack.data.watching:
             return return_command
 
@@ -2017,7 +2016,7 @@ class DebugWatch(JMCFunction):
             datapack.add_objective(scoreboard_name)
             tellraw = 'tellraw @a ["",{"text":"[JMC-Debug] ","color":"gold","bold":true},'
             if objective != datapack.var_name:
-                tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":": ","color":"aqua"}},'
+                tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":":","color":"aqua"}},'
             tellraw += f'{{"text":"{player} ","color":"gold"}},'
             tellraw += '{"text":"| ","color":"aqua","bold":true},'
             tellraw += f'{{"score":{{"name":"{player}","objective":"{scoreboard_name}"}}}},'
