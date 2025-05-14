@@ -1,6 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function that cannot be used with `/execute`"""
 
-from jmc.compile.pack_version import PackVersionFeature
+from ...pack_version import PackVersionFeature
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property

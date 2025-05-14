@@ -8,8 +8,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable
 
-from jmc.compile.pack_version import PackVersionFeature
-
+from ...compile.pack_version import PackVersionFeature
 from ...compile.datapack_data import SIMPLE_JSON_BODY
 
 from ..header import Header

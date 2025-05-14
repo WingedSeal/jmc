@@ -4,9 +4,7 @@ from enum import Enum, auto
 from typing import TYPE_CHECKING
 from json import dumps
 
-from jmc.compile.pack_version import PackVersionFeature
-
-
+from .pack_version import PackVersionFeature
 from .vanilla_command import COMMANDS as VANILLA_COMMANDS
 from .tokenizer import Tokenizer, Token, TokenType
 from .command.utils import (

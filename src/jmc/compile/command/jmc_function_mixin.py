@@ -1,4 +1,4 @@
-from jmc.compile.pack_version import PackVersionFeature
+from ..pack_version import PackVersionFeature
 from ..datapack_data import Item
 from .utils import FormattedText, hash_string_to_string
 from ..exception import JMCValueError

@@ -3,7 +3,7 @@
 import re
 from typing import Literal
 
-from jmc.compile.pack_version import PackVersionFeature
+from ..pack_version import PackVersionFeature
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType

@@ -6,9 +6,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
-from jmc.compile.pack_version import PackVersionFeature
-
-
+from .pack_version import PackVersionFeature
 from .header import Header
 from .header_parse import parse_header
 from .lexer import Lexer

@@ -600,7 +600,6 @@ class Lexer:
             )
 
         try:
-            print(json_content)
             json: dict | list = loads(json_content, strict=False)
         except JSONDecodeError as error:
             raise JMCDecodeJSONError(error, command[-1], tokenizer) from error

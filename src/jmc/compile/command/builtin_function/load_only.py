@@ -1,8 +1,7 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 import json
 
-from jmc.compile.pack_version import PackVersionFeature
-
+from ...pack_version import PackVersionFeature
 from ...utils import convention_jmc_to_mc
 from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType

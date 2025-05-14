@@ -4,8 +4,7 @@ import math
 from pathlib import Path
 from typing import Iterator
 
-from jmc.compile.pack_version import PackVersionFeature
-
+from ....compile.pack_version import PackVersionFeature
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
 from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError, relative_file_name
