@@ -2008,6 +2008,7 @@ class DebugWatch(JMCFunction):
 
     @classmethod
     def variable_operation_wrapper(cls, return_command: str, player: str, objective: str, datapack: "DataPack") -> str:
+        print(player, objective)
         if (player, objective) not in datapack.data.watching:
             return return_command
 
@@ -2030,8 +2031,8 @@ class DebugWatch(JMCFunction):
             tellraw += ']'
             datapack.add_raw_private_function(cls.function_group_name, [
                 return_command,
-                f'execute unless score {objective} {player} = {scoreboard_name} {player} run ' + tellraw,
-                f"scoreboard players operation {scoreboard_name} {player} = {objective} {player}"
+                f'execute unless score {player} {objective} = {player} {scoreboard_name} run ' + tellraw,
+                f"scoreboard players operation {player} {scoreboard_name} = {player} {objective}"
             ], hashed)
         hashed = datapack.data.hash_command(return_command, datapack, callback, hash_string_to_string)
         return datapack.call_func(cls.function_group_name, hashed)
