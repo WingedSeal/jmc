@@ -1991,7 +1991,11 @@ class TextPropsNBT(JMCFunction):
     func_type=FuncType.LOAD_ONLY,
     call_string="Debug.watch",
     arg_type={
-        "variable": ArgType.SCOREBOARD
+        "variable": ArgType.SCOREBOARD,
+        "src": ArgType.KEYWORD
+    },
+    defaults={
+        "src": "true"
     },
     name="debug_watch"
 )
@@ -2000,10 +2004,13 @@ class DebugWatch(JMCFunction):
     function_group_name = "__debug_watch__"
 
     def call(self) -> str:
+        is_src = self.check_bool("src")
         if self.datapack.data.is_too_late_debug_watch:
             raise JMCSyntaxException(f"At least 1 variable operation was performed before calling {self.call_string}", self.self_token, self.tokenizer)
         objective, player = self.args["variable"].split()
-        self.datapack.data.watching.add((objective, player))
+        if (objective, player) in self.datapack.data.watching:
+            raise JMCSyntaxException(f"{objective}:{player} is already being watched.", self.raw_args["variable"].token, self.tokenizer)
+        self.datapack.data.watching[(objective, player)] = is_src
         return ""
 
     @classmethod
@@ -2014,7 +2021,7 @@ class DebugWatch(JMCFunction):
         assert datapack.data.last_code_data is not None
         scoreboard_name = cls.scoreboard_prefix + objective
         datapack.add_objective(scoreboard_name)
-        tellraw = 'tellraw @a ["",{"text":"[JMC-Debug] ","color":"gold","bold":true},'
+        tellraw = 'tellraw @a ["",{"text":"[JMC] ","color":"gold","bold":true},'
         if objective != datapack.var_name:
             tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":":","color":"aqua"}},'
         tellraw += f'{{"text":"{player} ","color":"gold"}},'
@@ -2024,13 +2031,12 @@ class DebugWatch(JMCFunction):
         tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}},'
         if player.startswith("@"):
             tellraw += ',{"text":" | ","color":"aqua","bold":true},'
-            tellraw += f'{{"text":"{player}","color":"gold"}},'
-            tellraw += '{"text":"=","color":"aqua"},'
-            tellraw += f'{{"selector":"{player}"}},'
-        tellraw += '{"text":" | ","color":"aqua","bold":true},'
-        tellraw += f'{{"text":"{datapack.data.last_code_data[0]}","color":"yellow"}},'
-        tellraw += '{"text":" | ","color":"aqua","bold":true},'
-        tellraw += f'{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
+            tellraw += f'{{"selector":"{player}"}}'
+        if datapack.data.watching[(player, objective)]:
+            tellraw += ',{"text":" | ","color":"aqua","bold":true},'
+            tellraw += f'{{"text":"{datapack.data.last_code_data[0]}","color":"yellow"}},'
+            tellraw += '{"text":" | ","color":"aqua","bold":true},'
+            tellraw += f'{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
         tellraw += ']'
         return datapack.add_raw_private_function(cls.function_group_name, [
             return_command,

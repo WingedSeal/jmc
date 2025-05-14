@@ -157,8 +157,8 @@ class Data:
         """
         Dictionary of property and (key("clickEvent", etc.) and json body and whether to delete it after use)
         """
-        self.watching: set[tuple[str, str]] = set()
-        """Set of player and objective name from Debug.watch"""
+        self.watching: dict[tuple[str, str], bool] = {}
+        """Dictionary of (player and objective name from Debug.watch) and whether to include code data"""
         self.is_too_late_debug_watch = False
         """Whether it is too late to do Debug.watch() because some operation already compile"""
         self.hashed_command: dict[str, str] = {}
