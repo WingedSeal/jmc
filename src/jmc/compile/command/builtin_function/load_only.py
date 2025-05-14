@@ -1996,7 +1996,7 @@ class TextPropsNBT(JMCFunction):
     name="debug_watch"
 )
 class DebugWatch(JMCFunction):
-    scoreboard_name = "__debug__"
+    scoreboard_prefix = "__debug_watch_"
     function_group_name = "__debug_watch__"
 
     def call(self) -> str:
@@ -2004,8 +2004,6 @@ class DebugWatch(JMCFunction):
             raise JMCSyntaxException(f"At least 1 variable operation was performed before calling {self.call_string}", self.token, self.tokenizer)
         objective, player = self.args["variable"].split()
         self.datapack.data.watching.add((objective, player))
-        if self.is_never_used():
-            self.datapack.add_objective(self.scoreboard_name)
         return ""
 
     @classmethod
@@ -2014,10 +2012,26 @@ class DebugWatch(JMCFunction):
             return return_command
 
         def callback(hashed):
+            scoreboard_name = cls.scoreboard_prefix + objective
+            datapack.add_objective(scoreboard_name)
+            tellraw = 'tellraw @a ["",{"text":"[JMC-Debug] ","color":"gold","bold":true},'
+            if objective != datapack.var_name:
+                tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":": ","color":"aqua"}},'
+            tellraw += f'{{"text":"{player} ","color":"gold"}},'
+            tellraw += '{"text":"| ","color":"aqua","bold":true},'
+            tellraw += f'{{"score":{{"name":"{player}","objective":"{scoreboard_name}"}}}},'
+            tellraw += '{"text":" -> ","color":"aqua","bold":true},'
+            tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}}'
+            if player.startswith("@"):
+                tellraw += ',{"text":" | ","color":"aqua","bold":true},'
+                tellraw += f'{{"text":"{player}","color":"gold"}},'
+                tellraw += '{"text":"=","color":"aqua"},'
+                tellraw += f'{{"selector":"{player}"}}'
+            tellraw += ']'
             datapack.add_raw_private_function(cls.function_group_name, [
                 return_command,
-                f"execute unless score {objective} {player} = {cls.scoreboard_name} {objective}#{player} run tellraw @a 'IS IT WORKING?'",
-                f"scoreboard players operation {cls.scoreboard_name} {objective}#{player} = {objective} {player}"
+                f'execute unless score {objective} {player} = {scoreboard_name} {player} run ' + tellraw,
+                f"scoreboard players operation {scoreboard_name} {player} = {objective} {player}"
             ], hashed)
         hashed = datapack.data.hash_command(return_command, datapack, callback, hash_string_to_string)
         return datapack.call_func(cls.function_group_name, hashed)
