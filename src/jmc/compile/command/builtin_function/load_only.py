@@ -2022,22 +2022,22 @@ class DebugWatch(JMCFunction):
             return return_command
 
         assert datapack.data.last_code_data is not None
-        tellraw = 'tellraw @a ["",{"text":"[JMC] ","color":"gold","bold":true},'
+        tellraw = 'tellraw @a ["",{"text":"[JMC] ","color":"gold","bold":true}'
         if objective != datapack.var_name:
-            tellraw += f'{{"text":"{objective}","color":"red"}},{{"text":":","color":"aqua"}},'
-        tellraw += f'{{"text":"{player} ","color":"gold"}},'
-        tellraw += '{"text":"| ","color":"aqua","bold":true},'
-        tellraw += f'{{"score":{{"name":"{cls.tmp}","objective":"{datapack.var_name}"}}}},'
-        tellraw += '{"text":" -> ","color":"aqua","bold":true},'
-        tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}},'
+            tellraw += f',{{"text":"{objective}","color":"red"}},{{"text":":","color":"aqua"}}'
+        tellraw += f',{{"text":"{player} ","color":"gold"}}'
+        tellraw += ',{"text":"| ","color":"aqua","bold":true}'
+        tellraw += f',{{"score":{{"name":"{cls.tmp}","objective":"{datapack.var_name}"}}}}'
+        tellraw += ',{"text":" -> ","color":"aqua","bold":true}'
+        tellraw += f',{{"score":{{"name":"{player}","objective":"{objective}"}}}}'
         if player.startswith("@"):
-            tellraw += ',{"text":" | ","color":"aqua","bold":true},'
-            tellraw += f'{{"selector":"{player}"}}'
+            tellraw += ',{"text":" | ","color":"aqua","bold":true}'
+            tellraw += f',{{"selector":"{player}"}}'
         if datapack.data.watching[(player, objective)]:
-            tellraw += ',{"text":" | ","color":"aqua","bold":true},'
-            tellraw += f'{{"text":"{datapack.data.last_code_data[0]}","color":"yellow"}},'
-            tellraw += '{"text":" | ","color":"aqua","bold":true},'
-            tellraw += f'{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
+            tellraw += ',{"text":" | ","color":"aqua","bold":true}'
+            tellraw += f',{{"text":"{datapack.data.last_code_data[0]}","color":"yellow"}}'
+            tellraw += ',{"text":" | ","color":"aqua","bold":true}'
+            tellraw += f',{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
         tellraw += ']'
         return datapack.add_raw_private_function(cls.function_group_name, [
             f"scoreboard players operation {cls.tmp} {datapack.var_name} = {player} {objective}",
@@ -2065,6 +2065,7 @@ class DebugHistory(JMCFunction):
     scoreboard_name = "debug_history"
     current = "__debug__.current"
     tmp = "__debug__.tmp"
+
     def call(self) -> str:
         if not self.is_never_used():
             raise Exception("add error here")
@@ -2076,8 +2077,8 @@ class DebugHistory(JMCFunction):
         self.datapack.add_objective(self.scoreboard_name)
         self.datapack.add_load_command(f'scoreboard objectives modify {self.scoreboard_name} displayname {{"text":"History of {obj}:{score}","color":"gold","bold":true}}')
         record_call = self.datapack.add_raw_private_function(self.name, [
-            *(f"scoreboard players operation [{i+1}] {self.scoreboard_name} = [{i}] {self.scoreboard_name}"
-                for i in range(cache-1,0,-1)),
+            *(f"scoreboard players operation [{i + 1}] {self.scoreboard_name} = [{i}] {self.scoreboard_name}"
+                for i in range(cache - 1, 0, -1)),
             f"scoreboard players operation [1] {self.scoreboard_name} = [CURRENT] {self.scoreboard_name}",
             f"scoreboard players operation [CURRENT] {self.scoreboard_name} = {self.current} {self.datapack.var_name}",
         ], "record")
