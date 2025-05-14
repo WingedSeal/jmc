@@ -307,8 +307,6 @@ class ItemCreateSign(ItemMixin):
             self.datapack.version.require(
                 PackVersionFeature.SIGN_BACK_TEXT, self.raw_args["isFrontGlow"].token, self.tokenizer)
         if is_back_glow:
-            raise NotImplementedError("clam down my dude, im adding it")
-            # todo: implement back text
             self.datapack.version.require(
                 PackVersionFeature.SIGN_BACK_TEXT, self.raw_args["isBackGlow"].token, self.tokenizer)
         if variant not in self._VARIANTS:
@@ -326,13 +324,25 @@ class ItemCreateSign(ItemMixin):
         else:
             texts = []
             texts_tokens = []
-        if len(texts) > 4:
-            raise JMCValueError(
-                f"Sign may only have 4 lines of text (got {len(texts)})",
-                self.raw_args["texts"].token,
-                self.tokenizer)
-        texts.extend([''] * (4 - len(texts)))
-        texts_tokens.extend([Token.empty()] * (4 - len(texts_tokens)))
+        if self.datapack.version >= PackVersionFeature.SIGN_BACK_TEXT:
+            if len(texts) > 8:
+                raise JMCValueError(
+                    f"Sign may only have 8 lines of text (got {len(texts)})",
+                    self.raw_args["texts"].token,
+                    self.tokenizer, suggestion="4 lines for the front and 4 lines for the back")
+        else:
+            if len(texts) > 4:
+                raise JMCValueError(
+                    f"Sign may only have 4 lines of text (got {len(texts)})",
+                    self.raw_args["texts"].token,
+                    self.tokenizer)
+        has_back_text = len(texts) > 4
+        if has_back_text:
+            texts.extend([''] * (8 - len(texts)))
+            texts_tokens.extend([Token.empty()] * (8 - len(texts_tokens)))
+        else:
+            texts.extend([''] * (4 - len(texts)))
+            texts_tokens.extend([Token.empty()] * (4 - len(texts_tokens)))
 
         formatted_texts_ = [FormattedText(text, text_token, self.tokenizer, self.datapack) if text else FormattedText.empty(self.tokenizer, self.datapack)
                             for text, text_token in zip(texts, texts_tokens)]
@@ -352,16 +362,23 @@ class ItemCreateSign(ItemMixin):
         texts_ = [repr_(str(text)) for text in formatted_texts_]
 
         front_glow = "has_glowing_text:1b," if is_front_glow else ""
+        if has_back_text:
+            back_texts_ = texts_[4:]
+            del texts_[4:]
+            back_glow = "has_glowing_text:1b," if is_back_glow else ""
+            back_text = f""",back_text:{{{back_glow}messages:[{','.join(back_texts_)}]}}"""
+        else:
+            back_text = ""
         if self.datapack.version >= PackVersionFeature.COMPONENT:
             modify_component = {"entity_data": Token.empty(
-                f"""{{id:"sign",front_text:{{{front_glow}messages:[{','.join(texts_)}]}}}}""")}
+                f"""{{id:"sign",front_text:{{{front_glow}messages:[{','.join(texts_)}]}}{back_text}}}""")}
             self.datapack.data.item[self.args["itemId"]] = self.create_item(
                 modify_component=modify_component)
 
         else:
             if self.datapack.version >= PackVersionFeature.SIGN_BACK_TEXT:
                 modify_nbt = {"BlockEntityTag": Token.empty(
-                    f"""{{front_text:{{{front_glow}messages:[{','.join(texts_)}]}}}}""")}
+                    f"""{{front_text:{{{front_glow}messages:[{','.join(texts_)}]}}{back_text}}}""")}
                 self.datapack.data.item[self.args["itemId"]] = self.create_item(
                     modify_nbt=modify_nbt)
             else:
