@@ -229,8 +229,8 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
 
 
 def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack, 
-                 name: str = SWITCH_CASE_NAME, 
+                 func_contents: list[list[str]], datapack: DataPack,
+                 name: str = SWITCH_CASE_NAME,
                  start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None,
                  with_str: str | None = None) -> str:
     """
@@ -255,7 +255,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
                     f"scoreboard players set __found_case__ {datapack.var_name} 1")
             datapack.add_raw_private_function(
                 name, case_body, f"{str(func_count)}/{case_label}")
-            
+
         macro_function_call = f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
         if with_str is not None:
             macro_function_call = f"{macro_function_call} with {with_str}"
@@ -288,7 +288,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
 
 
 def switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer, prefix: str, 
+           tokenizer: Tokenizer, prefix: str,
            with_str: str | None = None) -> str:
     """
     Parse `switch`

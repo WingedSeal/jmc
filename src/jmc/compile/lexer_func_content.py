@@ -953,12 +953,9 @@ class FuncContent:
         return SKIP_TO_NEXT_LINE
 
     def __handle_switch_with(self, with_str: str) -> bool:
-        # @Nicoder
-        print(f"{with_str=}")
-        print(f"{self.switch_tokens=}")
-
         assert self.switch_tokens is not None
-        switch_commands = switch(self.switch_tokens, self.lexer.datapack, self.tokenizer, prefix="", with_str=with_str)
+        switch_commands = switch(
+            self.switch_tokens, self.lexer.datapack, self.tokenizer, prefix="", with_str=with_str)
         append_commands(self.__commands, switch_commands)
 
         self.switch_tokens = None
