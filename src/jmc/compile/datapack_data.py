@@ -139,7 +139,8 @@ class Data:
         "formatted_text_prop",
         "watching",
         "is_too_late_debug_watch",
-        "hashed_command")
+        "hashed_command",
+        "last_code_data")
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}
@@ -162,6 +163,8 @@ class Data:
         """Whether it is too late to do Debug.watch() because some operation already compile"""
         self.hashed_command: dict[str, str] = {}
         """Dictionary of hash and its command"""
+        self.last_code_data: tuple[str, str] | None = None
+        """File path and code"""
 
     def hash_command(self, intput_command: str, datapack: "DataPack", first_time_callback: Callable[[str], Any], hash_string_to_string: Callable[[str, int], str]) -> str:
         """

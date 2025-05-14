@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
-from ..exception import JMCSyntaxException
+from ..exception import JMCSyntaxException, relative_file_name
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import (
     find_scoreboard_player_type,
@@ -42,6 +42,8 @@ def variable_operation(
     :return: Full minecraft command
     """
     datapack.data.is_too_late_debug_watch = True
+    datapack.data.last_code_data = (relative_file_name(
+        tokenizer.file_path, tokens[0].line), tokenizer.file_string.split("\n")[tokens[0].line - 1])
     is_token_obj_selector = False
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         if len(tokens[0].string) == 1:

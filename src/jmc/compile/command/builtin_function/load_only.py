@@ -2012,6 +2012,7 @@ class DebugWatch(JMCFunction):
             return return_command
 
         def callback(hashed):
+            assert datapack.data.last_code_data is not None
             scoreboard_name = cls.scoreboard_prefix + objective
             datapack.add_objective(scoreboard_name)
             tellraw = 'tellraw @a ["",{"text":"[JMC-Debug] ","color":"gold","bold":true},'
@@ -2021,12 +2022,16 @@ class DebugWatch(JMCFunction):
             tellraw += '{"text":"| ","color":"aqua","bold":true},'
             tellraw += f'{{"score":{{"name":"{player}","objective":"{scoreboard_name}"}}}},'
             tellraw += '{"text":" -> ","color":"aqua","bold":true},'
-            tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}}'
+            tellraw += f'{{"score":{{"name":"{player}","objective":"{objective}"}}}},'
             if player.startswith("@"):
                 tellraw += ',{"text":" | ","color":"aqua","bold":true},'
                 tellraw += f'{{"text":"{player}","color":"gold"}},'
                 tellraw += '{"text":"=","color":"aqua"},'
-                tellraw += f'{{"selector":"{player}"}}'
+                tellraw += f'{{"selector":"{player}"}},'
+            tellraw += '{"text":" | ","color":"aqua","bold":true},'
+            tellraw += f'{{"text":"{datapack.data.last_code_data[0]}","color":"yellow"}},'
+            tellraw += '{"text":" | ","color":"aqua","bold":true},'
+            tellraw += f'{{"text":"{datapack.data.last_code_data[1]}","color":"yellow"}}'
             tellraw += ']'
             datapack.add_raw_private_function(cls.function_group_name, [
                 return_command,
