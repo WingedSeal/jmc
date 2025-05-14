@@ -649,14 +649,14 @@ class Lexer:
                 for index in indexes:
                     if index not in json_:
                         raise JMCSyntaxException(
-                            f"Stringifying path({stringify_path}) doesn't exist in JSON({json_path})",
+                            f"Stringifying path({stringify_path}) that doesn't exist in JSON({json_path})",
                             stringify_path_token,
                             tokenizer
                         )
                     json_ = json_[index]
                 if last_index not in json_:
                     raise JMCSyntaxException(
-                        f"Stringifying path({stringify_path}) doesn't exist in JSON({json_path})",
+                        f"Stringifying path({stringify_path}) that doesn't exist in JSON({json_path})",
                         stringify_path_token,
                         tokenizer
                     )
