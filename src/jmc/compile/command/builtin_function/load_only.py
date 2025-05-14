@@ -122,7 +122,6 @@ class RightClickSetup(EventMixin):
         "lore": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT,
         "component": ArgType.COMPONENT,
-        "onClick": ArgType.FUNC
     },
     name="item_create",
     defaults={
@@ -134,6 +133,35 @@ class RightClickSetup(EventMixin):
     }
 )
 class ItemCreate(ItemMixin, EventMixin):
+    def call(self) -> str:
+        self.datapack.data.item[self.args["itemId"]
+                                ] = self.create_item()
+
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="Item.createUse",
+    arg_type={
+        "itemId": ArgType.KEYWORD,
+        "itemType": ArgType.KEYWORD,
+        "displayName": ArgType.STRING,
+        "lore": ArgType.LIST,
+        "nbt": ArgType.JS_OBJECT,
+        "component": ArgType.COMPONENT,
+        "onClick": ArgType.FUNC
+    },
+    name="item_create_use",
+    defaults={
+        "displayName": "",
+        "lore": "",
+        "nbt": "",
+        "component": "",
+        "onClick": ""
+    }
+)
+class ItemCreateUse(ItemMixin, EventMixin):
     rc_obj = {
         "carrot_on_a_stick": "__item_rc_carrot",
         "warped_fungus_on_a_stick": "__item_rc_warped"
@@ -145,14 +173,12 @@ class ItemCreate(ItemMixin, EventMixin):
         modify_nbt = None
         item_type = self.args["itemType"]
         on_click = self.args["onClick"]
-        if on_click and item_type not in {
-                "carrot_on_a_stick", "warped_fungus_on_a_stick"}:
+        if on_click and item_type not in self.rc_obj:
             raise JMCValueError(
-                f"on_click can only be used with carrot_on_a_stick or warped_fungus_on_a_stick or in {
-                    self.call_string}",
+                f"on_click can only be used with {' or '.join(self.rc_obj.keys())}",
                 self.raw_args["onClick"].token,
                 self.tokenizer,
-                suggestion="Change item_type to carrot_on_a_stick or warped_fungus_on_a_stick")
+                suggestion=f"Change item_type to on_click can only be used with {' or '.join(self.rc_obj.keys())}")
 
         if on_click:
             item_id = self.datapack.data.get_item_id()
@@ -191,71 +217,50 @@ class ItemCreate(ItemMixin, EventMixin):
         return ""
 
 
-# @func_property(
-#     func_type=FuncType.LOAD_ONLY,
-#     call_string="Item.createSpawnEgg",
-#     arg_type={
-#         "itemId": ArgType.KEYWORD,
-#         "mobType": ArgType.KEYWORD,
-#         "displayName": ArgType.STRING,
-#         "onPlace": ArgType.FUNC,
-#         "lore": ArgType.LIST,
-#         "nbt": ArgType.JS_OBJECT
-#     },
-#     name="item_create_spawn_egg",
-#     defaults={
-#         "displayName": "",
-#         "lore": "",
-#         "nbt": "",
-#     }
-# )
-# class ItemCreateSpawnEgg(EventMixin):
-#     def call(self) -> str:
-#         mob_type = self.args["mobType"]
-#         spawn_egg = mob_type + "_spawn_egg"
-#         item_id = self.args["itemId"]
-#         on_place = self.args["onPlace"]
-#         name = self.args["displayName"]
-#         if self.args["lore"]:
-#             lores, lores_tokens = self.datapack.parse_list(
-#                 self.raw_args["lore"].token, self.tokenizer, TokenType.STRING)
-#         else:
-#             lores = []
-#             lores_tokens = []
-#
-#         nbt = self.tokenizer.parse_js_obj(
-#             self.raw_args["nbt"].token) if self.args["nbt"] else {}
-#
-#         if "display" in nbt:
-#             raise JMCValueError(
-#                 "display is already inside the nbt",
-#                 self.token,
-#                 self.tokenizer)
-#
-#         lore_ = ",".join(repr(str(FormattedText(lore, lore_token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
-#                          for lore, lore_token in zip(lores, lores_tokens))
-#
-#         self.add_event("used:" + spawn_egg, f"""execute as @e[type=marker,tag=__spawn_egg_{item_id}] at @s run {self.datapack.add_raw_private_function(self.name, [
-#             "kill @s",
-#             on_place
-#         ])}""")
-#
-#         nbt["display"] = Token.empty(f"""{{Name:{repr(
-#             str(FormattedText(name,
-#                               self.raw_args["displayName"].token,
-#                 self.tokenizer,
-#                 self.datapack,
-#                 is_default_no_italic=True,
-#                 is_allow_score_selector=False))
-#         )},Lore:[{lore_}]}},EntityTag:{{id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]}}""")
-#
-#         self.datapack.data.item[self.args["itemId"]] = Item(
-#             spawn_egg,
-#             self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
-#             nbt
-#         )
-#
-#         return ""
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="Item.createSpawnEgg",
+    arg_type={
+        "itemId": ArgType.KEYWORD,
+        "mobType": ArgType.KEYWORD,
+        "displayName": ArgType.STRING,
+        "onPlace": ArgType.FUNC,
+        "lore": ArgType.LIST,
+        "nbt": ArgType.JS_OBJECT,
+        "component": ArgType.COMPONENT
+    },
+    name="item_create_spawn_egg",
+    defaults={
+        "displayName": "",
+        "lore": "",
+        "nbt": "",
+        "component": "",
+    }
+)
+class ItemCreateSpawnEgg(EventMixin, ItemMixin):
+    def call(self) -> str:
+        mob_type = self.args["mobType"]
+        spawn_egg = mob_type + "_spawn_egg"
+        item_id = self.args["itemId"]
+        on_place = self.args["onPlace"]
+
+        self.add_event("used:" + spawn_egg, f"""execute as @e[type=marker,tag=__spawn_egg_{item_id}] at @s run {self.datapack.add_raw_private_function(self.name, [
+            "kill @s",
+            on_place
+        ])}""")
+
+        if self.datapack.version >= 33:
+            modify_component = {"entity_data": Token.empty(
+                f"""id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]""")}
+            self.datapack.data.item[self.args["itemId"]] = self.create_item(
+                modify_component=modify_component)
+
+        else:
+            modify_nbt = {"EntityTag": Token.empty(
+                f"""EntityTag:{{id:"minecraft:marker",Tags:["__spawn_egg_{item_id}"]}}""")}
+            self.datapack.data.item[self.args["itemId"]] = self.create_item(
+                modify_nbt=modify_nbt)
+        return ""
 #
 #
 # @func_property(
@@ -778,7 +783,7 @@ class GUIRegisters(ItemMixin):
                         suggestion=f"Use Item.create to make this item BEFORE using {
                             self.call_string}"
                     )
-                items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
+                items.append(self.clone_item(self.datapack.data.item[item_str], modify_nbt={
                     "__gui__": Token.empty(f"{{interactive_id:{interactive_id},name:{repr(name)}}}")}, error_token=item_str_token))
 
             self.set_items(
@@ -799,7 +804,7 @@ class GUIRegisters(ItemMixin):
                         suggestion=f"Use Item.create to make this item BEFORE using {
                             self.call_string}"
                     )
-                items.append(self.create_new_item(self.datapack.data.item[item_str], modify_nbt={
+                items.append(self.clone_item(self.datapack.data.item[item_str], modify_nbt={
                     "__gui__": Token.empty(f"{{name:{repr(name)}}}")}, error_token=item_str_token))
             self.set_items(
                 name,

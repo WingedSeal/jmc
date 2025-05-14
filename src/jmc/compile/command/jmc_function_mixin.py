@@ -7,7 +7,7 @@ from .jmc_function import JMCFunction
 
 
 class ItemMixin(JMCFunction):
-    def create_new_item(
+    def clone_item(
             self, item: "Item", modify_nbt: dict[str, Token] | None = None, modify_component: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
         """
         Create new item from existing item
