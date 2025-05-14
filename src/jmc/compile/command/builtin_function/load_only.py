@@ -278,7 +278,9 @@ class ItemCreateSpawnEgg(EventMixin, ItemMixin):
         "texts": ArgType.LIST,
         "nbt": ArgType.JS_OBJECT,
         "component": ArgType.COMPONENT,
-        "onClick": ArgType.FUNC
+        "onClick": ArgType.FUNC,
+        "isFrontGlow": ArgType.KEYWORD,
+        "isBackGlow": ArgType.KEYWORD
     },
     name="item_create_sign",
     defaults={
@@ -287,7 +289,9 @@ class ItemCreateSpawnEgg(EventMixin, ItemMixin):
         "texts": "",
         "nbt": "",
         "component": "",
-        "onClick": ""
+        "onClick": "",
+        "isFrontGlow": "false",
+        "isBackGlow": "false"
     }
 )
 class ItemCreateSign(ItemMixin):
@@ -297,7 +301,16 @@ class ItemCreateSign(ItemMixin):
 
     def call(self) -> str:
         variant = self.args["variant"]
-
+        is_front_glow = self.check_bool("isFrontGlow")
+        is_back_glow = self.check_bool("isBackGlow")
+        if is_front_glow:
+            self.datapack.version.require(
+                PackVersionFeature.SIGN_BACK_TEXT, self.raw_args["isFrontGlow"].token, self.tokenizer)
+        if is_back_glow:
+            raise NotImplementedError("clam down my dude, im adding it")
+            # todo: implement back text
+            self.datapack.version.require(
+                PackVersionFeature.SIGN_BACK_TEXT, self.raw_args["isBackGlow"].token, self.tokenizer)
         if variant not in self._VARIANTS:
             raise JMCValueError(
                 f"Unrecognized wood variant for sign ({variant})",
@@ -338,17 +351,24 @@ class ItemCreateSign(ItemMixin):
             lambda x: x) if self.datapack.version >= PackVersionFeature.TEXT_COMPONENT else repr
         texts_ = [repr_(str(text)) for text in formatted_texts_]
 
+        front_glow = "has_glowing_text:1b," if is_front_glow else ""
         if self.datapack.version >= PackVersionFeature.COMPONENT:
             modify_component = {"entity_data": Token.empty(
-                f"""{{id:"sign",front_text:{{messages:[{','.join(texts_)}]}}}}""")}
+                f"""{{id:"sign",front_text:{{{front_glow}messages:[{','.join(texts_)}]}}}}""")}
             self.datapack.data.item[self.args["itemId"]] = self.create_item(
                 modify_component=modify_component)
 
         else:
-            modify_nbt = {"BlockEntityTag": Token.empty(
-                f"""{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")}
-            self.datapack.data.item[self.args["itemId"]] = self.create_item(
-                modify_nbt=modify_nbt)
+            if self.datapack.version >= PackVersionFeature.SIGN_BACK_TEXT:
+                modify_nbt = {"BlockEntityTag": Token.empty(
+                    f"""{{front_text:{{{front_glow}messages:[{','.join(texts_)}]}}}}""")}
+                self.datapack.data.item[self.args["itemId"]] = self.create_item(
+                    modify_nbt=modify_nbt)
+            else:
+                modify_nbt = {"BlockEntityTag": Token.empty(
+                    f"""{{Text1:{texts_[0]},Text2:{texts_[1]},Text3:{texts_[2]},Text4:{texts_[3]}}}""")}
+                self.datapack.data.item[self.args["itemId"]] = self.create_item(
+                    modify_nbt=modify_nbt)
 
         return ""
 

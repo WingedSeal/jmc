@@ -89,6 +89,8 @@ class PackVersion:
 
 
 class PackVersionFeature:
+    SIGN_BACK_TEXT = PackVersion(13)
+    """Change NBT path for lines of text of sign"""
     VANILLA_MACRO = PackVersion(16)
     """Add Vanilla Macro ('with')"""
     PLS_RENAME_19 = PackVersion(19)
