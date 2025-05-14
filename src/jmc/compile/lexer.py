@@ -488,7 +488,6 @@ class Lexer:
         :raises JMCDecodeJSONError: Invalid JSON
         """
         logger.debug(f"Parsing 'new' keyword, prefix = {prefix!r}")
-        has_extends_arg = False
         if len(command) < 2:
             raise JMCSyntaxException(
                 "Expected keyword(JSON file's type)",
@@ -517,10 +516,17 @@ class Lexer:
             raise JMCSyntaxException(
                 "Expected { or [", command[2], tokenizer, col_length=True
             )
+        extends_from = ""
+        stringify_paths = []
         if command[3].string == "extends":
             if command[4].token_type != TokenType.PAREN_ROUND:
                 raise JMCSyntaxException("Expected (", command[3], tokenizer)
-            has_extends_arg = True
+            extends_from = convention_jmc_to_mc(
+                command[4], tokenizer, prefix="", is_make_lower=False, substr=(1, -1)
+            )
+        elif command[3].string == "stringify":
+            if command[4].token_type != TokenType.PAREN_ROUND:
+                raise JMCSyntaxException("Expected (", command[3], tokenizer)
         elif command[3].token_type not in {
             TokenType.PAREN_CURLY,
             TokenType.PAREN_SQUARE,
@@ -598,29 +604,31 @@ class Lexer:
                 "JSON content cannot be empty", command[-1], tokenizer
             )
 
-        if has_extends_arg:
-            super_name = convention_jmc_to_mc(
-                command[4], tokenizer, prefix="", is_make_lower=False, substr=(1, -1)
-            )
+        if extends_from:
             if namespace in Header().namespace_overrides:
                 super_path = (
                     namespace + "/" + json_type + "/" +
-                    super_name[len(namespace) + 1:]
+                    extends_from[len(namespace) + 1:]
                 )
             else:
-                super_path = json_type + "/" + super_name
+                super_path = json_type + "/" + extends_from
 
-            try:
-                super_json = self.datapack.jsons[super_path]
-            except KeyError:
+            if super_path not in self.datapack.jsons:
                 raise JMCSyntaxException(
-                    f"Invalid JSON({super_path})",
+                    f"JSON path doesn't exist ({super_path})",
                     command[2],
                     tokenizer,
                     suggestion=f"Make sure you have created a previous JSON file at that path and you are spelling its name correctly",
                 )
+            super_json = self.datapack.jsons[super_path]
 
-            assert isinstance(super_json, dict)
+            if not isinstance(super_json, dict):
+                raise JMCSyntaxException(
+                    f"Invalid JSON({super_path})",
+                    command[2],
+                    tokenizer,
+                    suggestion=f"This JSON is list not a JSON",
+                )
             json = deep_merge(super_json, json)
 
         self.datapack.defined_file_pos[json_path] = (command[1], tokenizer)
