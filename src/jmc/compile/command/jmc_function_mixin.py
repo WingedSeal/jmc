@@ -8,19 +8,23 @@ from .jmc_function import JMCFunction
 
 class ItemMixin(JMCFunction):
     def create_new_item(
-            self, item: "Item", modify_nbt: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
+            self, item: "Item", modify_nbt: dict[str, Token] | None = None, modify_component: dict[str, Token] | None = None, error_token: Token | None = None) -> "Item":
         """
         Create new item from existing item
 
         :param item: An Item to copy from
         :param modify_nbt: NBT to modify, defaults to None
+        :param modify_component: Component to modify, defaults to None
         :param error_token: Token to raise an error to, defaults to None
         :return: New Item
         """
         item_type = item.item_type
-        nbt = dict(item.raw_nbt)
+        nbt = dict(item.nbt)
+        component = dict(item.component)
         if modify_nbt is None:
             modify_nbt = {}
+        if modify_component is None:
+            modify_component = {}
         for key, value_token in modify_nbt.items():
             if key in nbt:
                 raise JMCValueError(
@@ -29,15 +33,25 @@ class ItemMixin(JMCFunction):
                     self.tokenizer)
 
             nbt[key] = value_token
+        for key, value_token in modify_component.items():
+            if key in component:
+                raise JMCValueError(
+                    f"{key} is already inside the component",
+                    value_token if error_token is None else error_token,
+                    self.tokenizer)
+
+            component[key] = value_token
+        is_component = self.datapack.version >= 33
         return Item(
             item_type,
-            self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+            self.datapack.token_dict_to_component(
+                component, self.tokenizer, nbt) if is_component else self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
             nbt,
-            is_component=item.is_component
+            component
         )
 
     def create_item(self, item_type_param: str = "itemType", display_name_param: str = "displayName",
-                    lore_param: str = "lore", nbt_param: str = "nbt", component_param: str = "component", modify_nbt: dict[str, Token] | None = None) -> "Item":
+                    lore_param: str = "lore", nbt_param: str = "nbt", component_param: str = "component", modify_nbt: dict[str, Token] | None = None, modify_component: dict[str, Token] | None = None) -> "Item":
         """
         Create new item from arguments given in the JMCFunction
 
@@ -47,8 +61,11 @@ class ItemMixin(JMCFunction):
         :param nbt_param: Paramter to access `self.args`,defaults to "nbt"
         :param component_param: Paramter to access `self.args`,defaults to "component"
         :param modify_nbt: NBT to modify, defaults to None
+        :param modify_component: Component to modify, defaults to None
         :return: Item
         """
+        if modify_component is not None:
+            assert self.datapack.version >= 33
         if self.args[component_param]:
             self.datapack.version.require(
                 33, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 33, use nbt instead")
@@ -57,6 +74,8 @@ class ItemMixin(JMCFunction):
                 33, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 33, use component instead", is_lower=True)
         if modify_nbt is None:
             modify_nbt = {}
+        if modify_component is None:
+            modify_component = {}
 
         item_type = self.args[item_type_param]
         if item_type.startswith("minecraft:"):
@@ -66,30 +85,44 @@ class ItemMixin(JMCFunction):
                 self.raw_args[lore_param].token, self.tokenizer, TokenType.STRING)
         else:
             lores = []
+        component: dict[str, Token] = {}
+        nbt: dict[str, Token] = {}
         if self.args[nbt_param]:
+            component = {}
             nbt = self.tokenizer.parse_js_obj(
                 self.raw_args[nbt_param].token)
         elif self.args[component_param]:
-            nbt = self.tokenizer.parse_component(
+            component = self.tokenizer.parse_component(
                 self.raw_args[component_param].token)
-        else:
-            nbt = {}
+            if "nbt" in component:
+                nbt = self.tokenizer.parse_js_obj(
+                    component["nbt"])
+                del component["nbt"]
+            else:
+                nbt = {}
 
         is_component = self.datapack.version >= 33
         for key, value_token in modify_nbt.items():
             if key in nbt:
                 raise JMCValueError(
-                    f"{key} is already inside the " +
-                    ("component" if is_component else "nbt"),
+                    f"{key} is already inside the nbt",
                     value_token,
                     self.tokenizer)
 
             nbt[key] = value_token
+        for key, value_token in modify_component.items():
+            if key in component:
+                raise JMCValueError(
+                    f"{key} is already inside the component",
+                    value_token,
+                    self.tokenizer)
+
+            component[key] = value_token
 
         if is_component:
             repr_ = (lambda x: x) if self.datapack.version >= 62 else repr
             if self.args[display_name_param]:
-                if "custom_name" in nbt:
+                if "custom_name" in component:
                     raise JMCValueError(
                         "custom_name is already inside the component",
                         self.token,
@@ -98,16 +131,16 @@ class ItemMixin(JMCFunction):
                     display_name_param,
                     is_default_no_italic=True,
                     is_allow_score_selector=False)
-                nbt["custom_name"] = Token.empty(repr_(name_))
+                component["custom_name"] = Token.empty(repr_(name_))
             if self.args[lore_param]:
-                if "lore" in nbt:
+                if "lore" in component:
                     raise JMCValueError(
                         "lore is already inside the component",
                         self.token,
                         self.tokenizer)
-                lore_ = ",".join([repr_(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False))
-                                  for lore in lores)])
-                nbt["lore"] = Token.empty(f"[{lore_}]")
+                lore_ = ",".join([repr_(str(FormattedText(lore, self.raw_args[lore_param].token, self.tokenizer, self.datapack, is_default_no_italic=True, is_allow_score_selector=False)))
+                                  for lore in lores])
+                component["lore"] = Token.empty(f"[{lore_}]")
 
         else:
             new_token_string = "{"
@@ -135,9 +168,9 @@ class ItemMixin(JMCFunction):
         return Item(
             item_type,
             self.datapack.token_dict_to_component(
-                nbt, self.tokenizer) if is_component else self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
+                component, self.tokenizer, nbt) if is_component else self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer),
             nbt,
-            is_component
+            component,
         )
 
 

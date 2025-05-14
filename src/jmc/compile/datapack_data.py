@@ -4,18 +4,18 @@ from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from ..compile.tokenizer import Token, Tokenizer
+    from ..compile.tokenizer import Token
 
 
 @dataclass(slots=True, frozen=True, eq=True)
 class Item:
     item_type: str
-    nbt: str
-    raw_nbt: dict[str, "Token"]
-    is_component: bool
+    nbt_component_str: str
+    nbt: dict[str, "Token"]
+    component: dict[str, "Token"]
 
     def __str__(self) -> str:
-        return self.item_type + (self.nbt if self.raw_nbt else "")
+        return self.item_type + (self.nbt_component_str if self.nbt or self.component else "")
 
 
 @dataclass(slots=True, frozen=False, eq=True)
@@ -66,8 +66,9 @@ class GUI:
     def __init__(self, name: str, mode: GUIMode, template: list[str]) -> None:
         self.default_item = Item(
             "gray_stained_glass_pane",
-            nbt="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(name),
-            raw_nbt={}, is_component=False)
+            nbt_component_str="""{display:{Name:'""'},__gui__:{name:%s}}""" % repr(
+                name),
+            nbt={}, component={})
         self.name = name
         self.is_created = False
         self.template_map = defaultdict(list)

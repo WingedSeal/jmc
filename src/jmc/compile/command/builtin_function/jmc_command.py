@@ -4,7 +4,6 @@ import math
 from pathlib import Path
 from typing import Iterator
 
-from ....compile.datapack import DataPack
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
 from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError, relative_file_name
@@ -148,7 +147,7 @@ class ItemSummon(JMCFunction):
                 self.tokenizer,
                 suggestion="Remove `Item` in the nbt",
             )
-        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt}}}{"," + self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
+        return f'summon item {self.args["pos"]} {{Item:{{id:"{self.datapack.data.item[self.args["itemId"]].item_type}",Count:{self.args["count"]},tag:{self.datapack.data.item[self.args["itemId"]].nbt_component_str}}}{"," + self.datapack.token_dict_to_raw_js_object(nbt, self.tokenizer)[1:-1] if nbt else ""}}}'
 
 
 @func_property(
@@ -1318,6 +1317,7 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
 )
 class JMCPythonFile(JMCFunction):
     def call(self) -> str:
+        new_path = None
         try:
             file_path = Path(self.tokenizer.file_path)
             new_path = Path(

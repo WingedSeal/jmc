@@ -1,6 +1,5 @@
 """Module handling datapack"""
 
-from ast import arg
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
@@ -774,12 +773,13 @@ class DataPack:
         return "{" + ",".join(pairs) + "}"
 
     def token_dict_to_component(
-        self, token_dict: dict[str, Token], tokenizer: Tokenizer
+        self, token_dict: dict[str, Token], tokenizer: Tokenizer, nbt_token_dict: dict[str, Token]
     ) -> str:
         """
         Turns a dictionary of key and token to a string in form of component
 
         :param token_dict: Dictionary of string and Token
+        :param nbt_token_dict: Dictionary of string and Token
         :return: String that looks like component
         """
         pairs = []
@@ -796,6 +796,9 @@ class DataPack:
                 )
             else:
                 pairs.append(f"{key}={token.string}")
+        if nbt_token_dict:
+            pairs.append(
+                f"nbt={self.token_dict_to_raw_js_object(nbt_token_dict, tokenizer)}")
         return "[" + ",".join(pairs) + "]"
 
     def __repr__(self) -> str:
