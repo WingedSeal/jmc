@@ -1,9 +1,8 @@
-import functools
 from json import JSONDecodeError, dump, load
 import os
 from pathlib import Path
 import threading
-from typing import Any, Callable, Protocol
+from typing import Any, Callable
 
 from .utils import Colors, get_input, pprint
 from ..compile.utils import SingleTon
@@ -233,7 +232,8 @@ class Configuration:
 
         # Target
         while True:
-            target_str = get_input("Main JMC file(Leave blank for default[main.jmc]): ")
+            target_str = get_input(
+                "Main JMC file(Leave blank for default[main.jmc]): ")
             if target_str == "":
                 target = self._default_target()
                 break

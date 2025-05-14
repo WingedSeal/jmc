@@ -23,7 +23,7 @@ class PackVersion:
         self._pack_format = pack_format
         """Datapack's pack_format"""
 
-    def require(self, pack_format: int, token: Token,
+    def require(self, pack_format: "int | PackVersion", token: Token,
                 tokenizer: Tokenizer, suggestion: str | None = None, is_lower: bool = False) -> None:
         """
         Raise MinecraftVersionTooLow when pack_format is too low
@@ -35,6 +35,8 @@ class PackVersion:
         :param suggestion: error suggestion, defaults to None
         :param is_lower: Set to True when expecting pack_format lower than this
         """
+        if isinstance(pack_format, PackVersion):
+            pack_format = pack_format._pack_format
         if is_lower:
             if self._pack_format != -1 and self._pack_format >= pack_format:
                 raise MinecraftVersionTooHigh(
@@ -84,3 +86,25 @@ class PackVersion:
         elif isinstance(__value, type(self)):
             return self._pack_format <= __value._pack_format
         return False
+
+
+class PackVersionFeature:
+    VANILLA_MACRO = PackVersion(16)
+    """Add Vanilla Macro ('with')"""
+    PLS_RENAME_19 = PackVersion(19)
+    """TODO: RENAME"""
+    PLS_RENAME_21 = PackVersion(21)
+    """TODO: RENAME"""
+    SHORT_GRASS = PackVersion(26)
+    """Rename 'grass' to 'short_grass'"""
+    COMPONENT = PackVersion(33)
+    """Switch from NBT system to Component system"""
+    LEGACY_FOLDER_RENAME = PackVersion(48)
+    """Change 'functions' to 'function' etc."""
+    PLS_RENAME_59 = PackVersion(59)
+    """TODO: RENAME"""
+    TEXT_COMPONENT = PackVersion(62)
+    """Make text component to no longer require stringifying the JSON"""
+
+    def __new__(cls, *args, **kwargs) -> "PackVersionFeature":
+        raise TypeError("Don't instantiate this")

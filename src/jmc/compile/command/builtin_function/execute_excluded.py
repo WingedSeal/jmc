@@ -1,5 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function that cannot be used with `/execute`"""
 
+from jmc.compile.pack_version import PackVersionFeature
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
 from ..jmc_function import JMCFunction, FuncType, func_property
@@ -384,9 +385,10 @@ class RaycastSimple(JMCFunction):
                         "minecraft:cave_air",
                         "minecraft:water",
                         "minecraft:lava",
-                        "minecraft:grass" if self.datapack.version < 26 else "minecraft:short_grass",
+                        "minecraft:grass" if self.datapack.version < PackVersionFeature.SHORT_GRASS else "minecraft:short_grass",
                         "#minecraft:small_flowers",
-                        *(["#minecraft:tall_flowers"] if self.datapack.version < 59 else []),
+                        *(["#minecraft:tall_flowers"]
+                          if self.datapack.version < PackVersionFeature.PLS_RENAME_59 else []),
                         "#minecraft:small_dripleaf_placeable",
                         "minecraft:fern",
                         "minecraft:fire",

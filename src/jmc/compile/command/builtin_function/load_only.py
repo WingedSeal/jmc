@@ -1,11 +1,13 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function"""
 import json
+
+from ...utils import convention_jmc_to_mc
 from ..jmc_function_mixin import EventMixin, ItemMixin
 from ...tokenizer import Token, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
-from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer, convention_jmc_to_mc
+from ..utils import ArgType, NumberType, PlayerType, ScoreboardPlayer
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .._flow_control import parse_switch
 

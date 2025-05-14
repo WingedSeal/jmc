@@ -2,6 +2,8 @@
 
 import re
 from typing import Literal
+
+from jmc.compile.pack_version import PackVersionFeature
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -242,7 +244,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     if case_numbers is None:
         case_numbers = [*range(1, len(func_contents) + 1)]
     func_count = datapack.get_count(name)
-    if datapack.version >= 16:
+    if datapack.version >= PackVersionFeature.VANILLA_MACRO:
         has_default = "default" in case_numbers
         for (case_body, case_label) in zip(func_contents, case_numbers):
             if has_default and case_label != "default":
@@ -335,7 +337,7 @@ def switch(command: list[Token], datapack: DataPack,
                 case_start = expected_case
             if count != expected_case:
                 datapack.version.require(
-                    16, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
+                    PackVersionFeature.VANILLA_MACRO, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
             if len(tokens) < 3:
                 raise JMCSyntaxException(
                     "Expected colon (:)", tokens[1], tokenizer, col_length=True)
@@ -347,7 +349,8 @@ def switch(command: list[Token], datapack: DataPack,
             expected_case += 1
             case_numbers.append(count)
         if tokens[0].string == "default" and tokens[0].token_type == TokenType.KEYWORD:
-            datapack.version.require(16, tokens[1], tokenizer)
+            datapack.version.require(
+                PackVersionFeature.VANILLA_MACRO, tokens[1], tokenizer)
             cases_content.append(current_case_content)
             current_case_content = []
             case_numbers.append("default")

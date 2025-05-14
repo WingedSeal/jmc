@@ -8,13 +8,15 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable
 
+from jmc.compile.pack_version import PackVersionFeature
+
 from ...compile.datapack_data import SIMPLE_JSON_BODY
 
 from ..header import Header
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import is_number, is_float, convention_jmc_to_mc
+from ..utils import is_number, is_float
 
 
 class PlayerType(Enum):
@@ -497,6 +499,7 @@ def eval_expr(expr: str) -> str:
             return f"{number:.3f}"
         string = f"{number:.12f}"
         whole, decimal = string.split(".")
+        i = 0
         for i, char in enumerate(decimal):
             if char != "0":
                 break
@@ -846,13 +849,13 @@ class FormattedText:
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
 
-        if self.datapack.version >= 19:
+        if self.datapack.version >= PackVersionFeature.PLS_RENAME_19:
             for _type in {"score", "selector", "nbt", "keybind"}:
                 if _type in self.current_json:
                     self.current_json["type"] = _type
             if (
                 "__private_nbt_expand__" in self.current_json
-                and self.datapack.version >= 21
+                and self.datapack.version >= PackVersionFeature.PLS_RENAME_21
             ):
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
                 self.current_json["type"] = "nbt"

@@ -1,3 +1,4 @@
+from jmc.compile.pack_version import PackVersionFeature
 from ..datapack_data import Item
 from .utils import FormattedText, hash_string_to_string
 from ..exception import JMCValueError
@@ -41,7 +42,7 @@ class ItemMixin(JMCFunction):
                     self.tokenizer)
 
             component[key] = value_token
-        is_component = self.datapack.version >= 33
+        is_component = self.datapack.version >= PackVersionFeature.COMPONENT
         return Item(
             item_type,
             self.datapack.token_dict_to_component(
@@ -65,13 +66,13 @@ class ItemMixin(JMCFunction):
         :return: Item
         """
         if modify_component is not None:
-            assert self.datapack.version >= 33
+            assert self.datapack.version >= PackVersionFeature.COMPONENT
         if self.args[component_param]:
             self.datapack.version.require(
-                33, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 33, use nbt instead")
+                PackVersionFeature.COMPONENT, self.raw_args[component_param].token, self.tokenizer, "Component is only available on at least pack format 33, use nbt instead")
         if self.args[nbt_param]:
             self.datapack.version.require(
-                33, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 33, use component instead", is_lower=True)
+                PackVersionFeature.COMPONENT, self.raw_args[nbt_param].token, self.tokenizer, "NBT is only available on pack format lower than 33, use component instead", is_lower=True)
         if modify_nbt is None:
             modify_nbt = {}
         if modify_component is None:
@@ -101,7 +102,7 @@ class ItemMixin(JMCFunction):
             else:
                 nbt = {}
 
-        is_component = self.datapack.version >= 33
+        is_component = self.datapack.version >= PackVersionFeature.COMPONENT
         for key, value_token in modify_nbt.items():
             if key in nbt:
                 raise JMCValueError(

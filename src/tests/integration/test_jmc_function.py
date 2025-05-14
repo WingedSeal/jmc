@@ -869,7 +869,7 @@ give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"tex
 
     def test_ItemCreate(self):
         pack = JMCTestPack().set_jmc_file("""
-Item.create(
+Item.createUse(
     veryCoolSword,
     carrot_on_a_stick,
     "&<gold, bold>A very cool sword",
@@ -885,7 +885,7 @@ execute as @a run Item.give(veryCoolSword);
         """).build()
 
         pack2 = JMCTestPack().set_jmc_file("""
-Item.create(
+Item.createUse(
     veryCoolSword,
     carrot_on_a_stick,
     "&<gold, bold>A very cool sword",
@@ -929,10 +929,10 @@ execute as @a[scores={on_event_1mqyp2x=1..}] at @s run function TEST:__private__
 > VIRTUAL/data/TEST/functions/__private__/on_event/used_carrot_on_a_stick.mcfunction
 scoreboard players set @s on_event_1mqyp2x 0
 execute store result score __item_id__ __variable__ run data get entity @s SelectedItem.tag.__item_id__
-execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/item_create/found
-> VIRTUAL/data/TEST/functions/__private__/item_create/found.mcfunction
-execute if score __item_id__ __variable__ matches 1 at @s run function TEST:__private__/item_create/0
-> VIRTUAL/data/TEST/functions/__private__/item_create/0.mcfunction
+execute if score __item_id__ __variable__ matches 1.. run function TEST:__private__/item_create_use/found
+> VIRTUAL/data/TEST/functions/__private__/item_create_use/found.mcfunction
+execute if score __item_id__ __variable__ matches 1 at @s run function TEST:__private__/item_create_use/0
+> VIRTUAL/data/TEST/functions/__private__/item_create_use/0.mcfunction
 say I'm very cool
 effect give @s speed 1 255 True
             """)
