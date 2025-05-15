@@ -182,7 +182,7 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
         return node
 
     _tree_to_operation(tree)
-    output_variable = cast(TemporaryVariable, output_variable)
+    output_variable = cast(TemporaryVariable | None, output_variable)
     assert output_variable is not None
     output_variable.content = "OUTPUT"
     output_variable.index = -1
