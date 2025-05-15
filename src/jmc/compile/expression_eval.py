@@ -2,6 +2,8 @@ from dataclasses import dataclass
 import bisect
 from typing import cast
 
+from .command.utils import eval_expr
+
 
 class OpenBracket:
     def get_order(self) -> int:
@@ -133,6 +135,9 @@ def print_tree(node: Node, indent: str = "", is_left: bool = False) -> None:
         print(f"{indent}{'├── ' if is_left else '└── '}{node.content}")
 
 
+EXPONENTIAL_CAP = 5000
+
+
 def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Number]]:
     operations: list[tuple[Variable, Operator, Number]] = []
     max_index = 0
@@ -167,6 +172,8 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                     times = int(right_var.content)
                     if times < 0:
                         raise Exception("no float here")
+                    elif times > EXPONENTIAL_CAP:
+                        raise Exception("too many times")
                     elif times == 0:
                         operations.append(
                             (left_var, Operator(""), Constant("1")))
@@ -177,8 +184,8 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                     operations.append((left_var, node.operator, right_var))
                 return left_var
             elif isinstance(left_var, Constant) and isinstance(right_var, Constant):
-                const = Constant(left_var.content +
-                                 node.content + right_var.content)  # TODO: Evaluate
+                const = Constant(eval_expr(left_var.content +
+                                 node.content + right_var.content))
                 if is_first_time:
                     output_variable = new_variable()
                     operations.append((output_variable, Operator(""), const))
@@ -198,6 +205,8 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                     times = int(right_var.content)
                     if times < 0:
                         raise Exception("no float here")
+                    elif times > EXPONENTIAL_CAP:
+                        raise Exception("too many times")
                     elif times == 0:
                         operations.append(
                             (new_var, Operator(""), Constant("1")))
@@ -223,10 +232,3 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
         temporary_variable.content = f"_t{max_index}"
         max_index += 1
     return operations
-
-
-tree = expression_to_tree(list("b^0+1"))
-print_tree(tree)
-
-for op in tree_to_operations(tree):
-    print(op[0].content, op[1].content + "=", op[2].content)
