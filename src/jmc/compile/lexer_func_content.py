@@ -173,7 +173,6 @@ class FuncContent:
             self.parse_self_command(current_line - 1, _is_switch=True)
             self.switch_tokens = None
             self.command = _command
-
         if (
             self.command[0].token_type != TokenType.KEYWORD
             and get_nbt_type(self.command) is None

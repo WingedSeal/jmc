@@ -364,7 +364,10 @@ def nbt_operation(
                 )
                 or
                 # = (<type>) <command>
-                tokens[0].token_type == TokenType.PAREN_ROUND
+                (
+                    tokens[0].token_type == TokenType.PAREN_ROUND
+                    and len(tokens) > 1
+                )
             )
         ):
             type_, scale = __get_type_scale(tokens, tokenizer, datapack)
@@ -395,6 +398,13 @@ def nbt_operation(
             if len(tokens) > 1:
                 raise JMCSyntaxException(
                     f"Unexpected token ({tokens[1]})", tokens[1], tokenizer
+                )
+            if tokens[0].token_type == TokenType.PAREN_ROUND:
+                raise JMCSyntaxException(
+                    "Unexpected round parenthesis '('",
+                    tokens[0],
+                    tokenizer,
+                    suggestion="'<NBT-Element> = (...)' is not a valid syntax."
                 )
             return f"data modify {nbt_type_str} {target}{path} {full_operator} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
