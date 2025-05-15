@@ -19,7 +19,9 @@ class Node:
 @dataclass
 class Operator(Node):
     def get_order(self) -> int:
-        if self.content in "*/%":
+        if self.content == "^":
+            return 30
+        elif self.content in "*/%":
             return 20
         elif self.content in "+-":
             return 10
@@ -27,9 +29,9 @@ class Operator(Node):
             raise Exception(self.content)
 
     def is_reflective(self) -> bool:
-        if self.content in "+-":
+        if self.content in "+*":
             return True
-        elif self.content in "*/%":
+        elif self.content in "-/%^":
             return False
         else:
             raise Exception(self.content)
@@ -93,7 +95,7 @@ def expression_to_tree(expression: list[str]) -> Expression:
     for char in expression:
         if is_int(char):
             number_stack.append(Constant(char))
-        elif char in "+-*/%":
+        elif char in "+-*/%^":
             operator = Operator(char)
             if operator_stack and operator.get_order() < operator_stack[-1].get_order():
                 process_stack()
@@ -159,7 +161,20 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                 if isinstance(right_var, TemporaryVariable):
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
-                operations.append((left_var, node.operator, right_var))
+                if node.content == "^":
+                    if not isinstance(right_var, Constant):
+                        raise Exception("^ only works on const")
+                    times = int(right_var.content)
+                    if times < 0:
+                        raise Exception("no float here")
+                    elif times == 0:
+                        operations.append(
+                            (left_var, Operator(""), Constant("1")))
+                    else:
+                        operations.extend(
+                            [(left_var, Operator("*"), left_var)] * (times - 1))
+                else:
+                    operations.append((left_var, node.operator, right_var))
                 return left_var
             elif isinstance(left_var, Constant) and isinstance(right_var, Constant):
                 const = Constant(left_var.content +
@@ -177,7 +192,20 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
                 operations.append((new_var, Operator(""), left_var))
-                operations.append((new_var, node.operator, right_var))
+                if node.content == "^":
+                    if not isinstance(right_var, Constant):
+                        raise Exception("^ only works on const")
+                    times = int(right_var.content)
+                    if times < 0:
+                        raise Exception("no float here")
+                    elif times == 0:
+                        operations.append(
+                            (new_var, Operator(""), Constant("1")))
+                    else:
+                        operations.extend(
+                            [(new_var, Operator("*"), new_var)] * (times - 1))
+                else:
+                    operations.append((new_var, node.operator, right_var))
                 return new_var
         return node
 
@@ -197,7 +225,7 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
     return operations
 
 
-tree = expression_to_tree(list("(b*2)+7/c-(9+9*1)"))
+tree = expression_to_tree(list("b^0+1"))
 print_tree(tree)
 
 for op in tree_to_operations(tree):
