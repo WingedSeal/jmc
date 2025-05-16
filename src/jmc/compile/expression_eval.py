@@ -146,9 +146,7 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
 
-    print_tree(tree)
     can_inject = search_for_output_in_tree(tree, output)
-    print_tree(tree)
 
     def new_variable() -> TemporaryVariable:
         if free_temporary_variable:
