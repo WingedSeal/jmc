@@ -203,7 +203,7 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                 if isinstance(right_var, TemporaryVariable):
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
-                if output.content != left_var.content:
+                if not can_inject or output.content != left_var.content:
                     operations.append((new_var, Operator(""), left_var))
                 if node.content == "^":
                     if not isinstance(right_var, Constant):
@@ -250,13 +250,18 @@ class Direction(Enum):
 
 def search_for_output_in_tree(tree: Expression, output: Variable) -> bool:
     """
-    Return whether output variable can be injected directly into operations 
+    Return whether output variable can be injected directly into operations
     (happens when there's no output in tree or when there's only 1 and tree can be swapped)
     """
     path: list[tuple[Expression, Direction]] = []
     output_path: list[tuple[Expression, Direction]] | None = None
 
+    is_return_false = False
+
     def _walk(node: Node):
+        nonlocal is_return_false
+        if is_return_false:
+            return
         if isinstance(node, Expression):
             path.append((node, Direction.LEFT))
             _walk(node.children[0])
@@ -267,19 +272,16 @@ def search_for_output_in_tree(tree: Expression, output: Variable) -> bool:
         elif isinstance(node, Variable) and node.content == output.content:
             nonlocal output_path
             if output_path is not None:
-                return False
+                is_return_false = True
             output_path = path.copy()
 
     _walk(tree)
+    if is_return_false:
+        return False
 
     output_path = cast(list[tuple[Expression, Direction]] | None, output_path)
     if output_path is None:
         return True
-
-    for exp, dir in output_path:
-        print(exp.content, dir)
-
-    print(tree.children[0].content)
 
     for node, direction in output_path:
         if direction == Direction.LEFT:
