@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import bisect
 from typing import cast
+from enum import Enum, auto
 
 from .command.utils import eval_expr
 
@@ -99,7 +100,7 @@ def expression_to_tree(expression: list[str]) -> Expression:
             number_stack.append(Constant(char))
         elif char in "+-*/%^":
             operator = Operator(char)
-            if operator_stack and operator.get_order() < operator_stack[-1].get_order():
+            if operator_stack and operator.get_order() <= operator_stack[-1].get_order():
                 process_stack()
             operator_stack.append(operator)
         elif char == "(":
@@ -138,12 +139,16 @@ def print_tree(node: Node, indent: str = "", is_left: bool = False) -> None:
 EXPONENTIAL_CAP = 5000
 
 
-def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Number]]:
+def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variable, Operator, Number]]:
     operations: list[tuple[Variable, Operator, Number]] = []
     max_index = 0
     free_temporary_variable: list[TemporaryVariable] = []
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
+
+    print_tree(tree)
+    can_inject = search_for_output_in_tree(tree, output)
+    print_tree(tree)
 
     def new_variable() -> TemporaryVariable:
         if free_temporary_variable:
@@ -198,7 +203,8 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
                 if isinstance(right_var, TemporaryVariable):
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
-                operations.append((new_var, Operator(""), left_var))
+                if output.content != left_var.content:
+                    operations.append((new_var, Operator(""), left_var))
                 if node.content == "^":
                     if not isinstance(right_var, Constant):
                         raise Exception("^ only works on const")
@@ -221,8 +227,9 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
     _tree_to_operation(tree)
     output_variable = cast(TemporaryVariable | None, output_variable)
     assert output_variable is not None
-    output_variable.content = "OUTPUT"
-    output_variable.index = -1
+    if can_inject:
+        output_variable.content = output.content
+        output_variable.index = -1
 
     max_index = 0
     for temporary_variable in all_temporary_variable:
@@ -231,4 +238,58 @@ def tree_to_operations(tree: Expression) -> list[tuple[Variable, Operator, Numbe
         temporary_variable.index = max_index
         temporary_variable.content = f"_t{max_index}"
         max_index += 1
+    if not can_inject:
+        operations.append((output, Operator(""), output_variable))
     return operations
+
+
+class Direction(Enum):
+    LEFT = auto()
+    RIGHT = auto()
+
+
+def search_for_output_in_tree(tree: Expression, output: Variable) -> bool:
+    """
+    Return whether output variable can be injected directly into operations 
+    (happens when there's no output in tree or when there's only 1 and tree can be swapped)
+    """
+    path: list[tuple[Expression, Direction]] = []
+    output_path: list[tuple[Expression, Direction]] | None = None
+
+    def _walk(node: Node):
+        if isinstance(node, Expression):
+            path.append((node, Direction.LEFT))
+            _walk(node.children[0])
+            path.pop()
+            path.append((node, Direction.RIGHT))
+            _walk(node.children[1])
+            path.pop()
+        elif isinstance(node, Variable) and node.content == output.content:
+            nonlocal output_path
+            if output_path is not None:
+                return False
+            output_path = path.copy()
+
+    _walk(tree)
+
+    output_path = cast(list[tuple[Expression, Direction]] | None, output_path)
+    if output_path is None:
+        return True
+
+    for exp, dir in output_path:
+        print(exp.content, dir)
+
+    print(tree.children[0].content)
+
+    for node, direction in output_path:
+        if direction == Direction.LEFT:
+            continue
+        elif direction == Direction.RIGHT:
+            if not node.operator.is_reflective():
+                return False
+    for node, direction in output_path:
+        if direction == Direction.LEFT:
+            continue
+        elif direction == Direction.RIGHT:
+            node.children = (node.children[1], node.children[0])
+    return True
