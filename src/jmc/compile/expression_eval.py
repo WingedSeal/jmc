@@ -9,7 +9,7 @@ from jmc.compile.exception import JMCSyntaxException
 from .command.utils import eval_expr, is_number
 from .tokenizer import Token, TokenType, Tokenizer
 
-OPERATOR_STRINGS = "+-*/%^"
+OPERATOR_STRINGS = list("+-*/%") + ["**"]
 
 
 class OpenBracket:
@@ -29,7 +29,7 @@ class Node:
 @dataclass
 class Operator(Node):
     def get_order(self) -> int:
-        if self.content == "^":
+        if self.content == "**":
             return 30
         elif self.content in "*/%":
             return 20
@@ -41,7 +41,7 @@ class Operator(Node):
     def is_reflective(self) -> bool:
         if self.content in "+*":
             return True
-        elif self.content in "-/%^":
+        elif self.content in "-/%" or self.content == "**":
             return False
         else:
             raise Exception(self.content)
@@ -243,9 +243,9 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                 if isinstance(right_var, TemporaryVariable):
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
-                if node.content == "^":
+                if node.content == "**":
                     if not isinstance(right_var, Constant):
-                        raise Exception("^ only works on const")
+                        raise Exception("** only works on const")
                     times = int(right_var.content)
                     if times < 0:
                         raise Exception("no float here")
@@ -279,9 +279,9 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                 if not can_inject or output.content != left_var.content:
                     operations.append(
                         (new_var, Operator("", Token.empty()), left_var))
-                if node.content == "^":
+                if node.content == "**":
                     if not isinstance(right_var, Constant):
-                        raise Exception("^ only works on const")
+                        raise Exception("** only works on const")
                     times = int(right_var.content)
                     if times < 0:
                         raise Exception("no float here")

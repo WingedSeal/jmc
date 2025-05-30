@@ -170,7 +170,6 @@ def variable_operation(
                 suggestion="Expected integer or variable or target selector",
             )
         expression_tokens = tokens_to_tokens(tokens[2:], tokenizer)
-        print(expression_tokens)
         expression_tree = expression_to_tree(expression_tokens, tokenizer)
         operations = tree_to_operations(expression_tree, Variable(
             f"{tokens[0].string} {objective_name}", tokens[0]))
