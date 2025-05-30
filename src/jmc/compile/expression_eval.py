@@ -3,7 +3,13 @@ import bisect
 from typing import cast
 from enum import Enum, auto
 
-from .command.utils import eval_expr
+from jmc.compile.datapack import DataPack
+from jmc.compile.exception import JMCSyntaxException
+
+from .command.utils import eval_expr, is_number
+from .tokenizer import Token, TokenType, Tokenizer
+
+OPERATOR_STRINGS = "+-*/%^"
 
 
 class OpenBracket:
@@ -17,6 +23,7 @@ OPEN_BRACKET = OpenBracket()
 @dataclass
 class Node:
     content: str
+    token: Token
 
 
 @dataclass
@@ -70,16 +77,68 @@ class Expression(Number):
             self.children = (self.children[1], self.children[0])
 
 
-def is_int(s: str):
-    try:
-        int(s)
-    except ValueError:
-        return False
-    else:
-        return True
+def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
+    return_tokens: list[Token] = []
+    is_hanging_negative_sign = False
+    for token in tokens:
+        if token.token_type == TokenType.OPERATOR:
+            if token.string == ":":
+                return_tokens[-1] = tokenizer.merge_tokens(
+                    [return_tokens[-1], token])
+            else:
+                if token and return_tokens[-1].token_type == TokenType.OPERATOR:
+                    is_hanging_negative_sign = True
+                return_tokens.append(token)
+        elif token.token_type == TokenType.PAREN_ROUND:
+            tokenizer_ = Tokenizer(
+                token.string[1:-1],
+                tokenizer.file_path,
+                token.line,
+                token.col + 1,
+                tokenizer.file_string,
+                expect_semicolon=False,
+                allow_semicolon=False
+            )
+            return_tokens.append(Token(TokenType.OPERATOR,
+                                       token.line, token.col, "("))
+            return_tokens.extend(tokens_to_tokens(
+                tokenizer_.programs[0], tokenizer))
+            return_tokens.append(Token(TokenType.OPERATOR, token.line +
+                                       token.string.count("\n"), token.col + token.length, ")"))
+        elif token.token_type == TokenType.PAREN_SQUARE:
+            if tokens[-1] and ":" in tokens[-1].string:
+                return_tokens[-1] = tokenizer.merge_tokens(
+                    [return_tokens[-1], token])
+            else:
+                raise JMCSyntaxException(
+                    f"Unexpected {token.token_type.value} token in expression", token, tokenizer)
+        elif token.token_type == TokenType.KEYWORD:
+            if return_tokens and return_tokens[-1] == TokenType.KEYWORD:
+                return_tokens[-1] = tokenizer.merge_tokens(
+                    [return_tokens[-1], token])
+            elif is_hanging_negative_sign:
+                if is_number(token.string):
+                    return_tokens[-1] = tokenizer.merge_tokens(
+                        [return_tokens[-1], token])
+                elif token.token_type == TokenType.KEYWORD:
+                    return_tokens.append(
+                        Token(TokenType.KEYWORD, return_tokens[-1].line, return_tokens[-1].col, "-1"))
+                    return_tokens.append(Token(TokenType.OPERATOR,
+                                               return_tokens[-1].line, return_tokens[-1].col, "*"))
+                else:
+                    raise JMCSyntaxException(
+                        "Unexpected hanging negative sign (-) in an expression", return_tokens[-1], tokenizer)
+            else:
+                return_tokens.append(token)
+        else:
+            raise JMCSyntaxException(
+                f"Unexpected {token.token_type.value} token in expression", token, tokenizer
+            )
+        is_hanging_negative_sign = False
+    return return_tokens
 
 
-def expression_to_tree(expression: list[str]) -> Expression:
+def expression_to_tree(expression: list[Token], tokenizer) -> Expression:
     operator_stack: list[Operator | OpenBracket] = []
     number_stack: list[Number] = []
 
@@ -93,22 +152,30 @@ def expression_to_tree(expression: list[str]) -> Expression:
             right = number_stack.pop()
             left = number_stack.pop()
             number_stack.append(Expression(
-                operator.content, (left, right), operator))
+                operator.content, operator.token, (left, right), operator))
 
-    for char in expression:
-        if is_int(char):
-            number_stack.append(Constant(char))
-        elif char in "+-*/%^":
-            operator = Operator(char)
+    for token in expression:
+        if is_number(token.string):
+            number_stack.append(Constant(token.string, token))
+        elif token.string in OPERATOR_STRINGS:
+            operator = Operator(token.string, token)
             if operator_stack and operator.get_order() <= operator_stack[-1].get_order():
                 process_stack()
             operator_stack.append(operator)
-        elif char == "(":
+        elif token.string == "(":
             operator_stack.append(OPEN_BRACKET)
-        elif char == ")":
+        elif token.string == ")":
             process_stack()
+        elif token.string.startswith("$"):
+            number_stack.append(
+                Variable(f"{token.string} {DataPack.var_name}", token))
+        elif ":" in token.string:
+            objective, player = token.string.split(":")
+            number_stack.append(
+                Variable(f"{player} {objective}", token))
         else:
-            number_stack.append(Variable(char))
+            raise JMCSyntaxException(
+                "Unrecognized expression token", token, tokenizer)
     process_stack()
     if len(number_stack) > 1:
         raise Exception()
@@ -154,7 +221,7 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
         nonlocal max_index
         max_index += 1
         temporary_variable = TemporaryVariable(
-            "", max_index)
+            "", Token.empty(), max_index)
         all_temporary_variable.append(temporary_variable)
         return temporary_variable
 
@@ -179,19 +246,20 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                         raise Exception("too many times")
                     elif times == 0:
                         operations.append(
-                            (left_var, Operator(""), Constant("1")))
+                            (left_var, Operator("", Token.empty()), Constant("1", Token.empty())))
                     else:
                         operations.extend(
-                            [(left_var, Operator("*"), left_var)] * (times - 1))
+                            [(left_var, Operator("*", Token.empty()), left_var)] * (times - 1))
                 else:
                     operations.append((left_var, node.operator, right_var))
                 return left_var
             elif isinstance(left_var, Constant) and isinstance(right_var, Constant):
                 const = Constant(eval_expr(left_var.content +
-                                 node.content + right_var.content))
+                                           node.content + right_var.content), Token.empty())
                 if is_first_time:
                     output_variable = new_variable()
-                    operations.append((output_variable, Operator(""), const))
+                    operations.append(
+                        (output_variable, Operator("", Token.empty()), const))
                 return const
 
             else:
@@ -202,7 +270,8 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                     bisect.insort(free_temporary_variable,
                                   right_var, key=lambda x: x.index)
                 if not can_inject or output.content != left_var.content:
-                    operations.append((new_var, Operator(""), left_var))
+                    operations.append(
+                        (new_var, Operator("", Token.empty()), left_var))
                 if node.content == "^":
                     if not isinstance(right_var, Constant):
                         raise Exception("^ only works on const")
@@ -213,10 +282,10 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                         raise Exception("too many times")
                     elif times == 0:
                         operations.append(
-                            (new_var, Operator(""), Constant("1")))
+                            (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
                     else:
                         operations.extend(
-                            [(new_var, Operator("*"), new_var)] * (times - 1))
+                            [(new_var, Operator("*", Token.empty()), new_var)] * (times - 1))
                 else:
                     operations.append((new_var, node.operator, right_var))
                 return new_var
@@ -234,10 +303,11 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
         if temporary_variable.index == -1:
             continue
         temporary_variable.index = max_index
-        temporary_variable.content = f"_t{max_index}"
+        temporary_variable.content = f"__temp{max_index}__ {DataPack.var_name}"
         max_index += 1
     if not can_inject:
-        operations.append((output, Operator(""), output_variable))
+        operations.append(
+            (output, Operator("", Token.empty()), output_variable))
     return operations
 
 

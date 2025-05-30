@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from jmc.compile.expression_eval import Variable, expression_to_tree, tokens_to_tokens, tree_to_operations
+
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
@@ -158,6 +160,49 @@ def variable_operation(
             return DebugWatch.variable_operation_wrapper(f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1", tokens[0].string, objective_name, datapack)
         elif tokens[2].string == "false":
             return DebugWatch.variable_operation_wrapper(f"scoreboard players add {tokens[0].string} {objective_name} 0", tokens[0].string, objective_name, datapack)
+
+    if operator == ":=":
+        if len(tokens) == 2:
+            raise JMCSyntaxException(
+                f"Expected keyword after operator{tokens[1].string} (got nothing)",
+                tokens[1],
+                tokenizer,
+                suggestion="Expected integer or variable or target selector",
+            )
+        expression_tokens = tokens_to_tokens(tokens[2:], tokenizer)
+        print(expression_tokens)
+        expression_tree = expression_to_tree(expression_tokens, tokenizer)
+        operations = tree_to_operations(expression_tree, Variable(
+            f"{tokens[0].string} {objective_name}", tokens[0]))
+        expression_commands: list[str] = []
+        for variable_, operator_, number_ in operations:
+            if " " in number_.content:  # right hand is not a constant number
+                expression_commands.append(
+                    f"scoreboard players operation {variable_.content} {operator_.content}= {number_.content}")
+                continue
+            number = int(number_.content)
+            if operator_.content == "+":
+                if number >= 0:
+                    expression_commands.append(
+                        f"scoreboard players add {variable_.content} {number}")
+                else:
+                    expression_commands.append(
+                        f"scoreboard players remove {variable_.content} {-number}")
+            elif operator_.content == "-":
+                if number >= 0:
+                    expression_commands.append(
+                        f"scoreboard players remove {variable_.content} {number}")
+                else:
+                    expression_commands.append(
+                        f"scoreboard players add {variable_.content} {-number}")
+            elif operator_.content in "*/%":
+                datapack.add_int(number)
+                expression_commands.append(
+                    f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}")
+            else:
+                raise Exception(
+                    "Somehow, there's an operator JMC doesn't know")
+        return DebugWatch.variable_operation_wrapper("\n".join(expression_commands), tokens[0].string, objective_name, datapack)
 
     if operator in {"++", "--"}:
         if len(tokens) > 2:
