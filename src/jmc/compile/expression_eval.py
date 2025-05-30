@@ -166,7 +166,7 @@ def expression_to_tree(expression: list[Token], tokenizer) -> Expression:
             number_stack.append(Constant(token.string, token))
         elif token.string in OPERATOR_STRINGS:
             operator = Operator(token.string, token)
-            if operator_stack and operator.get_order() <= operator_stack[-1].get_order():
+            if operator_stack and operator.get_order() < operator_stack[-1].get_order():
                 process_stack()
             operator_stack.append(operator)
         elif token.string == "(":
