@@ -78,7 +78,7 @@ def variable_operation(
             "Invalid objective:selector[] syntax", tokens[0], tokenizer
         )
 
-    if len(tokens) > 3 and tokens[2].string == "-":
+    if len(tokens) > 3 and tokens[2].string == "-" and tokens[1].string != ":=":
         tokens[2] = tokenizer.merge_tokens(tokens[2:4])
         del tokens[3]
 

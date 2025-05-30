@@ -86,9 +86,10 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
             else:
-                if token and return_tokens[-1].token_type == TokenType.OPERATOR:
+                if token.string == "-" and (not return_tokens or return_tokens[-1].token_type == TokenType.OPERATOR):
                     is_hanging_negative_sign = True
                 return_tokens.append(token)
+                continue
         elif token.token_type == TokenType.PAREN_ROUND:
             tokenizer_ = Tokenizer(
                 token.string[1:-1],
@@ -117,14 +118,17 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
             elif is_hanging_negative_sign:
+                is_hanging_negative_sign = False
                 if is_number(token.string):
                     return_tokens[-1] = tokenizer.merge_tokens(
                         [return_tokens[-1], token])
                 elif token.token_type == TokenType.KEYWORD:
+                    negative_sign_token = return_tokens.pop()
                     return_tokens.append(
-                        Token(TokenType.KEYWORD, return_tokens[-1].line, return_tokens[-1].col, "-1"))
+                        Token(TokenType.KEYWORD, negative_sign_token.line, negative_sign_token.col, "-1"))
                     return_tokens.append(Token(TokenType.OPERATOR,
-                                               return_tokens[-1].line, return_tokens[-1].col, "*"))
+                                               negative_sign_token.line, negative_sign_token.col, "*"))
+                    return_tokens.append(token)
                 else:
                     raise JMCSyntaxException(
                         "Unexpected hanging negative sign (-) in an expression", return_tokens[-1], tokenizer)
@@ -134,7 +138,10 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
             raise JMCSyntaxException(
                 f"Unexpected {token.token_type.value} token in expression", token, tokenizer
             )
-        is_hanging_negative_sign = False
+        if is_hanging_negative_sign:
+            raise JMCSyntaxException(
+                "Unexpected hanging negative sign (-) in an expression", return_tokens[-1], tokenizer)
+
     return return_tokens
 
 
