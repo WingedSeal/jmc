@@ -173,7 +173,7 @@ def variable_operation(
         expression_tree = expression_to_tree(
             expression_tokens, tokenizer, datapack, prefix)
         operations = tree_to_operations(expression_tree, Variable(
-            f"{tokens[0].string} {objective_name}", tokens[0]))
+            f"{tokens[0].string} {objective_name}", tokens[0]), tokenizer)
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
             if isinstance(number_, CommandNumber):

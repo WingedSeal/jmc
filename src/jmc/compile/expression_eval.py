@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import bisect
 from typing import cast
 from enum import Enum, auto
+from math import log2
 
 from .command.condition import FUNC_CONTENT
 
@@ -239,7 +240,7 @@ def print_tree(node: Node, indent: str = "", is_left: bool = False) -> None:
 EXPONENTIAL_CAP = 5000
 
 
-def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variable, Operator, Number]]:
+def tree_to_operations(tree: Expression, output: Variable, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
     operations: list[tuple[Variable, Operator, Number]] = []
     max_index = 0
     free_temporary_variable: list[TemporaryVariable] = []
@@ -277,18 +278,31 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                               right_var, key=lambda x: x.index)
             if node.content == "**":
                 if not isinstance(right_var, Constant):
-                    raise Exception("** only works on const")
+                    raise JMCSyntaxException(
+                        "Power operator (**) only works on a constant", right_var.token, tokenizer)
                 times = int(right_var.content)
                 if times < 0:
-                    raise Exception("no float here")
-                elif times > EXPONENTIAL_CAP:
-                    raise Exception("too many times")
+                    raise JMCSyntaxException(
+                        "Power operator (**) only works on a positive number as there's no float in minecraft scoreboard", right_var.token, tokenizer)
                 elif times == 0:
                     operations.append(
                         (left_var, Operator("", Token.empty()), Constant("1", Token.empty())))
+                elif times == 1:
+                    pass
                 else:
+                    power = int(log2(times))
+                    remainder = times - 2 ** power
+                    new_var = new_variable()
+                    bisect.insort(free_temporary_variable,
+                                  new_var, key=lambda x: x.index)
+                    if remainder != 0:
+                        operations.append(
+                            (new_var, Operator("", Token.empty()), left_var))
                     operations.extend(
-                        [(left_var, Operator("*", Token.empty()), left_var)] * (times - 1))
+                        [(left_var, Operator("*", Token.empty()), left_var)] * power)
+                    operations.extend(
+                        [(left_var, Operator("*", Token.empty()),
+                          new_var)] * remainder)
             else:
                 operations.append((left_var, node.operator, right_var))
             return left_var
@@ -313,18 +327,31 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
                     (new_var, Operator("", Token.empty()), left_var))
             if node.content == "**":
                 if not isinstance(right_var, Constant):
-                    raise Exception("** only works on const")
+                    raise JMCSyntaxException(
+                        "Power operator (**) only works on a constant", right_var.token, tokenizer)
                 times = int(right_var.content)
                 if times < 0:
-                    raise Exception("no float here")
-                elif times > EXPONENTIAL_CAP:
-                    raise Exception("too many times")
+                    raise JMCSyntaxException(
+                        "Power operator (**) only works on a positive number as there's no float in minecraft scoreboard", right_var.token, tokenizer)
                 elif times == 0:
                     operations.append(
                         (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
+                elif times == 1:
+                    pass
                 else:
+                    power = int(log2(times))
+                    remainder = times - 2 ** power
+                    new_var2 = new_variable()
+                    bisect.insort(free_temporary_variable,
+                                  new_var, key=lambda x: x.index)
+                    if remainder != 0:
+                        operations.append(
+                            (new_var2, Operator("", Token.empty()), new_var))
                     operations.extend(
-                        [(new_var, Operator("*", Token.empty()), new_var)] * (times - 1))
+                        [(new_var, Operator("*", Token.empty()), new_var)] * power)
+                    operations.extend(
+                        [(new_var, Operator("*", Token.empty()),
+                          new_var2)] * remainder)
             else:
                 operations.append((new_var, node.operator, right_var))
             return new_var
