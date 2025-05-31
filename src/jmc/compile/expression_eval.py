@@ -118,6 +118,14 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
                 expect_semicolon=False,
                 allow_semicolon=False
             )
+            if is_hanging_negative_sign:
+                negative_sign_token = return_tokens.pop()
+                return_tokens.append(
+                    Token(TokenType.KEYWORD, negative_sign_token.line, negative_sign_token.col, "-1"))
+                return_tokens.append(Token(TokenType.OPERATOR,
+                                           negative_sign_token.line, negative_sign_token.col, "*"))
+                is_hanging_negative_sign = False
+
             return_tokens.append(Token(TokenType.OPERATOR,
                                        token.line, token.col, "("))
             return_tokens.extend(tokens_to_tokens(
