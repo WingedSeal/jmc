@@ -92,8 +92,17 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
     for token in tokens:
         if token.token_type == TokenType.OPERATOR:
             if token.string == ":":
+                if not return_tokens:
+                    raise JMCSyntaxException(
+                        "Unexpected ':' in expression evaluation", token, tokenizer)
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
+            elif token.string == "::":
+                raise JMCSyntaxException(
+                    "NBT operation is not directly supported by expression evaluation",
+                    token,
+                    tokenizer,
+                    suggestion="Use command expression '{}' instead. Change '::path' to '{::path}'")
             else:
                 if token.string == "-" and (not return_tokens or (return_tokens[-1].token_type == TokenType.OPERATOR and return_tokens[-1].string != ")")):
                     is_hanging_negative_sign = True
