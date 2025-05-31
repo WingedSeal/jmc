@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import bisect
-from typing import cast
+from typing import Any, cast
 from enum import Enum, auto
 from math import log2
 
@@ -16,9 +16,25 @@ from .tokenizer import Token, TokenType, Tokenizer
 OPERATOR_STRINGS = list("+-*/%") + ["**"]
 
 
+class CustomOrder:
+    def __init__(self, order: int, line: int, col: int) -> None:
+        self.order = order
+        self.line = line
+        self.col = col
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, CustomOrder):
+            raise ValueError("CustomOrder is compared against other class")
+        if self.order != other.order:
+            return self.order < other.order
+        if self.line != other.line:
+            return self.line > other.line
+        return self.col > other.col
+
+
 class OpenBracket:
-    def get_order(self) -> int:
-        return 0
+    def get_order(self) -> CustomOrder:
+        return CustomOrder(0, 0, 0)
 
 
 OPEN_BRACKET = OpenBracket()
@@ -32,13 +48,13 @@ class Node:
 
 @dataclass
 class Operator(Node):
-    def get_order(self) -> int:
+    def get_order(self) -> CustomOrder:
         if self.content == "**":
-            return 30
+            return CustomOrder(30, self.token.line, self.token.col)
         elif self.content in "*/%":
-            return 20
+            return CustomOrder(20, self.token.line, self.token.col)
         elif self.content in "+-":
-            return 10
+            return CustomOrder(10, self.token.line, self.token.col)
         else:
             raise ValueError(f"{self.content} is not a known operator")
 
