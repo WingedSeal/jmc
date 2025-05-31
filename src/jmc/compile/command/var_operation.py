@@ -2,8 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from jmc.compile.expression_eval import Variable, expression_to_tree, tokens_to_tokens, tree_to_operations
-
+from ..expression_eval import CommandNumber, Variable, expression_to_tree, tokens_to_tokens, tree_to_operations
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
@@ -169,12 +168,19 @@ def variable_operation(
                 tokenizer,
                 suggestion="Expected integer or variable or target selector",
             )
-        expression_tokens = tokens_to_tokens(tokens[2:], tokenizer)
-        expression_tree = expression_to_tree(expression_tokens, tokenizer)
+        expression_tokens = tokens_to_tokens(
+            tokens[2:], tokenizer)
+        expression_tree = expression_to_tree(
+            expression_tokens, tokenizer, datapack, prefix)
         operations = tree_to_operations(expression_tree, Variable(
             f"{tokens[0].string} {objective_name}", tokens[0]))
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
+            if isinstance(number_, CommandNumber):
+                assert operator_.content == ""
+                expression_commands.append(
+                    f"execute store result score {variable_.content} run {number_.content}")
+                continue
             if " " in number_.content:  # right hand is not a constant number
                 expression_commands.append(
                     f"scoreboard players operation {variable_.content} {operator_.content}= {number_.content}")

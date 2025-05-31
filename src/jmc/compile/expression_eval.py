@@ -3,11 +3,14 @@ import bisect
 from typing import cast
 from enum import Enum, auto
 
-from jmc.compile.datapack import DataPack
-from jmc.compile.exception import JMCSyntaxException
+from .command.condition import FUNC_CONTENT
+
+from .exception import JMCSyntaxException
+from .datapack import DataPack
 
 from .command.utils import eval_expr, is_number
 from .tokenizer import Token, TokenType, Tokenizer
+
 
 OPERATOR_STRINGS = list("+-*/%") + ["**"]
 
@@ -49,6 +52,11 @@ class Operator(Node):
 
 @dataclass
 class Number(Node):
+    pass
+
+
+@dataclass
+class CommandNumber(Number):
     pass
 
 
@@ -106,6 +114,8 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
                 tokenizer_.programs[0], tokenizer))
             return_tokens.append(Token(TokenType.OPERATOR, token.line +
                                        token.string.count("\n"), token.col + token.length, ")"))
+        elif token.token_type == TokenType.PAREN_CURLY:
+            return_tokens.append(token)
         elif token.token_type == TokenType.PAREN_SQUARE:
             if tokens[-1] and ":" in tokens[-1].string:
                 return_tokens[-1] = tokenizer.merge_tokens(
@@ -145,10 +155,9 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
     return return_tokens
 
 
-def expression_to_tree(expression: list[Token], tokenizer) -> Expression:
+def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: "DataPack", prefix: str) -> Expression:
     operator_stack: list[Operator | OpenBracket] = []
     number_stack: list[Number] = []
-    __import__('pprint').pprint(expression)
 
     def process_stack():
         while operator_stack:
@@ -170,6 +179,22 @@ def expression_to_tree(expression: list[Token], tokenizer) -> Expression:
             if operator_stack and operator.get_order() < operator_stack[-1].get_order():
                 process_stack()
             operator_stack.append(operator)
+        elif token.token_type == TokenType.PAREN_CURLY:
+            tokenizer_ = Tokenizer(
+                token.string[1:-1],
+                tokenizer.file_path,
+                token.line,
+                token.col + 1,
+                tokenizer.file_string,
+                expect_semicolon=False
+            )
+            func = FUNC_CONTENT[0](
+                tokenizer_, tokenizer_.programs, is_load=False, lexer=datapack.lexer, prefix=prefix
+            ).parse()
+            if len(func) > 1:
+                raise JMCSyntaxException(
+                    "Command evaluation '{}' inside expression evaluation cannot return multiple command", token, tokenizer_)
+            number_stack.append(CommandNumber(func[0], token))
         elif token.string == "(":
             operator_stack.append(OPEN_BRACKET)
         elif token.string == ")":
@@ -234,70 +259,75 @@ def tree_to_operations(tree: Expression, output: Variable) -> list[tuple[Variabl
         return temporary_variable
 
     def _tree_to_operation(node: Number, is_first_time: bool = True) -> Number:
-        if isinstance(node, Expression):
-            nonlocal output_variable
-            left_var = _tree_to_operation(node.children[0], False)
-            right_var = _tree_to_operation(node.children[1], False)
-            if isinstance(left_var, TemporaryVariable):
-                if is_first_time:
-                    output_variable = left_var
-                if isinstance(right_var, TemporaryVariable):
-                    bisect.insort(free_temporary_variable,
-                                  right_var, key=lambda x: x.index)
-                if node.content == "**":
-                    if not isinstance(right_var, Constant):
-                        raise Exception("** only works on const")
-                    times = int(right_var.content)
-                    if times < 0:
-                        raise Exception("no float here")
-                    elif times > EXPONENTIAL_CAP:
-                        raise Exception("too many times")
-                    elif times == 0:
-                        operations.append(
-                            (left_var, Operator("", Token.empty()), Constant("1", Token.empty())))
-                    else:
-                        operations.extend(
-                            [(left_var, Operator("*", Token.empty()), left_var)] * (times - 1))
-                else:
-                    operations.append((left_var, node.operator, right_var))
-                return left_var
-            elif isinstance(left_var, Constant) and isinstance(right_var, Constant):
-                const = Constant(eval_expr(left_var.content +
-                                           node.content + right_var.content), Token.empty())
-                if is_first_time:
-                    output_variable = new_variable()
+        if isinstance(node, CommandNumber):
+            new_var = new_variable()
+            operations.append((new_var, Operator(
+                "", Token.empty()), node))
+            return new_var
+        if not isinstance(node, Expression):
+            return node
+        nonlocal output_variable
+        left_var = _tree_to_operation(node.children[0], False)
+        right_var = _tree_to_operation(node.children[1], False)
+        if isinstance(left_var, TemporaryVariable):
+            if is_first_time:
+                output_variable = left_var
+            if isinstance(right_var, TemporaryVariable):
+                bisect.insort(free_temporary_variable,
+                              right_var, key=lambda x: x.index)
+            if node.content == "**":
+                if not isinstance(right_var, Constant):
+                    raise Exception("** only works on const")
+                times = int(right_var.content)
+                if times < 0:
+                    raise Exception("no float here")
+                elif times > EXPONENTIAL_CAP:
+                    raise Exception("too many times")
+                elif times == 0:
                     operations.append(
-                        (output_variable, Operator("", Token.empty()), const))
-                return const
-
+                        (left_var, Operator("", Token.empty()), Constant("1", Token.empty())))
+                else:
+                    operations.extend(
+                        [(left_var, Operator("*", Token.empty()), left_var)] * (times - 1))
             else:
-                new_var = new_variable()
-                if is_first_time:
-                    output_variable = new_var
-                if isinstance(right_var, TemporaryVariable):
-                    bisect.insort(free_temporary_variable,
-                                  right_var, key=lambda x: x.index)
-                if not can_inject or output.content != left_var.content:
+                operations.append((left_var, node.operator, right_var))
+            return left_var
+        elif isinstance(left_var, Constant) and isinstance(right_var, Constant):
+            const = Constant(eval_expr(left_var.content +
+                                       node.content + right_var.content), Token.empty())
+            if is_first_time:
+                output_variable = new_variable()
+                operations.append(
+                    (output_variable, Operator("", Token.empty()), const))
+            return const
+
+        else:
+            new_var = new_variable()
+            if is_first_time:
+                output_variable = new_var
+            if isinstance(right_var, TemporaryVariable):
+                bisect.insort(free_temporary_variable,
+                              right_var, key=lambda x: x.index)
+            if not can_inject or output.content != left_var.content:
+                operations.append(
+                    (new_var, Operator("", Token.empty()), left_var))
+            if node.content == "**":
+                if not isinstance(right_var, Constant):
+                    raise Exception("** only works on const")
+                times = int(right_var.content)
+                if times < 0:
+                    raise Exception("no float here")
+                elif times > EXPONENTIAL_CAP:
+                    raise Exception("too many times")
+                elif times == 0:
                     operations.append(
-                        (new_var, Operator("", Token.empty()), left_var))
-                if node.content == "**":
-                    if not isinstance(right_var, Constant):
-                        raise Exception("** only works on const")
-                    times = int(right_var.content)
-                    if times < 0:
-                        raise Exception("no float here")
-                    elif times > EXPONENTIAL_CAP:
-                        raise Exception("too many times")
-                    elif times == 0:
-                        operations.append(
-                            (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
-                    else:
-                        operations.extend(
-                            [(new_var, Operator("*", Token.empty()), new_var)] * (times - 1))
+                        (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
                 else:
-                    operations.append((new_var, node.operator, right_var))
-                return new_var
-        return node
+                    operations.extend(
+                        [(new_var, Operator("*", Token.empty()), new_var)] * (times - 1))
+            else:
+                operations.append((new_var, node.operator, right_var))
+            return new_var
 
     _tree_to_operation(tree)
     output_variable = cast(TemporaryVariable | None, output_variable)
