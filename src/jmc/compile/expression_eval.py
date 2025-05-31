@@ -81,13 +81,12 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
     return_tokens: list[Token] = []
     is_hanging_negative_sign = False
     for token in tokens:
-        print(token.string, token.token_type.value)
         if token.token_type == TokenType.OPERATOR:
             if token.string == ":":
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
             else:
-                if token.string == "-" and (not return_tokens or return_tokens[-1].token_type == TokenType.OPERATOR):
+                if token.string == "-" and (not return_tokens or (return_tokens[-1].token_type == TokenType.OPERATOR and return_tokens[-1].string != ")")):
                     is_hanging_negative_sign = True
                 return_tokens.append(token)
                 continue
@@ -149,6 +148,7 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
 def expression_to_tree(expression: list[Token], tokenizer) -> Expression:
     operator_stack: list[Operator | OpenBracket] = []
     number_stack: list[Number] = []
+    __import__('pprint').pprint(expression)
 
     def process_stack():
         while operator_stack:
