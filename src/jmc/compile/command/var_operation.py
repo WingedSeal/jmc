@@ -194,6 +194,9 @@ def variable_operation(
                 else:
                     expression_commands.append(
                         f"scoreboard players add {variable_.content} {-number}")
+            elif operator_.content == "":
+                expression_commands.append(
+                    f"scoreboard players set {variable_.content} = {number}")
             elif operator_.content in "*/%":
                 datapack.add_int(number)
                 expression_commands.append(
