@@ -81,6 +81,7 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
     return_tokens: list[Token] = []
     is_hanging_negative_sign = False
     for token in tokens:
+        print(token.string, token.token_type.value)
         if token.token_type == TokenType.OPERATOR:
             if token.string == ":":
                 return_tokens[-1] = tokenizer.merge_tokens(
@@ -114,7 +115,7 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
                 raise JMCSyntaxException(
                     f"Unexpected {token.token_type.value} token in expression", token, tokenizer)
         elif token.token_type == TokenType.KEYWORD:
-            if return_tokens and return_tokens[-1] == TokenType.KEYWORD:
+            if return_tokens and return_tokens[-1].token_type == TokenType.KEYWORD:
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
             elif is_hanging_negative_sign:
