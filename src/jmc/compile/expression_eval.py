@@ -17,10 +17,11 @@ OPERATOR_STRINGS = list("+-*/%") + ["**"]
 
 
 class CustomOrder:
-    def __init__(self, order: int, line: int, col: int) -> None:
+    def __init__(self, order: int, line: int, col: int, is_left_precedence: bool = True) -> None:
         self.order = order
         self.line = line
         self.col = col
+        self.is_left_precedence = is_left_precedence
 
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, CustomOrder):
@@ -28,8 +29,14 @@ class CustomOrder:
         if self.order != other.order:
             return self.order < other.order
         if self.line != other.line:
-            return self.line > other.line
-        return self.col > other.col
+            if self.is_left_precedence:
+                return self.line > other.line
+            else:
+                return self.line < other.line
+        if self.is_left_precedence:
+            return self.col > other.col
+        else:
+            return self.col < other.col
 
 
 class OpenBracket:
@@ -50,7 +57,7 @@ class Node:
 class Operator(Node):
     def get_order(self) -> CustomOrder:
         if self.content == "**":
-            return CustomOrder(30, self.token.line, self.token.col)
+            return CustomOrder(30, self.token.line, self.token.col, is_left_precedence=False)
         elif self.content in "*/%":
             return CustomOrder(20, self.token.line, self.token.col)
         elif self.content in "+-":
