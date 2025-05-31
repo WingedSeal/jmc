@@ -156,7 +156,7 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
     return return_tokens
 
 
-def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: "DataPack", prefix: str) -> Expression:
+def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: "DataPack", prefix: str) -> Number:
     operator_stack: list[Operator | OpenBracket] = []
     number_stack: list[Number] = []
 
@@ -213,7 +213,6 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
     process_stack()
     if len(number_stack) > 1:
         raise Exception()
-    assert isinstance(number_stack[0], Expression)
     return number_stack[0]
 
 
@@ -240,7 +239,9 @@ def print_tree(node: Node, indent: str = "", is_left: bool = False) -> None:
 EXPONENTIAL_CAP = 5000
 
 
-def tree_to_operations(tree: Expression, output: Variable, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
+def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
+    if not isinstance(tree, Expression):
+        return [(output, Operator("", Token.empty()), tree)]
     operations: list[tuple[Variable, Operator, Number]] = []
     max_index = 0
     free_temporary_variable: list[TemporaryVariable] = []
