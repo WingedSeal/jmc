@@ -40,7 +40,7 @@ class Operator(Node):
         elif self.content in "+-":
             return 10
         else:
-            raise Exception(self.content)
+            raise ValueError(f"{self.content} is not a known operator")
 
     def is_reflective(self) -> bool:
         if self.content in "+*":
@@ -48,7 +48,7 @@ class Operator(Node):
         elif self.content in "-/%" or self.content == "**":
             return False
         else:
-            raise Exception(self.content)
+            raise ValueError(f"{self.content} is not a known operator")
 
 
 @dataclass
@@ -166,7 +166,8 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
             if isinstance(operator, OpenBracket):
                 break
             if len(number_stack) < 2:
-                raise Exception()
+                raise JMCSyntaxException(
+                    "Number stack is empty when trying to evaluate the expression", operator.token, tokenizer)
             right = number_stack.pop()
             left = number_stack.pop()
             number_stack.append(Expression(
@@ -212,7 +213,8 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
                 "Unrecognized expression token", token, tokenizer)
     process_stack()
     if len(number_stack) > 1:
-        raise Exception()
+        raise JMCSyntaxException(
+            "Number stack is not empty at the end of expression evaluation", number_stack[0].token, tokenizer)
     return number_stack[0]
 
 
