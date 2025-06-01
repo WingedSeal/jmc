@@ -4,6 +4,8 @@ from typing import Any, cast
 from enum import Enum, auto
 from math import log2
 
+from jmc.compile.utils import is_float
+
 from .command.condition import FUNC_CONTENT
 
 from .exception import JMCSyntaxException
@@ -214,7 +216,7 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
                 operator.content, operator.token, (left, right), operator))
 
     for token in expression:
-        if is_number(token.string):
+        if is_float(token.string):
             number_stack.append(Constant(token.string, token))
         elif token.string in OPERATOR_STRINGS:
             operator = Operator(token.string, token)
@@ -323,10 +325,13 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
                 if not isinstance(right_var, Constant):
                     raise JMCSyntaxException(
                         "Power operator (**) only works on a constant", right_var.token, tokenizer)
-                times = int(right_var.content)
+                times = float(right_var.content)
                 if times < 0:
                     raise JMCSyntaxException(
                         "Power operator (**) only works on a positive number as there's no float in minecraft scoreboard", right_var.token, tokenizer)
+                elif not times.is_integer():
+                    raise JMCSyntaxException(
+                        "Power operator (**) only works on a whole integer", right_var.token, tokenizer)
                 elif times == 0:
                     operations.append(
                         (left_var, Operator("", Token.empty()), Constant("1", Token.empty())))
@@ -358,46 +363,48 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
                     (output_variable, Operator("", Token.empty()), const))
             return const
 
-        else:
-            new_var = new_variable()
-            if is_first_time:
-                output_variable = new_var
-            if isinstance(right_var, TemporaryVariable):
-                bisect.insort(free_temporary_variable,
-                              right_var, key=lambda x: x.index)
-            if not can_inject or output.content != left_var.content:
+        new_var = new_variable()
+        if is_first_time:
+            output_variable = new_var
+        if isinstance(right_var, TemporaryVariable):
+            bisect.insort(free_temporary_variable,
+                          right_var, key=lambda x: x.index)
+        if not can_inject or output.content != left_var.content:
+            operations.append(
+                (new_var, Operator("", Token.empty()), left_var))
+        if node.content == "**":
+            if not isinstance(right_var, Constant):
+                raise JMCSyntaxException(
+                    "Power operator (**) only works on a constant", right_var.token, tokenizer)
+            times = float(right_var.content)
+            if times < 0:
+                raise JMCSyntaxException(
+                    "Power operator (**) only works on a positive number as there's no float in minecraft scoreboard", right_var.token, tokenizer)
+            elif not times.is_integer():
+                raise JMCSyntaxException(
+                    "Power operator (**) only works on a whole integer", right_var.token, tokenizer)
+            elif times == 0:
                 operations.append(
-                    (new_var, Operator("", Token.empty()), left_var))
-            if node.content == "**":
-                if not isinstance(right_var, Constant):
-                    raise JMCSyntaxException(
-                        "Power operator (**) only works on a constant", right_var.token, tokenizer)
-                times = int(right_var.content)
-                if times < 0:
-                    raise JMCSyntaxException(
-                        "Power operator (**) only works on a positive number as there's no float in minecraft scoreboard", right_var.token, tokenizer)
-                elif times == 0:
-                    operations.append(
-                        (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
-                elif times == 1:
-                    pass
-                else:
-                    power = int(log2(times))
-                    remainder = times - 2 ** power
-                    new_var2 = new_variable()
-                    bisect.insort(free_temporary_variable,
-                                  new_var, key=lambda x: x.index)
-                    if remainder != 0:
-                        operations.append(
-                            (new_var2, Operator("", Token.empty()), new_var))
-                    operations.extend(
-                        [(new_var, Operator("*", Token.empty()), new_var)] * power)
-                    operations.extend(
-                        [(new_var, Operator("*", Token.empty()),
-                          new_var2)] * remainder)
+                    (new_var, Operator("", Token.empty()), Constant("1", Token.empty())))
+            elif times == 1:
+                pass
             else:
-                operations.append((new_var, node.operator, right_var))
-            return new_var
+                power = int(log2(times))
+                remainder = times - 2 ** power
+                new_var2 = new_variable()
+                bisect.insort(free_temporary_variable,
+                              new_var, key=lambda x: x.index)
+                if remainder != 0:
+                    operations.append(
+                        (new_var2, Operator("", Token.empty()), new_var))
+                operations.extend(
+                    [(new_var, Operator("*", Token.empty()), new_var)] * power)
+                operations.extend(
+                    [(new_var, Operator("*", Token.empty()),
+                      new_var2)] * remainder)
+        else:
+            operations.append((new_var, node.operator, right_var))
+        return new_var
 
     _tree_to_operation(tree)
     output_variable = cast(TemporaryVariable | None, output_variable)

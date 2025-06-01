@@ -1,6 +1,7 @@
 """Module handling variable operation"""
 
 from typing import TYPE_CHECKING
+from fractions import Fraction
 
 from ..expression_eval import CommandNumber, Variable, expression_to_tree, tokens_to_tokens, tree_to_operations
 from ..command.builtin_function.load_only import DebugWatch
@@ -185,7 +186,7 @@ def variable_operation(
                 expression_commands.append(
                     f"scoreboard players operation {variable_.content} {operator_.content}= {number_.content}")
                 continue
-            number = int(number_.content)
+            number = int(float(number_.content))
             if operator_.content == "+":
                 if number >= 0:
                     expression_commands.append(
@@ -203,10 +204,30 @@ def variable_operation(
             elif operator_.content == "":
                 expression_commands.append(
                     f"scoreboard players set {variable_.content} {number}")
-            elif operator_.content in "*/%":
+            elif operator_.content == "%":
                 datapack.add_int(number)
                 expression_commands.append(
                     f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}")
+            elif operator_.content in "*/":
+                number_float = float(number_.content)
+                if number_float.is_integer():
+                    datapack.add_int(number)
+                    expression_commands.append(
+                        f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}")
+                else:
+                    if operator_.content == "/":
+                        number_float = 1 / number_float
+                    fraction = Fraction(
+                        number_float).limit_denominator(1_000_000)
+                    multiplier, divider = fraction.as_integer_ratio()
+                    if multiplier != 1:
+                        datapack.add_int(multiplier)
+                        expression_commands.append(
+                            f"scoreboard players operation {variable_.content} *= {multiplier} {datapack.int_name}")
+                    if divider != 1:
+                        datapack.add_int(divider)
+                        expression_commands.append(
+                            f"scoreboard players operation {variable_.content} /= {divider} {datapack.int_name}")
             else:
                 raise Exception(
                     "Somehow, there's an operator JMC doesn't know")
