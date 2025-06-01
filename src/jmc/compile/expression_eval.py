@@ -160,7 +160,7 @@ def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
         elif token.token_type == TokenType.PAREN_CURLY:
             return_tokens.append(token)
         elif token.token_type == TokenType.PAREN_SQUARE:
-            if tokens[-1] and ":" in tokens[-1].string:
+            if return_tokens and return_tokens[-1] and ":" in return_tokens[-1].string:
                 return_tokens[-1] = tokenizer.merge_tokens(
                     [return_tokens[-1], token])
             else:
