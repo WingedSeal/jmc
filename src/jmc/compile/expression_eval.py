@@ -339,7 +339,7 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
                     pass
                 else:
                     power = int(log2(times))
-                    remainder = times - 2 ** power
+                    remainder = int(times - 2 ** power)
                     new_var = new_variable()
                     bisect.insort(free_temporary_variable,
                                   new_var, key=lambda x: x.index)
@@ -390,7 +390,7 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
                 pass
             else:
                 power = int(log2(times))
-                remainder = times - 2 ** power
+                remainder = int(times - 2 ** power)
                 new_var2 = new_variable()
                 bisect.insort(free_temporary_variable,
                               new_var, key=lambda x: x.index)
