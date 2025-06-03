@@ -527,5 +527,21 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
 
         new_operations.extend(temp_operations)
         temp_operations = [saved_operation]
-    new_operations.extend(temp_operations)
+    if temp_operations:
+        first_const_index = -1
+        indices_to_delete: list[int] = []
+        for i, (var, op, num) in enumerate(temp_operations):
+            if not isinstance(num, Constant):
+                continue
+            if first_const_index == -1:
+                first_const_index = i
+                continue
+            const = temp_operations[first_const_index][2]
+            temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
+                eval_expr(const.content + op.content + " " + num.content), const.token))
+            indices_to_delete.append(i)
+
+        for i in reversed(indices_to_delete):
+            del temp_operations[i]
+        new_operations.extend(temp_operations)
     return new_operations
