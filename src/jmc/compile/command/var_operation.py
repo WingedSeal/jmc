@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 from fractions import Fraction
 
-from ..expression_eval import CommandNumber, Variable, expression_to_tree, tokens_to_tokens, tree_to_operations
+from ..expression_eval import CommandNumber, Variable, expression_to_tree, print_tree, tokens_to_tokens, tree_to_operations
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack

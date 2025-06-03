@@ -202,10 +202,12 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
     operator_stack: list[Operator | OpenBracket] = []
     number_stack: list[Number] = []
 
-    def process_stack():
+    def process_stack(is_consume_bracket: bool = False):
         while operator_stack:
             operator = operator_stack.pop()
             if isinstance(operator, OpenBracket):
+                if not is_consume_bracket:
+                    operator_stack.append(operator)
                 break
             if len(number_stack) < 2:
                 raise JMCSyntaxException(
@@ -242,7 +244,7 @@ def expression_to_tree(expression: list[Token], tokenizer: Tokenizer, datapack: 
         elif token.string == "(":
             operator_stack.append(OPEN_BRACKET)
         elif token.string == ")":
-            process_stack()
+            process_stack(is_consume_bracket=True)
         elif token.string.startswith("$"):
             number_stack.append(
                 Variable(f"{token.string} {DataPack.var_name}", token))
