@@ -501,11 +501,16 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             temp_operations[-1][1])
         is_after_equal = len(
             temp_operations) == 1 and temp_operations[0][1].content == ""
+        print(var.content + op.content + num.content)
+        print(is_same_var, is_same_op_group, is_after_equal)
         if is_same_var and (is_same_op_group or is_after_equal):
             temp_operations.append((var, op, num))
             continue
 
+        saved_operation = (var, op, num)
+
         first_const_index = -1
+        indices_to_delete: list[int] = []
         for i, (var, op, num) in enumerate(temp_operations):
             if not isinstance(num, Constant):
                 continue
@@ -515,9 +520,12 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             const = temp_operations[first_const_index][2]
             temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
                 eval_expr(const.content + op.content + " " + num.content), const.token))
-            del temp_operations[i]  # Scary! Surely it deletes the correct one
+            indices_to_delete.append(i)
+
+        for i in reversed(indices_to_delete):
+            del temp_operations[i]
 
         new_operations.extend(temp_operations)
-        temp_operations.clear()
+        temp_operations = [saved_operation]
     new_operations.extend(temp_operations)
     return new_operations
