@@ -75,6 +75,13 @@ class Operator(Node):
         else:
             raise ValueError(f"{self.content} is not a known operator")
 
+    def is_same_group(self, other: "Operator") -> bool:
+        if self.content == other.content:
+            return True
+        if self.content in "+-" and other.content in "+-":
+            return True
+        return False
+
 
 @dataclass
 class Number(Node):
@@ -480,3 +487,37 @@ def search_for_output_in_tree(tree: Expression, output: Variable) -> bool:
         elif direction == Direction.RIGHT:
             node.children = (node.children[1], node.children[0])
     return True
+
+
+def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[tuple[Variable, Operator, Number]]:
+    temp_operations: list[tuple[Variable, Operator, Number]] = []
+    new_operations: list[tuple[Variable, Operator, Number]] = []
+    for var, op, num in operations:
+        if not temp_operations:
+            temp_operations.append((var, op, num))
+            continue
+        is_same_var = temp_operations and var.content == temp_operations[0][0].content
+        is_same_op_group = temp_operations and op.is_same_group(
+            temp_operations[-1][1])
+        is_after_equal = len(
+            temp_operations) == 1 and temp_operations[0][1].content == ""
+        if is_same_var and (is_same_op_group or is_after_equal):
+            temp_operations.append((var, op, num))
+            continue
+
+        first_const_index = -1
+        for i, (var, op, num) in enumerate(temp_operations):
+            if not isinstance(num, Constant):
+                continue
+            if first_const_index == -1:
+                first_const_index = i
+                continue
+            const = temp_operations[first_const_index][2]
+            temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
+                eval_expr(const.content + op.content + " " + num.content), const.token))
+            del temp_operations[i]  # Scary! Surely it deletes the correct one
+
+        new_operations.extend(temp_operations)
+        temp_operations.clear()
+    new_operations.extend(temp_operations)
+    return new_operations

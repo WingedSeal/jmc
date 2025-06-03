@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 from fractions import Fraction
 
-from ..expression_eval import CommandNumber, Variable, expression_to_tree, print_tree, tokens_to_tokens, tree_to_operations
+from ..expression_eval import CommandNumber, Variable, expression_to_tree, optimize_const, print_tree, tokens_to_tokens, tree_to_operations
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
@@ -175,6 +175,7 @@ def variable_operation(
             expression_tokens, tokenizer, datapack, prefix)
         operations = tree_to_operations(expression_tree, Variable(
             f"{tokens[0].string} {objective_name}", tokens[0]), tokenizer)
+        operations = optimize_const(operations)
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
             if isinstance(number_, CommandNumber):
