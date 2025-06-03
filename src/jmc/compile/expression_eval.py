@@ -501,8 +501,6 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             temp_operations[-1][1])
         is_after_equal = len(
             temp_operations) == 1 and temp_operations[0][1].content == ""
-        print(var.content + op.content + num.content)
-        print(is_same_var, is_same_op_group, is_after_equal)
         if is_same_var and (is_same_op_group or is_after_equal):
             temp_operations.append((var, op, num))
             continue
@@ -522,6 +520,12 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
                 eval_expr(const.content + op.content + " " + num.content), const.token))
             indices_to_delete.append(i)
 
+            if first_const_index != -1:
+                if temp_operations[first_const_index][1].content == "*%" and int(temp_operations[first_const_index][2].content) == 1:
+                    indices_to_delete.insert(0, first_const_index)
+                if temp_operations[first_const_index][1].content == "+-" and int(temp_operations[first_const_index][2].content) == 0:
+                    indices_to_delete.insert(0, first_const_index)
+
         for i in reversed(indices_to_delete):
             del temp_operations[i]
 
@@ -540,6 +544,15 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
                 eval_expr(const.content + op.content + " " + num.content), const.token))
             indices_to_delete.append(i)
+        print(first_const_index)
+        print(temp_operations[first_const_index][1].content)
+        print(temp_operations[first_const_index][2].content)
+        if first_const_index != -1:
+            if temp_operations[first_const_index][1].content in "*%" and int(temp_operations[first_const_index][2].content) == 1:
+                indices_to_delete.insert(0, first_const_index)
+            elif temp_operations[first_const_index][1].content in "+-" and int(temp_operations[first_const_index][2].content) == 0:
+                print("yeah")
+                indices_to_delete.insert(0, first_const_index)
 
         for i in reversed(indices_to_delete):
             del temp_operations[i]
