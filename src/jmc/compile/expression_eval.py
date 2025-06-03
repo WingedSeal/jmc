@@ -531,9 +531,10 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
 
         new_operations.extend(temp_operations)
         temp_operations = [saved_operation]
+
     if temp_operations:
         first_const_index = -1
-        indices_to_delete: list[int] = []
+        indices_to_delete: list[int] = []  # type: ignore[no-redef]
         for i, (var, op, num) in enumerate(temp_operations):
             if not isinstance(num, Constant):
                 continue
