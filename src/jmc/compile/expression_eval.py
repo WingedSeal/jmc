@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import bisect
+from fractions import Fraction
 from typing import Any, cast
 from enum import Enum, auto
 from math import log2
@@ -521,9 +522,9 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             indices_to_delete.append(i)
 
             if first_const_index != -1:
-                if temp_operations[first_const_index][1].content == "*%" and int(temp_operations[first_const_index][2].content) == 1:
+                if temp_operations[first_const_index][1].content == "*%" and float(temp_operations[first_const_index][2].content) == 1:
                     indices_to_delete.insert(0, first_const_index)
-                if temp_operations[first_const_index][1].content == "+-" and int(temp_operations[first_const_index][2].content) == 0:
+                if temp_operations[first_const_index][1].content == "+-" and float(temp_operations[first_const_index][2].content) == 0:
                     indices_to_delete.insert(0, first_const_index)
 
         for i in reversed(indices_to_delete):
@@ -542,20 +543,48 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
                 first_const_index = i
                 continue
             const = temp_operations[first_const_index][2]
-            temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
-                eval_expr(const.content + op.content + " " + num.content), const.token))
+            first_const_op = temp_operations[first_const_index][1]
+
+            if first_const_op.content == "%":
+                continue
+
+            def __eval(expr: str):
+                temp_operations[first_const_index] = (temp_operations[first_const_index][0], temp_operations[first_const_index][1], Constant(
+                    eval_expr(expr), const.token))
+            if first_const_op.content == "*":
+                __eval(const.content + op.content + " " + num.content)
+            elif first_const_op.content == "/":
+                __eval(const.content + ("*" if op.content ==
+                                        "/" else "/") + " " + num.content)
+            elif first_const_op.content in "+-":
+                __eval(first_const_op.content + const.content +
+                       op.content + " " + num.content)
+            elif first_const_op.content == "":
+                __eval(const.content + op.content + " " + num.content)
+            else:
+                raise Exception("Unreachable")
             indices_to_delete.append(i)
-        print(first_const_index)
-        print(temp_operations[first_const_index][1].content)
-        print(temp_operations[first_const_index][2].content)
         if first_const_index != -1:
-            if temp_operations[first_const_index][1].content in "*%" and int(temp_operations[first_const_index][2].content) == 1:
+            if temp_operations[first_const_index][1].content in "*%" and float(temp_operations[first_const_index][2].content) == 1:
                 indices_to_delete.insert(0, first_const_index)
-            elif temp_operations[first_const_index][1].content in "+-" and int(temp_operations[first_const_index][2].content) == 0:
-                print("yeah")
+            elif temp_operations[first_const_index][1].content in "+-" and float(temp_operations[first_const_index][2].content) == 0:
                 indices_to_delete.insert(0, first_const_index)
 
         for i in reversed(indices_to_delete):
             del temp_operations[i]
         new_operations.extend(temp_operations)
     return new_operations
+
+
+# def progressive_fraction(number_float: float, tolerance=1e-6) -> Fraction:
+#     if number_float == 0:
+#         return Fraction(0)
+#     frac = cast(Fraction, None)
+#     for limit in [10, 100, 1000, 10_000, 100_000, 1_000_000]:
+#         frac = Fraction(number_float).limit_denominator(limit)
+#         error = abs(float(frac) - number_float)
+#         relative_error = error / abs(number_float)
+#         if relative_error < tolerance:
+#             return frac
+#
+#     return frac

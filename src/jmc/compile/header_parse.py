@@ -141,6 +141,8 @@ def __eval_macro_factory(
         number = eval_expr(string)
     except (TypeError, SyntaxError):
         raise EvaluationException(string)
+    except ZeroDivisionError:
+        raise EvaluationException(string, "ZeroDivisionError")
     new_token = Token(
         TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(
             number)

@@ -124,8 +124,8 @@ def error_msg(
 class EvaluationException(SyntaxError):
     """Header file not found"""
 
-    def __init__(self, string: str):
-        msg = f"Unable to evaluate expression '{string}'"
+    def __init__(self, string: str, text: str = ""):
+        msg = f"Unable to evaluate expression '{string}'.{' ' if text else ''}{text}"
         log(self, (msg,))
         super().__init__(msg)
 
