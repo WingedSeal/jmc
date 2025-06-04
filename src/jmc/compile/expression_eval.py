@@ -115,8 +115,13 @@ class Expression(Number):
     operator: Operator
 
     def __post_init__(self):
-        if self.operator.is_reflective() and not isinstance(self.children[0], Expression) and isinstance(self.children[1], Expression):
-            self.children = (self.children[1], self.children[0])
+        if self.operator.is_reflective():
+            if not isinstance(self.children[0], Expression) and isinstance(self.children[1], Expression):
+                self.children = (self.children[1], self.children[0])
+                return
+            if isinstance(self.children[0], Constant) and not isinstance(self.children[1], Constant):
+                self.children = (self.children[1], self.children[0])
+                return
 
 
 def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
@@ -503,7 +508,15 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
         is_after_equal = len(
             temp_operations) == 1 and temp_operations[0][1].content == ""
         if is_same_var and (is_same_op_group or is_after_equal):
-            temp_operations.append((var, op, num))
+            if (temp_operations[0][1].content != ""
+                        or not temp_operations[0][1].is_reflective()
+                        or not isinstance(temp_operations[0][2], Constant)
+                        or isinstance(num, Constant)
+                    ):
+                temp_operations.append((var, op, num))
+                continue
+            temp_operations.append((var, op, temp_operations[0][2]))
+            temp_operations[0] = (var, temp_operations[0][1], num)
             continue
 
         saved_operation = (var, op, num)
