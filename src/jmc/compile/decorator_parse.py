@@ -77,6 +77,21 @@ def dec_property(call_string: str,
     return decorator
 
 
+@dec_property("if", arg_type={"value": ArgType.FLOAT}, is_save_to_datapack=False)
+class If(JMCDecorator):
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
+        if pre_func.func_path in self.datapack.functions:
+            old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
+                pre_func.func_path]
+            raise JMCSyntaxException(
+                f"Duplicate function declaration({pre_func.func_path})", pre_func.self_token, pre_func.tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
+        value = float(self.args["value"])
+        if value >= 0 and value < 1:
+            pre_func.func_content = ""
+        self.datapack.lazy_func[pre_func.func_path] = pre_func
+
+
 @dec_property("add",
               arg_type={
                   "from": ArgType._FUNC_CALL
