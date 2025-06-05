@@ -509,10 +509,9 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             temp_operations) == 1 and temp_operations[0][1].content == ""
         if is_same_var and (is_same_op_group or is_after_equal):
             if (temp_operations[0][1].content != ""
-                        or not temp_operations[0][1].is_reflective()
-                        or not isinstance(temp_operations[0][2], Constant)
-                        or isinstance(num, Constant)
-                    ):
+                    or not op.is_reflective()
+                    or not isinstance(temp_operations[0][2], Constant)
+                    or isinstance(num, Constant)):
                 temp_operations.append((var, op, num))
                 continue
             temp_operations.append((var, op, temp_operations[0][2]))
