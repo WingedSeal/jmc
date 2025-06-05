@@ -1,17 +1,13 @@
 from dataclasses import dataclass
 import bisect
-from fractions import Fraction
 from typing import Any, cast
 from enum import Enum, auto
 from math import log2
 
-from jmc.compile.utils import is_float
-
+from .utils import is_float
 from .command.condition import FUNC_CONTENT
-
 from .exception import JMCSyntaxException
 from .datapack import DataPack
-
 from .command.utils import eval_expr, is_number
 from .tokenizer import Token, TokenType, Tokenizer
 
@@ -511,6 +507,7 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             if (temp_operations[0][1].content != ""
                     or not op.is_reflective()
                     or not isinstance(temp_operations[0][2], Constant)
+                    or float(num.content).is_integer()
                     or isinstance(num, Constant)):
                 temp_operations.append((var, op, num))
                 continue
