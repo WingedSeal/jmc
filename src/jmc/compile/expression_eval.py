@@ -400,11 +400,12 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
             elif times == 1:
                 pass
             else:
+                print("here")
                 power = int(log2(times))
                 remainder = int(times - 2 ** power)
                 new_var2 = new_variable()
                 bisect.insort(free_temporary_variable,
-                              new_var, key=lambda x: x.index)
+                              new_var2, key=lambda x: x.index)
                 if remainder != 0:
                     operations.append(
                         (new_var2, Operator("", Token.empty()), new_var))
