@@ -2,7 +2,7 @@ from .utils import convention_jmc_to_mc
 from .exception import JMCMissingValueError, JMCSyntaxException
 from .header import Header
 from .tokenizer import Token, Tokenizer
-from .command.utils import Arg, ArgType, verify_args
+from .command.utils import Arg, ArgType, hardcode_parse_calc, verify_args
 from .datapack import DataPack, Function, PreFunction
 
 

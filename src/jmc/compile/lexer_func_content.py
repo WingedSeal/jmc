@@ -11,7 +11,6 @@ from .command.utils import (
     ArgType,
     find_scoreboard_player_type,
     hardcode_parse_calc,
-    verify_args,
     verify_list,
 )
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
@@ -692,6 +691,8 @@ class FuncContent:
                     args, kwargs, self.command[key_pos +
                                                1], hardcode_parse_calc
                 )
+                if func.split("/")[-1] == "_":
+                    del self.lexer.datapack.lazy_func[func]
                 if self.is_execute and "\n" in __command:
                     raise JMCSyntaxException(
                         "Lazy function with multiple commands cannot be used with execute.",
@@ -782,6 +783,8 @@ class FuncContent:
             __command = self.lexer.datapack.lazy_func[func].handle_lazy(
                 [], {}, self.command[key_pos + 1], hardcode_parse_calc
             )
+            if func.split("/")[-1] == "_":
+                del self.lexer.datapack.lazy_func[func]
             if self.is_execute and "\n" in __command:
                 raise JMCSyntaxException(
                     "Lazy function with multiple commands cannot be used with execute.",
