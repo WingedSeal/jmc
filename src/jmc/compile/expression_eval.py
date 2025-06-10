@@ -118,10 +118,10 @@ class Expression(Number):
             if isinstance(self.children[0], Constant) and not isinstance(self.children[1], Constant):
                 self.children = (self.children[1], self.children[0])
                 return
-        # if self.operator.content == "-" and isinstance(self.children[0], Expression) and isinstance(self.children[1], Expression):
-        #     self.operator = Operator("+", Token.empty())
-        #     self.children = (Expression("*", Token.empty(), (self.children[1], Constant(
-        #         "-1", Token.empty())), Operator("*", Token.empty())), self.children[0])
+        if self.operator.content == "-" and isinstance(self.children[0], Expression) and isinstance(self.children[1], Expression):
+            self.operator = Operator("+", Token.empty())
+            self.children = (Expression("*", Token.empty(), (self.children[1], Constant(
+                "-1", Token.empty())), Operator("*", Token.empty())), self.children[0])
 
 
 def tokens_to_tokens(tokens: list[Token], tokenizer: Tokenizer) -> list[Token]:
