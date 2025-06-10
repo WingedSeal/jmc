@@ -298,7 +298,7 @@ def print_tree(node: Node, indent: str = "", is_left: bool = False) -> None:
 EXPONENTIAL_CAP = 5000
 
 
-def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
+def tree_to_operations(tree: Number, output: Variable, output_operation: str, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
     if not isinstance(tree, Expression):
         return [(output, Operator("", Token.empty()), tree)]
     operations: list[tuple[Variable, Operator, Number]] = []
@@ -307,7 +307,10 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
 
-    can_inject = search_for_output_in_tree(tree, output)
+    if output_operation == "":
+        can_inject = search_for_output_in_tree(tree, output)
+    else:
+        can_inject = False
 
     def new_variable() -> TemporaryVariable:
         if free_temporary_variable:
@@ -437,7 +440,7 @@ def tree_to_operations(tree: Number, output: Variable, tokenizer: Tokenizer) -> 
         max_index += 1
     if not can_inject:
         operations.append(
-            (output, Operator("", Token.empty()), output_variable))
+            (output, Operator(output_operation, Token.empty()), output_variable))
     return operations
 
 

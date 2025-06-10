@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 from fractions import Fraction
 
-from ..expression_eval import CommandNumber, Variable, expression_to_tree, optimize_const, print_tree, tokens_to_tokens, tree_to_operations
+from ..expression_eval import CommandNumber, Variable, expression_to_tree, optimize_const, tokens_to_tokens, tree_to_operations
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
@@ -161,7 +161,8 @@ def variable_operation(
         elif tokens[2].string == "false":
             return DebugWatch.variable_operation_wrapper(f"scoreboard players add {tokens[0].string} {objective_name} 0", tokens[0].string, objective_name, datapack)
 
-    if operator == ":=":
+    if operator == ":=" or (
+            len(operator) == 3 and operator.startswith(":") and operator.endswith("=") and operator[1] in "+-*/%"):
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)",
@@ -174,7 +175,7 @@ def variable_operation(
         expression_tree = expression_to_tree(
             expression_tokens, tokenizer, datapack, prefix)
         operations = tree_to_operations(expression_tree, Variable(
-            f"{tokens[0].string} {objective_name}", tokens[0]), tokenizer)
+            f"{tokens[0].string} {objective_name}", tokens[0]), operator.lstrip(":").rstrip("="), tokenizer)
         operations = optimize_const(operations)
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
