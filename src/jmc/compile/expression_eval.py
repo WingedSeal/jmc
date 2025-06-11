@@ -514,7 +514,7 @@ def optimize_const(operations: list[tuple[Variable, Operator, Number]]) -> list[
             if (temp_operations[0][1].content != ""
                     or not op.is_reflective()
                     or not isinstance(temp_operations[0][2], Constant)
-                    or float(num.content).is_integer()
+                    # or float(num.content).is_integer()
                     or isinstance(num, Constant)):
                 temp_operations.append((var, op, num))
                 continue
