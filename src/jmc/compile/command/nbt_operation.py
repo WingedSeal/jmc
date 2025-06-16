@@ -473,9 +473,18 @@ def nbt_operation(
         return f"execute store success {nbt_type_str} {target}{path} {type_} {scale} run {func_content[0]}"
 
     elif operator == "*":
-        if (tokens[0].string == "-"):
+        if tokens[0].string == "-":
             tokens[0] = tokenizer.merge_tokens(tokens[0:2])
             del tokens[1]
+        if tokens[0].string == "$" and len(tokens) > 1 and tokens[1].token_type == TokenType.PAREN_ROUND:
+            tokens[0] = tokenizer.merge_tokens(tokens[0:2])
+            del tokens[1]
+        if len(tokens) > 1:
+            raise JMCSyntaxException(
+                f"Unexpected token {tokens[1].string}",
+                tokens[1],
+                tokenizer
+            )
         return f"data get {nbt_type_str} {target}{path} {tokens[0].string}"
 
     raise JMCSyntaxException(
