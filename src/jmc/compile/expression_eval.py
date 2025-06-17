@@ -307,7 +307,10 @@ def tree_to_operations(tree: Number, output: Variable, output_operation: str, to
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
 
-    can_inject = search_for_output_in_tree(tree, output)
+    if output_operation != "":
+        can_inject = search_for_output_in_tree(tree, output)
+    else:
+        can_inject = False
 
     def new_variable() -> TemporaryVariable:
         if free_temporary_variable:
