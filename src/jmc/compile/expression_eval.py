@@ -300,17 +300,14 @@ EXPONENTIAL_CAP = 5000
 
 def tree_to_operations(tree: Number, output: Variable, output_operation: str, tokenizer: Tokenizer) -> list[tuple[Variable, Operator, Number]]:
     if not isinstance(tree, Expression):
-        return [(output, Operator("", Token.empty()), tree)]
+        return [(output, Operator(output_operation, Token.empty()), tree)]
     operations: list[tuple[Variable, Operator, Number]] = []
     max_index = 0
     free_temporary_variable: list[TemporaryVariable] = []
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
 
-    if output_operation == "":
-        can_inject = search_for_output_in_tree(tree, output)
-    else:
-        can_inject = False
+    can_inject = search_for_output_in_tree(tree, output)
 
     def new_variable() -> TemporaryVariable:
         if free_temporary_variable:
@@ -427,6 +424,11 @@ def tree_to_operations(tree: Number, output: Variable, output_operation: str, to
     _tree_to_operation(tree)
     output_variable = cast(TemporaryVariable | None, output_variable)
     assert output_variable is not None
+    if output_operation != "":
+        for left_var, op, _ in operations:
+            if left_var is output_variable:
+                op.content = output_operation
+                break
     if can_inject:
         output_variable.content = output.content
         output_variable.index = -1

@@ -176,9 +176,6 @@ def variable_operation(
             expression_tokens, tokenizer, datapack, prefix)
         operations = tree_to_operations(expression_tree, Variable(
             f"{tokens[0].string} {objective_name}", tokens[0]), operator.lstrip(":").rstrip("="), tokenizer)
-        if len(operations) == 2 and operations[0][0] == operations[1][2] and operations[0][1].content == "":
-            operations = [
-                (operations[1][0], operations[1][1], operations[0][2])]
         operations = optimize_const(operations)
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
