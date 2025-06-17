@@ -307,7 +307,7 @@ def tree_to_operations(tree: Number, output: Variable, output_operation: str, to
     all_temporary_variable: list[TemporaryVariable] = []
     output_variable: TemporaryVariable | None = None
 
-    if output_operation != "":
+    if output_operation == "":
         can_inject = search_for_output_in_tree(tree, output)
     else:
         can_inject = False
@@ -427,11 +427,15 @@ def tree_to_operations(tree: Number, output: Variable, output_operation: str, to
     _tree_to_operation(tree)
     output_variable = cast(TemporaryVariable | None, output_variable)
     assert output_variable is not None
-    if output_operation != "":
+
+    can_inject_iop = output_operation != "" and operations[0][
+        0] is output_variable and operations[0][1].content == "" and operations[0][2].content != output.content
+    if can_inject_iop:
         for left_var, op, _ in operations:
             if left_var is output_variable:
                 op.content = output_operation
                 break
+        can_inject = True
     if can_inject:
         output_variable.content = output.content
         output_variable.index = -1
