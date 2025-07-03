@@ -74,11 +74,10 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "trigger": {"scoreboard"},
     "bossbar": {"execute"},
     "title": {"title"},
-    "item": {"summon"},
     "loot": {"loot", "give"},
     "data": {"execute", "with"},
     "weather": {"playsound"},
-    "item": {"particle"},
+    "item": {"particle", "summon"},
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
