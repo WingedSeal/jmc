@@ -78,6 +78,7 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "data": {"execute", "with"},
     "weather": {"playsound"},
     "item": {"particle", "summon"},
+    "list": {"scoreboard"},
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
