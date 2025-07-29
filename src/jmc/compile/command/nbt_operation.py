@@ -98,6 +98,7 @@ def merge_path(
     if len(tokens) <= start_index:
         return string
 
+    index = None
     for index, token in enumerate(tokens[start_index:]):
         if token.string.startswith(
                 ".") or token.string == ":" or string.endswith(":"):
@@ -113,9 +114,12 @@ def merge_path(
             or (token.token_type == TokenType.PAREN_ROUND and string.endswith("$"))
         ):
             string += datapack.lexer.clean_up_paren_token(token, tokenizer)
+        elif string.endswith(")") and token.token_type == TokenType.KEYWORD:
+            string += token.string
         else:
             del tokens[start_index: start_index + index]
             return string
+    assert index is not None
     del tokens[start_index: start_index + index + 1]
     return string
 
