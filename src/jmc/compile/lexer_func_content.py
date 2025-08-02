@@ -196,12 +196,16 @@ class FuncContent:
         if self.command[0].string == "function" and not self.lexer._is_vanilla_func(
             self.command
         ):
-            self.lexer.parse_func(
+            instant_call_count = self.lexer.parse_func(
                 self.tokenizer,
                 self.command,
                 self.tokenizer.file_path,
                 prefix=self.prefix,
             )
+            if instant_call_count is not None:
+                append_commands(self.__commands,
+                                self.lexer.datapack.call_func(
+                                    "instant_call", str(instant_call_count)))
             return
         elif is_decorator(self.command[0].string):
             self.lexer.parse_decorated_function(

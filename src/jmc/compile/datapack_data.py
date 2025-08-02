@@ -140,7 +140,8 @@ class Data:
         "watching",
         "is_too_late_debug_watch",
         "hashed_command",
-        "last_code_data")
+        "last_code_data"
+    )
 
     def __init__(self) -> None:
         self.item: dict[str, Item] = {}

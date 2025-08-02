@@ -170,7 +170,12 @@ class Lexer:
         for command in tokenizer.programs:
             if command[0].string == "function" and not self._is_vanilla_func(command):
                 self.parse_current_load()
-                self.parse_func(tokenizer, command, file_path_str)
+                instant_call_count = self.parse_func(
+                    tokenizer, command, file_path_str)
+                if instant_call_count is not None:
+                    self.datapack.functions[self.datapack.load_name].append(
+                        self.datapack.call_func(
+                            "instant_call", str(instant_call_count)))
             elif is_decorator(command[0].string):
                 self.parse_current_load()
                 self.parse_decorated_function(
@@ -355,8 +360,8 @@ class Lexer:
         if len(command) > 4:
             raise JMCSyntaxException("Unexpected token", command[4], tokenizer)
 
-        func_path = prefix + \
-            convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_name = convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_path = prefix + func_name
         if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC",
@@ -379,7 +384,7 @@ class Lexer:
                 tokenizer,
                 suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
             )
-        if func_path == self.datapack.private_name:
+        if func_path.startswith(self.datapack.private_name):
             raise JMCSyntaxException(
                 "Private function is defined",
                 command[1],
@@ -388,6 +393,7 @@ class Lexer:
             )
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         return PreFunction(
+            func_name,
             func_content,
             file_path_str,
             command[3].line,
@@ -408,7 +414,7 @@ class Lexer:
         file_path_str: str,
         prefix: str = "",
         is_save_to_datapack: bool = True,
-    ) -> tuple[Function, str]:
+    ) -> int | None:
         """
         Parse a function definition in form of list of token
 
@@ -417,7 +423,7 @@ class Lexer:
         :param file_path_str: File path to current JMC function as string
         :param prefix: Prefix of function(for Class feature), defaults to ''
         :param is_save_to_datapack: Whether to save the result function into the datapack, defaults to True
-        :return: A tuple of Function and its path string
+        :return: Instant call number so the caller know which function to call. Or None if there's no instant call
         :raises JMCSyntaxException: Function name isn't keyword token
         :raises JMCSyntaxException: Function name is not followed by paren_round token
         :raises JMCSyntaxException: paren_round token isn't followed by paren_curly token
@@ -429,10 +435,18 @@ class Lexer:
         pre_function = self.parse_func_tokens(
             tokenizer, command, file_path_str, prefix, is_save_to_datapack
         )
-        return_value = pre_function.parse()
+        is_instant_call = None
+        if pre_function.func_name == "_":
+            del self.datapack.defined_file_pos[pre_function.func_path]
+            pre_function.func_name = str(self.datapack.instant_call_count)
+            is_instant_call = self.datapack.instant_call_count
+            self.datapack.instant_call_count += 1
+            pre_function.func_path = self.datapack.private_name + \
+                "/instant_call/" + pre_function.func_name
+        function_ = pre_function.parse()
         if is_save_to_datapack:
-            self.datapack.functions[pre_function.func_path] = return_value
-        return return_value, pre_function.func_path
+            self.datapack.functions[pre_function.func_path] = function_
+        return is_instant_call
 
     def _is_vanilla_func(self, command: list[Token]) -> bool:
         """
@@ -803,7 +817,15 @@ class Lexer:
         )
         for command in tokenizer.programs:
             if command[0].string == "function" and len(command) == 4:
-                self.parse_func(tokenizer, command, file_path_str, prefix)
+                instant_call_count = self.parse_func(
+                    tokenizer, command, file_path_str, prefix)
+                if instant_call_count is not None:
+                    raise JMCSyntaxException(
+                        f"Instant Call cannot be used in class's body",
+                        command[1],
+                        tokenizer,
+                        suggestion="Rename the function to something else beside '_'"
+                    )
             elif is_decorator(command[0].string):
                 self.parse_decorated_function(
                     tokenizer, command, file_path_str, prefix)

@@ -42,6 +42,7 @@ class PreFunction:
     """
 
     __slots__ = (
+        "func_name",
         "func_content",
         "jmc_file_path",
         "line",
@@ -57,6 +58,7 @@ class PreFunction:
 
     def __init__(
         self,
+        func_name: str,
         func_content: str,
         jmc_file_path: str,
         line: int,
@@ -69,6 +71,7 @@ class PreFunction:
         tokenizer: Tokenizer,
         prefix: str,
     ) -> None:
+        self.func_name = func_name
         self.func_content = func_content
         self.self_token = self_token
         self.params = params
@@ -286,6 +289,7 @@ class DataPack:
         "after_loads",
         "version",
         "after_func",
+        "instant_call_count"
     )
     private_name = "__private__"
     load_name = "__load__"
@@ -350,6 +354,9 @@ class DataPack:
 
         self.lazy_func: dict[str, PreFunction] = {}
         """Dictionary of lazy function name and PreFunction object """
+
+        self.instant_call_count: int = 0
+        """How many instant call (`_`) is used"""
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """
