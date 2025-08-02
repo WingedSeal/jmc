@@ -42,6 +42,7 @@ class PreFunction:
     """
 
     __slots__ = (
+        "func_name",
         "func_content",
         "jmc_file_path",
         "line",
@@ -57,6 +58,7 @@ class PreFunction:
 
     def __init__(
         self,
+        func_name: str,
         func_content: str,
         jmc_file_path: str,
         line: int,
@@ -69,6 +71,7 @@ class PreFunction:
         tokenizer: Tokenizer,
         prefix: str,
     ) -> None:
+        self.func_name = func_name
         self.func_content = func_content
         self.self_token = self_token
         self.params = params

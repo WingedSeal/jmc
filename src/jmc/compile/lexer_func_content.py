@@ -204,9 +204,11 @@ class FuncContent:
             )
             return
         elif is_decorator(self.command[0].string):
-            self.lexer.parse_decorated_function(
+            return_command = self.lexer.parse_decorated_function(
                 self.tokenizer, self.command, self.tokenizer.file_path
             )
+            if return_command is not None:
+                append_commands(self.__commands, return_command[0])
             return
         elif self.command[0].string == "new":
             self.lexer.parse_new(self.tokenizer, self.command)

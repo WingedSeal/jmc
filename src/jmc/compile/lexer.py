@@ -173,8 +173,11 @@ class Lexer:
                 self.parse_func(tokenizer, command, file_path_str)
             elif is_decorator(command[0].string):
                 self.parse_current_load()
-                self.parse_decorated_function(
+                return_command = self.parse_decorated_function(
                     tokenizer, command, file_path_str)
+                if return_command is not None:
+                    self.datapack.functions[self.datapack.load_name].append(
+                        return_command[0])
             elif command[0].string == "new":
                 self.parse_current_load()
                 self.parse_new(tokenizer, command)
@@ -249,7 +252,16 @@ class Lexer:
         command: list[Token],
         file_path_str: str,
         prefix: str = "",
-    ):
+    ) -> tuple[str, JMCSyntaxException] | None:
+        """
+        Parse function with decorator @
+
+        :param tokenizer: Tokenizer
+        :param command: List of tokens that make up the function
+        :param file_path_str: File's path
+        :param prefix: Class the function is defined in
+        :return: Minecraft command to put in place of the function and an error if called in class body. None if there isn't any
+        """
         decorator_name = command[0].string[1:]
         if decorator_name not in DECORATORS:
             raise JMCSyntaxException(
@@ -286,9 +298,12 @@ class Lexer:
         if jmc_decorator.is_save_to_datapack:
             func_object = pre_function.parse()
             self.datapack.functions[pre_function.func_path] = func_object
-        jmc_decorator(tokenizer, command, self.datapack, prefix, args).modify(
+        decorator = jmc_decorator(
+            tokenizer, command, self.datapack, prefix, args)
+        decorator.modify(
             pre_function, func_object
         )
+        return decorator.return_command()
 
     def parse_func_tokens(
         self,
@@ -355,8 +370,8 @@ class Lexer:
         if len(command) > 4:
             raise JMCSyntaxException("Unexpected token", command[4], tokenizer)
 
-        func_path = prefix + \
-            convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_name = convention_jmc_to_mc(command[1], tokenizer, prefix="")
+        func_path = prefix + func_name
         if func_path.startswith(DataPack.private_name + "/"):
             raise JMCSyntaxException(
                 f"Function({func_path}) may override private function of JMC",
@@ -388,6 +403,7 @@ class Lexer:
             )
         self.datapack.defined_file_pos[func_path] = (command[1], tokenizer)
         return PreFunction(
+            func_name,
             func_content,
             file_path_str,
             command[3].line,
@@ -805,8 +821,10 @@ class Lexer:
             if command[0].string == "function" and len(command) == 4:
                 self.parse_func(tokenizer, command, file_path_str, prefix)
             elif is_decorator(command[0].string):
-                self.parse_decorated_function(
+                return_command = self.parse_decorated_function(
                     tokenizer, command, file_path_str, prefix)
+                if return_command is not None:
+                    raise return_command[1]
             elif command[0].string == "new":
                 self.parse_new(tokenizer, command, prefix)
             elif command[0].string == "class":

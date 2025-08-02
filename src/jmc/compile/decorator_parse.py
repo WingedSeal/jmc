@@ -31,6 +31,7 @@ class JMCDecorator:
     def __init__(self, tokenizer: Tokenizer, tokens: list[Token], datapack: DataPack, prefix: str,
                  arg_token: Token | None) -> None:
         self.tokens = tokens
+        self.token = tokens[0]
         self.arg_token = arg_token
         self.tokenizer = tokenizer
         self.datapack = datapack
@@ -53,6 +54,9 @@ class JMCDecorator:
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         raise NotImplementedError(
             "'modify' method of JMCDecorator not implemented")
+
+    def return_command(self) -> tuple[str, JMCSyntaxException] | None:
+        return None
 
 
 DECORATORS: dict[str, type[JMCDecorator]] = {}
@@ -79,6 +83,8 @@ def dec_property(call_string: str,
 
 @dec_property("if", arg_type={"value": ArgType.FLOAT}, is_save_to_datapack=False)
 class If(JMCDecorator):
+    instant_call_func: PreFunction | None
+
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         if pre_func.func_path in self.datapack.functions:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
@@ -89,7 +95,17 @@ class If(JMCDecorator):
         value = float(self.args["value"])
         if value == 0:
             pre_func.func_content = ""
-        self.datapack.lazy_func[pre_func.func_path] = pre_func
+        if pre_func.func_name == "_":
+            self.instant_call_func = pre_func
+        else:
+            self.datapack.lazy_func[pre_func.func_path] = pre_func
+            self.instant_call_func = None
+
+    def return_command(self) -> tuple[str, JMCSyntaxException] | None:
+        if self.instant_call_func is None:
+            return None
+        return self.instant_call_func.handle_lazy(
+            [], {}, self.token, hardcode_parse_calc), JMCSyntaxException("Instant Call cannot be used in class body", self.tokens[3], self.tokenizer, suggestion="Rename the function to anything else beside '_'")
 
 
 @dec_property("add",
