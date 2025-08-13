@@ -254,7 +254,7 @@ def __create_macro_factory(
                     __copy_macro_token(
                         argument_tokens[token_or_int[0]],
                         line,
-                        col,
+                        col + extra_col,
                         len(key),
                         replaced_token_col,
                         token_or_int[1].col,
@@ -266,6 +266,7 @@ def __create_macro_factory(
                 )
 
         if reapplier is None:
+            print(return_list)
             return return_list
         else:
             return _reapply_defered_macro(return_list, reapplier)
