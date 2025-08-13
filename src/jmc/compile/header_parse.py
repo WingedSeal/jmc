@@ -266,7 +266,6 @@ def __create_macro_factory(
                 )
 
         if reapplier is None:
-            print(return_list)
             return return_list
         else:
             return _reapply_defered_macro(return_list, reapplier)
