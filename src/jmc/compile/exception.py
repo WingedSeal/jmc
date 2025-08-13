@@ -94,12 +94,15 @@ def error_msg(
         msgs_ = tokenizer.file_string.split(NEW_LINE)
         msgs_.append("\n")
         max_space = len(str(display_line + 1))
-        line_ = overide_file_str(msgs_[display_line - 1])
+        if display_line <= len(msgs_):
+            line_ = overide_file_str(msgs_[display_line - 1])
+        else:
+            line_ = ""
         if entire_line:
             tab_count = line_.count(TAB)
             msg = f"""In {relative_file_name(tokenizer.file_path, line)}
 {message} at line {line}.
-{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[display_line - 2].replace(TAB, "    ") if display_line > 1 else ""}
+{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[(display_line - 2) % len(msgs_)].replace(TAB, "    ") if display_line > 1 else ""}
 {display_line}{" " * (max_space - len(str(display_line)))} |{line_.replace(TAB, "    ")}
 {" " * (col + max_space + 3 * tab_count + 1)}{"^" * (len(line_) - col + 1)}
 {display_line + 1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
@@ -107,7 +110,7 @@ def error_msg(
             tab_count = line_[: col - 1].count(TAB)
             msg = f"""In {relative_file_name(tokenizer.file_path, line, col)}
 {message} at line {line} col {col}.
-{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[display_line - 2].replace(TAB, "    ") if display_line > 1 else ""}
+{display_line - 1}{" " * (max_space - len(str(display_line - 1)))} |{msgs_[(display_line - 2) % len(msgs_)].replace(TAB, "    ") if display_line > 1 else ""}
 {display_line}{" " * (max_space - len(str(display_line)))} |{line_.replace(TAB, "    ")}
 {" " * (col + max_space + 3 * tab_count + 1)}{"^" * (display_col - col)}
 {display_line + 1} |{msgs_[display_line].replace(TAB, "    ") if display_line < len(msgs_) else ""}"""
