@@ -707,34 +707,38 @@ class FuncContent:
             self.lexer.datapack.functions_called[func] = token, self.tokenizer
             if args:
                 if len(args) > 1:
-                    raise JMCSyntaxException(
+                    self.lexer.datapack.delayed_error = JMCSyntaxException(
                         f"Expected 1 position argument (got {len(args)})",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is intended to be a lazy function, it has to be defined BEFORE using.',
                     )
+                    return SKIP_TO_NEXT_LINE
                 if kwargs:
-                    raise JMCSyntaxException(
+                    self.lexer.datapack.delayed_error = JMCSyntaxException(
                         f"Expected exclusively positional or keyword argument",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax',
                     )
+                    return SKIP_TO_NEXT_LINE
                 if len(args[0]) > 1:
-                    raise JMCSyntaxException(
+                    self.lexer.datapack.delayed_error = JMCSyntaxException(
                         f"Unexpected token after `{{}}` in positional argument syntax",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax',
                     )
+                    return SKIP_TO_NEXT_LINE
                 if args[0][0].token_type != TokenType.PAREN_CURLY:
-                    raise JMCSyntaxException(
+                    self.lexer.datapack.delayed_error = JMCSyntaxException(
                         f"Expected curly parenthesis({{}}) (got {
                             args[0][0].token_type.value}) in positional argument syntax",
                         arg_token,
                         self.tokenizer,
                         suggestion='The positional argument syntax is `func({"key":"value"});`. You might be going for `func(key="value")` syntax. If this is meant to be a built-in function call, you may have misspelled it',
                     )
+                    return SKIP_TO_NEXT_LINE
                 append_commands(
                     self.__commands,
                     f"function {
@@ -747,21 +751,23 @@ class FuncContent:
                 json = {}
                 for key, value in kwargs.items():
                     if len(value) > 1:
-                        raise JMCSyntaxException(
+                        self.lexer.datapack.delayed_error = JMCSyntaxException(
                             f"Expected 1 string token after `=` (got {
                                 len(value)}) in keyword argument syntax",
                             arg_token,
                             self.tokenizer,
                             suggestion='The keyword argument syntax is `func(key="value")`',
                         )
+                        return SKIP_TO_NEXT_LINE
                     if value[0].token_type != TokenType.STRING:
-                        raise JMCSyntaxException(
+                        self.lexer.datapack.delayed_error = JMCSyntaxException(
                             f"Expected string as key in keyword argument syntax (got {
                                 value[0].token_type.value})",
                             arg_token,
                             self.tokenizer,
                             suggestion='The keyword argument syntax is `func(key="value")`',
                         )
+                        return SKIP_TO_NEXT_LINE
                     json[key] = value[0].string
                 append_commands(
                     self.__commands,

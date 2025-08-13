@@ -289,6 +289,7 @@ class DataPack:
         "after_loads",
         "version",
         "after_func",
+        "delayed_error",
     )
     private_name = "__private__"
     load_name = "__load__"
@@ -353,6 +354,9 @@ class DataPack:
 
         self.lazy_func: dict[str, PreFunction] = {}
         """Dictionary of lazy function name and PreFunction object """
+
+        self.delayed_error: Exception | None = None
+        """Delayed error to be raise at the end, used for low priority errors"""
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """
@@ -659,6 +663,8 @@ class DataPack:
                     f"Function '{function_called}' was not defined", token, tokenizer
                 )
 
+        if self.delayed_error is not None:
+            raise self.delayed_error
         self.private_functions = {}
         self.loads = []
         self.ticks = []
