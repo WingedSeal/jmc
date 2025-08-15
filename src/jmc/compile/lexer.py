@@ -32,7 +32,53 @@ logger = Logger(__name__)
 
 
 JSON_FILE_TYPES = [
+    "advancement",
+    "banner_pattern",
+    "cat_variant",
+    "chat_type",
+    "chicken_variant",
+    "cow_variant",
+    "damage_type",
+    "dialog",
+    "dimension",
+    "dimension_type",
+    "enchantment",
+    "enchantment_provider",
+    "frog_variant",
+    "instrument",
+    "item_modifier",
+    "jukebox_song",
+    "loot_table",
+    "painting_variant",
+    "pig_variant",
+    "predicate",
+    "recipe",
+    "test_environment",
+    "test_instance",
+    "trial_spawner",
+    "trim_material",
+    "trim_pattern",
+    "wolf_sound_variant",
+    "wolf_variant",
+
+    "worldgen/biome",
+    "worldgen/configured_carver",
+    "worldgen/configured_feature",
+    "worldgen/density_function",
+    "worldgen/noise",
+    "worldgen/noise_settings",
+    "worldgen/placed_feature",
+    "worldgen/processor_list",
+    "worldgen/structure",
+    "worldgen/structure_set",
+    "worldgen/template_pool",
+    "worldgen/world_preset",
+    "worldgen/flat_level_generator_preset",
+    "worldgen/multi_noise_biome_source_parameter_list",
+
     "advancements",
+    "banner_pattern",
+    "cat_variant"
     "dimension",
     "dimension_type",
     "loot_tables",
@@ -62,15 +108,15 @@ JSON_FILE_TYPES = [
 ]
 """List of all possible vanilla json file types"""
 
-JMC_JSON_FILE_TYPES = {
-    "predicate": "predicates",
-    "item_modifier": "item_modifiers",
-    "advancement": "advancements",
-    "loot_table": "loot_tables",
-    "structure": "structures",
-    "recipe": "recipes",
-}
-"""Dictionary of JMC's custom file type that'll be automatically converted to vanilla ones"""
+LEGACY_JSON_FILE_TYPES = [
+    "predicates",
+    "item_modifiers",
+    "advancements",
+    "loot_tables",
+    "structures",
+    "recipes"
+]
+"""List of json file types that's different in older version"""
 
 
 class Lexer:
@@ -558,9 +604,8 @@ class Lexer:
         )
 
         if json_type not in JSON_FILE_TYPES and not json_type.startswith("tags/"):
-            if json_type in JMC_JSON_FILE_TYPES:
-                if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME:
-                    json_type = JMC_JSON_FILE_TYPES[json_type]
+            if json_type + "s" in LEGACY_JSON_FILE_TYPES:
+                json_type += "s"
             elif json_type.startswith("tag/"):
                 json_type = json_type.replace("tag/", "tags/")
             else:
