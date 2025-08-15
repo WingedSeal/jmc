@@ -643,6 +643,24 @@ def __parse_header(
                 )
             header.dels.add(arg_tokens[0].string)
 
+        # #resource
+        elif directive_token.string == "resource":
+            if not arg_tokens or len(arg_tokens) != 1:
+                raise HeaderSyntaxException(
+                    f"Expected 1 arguments after '#resource' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            if arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    f"Expected keyword after '#resource' (got {arg_tokens[0].token_type.value})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            header.resources.add(arg_tokens[0].string.replace(".", "/"))
+
         # #static
         elif directive_token.string == "static":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.STRING:

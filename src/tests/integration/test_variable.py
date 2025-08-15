@@ -5,7 +5,7 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.compile.test_compile import JMCTestPack
 
-from jmc.compile.exception import JMCSyntaxException
+from jmc.compile.exception import JMCSyntaxException, JMCValueError
 
 
 class TestVariable(unittest.TestCase):
@@ -140,7 +140,7 @@ execute store result score @s obj run scoreboard players get $x __variable__
             """)
         )
 
-        with self.assertRaises(JMCSyntaxException):
+        with self.assertRaises(JMCValueError):
             JMCTestPack().set_jmc_file("""
 $x.get(key=value);
         """).build()

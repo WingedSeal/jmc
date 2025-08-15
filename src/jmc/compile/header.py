@@ -40,6 +40,7 @@ class Header(SingleTon):
         "commands",
         "statics",
         "dels",
+        "resources",
         "post_process",
         "finished_compiled_time",
         "nometa",
@@ -65,6 +66,8 @@ class Header(SingleTon):
     """All path that JMC will not remove"""
     dels: set[str]
     """List of exception to command(first arguments) to ignore"""
+    resources: set[str]
+    """List of custom json file types"""
     post_process: list[Callable[["DataPack"], Any]]
     """Python function to run before building datapack"""
     finished_compiled_time: float
@@ -93,6 +96,7 @@ class Header(SingleTon):
         obj.conditions = VANILLA_CONDITIONS.copy()
         obj.statics = set()
         obj.dels = set()
+        obj.resources = set()
         obj.post_process = []
         obj.finished_compiled_time = 0
         obj.nometa = False

@@ -541,7 +541,7 @@ class Lexer:
         :raises JMCSyntaxException: JSON file's path is not followed by paren_round token
         :raises JMCSyntaxException: paren_round token is not followed by anything
         :raises JMCSyntaxException: paren_round token is not followed by paren_curly token
-        :raises MinecraftSyntaxWarning: JSON file's type isn't in JSON_FILE_TYPES
+        :raises MinecraftSyntaxWarning: JSON file's type isn't in JSON_FILE_TYPES and isn't in header.resources
         :raises MinecraftSyntaxWarning: Uppercase letter found in JSON file's path
         :raises JMCSyntaxException: Start JSON file's name with JMC's PRIVATE_NAME
         :raises JMCSyntaxException: Duplicate new json declaration
@@ -603,7 +603,7 @@ class Lexer:
             command[1], tokenizer, is_make_lower=False, prefix=""
         )
 
-        if json_type not in JSON_FILE_TYPES and not json_type.startswith("tags/"):
+        if json_type not in JSON_FILE_TYPES and json_type not in Header().resources and not json_type.startswith("tags/"):
             if json_type + "s" in LEGACY_JSON_FILE_TYPES:
                 json_type += "s"
             elif json_type.startswith("tag/"):

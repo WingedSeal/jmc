@@ -1123,6 +1123,7 @@ class FuncContent:
             # special case
             return CONTINUE_LINE
         try:
+            delayed_error = self.lexer.datapack.delayed_error
             append_commands(
                 self.__commands,
                 variable_operation(
@@ -1135,6 +1136,8 @@ class FuncContent:
                     self.prefix,
                 ),
             )
+            if delayed_error is None and self.lexer.datapack.delayed_error is not None:
+                raise self.lexer.datapack.delayed_error
         except EXCEPTIONS as var_error:
             if key_pos != 0:
                 raise var_error
@@ -1167,6 +1170,8 @@ class FuncContent:
                 ):
                     raise var_error
                 raise normal_error
+            if not self.__commands:
+                return SKIP_TO_NEXT_LINE  # TODO: Will this break anything?
             self.__commands[0] = "$" + self.__commands[0]
         return SKIP_TO_NEXT_LINE
 

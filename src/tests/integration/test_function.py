@@ -5,7 +5,7 @@ import unittest
 from tests.utils import string_to_tree_dict
 from jmc.compile.test_compile import JMCTestPack
 
-from jmc.compile.exception import JMCFileNotFoundError, JMCSyntaxException
+from jmc.compile.exception import JMCFileNotFoundError, JMCSyntaxException, JMCValueError
 
 
 class TestFunction(unittest.TestCase):
@@ -40,7 +40,7 @@ function customFunction(parameter) {
 }
         """).build()
 
-        with self.assertRaises(JMCSyntaxException):
+        with self.assertRaises(JMCValueError):
             JMCTestPack().set_jmc_file("""
 customFunction(argument);
         """).build()
