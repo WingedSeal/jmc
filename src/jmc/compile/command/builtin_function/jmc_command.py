@@ -224,7 +224,12 @@ class JMCCall(JMCFunction):
 )
 class JMCPrint(JMCFunction):
     def call(self) -> str:
-        print(f"JMC.print: {self.args['text']}")
+        text = self.args['text']
+        if "\n" not in text:
+            print(f"JMC.print: {text}")
+        else:
+            print("\n".join(
+                f"JMC.print[{i}]: {text}" for i, text in enumerate(text.split('\n'))))
         return ""
 
 
@@ -239,7 +244,12 @@ class JMCPrint(JMCFunction):
 )
 class JMCPrintAny(JMCFunction):
     def call(self) -> str:
-        print(f"JMC.printAny: {self.args['prefix']}{self.args['any']}")
+        text = self.args['prefix'] + self.args['any']
+        if "\n" not in text:
+            print(f"JMC.printAny: {text}")
+        else:
+            print("\n".join(
+                f"JMC.printAny[{i}]: {text}" for i, text in enumerate(text.split('\n'))))
         return ""
 
 
