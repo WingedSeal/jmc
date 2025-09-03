@@ -52,7 +52,7 @@ def get_args() -> argparse.Namespace:
         required=False,
         default=[],
         nargs="+",
-        type="str",
+        type=str,
         help="set macros defined with #env to 1"
     )
 
