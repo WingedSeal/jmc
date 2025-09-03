@@ -44,7 +44,7 @@ def exit_() -> None:
     sys.exit(0)
 
 
-@add_command("compile [env1] [env2] ...", "compile")
+@add_command("compile [env ...]", "compile")
 def compile_(*envs: str) -> None:
     """Compile main JMC file"""
 
