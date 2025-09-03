@@ -150,6 +150,25 @@ def __eval_macro_factory(
     return [new_token]
 
 
+def __not_macro_factory(
+    argument_tokens: list[Token], line: int, col: int
+) -> list[Token]:
+    """Macro factory for NOT binding, set 0 to 1 and everything else to 0"""
+    string = argument_tokens[0].string
+    header = Header()
+    for key, replaced in header.number_macros.items():
+        string = string.replace(key, replaced)
+    if string == "0":
+        number = "1"
+    else:
+        number = "0"
+    new_token = Token(
+        TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(
+            number)
+    )
+    return [new_token]
+
+
 def __create_macro_factory(
     replaced_tokens: list[Token],
     parameters_token: Token | None,
@@ -505,6 +524,9 @@ def __parse_header(
                     ]
                 elif binder == "EVAL":
                     header.macros[key] = __eval_macro_factory, 1
+                    key = ""
+                elif binder == "NOT":
+                    header.macros[key] = __not_macro_factory, 1
                     key = ""
                 else:
                     raise HeaderSyntaxException(
