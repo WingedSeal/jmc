@@ -45,7 +45,7 @@ def get_args() -> argparse.Namespace:
     compile_parser = subparser.add_parser("compile", help="compile")
     compile_parser.add_argument(
         "--environment",
-        "--environments"
+        "--environments",
         "--env",
         "--envs",
         "-e",
