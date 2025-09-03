@@ -669,7 +669,7 @@ class DataPack:
         if envs:
             envs_error = ", ".join(envs)
             raise JMCBuildError(
-                f"The following environment variables were set to 1 but they do not exist: {envs_error}",
+                f"The following environment variables were set to 1 but they do not exist: {envs_error}. Add them using `#env {envs[0]}`, etc. in header file.",
             )
 
         if self.delayed_error is not None:
