@@ -231,12 +231,15 @@ class JMCPrint(JMCFunction):
 @func_property(
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.printAny",
-    arg_type={"any": ArgType.ANY},
+    arg_type={"any": ArgType.ANY, "prefix": ArgType.STRING},
+    defaults={
+        "prefix": ""
+    },
     name="jmc_print_any",
 )
 class JMCPrintAny(JMCFunction):
     def call(self) -> str:
-        print(f"JMC.printAny: {self.args['any']}")
+        print(f"JMC.printAny: {self.args['prefix']}{self.args['any']}")
         return ""
 
 
