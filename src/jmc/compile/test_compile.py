@@ -48,6 +48,7 @@ INT=__int__"""
             target=Path("main.jmc"),
             output=Path(output)
         )
+        self.envs = []
 
     def set_pack_format(self, pack_format: int) -> "JMCTestPack":
         self.config.pack_format = str(pack_format)

@@ -377,6 +377,41 @@ def __parse_header(
                 if is_number(num):
                     header.number_macros[key] = num
 
+        # #env
+        elif directive_token.string == "env":
+            if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
+                raise HeaderSyntaxException(
+                    "Expected keyword after '#env'", file_name, line, line_str
+                )
+
+            key = arg_tokens[0].string
+            if key in header.macros:
+                raise HeaderDuplicatedMacro(
+                    f"'{key}' macro is already defined", file_name, line, line_str
+                )
+
+            if len(arg_tokens) != 1:
+                raise HeaderSyntaxException(
+                    "Expected keyword after '#env'", file_name, line, line_str
+                )
+            if key in header.envs:
+                header.envs.remove(key)
+                replacement = "1"
+            else:
+                replacement = "0"
+
+            header.macros[key] = __create_macro_factory(
+                [Token.empty(replacement)],
+                None,
+                key,
+                tokenizer,
+                HeaderSyntaxException(
+                    "Invalid macro argument syntax", file_name, line, line_str
+                ),
+                reapplier=None,
+            )
+            header.number_macros[key] = replacement
+
         # #deepdefine
         elif directive_token.string == "deepdefine":
             if not arg_tokens or arg_tokens[0].token_type != TokenType.KEYWORD:
