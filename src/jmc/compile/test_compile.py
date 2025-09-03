@@ -22,10 +22,11 @@ class JMCTestPack:
     :param output: virtual directory for output, defaults to "VIRTUAL"
     """
     __slots__ = ("cert", "jmc_file", "header_file",
-                 "__built", "config")
+                 "__built", "config", "envs")
     cert: str
     jmc_file: str
     header_file: str | None
+    envs: list[str]
     __built: dict[str, str] | None
     """Dictionary of file name and file content"""
 
@@ -82,6 +83,16 @@ INT=__int__"""
         self.header_file = file_content
         return self
 
+    def set_envs(self, envs: list[str]) -> "JMCTestPack":
+        """
+        Set --env 
+
+        :param envs: Environment variables
+        :return: Self
+        """
+        self.envs = envs
+        return self
+
     def build(self) -> "JMCTestPack":
         """
         Build datapack
@@ -89,6 +100,7 @@ INT=__int__"""
         """
         logger.info("Building from JMCPack")
         Header.clear()
+        Header().envs = self.envs.copy()
         is_delete, cert_config, cert_file = read_cert(
             self.config, _test_file=self.cert)
         read_header(self.config, _test_file=self.header_file)

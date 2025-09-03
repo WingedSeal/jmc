@@ -65,7 +65,8 @@ class PyJMC:
                      "VAR": "__variable__",
                      "INT": "__int__",
                      "STORAGE": "__storage__"
-                 }) -> None:
+                 }, envs: list[str] | None = None) -> None:
+        Header().envs = envs if envs is not None else []
         self.config = Configuration(
             GlobalData(),
             namespace=namespace,

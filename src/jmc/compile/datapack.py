@@ -9,6 +9,7 @@ from .pack_version import PackVersion, PackVersionFeature
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
 from .exception import (
+    JMCBuildError,
     JMCSyntaxException,
     JMCSyntaxWarning,
     JMCValueError,
@@ -662,6 +663,14 @@ class DataPack:
                 raise JMCValueError(
                     f"Function '{function_called}' was not defined", token, tokenizer
                 )
+
+        envs = Header().envs
+
+        if envs:
+            envs_error = ", ".join(envs)
+            raise JMCBuildError(
+                f"The following environment variables were set to 1 but they do not exist: {envs_error}",
+            )
 
         if self.delayed_error is not None:
             raise self.delayed_error

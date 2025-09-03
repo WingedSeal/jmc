@@ -44,6 +44,7 @@ class Header(SingleTon):
         "post_process",
         "finished_compiled_time",
         "nometa",
+        "using_envs",
     )
 
     file_read: set[str]
@@ -73,6 +74,8 @@ class Header(SingleTon):
     finished_compiled_time: float
     nometa: bool
     """Whether hand pack.mcmeta to user"""
+    envs: list[str]
+    """Environment variables to set to 1 (gotten from cli). This should be empty list at the end of compilation"""
 
     def __init__(self) -> None:
         self.__clear(self)

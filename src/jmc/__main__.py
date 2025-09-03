@@ -4,6 +4,8 @@ import argparse
 from pathlib import Path
 import sys
 
+from jmc.compile.header import Header
+
 from .terminal.configuration import Configuration
 from .compile import Logger
 from .terminal.utils import RestartException, handle_exception
@@ -27,7 +29,7 @@ def main():
     if args.command == "init":
         init(args)
     elif args.command == "compile":
-        compile()
+        compile(args)
     elif args.command == "config":
         config(args)
     elif args.command == "run" or args.command is None:
@@ -41,6 +43,18 @@ def get_args() -> argparse.Namespace:
     subparser = parser.add_subparsers(dest="command", required=False)
 
     compile_parser = subparser.add_parser("compile", help="compile")
+    compile_parser.add_argument(
+        "--environment",
+        "--environments"
+        "--env",
+        "--envs",
+        "-e",
+        required=False,
+        default=[],
+        nargs="+",
+        type="str",
+        help="set macros defined with #env to 1"
+    )
 
     run_parser = subparser.add_parser("run", help="start a jmc session")
 
@@ -134,10 +148,11 @@ def config(args: argparse.Namespace):
     configuration.save_config()
 
 
-def compile():
+def compile(args: argparse.Namespace):
     if not global_data.config.is_file_exist():
         print("Compilation failed: Configuration file does not exists.")
     global_data.config.load_config()
+    Header().envs = args.environment
     terminal_commands.compile_()
 
 

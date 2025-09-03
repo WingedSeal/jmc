@@ -44,14 +44,9 @@ def exit_() -> None:
     sys.exit(0)
 
 
-@add_command("compile [debug]", "compile")
-def compile_(debug: str = "") -> None:
+@add_command("compile [env1] [env2] ...", "compile")
+def compile_(*envs: str) -> None:
     """Compile main JMC file"""
-    if debug:
-        if debug != "debug":
-            raise TypeError(f"Unrecognized argument '{debug}'")
-        pprint("DEBUG MODE", Colors.INFO)
-    debug_compile = bool(debug)
 
     pprint("Compiling...", Colors.INFO)
     if not global_data.config:
@@ -59,6 +54,7 @@ def compile_(debug: str = "") -> None:
         return
     try:
         start_time = perf_counter()
+        Header().envs = list(envs)
         compile_jmc(global_data.config, debug=True)
         finished_compiled_time = Header().finished_compiled_time
         stop_time = perf_counter()
@@ -70,10 +66,6 @@ def compile_(debug: str = "") -> None:
     except Exception as error:
         logger.exception("Non-JMC Error occur")
         handle_exception(error, global_data.EVENT, is_ok=False)
-
-    if debug_compile:
-        __log_debug()
-        __log_info()
 
 
 def __log_debug() -> None:
