@@ -2,8 +2,7 @@ from json import JSONDecodeError, dump, load
 import os
 from pathlib import Path
 import threading
-from typing import Any, Callable
-
+from typing import Any, Callable, TypeVar
 from .utils import Colors, get_input, pprint
 from ..compile.utils import SingleTon
 from ..compile import Logger
@@ -321,6 +320,9 @@ class GlobalData(SingleTon):
         self.commands[command] = (func, usage)
 
 
+T = TypeVar("T", bound=TerminalCommand)
+
+
 def add_command(usage: str, rename: str = ""):
     """
     Decorator factory to add terminal command
@@ -329,7 +331,7 @@ def add_command(usage: str, rename: str = ""):
     :return: decorator function
     """
 
-    def decorator(func: TerminalCommand) -> TerminalCommand:
+    def decorator(func: T) -> T:
         """
         Decorator to add terminal command
 

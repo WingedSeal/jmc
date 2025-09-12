@@ -152,8 +152,7 @@ def compile(args: argparse.Namespace):
     if not global_data.config.is_file_exist():
         print("Compilation failed: Configuration file does not exists.")
     global_data.config.load_config()
-    Header().envs = args.environment
-    terminal_commands.compile_()
+    terminal_commands.compile_(*args.environment)
 
 
 def run():

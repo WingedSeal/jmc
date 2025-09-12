@@ -86,7 +86,7 @@ INT=__int__"""
 
     def set_envs(self, envs: list[str]) -> "JMCTestPack":
         """
-        Set --env 
+        Set --env
 
         :param envs: Environment variables
         :return: Self
