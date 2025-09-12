@@ -45,6 +45,7 @@ class Header(SingleTon):
         "finished_compiled_time",
         "nometa",
         "using_envs",
+        "force_bst"
     )
 
     file_read: set[str]
@@ -76,6 +77,8 @@ class Header(SingleTon):
     """Whether hand pack.mcmeta to user"""
     envs: list[str]
     """Environment variables to set to 1 (gotten from cli). This should be empty list at the end of compilation"""
+    force_bst: bool
+    """Whether to force binary search on switch case after vanilla macro"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -103,6 +106,7 @@ class Header(SingleTon):
         obj.post_process = []
         obj.finished_compiled_time = 0
         obj.nometa = False
+        obj.force_bst = False
 
     def add_file_read(self, path: Path) -> None:
         """

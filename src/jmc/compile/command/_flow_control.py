@@ -4,6 +4,7 @@ import re
 from typing import Literal
 
 from ..pack_version import PackVersionFeature
+from ..header import Header
 from .condition import parse_condition
 from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
 from ..tokenizer import Token, Tokenizer, TokenType
@@ -247,7 +248,7 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     if case_numbers is None:
         case_numbers = [*range(1, len(func_contents) + 1)]
     func_count = datapack.get_count(name)
-    if datapack.version >= PackVersionFeature.VANILLA_MACRO:
+    if datapack.version >= PackVersionFeature.VANILLA_MACRO and not Header().force_bst:
         has_default = "default" in case_numbers
         for (case_body, case_label) in zip(func_contents, case_numbers):
             if has_default and case_label != "default":

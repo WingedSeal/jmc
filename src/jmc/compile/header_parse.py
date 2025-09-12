@@ -610,6 +610,17 @@ def __parse_header(
             else:
                 header.credits.append("")
 
+        # #forcebst
+        elif directive_token.string == "forcebst":
+            if arg_tokens:
+                raise HeaderSyntaxException(
+                    "Expected 0 arguments after '#forcebst'",
+                    file_name,
+                    line,
+                    line_str
+                )
+            header.force_bst = True
+
         # #enum
         elif directive_token.string == "enum":
             if len(arg_tokens) < 2:
