@@ -353,7 +353,7 @@ def parse_switch(
     )
     return (
         f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n"
-        + f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}"
+        + datapack.call_func(name, func_count)
     )
 
 
