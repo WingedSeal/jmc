@@ -120,8 +120,7 @@ def __custom_macro_factory(
                     )
                 )
                 extra_col += (
-                    argument_tokens[token_or_int[0]].length -
-                    token_or_int[1].length
+                    argument_tokens[token_or_int[0]].length - token_or_int[1].length
                 )
 
         return return_list
@@ -144,8 +143,7 @@ def __eval_macro_factory(
     except ZeroDivisionError:
         raise EvaluationException(string, "ZeroDivisionError")
     new_token = Token(
-        TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(
-            number)
+        TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(number)
     )
     return [new_token]
 
@@ -163,8 +161,7 @@ def __not_macro_factory(
     else:
         number = "0"
     new_token = Token(
-        TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(
-            number)
+        TokenType.KEYWORD, line=line, col=col, string=number, _macro_length=len(number)
     )
     return [new_token]
 
@@ -183,8 +180,7 @@ def __create_macro_factory(
     # Parsing parameters_token
     parameter_tokens: list[Token] = []
     if parameters_token is not None:
-        parameter_tokens_, invalid_kwargs = tokenizer.parse_func_args(
-            parameters_token)
+        parameter_tokens_, invalid_kwargs = tokenizer.parse_func_args(parameters_token)
         for parameter_token_ in parameter_tokens_:
             if parameter_token_[0].token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
@@ -280,8 +276,7 @@ def __create_macro_factory(
                     )
                 )
                 extra_col += (
-                    argument_tokens[token_or_int[0]].length -
-                    token_or_int[1].length
+                    argument_tokens[token_or_int[0]].length - token_or_int[1].length
                 )
 
         if reapplier is None:
@@ -515,8 +510,7 @@ def __parse_header(
                             line_str,
                         )
                     replaced_tokens = [
-                        Token.empty(hash_string_to_string(
-                            config.namespace, length))
+                        Token.empty(hash_string_to_string(config.namespace, length))
                     ]
                 elif binder == "__UUID__":
                     replaced_tokens = [
@@ -545,8 +539,7 @@ def __parse_header(
                             line,
                             line_str,
                         )
-                    header.macros[key] = __custom_macro_factory(
-                        replaced_tokens, key)
+                    header.macros[key] = __custom_macro_factory(replaced_tokens, key)
 
         # #include
         elif directive_token.string == "include":
@@ -614,10 +607,7 @@ def __parse_header(
         elif directive_token.string == "forcebst":
             if arg_tokens:
                 raise HeaderSyntaxException(
-                    "Expected 0 arguments after '#forcebst'",
-                    file_name,
-                    line,
-                    line_str
+                    "Expected 0 arguments after '#forcebst'", file_name, line, line_str
                 )
             header.force_bst = True
 
@@ -799,7 +789,24 @@ def __parse_header(
             header.post_process.append(__uninstall)
         # #nometa
         elif directive_token.string == "nometa":
+            if arg_tokens:
+                raise HeaderSyntaxException(
+                    f"Expected 0 arguments after '#nometa' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
             header.nometa = True
+        # #show_private_command
+        elif directive_token.string == "show_private_command":
+            if arg_tokens:
+                raise HeaderSyntaxException(
+                    f"Expected 0 arguments after '#nometa' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            header.show_private_command = True
 
         else:
             raise HeaderSyntaxException(
