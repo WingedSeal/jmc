@@ -315,7 +315,7 @@ def parse_switch(
                 name, case_body, f"{str(func_count)}/{case_label}"
             )
 
-        macro_function_call = f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
+        macro_function_call = f"$function {datapack.call_func(name, func_count)}"
         if with_str is not None:
             macro_function_call = f"{macro_function_call} with {with_str}"
 
