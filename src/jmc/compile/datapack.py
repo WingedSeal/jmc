@@ -504,6 +504,11 @@ class DataPack:
     def _get_func_in_comment(self, name: str, count: str) -> str:
         if not Header().show_private_command:
             return ""
+        if (
+            name not in self.private_functions
+            or count not in self.private_functions[name]
+        ):
+            return "\n# ...\n"
         return (
             "\n# "
             + "\n# ".join(
