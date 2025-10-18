@@ -1,4 +1,5 @@
 """Main module"""
+
 import atexit
 import argparse
 from pathlib import Path
@@ -22,7 +23,6 @@ logger = Logger(__name__)
 
 def main():
     """Main function"""
-    atexit.register(lambda: print(Colors.EXIT.value + "\n"))
     logger.info(f"Argv: {sys.argv}")
     args = get_args()
     logger.info(f"Args: {args}")
@@ -33,13 +33,13 @@ def main():
     elif args.command == "config":
         config(args)
     elif args.command == "run" or args.command is None:
+        atexit.register(lambda: print(Colors.EXIT.value + "\n"))
         run()
 
 
 def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description='Javascript-like Minecraft Function')
-    parser.add_argument("--version", "-v", action='version', version=VERSION)
+    parser = argparse.ArgumentParser(description="Javascript-like Minecraft Function")
+    parser.add_argument("--version", "-v", action="version", version=VERSION)
     subparser = parser.add_subparsers(dest="command", required=False)
 
     compile_parser = subparser.add_parser("compile", help="compile")
@@ -53,47 +53,26 @@ def get_args() -> argparse.Namespace:
         default=[],
         nargs="+",
         type=str,
-        help="set macros defined with #env to 1"
+        help="set macros defined with #env to 1",
     )
 
     run_parser = subparser.add_parser("run", help="start a jmc session")
 
-    init_parser = subparser.add_parser(
-        "init", help="initialize configurations")
+    init_parser = subparser.add_parser("init", help="initialize configurations")
+    init_parser.add_argument("--namespace", "-n", required=True, type=str)
     init_parser.add_argument(
-        "--namespace",
-        "-n",
-        required=True,
-        type=str)
+        "--description", "--desc", "-d", default="", required=False, type=str
+    )
     init_parser.add_argument(
-        "--description",
-        "--desc",
-        "-d",
-        default="",
-        required=False,
-        type=str)
+        "--packformat", "--pack_format", "-p", required=True, type=int
+    )
     init_parser.add_argument(
-        "--packformat",
-        "--pack_format",
-        "-p",
-        required=True,
-        type=int)
+        "--target", "--target_path", "-t", required=False, type=Path
+    )
     init_parser.add_argument(
-        "--target",
-        "--target_path",
-        "-t",
-        required=False,
-        type=Path)
-    init_parser.add_argument(
-        "--output",
-        "--output_path",
-        "-o",
-        required=False,
-        type=Path)
-    init_parser.add_argument(
-        "--force",
-        dest="is_force",
-        action='store_true')
+        "--output", "--output_path", "-o", required=False, type=Path
+    )
+    init_parser.add_argument("--force", dest="is_force", action="store_true")
 
     config_parser = subparser.add_parser("config", help="edit configuration")
     config_parser.add_argument(
@@ -101,18 +80,9 @@ def get_args() -> argparse.Namespace:
         "-c",
         required=True,
         type=str,
-        choices=(
-            "namespace",
-            "description",
-            "pack_format",
-            "target",
-            "output"
-        ))
-    config_parser.add_argument(
-        "--value",
-        "-v",
-        required=True,
-        type=str)
+        choices=("namespace", "description", "pack_format", "target", "output"),
+    )
+    config_parser.add_argument("--value", "-v", required=True, type=str)
 
     args = parser.parse_args()
     return args
@@ -126,14 +96,16 @@ def init(args: argparse.Namespace):
         args.description,
         args.packformat,
         args.target,
-        args.output
+        args.output,
     )
     if args.target is None:
         configuration.target = configuration._default_target()
     if args.output is None:
         configuration.output = configuration._default_output()
     if not args.is_force and configuration.is_file_exist():
-        print("Initialization failed: Configuration file already exists. Run with `--force` to override the old file.")
+        print(
+            "Initialization failed: Configuration file already exists. Run with `--force` to override the old file."
+        )
         return
     configuration.save_config()
 
