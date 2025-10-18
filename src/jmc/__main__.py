@@ -1,6 +1,7 @@
 """Main module"""
 
 import atexit
+import subprocess
 import argparse
 from pathlib import Path
 import sys
@@ -35,6 +36,8 @@ def main():
     elif args.command == "run" or args.command is None:
         atexit.register(lambda: print(Colors.EXIT.value + "\n"))
         run()
+    elif args.command == "update":
+        update(args)
 
 
 def get_args() -> argparse.Namespace:
@@ -84,6 +87,22 @@ def get_args() -> argparse.Namespace:
     )
     config_parser.add_argument("--value", "-v", required=True, type=str)
 
+    update_parser = subparser.add_parser("update", help="update jmc from pip")
+    update_parser.add_argument(
+        "--git",
+        "-g",
+        dest="is_git",
+        action="store_true",
+        help="force install git version from github repository",
+    )
+    update_parser.add_argument(
+        "--verbose",
+        "-v",
+        dest="is_verbose",
+        action="store_true",
+        help="show pip output",
+    )
+
     args = parser.parse_args()
     return args
 
@@ -108,6 +127,44 @@ def init(args: argparse.Namespace):
         )
         return
     configuration.save_config()
+
+
+def update(args: argparse.Namespace):
+    """Update the CLI package to the latest version via pip"""
+    git_version_detected = VERSION.endswith("-git")
+    if git_version_detected:
+        print("Git version detected")
+        if args.is_git:
+            print("Ignoring '--git' flag")
+    elif args.is_git:
+        print("Forcing git version")
+
+    if args.is_git or git_version_detected:
+        package = [
+            "--force-reinstall",
+            "--no-deps",
+            "git+https://github.com/WingedSeal/jmc.git#subdirectory=src",
+        ]
+    else:
+        package = ["jmcfunction"]
+    try:
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+            ]
+            + (
+                [] if args.is_verbose else ["--quiet", "--quiet"]
+            )  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
+            + package
+        )
+        print("Update installed")
+    except subprocess.CalledProcessError as e:
+        print(f"Update failed: {e}")
+        sys.exit(1)
 
 
 def config(args: argparse.Namespace):
