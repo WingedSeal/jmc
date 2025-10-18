@@ -1,2 +1,2 @@
-VERSION = "v1.2.19-alpha.1"
+VERSION = "v1.2.19-git"
 CONFIG_FILE_NAME = "jmc_config.json"
