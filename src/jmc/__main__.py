@@ -193,7 +193,7 @@ def run():
             handle_exception(error, global_data.EVENT, is_ok=True)
         except RestartException:
             pass
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             break
 
 
