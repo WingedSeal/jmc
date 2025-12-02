@@ -132,7 +132,6 @@ class RightClickSetup(EventMixin):
         "lore": "",
         "nbt": "",
         "component": "",
-        "onClick": ""
     }
 )
 class ItemCreate(ItemMixin, EventMixin):
