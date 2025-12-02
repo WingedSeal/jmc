@@ -3,6 +3,7 @@ import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash from "../../utils/scrollToHash";
 import { Link } from "react-router-dom";
+import SectionLinkCopy from "../../components/SectionLinkCopy";
 
 const NBT = () => {
     useScrollToHash();
@@ -66,6 +67,7 @@ const NBT = () => {
 
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 NBT Assignment
+                <SectionLinkCopy sectionId="nbt_assignment" />
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
@@ -107,6 +109,7 @@ const NBT = () => {
             <section id="nbt_operation" />
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 NBT Operation
+                <SectionLinkCopy sectionId="nbt_operation" />
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
@@ -200,6 +203,7 @@ const NBT = () => {
             <section id="get_nbt" />
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 Get NBT
+                <SectionLinkCopy sectionId="get_nbt" />
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
@@ -234,6 +238,7 @@ const NBT = () => {
             <section id="remove_nbt" />
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 Remove NBT
+                <SectionLinkCopy sectionId="remove_nbt" />
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <p>
@@ -258,6 +263,7 @@ const NBT = () => {
             <section id="execute_store" />
             <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                 Execute store
+                <SectionLinkCopy sectionId="execute_store" />
             </div>
             <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                 <CodeBlock>

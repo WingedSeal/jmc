@@ -1,6 +1,7 @@
 import React from "react";
 import "./Feature.css";
 import Example from "./Example";
+import SectionLinkCopy from "../SectionLinkCopy";
 
 interface FeatureInterface {
     id: string;
@@ -30,6 +31,7 @@ const Feature: React.FC<FeatureInterface> = (props) => {
                     }
                 >
                     {props.summary}
+                    <SectionLinkCopy sectionId={props.id} />
                 </summary>
                 {props.children}
                 {props.examples ? (

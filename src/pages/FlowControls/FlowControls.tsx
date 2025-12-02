@@ -3,6 +3,7 @@ import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash, { scrollToHash } from "../../utils/scrollToHash";
 import { Link } from "react-router-dom";
+import SectionLinkCopy from "../../components/SectionLinkCopy";
 
 const FlowControls = () => {
     useScrollToHash();
@@ -15,6 +16,7 @@ const FlowControls = () => {
                 <section id="condition" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Condition
+                    <SectionLinkCopy sectionId="condition" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -115,6 +117,7 @@ const FlowControls = () => {
                 <section id="logical_operator" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Logical Operator (Logic Gate)
+                    <SectionLinkCopy sectionId="logical_operator" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -164,6 +167,7 @@ const FlowControls = () => {
                 <section id="if_else" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     If & Else
+                    <SectionLinkCopy sectionId="if_else" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -247,6 +251,7 @@ const FlowControls = () => {
                 <section id="if_expand" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     If expand
+                    <SectionLinkCopy sectionId="if_expand" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -266,6 +271,7 @@ const FlowControls = () => {
                 <section id="while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     While Loop
+                    <SectionLinkCopy sectionId="while" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -297,6 +303,7 @@ const FlowControls = () => {
                 <section id="do_while" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Do-While Loop
+                    <SectionLinkCopy sectionId="do_while" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -326,6 +333,7 @@ const FlowControls = () => {
                 <section id="for" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     For Loop
+                    <SectionLinkCopy sectionId="for" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -376,6 +384,7 @@ const FlowControls = () => {
                 <section id="async" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Async Loop
+                    <SectionLinkCopy sectionId="async" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -410,6 +419,7 @@ const FlowControls = () => {
                 <section id="switch_case" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case (pre-Minecraft 1.20.2)
+                    <SectionLinkCopy sectionId="switch_case" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -515,6 +525,7 @@ const FlowControls = () => {
                 <section id="switch_case_new" />
                 <div className="text-primary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Switch Case (Minecraft 1.20.2+)
+                    <SectionLinkCopy sectionId="switch_case_new" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -608,6 +619,13 @@ const FlowControls = () => {
                         <br />
                         {"}"}
                     </CodeBlock>
+                    <p>
+                        You can add{" "}
+                        <code>
+                            with {"{"}...{"}"}
+                        </code>{" "}
+                        at the end.
+                    </p>
                 </div>
             </section>
         </>

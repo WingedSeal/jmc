@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash from "../../utils/scrollToHash";
+import SectionLinkCopy from "../../components/SectionLinkCopy";
 
 const Function = () => {
     useScrollToHash();
@@ -15,6 +16,7 @@ const Function = () => {
                 <section id="function_defining" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function defining
+                    <SectionLinkCopy sectionId="function_defining" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -75,6 +77,7 @@ const Function = () => {
                 <section id="function_calling" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Function calling
+                    <SectionLinkCopy sectionId="function_calling" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -110,12 +113,18 @@ const Function = () => {
                         <CodeText type="function">
                             folder_name.function_name
                         </CodeText>
-                        ();{" "}
+                        (); <br />
+                        <CodeText type="keyword">if</CodeText> (
+                        <CodeText type="function">function_name</CodeText>()){" "}
+                        {"{"}
+                        <CodeText type="operator">...</CodeText>
+                        {"}"}
                     </CodeBlock>
                 </div>
                 <section id="anonymous_function" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Anonymous Function
+                    <SectionLinkCopy sectionId="anonymous_function" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -169,6 +178,7 @@ const Function = () => {
                 <section id="execute_expand" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Execute Expand
+                    <SectionLinkCopy sectionId="execute_expand" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -200,6 +210,7 @@ const Function = () => {
                 <section id="class" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Class (Function grouping)
+                    <SectionLinkCopy sectionId="class" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -275,7 +286,9 @@ const Function = () => {
                         () {"{}"}
                         <br />
                         <Tab />
-                        <CodeText type="function">random_function</CodeText>() {"{"}
+                        <CodeText type="function">
+                            random_function
+                        </CodeText>() {"{"}
                         <br />
                         <Tab />
                         <Tab />
@@ -302,10 +315,11 @@ const Function = () => {
                         {"}"}
                     </CodeBlock>
                 </div>
+                <section id="macro" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Vanilla Function Macro (Minecraft 1.20.2+)
+                    <SectionLinkCopy sectionId="macro" />
                 </div>
-                <section id="macro" />
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
@@ -351,19 +365,15 @@ const Function = () => {
                         <CodeText type="operator">=</CodeText>
                         jmc]
                         <CodeText type="operator">::</CodeText>
-                        my_path
-                        ;
+                        my_path ;
                         <br />
                         <CodeText type="function">function_name</CodeText>
-                        () with [
-                        <CodeText type="number">~</CodeText>
+                        () with [<CodeText type="number">~</CodeText>
                         <CodeText type="operator">,</CodeText>{" "}
                         <CodeText type="number">10</CodeText>
                         <CodeText type="operator">,</CodeText>{" "}
-                        <CodeText type="number">~</CodeText>
-                        ]
-                        <CodeText type="operator">::</CodeText>
-                        ;
+                        <CodeText type="number">~</CodeText>]
+                        <CodeText type="operator">::</CodeText>;
                     </CodeBlock>
                     <p>
                         It also has a special feature that automatically convert

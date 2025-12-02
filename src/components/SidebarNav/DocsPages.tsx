@@ -127,6 +127,13 @@ const getDocsPages = (
                     hash="execute_store"
                     searchValue={searchValue}
                 />,
+                <DocsLink
+                    name="Expression Evaluation"
+                    keyword=":= evaluate"
+                    page="variable"
+                    hash="expression_evaluation"
+                    searchValue={searchValue}
+                />,
             ]}
         />,
         <DocsLink
@@ -239,6 +246,13 @@ const getDocsPages = (
                     searchValue={searchValue}
                     hash="root"
                 />,
+                <DocsLink
+                    name="If"
+                    keyword="conditional compilation debug"
+                    page="decorator"
+                    searchValue={searchValue}
+                    hash="if"
+                />,
             ]}
         />,
         <DocsLink
@@ -252,14 +266,28 @@ const getDocsPages = (
                     keyword="replaced token define"
                     page="header"
                     searchValue={searchValue}
-                    hash="define"
+                    hash="macro"
+                />,
+                <DocsLink
+                    name="Deep Define"
+                    keyword="replaced token define eval"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="deepdefine"
                 />,
                 <DocsLink
                     name="Binding"
-                    keyword="special macro __uuid__ __namespace__ random generate auto"
+                    keyword="special macro __uuid__ __namespace__ random generate auto eval not"
                     page="header"
                     searchValue={searchValue}
                     hash="binding"
+                />,
+                <DocsLink
+                    name="Environment Variable"
+                    keyword="env @if debug"
+                    page="header"
+                    searchValue={searchValue}
+                    hash="env"
                 />,
                 <DocsLink
                     name="Credit"
@@ -323,6 +351,20 @@ const getDocsPages = (
                     page="header"
                     searchValue={searchValue}
                     hash="enum"
+                />,
+                <DocsLink
+                    name="Force BST"
+                    keyword=""
+                    page="header"
+                    searchValue={searchValue}
+                    hash="forcebst"
+                />,
+                <DocsLink
+                    name="Show Private Command"
+                    keyword=""
+                    page="header"
+                    searchValue={searchValue}
+                    hash="show_private_command"
                 />,
             ]}
         />,

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash from "../../utils/scrollToHash";
+import SectionLinkCopy from "../../components/SectionLinkCopy";
 
 const Variable = () => {
     useScrollToHash();
@@ -26,6 +27,7 @@ const Variable = () => {
                 <section id="variable_assignment" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Assignment
+                    <SectionLinkCopy sectionId="variable_assignment" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -82,6 +84,7 @@ const Variable = () => {
                 <section id="variable_operation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Variable Operation
+                    <SectionLinkCopy sectionId="variable_operation" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -133,7 +136,7 @@ const Variable = () => {
                         <li>
                             <code>??=</code> Null Coalescing: If source's score
                             is null/undefined, set source's score to target's
-                            score.
+                            score. (This operator works with NBT syntax)
                         </li>
                     </ul>
                     <CodeBlock>
@@ -164,6 +167,7 @@ const Variable = () => {
                 <section id="variable_incrementation" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Incrementation
+                    <SectionLinkCopy sectionId="variable_incrementation" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <ul className="ml-4 md:ml-6 list-disc list-inside">
@@ -204,6 +208,7 @@ const Variable = () => {
                 <section id="get_variable" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Get variable
+                    <SectionLinkCopy sectionId="get_variable" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -235,39 +240,22 @@ const Variable = () => {
                 <section id="convert_to_string" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Convert to string
+                    <SectionLinkCopy sectionId="convert_to_string" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
                         <Tab />
                         Use{" "}
-                        <code>
-                            <CodeText type="function">.toString</CodeText>()
-                        </code>{" "}
-                        method to convert to JSON for tellraw, title, etc. This
-                        method is the only one that can be used anywhere in the
-                        code. To change the style, pass argument(s) into the
-                        method.
-                    </p>
-                    <p className="text-warning">
-                        <Tab />
-                        Using{" "}
                         <Link to="/documentation/built-in-function#formatted_text">
                             FormattedText
                         </Link>{" "}
-                        is prefered over <code>.toString</code>
+                        to convert a variable to string.
                     </p>
-                    <CodeBlock>
-                        tellraw <CodeText type="param">@a</CodeText>{" "}
-                        <CodeText type="variable">$my_var</CodeText>
-                        <CodeText type="function">.toString</CodeText>
-                        (color<CodeText type="operator">=</CodeText>
-                        red<CodeText type="operator">,</CodeText> bold
-                        <CodeText type="operator">=</CodeText>true);
-                    </CodeBlock>
                 </div>
                 <section id="execute_store" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Execute store
+                    <SectionLinkCopy sectionId="execute_store" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <CodeBlock>
@@ -293,6 +281,52 @@ const Variable = () => {
                         <CodeText type="variable">$my_var</CodeText>{" "}
                         <CodeText type="operator">=</CodeText> data get entity
                         @s SelectedItem.tag.my_var;
+                    </CodeBlock>
+                </div>
+                <section id="expression_evaluation" />
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    Expression Evaluation
+                    <SectionLinkCopy sectionId="expression_evaluation" />
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Evaluate an expression and store the result in a
+                        variable. An expression may contain a command wrapped in
+                        curly parenthesis. (Reminder: NBT syntax is also a
+                        command)
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="variable">{"$<variable>"}</CodeText>{" "}
+                        <CodeText type="operator">:{"<operator>"}</CodeText>{" "}
+                        <CodeText type="variable">{"$<expression>"}</CodeText>{" "}
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        Example
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="variable">$my_var</CodeText>{" "}
+                        <CodeText type="operator">:=</CodeText> (
+                        <CodeText type="number">5</CodeText>{" "}
+                        <CodeText type="operator">+</CodeText>{" "}
+                        <CodeText type="variable">$var2</CodeText>)
+                        <CodeText type="operator">**</CodeText>
+                        <CodeText type="number">2</CodeText>{" "}
+                        <CodeText type="operator">/</CodeText> {"{"}
+                        <CodeText type="class">my_storage</CodeText>
+                        <CodeText type="operator">::</CodeText>
+                        <CodeText type="param">path</CodeText>
+                        <CodeText type="operator">.</CodeText>
+                        <CodeText type="param">to</CodeText>
+                        <CodeText type="operator">.</CodeText>
+                        <CodeText type="param">element</CodeText>
+                        {"}"} <CodeText type="operator">-</CodeText> {"{"}
+                        say{" "}
+                        <CodeText type="string">
+                            "This command returns 1"
+                        </CodeText>
+                        {"}"};
                     </CodeBlock>
                 </div>
             </section>

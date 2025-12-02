@@ -131,12 +131,8 @@ const BuildinFeatures = [
             ]}
         />
     </Feature>,
-    <Feature id="item_create" summary="Item.create()" keywords="new rightclick">
+    <Feature id="item_create" summary="Item.create()" keywords="new">
         <p>Create a custom item and save it for further use.</p>
-        <p>
-            onClick can only be used with "carrot_on_a_stick" or
-            "warped_fungus_on_a_stick" itemType.
-        </p>
         <p>
             <code>itemId</code> is the unique name of this item so that it can
             be referenced in other Item function.
@@ -150,6 +146,36 @@ const BuildinFeatures = [
                 { key: "displayName", type: "FormattedString", default: '""' },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "component", type: "Component", default: "[]" },
+            ]}
+            newline
+        />
+    </Feature>,
+    <Feature
+        id="item_create_use"
+        summary="Item.createUse()"
+        keywords="new right click"
+    >
+        <p>Create a custom item and save it for further use.</p>
+        <p>
+            <code>itemId</code> is the unique name of this item so that it can
+            be referenced in other Item function.
+        </p>
+        <p>
+            <code>itemType</code> can only be either
+            <code>carrot_on_a_stick</code> or
+            <code>warped_fungus_on_a_stick</code>.
+        </p>
+        <Command
+            name="Item.createUse"
+            type="LoadOnly"
+            params={[
+                { key: "itemId", type: "Keyword" },
+                { key: "itemType", type: "Item" },
+                { key: "displayName", type: "FormattedString", default: '""' },
+                { key: "lore", type: "List<FormattedString>", default: "[]" },
+                { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "component", type: "Component", default: "[]" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
             ]}
             newline
@@ -179,7 +205,10 @@ const BuildinFeatures = [
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "texts", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "component", type: "Component", default: "[]" },
                 { key: "onClick", type: "Function", default: "()=>{}" },
+                { key: "isFrontGlow", type: "boolean", default: "false" },
+                { key: "isBackGlow", type: "boolean", default: "false" },
             ]}
             newline
         />
@@ -204,6 +233,7 @@ const BuildinFeatures = [
                 { key: "onPlace", type: "Function", default: "()=>{}" },
                 { key: "lore", type: "List<FormattedString>", default: "[]" },
                 { key: "nbt", type: "JSObject", default: "{}" },
+                { key: "component", type: "Component", default: "[]" },
             ]}
             newline
         />
@@ -1068,6 +1098,71 @@ const BuildinFeatures = [
         />
     </Feature>,
     <Feature
+        id="jmc_call"
+        summary="JMC.call()"
+        keywords="anonymous function arrow function"
+        examples={[
+            "https://jmc.wingedseal.com/try-out?jmc=AIGwhgXgngUAZgVwHYGMAuBLA9kgBGgUwGc0AKFMEEAIzBQGsBKXAbxgEgApAWQGEA6ClVIASITTpMA3DAC%2BMGIRKlSjALwA%2BNuyJgouAEQB1DFVzjaDAzNmMZ8ZOmx4wSLGgAWBAE4AxR5g4qqwcuvrGpiDmlBIMAEzWcgpKZK7uXn4BznZAA",
+        ]}
+    >
+        <p>
+            Call any function with parameters. But unlike normal{" "}
+            <code>func()</code> syntax, it can be used with anonymous function.
+            It is mainly used for lazy function.
+        </p>
+        <Command
+            name="JMC.call"
+            type="JMCFunction"
+            params={[{ key: "function", type: "Function" }]}
+        />
+    </Feature>,
+    <Feature id="jmc_print" summary="JMC.print()" keywords="">
+        <p>Print any text to console when compiling.</p>
+        <Command
+            name="JMC.print"
+            type="JMCFunction"
+            params={[{ key: "text", type: "string" }]}
+        />
+    </Feature>,
+    <Feature id="jmc_todo" summary="JMC.todo()" keywords="print">
+        <p>
+            Print any text along with the call site to console when compiling.
+        </p>
+        <Command
+            name="JMC.todo"
+            type="JMCFunction"
+            params={[{ key: "text", type: "string" }]}
+        />
+    </Feature>,
+    <Feature
+        id="jmc_print_any"
+        summary="JMC.printAny()"
+        keywords="debugging compiler"
+    >
+        <p>Print out the token the compiler is seeing, used for debugging.</p>
+        <p>
+            <code>prefix</code> is the normal text that will come before the
+            token
+        </p>
+        <Command
+            name="JMC.printAny"
+            type="JMCFunction"
+            params={[
+                { key: "any", type: "Any" },
+                { key: "prefix", type: "string", default: '""' },
+            ]}
+        />
+        <p>
+            For example, to see if <code>#env __DEBUG__</code> has been set,
+        </p>
+        <CodeBlock>
+            <CodeText type="class">JMC</CodeText>
+            <CodeText type="operator">.</CodeText>
+            <CodeText type="function">printAny</CodeText>(__DEBUG__,{" "}
+            <CodeText type="string"> "__DEBUG__ is set to "</CodeText>);
+        </CodeBlock>
+    </Feature>,
+    <Feature
         id="string_is_equal"
         summary="String.isEqual()"
         keywords="compare nbt"
@@ -1880,6 +1975,25 @@ const BuildinFeatures = [
                 { key: "removeFrom", type: "TargetSelector", default: "@e" },
             ]}
             newline
+        />
+    </Feature>,
+    <Feature id="debug_watch" summary="Debug.watch()" keywords="track gdb">
+        <p>
+            Print in-game debug text when a variable got updated by JMC's
+            operation like <code>$x++;</code>, <code>test:@s = 10;</code>{" "}
+            (Manual <code>scoreboard players</code> command will not do this)
+        </p>
+        <p>
+            <code>src</code> is a flag to determine whether to print the source
+            code and the line it was updated.
+        </p>
+        <Command
+            name="Debug.watch"
+            type="LoadOnly"
+            params={[
+                { key: "variable", type: "scoreboard" },
+                { key: "src", type: "boolean", default: "true" },
+            ]}
         />
     </Feature>,
 ];

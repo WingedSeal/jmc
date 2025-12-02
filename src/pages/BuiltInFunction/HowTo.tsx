@@ -193,7 +193,8 @@ const howTo = (
             <CodeText type="class">FunctionName</CodeText>
             <br />
             <CodeText type="class">TargetSelector</CodeText>{" "}
-            <CodeText type="operator">=</CodeText> <CodeText type="param">@a</CodeText>[tag
+            <CodeText type="operator">=</CodeText>{" "}
+            <CodeText type="param">@a</CodeText>[tag
             <CodeText type="operator">=</CodeText>test]
             <br />
             <CodeText type="class">Scoreboard</CodeText>{" "}
@@ -220,6 +221,37 @@ const howTo = (
             <CodeText type="operator">=</CodeText> carrot_on_a_stick{" "}
             <CodeText type="comment">{"//"} A minecraft item's id</CodeText>
             <br />
+            <CodeText type="class">Components</CodeText>{" "}
+            <CodeText type="operator">=</CodeText> [
+            <br />
+            <Tab />
+            attribute_modifiers<CodeText type="operator">=</CodeText>[<br />
+            <Tab />
+            <Tab />
+            {"{"}type<CodeText type="operator">:</CodeText>
+            <CodeText type="string">"minecraft:scale"</CodeText>
+            <CodeText type="operator">,</CodeText>slot
+            <CodeText type="operator">:</CodeText>
+            <CodeText type="string">"hand"</CodeText>
+            <CodeText type="operator">,</CodeText>id
+            <CodeText type="operator">:</CodeText>
+            <CodeText type="string">"example:grow"</CodeText>
+            <CodeText type="operator">,</CodeText>amount
+            <CodeText type="operator">:</CodeText>4
+            <CodeText type="operator">,</CodeText>operation
+            <CodeText type="operator">:</CodeText>
+            <CodeText type="string">"add_multiplied_base"</CodeText>
+            {"}"}
+            <br />
+            <Tab />]<CodeText type="operator">,</CodeText>
+            <br />
+            <Tab />
+            <CodeText type="operator">...</CodeText>
+            <br />]{" "}
+            <CodeText type="comment">
+                {"//"} Minecraft's component syntax
+            </CodeText>
+            <br />
             <CodeText type="class">Keyword</CodeText>{" "}
             <CodeText type="operator">=</CodeText> anyKeyword
             <br />
@@ -230,7 +262,8 @@ const howTo = (
             <CodeText type="operator">:</CodeText> Used in condition such as if,
             while etc.
             <br />
-            <CodeText type="keyword">if</CodeText> ( <CodeText type="class">Bool</CodeText>
+            <CodeText type="keyword">if</CodeText> ({" "}
+            <CodeText type="class">Bool</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">example</CodeText>(argument) ) {"{"}
             <br />
@@ -356,7 +389,10 @@ const howTo = (
             <br />
             <Tab />
             <Tab />
-            effect give <CodeText type="param">@s</CodeText> speed <CodeText type="number">1</CodeText> <CodeText type="number">255</CodeText> <CodeText type="operator">true</CodeText>;
+            effect give <CodeText type="param">@s</CodeText> speed{" "}
+            <CodeText type="number">1</CodeText>{" "}
+            <CodeText type="number">255</CodeText>{" "}
+            <CodeText type="operator">true</CodeText>;
             <br />
             <Tab />
             {"} "}
@@ -371,7 +407,8 @@ const howTo = (
                 }
             </CodeText>
             <br />
-            execute as <CodeText type="param">@a</CodeText> run <CodeText type="class">Item</CodeText>
+            execute as <CodeText type="param">@a</CodeText> run{" "}
+            <CodeText type="class">Item</CodeText>
             <CodeText type="operator">.</CodeText>
             <CodeText type="function">give</CodeText>(veryCoolSword);
         </CodeBlock>

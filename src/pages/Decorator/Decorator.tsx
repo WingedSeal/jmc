@@ -2,6 +2,7 @@ import React from "react";
 import CodeBlock, { CodeText } from "../../components/CodeBlock";
 import { Tab } from "../../components/CodeBlock/CodeBlock";
 import useScrollToHash from "../../utils/scrollToHash";
+import SectionLinkCopy from "../../components/SectionLinkCopy";
 
 const Decorator = () => {
     useScrollToHash();
@@ -34,6 +35,7 @@ const Decorator = () => {
                 <section id="add" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Add
+                    <SectionLinkCopy sectionId="add" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -57,6 +59,7 @@ const Decorator = () => {
                 <section id="lazy" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Lazy
+                    <SectionLinkCopy sectionId="lazy" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -85,6 +88,7 @@ const Decorator = () => {
                 <section id="root" />
                 <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
                     Root
+                    <SectionLinkCopy sectionId="root" />
                 </div>
                 <div className="text-white text-base md:text-2xl mt-4 max-w-full">
                     <p>
@@ -123,6 +127,40 @@ const Decorator = () => {
                         <br />
                         {"}"}
                     </CodeBlock>
+                </div>
+                <section id="if" />
+                <div className="text-secondary-contrast text-xl md:text-4xl mt-3 md:mt-4">
+                    If
+                    <SectionLinkCopy sectionId="if" />
+                </div>
+                <div className="text-white text-base md:text-2xl mt-4 max-w-full">
+                    <p>
+                        <Tab />
+                        Take a number constant. If the constant is 0, the
+                        function will be created as an empty lazy function.
+                        Otherwise, the function will be created as normal lazy
+                        function. Note that an empty lazy function is still
+                        callable, it just doesn't do anything.
+                    </p>
+                    <CodeBlock>
+                        <CodeText type="param">@if(__DEBUG__)</CodeText>{" "}
+                        <CodeText type="comment">
+                            {"//"} #env __DEBUG__
+                        </CodeText>
+                        <br />
+                        <CodeText type="keyword">function</CodeText>{" "}
+                        <CodeText type="function">debug</CodeText>
+                        (string) {"{"} <br />
+                        <Tab />
+                        say <CodeText type="number">$string</CodeText>;
+                        <br />
+                        {"}"}
+                    </CodeBlock>
+                    <p>
+                        <Tab />
+                        If a function is named <code>_</code>, it'll be
+                        automatically called and deleted.
+                    </p>
                 </div>
             </section>
         </>
