@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
 
+from jmc.compile.utils import clean_up_paren_token
+
 from .pack_version import PackVersion, PackVersionFeature
 from .tokenizer import Token, TokenType, Tokenizer
 from .datapack_data import Data
@@ -810,7 +812,7 @@ class DataPack:
                 TokenType.PAREN_SQUARE,
             }:
                 pairs.append(
-                    f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                    f"{key}:{clean_up_paren_token(token, tokenizer, is_nbt=False)}"
                 )
             else:
                 pairs.append(f"{key}:{token.string}")
@@ -839,7 +841,7 @@ class DataPack:
                 TokenType.PAREN_SQUARE,
             }:
                 pairs.append(
-                    f"{key}={self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                    f"{key}={clean_up_paren_token(token, tokenizer, is_nbt=False)}"
                 )
             else:
                 pairs.append(f"{key}={token.string}")

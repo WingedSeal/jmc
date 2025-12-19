@@ -15,7 +15,7 @@ from ..header import Header
 from ..datapack import DataPack
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..exception import JMCSyntaxException, JMCValueError
-from ..utils import is_number, is_float
+from ..utils import clean_up_paren_token, is_number, is_float
 
 
 class PlayerType(Enum):
@@ -45,14 +45,14 @@ def merge_obj_selector(
     tokens: list[Token], tokenizer: Tokenizer, datapack: DataPack, start_index: int = 0
 ) -> Token:
     """
-    Merge objective:selector[] into one token
+     Merge objective:selector[] into one token
 
-   :param tokens: List of tokens
-   :param tokenizer: Tokenizer
-   :param datapack: Datapack
-   :param start_index: Index of the first token(keyword) in objective:selector[], defaults to 0
-   :raises ValueError: Impossible tokens array length (merge_obj_selector used without is_obj_selector)
-   :return: Merged token
+    :param tokens: List of tokens
+    :param tokenizer: Tokenizer
+    :param datapack: Datapack
+    :param start_index: Index of the first token(keyword) in objective:selector[], defaults to 0
+    :raises ValueError: Impossible tokens array length (merge_obj_selector used without is_obj_selector)
+    :return: Merged token
     """
     if (
         len(tokens) >= start_index + 4
@@ -62,17 +62,14 @@ def merge_obj_selector(
             tokens[start_index + 3].token_type,
             tokens[start_index + 3].line,
             tokens[start_index + 3].col,
-            datapack.lexer.clean_up_paren_token(
-                tokens[start_index + 3], tokenizer),
+            clean_up_paren_token(tokens[start_index + 3], tokenizer),
         )
-        return_value = tokenizer.merge_tokens(
-            tokens[start_index: start_index + 4])
-        del tokens[start_index + 1: start_index + 4]
+        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 4])
+        del tokens[start_index + 1 : start_index + 4]
         return return_value
     elif len(tokens) >= start_index + 3:
-        return_value = tokenizer.merge_tokens(
-            tokens[start_index: start_index + 3])
-        del tokens[start_index + 1: start_index + 3]
+        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 3])
+        del tokens[start_index + 1 : start_index + 3]
         return return_value
     raise ValueError(
         "Impossible tokens array length (merge_obj_selector used without is_obj_selector)"
@@ -83,26 +80,24 @@ def find_scoreboard_player_type(
     token: Token, tokenizer: Tokenizer, allow_integer: bool = True
 ) -> ScoreboardPlayer:
     """
-    Generate ScoreboardPlayer including its type from a keyword token
+     Generate ScoreboardPlayer including its type from a keyword token
 
-   :param token: keyword token to parse
-   :param tokenizer: token's Tokenizer
-   :param allow_integer: Whether to allow integer(rvalue), defaults to True
-   :raises JMCSyntaxException: Token is not a keyword token
-   :return: ScoreboardPlayer
+    :param token: keyword token to parse
+    :param tokenizer: token's Tokenizer
+    :param allow_integer: Whether to allow integer(rvalue), defaults to True
+    :raises JMCSyntaxException: Token is not a keyword token
+    :return: ScoreboardPlayer
     """
     if token.token_type != TokenType.KEYWORD:
         raise JMCSyntaxException("Expected keyword", token, tokenizer)
 
     if token.string.startswith(DataPack.VARIABLE_SIGN):
         return ScoreboardPlayer(
-            player_type=PlayerType.VARIABLE, value=(
-                DataPack.var_name, token.string)
+            player_type=PlayerType.VARIABLE, value=(DataPack.var_name, token.string)
         )
 
     if is_number(token.string):
-        return ScoreboardPlayer(
-            player_type=PlayerType.INTEGER, value=int(token.string))
+        return ScoreboardPlayer(player_type=PlayerType.INTEGER, value=int(token.string))
 
     splits = token.string.split(":", 1)
     if len(splits) == 1:
@@ -154,23 +149,21 @@ class Arg:
         self.token = token
         self.arg_type = arg_type
 
-    def verify(self, verifier: ArgType, tokenizer: Tokenizer,
-               key_string: str) -> "Arg":
+    def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
         """
-        Verify if the argument is valid
+         Verify if the argument is valid
 
-       :param verifier: Argument's type
-       :param tokenizer: _description_
-       :param key_string: Key(kwarg) in from of string
-       :return: self
+        :param verifier: Argument's type
+        :param tokenizer: _description_
+        :param key_string: Key(kwarg) in from of string
+        :return: self
         """
         if verifier == ArgType.ANY:
             return self
         elif verifier == ArgType.SCOREBOARD_INT:
             if self.arg_type in {ArgType.SCOREBOARD, ArgType.INTEGER}:
                 return self
-            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
-                    ":") == 1:
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(":") == 1:
                 return self
             raise JMCValueError(
                 f"For '{key_string}' key, expected {
@@ -182,8 +175,7 @@ class Arg:
         elif verifier == ArgType.SCOREBOARD:
             if self.arg_type == ArgType.SCOREBOARD:
                 return self
-            if self.arg_type == ArgType.KEYWORD and self.token.string.count(
-                    ":") == 1:
+            if self.arg_type == ArgType.KEYWORD and self.token.string.count(":") == 1:
                 self.arg_type = ArgType.SCOREBOARD
                 return self
             raise JMCValueError(
@@ -282,12 +274,12 @@ class Arg:
 
 def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
     """
-    Find type of the argument in form of token and return the ArgType
+     Find type of the argument in form of token and return the ArgType
 
-   :param tokens: List of tokens representing an argument
-   :param tokenizer: Tokenizer
-   :raises JMCValueError: Cannot find ArgType.FUNC type
-   :return: Argument's type of the token
+    :param tokens: List of tokens representing an argument
+    :param tokenizer: Tokenizer
+    :raises JMCValueError: Cannot find ArgType.FUNC type
+    :return: Argument's type of the token
     """
     if not tokens:
         raise ValueError("Trying to find type of empty argument")
@@ -389,12 +381,12 @@ def verify_list(
     expected_arg_type: ArgType, token: Token, tokenizer: Tokenizer
 ) -> list[Arg]:
     """
-    Verify list types of a paren_square token
+     Verify list types of a paren_square token
 
-   :param expected_arg_type: ArgType every element in list is expected to be
-   :param token: paren_square token
-   :param tokenizer: token's tokenizer
-   :return: List of Arg
+    :param expected_arg_type: ArgType every element in list is expected to be
+    :param token: paren_square token
+    :param tokenizer: token's tokenizer
+    :return: List of Arg
     """
     results = []
     args, kwargs = tokenizer.parse_func_args(token, TokenType.PAREN_SQUARE)
@@ -408,8 +400,7 @@ def verify_list(
         arg_token = tokenizer.merge_tokens(arg)
         try:
             results.append(
-                Arg(arg_token, arg_type).verify(
-                    expected_arg_type, tokenizer, "list")
+                Arg(arg_token, arg_type).verify(expected_arg_type, tokenizer, "list")
             )
         except JMCValueError as error:
             raise JMCValueError(
@@ -426,15 +417,15 @@ def verify_args(
     params: dict[str, ArgType], feature_name: str, token: Token, tokenizer: Tokenizer
 ) -> dict[str, Arg | None]:
     """
-    Verify argument types of a paren_round token
+     Verify argument types of a paren_round token
 
-   :param params: Dictionary of arguments(string) and its type(ArgType)
-   :param feature_name: Feature name to show up in error
-   :param token: paren_round token
-   :param tokenizer: token's tokenizer
-   :raises JMCValueError: Got too many positional arguments
-   :raises JMCValueError: Unknown key
-   :return: Dictionary of arguments(string) and said argument in Arg form
+    :param params: Dictionary of arguments(string) and its type(ArgType)
+    :param feature_name: Feature name to show up in error
+    :param token: paren_round token
+    :param tokenizer: token's tokenizer
+    :raises JMCValueError: Got too many positional arguments
+    :raises JMCValueError: Unknown key
+    :return: Dictionary of arguments(string) and said argument in Arg form
     """
     args, kwargs = tokenizer.parse_func_args(token)
     result: dict[str, Arg | None] = {key: None for key in params}
@@ -447,15 +438,13 @@ def verify_args(
             token,
             tokenizer,
         )
+    ARG_TYPES_TO_CLEAN_UP = (ArgType.SELECTOR,)
     for key, arg in zip(key_list, args):
         arg_type = find_arg_type(arg, tokenizer)
-        arg_token = tokenizer.merge_tokens(arg)
-        result[key] = Arg(
-            arg_token,
-            arg_type).verify(
-            params[key],
-            tokenizer,
-            key)
+        arg_token = tokenizer.merge_tokens(
+            arg, is_clean_up=arg_type in ARG_TYPES_TO_CLEAN_UP
+        )
+        result[key] = Arg(arg_token, arg_type).verify(params[key], tokenizer, key)
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
@@ -467,22 +456,19 @@ def verify_args(
                         f"'{param}'" for param in params)}""",
             )
         arg_type = find_arg_type(kwarg, tokenizer)
-        kwarg_token = tokenizer.merge_tokens(kwarg)
-        result[key] = Arg(
-            kwarg_token,
-            arg_type).verify(
-            params[key],
-            tokenizer,
-            key)
+        kwarg_token = tokenizer.merge_tokens(
+            kwarg, is_clean_up=arg_type in ARG_TYPES_TO_CLEAN_UP
+        )
+        result[key] = Arg(kwarg_token, arg_type).verify(params[key], tokenizer, key)
     return result
 
 
 def eval_expr(expr: str) -> str:
     """
-    Evaluate mathematical expression and calculate the result number then cast it to string
+     Evaluate mathematical expression and calculate the result number then cast it to string
 
-   :param expr: Expression string
-   :return: String representation of result number
+    :param expr: Expression string
+    :return: String representation of result number
     """
     number = __eval(ast.parse(expr.replace("\\", "//"), mode="eval").body)
     if isinstance(number, int):
@@ -520,11 +506,11 @@ OPERATORS: dict[type, Callable[..., Any]] = {
 
 def __eval(node):
     """
-    Inner working of eval_expr
+     Inner working of eval_expr
 
-   :param node: expr(body of Expression returned from ast.parse)
-   :raises TypeError: Invalid type of node
-   :return: Result number
+    :param node: expr(body of Expression returned from ast.parse)
+    :raises TypeError: Invalid type of node
+    :return: Result number
     """
     if isinstance(node, ast.Constant):  # <number>
         return node.value
@@ -541,20 +527,20 @@ SIMPLE_JSON_TYPE = dict[str, str | bool | int | dict[str, str | bool | int]]
 
 class FormattedText:
     """
-    Parse formatted text into raw json string
+     Parse formatted text into raw json string
 
-   :param raw_text: Text
-   :param token: Token (only used for error)
-   :param tokenizer: Tokenizer
-   :param is_default_no_italic: Whether to set italic to False by default, defaults to False
-   :param is_allow_score_selector: Whether to allow score selector in the string, defaults to True
-   :return: Raw JSON string
+    :param raw_text: Text
+    :param token: Token (only used for error)
+    :param tokenizer: Tokenizer
+    :param is_default_no_italic: Whether to set italic to False by default, defaults to False
+    :param is_allow_score_selector: Whether to allow score selector in the string, defaults to True
+    :return: Raw JSON string
 
-    .. example::
-    >>> str(FormattedText("&4&lName", token, tokenizer))
-    '{"text":"Name", "color":"red", "bold":true}'
-    >>> str(FormattedText("&<red,bold>Name", token, tokenizer, is_default_no_italic=True))
-    '{"text":"Name", "color":"red", "bold":true, "italic":false}'
+     .. example::
+     >>> str(FormattedText("&4&lName", token, tokenizer))
+     '{"text":"Name", "color":"red", "bold":true}'
+     >>> str(FormattedText("&<red,bold>Name", token, tokenizer, is_default_no_italic=True))
+     '{"text":"Name", "color":"red", "bold":true, "italic":false}'
     """
 
     __slots__ = (
@@ -622,10 +608,10 @@ class FormattedText:
 
     def add_key(self, key: str, value: SIMPLE_JSON_BODY) -> None:
         """
-        Add json to result
+         Add json to result
 
-       :param key: JSON Key
-       :param value: JSON Value
+        :param key: JSON Key
+        :param value: JSON Value
         """
         if self.result:
             self.result[0][key] = value
@@ -791,7 +777,7 @@ class FormattedText:
 
             if prop.endswith(")"):
                 open_paren_index = prop.find("(")
-                arg = prop[open_paren_index + 1: -1].strip()
+                arg = prop[open_paren_index + 1 : -1].strip()
                 prop_ = prop[:open_paren_index]
                 if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
@@ -928,9 +914,9 @@ class FormattedText:
 
     def __parse_code(self, char: str) -> None:
         """
-        Parse color code
+         Parse color code
 
-       :param char: A character in color code
+        :param char: A character in color code
         """
         prop = self.PROPS.get(char, None)
         if prop is None:
@@ -1105,7 +1091,7 @@ def hardcode_parse_calc(
         raise JMCSyntaxException(
             "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False
         )
-    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
+    for char in string[calc_pos + 13 :]:  # len('Hardcode.calc') = 13
         index += 1
         if char == "(":
             count += 1
@@ -1160,4 +1146,4 @@ def hardcode_parse_calc(
                 display_col_length=False,
             )
 
-    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
+    return string[:calc_pos] + eval_expr(expression) + string[index + 13 :]

@@ -2,10 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from jmc.compile.lexer import clean_up_paren_token
 
 from .command.utils import eval_expr, hash_string_to_string
-from .utils import is_connected, get_mc_uuid, is_number
+from .utils import clean_up_paren_token, is_connected, get_mc_uuid, is_number
 from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
 from .exception import (

@@ -5,12 +5,13 @@ import functools
 from random import Random
 import re
 from json import JSONEncoder, dumps
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
+
 
 from .exception import JMCSyntaxException, MinecraftSyntaxWarning
 
 if TYPE_CHECKING:
-    from .tokenizer import Token, Tokenizer
+    from .tokenizer import Token, Tokenizer, TokenType
 
 
 class SingleTonMeta(type):
@@ -38,8 +39,7 @@ class SingleTon(metaclass=SingleTonMeta):
 
     def __new__(cls, *args, **kwargs):
         if cls is SingleTon:
-            raise TypeError(
-                f"Only children of '{cls.__name__}' may be instantiated")
+            raise TypeError(f"Only children of '{cls.__name__}' may be instantiated")
         return super().__new__(cls, *args, **kwargs)
 
 
@@ -156,46 +156,6 @@ def __parse_to_string(
     return json
 
 
-def __search_to_string(
-    match: re.Match, token: "Token", var_name: str, tokenizer: "Tokenizer"
-) -> str:
-    """
-    Function for regex.subn
-
-    :param match: Match object
-    :param token: Token to search for `toString`
-    :param var_name: `DataPack.VARNAME`
-    :param tokenizer: token's tokenizer
-    :return: JSON formatted string
-    """
-    var: str = match.group(1)
-    properties = __parse_to_string(token, tokenizer)
-    properties["score"] = {"name": var, "objective": var_name}
-    return dumps(properties, separators=(",", ":"))
-
-
-def search_to_string(
-    last_str: str, token: "Token", var_name: str, tokenizer: "Tokenizer"
-) -> tuple[str, bool]:
-    """
-    Find `toString` in a last_str
-
-    :param last_str: Last string before this token
-    :param token: paren_round token (Arguments of `toString`)
-    :param VAR_NAME: `DataPack.VARNAME``
-    :param tokenizer: token's tokenizer
-    :return: Tuple of New string and Whether `toString` is found
-    """
-    new_str, count = re.subn(
-        r"(\$[A-z0-9\-\.\_]+)\.toString$",
-        lambda match: __search_to_string(match, token, var_name, tokenizer),
-        last_str,
-    )
-    if count:
-        return new_str, True
-    return last_str, False
-
-
 class JSONUniversalEncoder(JSONEncoder):
     """
     JSONEncoder that can encode everything, used for displaying results
@@ -258,7 +218,7 @@ def convention_jmc_to_mc(
     else:
         string = custom_string
     if substr is not None:
-        string = string[substr[0]:substr[1]]
+        string = string[substr[0] : substr[1]]
     if string.startswith("."):
         raise JMCSyntaxException("Name started with '.'", token, tokenizer)
     if string.endswith("."):
@@ -325,3 +285,60 @@ def deep_merge(first: dict, second: dict) -> dict:
         else:
             output[key] = second[key]
     return output
+
+
+def clean_up_paren_token(
+    token: "Token",
+    tokenizer: "Tokenizer",
+    is_nbt: bool = True,
+    keyword_token_callback: Callable[["Token"], str] = lambda token: token.string,
+) -> str:
+    """
+    Turn a paren token into a clean string
+
+    :param token: paren token
+    :param tokenizer: token's Tokenizer
+    :param is_nbt: Whether the token is in form of minecraft nbt, defaults to True
+    :param keyword_token_callback: A special function to modify any keyword token
+    :return: Clean string representing paren token for output
+    """
+    if len(token.string) == 2:
+        return token.string
+    open_ = token.string[0]
+    close = token.string[-1]
+    TokenType = type(token.token_type)
+    tokenizer = type(tokenizer)(
+        token.string[1:-1],
+        tokenizer.file_path,
+        token.line,
+        token.col + 1,
+        tokenizer.file_string,
+        expect_semicolon=False,
+        allow_semicolon=token.token_type == TokenType.PAREN_SQUARE,
+    )
+    string = ""
+    if open_ == "{" and tokenizer.programs[0][0].token_type == TokenType.STRING:
+        is_nbt = False
+
+    for token_ in tokenizer.programs[0]:
+        if token_.token_type in {
+            TokenType.PAREN_CURLY,
+            TokenType.PAREN_SQUARE,
+            TokenType.PAREN_ROUND,
+        }:
+            _string = clean_up_paren_token(
+                token_, tokenizer, is_nbt, keyword_token_callback
+            )
+        elif token_.token_type == TokenType.STRING:
+            if is_nbt:
+                _string = repr(token_.string)
+                if '"' not in _string:
+                    _string = f'"{_string[1:-1]}"'
+            else:
+                _string = dumps(token_.string)
+        elif token_.token_type == TokenType.KEYWORD:
+            _string = keyword_token_callback(token_)
+        else:
+            _string = token_.string
+        string += _string
+    return open_ + string + close
