@@ -1,5 +1,6 @@
 """Module handling jmc's header"""
 
+import re
 from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 
@@ -82,6 +83,8 @@ class Header(SingleTon):
     """Whether to force binary search on switch case after vanilla macro"""
     show_private_command: bool
     """Whether to output comment result of private function call"""
+    track_function_regexs: list[tuple[re.Pattern, str, str, str, str]]
+    """List of regex from Debug.trackFunction, prefix, suffix, color and function name color"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -111,6 +114,7 @@ class Header(SingleTon):
         obj.nometa = False
         obj.force_bst = False
         obj.show_private_command = False
+        obj.track_function_regexs = []
 
     def add_file_read(self, path: Path) -> None:
         """

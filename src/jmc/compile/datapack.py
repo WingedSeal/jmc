@@ -1,5 +1,6 @@
 """Module handling datapack"""
 
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
@@ -702,6 +703,14 @@ class DataPack:
         self.private_functions = {}
         self.loads = []
         self.ticks = []
+
+        track_function_regexs = Header().track_function_regexs
+        for regex, prefix, suffix, color, function_color in track_function_regexs:
+            for name, function in self.functions.items():
+                if regex.fullmatch(name) is None:
+                    continue
+                tellraw = f'tellraw @a ["",{{"text":"[JMC] ","color":"gold","bold":true}},{{"text":"{prefix}","color":"{color}"}},{{"text":"{name}","color":"{function_color}"}},{{"text":"{suffix}","color":"{color}"}}]'
+                function.insert(tellraw, 0)
 
     def parse_func_map(
         self, token: Token, tokenizer: Tokenizer, prefix: str
