@@ -24,7 +24,8 @@ class PackVersion:
         """Datapack's pack_format"""
 
     def require(self, pack_format: "int | PackVersion", token: Token,
-                tokenizer: Tokenizer, suggestion: str | None = None, is_lower: bool = False) -> None:
+                tokenizer: Tokenizer, suggestion: str | None = None, 
+                is_lower: bool = False) -> None:
         """
         Raise MinecraftVersionTooLow when pack_format is too low
         Raise MinecraftVersionTooHigh when pack_format is too high
@@ -93,18 +94,18 @@ class PackVersionFeature:
     """Change NBT path for lines of text of sign"""
     VANILLA_MACRO = PackVersion(16)
     """Add Vanilla Macro ('with')"""
-    PLS_RENAME_19 = PackVersion(19)
-    """TODO: RENAME"""
-    PLS_RENAME_21 = PackVersion(21)
-    """TODO: RENAME"""
+    TYPE_FIELD_TEXT_COMPONENT = PackVersion(19)
+    """Text components have 'type' field for parsing optimization"""
+    SOURCE_FIELD_TEXT_COMPONENT = PackVersion(21)
+    """NBT text components need 'source' to specify entity/block/storage"""
     SHORT_GRASS = PackVersion(26)
     """Rename 'grass' to 'short_grass'"""
     COMPONENT = PackVersion(33)
     """Switch from NBT system to Component system"""
     LEGACY_FOLDER_RENAME = PackVersion(48)
     """Change 'functions' to 'function' etc."""
-    PLS_RENAME_59 = PackVersion(59)
-    """TODO: RENAME"""
+    TALL_FLOWER = PackVersion(59)
+    """#minecraft:tall_flowers block tag got removed"""
     TEXT_COMPONENT = PackVersion(62)
     """Make text component to no longer require stringifying the JSON"""
 

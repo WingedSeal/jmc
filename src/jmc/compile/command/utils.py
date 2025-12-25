@@ -834,13 +834,13 @@ class FormattedText:
         if "color" not in self.current_json and self.current_color:
             self.current_json["color"] = self.current_color
 
-        if self.datapack.version >= PackVersionFeature.PLS_RENAME_19:
+        if self.datapack.version >= PackVersionFeature.TYPE_FIELD_TEXT_COMPONENT:
             for _type in {"score", "selector", "nbt", "keybind"}:
                 if _type in self.current_json:
                     self.current_json["type"] = _type
             if (
                 "__private_nbt_expand__" in self.current_json
-                and self.datapack.version >= PackVersionFeature.PLS_RENAME_21
+                and self.datapack.version >= PackVersionFeature.SOURCE_FIELD_TEXT_COMPONENT
             ):
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
                 self.current_json["type"] = "nbt"
