@@ -3,6 +3,8 @@ from enum import Enum, auto
 from json import JSONDecodeError, loads
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
+from jmc.compile.command.nbt_operation import extract_nbt, get_nbt_type
+
 
 from ..utils import convention_jmc_to_mc, is_float
 from ..datapack_data import Item, SIMPLE_JSON_BODY
@@ -177,6 +179,20 @@ class JMCFunction:
                 self.args[key] = (
                     f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
                 )
+            elif arg.arg_type == ArgType.NBT:
+                nbt_type = get_nbt_type(arg.raw_tokens)
+                if nbt_type is None:
+                    raise JMCValueError(
+                        f"{key} has invalid NBT syntax",
+                        arg.token,
+                        tokenizer,
+                        suggestion="Use :: NBT syntax",
+                    )
+                nbt_type_str, target, path = extract_nbt(
+                    arg.raw_tokens, tokenizer, datapack, nbt_type
+                )
+                self.args[key] = f"{nbt_type_str} {target}{path}"
+
             else:
                 self.args[key] = arg.token.string
 

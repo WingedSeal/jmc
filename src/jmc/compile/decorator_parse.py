@@ -28,8 +28,14 @@ class JMCDecorator:
     prefix: str
     """String of function prefix, aka. class it's currently in"""
 
-    def __init__(self, tokenizer: Tokenizer, tokens: list[Token], datapack: DataPack, prefix: str,
-                 arg_token: Token | None) -> None:
+    def __init__(
+        self,
+        tokenizer: Tokenizer,
+        tokens: list[Token],
+        datapack: DataPack,
+        prefix: str,
+        arg_token: Token | None,
+    ) -> None:
         self.tokens = tokens
         self.token = tokens[0]
         self.arg_token = arg_token
@@ -37,8 +43,9 @@ class JMCDecorator:
         self.datapack = datapack
         self.prefix = prefix
         if arg_token:
-            args_Args = verify_args(self.arg_type,
-                                    self.call_string, arg_token, tokenizer)
+            args_Args = verify_args(
+                self.arg_type, self.call_string, arg_token, tokenizer
+            )
             self.raw_args = {}
             self.args = {}
 
@@ -52,8 +59,7 @@ class JMCDecorator:
                 self.args[key] = arg.token.string
 
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
-        raise NotImplementedError(
-            "'modify' method of JMCDecorator not implemented")
+        raise NotImplementedError("'modify' method of JMCDecorator not implemented")
 
     def return_command(self) -> tuple[str, JMCSyntaxException] | None:
         return None
@@ -62,8 +68,12 @@ class JMCDecorator:
 DECORATORS: dict[str, type[JMCDecorator]] = {}
 
 
-def dec_property(call_string: str,
-                 arg_type: dict[str, ArgType] | None = None, defaults: dict[str, str] | None = None, is_save_to_datapack: bool = True):
+def dec_property(
+    call_string: str,
+    arg_type: dict[str, ArgType] | None = None,
+    defaults: dict[str, str] | None = None,
+    is_save_to_datapack: bool = True,
+):
 
     def decorator(cls: type[JMCDecorator]) -> type[JMCDecorator]:
         """
@@ -78,6 +88,7 @@ def dec_property(call_string: str,
         cls.call_string = call_string
         DECORATORS[call_string] = cls
         return cls
+
     return decorator
 
 
@@ -88,10 +99,14 @@ class If(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         if pre_func.func_path in self.datapack.functions:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
-                pre_func.func_path]
+                pre_func.func_path
+            ]
             raise JMCSyntaxException(
-                f"Duplicate function declaration({pre_func.func_path})", pre_func.self_token, pre_func.tokenizer,
-                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
+                f"Duplicate function declaration({pre_func.func_path})",
+                pre_func.self_token,
+                pre_func.tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}",
+            )
         value = float(self.args["value"])
         if value == 0:
             pre_func.func_content = ""
@@ -105,33 +120,42 @@ class If(JMCDecorator):
         if self.instant_call_func is None:
             return None
         return self.instant_call_func.handle_lazy(
-            [], {}, self.token, hardcode_parse_calc), JMCSyntaxException("Instant Call cannot be used in class body", self.tokens[3], self.tokenizer, suggestion="Rename the function to anything else beside '_'")
+            [], {}, self.token, hardcode_parse_calc
+        ), JMCSyntaxException(
+            "Instant Call cannot be used in class body",
+            self.tokens[3],
+            self.tokenizer,
+            suggestion="Rename the function to anything else beside '_'",
+        )
 
 
-@dec_property("add",
-              arg_type={
-                  "from": ArgType._FUNC_CALL
-              })
+@dec_property("add", arg_type={"from": ArgType._FUNC_CALL})
 class Add(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         call_from = convention_jmc_to_mc(
-            self.raw_args["from"].token, self.tokenizer, self.prefix)
+            self.raw_args["from"].token, self.tokenizer, self.prefix
+        )
         if call_from == self.datapack.tick_name:
             self.datapack.after_ticks.append(
-                f"function {self.datapack.format_func_path(pre_func.func_path)}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}"
+            )
             return
         if call_from == self.datapack.load_name:
             self.datapack.after_loads.append(
-                f"function {self.datapack.format_func_path(pre_func.func_path)}")
+                f"function {self.datapack.format_func_path(pre_func.func_path)}"
+            )
             return
 
         self.datapack.after_func[call_from].append(
-            f"function {self.datapack.format_func_path(pre_func.func_path)}")
+            f"function {self.datapack.format_func_path(pre_func.func_path)}"
+        )
 
         if self.arg_token is None:
             return
-        self.datapack.after_func_token[call_from
-                                       ] = self.raw_args["from"].token, self.tokenizer
+        self.datapack.after_func_token[call_from] = (
+            self.raw_args["from"].token,
+            self.tokenizer,
+        )
 
 
 @dec_property("lazy", is_save_to_datapack=False)
@@ -139,10 +163,14 @@ class Lazy(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
         if pre_func.func_path in self.datapack.functions:
             old_function_token, old_function_tokenizer = self.datapack.defined_file_pos[
-                pre_func.func_path]
+                pre_func.func_path
+            ]
             raise JMCSyntaxException(
-                f"Duplicate function declaration({pre_func.func_path})", pre_func.self_token, pre_func.tokenizer,
-                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}")
+                f"Duplicate function declaration({pre_func.func_path})",
+                pre_func.self_token,
+                pre_func.tokenizer,
+                suggestion=f"This function was already defined at line {old_function_token.line} col {old_function_token.col} in {old_function_tokenizer.file_path}",
+            )
         self.datapack.lazy_func[pre_func.func_path] = pre_func
 
 

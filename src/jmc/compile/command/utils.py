@@ -139,14 +139,18 @@ class ArgType(Enum):
     FUNC = "function"
     _FUNC_CALL = "function"
     SCOREBOARD_INT = "integer, variable, or objective:selector"
+    NBT = "NBT"
     ANY = None
 
 
 class Arg:
-    __slots__ = ("token", "arg_type")
+    __slots__ = ("token", "arg_type", "raw_tokens")
 
-    def __init__(self, token: Token, arg_type: ArgType) -> None:
+    def __init__(
+        self, token: Token, arg_type: ArgType, raw_tokens: list[Token]
+    ) -> None:
         self.token = token
+        self.raw_tokens = raw_tokens
         self.arg_type = arg_type
 
     def verify(self, verifier: ArgType, tokenizer: Tokenizer, key_string: str) -> "Arg":
@@ -295,6 +299,10 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
         if tokens[0].token_type == TokenType.STRING:
             return ArgType.STRING
 
+    for token in tokens:
+        if token.string == "::":
+            return ArgType.NBT
+
     if is_number(tokens[0].string):
         if len(tokens) > 1:
             raise JMCSyntaxException(
@@ -400,7 +408,9 @@ def verify_list(
         arg_token = tokenizer.merge_tokens(arg)
         try:
             results.append(
-                Arg(arg_token, arg_type).verify(expected_arg_type, tokenizer, "list")
+                Arg(arg_token, arg_type, arg).verify(
+                    expected_arg_type, tokenizer, "list"
+                )
             )
         except JMCValueError as error:
             raise JMCValueError(
@@ -444,7 +454,7 @@ def verify_args(
         arg_token = tokenizer.merge_tokens(
             arg, is_clean_up=arg_type in ARG_TYPES_TO_CLEAN_UP
         )
-        result[key] = Arg(arg_token, arg_type).verify(params[key], tokenizer, key)
+        result[key] = Arg(arg_token, arg_type, arg).verify(params[key], tokenizer, key)
     for key, kwarg in kwargs.items():
         if key not in key_list:
             raise JMCValueError(
@@ -459,7 +469,9 @@ def verify_args(
         kwarg_token = tokenizer.merge_tokens(
             kwarg, is_clean_up=arg_type in ARG_TYPES_TO_CLEAN_UP
         )
-        result[key] = Arg(kwarg_token, arg_type).verify(params[key], tokenizer, key)
+        result[key] = Arg(kwarg_token, arg_type, kwarg).verify(
+            params[key], tokenizer, key
+        )
     return result
 
 
@@ -840,7 +852,8 @@ class FormattedText:
                     self.current_json["type"] = _type
             if (
                 "__private_nbt_expand__" in self.current_json
-                and self.datapack.version >= PackVersionFeature.SOURCE_FIELD_TEXT_COMPONENT
+                and self.datapack.version
+                >= PackVersionFeature.SOURCE_FIELD_TEXT_COMPONENT
             ):
                 assert isinstance(self.current_json["__private_nbt_expand__"], dict)
                 self.current_json["type"] = "nbt"
