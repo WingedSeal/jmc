@@ -174,7 +174,7 @@ def extract_nbt(
         del tokens[start_index : start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.ENTITY:
-        if tokens[2].token_type == TokenType.PAREN_SQUARE:
+        if tokens[start_index + 1].token_type == TokenType.PAREN_SQUARE:
             target = tokens[start_index].string + clean_up_paren_token(
                 tokens[start_index + 1], tokenizer
             )
