@@ -2,7 +2,7 @@ from enum import Enum, auto
 import re
 from typing import TYPE_CHECKING
 
-from ..utils import is_float, is_number
+from ..utils import clean_up_paren_token, is_float, is_number
 from ..exception import JMCSyntaxException
 from ..datapack import DataPack
 from ..tokenizer import Token, TokenType, Tokenizer
@@ -89,8 +89,7 @@ def merge_path(
     ) or tokens[start_index].string.startswith("^"):
         return ""
     if tokens[start_index].token_type == TokenType.PAREN_CURLY:
-        string = datapack.lexer.clean_up_paren_token(
-            tokens[start_index], tokenizer)
+        string = clean_up_paren_token(tokens[start_index], tokenizer)
     else:
         string = tokens[start_index].string
     del tokens[start_index]
@@ -100,8 +99,7 @@ def merge_path(
 
     index = None
     for index, token in enumerate(tokens[start_index:]):
-        if token.string.startswith(
-                ".") or token.string == ":" or string.endswith(":"):
+        if token.string.startswith(".") or token.string == ":" or string.endswith(":"):
             string += token.string
         elif token.token_type == TokenType.STRING and string.endswith("."):
             string += token.string
@@ -113,14 +111,14 @@ def merge_path(
             )
             or (token.token_type == TokenType.PAREN_ROUND and string.endswith("$"))
         ):
-            string += datapack.lexer.clean_up_paren_token(token, tokenizer)
+            string += clean_up_paren_token(token, tokenizer)
         elif string.endswith(")") and token.token_type == TokenType.KEYWORD:
             string += token.string
         else:
-            del tokens[start_index: start_index + index]
+            del tokens[start_index : start_index + index]
             return string
     assert index is not None
-    del tokens[start_index: start_index + index + 1]
+    del tokens[start_index : start_index + index + 1]
     return string
 
 
@@ -144,7 +142,7 @@ def extract_nbt(
     if nbt_type == NBTType.AUTO_STORAGE:
         if tokens[start_index].string == "::":
             path = merge_path(tokens, start_index + 1, tokenizer, datapack)
-            del tokens[start_index:start_index + 1]
+            del tokens[start_index : start_index + 1]
             return (
                 get_nbt_string(nbt_type),
                 datapack.namespace + ":" + datapack.namespace,
@@ -153,7 +151,7 @@ def extract_nbt(
         else:
             target = tokens[start_index].string
             path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-            del tokens[start_index:start_index + 2]
+            del tokens[start_index : start_index + 2]
             return (
                 get_nbt_string(nbt_type),
                 datapack.namespace + ":" + target,
@@ -166,26 +164,26 @@ def extract_nbt(
             + tokens[start_index + 2].string
         )
         path = merge_path(tokens, start_index + 4, tokenizer, datapack)
-        del tokens[start_index: start_index + 4]
+        del tokens[start_index : start_index + 4]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.BLOCK:
         target = " ".join(
             _token.string for _token in tokenizer.parse_list(tokens[start_index])
         )
         path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-        del tokens[start_index: start_index + 2]
+        del tokens[start_index : start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.ENTITY:
         if tokens[1].token_type == TokenType.PAREN_SQUARE:
-            target = tokens[start_index].string + datapack.lexer.clean_up_paren_token(
+            target = tokens[start_index].string + clean_up_paren_token(
                 tokens[start_index + 1], tokenizer
             )
             path = merge_path(tokens, start_index + 3, tokenizer, datapack)
-            del tokens[start_index: start_index + 3]
+            del tokens[start_index : start_index + 3]
         else:
             target = tokens[start_index].string
             path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-            del tokens[start_index: start_index + 2]
+            del tokens[start_index : start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     raise NotImplementedError("Invalid nbt_type")
 
@@ -193,8 +191,7 @@ def extract_nbt(
 def __str_slice(token: Token, tokenizer: Tokenizer) -> str:
     slices = token.string[1:-1].split(":")
     if not slices or len(slices) > 2:
-        raise JMCSyntaxException(
-            "Expected operator after nbt", token, tokenizer)
+        raise JMCSyntaxException("Expected operator after nbt", token, tokenizer)
     if not slices[1]:
         return slices[0].strip()
     return slices[0].strip() + " " + slices[1].strip()
@@ -210,8 +207,7 @@ def __get_type_scale(
         and tokens[0].string == "$"
         and tokens[1].token_type == TokenType.PAREN_ROUND
     ):
-        tokens[0] = tokenizer.merge_tokens(
-            tokens[0:2], lexer_to_cleanup=datapack.lexer)
+        tokens[0] = tokenizer.merge_tokens(tokens[0:2])
         del tokens[1]
     if (
         len(tokens) > 1
@@ -240,15 +236,13 @@ def __get_type_scale(
     return type_, scale
 
 
-def __clean_token(token: Token, tokenizer: Tokenizer,
-                  datapack: DataPack) -> str:
+def __clean_token(token: Token, tokenizer: Tokenizer, datapack: DataPack) -> str:
     if token.token_type in (
         TokenType.PAREN_CURLY,
         TokenType.PAREN_ROUND,
         TokenType.PAREN_SQUARE,
     ):
-        return datapack.lexer.clean_up_paren_token(
-            token, tokenizer, is_nbt=True)
+        return clean_up_paren_token(token, tokenizer, is_nbt=True)
     return token.get_full_string()
 
 
@@ -261,8 +255,7 @@ def nbt_operation(
     prefix: str,
 ) -> str:
     left_nbt = tokens[0]
-    nbt_type_str, target, path = extract_nbt(
-        tokens, tokenizer, datapack, nbt_type)
+    nbt_type_str, target, path = extract_nbt(tokens, tokenizer, datapack, nbt_type)
     if not tokens:
         return f"data get {nbt_type_str} {target}{path}"
 
@@ -368,10 +361,7 @@ def nbt_operation(
                 )
                 or
                 # = (<type>) <command>
-                (
-                    tokens[0].token_type == TokenType.PAREN_ROUND
-                    and len(tokens) > 1
-                )
+                (tokens[0].token_type == TokenType.PAREN_ROUND and len(tokens) > 1)
             )
         ):
             type_, scale = __get_type_scale(tokens, tokenizer, datapack)
@@ -397,7 +387,10 @@ def nbt_operation(
         if right_nbt_type is None:
             if tokens[0].string == "-":
                 tokens = [tokenizer.merge_tokens(tokens)]
-            if tokens[0].string == "$" and tokens[1].token_type == TokenType.PAREN_ROUND:  # Vanilla macro
+            if (
+                tokens[0].string == "$"
+                and tokens[1].token_type == TokenType.PAREN_ROUND
+            ):  # Vanilla macro
                 tokens = [tokenizer.merge_tokens(tokens)]
             if len(tokens) > 1:
                 raise JMCSyntaxException(
@@ -408,7 +401,7 @@ def nbt_operation(
                     "Unexpected round parenthesis '('",
                     tokens[0],
                     tokenizer,
-                    suggestion="'<NBT-Element> = (...)' is not a valid syntax."
+                    suggestion="'<NBT-Element> = (...)' is not a valid syntax.",
                 )
             return f"data modify {nbt_type_str} {target}{path} {full_operator} value {__clean_token(tokens[0], tokenizer, datapack)}"
         else:
@@ -418,7 +411,8 @@ def nbt_operation(
             if tokens:
                 if tokens[0].token_type != TokenType.PAREN_SQUARE:
                     raise JMCSyntaxException(
-                        f"Unexpected token({tokens[0].string})", tokens[0], tokenizer)
+                        f"Unexpected token({tokens[0].string})", tokens[0], tokenizer
+                    )
                 return f"""data modify {nbt_type_str} {target}{path} {full_operator} string {right_nbt_type_str} {right_target}{right_path} {
                     __str_slice(tokens[0], tokenizer)}"""
             else:
@@ -429,7 +423,8 @@ def nbt_operation(
         if right_nbt_type is None:
             if len(tokens) > 1:
                 raise JMCSyntaxException(
-                    f"Unexpected token ({tokens[1].string})", tokens[1], tokenizer)
+                    f"Unexpected token ({tokens[1].string})", tokens[1], tokenizer
+                )
             if not path:
                 return f"data merge {nbt_type_str} {target} {__clean_token(tokens[0], tokenizer, datapack)}"
             return f"data modify {nbt_type_str} {target}{path} merge value {__clean_token(tokens[0], tokenizer, datapack)}"
@@ -480,14 +475,16 @@ def nbt_operation(
         if tokens[0].string == "-":
             tokens[0] = tokenizer.merge_tokens(tokens[0:2])
             del tokens[1]
-        if tokens[0].string == "$" and len(tokens) > 1 and tokens[1].token_type == TokenType.PAREN_ROUND:
+        if (
+            tokens[0].string == "$"
+            and len(tokens) > 1
+            and tokens[1].token_type == TokenType.PAREN_ROUND
+        ):
             tokens[0] = tokenizer.merge_tokens(tokens[0:2])
             del tokens[1]
         if len(tokens) > 1:
             raise JMCSyntaxException(
-                f"Unexpected token {tokens[1].string}",
-                tokens[1],
-                tokenizer
+                f"Unexpected token {tokens[1].string}", tokens[1], tokenizer
             )
         return f"data get {nbt_type_str} {target}{path} {tokens[0].string}"
 

@@ -6,30 +6,37 @@ from typing import Literal
 from ..pack_version import PackVersionFeature
 from ..header import Header
 from .condition import parse_condition
-from .utils import ScoreboardPlayer, find_scoreboard_player_type, merge_obj_selector, is_obj_selector, PlayerType
+from .utils import (
+    ScoreboardPlayer,
+    find_scoreboard_player_type,
+    merge_obj_selector,
+    is_obj_selector,
+    PlayerType,
+)
 from ..tokenizer import Token, Tokenizer, TokenType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException
 
 
-def if_(command: list[Token], datapack: DataPack,
-        tokenizer: Tokenizer, prefix: str) -> str | None:
+def if_(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> str | None:
     """
     Parse `if`
     """
     if len(command) < 2:
-        raise JMCSyntaxException(
-            "Expected (", command[0], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected (", command[0], tokenizer, col_length=True)
     if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
-            "Expected (", command[1], tokenizer, display_col_length=False)
+            "Expected (", command[1], tokenizer, display_col_length=False
+        )
     if len(command) < 3:
-        raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected {", command[1], tokenizer, col_length=True)
     if command[2].string == "expand":
         if len(command) < 4:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, col_length=True)
+                "Expected {", command[2], tokenizer, col_length=True
+            )
         datapack.lexer.if_else_box.append((command[1], command[3]))
         return datapack.lexer.parse_if_else(tokenizer, prefix, is_expand=True)
 
@@ -41,24 +48,26 @@ def if_(command: list[Token], datapack: DataPack,
     return None
 
 
-def macro_if(command: list[Token], datapack: DataPack,
-             tokenizer: Tokenizer, prefix: str) -> str | None:
+def macro_if(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> str | None:
     if len(command) < 2:
-        raise JMCSyntaxException(
-            "Expected (", command[0], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected (", command[0], tokenizer, col_length=True)
     if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
-            "Expected (", command[1], tokenizer, display_col_length=False)
+            "Expected (", command[1], tokenizer, display_col_length=False
+        )
     if len(command) < 3:
-        raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected {", command[1], tokenizer, col_length=True)
     if command[2].string == "expand":
         if len(command) < 4:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, col_length=True)
+                "Expected {", command[2], tokenizer, col_length=True
+            )
         datapack.lexer.if_else_box.append((command[1], command[3]))
         return datapack.lexer.parse_if_else(
-            tokenizer, prefix, is_expand=True, is_macro=True)
+            tokenizer, prefix, is_expand=True, is_macro=True
+        )
 
     if command[2].token_type != TokenType.PAREN_CURLY:
         datapack.lexer.if_else_box.append((command[1], command[2:]))
@@ -68,47 +77,47 @@ def macro_if(command: list[Token], datapack: DataPack,
     return datapack.lexer.parse_if_else(tokenizer, prefix, is_macro=True)
 
 
-def else_(command: list[Token], datapack: DataPack,
-          tokenizer: Tokenizer, prefix: str) -> str | None:
+def else_(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> str | None:
     """
     Parse `else`
     """
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
-            "'else' cannot be used without 'if'", command[0], tokenizer)
+            "'else' cannot be used without 'if'", command[0], tokenizer
+        )
 
     if len(command) < 2:
         raise JMCSyntaxException(
-            "Expected 'if' or {", command[0], tokenizer, col_length=True)
+            "Expected 'if' or {", command[0], tokenizer, col_length=True
+        )
 
     if command[1].token_type == TokenType.KEYWORD and command[1].string == "if":
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected (", command[1], tokenizer, col_length=True)
+                "Expected (", command[1], tokenizer, col_length=True
+            )
         if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected (", command[2], tokenizer, display_col_length=False)
+                "Expected (", command[2], tokenizer, display_col_length=False
+            )
         if len(command) < 4:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, col_length=True)
+                "Expected {", command[2], tokenizer, col_length=True
+            )
         if command[3].token_type != TokenType.PAREN_CURLY:
             # raise JMCSyntaxException(
             #     "Expected {", command[3], tokenizer, display_col_length=False)
-            datapack.lexer.if_else_box.append(
-                (command[2], command[3:]))
+            datapack.lexer.if_else_box.append((command[2], command[3:]))
             return None
 
-        datapack.lexer.if_else_box.append(
-            (command[2], command[3]))
+        datapack.lexer.if_else_box.append((command[2], command[3]))
         return None
     if command[1].token_type == TokenType.PAREN_CURLY:
-        datapack.lexer.if_else_box.append(
-            (None, command[1])
-        )
+        datapack.lexer.if_else_box.append((None, command[1]))
     else:
-        datapack.lexer.if_else_box.append(
-            (None, command[1:])
-        )
+        datapack.lexer.if_else_box.append((None, command[1:]))
     return datapack.lexer.parse_if_else(tokenizer, prefix)
 
     # raise JMCSyntaxException(
@@ -118,31 +127,37 @@ def else_(command: list[Token], datapack: DataPack,
 WHILE_NAME = "while_loop"
 
 
-def while_(command: list[Token], datapack: "DataPack",
-           tokenizer: "Tokenizer", prefix: str) -> str:
+def while_(
+    command: list[Token], datapack: "DataPack", tokenizer: "Tokenizer", prefix: str
+) -> str:
     """
     Parse `while`
     """
     if datapack.lexer.do_while_box is None:
         if len(command) < 2:
             raise JMCSyntaxException(
-                "Expected (", command[0], tokenizer, col_length=True)
+                "Expected (", command[0], tokenizer, col_length=True
+            )
         if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected (", command[1], tokenizer, display_col_length=False)
+                "Expected (", command[1], tokenizer, display_col_length=False
+            )
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected {", command[1], tokenizer, col_length=True)
+                "Expected {", command[1], tokenizer, col_length=True
+            )
         if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, display_col_length=False)
+                "Expected {", command[2], tokenizer, display_col_length=False
+            )
 
-        condition, precommand = parse_condition(
-            command[1], tokenizer, datapack, prefix)
+        condition, precommand = parse_condition(command[1], tokenizer, datapack, prefix)
         count = datapack.get_count(WHILE_NAME)
-        call_func = f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"
+        call_func = f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}"
         datapack.add_custom_private_function(
-            WHILE_NAME, command[2], tokenizer, count, prefix, postcommands=[call_func])
+            WHILE_NAME, command[2], tokenizer, count, prefix, postcommands=[call_func]
+        )
+        call_func = f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}"
         return call_func
 
     else:
@@ -150,34 +165,45 @@ def while_(command: list[Token], datapack: "DataPack",
         datapack.lexer.do_while_box = None
         if len(command) < 2:
             raise JMCSyntaxException(
-                "Expected (", command[0], tokenizer, col_length=True)
+                "Expected (", command[0], tokenizer, col_length=True
+            )
         if command[1].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected (", command[1], tokenizer, display_col_length=False)
+                "Expected (", command[1], tokenizer, display_col_length=False
+            )
         if len(command) > 2:
             raise JMCSyntaxException(
-                "Unexpected token", command[2], tokenizer, display_col_length=False)
+                "Unexpected token", command[2], tokenizer, display_col_length=False
+            )
 
-        condition, precommand = parse_condition(
-            command[1], tokenizer, datapack, prefix)
+        condition, precommand = parse_condition(command[1], tokenizer, datapack, prefix)
         count = datapack.get_count(WHILE_NAME)
         call_func = datapack.add_custom_private_function(
-            WHILE_NAME, func_content, tokenizer, count, prefix, postcommands=[f"{precommand}execute {condition} run function {datapack.namespace}:{DataPack.private_name}/{WHILE_NAME}/{count}"])
+            WHILE_NAME,
+            func_content,
+            tokenizer,
+            count,
+            prefix,
+            postcommands=[
+                f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}"
+            ],
+        )
 
         return call_func
 
 
-def do(command: list[Token], datapack: DataPack,
-       tokenizer: Tokenizer, prefix: str) -> None:
+def do(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> None:
     """
     Parse `do`
     """
     if len(command) < 2:
-        raise JMCSyntaxException(
-            "Expected {", command[0], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected {", command[0], tokenizer, col_length=True)
     if command[1].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, display_col_length=False)
+            "Expected {", command[1], tokenizer, display_col_length=False
+        )
 
     datapack.lexer.do_while_box = command[1]
 
@@ -185,8 +211,16 @@ def do(command: list[Token], datapack: DataPack,
 SWITCH_CASE_NAME = "switch_case"
 
 
-def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
-                          func_contents: list[list[str]], scoreboard_player: ScoreboardPlayer, name: str, start_at: int = 1) -> None:
+def __parse_switch_binary(
+    min_: int,
+    max_: int,
+    count: str,
+    datapack: DataPack,
+    func_contents: list[list[str]],
+    scoreboard_player: ScoreboardPlayer,
+    name: str,
+    start_at: int = 1,
+) -> None:
     """
     For recursion of JMC switch-case's binary tree
 
@@ -202,8 +236,7 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
     if max_ < min_:
         raise ValueError("min_ is more than max_ in __parse_switch_binary")
     if max_ == min_:
-        datapack.add_raw_private_function(
-            name, func_contents[min_ - start_at], count)
+        datapack.add_raw_private_function(name, func_contents[min_ - start_at], count)
     else:
         count_less = datapack.get_count(name)
         count_more = datapack.get_count(name)
@@ -218,22 +251,45 @@ def __parse_switch_binary(min_: int, max_: int, count: str, datapack: DataPack,
             raise ValueError("scoreboard_player.value is int")
 
         datapack.add_raw_private_function(
-            name, [
+            name,
+            [
                 f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_less} run function {datapack.namespace}:{DataPack.private_name}/{name}/{count_less}",
                 f"execute if score {scoreboard_player.value[1]} {scoreboard_player.value[0]} matches {match_more} run function {datapack.namespace}:{DataPack.private_name}/{name}/{count_more}",
-            ], count)
+            ],
+            count,
+        )
 
-        __parse_switch_binary(min_, half1, count_less,
-                              datapack, func_contents, scoreboard_player, name, start_at)
-        __parse_switch_binary(half2, max_, count_more,
-                              datapack, func_contents, scoreboard_player, name, start_at)
+        __parse_switch_binary(
+            min_,
+            half1,
+            count_less,
+            datapack,
+            func_contents,
+            scoreboard_player,
+            name,
+            start_at,
+        )
+        __parse_switch_binary(
+            half2,
+            max_,
+            count_more,
+            datapack,
+            func_contents,
+            scoreboard_player,
+            name,
+            start_at,
+        )
 
 
-def parse_switch(scoreboard_player: ScoreboardPlayer,
-                 func_contents: list[list[str]], datapack: DataPack,
-                 name: str = SWITCH_CASE_NAME,
-                 start_at: int = 1, case_numbers: list[int | Literal["default"]] | None = None,
-                 with_str: str | None = None) -> str:
+def parse_switch(
+    scoreboard_player: ScoreboardPlayer,
+    func_contents: list[list[str]],
+    datapack: DataPack,
+    name: str = SWITCH_CASE_NAME,
+    start_at: int = 1,
+    case_numbers: list[int | Literal["default"]] | None = None,
+    with_str: str | None = None,
+) -> str:
     """
     Create a binary tree for JMC switch-case
 
@@ -250,77 +306,103 @@ def parse_switch(scoreboard_player: ScoreboardPlayer,
     func_count = datapack.get_count(name)
     if datapack.version >= PackVersionFeature.VANILLA_MACRO and not Header().force_bst:
         has_default = "default" in case_numbers
-        for (case_body, case_label) in zip(func_contents, case_numbers):
+        for case_body, case_label in zip(func_contents, case_numbers):
             if has_default and case_label != "default":
                 case_body.append(
-                    f"scoreboard players set __found_case__ {datapack.var_name} 1")
+                    f"scoreboard players set __found_case__ {datapack.var_name} 1"
+                )
             datapack.add_raw_private_function(
-                name, case_body, f"{str(func_count)}/{case_label}")
+                name, case_body, f"{str(func_count)}/{case_label}"
+            )
 
-        macro_function_call = f"$function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/$(switch_key)"
+        macro_function_call = (
+            f"${datapack.call_func(name, func_count + '/$(switch_key)')}"
+        )
         if with_str is not None:
             macro_function_call = f"{macro_function_call} with {with_str}"
 
         datapack.add_raw_private_function(
-            name, [macro_function_call], f"{str(func_count)}/select")
+            name, [macro_function_call], f"{str(func_count)}/select"
+        )
         return (
-            (f"scoreboard players set __found_case__ {datapack.var_name} 0\n" if has_default else "") +
-            f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}" +
-            f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}" +
-            (f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default" if has_default else "")
+            (
+                f"scoreboard players set __found_case__ {datapack.var_name} 0\n"
+                if has_default
+                else ""
+            )
+            + f"execute store result storage {datapack.namespace}:{datapack.storage_name} switch_key int 1 run scoreboard players get {scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+            + f"\nfunction {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/select with storage {datapack.namespace}:{datapack.storage_name}"
+            + (
+                f"\nexecute unless score __found_case__ {datapack.var_name} matches 1 run function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}/default"
+                if has_default
+                else ""
+            )
         )
 
     switch_id = datapack.data.get_current_switch()
-    temp_score = ScoreboardPlayer(player_type=PlayerType.SCOREBOARD,
-                                  value=(datapack.var_name, switch_id))
+    temp_score = ScoreboardPlayer(
+        player_type=PlayerType.SCOREBOARD, value=(datapack.var_name, switch_id)
+    )
     __parse_switch_binary(
         start_at,
-        len(func_contents) +
-        start_at -
-        1,
+        len(func_contents) + start_at - 1,
         func_count,
         datapack,
         func_contents,
         temp_score,
         name,
-        start_at)
-    return (f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n" +
-            f"function {datapack.namespace}:{DataPack.private_name}/{name}/{func_count}")
+        start_at,
+    )
+    return (
+        f"scoreboard players operation {switch_id} {datapack.var_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}\n"
+        + datapack.call_func(name, func_count)
+    )
 
 
-def switch(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer, prefix: str,
-           with_str: str | None = None) -> str:
+def switch(
+    command: list[Token],
+    datapack: DataPack,
+    tokenizer: Tokenizer,
+    prefix: str,
+    with_str: str | None = None,
+) -> str:
     """
     Parse `switch`
     """
     if len(command) == 1:
-        raise JMCSyntaxException(
-            "Expected (", command[0], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected (", command[0], tokenizer, col_length=True)
     if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
-            "Expected (", command[1], tokenizer, display_col_length=False)
+            "Expected (", command[1], tokenizer, display_col_length=False
+        )
     if len(command) == 2:
-        raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected {", command[1], tokenizer, col_length=True)
     if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
-            "Expected {", command[2], tokenizer, display_col_length=False)
+            "Expected {", command[2], tokenizer, display_col_length=False
+        )
     if command[2].string == "{}":
         raise JMCSyntaxException(
-            "Switch content cannot be empty", command[2], tokenizer)
+            "Switch content cannot be empty", command[2], tokenizer
+        )
 
     list_of_tokens = tokenizer.parse(
-        command[2].string[1:-1], command[2].line, command[2].col + 1, expect_semicolon=True)
+        command[2].string[1:-1],
+        command[2].line,
+        command[2].col + 1,
+        expect_semicolon=True,
+    )
 
     case_numbers: list[int | Literal["default"]] = []
     expected_case: int | None = None
     case_start: int | None = None
     cases_content: list[list[list[Token]]] = []
     current_case_content: list[list[Token]] = []
-    if list_of_tokens[0][0].string != "case" or list_of_tokens[0][0].token_type != TokenType.KEYWORD:
-        raise JMCSyntaxException(
-            "Expected 'case'", list_of_tokens[0][0], tokenizer)
+    if (
+        list_of_tokens[0][0].string != "case"
+        or list_of_tokens[0][0].token_type != TokenType.KEYWORD
+    ):
+        raise JMCSyntaxException("Expected 'case'", list_of_tokens[0][0], tokenizer)
 
     for tokens in list_of_tokens:
         if tokens[0].string == "case" and tokens[0].token_type == TokenType.KEYWORD:
@@ -328,15 +410,15 @@ def switch(command: list[Token], datapack: DataPack,
             current_case_content = []
             if len(tokens) == 1:
                 raise JMCSyntaxException(
-                    "Expected case number", tokens[0], tokenizer, col_length=True)
+                    "Expected case number", tokens[0], tokenizer, col_length=True
+                )
             if tokens[1].string == "-":
                 count_str = tokens[1].string + tokens[2].string
                 del tokens[2]
             else:
                 count_str = tokens[1].string
             if not count_str.lstrip("-").isalnum():
-                raise JMCSyntaxException(
-                    "Expected case number", tokens[1], tokenizer)
+                raise JMCSyntaxException("Expected case number", tokens[1], tokenizer)
 
             count = int(count_str)
             if expected_case is None:
@@ -345,27 +427,35 @@ def switch(command: list[Token], datapack: DataPack,
                 case_start = expected_case
             if count != expected_case:
                 datapack.version.require(
-                    PackVersionFeature.VANILLA_MACRO, tokens[1], tokenizer, suggestion=f"Expected case number {expected_case}")
+                    PackVersionFeature.VANILLA_MACRO,
+                    tokens[1],
+                    tokenizer,
+                    suggestion=f"Expected case number {expected_case}",
+                )
             if len(tokens) < 3:
                 raise JMCSyntaxException(
-                    "Expected colon (:)", tokens[1], tokenizer, col_length=True)
+                    "Expected colon (:)", tokens[1], tokenizer, col_length=True
+                )
             if tokens[2].token_type != TokenType.OPERATOR or tokens[2].string != ":":
-                raise JMCSyntaxException(
-                    "Expected colon (:)", tokens[2], tokenizer)
+                raise JMCSyntaxException("Expected colon (:)", tokens[2], tokenizer)
 
             tokens = tokens[3:]
             expected_case += 1
             case_numbers.append(count)
         if tokens[0].string == "default" and tokens[0].token_type == TokenType.KEYWORD:
             datapack.version.require(
-                PackVersionFeature.VANILLA_MACRO, tokens[1], tokenizer)
+                PackVersionFeature.VANILLA_MACRO, tokens[1], tokenizer
+            )
             cases_content.append(current_case_content)
             current_case_content = []
             case_numbers.append("default")
             tokens = tokens[2:]
         # End If case
-        if tokens[0].string == "break" and tokens[0].token_type == TokenType.KEYWORD and len(
-                tokens) == 1:
+        if (
+            tokens[0].string == "break"
+            and tokens[0].token_type == TokenType.KEYWORD
+            and len(tokens) == 1
+        ):
             continue
         current_case_content.append(tokens)
 
@@ -374,109 +464,143 @@ def switch(command: list[Token], datapack: DataPack,
 
     func_contents: list[list[str]] = []
     for case_content in cases_content:
-        func_contents.append(datapack.lexer._parse_func_content(
-            tokenizer, case_content, prefix, is_load=False))
+        func_contents.append(
+            datapack.lexer._parse_func_content(
+                tokenizer, case_content, prefix, is_load=False
+            )
+        )
 
     # Parse variable
     tokens = tokenizer.parse(
-        command[1].string[1:-1], command[1].line, command[1].col + 1, expect_semicolon=False)[0]
+        command[1].string[1:-1],
+        command[1].line,
+        command[1].col + 1,
+        expect_semicolon=False,
+    )[0]
 
     if len(tokens) > 1:
         if is_obj_selector(tokens):
             tokens = [merge_obj_selector(tokens, tokenizer, datapack)]
         else:
             raise JMCSyntaxException(
-                f"Unexpected token({tokens[1].string})", tokens[1], tokenizer)
+                f"Unexpected token({tokens[1].string})", tokens[1], tokenizer
+            )
 
     scoreboard_player = find_scoreboard_player_type(
-        tokens[0], tokenizer, allow_integer=False)
+        tokens[0], tokenizer, allow_integer=False
+    )
 
     if scoreboard_player.player_type == PlayerType.INTEGER:
         raise JMCSyntaxException(
-            "Unexpected integer in switch case", tokens[0], tokenizer)
+            "Unexpected integer in switch case", tokens[0], tokenizer
+        )
 
     if case_start is None:
         raise ValueError("case_start is None")
-    return parse_switch(scoreboard_player, func_contents,
-                        datapack, start_at=case_start, case_numbers=case_numbers, with_str=with_str)
+    return parse_switch(
+        scoreboard_player,
+        func_contents,
+        datapack,
+        start_at=case_start,
+        case_numbers=case_numbers,
+        with_str=with_str,
+    )
 
 
 FOR_NAME = "for_loop"
 
 
-def for_(command: list[Token], datapack: DataPack,
-         tokenizer: Tokenizer, prefix: str) -> str:
+def for_(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> str:
     """
     Parse `for`
     """
     precommand, condition, first_statement, last_statement = __handle_for(
-        command, datapack, tokenizer, prefix)
+        command, datapack, tokenizer, prefix
+    )
 
     count = datapack.get_count(FOR_NAME)
-    call_func = f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+    call_func = (
+        f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+    )
     datapack.add_custom_private_function(
         FOR_NAME,
         command[2],
         tokenizer,
         count,
         prefix,
-        postcommands=[
-            *last_statement,
-            call_func
-        ]
+        postcommands=[*last_statement, call_func],
     )
+    call_func = (
+        f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}"
+    )
+    return "\n".join([*first_statement, call_func])
 
-    return "\n".join([
-        *first_statement,
-        call_func
-    ])
 
-
-def __handle_for(command: list[Token], datapack: DataPack,
-                 tokenizer: Tokenizer, prefix: str, *, allow_true: bool = False) -> tuple[str, str, list[str], list[str]]:
+def __handle_for(
+    command: list[Token],
+    datapack: DataPack,
+    tokenizer: Tokenizer,
+    prefix: str,
+    *,
+    allow_true: bool = False,
+) -> tuple[str, str, list[str], list[str]]:
     """
     Parse a for loop
     :return: precommand, condition, first_statement, last_statement
     """
     if len(command) == 1:
-        raise JMCSyntaxException(
-            "Expected (", command[0], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected (", command[0], tokenizer, col_length=True)
     if command[1].token_type != TokenType.PAREN_ROUND:
         raise JMCSyntaxException(
-            "Expected (", command[1], tokenizer, display_col_length=False)
+            "Expected (", command[1], tokenizer, display_col_length=False
+        )
     if len(command) == 2:
-        raise JMCSyntaxException(
-            "Expected {", command[1], tokenizer, col_length=True)
+        raise JMCSyntaxException("Expected {", command[1], tokenizer, col_length=True)
     if command[2].token_type != TokenType.PAREN_CURLY:
         raise JMCSyntaxException(
-            "Expected {", command[2], tokenizer, display_col_length=False)
+            "Expected {", command[2], tokenizer, display_col_length=False
+        )
     if command[2].string == "{}":
         raise JMCSyntaxException(
-            "For loop content cannot be empty", command[2], tokenizer)
-    statements = tokenizer.parse(command[1].string[1:-1], command[1].line,
-                                 command[1].col + 1, expect_semicolon=True, allow_last_missing_semicolon=True)
+            "For loop content cannot be empty", command[2], tokenizer
+        )
+    statements = tokenizer.parse(
+        command[1].string[1:-1],
+        command[1].line,
+        command[1].col + 1,
+        expect_semicolon=True,
+        allow_last_missing_semicolon=True,
+    )
     if len(statements) != 3:
         raise JMCSyntaxException(
-            f"Expected 3 statements (got {len(statements)})", command[1], tokenizer)
+            f"Expected 3 statements (got {len(statements)})", command[1], tokenizer
+        )
 
-    if statements[0][0].string in {
-            "let", "var"} and statements[0][0].token_type == TokenType.KEYWORD:
+    if (
+        statements[0][0].string in {"let", "var"}
+        and statements[0][0].token_type == TokenType.KEYWORD
+    ):
         raise JMCSyntaxException(
-            f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword", statements[0][0], tokenizer)
+            f"JMC does not support local scope variable, do not use '{statements[0][0].string}' keyword",
+            statements[0][0],
+            tokenizer,
+        )
 
     first_statement_tokens = statements[0]
 
     first_statement = datapack.lexer.parse_line(
-        first_statement_tokens, tokenizer, prefix)
-    if allow_true and len(
-            statements[1]) == 1 and statements[1][0].string == "true":
+        first_statement_tokens, tokenizer, prefix
+    )
+    if allow_true and len(statements[1]) == 1 and statements[1][0].string == "true":
         condition = "true"
         precommand = ""
     else:
         condition, precommand = parse_condition(
-            statements[1], tokenizer, datapack, prefix)
-    last_statement = datapack.lexer.parse_line(
-        statements[2], tokenizer, prefix)
+            statements[1], tokenizer, datapack, prefix
+        )
+    last_statement = datapack.lexer.parse_line(statements[2], tokenizer, prefix)
 
     return precommand, condition, first_statement, last_statement
 
@@ -484,33 +608,57 @@ def __handle_for(command: list[Token], datapack: DataPack,
 ASYNC_NAME = "async"
 
 
-def async_(command: list[Token], datapack: DataPack,
-           tokenizer: Tokenizer, prefix: str) -> str:
+def async_(
+    command: list[Token], datapack: DataPack, tokenizer: Tokenizer, prefix: str
+) -> str:
     """
     Parse `async while` and `async for`
     """
     if len(command) == 1:
         raise JMCSyntaxException(
-            "Expected 'for' or 'while' after 'async'", command[0], tokenizer, col_length=True)
+            "Expected 'for' or 'while' after 'async'",
+            command[0],
+            tokenizer,
+            col_length=True,
+        )
     if command[1].token_type != TokenType.KEYWORD:
         raise JMCSyntaxException(
-            f"Expected 'for' or 'while' after 'async' (got '{command[1].token_type.value}')", command[1], tokenizer)
+            f"Expected 'for' or 'while' after 'async' (got '{command[1].token_type.value}')",
+            command[1],
+            tokenizer,
+        )
     if command[1].string == "for":
         if len(command) == 4:
             raise JMCSyntaxException(
-                "Expected delay", command[3], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+                "Expected delay",
+                command[3],
+                tokenizer,
+                col_length=True,
+                suggestion="Example: `1s`, `1t`, `1d`",
+            )
         if len(command) > 5:
             raise JMCSyntaxException(
-                "Unexpected token", command[5], tokenizer, )
+                "Unexpected token",
+                command[5],
+                tokenizer,
+            )
         if command[4].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
-                f"Expected a keyword as delay (got {command[4].token_type.value})", command[4], tokenizer)
+                f"Expected a keyword as delay (got {command[4].token_type.value})",
+                command[4],
+                tokenizer,
+            )
         if not re.compile(r"^[0-9]+[dst]$").match(command[4].string):
             raise JMCSyntaxException(
-                "Expected delay in form of '<number><unit>'", command[4], tokenizer, suggestion="Example: `1s`, `1t`, `1d`")
+                "Expected delay in form of '<number><unit>'",
+                command[4],
+                tokenizer,
+                suggestion="Example: `1s`, `1t`, `1d`",
+            )
 
         precommand, condition, first_statement, last_statement = __handle_for(
-            command[1:-1], datapack, tokenizer, prefix, allow_true=True)
+            command[1:-1], datapack, tokenizer, prefix, allow_true=True
+        )
 
         count = datapack.get_count(FOR_NAME)
         if condition == "true":
@@ -518,7 +666,9 @@ def async_(command: list[Token], datapack: DataPack,
         else:
             call_check_func = datapack.add_private_function(
                 ASYNC_NAME,
-                f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}", force_create_func=True)
+                f"{precommand}execute {condition} run {datapack.call_func(FOR_NAME, count)}",
+                force_create_func=True,
+            )
 
         datapack.add_custom_private_function(
             FOR_NAME,
@@ -528,61 +678,87 @@ def async_(command: list[Token], datapack: DataPack,
             prefix,
             postcommands=[
                 *last_statement,
-                "schedule " + call_check_func + " " + command[4].string
-            ]
+                "schedule " + call_check_func + " " + command[4].string,
+            ],
         )
 
-        return "\n".join([
-            *first_statement,
-            call_check_func
-        ])
+        return "\n".join([*first_statement, call_check_func])
 
     elif command[1].string == "while":
         if len(command) < 3:
             raise JMCSyntaxException(
-                "Expected (", command[1], tokenizer, col_length=True)
+                "Expected (", command[1], tokenizer, col_length=True
+            )
         if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected (", command[2], tokenizer, display_col_length=False)
+                "Expected (", command[2], tokenizer, display_col_length=False
+            )
         if len(command) < 4:
             raise JMCSyntaxException(
-                "Expected {", command[2], tokenizer, col_length=True)
+                "Expected {", command[2], tokenizer, col_length=True
+            )
         if command[2].token_type != TokenType.PAREN_ROUND:
             raise JMCSyntaxException(
-                "Expected {", command[3], tokenizer, display_col_length=False)
+                "Expected {", command[3], tokenizer, display_col_length=False
+            )
         if len(command) == 4:
             raise JMCSyntaxException(
-                "Expected delay", command[3], tokenizer, col_length=True, suggestion="Example: `1s`, `1t`, `1d`")
+                "Expected delay",
+                command[3],
+                tokenizer,
+                col_length=True,
+                suggestion="Example: `1s`, `1t`, `1d`",
+            )
         if len(command) > 5:
             raise JMCSyntaxException(
-                "Unexpected token", command[5], tokenizer, )
+                "Unexpected token",
+                command[5],
+                tokenizer,
+            )
         if command[4].token_type != TokenType.KEYWORD:
             raise JMCSyntaxException(
-                f"Expected a keyword as delay (got {command[4].token_type.value})", command[4], tokenizer)
+                f"Expected a keyword as delay (got {command[4].token_type.value})",
+                command[4],
+                tokenizer,
+            )
         if not re.compile(r"^[0-9]+[dst]$").match(command[4].string):
             raise JMCSyntaxException(
-                "Expected delay in form of '<number><unit>'", command[4], tokenizer, suggestion="Example: `1s`, `1t`, `1d`")
+                "Expected delay in form of '<number><unit>'",
+                command[4],
+                tokenizer,
+                suggestion="Example: `1s`, `1t`, `1d`",
+            )
 
         if command[2].string[1:-1].strip() == "true":
             condition = "true"
             precommand = ""
         else:
             condition, precommand = parse_condition(
-                command[2], tokenizer, datapack, prefix)
+                command[2], tokenizer, datapack, prefix
+            )
 
         count = datapack.get_count(WHILE_NAME)
         if condition == "true":
             call_check_func = datapack.call_func(WHILE_NAME, count)
         else:
             call_check_func = datapack.add_private_function(
-                ASYNC_NAME, f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}", force_create_func=True)
+                ASYNC_NAME,
+                f"{precommand}execute {condition} run {datapack.call_func(WHILE_NAME, count)}",
+                force_create_func=True,
+            )
 
         datapack.add_custom_private_function(
-            WHILE_NAME, command[3], tokenizer, count, prefix, postcommands=[
-                "schedule " + call_check_func + " " + command[4].string
-            ]
+            WHILE_NAME,
+            command[3],
+            tokenizer,
+            count,
+            prefix,
+            postcommands=["schedule " + call_check_func + " " + command[4].string],
         )
         return call_check_func
 
     raise JMCSyntaxException(
-        f"Expected 'for' or 'while' after 'async' (got '{command[1].string}')", command[1], tokenizer)
+        f"Expected 'for' or 'while' after 'async' (got '{command[1].string}')",
+        command[1],
+        tokenizer,
+    )

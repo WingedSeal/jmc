@@ -1,0 +1,23 @@
+from sys import path
+
+path.append("../src")
+
+from jmc import JMCTestPack
+
+result = (
+    JMCTestPack(namespace="namespace")
+    .set_jmc_file(
+        r"""
+
+    """
+    )
+    .set_header_file(
+        r"""
+
+    """
+    )
+    .set_pack_format(9999)
+    .to_string()
+)
+
+print(result)

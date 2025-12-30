@@ -6,7 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 
-from .utils import is_connected, is_decorator
+from .utils import clean_up_paren_token, is_connected, is_decorator
 from .header import MacroFactory, Header
 from .exception import JMCSyntaxException, JMCSyntaxWarning
 from .log import Logger
@@ -170,8 +170,7 @@ PAREN_PAIR = {
 }
 """Dictionary of left bracket(string) and right bracket(string)"""
 
-OPERATORS = {"+", "-", "*", "/", ">", "<",
-             "=", "%", ":", "!", "|", "&", "?", "\\"}
+OPERATORS = {"+", "-", "*", "/", ">", "<", "=", "%", ":", "!", "|", "&", "?", "\\"}
 
 
 class Tokenizer:
@@ -354,8 +353,7 @@ class Tokenizer:
                     new_token,
                     self,
                 )
-            self.keywords.extend(macro_factory(
-                args, token_pos.line, token_pos.col))
+            self.keywords.extend(macro_factory(args, token_pos.line, token_pos.col))
         else:
             self.keywords.append(new_token)
 
@@ -795,7 +793,7 @@ class Tokenizer:
         self,
         tokens: list[Token],
         use_full_string: bool = False,
-        lexer_to_cleanup: "Lexer | None" = None,
+        is_clean_up: bool = True,
     ) -> Token:
         """
         Merge multiple token together
@@ -806,12 +804,12 @@ class Tokenizer:
         """
 
         def __handle_token(token: Token):
-            if lexer_to_cleanup is not None and token.token_type in (
+            if is_clean_up and token.token_type in (
                 TokenType.PAREN_CURLY,
                 TokenType.PAREN_ROUND,
                 TokenType.PAREN_SQUARE,
             ):
-                return lexer_to_cleanup.clean_up_paren_token(token, self)
+                return clean_up_paren_token(token, self)
             if use_full_string:
                 return token.get_full_string()
             return token.string
@@ -970,8 +968,7 @@ class Tokenizer:
                 kwargs[key] = value
                 continue
 
-            args.append(self.__parse_func_arg(
-                comma_separated_token, bool(kwargs)))
+            args.append(self.__parse_func_arg(comma_separated_token, bool(kwargs)))
 
         return args, kwargs
 
@@ -1019,7 +1016,11 @@ class Tokenizer:
 
         return params
 
-    def parse_list(self, token: Token, paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]")) -> list[Token]:
+    def parse_list(
+        self,
+        token: Token,
+        paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]"),
+    ) -> list[Token]:
         """
         Parse list
 
@@ -1117,8 +1118,7 @@ class Tokenizer:
                     self,
                 )
             key = comma_separated_token[0].string
-            value = self.__parse_func_arg(
-                comma_separated_token[2:], False, is_nbt=True)
+            value = self.__parse_func_arg(comma_separated_token[2:], False, is_nbt=True)
             if key in component:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", comma_separated_token[0], self
@@ -1182,8 +1182,7 @@ class Tokenizer:
                     self,
                 )
             key = comma_separated_token[0].string
-            value = self.__parse_func_arg(
-                comma_separated_token[2:], False, is_nbt=True)
+            value = self.__parse_func_arg(comma_separated_token[2:], False, is_nbt=True)
             if key in js_obj:
                 raise JMCSyntaxException(
                     f"Duplicated key({key})", comma_separated_token[0], self

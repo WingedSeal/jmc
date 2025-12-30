@@ -1,4 +1,5 @@
 """Setup file for pypi"""
+
 from pathlib import Path
 from setuptools import setup, find_packages
 from jmc import VERSION
@@ -8,9 +9,9 @@ with (Path(__file__).parents[1] / "README.md").open(encoding="utf-8") as file:
     README = "\n" + file.read()
 
 DESCRIPTION = "Compiler for JMC (JavaScript-like Minecraft Function), a mcfunction extension language for making Minecraft Datapack."
-version = VERSION.replace("-alpha.", "a").replace("-beta.", "b")[1:]
+version = VERSION.replace("-git", "").replace("-alpha.", "a").replace("-beta.", "b")[1:]
 
-if ("/" + VERSION + "/") not in README:
+if ("/" + VERSION.replace("-git", "") + "/") not in README:
     raise ValueError("README file's version has not been updated")
 
 setup(
@@ -23,12 +24,7 @@ setup(
     long_description=README,
     packages=find_packages(),
     install_requires=[],
-    keywords=[
-        "python",
-        "minecraft",
-        "mcfunction",
-        "datapack",
-        "compiler"],
+    keywords=["python", "minecraft", "mcfunction", "datapack", "compiler"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -48,5 +44,5 @@ setup(
         "Documentation": "https://jmc.wingedseal.com/",
         "Repository": "https://github.com/WingedSeal/jmc",
     },
-    license="MIT License"
+    license="MIT License",
 )

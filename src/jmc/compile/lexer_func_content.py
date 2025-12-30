@@ -16,11 +16,11 @@ from .command.utils import (
 from .exception import EXCEPTIONS, JMCSyntaxException, MinecraftSyntaxWarning
 from .log import Logger
 from .utils import (
+    clean_up_paren_token,
     convention_jmc_to_mc,
     is_decorator,
     is_number,
     is_connected,
-    search_to_string,
 )
 from .datapack import DataPack
 from .command.condition import BOOL_FUNCTIONS, FUNC_CONTENT
@@ -78,7 +78,7 @@ FIRST_ARGUMENTS_EXCEPTION = {
     "data": {"execute", "with"},
     "weather": {"playsound"},
     "item": {"particle", "summon"},
-    "list": {"scoreboard"},
+    "list": {"scoreboard", "datapack"},
 }
 """Dictionary of (FIRST_ARGUMENTS that can also be used as normal argument in a command) and (those commands)
 
@@ -425,28 +425,24 @@ class FuncContent:
             return
 
         if token.token_type == TokenType.PAREN_ROUND:
-            self.__commands[-1], success = search_to_string(
-                self.__commands[-1], token, DataPack.var_name, self.tokenizer
-            )
-            if not success:
-                if is_connected(token, self.command[key_pos - 1]):
-                    self.__commands[-1] += self.lexer.clean_up_paren_token(
-                        token, self.tokenizer
-                    )
-                else:
-                    append_commands(
-                        self.__commands,
-                        self.lexer.clean_up_paren_token(token, self.tokenizer),
-                    )
-        elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             if is_connected(token, self.command[key_pos - 1]):
-                self.__commands[-1] += self.lexer.clean_up_paren_token(
+                self.__commands[-1] += clean_up_paren_token(
                     token, self.tokenizer
                 )
             else:
                 append_commands(
                     self.__commands,
-                    self.lexer.clean_up_paren_token(token, self.tokenizer),
+                    clean_up_paren_token(token, self.tokenizer),
+                )
+        elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
+            if is_connected(token, self.command[key_pos - 1]):
+                self.__commands[-1] += clean_up_paren_token(
+                    token, self.tokenizer
+                )
+            else:
+                append_commands(
+                    self.__commands,
+                    clean_up_paren_token(token, self.tokenizer),
                 )
         elif token.token_type == TokenType.STRING:
             if (
@@ -743,7 +739,7 @@ class FuncContent:
                     self.__commands,
                     f"function {
                         self.lexer.datapack.format_func_path(func)} {
-                        self.lexer.clean_up_paren_token(
+                        clean_up_paren_token(
                             args[0][0], self.tokenizer)}",
                 )
                 return SKIP_TO_NEXT_LINE
@@ -936,14 +932,14 @@ class FuncContent:
                 )
             if self.switch_tokens is not None:
                 return self.__handle_switch_with(
-                    self.lexer.clean_up_paren_token(
+                    clean_up_paren_token(
                         self.command[key_pos + 1], self.tokenizer, True
                     )
                 )
 
             append_commands(
                 self.__commands,
-                self.lexer.clean_up_paren_token(
+                clean_up_paren_token(
                     self.command[key_pos + 1], self.tokenizer, True
                 ),
             )

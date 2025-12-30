@@ -1,9 +1,12 @@
 """Module handling datapack"""
 
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 from json import JSONEncoder, dumps
+
+from jmc.compile.utils import clean_up_paren_token
 
 from .pack_version import PackVersion, PackVersionFeature
 from .tokenizer import Token, TokenType, Tokenizer
@@ -315,8 +318,7 @@ class DataPack:
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
         """Dictionary of json name and a dictionary(jsobject)"""
-        self.private_functions: dict[str,
-                                     dict[str, Function]] = defaultdict(dict)
+        self.private_functions: dict[str, dict[str, Function]] = defaultdict(dict)
         """Dictionary of function's group name and (Dictionary of function name and a Function object)"""
         self.private_function_count: dict[str, int] = defaultdict(int)
         """Current count of how many private functions there are in each group name"""
@@ -392,7 +394,10 @@ class DataPack:
         :param count: Name of the function (usually as count)
         :return: String for calling minecraft function
         """
-        return f"function {self.namespace}:{self.private_name}/{name}/{count}"
+        return (
+            f"function {self.namespace}:{self.private_name}/{name}/{count}"
+            + self._get_func_in_comment(name, count)
+        )
 
     def add_private_json(
         self, json_type: str, name: str, json: dict[str, Any] | list[Any]
@@ -404,7 +409,10 @@ class DataPack:
         :param name: Name of the private json
         :param json: Dictionary object
         """
-        if self.version >= PackVersionFeature.LEGACY_FOLDER_RENAME and json_type.endswith("s"):
+        if (
+            self.version >= PackVersionFeature.LEGACY_FOLDER_RENAME
+            and json_type.endswith("s")
+        ):
             json_type = json_type[:-1]
         self.jsons[f"{json_type}/{self.private_name}/{name}"] = json
 
@@ -495,6 +503,24 @@ class DataPack:
         """
 
         self.functions[name] = Function(commands)
+
+    def _get_func_in_comment(self, name: str, count: str) -> str:
+        if not Header().show_private_command:
+            return ""
+        if (
+            name not in self.private_functions
+            or count not in self.private_functions[name]
+        ):
+            return "\n# ...\n"
+        return (
+            "\n# "
+            + "\n# ".join(
+                line
+                for command in self.private_functions[name][count].commands
+                for line in command.split("\n")
+            )
+            + "\n"
+        )
 
     def add_private_function(
         self,
@@ -678,6 +704,14 @@ class DataPack:
         self.loads = []
         self.ticks = []
 
+        track_function_regexs = Header().track_function_regexs
+        for regex, prefix, suffix, color, function_color in track_function_regexs:
+            for name, function in self.functions.items():
+                if regex.fullmatch(name) is None:
+                    continue
+                tellraw = f'tellraw @a ["",{{"text":"[JMC] ","color":"gold","bold":true}},{{"text":"{prefix}","color":"{color}"}},{{"text":"{name}","color":"{function_color}"}},{{"text":"{suffix}","color":"{color}"}}]'
+                function.insert(tellraw, 0)
+
     def parse_func_map(
         self, token: Token, tokenizer: Tokenizer, prefix: str
     ) -> dict[int, tuple[str, bool]]:
@@ -702,8 +736,7 @@ class DataPack:
                 func_map[num] = value.string, False
             elif value.token_type == TokenType.FUNC:
                 func_map[num] = (
-                    "\n".join(self.parse_function_token(
-                        value, tokenizer, prefix)),
+                    "\n".join(self.parse_function_token(value, tokenizer, prefix)),
                     True,
                 )
             else:
@@ -713,7 +746,11 @@ class DataPack:
         return func_map
 
     def parse_list(
-        self, token: Token, tokenizer: Tokenizer, list_of: TokenType, paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]")
+        self,
+        token: Token,
+        tokenizer: Tokenizer,
+        list_of: TokenType,
+        paren: tuple[TokenType, str] = (TokenType.PAREN_SQUARE, "[]"),
     ) -> tuple[list[str], list[Token]]:
         """
         Parse paren_square token into list of strings
@@ -760,8 +797,7 @@ class DataPack:
                     token,
                     tokenizer,
                 )
-            result_string, result_token = self.parse_list(
-                token_, tokenizer, list_of)
+            result_string, result_token = self.parse_list(token_, tokenizer, list_of)
             result_strings.append(result_string)
             result_tokens.append(result_token)
         return result_strings, result_tokens
@@ -785,14 +821,17 @@ class DataPack:
                 TokenType.PAREN_SQUARE,
             }:
                 pairs.append(
-                    f"{key}:{self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                    f"{key}:{clean_up_paren_token(token, tokenizer, is_nbt=False)}"
                 )
             else:
                 pairs.append(f"{key}:{token.string}")
         return "{" + ",".join(pairs) + "}"
 
     def token_dict_to_component(
-        self, token_dict: dict[str, Token], tokenizer: Tokenizer, nbt_token_dict: dict[str, Token]
+        self,
+        token_dict: dict[str, Token],
+        tokenizer: Tokenizer,
+        nbt_token_dict: dict[str, Token],
     ) -> str:
         """
         Turns a dictionary of key and token to a string in form of component
@@ -811,13 +850,14 @@ class DataPack:
                 TokenType.PAREN_SQUARE,
             }:
                 pairs.append(
-                    f"{key}={self.lexer.clean_up_paren_token(token, tokenizer, is_nbt=False)}"
+                    f"{key}={clean_up_paren_token(token, tokenizer, is_nbt=False)}"
                 )
             else:
                 pairs.append(f"{key}={token.string}")
         if nbt_token_dict:
             pairs.append(
-                f"nbt={self.token_dict_to_raw_js_object(nbt_token_dict, tokenizer)}")
+                f"nbt={self.token_dict_to_raw_js_object(nbt_token_dict, tokenizer)}"
+            )
         return "[" + ",".join(pairs) + "]"
 
     def __repr__(self) -> str:
