@@ -2028,9 +2028,7 @@ class TextPropsKeybind(JMCFunction):
     call_string="TextProp.nbt",
     arg_type={
         "propertyName": ArgType.STRING,
-        "type": ArgType.KEYWORD,
-        "source": ArgType.STRING,
-        "path": ArgType.KEYWORD,
+        "nbt": ArgType.NBT,
         "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD,
@@ -2040,35 +2038,14 @@ class TextPropsKeybind(JMCFunction):
 )
 class TextPropNBT(JMCFunction):
     def call(self) -> str:
-        _type = self.raw_args["type"]
-        if not _type:
-            raise JMCValueError(
-                "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
-                self.raw_args["type"].token,
-                self.tokenizer,
-            )
-        source = self.raw_args["source"]
-        if not source:
-            raise JMCValueError(
-                "Missing NBT source in TextProp.nbt",
-                self.raw_args["source"].token,
-                self.tokenizer,
-            )
-        path = self.raw_args["path"]
-        if not path:
-            raise JMCValueError(
-                "Missing NBT path in TextProp.nbt",
-                self.raw_args["path"].token,
-                self.tokenizer,
-            )
-
+        nbt_type, source, path = self.args["nbt"].split(" ", 2)
         output: SIMPLE_JSON_BODY = {
-            self.args["type"]: self.args["source"],
-            "nbt": self.args["path"],
+            nbt_type: source,
+            "nbt": path,
             "interpret": self.args["interpret"],
         }
         if self.args["separator"] != ", ":
-            output["separator"] = json.loads(  # type: ignore # fmt: off
+            output["separator"] = json.loads(  
                 self.format_text("separator")
             )
         self.add_formatted_text_prop(
@@ -2083,9 +2060,7 @@ class TextPropNBT(JMCFunction):
     arg_type={
         "propertyName": ArgType.STRING,
         "indexString": ArgType.STRING,
-        "type": ArgType.KEYWORD,
-        "source": ArgType.STRING,
-        "path": ArgType.KEYWORD,
+        "nbt": ArgType.NBT,
         "separator": ArgType.STRING,
         "interpret": ArgType.KEYWORD,
         "local": ArgType.KEYWORD,
@@ -2095,39 +2070,16 @@ class TextPropNBT(JMCFunction):
 )
 class TextPropsNBT(JMCFunction):
     def call(self) -> str:
-        _type = self.raw_args["type"]
-        if not _type:
-            raise JMCValueError(
-                "Missing NBT type in TextProp.nbt (should be `block`, `entity`, or `storage`)",
-                self.raw_args["type"].token,
-                self.tokenizer,
-            )
-        source = self.raw_args["source"]
-        if not source:
-            raise JMCValueError(
-                "Missing NBT source in TextProp.nbt",
-                self.raw_args["source"].token,
-                self.tokenizer,
-            )
-        path = self.raw_args["path"]
-        if not path:
-            raise JMCValueError(
-                "Missing NBT path in TextProp.nbt",
-                self.raw_args["path"].token,
-                self.tokenizer,
-            )
-
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
+            nbt_type, source, path = self.args["nbt"].replace(self.args["indexString"], arg).split(" ", 2)
             output: SIMPLE_JSON_BODY = {
-                self.args["type"]: self.args["source"].replace(
-                    self.args["indexString"], arg
-                ),
-                "nbt": self.args["path"].replace(self.args["indexString"], arg),
+                nbt_type: source,
+                "nbt": path,
                 "interpret": self.args["interpret"],
             }
             if self.args["separator"] != ", ":
-                output["separator"] = self.format_text(  # type: ignore # fmt: off
+                output["separator"] = self.format_text(
                     "separator"
                 )
             return output
