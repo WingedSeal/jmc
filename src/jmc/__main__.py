@@ -4,11 +4,10 @@ import atexit
 import shutil
 import subprocess
 import argparse
-import importlib
+import importlib.util
 from pathlib import Path
 import sys
 
-from jmc.compile.header import Header
 
 from .terminal.configuration import Configuration
 from .compile import Logger
