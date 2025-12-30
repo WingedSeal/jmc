@@ -7,7 +7,12 @@ from typing import Iterator
 from ....compile.pack_version import PackVersionFeature
 from ....compile.utils import convention_jmc_to_mc
 from ....compile.tokenizer import Token, TokenType
-from ...exception import EXCEPTIONS, JMCSyntaxException, JMCValueError, relative_file_name
+from ...exception import (
+    EXCEPTIONS,
+    JMCSyntaxException,
+    JMCValueError,
+    relative_file_name,
+)
 from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
@@ -224,12 +229,15 @@ class JMCCall(JMCFunction):
 )
 class JMCPrint(JMCFunction):
     def call(self) -> str:
-        text = self.args['text']
+        text = self.args["text"]
         if "\n" not in text:
             print(f"JMC.print: {text}")
         else:
-            print("\n".join(
-                f"JMC.print[{i}]: {text}" for i, text in enumerate(text.split('\n'))))
+            print(
+                "\n".join(
+                    f"JMC.print[{i}]: {text}" for i, text in enumerate(text.split("\n"))
+                )
+            )
         return ""
 
 
@@ -237,19 +245,21 @@ class JMCPrint(JMCFunction):
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.printAny",
     arg_type={"any": ArgType.ANY, "prefix": ArgType.STRING},
-    defaults={
-        "prefix": ""
-    },
+    defaults={"prefix": ""},
     name="jmc_print_any",
 )
 class JMCPrintAny(JMCFunction):
     def call(self) -> str:
-        text = self.args['prefix'] + self.args['any']
+        text = self.args["prefix"] + self.args["any"]
         if "\n" not in text:
             print(f"JMC.printAny: {text}")
         else:
-            print("\n".join(
-                f"JMC.printAny[{i}]: {text}" for i, text in enumerate(text.split('\n'))))
+            print(
+                "\n".join(
+                    f"JMC.printAny[{i}]: {text}"
+                    for i, text in enumerate(text.split("\n"))
+                )
+            )
         return ""
 
 
@@ -258,15 +268,14 @@ class JMCPrintAny(JMCFunction):
     call_string="JMC.todo",
     arg_type={"text": ArgType.STRING},
     name="jmc_todo",
-    defaults={
-        "text": ""
-    }
+    defaults={"text": ""},
 )
 class JMCTodo(JMCFunction):
     def call(self) -> str:
         self.self_token
         print(
-            f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}")
+            f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}"
+        )
         return ""
 
 
@@ -327,8 +336,7 @@ class Print(JMCFunction):
             raise ValueError("value is int")
         name = scoreboard_player.value[1]
         obj = scoreboard_player.value[0]
-        return 'tellraw @a {"score":{"name":"%s","objective":"%s"}}' % (
-            name, obj)
+        return 'tellraw @a {"score":{"name":"%s","objective":"%s"}}' % (name, obj)
 
 
 @func_property(
@@ -437,8 +445,7 @@ def points_to_commands(
     },
 )
 class ParticleCircle(JMCFunction):
-    def draw(self, radius: float,
-             spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, spread: int) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -463,10 +470,7 @@ class ParticleCircle(JMCFunction):
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
-                self.draw(
-                    float(
-                        self.args["radius"]), int(
-                        self.args["spread"])),
+                self.draw(float(self.args["radius"]), int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
@@ -500,8 +504,7 @@ class ParticleCircle(JMCFunction):
     },
 )
 class ParticleSphere(JMCFunction):
-    def draw(self, radius: float,
-             spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, radius: float, spread: int) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -533,10 +536,7 @@ class ParticleSphere(JMCFunction):
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
-                self.draw(
-                    float(
-                        self.args["radius"]), int(
-                        self.args["spread"])),
+                self.draw(float(self.args["radius"]), int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
@@ -759,8 +759,7 @@ class ParticleSpiral(JMCFunction):
         d_y = height / spread
         for i in range(spread):
             points.append(
-                (radius * math.cos(i * angle), i *
-                 d_y, radius * math.sin(i * angle))
+                (radius * math.cos(i * angle), i * d_y, radius * math.sin(i * angle))
             )
         return points
 
@@ -863,8 +862,7 @@ class ParticleCylinder(JMCFunction):
         for y in range(spread_y):
             angle = 2 * math.pi / spread_xz
             for i in drange(0, spread_xz, angle):
-                points.append(
-                    (radius * math.cos(i), y * d_y, radius * math.sin(i)))
+                points.append((radius * math.cos(i), y * d_y, radius * math.sin(i)))
         return points
 
     def call(self) -> str:
@@ -917,8 +915,7 @@ class ParticleCylinder(JMCFunction):
     },
 )
 class ParticleLine(JMCFunction):
-    def draw(self, distance: float,
-             spread: int) -> list[tuple[float, float, float]]:
+    def draw(self, distance: float, spread: int) -> list[tuple[float, float, float]]:
         """
         Draw particles
 
@@ -939,10 +936,7 @@ class ParticleLine(JMCFunction):
         return self.datapack.add_raw_private_function(
             self.name,
             commands=points_to_commands(
-                self.draw(
-                    float(
-                        self.args["distance"]), int(
-                        self.args["spread"])),
+                self.draw(float(self.args["distance"]), int(self.args["spread"])),
                 self.args["particle"],
                 self.args["speed"],
                 self.args["count"],
@@ -1190,7 +1184,11 @@ class AdvancementRevoke(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME else "advancements"
+        ADVANCEMENT = (
+            "advancement"
+            if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME
+            else "advancements"
+        )
         if namespace == "minecraft":
             if not (
                 advancement in MINECRAFT_ADVANCEMENTS
@@ -1259,7 +1257,11 @@ class AdvancementGrant(JMCFunction):
             if self.args["namespace"] == ""
             else self.args["namespace"]
         )
-        ADVANCEMENT = "advancement" if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME else "advancements"
+        ADVANCEMENT = (
+            "advancement"
+            if self.datapack.version >= PackVersionFeature.LEGACY_FOLDER_RENAME
+            else "advancements"
+        )
         if namespace == "minecraft":
             if not (
                 f"minecraft/{ADVANCEMENT}/{advancement}" in MINECRAFT_ADVANCEMENTS
@@ -1337,8 +1339,11 @@ ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
     func_type=FuncType.JMC_COMMAND,
     call_string="JMC.pythonFile",
     name="jmc_python_file",
-    arg_type={"pythonFile": ArgType.STRING, "env": ArgType.STRING,
-              "jmc": ArgType.KEYWORD},
+    arg_type={
+        "pythonFile": ArgType.STRING,
+        "env": ArgType.STRING,
+        "jmc": ArgType.KEYWORD,
+    },
     defaults={"env": "", "jmc": "false"},
 )
 class JMCPythonFile(JMCFunction):
@@ -1346,12 +1351,10 @@ class JMCPythonFile(JMCFunction):
         new_path = None
         try:
             file_path = Path(self.tokenizer.file_path)
-            new_path = Path(
-                (file_path.parent / self.args["pythonFile"]).resolve())
+            new_path = Path((file_path.parent / self.args["pythonFile"]).resolve())
             if new_path.suffix != ".py":
                 new_path = Path(
-                    (file_path.parent /
-                     (self.args["pythonFile"] + ".py")).resolve()
+                    (file_path.parent / (self.args["pythonFile"] + ".py")).resolve()
                 )
             with new_path.open("r") as file:
                 python_code = file.read()
@@ -1378,23 +1381,19 @@ class JMCPythonFile(JMCFunction):
 
         if self.check_bool("jmc"):
             try:
-                return "\n".join(self.datapack.parse_function_token(
-                    Token(
-                        TokenType.PAREN_CURLY,
-                        0,
-                        0,
-                        f"{{\n{output}\n}}"
-                    ),
-                    self.tokenizer,
-                    self.prefix,
-                ))
+                return "\n".join(
+                    self.datapack.parse_function_token(
+                        Token(TokenType.PAREN_CURLY, 0, 0, f"{{\n{output}\n}}"),
+                        self.tokenizer,
+                        self.prefix,
+                    )
+                )
             except EXCEPTIONS as error:
                 raise JMCValueError(
                     "A JMC exception occured in JMC.python when parsing jmc",
                     self.raw_args["pythonFile"].token,
                     self.tokenizer,
-                    suggestion="\n".join(str(error).split("|")[
-                                         0].split("\n")[:-1]),
+                    suggestion="\n".join(str(error).split("|")[0].split("\n")[:-1]),
                     col_length=False,
                     display_col_length=False,
                 )
@@ -1409,7 +1408,8 @@ class JMCPythonFile(JMCFunction):
     arg_type={
         "pythonCode": ArgType.STRING,
         "env": ArgType.STRING,
-        "jmc": ArgType.KEYWORD},
+        "jmc": ArgType.KEYWORD,
+    },
     defaults={"env": "", "jmc": "false"},
 )
 class JMCPython(JMCFunction):
@@ -1417,7 +1417,7 @@ class JMCPython(JMCFunction):
         if not string:
             return string
         if string.startswith(indent):
-            return string[len(indent):]
+            return string[len(indent) :]
         raise JMCSyntaxException(
             "Invalid indentation when trimming indentation",
             self.raw_args["pythonCode"].token,
@@ -1432,8 +1432,7 @@ class JMCPython(JMCFunction):
             return ""
 
         python_lines = self.args["pythonCode"].split("\n")
-        indent = python_lines[0][: len(
-            python_lines[0]) - len(python_lines[0].lstrip())]
+        indent = python_lines[0][: len(python_lines[0]) - len(python_lines[0].lstrip())]
         if not indent:
             python_code = self.args["pythonCode"]
         else:
@@ -1456,23 +1455,19 @@ class JMCPython(JMCFunction):
 
         if self.check_bool("jmc"):
             try:
-                return "\n".join(self.datapack.parse_function_token(
-                    Token(
-                        TokenType.PAREN_CURLY,
-                        0,
-                        0,
-                        f"{{\n{output}\n}}"
-                    ),
-                    self.tokenizer,
-                    self.prefix,
-                ))
+                return "\n".join(
+                    self.datapack.parse_function_token(
+                        Token(TokenType.PAREN_CURLY, 0, 0, f"{{\n{output}\n}}"),
+                        self.tokenizer,
+                        self.prefix,
+                    )
+                )
             except EXCEPTIONS as error:
                 raise JMCValueError(
                     "A JMC exception occured in JMC.python when parsing jmc",
                     self.raw_args["pythonCode"].token,
                     self.tokenizer,
-                    suggestion="\n".join(str(error).split("|")[
-                                         0].split("\n")[:-1]),
+                    suggestion="\n".join(str(error).split("|")[0].split("\n")[:-1]),
                     col_length=False,
                     display_col_length=False,
                 )
@@ -1485,8 +1480,7 @@ class JMCPython(JMCFunction):
     call_string="Array.forEach",
     name="array_for_each",
     arg_type={
-        "target": ArgType.STRING,
-        "path": ArgType.STRING,
+        "nbt": ArgType.NBT,
         "function": ArgType.ARROW_FUNC,
     },
 )
@@ -1494,18 +1488,25 @@ class ArrayForEach(JMCFunction):
     def call(self) -> str:
         length = "__length__"
         current = "__current__"
+        if not self.args["nbt"].startswith("storage "):
+            raise JMCValueError(
+                f"{self.call_string} only works with storage NBT ({self.args['nbt'].split(' ', 1)[0]} was given)",
+                self.raw_args["nbt"].token,
+                self.tokenizer,
+                suggestion="This function modify the NBT by left shifting equal to length of the array.",
+            )
         count = self.datapack.get_count("array")
         loop_func = self.datapack.add_raw_private_function(
             "array",
             [
                 self.args["function"],
-                f"data modify storage {self.args['target']} {self.args['path']} append from storage {self.args['target']} {self.args['path']}[0]",
-                f"data remove storage {self.args['target']} {self.args['path']}[0]",
+                f"data modify {self.args['nbt']} append from {self.args['nbt']}[0]",
+                f"data remove {self.args['nbt']}[0]",
                 f"scoreboard players add {current} {self.datapack.var_name} 1",
                 f"execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {self.datapack.call_func('array', count)}",
             ],
             count,
         )
-        return f"""execute store result score {length} {self.datapack.var_name} run data get storage {self.args["target"]} {self.args["path"]}
+        return f"""execute store result score {length} {self.datapack.var_name} run data get {self.args['nbt']}
 scoreboard players set {current} {self.datapack.var_name} 0
 execute if score {current} {self.datapack.var_name} < {length} {self.datapack.var_name} run {loop_func}"""
