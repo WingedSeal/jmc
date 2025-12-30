@@ -21,5 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
+import sys
+
+if sys.version_info < (3, 12):
+    raise RuntimeError(
+        "'jmc' requires Python >= 3.12\n"
+        "The current version is {}.{}.{}".format(*sys.version_info[:3])
+    )
+
 from .compile.test_compile import JMCTestPack
 from .api import PyJMC, VERSION
