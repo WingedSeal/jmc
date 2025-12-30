@@ -730,13 +730,19 @@ class FormattedText:
             if prop.startswith(DataPack.VARIABLE_SIGN):
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with score in formatted text",
+                        "score used with selector in formatted text",
                         self.token,
                         self.tokenizer,
                     )
                 if "score" in self.current_json:
                     raise JMCValueError(
                         "score used twice in formatted text", self.token, self.tokenizer
+                    )
+                if "nbt" in self.current_json:
+                    raise JMCValueError(
+                        "score used with nbt in formatted text",
+                        self.token,
+                        self.tokenizer,
                     )
                 self.current_json["score"] = {
                     "name": prop,
@@ -751,13 +757,19 @@ class FormattedText:
             if prop.count(":") == 1:
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with score in formatted text",
+                        "score used with selector in formatted text",
                         self.token,
                         self.tokenizer,
                     )
                 if "score" in self.current_json:
                     raise JMCValueError(
                         "score used twice in formatted text", self.token, self.tokenizer
+                    )
+                if "nbt" in self.current_json:
+                    raise JMCValueError(
+                        "score used with nbt in formatted text",
+                        self.token,
+                        self.tokenizer,
                     )
                 objective, name = prop.split(":")
                 self.current_json["score"] = {"name": name, "objective": objective}
@@ -770,13 +782,19 @@ class FormattedText:
             if prop.startswith("@"):
                 if "score" in self.current_json:
                     raise JMCValueError(
-                        "score used with selector in formatted text",
+                        "selector used with score in formatted text",
                         self.token,
                         self.tokenizer,
                     )
                 if "selector" in self.current_json:
                     raise JMCValueError(
-                        "selector used with selector in formatted text",
+                        "selector used twice in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                if "nbt" in self.current_json:
+                    raise JMCValueError(
+                        "selector used with nbt in formatted text",
                         self.token,
                         self.tokenizer,
                     )
@@ -827,6 +845,31 @@ class FormattedText:
                     del self.datapack.data.formatted_text_prop[prop_]
                 continue
 
+            if prop.count("::") == 1:
+                if "score" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used with score in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                if "selector" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used with selector in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                if "nbt" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used twice in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                source, path = prop.split("::", 1)
+                nbt_type = guess_nbt_type(source)
+                self.current_json["nbt"] = path
+                self.current_json[nbt_type] = source
+                continue
+
             if prop not in self.datapack.data.formatted_text_prop:
                 raise JMCValueError(
                     f"Unknown property '{prop}'", self.token, self.tokenizer
@@ -866,6 +909,7 @@ class FormattedText:
         if (
             "score" in self.current_json
             or "selector" in self.current_json
+            or "nbt" in self.current_json
             or "keybind" in self.current_json
             or "__private_nbt_expand__" in self.current_json
         ):
@@ -1160,3 +1204,32 @@ def hardcode_parse_calc(
             )
 
     return string[:calc_pos] + eval_expr(expression) + string[index + 13 :]
+
+
+def is_uuid(source: str) -> bool:
+    """
+    Tells whether source of the data is minecraft UUID or not
+
+    :param source: Source of the data
+    :return: Whether the source is in a minecraft UUID format
+    """
+    parts = source.split("-")
+    return len(parts) == 5 and all(
+        len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts
+    )
+
+
+def guess_nbt_type(source: str) -> str:
+    """Inferior version of get_nbt_type but it'll work on string"""
+    if source.startswith("@") or is_uuid(source):
+        return "entity"
+
+    if re.match(MINECRAFT_POSITION_REGEX, source):
+        return "block"
+
+    return "storage"
+
+
+MINECRAFT_POSITION_REGEX = (
+    r"^[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?[~\^]?$"
+)

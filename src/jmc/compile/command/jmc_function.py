@@ -3,9 +3,7 @@ from enum import Enum, auto
 from json import JSONDecodeError, loads
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
-from jmc.compile.command.nbt_operation import extract_nbt, get_nbt_type
-
-
+from ..command.nbt_operation import extract_nbt, get_nbt_type
 from ..utils import convention_jmc_to_mc, is_float
 from ..datapack_data import Item, SIMPLE_JSON_BODY
 from .utils import (

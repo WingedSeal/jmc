@@ -9,24 +9,6 @@ IF = True
 UNLESS = False
 
 
-def is_uuid(source: str) -> bool:
-    """
-    Tells whether source of the data is minecraft UUID or not
-
-    :param source: Source of the data
-    :return: Whether the source is in a minecraft UUID format
-    """
-    parts = source.split("-")
-    return len(parts) == 5 and all(
-        len(part) in (8, 4, 4, 4, 12) and part.isalnum() for part in parts
-    )
-
-
-MINECRAFT_POSITION_REGEX = (
-    r"^[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?[~\^]?$"
-)
-
-
 @func_property(
     func_type=FuncType.BOOL_FUNCTION,
     call_string="Timer.isOver",
