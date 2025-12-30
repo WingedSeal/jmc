@@ -170,6 +170,7 @@ def update(args: argparse.Namespace):
 
 def _get_updater() -> list[str] | None:
     if importlib.util.find_spec("pip") is not None:
+        print("Module 'pip' found, updating...")
         return [sys.executable, "-m", "pip"]
     print("Module 'pip' not found, falling back to 'uv' command")
     if shutil.which("uv") is not None:
@@ -179,6 +180,7 @@ def _get_updater() -> list[str] | None:
                 ["uv", "tool", "list"], capture_output=True, text=True, check=True
             )
             if PACKAGE_NAME in result.stdout:
+                print(f"'{PACKAGE_NAME}' package found in 'uv', updating...")
                 return ["uv", "tool"]
         except subprocess.CalledProcessError:
             pass
