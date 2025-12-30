@@ -149,13 +149,7 @@ def update(args: argparse.Namespace):
         package = ["jmcfunction"]
     try:
         subprocess.check_call(
-            [
-                sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-            ]
+            [sys.executable, "-m", "pip", "install", "--upgrade", "--user"]
             + (
                 [] if args.is_verbose else ["--quiet", "--quiet"]
             )  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
