@@ -41,8 +41,7 @@ logger = Logger(__name__)
 SKIP_TO_NEXT_LINE = True
 CONTINUE_LINE = False
 
-EXECUTE_EXCLUDED_COMMANDS = JMCFunction.get_subclasses(
-    FuncType.EXECUTE_EXCLUDED)
+EXECUTE_EXCLUDED_COMMANDS = JMCFunction.get_subclasses(FuncType.EXECUTE_EXCLUDED)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can't be used with `/execute`"""
 LOAD_ONCE_COMMANDS = JMCFunction.get_subclasses(FuncType.LOAD_ONCE)
 """Dictionary of command's name and a class of JMCFunction type for custom jmc command that can be only used *once* in load"""
@@ -270,16 +269,14 @@ class FuncContent:
             )
         if self.lexer.if_else_box:
             append_commands(
-                self.__commands, self.lexer.parse_if_else(
-                    self.tokenizer, self.prefix)
+                self.__commands, self.lexer.parse_if_else(self.tokenizer, self.prefix)
             )
 
         if self.__commands:
             if self.expanded_commands is not None:
                 for expanded_command in self.expanded_commands:
                     if expanded_command.startswith("execute"):
-                        expanded_command = expanded_command[len(
-                            "execute") + 1:]
+                        expanded_command = expanded_command[len("execute") + 1 :]
                         self.command_strings.append(
                             " ".join(self.__commands[:-1])
                             + " "
@@ -426,9 +423,7 @@ class FuncContent:
 
         if token.token_type == TokenType.PAREN_ROUND:
             if is_connected(token, self.command[key_pos - 1]):
-                self.__commands[-1] += clean_up_paren_token(
-                    token, self.tokenizer
-                )
+                self.__commands[-1] += clean_up_paren_token(token, self.tokenizer)
             else:
                 append_commands(
                     self.__commands,
@@ -436,9 +431,7 @@ class FuncContent:
                 )
         elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             if is_connected(token, self.command[key_pos - 1]):
-                self.__commands[-1] += clean_up_paren_token(
-                    token, self.tokenizer
-                )
+                self.__commands[-1] += clean_up_paren_token(token, self.tokenizer)
             else:
                 append_commands(
                     self.__commands,
@@ -495,8 +488,7 @@ class FuncContent:
                 token.token_type == TokenType.PAREN_CURLY
                 and (self.is_execute or self.__commands[key_pos - 2] == "return")
             ):
-                raise JMCSyntaxException(
-                    "Expected keyword", token, self.tokenizer)
+                raise JMCSyntaxException("Expected keyword", token, self.tokenizer)
             if self.expanded_commands is not None:
                 self.expanded_commands = self.lexer.datapack.parse_function_token(
                     token, self.tokenizer, self.prefix
@@ -686,8 +678,7 @@ class FuncContent:
             args, kwargs = self.tokenizer.parse_func_args(arg_token)
             if func in self.lexer.datapack.lazy_func:
                 __command = self.lexer.datapack.lazy_func[func].handle_lazy(
-                    args, kwargs, self.command[key_pos +
-                                               1], hardcode_parse_calc
+                    args, kwargs, self.command[key_pos + 1], hardcode_parse_calc
                 )
                 if func.split("/")[-1] == "_":
                     del self.lexer.datapack.lazy_func[func]
@@ -858,22 +849,22 @@ class FuncContent:
                 append_commands(self.__commands, "with")
             return
         self.lexer.datapack.version.require(
-            PackVersionFeature.VANILLA_MACRO, token, self.tokenizer)
+            PackVersionFeature.VANILLA_MACRO, token, self.tokenizer
+        )
         append_commands(self.__commands, self.command_strings.pop())
         if self.command[key_pos + 1].token_type != TokenType.PAREN_CURLY:
             append_commands(self.__commands, "with")
 
     def __handle_with(self, key_pos: int, token: Token) -> bool:
         self.lexer.datapack.version.require(
-            PackVersionFeature.LEGACY_FOLDER_RENAME, token, self.tokenizer)
+            PackVersionFeature.LEGACY_FOLDER_RENAME, token, self.tokenizer
+        )
         if not self.__commands and self.switch_tokens is None:
             return CONTINUE_LINE
-        if (
-            self.command[key_pos + 1].token_type == TokenType.PAREN_SQUARE
-            and (
-                len(self.command) <= key_pos + 2
-                or len(self.command) > key_pos + 2 and self.command[key_pos + 2].string != "::"
-            )
+        if self.command[key_pos + 1].token_type == TokenType.PAREN_SQUARE and (
+            len(self.command) <= key_pos + 2
+            or len(self.command) > key_pos + 2
+            and self.command[key_pos + 2].string != "::"
         ):
             if len(self.command) > key_pos + 2:
                 raise JMCSyntaxException(
@@ -904,7 +895,7 @@ class FuncContent:
             )
             return SKIP_TO_NEXT_LINE
 
-        __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
+        __with_nbt_type = get_nbt_type(self.command[key_pos + 1 :])
         if __with_nbt_type is None:
             token_ = self.command[key_pos + 1]
             if token_.token_type != TokenType.PAREN_CURLY:
@@ -939,9 +930,7 @@ class FuncContent:
 
             append_commands(
                 self.__commands,
-                clean_up_paren_token(
-                    self.command[key_pos + 1], self.tokenizer, True
-                ),
+                clean_up_paren_token(self.command[key_pos + 1], self.tokenizer, True),
             )
             return SKIP_TO_NEXT_LINE
         nbt_type_str, target, path = extract_nbt(
@@ -959,7 +948,12 @@ class FuncContent:
     def __handle_switch_with(self, with_str: str) -> bool:
         assert self.switch_tokens is not None
         switch_commands = switch(
-            self.switch_tokens, self.lexer.datapack, self.tokenizer, prefix="", with_str=with_str)
+            self.switch_tokens,
+            self.lexer.datapack,
+            self.tokenizer,
+            prefix="",
+            with_str=with_str,
+        )
         append_commands(self.__commands, switch_commands)
 
         self.switch_tokens = None
@@ -994,8 +988,7 @@ class FuncContent:
                 self.tokenizer,
                 suggestion=r"Use '\\n' instead of '\n'",
             )
-        append_commands(self.__commands,
-                        f"say {self.command[key_pos + 1].string}")
+        append_commands(self.__commands, f"say {self.command[key_pos + 1].string}")
 
     def __handle_schedule(self, key_pos: int) -> bool:
         if len(self.command) < key_pos + 3:
@@ -1068,8 +1061,7 @@ class FuncContent:
                         self.command[key_pos + 5],
                         self.tokenizer,
                     )
-                append_commands(self.__commands,
-                                self.command[key_pos + 5].string)
+                append_commands(self.__commands, self.command[key_pos + 5].string)
             if len(self.command) > key_pos + 6:
                 raise JMCSyntaxException(
                     "Unexpected token in schedule",
@@ -1209,8 +1201,7 @@ class FuncContent:
             )
             return SKIP_TO_NEXT_LINE
 
-        execute_excluded_command = self.get_function(
-            token, EXECUTE_EXCLUDED_COMMANDS)
+        execute_excluded_command = self.get_function(token, EXECUTE_EXCLUDED_COMMANDS)
         if execute_excluded_command is not None:
             if self.is_execute:
                 append_commands(
