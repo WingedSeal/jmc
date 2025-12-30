@@ -156,7 +156,7 @@ def update(args: argparse.Namespace):
         sys.exit(1)
     try:
         subprocess.check_call(
-            [*updater, "install", "--upgrade", "--user"]
+            [*updater, "install", "--upgrade"]
             + (
                 [] if args.is_verbose else ["--quiet", "--quiet"]
             )  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
