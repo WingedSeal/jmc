@@ -1,8 +1,10 @@
 """Main module"""
 
 import atexit
+import shutil
 import subprocess
 import argparse
+import importlib
 from pathlib import Path
 import sys
 
@@ -20,6 +22,8 @@ global_data: GlobalData = GlobalData()
 from . import terminal_commands  # noqa
 
 logger = Logger(__name__)
+
+PACKAGE_NAME = "jmcfunction"
 
 
 def main():
@@ -146,10 +150,14 @@ def update(args: argparse.Namespace):
             "git+https://github.com/WingedSeal/jmc.git#subdirectory=src",
         ]
     else:
-        package = ["jmcfunction"]
+        package = [PACKAGE_NAME]
+
+    updater = _get_updater()
+    if updater is None:
+        sys.exit(1)
     try:
         subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", "--upgrade", "--user"]
+            [*updater, "install", "--upgrade", "--user"]
             + (
                 [] if args.is_verbose else ["--quiet", "--quiet"]
             )  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
@@ -159,6 +167,25 @@ def update(args: argparse.Namespace):
     except subprocess.CalledProcessError as e:
         print(f"Update failed: {e}")
         sys.exit(1)
+
+
+def _get_updater() -> list[str] | None:
+    if importlib.util.find_spec("pip") is not None:
+        return [sys.executable, "-m", "pip"]
+    print("Module 'pip' not found, falling back to 'uv' command")
+    if shutil.which("uv") is not None:
+        print("command 'uv' found")
+        try:
+            result = subprocess.run(
+                ["uv", "tool", "list"], capture_output=True, text=True, check=True
+            )
+            if PACKAGE_NAME in result.stdout:
+                return ["uv", "tool"]
+        except subprocess.CalledProcessError:
+            pass
+        print(f"'{PACKAGE_NAME}' package not found in 'uv'")
+    print("Update failed")
+    return None
 
 
 def config(args: argparse.Namespace):
