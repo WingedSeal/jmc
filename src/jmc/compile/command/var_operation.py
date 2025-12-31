@@ -3,13 +3,21 @@
 from typing import TYPE_CHECKING
 from fractions import Fraction
 
-from ..expression_eval import CommandNumber, Variable, expression_to_tree, optimize_const, tokens_to_tokens, tree_to_operations
+from ..expression_eval import (
+    CommandNumber,
+    Variable,
+    expression_to_tree,
+    optimize_const,
+    tokens_to_tokens,
+    tree_to_operations,
+)
 from ..command.builtin_function.load_only import DebugWatch
 from .jmc_function import JMCFunction, FuncType
 from ..datapack import DataPack
 from ..exception import JMCSyntaxException, relative_file_name
 from ..tokenizer import Token, TokenType, Tokenizer
 from .utils import (
+    ScoreboardPlayer,
     find_scoreboard_player_type,
     PlayerType,
     is_obj_selector,
@@ -19,8 +27,8 @@ from .utils import (
 if TYPE_CHECKING:
     from ..lexer_func_content import FuncContent
 
-VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(
-    FuncType.VARIABLE_OPERATION)
+VAR_OPERATION_COMMANDS = JMCFunction.get_subclasses(FuncType.VARIABLE_OPERATION)
+CASTING_TYPES = ("command", "const", "var", "score")
 
 
 def variable_operation(
@@ -44,8 +52,10 @@ def variable_operation(
     :return: Full minecraft command
     """
     datapack.data.is_too_late_debug_watch = True
-    datapack.data.last_code_data = (relative_file_name(
-        tokenizer.file_path, tokens[0].line), tokenizer.file_string.split("\n")[tokens[0].line - 1])
+    datapack.data.last_code_data = (
+        relative_file_name(tokenizer.file_path, tokens[0].line),
+        tokenizer.file_string.split("\n")[tokens[0].line - 1],
+    )
     is_token_obj_selector = False
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN):
         if len(tokens[0].string) == 1:
@@ -113,6 +123,55 @@ def variable_operation(
 
     operator = tokens[1].string
 
+    if (
+        len(tokens) == 4
+        and tokens[2].string == "$"
+        and tokens[3].token_type == TokenType.PAREN_ROUND
+    ):
+        raise JMCSyntaxException(
+            f"Unable to determine type of right-hand operand due to use of vanilla macro",
+            token=tokenizer.merge_tokens(tokens[2:4]),
+            tokenizer=tokenizer,
+            suggestion=f"""Consider casting the vanilla macro using `<variable> <operator> (<type>) $(<vanilla_macro>)` syntax.
+Available types are: {", ".join("'"+casting_type+"'" for casting_type in CASTING_TYPES)}
+Example: `$var = (const) $(my_int)`""",
+        )
+
+    if (
+        len(tokens) == 5
+        and tokens[2].token_type == TokenType.PAREN_ROUND
+        and tokens[3].string == "$"
+        and tokens[4].token_type == TokenType.PAREN_ROUND
+    ):
+        vanilla_macro = tokenizer.merge_tokens(tokens[3:5])
+        casting_type = tokens[2].string[1:-1]
+        if casting_type not in CASTING_TYPES:
+            raise JMCSyntaxException(
+                f"Unrecognized casting types for vanilla macro: {casting_type}",
+                token=vanilla_macro,
+                tokenizer=tokenizer,
+                suggestion=f"""Available types are: {", ".join("'"+casting_type+"'" for casting_type in CASTING_TYPES)}""",
+            )
+    else:
+        vanilla_macro = None
+        casting_type = None
+
+    if vanilla_macro is not None and casting_type == "command":
+        if operator == "=":
+            return DebugWatch.variable_operation_wrapper(
+                f"execute store result score {tokens[0].string} {objective_name} run {vanilla_macro.string}",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
+        elif operator == "?=":
+            return DebugWatch.variable_operation_wrapper(
+                f"execute store result success {tokens[0].string} {objective_name} run {vanilla_macro.string}",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
+
     if operator == "=" and len(tokens) > 2 and tokens[2].string in first_arguments:
         func_content = FuncContent(
             tokenizer, [tokens[2:]], is_load=False, lexer=datapack.lexer, prefix=prefix
@@ -125,8 +184,18 @@ def variable_operation(
             )
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
-            return DebugWatch.variable_operation_wrapper(f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}", tokens[0].string, objective_name, datapack)
-        return DebugWatch.variable_operation_wrapper(f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
+        return DebugWatch.variable_operation_wrapper(
+            f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}",
+            tokens[0].string,
+            objective_name,
+            datapack,
+        )
 
     if (
         operator == "="
@@ -141,7 +210,12 @@ def variable_operation(
                 tokenizer,
                 suggestion="Probably missing semicolon.",
             )
-        return DebugWatch.variable_operation_wrapper(f"scoreboard players set {tokens[0].string} {objective_name} {'1' if tokens[2].string == 'true' else '0'}", tokens[0].string, objective_name, datapack)
+        return DebugWatch.variable_operation_wrapper(
+            f"scoreboard players set {tokens[0].string} {objective_name} {'1' if tokens[2].string == 'true' else '0'}",
+            tokens[0].string,
+            objective_name,
+            datapack,
+        )
 
     if (
         operator == "??="
@@ -157,12 +231,26 @@ def variable_operation(
                 suggestion="Probably missing semicolon.",
             )
         if tokens[2].string == "true":
-            return DebugWatch.variable_operation_wrapper(f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} run scoreboard players set {tokens[0].string} {objective_name} 1",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
         elif tokens[2].string == "false":
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players add {tokens[0].string} {objective_name} 0", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"scoreboard players add {tokens[0].string} {objective_name} 0",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
 
     if operator == ":=" or (
-            len(operator) == 3 and operator.startswith(":") and operator.endswith("=") and operator[1] in "+-*/%"):
+        len(operator) == 3
+        and operator.startswith(":")
+        and operator.endswith("=")
+        and operator[1] in "+-*/%"
+    ):
         if len(tokens) == 2:
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got nothing)",
@@ -170,70 +258,85 @@ def variable_operation(
                 tokenizer,
                 suggestion="Expected integer or variable or target selector",
             )
-        expression_tokens = tokens_to_tokens(
-            tokens[2:], tokenizer)
+        expression_tokens = tokens_to_tokens(tokens[2:], tokenizer)
         expression_tree = expression_to_tree(
-            expression_tokens, tokenizer, datapack, prefix)
-        operations = tree_to_operations(expression_tree, Variable(
-            f"{tokens[0].string} {objective_name}", tokens[0]), operator.lstrip(":").rstrip("="), tokenizer)
+            expression_tokens, tokenizer, datapack, prefix
+        )
+        operations = tree_to_operations(
+            expression_tree,
+            Variable(f"{tokens[0].string} {objective_name}", tokens[0]),
+            operator.lstrip(":").rstrip("="),
+            tokenizer,
+        )
         operations = optimize_const(operations)
         expression_commands: list[str] = []
         for variable_, operator_, number_ in operations:
             if isinstance(number_, CommandNumber):
                 assert operator_.content == ""
                 expression_commands.append(
-                    f"execute store result score {variable_.content} run {number_.content}")
+                    f"execute store result score {variable_.content} run {number_.content}"
+                )
                 continue
             if " " in number_.content:  # right hand is not a constant number
                 expression_commands.append(
-                    f"scoreboard players operation {variable_.content} {operator_.content}= {number_.content}")
+                    f"scoreboard players operation {variable_.content} {operator_.content}= {number_.content}"
+                )
                 continue
             number = int(float(number_.content))
             if operator_.content == "+":
                 if number >= 0:
                     expression_commands.append(
-                        f"scoreboard players add {variable_.content} {number}")
+                        f"scoreboard players add {variable_.content} {number}"
+                    )
                 else:
                     expression_commands.append(
-                        f"scoreboard players remove {variable_.content} {-number}")
+                        f"scoreboard players remove {variable_.content} {-number}"
+                    )
             elif operator_.content == "-":
                 if number >= 0:
                     expression_commands.append(
-                        f"scoreboard players remove {variable_.content} {number}")
+                        f"scoreboard players remove {variable_.content} {number}"
+                    )
                 else:
                     expression_commands.append(
-                        f"scoreboard players add {variable_.content} {-number}")
+                        f"scoreboard players add {variable_.content} {-number}"
+                    )
             elif operator_.content == "":
                 expression_commands.append(
-                    f"scoreboard players set {variable_.content} {number}")
+                    f"scoreboard players set {variable_.content} {number}"
+                )
             elif operator_.content == "%":
                 datapack.add_int(number)
                 expression_commands.append(
-                    f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}")
+                    f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}"
+                )
             elif operator_.content in "*/":
                 number_float = float(number_.content)
                 if number_float.is_integer():
                     datapack.add_int(number)
                     expression_commands.append(
-                        f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}")
+                        f"scoreboard players operation {variable_.content} {operator_.content}= {number} {datapack.int_name}"
+                    )
                 else:
                     if operator_.content == "/":
                         number_float = 1 / number_float
-                    fraction = Fraction(
-                        number_float).limit_denominator(1_000_000)
+                    fraction = Fraction(number_float).limit_denominator(1_000_000)
                     multiplier, divider = fraction.as_integer_ratio()
                     if multiplier != 1:
                         datapack.add_int(multiplier)
                         expression_commands.append(
-                            f"scoreboard players operation {variable_.content} *= {multiplier} {datapack.int_name}")
+                            f"scoreboard players operation {variable_.content} *= {multiplier} {datapack.int_name}"
+                        )
                     if divider != 1:
                         datapack.add_int(divider)
                         expression_commands.append(
-                            f"scoreboard players operation {variable_.content} /= {divider} {datapack.int_name}")
+                            f"scoreboard players operation {variable_.content} /= {divider} {datapack.int_name}"
+                        )
             else:
-                raise Exception(
-                    "Somehow, there's an operator JMC doesn't know")
-        return DebugWatch.variable_operation_wrapper("\n".join(expression_commands), tokens[0].string, objective_name, datapack)
+                raise Exception("Somehow, there's an operator JMC doesn't know")
+        return DebugWatch.variable_operation_wrapper(
+            "\n".join(expression_commands), tokens[0].string, objective_name, datapack
+        )
 
     if operator in {"++", "--"}:
         if len(tokens) > 2:
@@ -243,9 +346,19 @@ def variable_operation(
                 tokenizer,
             )
         if operator == "++":
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players add {tokens[0].string} {objective_name} 1", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"scoreboard players add {tokens[0].string} {objective_name} 1",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
         if operator == "--":
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players remove {tokens[0].string} {objective_name} 1", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"scoreboard players remove {tokens[0].string} {objective_name} 1",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
     elif operator == "?=":
         if len(tokens) == 2:
             raise JMCSyntaxException(
@@ -264,8 +377,18 @@ def variable_operation(
             )
         if func_content[0].startswith("execute"):
             # len("execute ") = 8
-            return DebugWatch.variable_operation_wrapper(f"execute store success score {tokens[0].string} {objective_name} {func_content[0][8:]}", tokens[0].string, objective_name, datapack)
-        return DebugWatch.variable_operation_wrapper(f"execute store success score {tokens[0].string} {objective_name} run {func_content[0]}", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"execute store success score {tokens[0].string} {objective_name} {func_content[0][8:]}",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
+        return DebugWatch.variable_operation_wrapper(
+            f"execute store success score {tokens[0].string} {objective_name} run {func_content[0]}",
+            tokens[0].string,
+            objective_name,
+            datapack,
+        )
     elif operator in {
         "+=",
         "-=",
@@ -275,7 +398,6 @@ def variable_operation(
         "++",
         "--",
         "><",
-        "->",
         ">",
         "<",
         "=",
@@ -293,7 +415,7 @@ def variable_operation(
             TokenType.KEYWORD,
             TokenType.OPERATOR,
             TokenType.PAREN_SQUARE,
-        ):
+        ) and (vanilla_macro is None or tokens[2].token_type != TokenType.PAREN_ROUND):
             raise JMCSyntaxException(
                 f"Expected keyword after operator{tokens[1].string} (got {tokens[2].token_type.value})",
                 tokens[2],
@@ -323,8 +445,7 @@ def variable_operation(
                 )
 
             if len(tokens) > 4:
-                raise JMCSyntaxException(
-                    "Unexpected token", tokens[4], tokenizer)
+                raise JMCSyntaxException("Unexpected token", tokens[4], tokenizer)
 
             return VAR_OPERATION_COMMANDS[tokens[2].string](
                 tokens[3],
@@ -355,8 +476,13 @@ def variable_operation(
                     tokens[2],
                     tokenizer,
                 )
-            return DebugWatch.variable_operation_wrapper(f"""execute store result score {
-                tokens[0].string} {objective_name} run {func[0]}""", tokens[0].string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"""execute store result score {
+                tokens[0].string} {objective_name} run {func[0]}""",
+                tokens[0].string,
+                objective_name,
+                datapack,
+            )
 
         left_token = tokens[0]
         right_token = tokens[2]
@@ -367,12 +493,17 @@ def variable_operation(
             old_tokens = tokens.copy()
             right_token = merge_obj_selector(tokens, tokenizer, datapack, 2)
 
-        if len(tokens) > 3:
+        if vanilla_macro is None and len(tokens) > 3:
             if operator == "=":
                 try:
-                    return DebugWatch.variable_operation_wrapper(f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments, prefix)}""".replace(
-                        "run execute store", "store"
-                    ), left_token.string, objective_name, datapack)
+                    return DebugWatch.variable_operation_wrapper(
+                        f"""execute store result score {left_token.string} {objective_name} run {variable_operation(old_tokens[2:] if old_tokens is not None else tokens[2:], tokenizer, datapack, is_execute, FuncContent, first_arguments, prefix)}""".replace(
+                            "run execute store", "store"
+                        ),
+                        left_token.string,
+                        objective_name,
+                        datapack,
+                    )
                 except Exception as error:
                     try:
                         func_content = FuncContent(
@@ -390,8 +521,18 @@ def variable_operation(
                             )
                         if func_content[0].startswith("execute"):
                             # len("execute ") = 8
-                            return DebugWatch.variable_operation_wrapper(f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}", tokens[0].string, objective_name, datapack)
-                        return DebugWatch.variable_operation_wrapper(f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}", tokens[0].string, objective_name, datapack)
+                            return DebugWatch.variable_operation_wrapper(
+                                f"execute store result score {tokens[0].string} {objective_name} {func_content[0][8:]}",
+                                tokens[0].string,
+                                objective_name,
+                                datapack,
+                            )
+                        return DebugWatch.variable_operation_wrapper(
+                            f"execute store result score {tokens[0].string} {objective_name} run {func_content[0]}",
+                            tokens[0].string,
+                            objective_name,
+                            datapack,
+                        )
                     except Exception:
                         raise error
             elif operator == "??=":
@@ -410,8 +551,18 @@ def variable_operation(
                     )
                 if func_content[0].startswith("execute"):
                     # len("execute ") = 8
-                    return DebugWatch.variable_operation_wrapper(f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} {func_content[0][8:]}", tokens[0].string, objective_name, datapack)
-                return DebugWatch.variable_operation_wrapper(f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} run {func_content[0]}", tokens[0].string, objective_name, datapack)
+                    return DebugWatch.variable_operation_wrapper(
+                        f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} {func_content[0][8:]}",
+                        tokens[0].string,
+                        objective_name,
+                        datapack,
+                    )
+                return DebugWatch.variable_operation_wrapper(
+                    f"execute unless score {tokens[0].string} {objective_name} = {tokens[0].string} {objective_name} store result score {tokens[0].string} {objective_name} run {func_content[0]}",
+                    tokens[0].string,
+                    objective_name,
+                    datapack,
+                )
 
             else:
                 raise JMCSyntaxException(
@@ -421,51 +572,124 @@ def variable_operation(
                     suggestion="Probably missing semicolon.",
                 )
 
-        scoreboard_player = find_scoreboard_player_type(
-            right_token, tokenizer, allow_integer=False
-        )
-
-        if operator == "->":
-            if scoreboard_player.player_type == PlayerType.INTEGER:
-                raise JMCSyntaxException(
-                    "Cannot copy score into integer", right_token, tokenizer
-                )
-            if isinstance(scoreboard_player.value, int):
-                raise ValueError("scoreboard_player.value is int")
-
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players operation {scoreboard_player.value[1]} {scoreboard_player.value[0]} = {left_token.string} {objective_name}", scoreboard_player.value[1], scoreboard_player.value[0], datapack)
+        if vanilla_macro is None or casting_type is None:
+            scoreboard_player = find_scoreboard_player_type(
+                right_token, tokenizer, allow_integer=False
+            )
+        else:
+            match casting_type:
+                case "command":
+                    raise JMCSyntaxException(
+                        f"'command' type vanilla macro is only available for operator '=' and '?=' (got '{operator}')",
+                        token=tokens[2],
+                        tokenizer=tokenizer,
+                    )
+                case "const":
+                    scoreboard_player = ScoreboardPlayer(
+                        PlayerType.INTEGER, vanilla_macro.string
+                    )
+                case "var":
+                    scoreboard_player = ScoreboardPlayer(
+                        PlayerType.VARIABLE, (DataPack.var_name, vanilla_macro.string)
+                    )
+                case "score":
+                    scoreboard_player = ScoreboardPlayer(
+                        PlayerType.VARIABLE, vanilla_macro.string
+                    )
 
         if scoreboard_player.player_type == PlayerType.INTEGER:
             if operator == "+=":
-                if scoreboard_player.value < 0:  # type: ignore
-                    return DebugWatch.variable_operation_wrapper(f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value * -1}", left_token.string, objective_name, datapack)
-                return DebugWatch.variable_operation_wrapper(f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value}", left_token.string, objective_name, datapack)
+                if (
+                    isinstance(scoreboard_player.value, int)
+                    and scoreboard_player.value < 0
+                ):
+                    return DebugWatch.variable_operation_wrapper(
+                        f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value * -1}",
+                        left_token.string,
+                        objective_name,
+                        datapack,
+                    )
+                return DebugWatch.variable_operation_wrapper(
+                    f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value}",
+                    left_token.string,
+                    objective_name,
+                    datapack,
+                )
             if operator == "-=":
-                if scoreboard_player.value < 0:  # type: ignore
-                    return DebugWatch.variable_operation_wrapper(f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value * -1}", left_token.string, objective_name, datapack)
-                return DebugWatch.variable_operation_wrapper(f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value}", left_token.string, objective_name, datapack)
+                if (
+                    isinstance(scoreboard_player.value, int)
+                    and scoreboard_player.value < 0
+                ):
+                    return DebugWatch.variable_operation_wrapper(
+                        f"scoreboard players add {left_token.string} {objective_name} {scoreboard_player.value * -1}",
+                        left_token.string,
+                        objective_name,
+                        datapack,
+                    )
+                return DebugWatch.variable_operation_wrapper(
+                    f"scoreboard players remove {left_token.string} {objective_name} {scoreboard_player.value}",
+                    left_token.string,
+                    objective_name,
+                    datapack,
+                )
             if operator == "=":
-                return DebugWatch.variable_operation_wrapper(f"scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}", left_token.string, objective_name, datapack)
+                return DebugWatch.variable_operation_wrapper(
+                    f"scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}",
+                    left_token.string,
+                    objective_name,
+                    datapack,
+                )
             if operator == "??=":
                 if scoreboard_player.value == 0:
                     return (
                         f"scoreboard players add {left_token.string} {objective_name} 0"
                     )
                 else:
-                    return DebugWatch.variable_operation_wrapper(f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}", left_token.string, objective_name, datapack)
+                    return DebugWatch.variable_operation_wrapper(
+                        f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players set {left_token.string} {objective_name} {scoreboard_player.value}",
+                        left_token.string,
+                        objective_name,
+                        datapack,
+                    )
 
-            if not isinstance(scoreboard_player.value, int):
-                raise ValueError("scoreboard_player.value is not int")
-            datapack.add_int(scoreboard_player.value)
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value} {DataPack.int_name}", left_token.string, objective_name, datapack)
+            if isinstance(scoreboard_player.value, int):
+                datapack.add_int(scoreboard_player.value)
+                return DebugWatch.variable_operation_wrapper(
+                    f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value} {DataPack.int_name}",
+                    left_token.string,
+                    objective_name,
+                    datapack,
+                )
+            elif isinstance(scoreboard_player.value, str):
+                return DebugWatch.variable_operation_wrapper(
+                    f"scoreboard players set __temp__ {DataPack.var_name} {scoreboard_player.value}\n"
+                    f"scoreboard players operation {left_token.string} {objective_name} {operator} __temp__ {DataPack.var_name}",
+                    left_token.string,
+                    objective_name,
+                    datapack,
+                )
+            else:
+                raise NotImplementedError("Unreachable")
 
-        if isinstance(scoreboard_player.value, int):
-            raise ValueError("scoreboard_player.value is int")
+        if isinstance(scoreboard_player.value, tuple):
+            right_hand = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
+        else:
+            right_hand = scoreboard_player.value
 
         if operator == "??=":
-            return DebugWatch.variable_operation_wrapper(f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players operation {left_token.string} {objective_name} = {scoreboard_player.value[1]} {scoreboard_player.value[0]}", left_token.string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"execute unless score {left_token.string} {objective_name} = {left_token.string} {objective_name} run scoreboard players operation {left_token.string} {objective_name} = {right_hand}",
+                left_token.string,
+                objective_name,
+                datapack,
+            )
         else:
-            return DebugWatch.variable_operation_wrapper(f"scoreboard players operation {left_token.string} {objective_name} {operator} {scoreboard_player.value[1]} {scoreboard_player.value[0]}", left_token.string, objective_name, datapack)
+            return DebugWatch.variable_operation_wrapper(
+                f"scoreboard players operation {left_token.string} {objective_name} {operator} {right_hand}",
+                left_token.string,
+                objective_name,
+                datapack,
+            )
 
     raise JMCSyntaxException(
         f"Unrecognized operator ({operator})", tokens[1], tokenizer

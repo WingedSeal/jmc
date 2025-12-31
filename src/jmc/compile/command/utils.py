@@ -27,8 +27,8 @@ class PlayerType(Enum):
 @dataclass(frozen=True, slots=True)
 class ScoreboardPlayer:
     player_type: PlayerType
-    value: int | tuple[str, str]
-    """Contains either integer or (objective and selector)"""
+    value: str | int | tuple[str, str]
+    """Contains either integer or (objective and selector). str is used for storing vanilla macro integer"""
 
 
 def is_obj_selector(tokens: list[Token], start_index: int = 0) -> bool:
