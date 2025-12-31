@@ -142,8 +142,22 @@ Example: `$var = (const) $(my_int)`""",
         and tokens[2].token_type == TokenType.PAREN_ROUND
         and tokens[3].string == "$"
         and tokens[4].token_type == TokenType.PAREN_ROUND
-    ):
+    ):  # <var> = (<type>) $(<vanilla_macro>)
         vanilla_macro = tokenizer.merge_tokens(tokens[3:5])
+        casting_type = tokens[2].string[1:-1]
+        if casting_type not in CASTING_TYPES:
+            raise JMCSyntaxException(
+                f"Unrecognized casting types for vanilla macro: {casting_type}",
+                token=vanilla_macro,
+                tokenizer=tokenizer,
+                suggestion=f"""Available types are: {", ".join("'"+casting_type+"'" for casting_type in CASTING_TYPES)}""",
+            )
+    elif (
+        len(tokens) == 4
+        and tokens[2].token_type == TokenType.PAREN_ROUND
+        and tokens[3].token_type == TokenType.STRING
+    ):  # <var> = (<type>) "<complicated_vanilla_macro>"
+        vanilla_macro = tokens[3]
         casting_type = tokens[2].string[1:-1]
         if casting_type not in CASTING_TYPES:
             raise JMCSyntaxException(
