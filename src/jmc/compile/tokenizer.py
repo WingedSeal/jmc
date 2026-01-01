@@ -1191,3 +1191,20 @@ class Tokenizer:
             continue
 
         return js_obj
+
+    def merge_vanilla_macro(self, tokens: list[Token], key_pos: int):
+        if (
+            len(tokens[key_pos:]) >= 2
+            and tokens[key_pos + 1].token_type == TokenType.PAREN_ROUND
+            and tokens[key_pos].string.endswith("$")
+        ):
+            if (
+                len(tokens[key_pos:]) >= 3
+                and tokens[key_pos + 2].token_type == TokenType.KEYWORD
+                and is_connected(tokens[key_pos + 1], tokens[key_pos + 2])
+            ):
+                tokens[key_pos] = self.merge_tokens(tokens[key_pos : key_pos + 3])
+                del tokens[key_pos + 1 : key_pos + 3]
+            else:
+                tokens[key_pos] = self.merge_tokens(tokens[key_pos : key_pos + 2])
+                del tokens[key_pos + 1]

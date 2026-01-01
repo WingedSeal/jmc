@@ -157,8 +157,7 @@ def custom_condition(
                     tokenizer,
                     suggestion=f"Did you mean `if (!{first_token.string}) {{`?",
                 )
-            scoreboard_player = find_scoreboard_player_type(
-                second_token, tokenizer)
+            scoreboard_player = find_scoreboard_player_type(second_token, tokenizer)
             operator = operator_token.string
 
             if scoreboard_player.player_type == PlayerType.INTEGER:
@@ -391,6 +390,10 @@ def condition_to_ast(
             expect_semicolon=False,
         )
         tokens = tokenizer.programs[0]
+
+    for key_pos in range(len(tokens)):
+        tokenizer.merge_vanilla_macro(tokens, key_pos)
+
     list_of_tokens = find_operator(tokens, OR_OPERATOR, tokenizer)
     if len(list_of_tokens) > 1:
         return {
@@ -443,8 +446,7 @@ def ast_to_commands(
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError(
-                'ast["body"] is a Condition instead of list in AND')
+            raise ValueError('ast["body"] is a Condition instead of list in AND')
         for and_body in ast["body"]:
             if isinstance(and_body, str):
                 raise ValueError('ast["body"] is string')
@@ -459,8 +461,7 @@ def ast_to_commands(
         datapack.data.condition_count += 1
         precommand_or: list[tuple[list[Condition], int]] = []
         if isinstance(ast["body"], Condition):
-            raise ValueError(
-                'ast["body"] is a Condition instead of list in OR')
+            raise ValueError('ast["body"] is a Condition instead of list in OR')
         for or_body in ast["body"]:
             if isinstance(or_body, str):
                 raise ValueError('ast["body"] is string')
@@ -535,30 +536,32 @@ def ast_to_strings(ast: AST_TYPE, datapack: DataPack) -> tuple[str, str]:
 
 
 def parse_condition(
-    condition_token: Token | list[Token], tokenizer: Tokenizer, datapack: DataPack, prefix: str
+    condition_token: Token | list[Token],
+    tokenizer: Tokenizer,
+    datapack: DataPack,
+    prefix: str,
 ) -> tuple[str, str]:
     """
-    Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
-    Example:
-    ```py
-    condition1, precommands1 = parse_condition(...)
-    condition2, precommands2 = parse_condition(...)
-    commands = [
-        f"{precommands1}execute {condition1} run {datapack.add_private_function("if_else", token, tokenizer)}",
-        f"{precommands2}execute unless ... {condition2} run {datapack.add_private_function("if_else", token, tokenizer)}",
-    ]
-    return datapack.add_raw_private_function("if_else", commands)
-    ```
+        Parse condition token(s) (token or list of tokens) to `if ...` and pre-commands with newline
+        Example:
+        ```py
+        condition1, precommands1 = parse_condition(...)
+        condition2, precommands2 = parse_condition(...)
+        commands = [
+            f"{precommands1}execute {condition1} run {datapack.add_private_function("if_else", token, tokenizer)}",
+            f"{precommands2}execute unless ... {condition2} run {datapack.add_private_function("if_else", token, tokenizer)}",
+        ]
+        return datapack.add_raw_private_function("if_else", commands)
+        ```
 
-    :param condition_token: Token or List of tokens
-    :param tokenizer: Tokenizer
-    :param datapack: Datapack object
-  :param prefix: Prefix of function(for Class feature)
-    :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
+        :param condition_token: Token or List of tokens
+        :param tokenizer: Tokenizer
+        :param datapack: Datapack object
+      :param prefix: Prefix of function(for Class feature)
+        :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
     datapack.data.condition_count = 0
-    tokens = condition_token if isinstance(
-        condition_token, list) else [condition_token]
+    tokens = condition_token if isinstance(condition_token, list) else [condition_token]
 
     ast = condition_to_ast(tokens, tokenizer, datapack, prefix)
     condition, precommand = ast_to_strings(ast, datapack)
