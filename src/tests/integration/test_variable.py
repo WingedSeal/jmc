@@ -1,4 +1,5 @@
 import sys  # noqa
+
 sys.path.append("./src")  # noqa
 
 import unittest
@@ -10,14 +11,21 @@ from jmc.compile.exception import JMCSyntaxException, JMCValueError
 
 class TestVariable(unittest.TestCase):
     def test_declaration(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $x += 0;
 $y += 0;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -28,27 +36,33 @@ $y += 0;
 scoreboard objectives add __variable__ dummy
 scoreboard players add $x __variable__ 0
 scoreboard players add $y __variable__ 0
-            """)
+            """
+            ),
         )
 
-#     def test_no_op_error(self):
-#         with self.assertRaises(JMCSyntaxException):
-#             JMCTestPack().set_jmc_file("""
-# $x;
-#         """).build()
+    #     def test_no_op_error(self):
+    #         with self.assertRaises(JMCSyntaxException):
+    #             JMCTestPack().set_jmc_file("""
+    # $x;
+    #         """).build()
 
     def test_assignment(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $x = obj:var1;
 $y = 1;
 $z = $x;
-$z -> obj:var2;
-$z->obj:var3;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -62,21 +76,29 @@ scoreboard players set $y __variable__ 1
 scoreboard players operation $z __variable__ = $x __variable__
 scoreboard players operation var2 obj = $z __variable__
 scoreboard players operation var3 obj = $z __variable__
-            """)
+            """
+            ),
         )
 
     def test_operations(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $x += 1;
 $x *= 2;
 $x /= 3;
 $x += obj:var;
 $x -= $y;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -93,19 +115,27 @@ scoreboard players operation $x __variable__ *= 2 __int__
 scoreboard players operation $x __variable__ /= 3 __int__
 scoreboard players operation $x __variable__ += var obj
 scoreboard players operation $x __variable__ -= $y __variable__
-            """)
+            """
+            ),
         )
 
     def test_increment(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $x ++;
 $x++;
 $x--;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -117,17 +147,25 @@ scoreboard objectives add __variable__ dummy
 scoreboard players add $x __variable__ 1
 scoreboard players add $x __variable__ 1
 scoreboard players remove $x __variable__ 1
-            """)
+            """
+            ),
         )
 
     def test_get(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 execute store result score @s obj run $x.get();
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -137,22 +175,32 @@ execute store result score @s obj run $x.get();
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute store result score @s obj run scoreboard players get $x __variable__
-            """)
+            """
+            ),
         )
 
         with self.assertRaises(JMCValueError):
-            JMCTestPack().set_jmc_file("""
+            JMCTestPack().set_jmc_file(
+                """
 $x.get(key=value);
-        """).build()
+        """
+            ).build()
 
     def test_store_result(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $currentAmmo = data get entity @s SelectedItem.tag.ammo;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -162,17 +210,25 @@ $currentAmmo = data get entity @s SelectedItem.tag.ammo;
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute store result score $currentAmmo __variable__ run data get entity @s SelectedItem.tag.ammo
-            """)
+            """
+            ),
         )
 
     def test_store_success(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $currentAmmo ?= data get entity @s SelectedItem.tag.ammo;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -182,19 +238,27 @@ $currentAmmo ?= data get entity @s SelectedItem.tag.ammo;
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute store success score $currentAmmo __variable__ run data get entity @s SelectedItem.tag.ammo
-            """)
+            """
+            ),
         )
 
     def test_chain(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $var1 = obj1:selector1 = $var2 = obj2:selector2[tag=tag2];
 $var1 = obj1:selector1 = $var2 = obj2:selector2[tag=tag2] = 5;
 $var1 = obj1:selector1 = $var2 > obj2:selector2[tag=tag2];
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -206,21 +270,29 @@ scoreboard objectives add __variable__ dummy
 execute store result score $var1 __variable__ store result score selector1 obj1 run scoreboard players operation $var2 __variable__ = selector2[tag=tag2] obj2
 execute store result score $var1 __variable__ store result score selector1 obj1 store result score $var2 __variable__ run scoreboard players set selector2[tag=tag2] obj2 5
 execute store result score $var1 __variable__ store result score selector1 obj1 run scoreboard players operation $var2 __variable__ > selector2[tag=tag2] obj2
-            """)
+            """
+            ),
         )
 
     def test_obj_selector(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 obj:selector = 1;
 obj:selector[tag=test] = 1;
 obj:selector = $var;
 $var = obj:selector;
 $var = obj:selector[tag=test];
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -234,20 +306,28 @@ scoreboard players set selector[tag=test] obj 1
 scoreboard players operation selector obj = $var __variable__
 scoreboard players operation $var __variable__ = selector obj
 scoreboard players operation $var __variable__ = selector[tag=test] obj
-            """)
+            """
+            ),
         )
 
     def test_null_coalesce(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $a ??= 0;
 $a ??= false;
 $a ??= true;
 $a ??= $b;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -260,17 +340,25 @@ scoreboard players add $a __variable__ 0
 scoreboard players add $a __variable__ 0
 execute unless score $a __variable__ = $a __variable__ run scoreboard players set $a __variable__ 1
 execute unless score $a __variable__ = $a __variable__ run scoreboard players operation $a __variable__ = $b __variable__
-            """)
+            """
+            ),
         )
 
     def test_execute_store(self):
-        pack = JMCTestPack().set_jmc_file("""
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
 $a = data get entity @s SelectedItem.tag.my_var;
-        """).build()
+        """
+            )
+            .build()
+        )
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict("""
+            string_to_tree_dict(
+                """
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -280,7 +368,8 @@ $a = data get entity @s SelectedItem.tag.my_var;
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute store result score $a __variable__ run data get entity @s SelectedItem.tag.my_var
-            """)
+            """
+            ),
         )
 
 

@@ -516,9 +516,8 @@ class FuncContent:
         if (
             len(self.command[key_pos:]) >= 2
             and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND
+            and self.command[key_pos].string.endswith("$")
         ):
-            if not self.command[key_pos].string.endswith("$"):
-                return self.__handle_function_call(key_pos, token)
             if (
                 len(self.command[key_pos:]) >= 3
                 and self.command[key_pos + 2].token_type == TokenType.KEYWORD
@@ -622,6 +621,12 @@ class FuncContent:
                     token,
                     self.tokenizer,
                 )
+
+        if (
+            len(self.command[key_pos:]) >= 2
+            and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND
+        ):
+            return self.__handle_function_call(key_pos, token)
 
         if not self._bypass_checks:
             if (
