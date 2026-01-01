@@ -465,6 +465,9 @@ class Tokenizer:
         if self.state == TokenType.STRING:
             if self.quote == Quote.BACKTICK:
                 self.token_str += char
+            elif self.is_escaped:
+                self.is_escaped = False
+                self.token_str = self.token_str[:-1]
             else:
                 raise JMCSyntaxException(
                     "String literal contains an unescaped line break.",
