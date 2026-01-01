@@ -513,6 +513,27 @@ class FuncContent:
             return SKIP_TO_NEXT_LINE
         # End Handle Errors
 
+        if (
+            len(self.command[key_pos:]) >= 2
+            and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND
+        ):
+            if not self.command[key_pos].string.endswith("$"):
+                return self.__handle_function_call(key_pos, token)
+            if (
+                len(self.command[key_pos:]) >= 3
+                and self.command[key_pos + 2].token_type == TokenType.KEYWORD
+                and is_connected(self.command[key_pos + 1], self.command[key_pos + 2])
+            ):
+                self.command[key_pos] = self.tokenizer.merge_tokens(
+                    self.command[key_pos : key_pos + 3]
+                )
+                del self.command[key_pos + 1 : key_pos + 3]
+            else:
+                self.command[key_pos] = self.tokenizer.merge_tokens(
+                    self.command[key_pos : key_pos + 2]
+                )
+                del self.command[key_pos + 1]
+
         if token.string == "with":
             self.__handle_with_anon(key_pos, token)
             if len(self.command) <= key_pos + 1:
@@ -601,12 +622,6 @@ class FuncContent:
                     token,
                     self.tokenizer,
                 )
-
-        if (
-            len(self.command[key_pos:]) >= 2
-            and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND
-        ):
-            return self.__handle_function_call(key_pos, token)
 
         if not self._bypass_checks:
             if (
