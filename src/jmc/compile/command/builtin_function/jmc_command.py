@@ -223,19 +223,19 @@ class JMCCall(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string="JMC.print",
+    call_string="JMC.log",
     arg_type={"text": ArgType.STRING},
     name="jmc_print",
 )
-class JMCPrint(JMCFunction):
+class JMCLog(JMCFunction):
     def call(self) -> str:
         text = self.args["text"]
         if "\n" not in text:
-            print(f"JMC.print: {text}")
+            print(f"JMC.log: {text}")
         else:
             print(
                 "\n".join(
-                    f"JMC.print[{i}]: {text}" for i, text in enumerate(text.split("\n"))
+                    f"JMC.log[{i}]: {text}" for i, text in enumerate(text.split("\n"))
                 )
             )
         return ""
@@ -243,20 +243,20 @@ class JMCPrint(JMCFunction):
 
 @func_property(
     func_type=FuncType.JMC_COMMAND,
-    call_string="JMC.printAny",
+    call_string="JMC.logAny",
     arg_type={"any": ArgType.ANY, "prefix": ArgType.STRING},
     defaults={"prefix": ""},
     name="jmc_print_any",
 )
-class JMCPrintAny(JMCFunction):
+class JMCLogAny(JMCFunction):
     def call(self) -> str:
         text = self.args["prefix"] + self.args["any"]
         if "\n" not in text:
-            print(f"JMC.printAny: {text}")
+            print(f"JMC.logAny: {text}")
         else:
             print(
                 "\n".join(
-                    f"JMC.printAny[{i}]: {text}"
+                    f"JMC.logAny[{i}]: {text}"
                     for i, text in enumerate(text.split("\n"))
                 )
             )
