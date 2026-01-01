@@ -16,6 +16,7 @@ from .exception import (
     JMCSyntaxException,
     JMCSyntaxWarning,
     JMCValueError,
+    relative_file_name,
 )
 from .log import Logger
 from .header import Header
@@ -689,11 +690,14 @@ class DataPack:
                     call_site = "root"
                 else:
                     call_site = f"'{prefix}'"
+                old_function_token, old_function_tokenizer = self.defined_file_pos[
+                    function_called
+                ]
                 raise JMCValueError(
-                    f"User private function '{function_called}' has been called from outside the class (from {call_site})",
+                    f"User private function '{function_called}'  has been called from outside the class (from {call_site})",
                     token,
                     tokenizer,
-                    suggestion="Remove the @private decorator",
+                    suggestion=f"Remove the @private decorator from function '{function_called}' at {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
                 )
             if (
                 function_called not in self.functions
