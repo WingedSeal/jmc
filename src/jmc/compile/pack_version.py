@@ -17,15 +17,21 @@ class PackVersion:
     >>> self.datapack.version.require(11, token, tokenizer)
     raise MinecraftVersionTooLow
     """
-    __slot__ = ('_pack_format', )
+
+    __slot__ = ("_pack_format",)
 
     def __init__(self, pack_format: int) -> None:
         self._pack_format = pack_format
         """Datapack's pack_format"""
 
-    def require(self, pack_format: "int | PackVersion", token: Token,
-                tokenizer: Tokenizer, suggestion: str | None = None, 
-                is_lower: bool = False) -> None:
+    def require(
+        self,
+        pack_format: "int | PackVersion",
+        token: Token,
+        tokenizer: Tokenizer,
+        suggestion: str | None = None,
+        is_lower: bool = False,
+    ) -> None:
         """
         Raise MinecraftVersionTooLow when pack_format is too low
         Raise MinecraftVersionTooHigh when pack_format is too high
@@ -41,11 +47,13 @@ class PackVersion:
         if is_lower:
             if self._pack_format != -1 and self._pack_format >= pack_format:
                 raise MinecraftVersionTooHigh(
-                    pack_format, token, tokenizer, suggestion=suggestion)
+                    pack_format, token, tokenizer, suggestion=suggestion
+                )
         else:
             if self._pack_format != -1 and self._pack_format < pack_format:
                 raise MinecraftVersionTooLow(
-                    pack_format, token, tokenizer, suggestion=suggestion)
+                    pack_format, token, tokenizer, suggestion=suggestion
+                )
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, int):

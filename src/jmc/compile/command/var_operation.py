@@ -73,7 +73,9 @@ def variable_operation(
         scoreboard_player = find_scoreboard_player_type(
             merged_token, tokenizer, allow_integer=False
         )
-        if isinstance(scoreboard_player.value, int):
+        if isinstance(scoreboard_player.value, int) or isinstance(
+            scoreboard_player.value, str
+        ):
             raise ValueError("Unexpected scoreboard player type")
         objective_name, selector_string = scoreboard_player.value
         tokens[0] = Token(
@@ -491,8 +493,7 @@ Example: `$var = (const) $(my_int)`""",
                     tokenizer,
                 )
             return DebugWatch.variable_operation_wrapper(
-                f"""execute store result score {
-                tokens[0].string} {objective_name} run {func[0]}""",
+                f"""execute store result score {tokens[0].string} {objective_name} run {func[0]}""",
                 tokens[0].string,
                 objective_name,
                 datapack,
@@ -687,8 +688,10 @@ Example: `$var = (const) $(my_int)`""",
 
         if isinstance(scoreboard_player.value, tuple):
             right_hand = f"{scoreboard_player.value[1]} {scoreboard_player.value[0]}"
-        else:
+        elif isinstance(scoreboard_player.value, str):
             right_hand = scoreboard_player.value
+        else:
+            raise NotImplementedError("Unreachable")
 
         if operator == "??=":
             return DebugWatch.variable_operation_wrapper(

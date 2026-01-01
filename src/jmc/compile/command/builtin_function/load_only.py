@@ -2045,7 +2045,7 @@ class TextPropNBT(JMCFunction):
             "interpret": self.args["interpret"],
         }
         if self.args["separator"] != ", ":
-            output["separator"] = json.loads(  
+            output["separator"] = json.loads(  # type: ignore
                 self.format_text("separator")
             )
         self.add_formatted_text_prop(
@@ -2072,16 +2072,16 @@ class TextPropsNBT(JMCFunction):
     def call(self) -> str:
         @lru_cache()
         def inner(arg: str) -> SIMPLE_JSON_BODY:
-            nbt_type, source, path = self.args["nbt"].replace(self.args["indexString"], arg).split(" ", 2)
+            nbt_type, source, path = (
+                self.args["nbt"].replace(self.args["indexString"], arg).split(" ", 2)
+            )
             output: SIMPLE_JSON_BODY = {
                 nbt_type: source,
                 "nbt": path,
                 "interpret": self.args["interpret"],
             }
             if self.args["separator"] != ", ":
-                output["separator"] = self.format_text(
-                    "separator"
-                )
+                output["separator"] = self.format_text("separator")  # type: ignore
             return output
 
         self.add_formatted_text_prop(

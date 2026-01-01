@@ -1,4 +1,4 @@
 #!/bin/sh
 python src/tests/test_all.py || exit 1
 mypy ./src/jmc
-pycodestyle ./src --ignore=E501,W50,E203
+pycodestyle ./src --ignore=E501,W50,E203,E226

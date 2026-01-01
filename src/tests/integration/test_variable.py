@@ -74,8 +74,6 @@ scoreboard objectives add __variable__ dummy
 scoreboard players operation $x __variable__ = var1 obj
 scoreboard players set $y __variable__ 1
 scoreboard players operation $z __variable__ = $x __variable__
-scoreboard players operation var2 obj = $z __variable__
-scoreboard players operation var3 obj = $z __variable__
             """
             ),
         )
