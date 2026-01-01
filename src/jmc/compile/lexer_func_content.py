@@ -1153,6 +1153,8 @@ class FuncContent:
                 self.parse_self_command(0)
             except EXCEPTIONS as normal_error:
                 token = self.command[0]
+                if getattr(normal_error, "priority"):
+                    raise normal_error
                 if (
                     token.string not in VANILLA_COMMANDS
                     and token.string not in Header().commands

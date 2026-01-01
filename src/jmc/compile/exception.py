@@ -182,6 +182,7 @@ class JMCSyntaxException(SyntaxError):
         display_col_length: bool = True,
         entire_line: bool = False,
         suggestion: str | None = None,
+        priority: bool = False,
     ) -> None:
         self.message = message
         self.token = token
@@ -190,6 +191,7 @@ class JMCSyntaxException(SyntaxError):
         self.display_col_length = display_col_length
         self.entire_line = entire_line
         self.suggestion = suggestion
+        self.priority = priority
         msg = error_msg(
             message,
             token,

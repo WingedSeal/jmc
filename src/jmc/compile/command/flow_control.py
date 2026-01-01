@@ -7,19 +7,15 @@ from ._flow_control import (
     do,
     switch,
     for_,
-    async_
+    async_,
 )
 
 from ..tokenizer import Token, Tokenizer
 from ..datapack import DataPack
 
-FLOW_CONTROL_COMMANDS: dict[str, Callable[
-    [
-        list[Token],
-        DataPack,
-        Tokenizer,
-        str
-    ], str | None]] = {
+FLOW_CONTROL_COMMANDS: dict[
+    str, Callable[[list[Token], DataPack, Tokenizer, str], str | None]
+] = {
     "while": while_,
     "do": do,
     "if": if_,

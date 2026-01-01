@@ -85,7 +85,11 @@ def else_(
     """
     if not datapack.lexer.if_else_box:
         raise JMCSyntaxException(
-            "'else' cannot be used without 'if'", command[0], tokenizer
+            "'else' cannot be used without 'if'",
+            command[0],
+            tokenizer,
+            priority=True,
+            suggestion="'$if' doesn't support 'else'",
         )
 
     if len(command) < 2:
