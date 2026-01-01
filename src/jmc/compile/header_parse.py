@@ -9,7 +9,7 @@ from .header import Header, MacroFactory
 from .tokenizer import Token, TokenType, Tokenizer
 from .exception import (
     EvaluationException,
-    HeaderDuplicatedMacro,
+    HeaderDuplicatedDirective,
     HeaderFileNotFoundError,
     HeaderSyntaxException,
     JMCSyntaxException,
@@ -352,7 +352,7 @@ def __parse_header(
 
             key = arg_tokens[0].string
             if key in header.macros:
-                raise HeaderDuplicatedMacro(
+                raise HeaderDuplicatedDirective(
                     f"'{key}' macro is already defined", file_name, line, line_str
                 )
 
@@ -399,7 +399,7 @@ def __parse_header(
 
             key = arg_tokens[0].string
             if key in header.macros:
-                raise HeaderDuplicatedMacro(
+                raise HeaderDuplicatedDirective(
                     f"'{key}' macro is already defined", file_name, line, line_str
                 )
 
@@ -434,7 +434,7 @@ def __parse_header(
 
             key = arg_tokens[0].string
             if key in header.macros:
-                raise HeaderDuplicatedMacro(
+                raise HeaderDuplicatedDirective(
                     f"'{key}' macro is already defined", file_name, line, line_str
                 )
 
@@ -532,7 +532,7 @@ def __parse_header(
 
                 if key:
                     if key in header.macros:
-                        raise HeaderDuplicatedMacro(
+                        raise HeaderDuplicatedDirective(
                             f"'{key}' macro is already defined",
                             file_name,
                             line,
@@ -734,7 +734,7 @@ def __parse_header(
                     line,
                     line_str,
                 )
-            static_folder = namespace_path / arg_tokens[0].string
+            static_folder = (namespace_path / arg_tokens[0].string).resolve()
             if not static_folder.is_dir():
                 raise HeaderSyntaxException(
                     f"Static folder not found: {static_folder.as_posix()}",
@@ -806,6 +806,34 @@ def __parse_header(
                     line_str,
                 )
             header.show_private_command = True
+        # #copy
+        elif directive_token.string == "copy":
+            if not arg_tokens or arg_tokens[0].token_type != TokenType.STRING:
+                raise HeaderSyntaxException(
+                    "Expected copy folder name(string) after '#copy'",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            if len(arg_tokens) > 1:
+                raise HeaderSyntaxException(
+                    f"Expected 1 arguments after '#copy' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            copy_folder = (namespace_path / arg_tokens[0].string).resolve()
+            if header.copy is not None:
+                raise HeaderDuplicatedDirective(
+                    f"'#copy' can only be used once.", file_name, line, line_str
+                )
+            if not copy_folder.is_dir():
+                raise HeaderSyntaxException(
+                    f"Path '{copy_folder.as_posix()} is not a valid directory'",
+                    file_name,
+                    line,
+                    line_str,
+                )
 
         else:
             raise HeaderSyntaxException(
@@ -832,7 +860,7 @@ def parse_header(
     :param file_name: Header file's name
     :param parent_target: Path to parent of the main jmc file
     :raises HeaderSyntaxException: A line in the file doesn't start with '#'
-    :raises HeaderDuplicatedMacro: Define same macro twice
+    :raises HeaderDuplicatedDirective: Define same macro twice
     :raises HeaderSyntaxException: Too many/little argument for define
     :raises HeaderSyntaxException: File name isn't wrapped in quote or angle bracket (For `#include`)
     :raises HeaderFileNotFoundError: Can't find header file

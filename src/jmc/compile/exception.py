@@ -142,7 +142,7 @@ class HeaderFileNotFoundError(FileNotFoundError):
         super().__init__(msg)
 
 
-class HeaderDuplicatedMacro(ValueError):
+class HeaderDuplicatedDirective(ValueError):
     """Define same macro twice"""
 
     def __init__(self, message: str, file_name: str, line: int, line_str: str):
@@ -408,7 +408,7 @@ class MinecraftSyntaxWarning(SyntaxError):
 
 
 EXCEPTIONS = (
-    HeaderDuplicatedMacro,
+    HeaderDuplicatedDirective,
     HeaderFileNotFoundError,
     HeaderSyntaxException,
     JMCDecodeJSONError,

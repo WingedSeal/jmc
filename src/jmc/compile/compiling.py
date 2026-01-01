@@ -95,8 +95,7 @@ def get_cert() -> dict[str, str]:
     }
 
 
-def read_header(config: "Configuration",
-                _test_file: str | None = None) -> bool:
+def read_header(config: "Configuration", _test_file: str | None = None) -> bool:
     """
     Read the main header file
 
@@ -191,12 +190,10 @@ def read_cert(
             cert_config = {}
         DataPack.load_name = cert_config.get("LOAD", old_cert_config["LOAD"])
         DataPack.tick_name = cert_config.get("TICK", old_cert_config["TICK"])
-        DataPack.private_name = cert_config.get(
-            "PRIVATE", old_cert_config["PRIVATE"])
+        DataPack.private_name = cert_config.get("PRIVATE", old_cert_config["PRIVATE"])
         DataPack.var_name = cert_config.get("VAR", old_cert_config["VAR"])
         DataPack.int_name = cert_config.get("INT", old_cert_config["INT"])
-        DataPack.storage_name = cert_config.get(
-            "STORAGE", old_cert_config["STORAGE"])
+        DataPack.storage_name = cert_config.get("STORAGE", old_cert_config["STORAGE"])
         cert_config = get_cert()
         if _test_file is None:
             return True, cert_config, cert_file
@@ -285,7 +282,7 @@ def build(
 
     logger.debug(f"Building (_is_virtual={_is_virtual})")
     datapack.build()
-    Header().finished_compiled_time = perf_counter()
+    header.finished_compiled_time = perf_counter()
     output_folder = Path(config.output)
     namespace_folder = output_folder / "data" / config.namespace
     minecraft_folder = output_folder / "data" / "minecraft"
@@ -293,15 +290,15 @@ def build(
         output_folder / "data" / namespace for namespace in header.namespace_overrides
     }
 
-    functions_tags_folder = output_folder / \
-        "data" / "minecraft" / "tags" / function_folder
+    functions_tags_folder = (
+        output_folder / "data" / "minecraft" / "tags" / function_folder
+    )
 
     if is_delete:
-        statics = Header().statics
+        statics = header.statics
         for folder in {namespace_folder} | overrides_folders:
             if not os.path.isdir(folder):
                 continue
-
             if statics:
                 rmtree(folder, statics)
             else:
@@ -321,18 +318,20 @@ def build(
 
     if not _is_virtual:
         make_cert(cert_config, cert_file)
+        if header.copy is not None:
+            for item in header.copy.iterdir():
+                if item.is_dir():
+                    shutil.copytree(item, output_folder / item.name, dirs_exist_ok=True)
+                else:
+                    shutil.copy(item, output_folder / item.name)
 
     if not _is_virtual:
         functions_tags_folder.mkdir(exist_ok=True, parents=True)
     load_tag = functions_tags_folder / "load.json"
     tick_tag = functions_tags_folder / "tick.json"
 
-    load_json = {
-        "values": []} if _is_virtual else read_func_tag(
-        load_tag, config)
-    tick_json = {
-        "values": []} if _is_virtual else read_func_tag(
-        tick_tag, config)
+    load_json = {"values": []} if _is_virtual else read_func_tag(load_tag, config)
+    tick_json = {"values": []} if _is_virtual else read_func_tag(tick_tag, config)
 
     load_json["values"].append(f"{config.namespace}:{DataPack.load_name}")
     if _is_virtual:
@@ -360,11 +359,10 @@ def build(
                 / "data"
                 / namespace
                 / function_folder
-                / (func_path[len(namespace) + 1:] + ".mcfunction")
+                / (func_path[len(namespace) + 1 :] + ".mcfunction")
             )
         else:
-            path = namespace_folder / function_folder / \
-                (func_path + ".mcfunction")
+            path = namespace_folder / function_folder / (func_path + ".mcfunction")
         content = post_process(func.content)
 
         if _is_virtual:
@@ -381,7 +379,7 @@ def build(
                 output_folder
                 / "data"
                 / namespace
-                / (json_path[len(namespace) + 1:] + ".json")
+                / (json_path[len(namespace) + 1 :] + ".json")
             )
         else:
             path = namespace_folder / (json_path + ".json")

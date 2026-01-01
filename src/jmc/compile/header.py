@@ -48,6 +48,7 @@ class Header(SingleTon):
         "using_envs",
         "force_bst",
         "show_private_command",
+        "copy",
     )
 
     file_read: set[str]
@@ -85,6 +86,8 @@ class Header(SingleTon):
     """Whether to output comment result of private function call"""
     track_function_regexs: list[tuple[re.Pattern, str, str, str, str]]
     """List of regex from Debug.trackFunction, prefix, suffix, color and function name color"""
+    copy: Path | None
+    """Path to copy to the root of the built project"""
 
     def __init__(self) -> None:
         self.__clear(self)
@@ -115,6 +118,7 @@ class Header(SingleTon):
         obj.force_bst = False
         obj.show_private_command = False
         obj.track_function_regexs = []
+        obj.copy = None
 
     def add_file_read(self, path: Path) -> None:
         """
