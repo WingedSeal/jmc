@@ -312,8 +312,8 @@ class DataPack:
         """Set of integers going to be used in scoreboard"""
         self.functions: dict[str, Function] = {}
         """Dictionary of function name and a Function object"""
-        self.functions_called: dict[str, tuple[Token, Tokenizer]] = {}
-        """Dictionary of function name that is called by user and its coresponding token and tokenizer"""
+        self.functions_called: dict[str, tuple[Token, Tokenizer, str]] = {}
+        """Dictionary of function name that is called by user and its coresponding token, tokenizer and prefix (class)"""
         self.load_function: list[list[Token]] = []
         """List of commands(list of tokens) in load function"""
         self.jsons: dict[str, dict[str, Any] | list[Any]] = defaultdict(dict)
@@ -360,6 +360,9 @@ class DataPack:
 
         self.delayed_error: Exception | None = None
         """Delayed error to be raise at the end, used for low priority errors"""
+
+        self.user_private_functions: dict[str, str] = {}
+        """Dictionary of @private function path and its prefix"""
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """
@@ -673,7 +676,25 @@ class DataPack:
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
 
-        for function_called, (token, tokenizer) in self.functions_called.items():
+        for function_called, (
+            token,
+            tokenizer,
+            prefix,
+        ) in self.functions_called.items():
+            if (
+                function_called in self.user_private_functions
+                and prefix != self.user_private_functions[function_called]
+            ):
+                if prefix == "":
+                    call_site = "root"
+                else:
+                    call_site = f"'{prefix}'"
+                raise JMCValueError(
+                    f"User private function '{function_called}' has been called from outside the class (from {call_site})",
+                    token,
+                    tokenizer,
+                    suggestion="Remove the @private decorator",
+                )
             if (
                 function_called not in self.functions
                 and function_called.split("/")[0].strip()

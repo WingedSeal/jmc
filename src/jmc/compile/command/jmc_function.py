@@ -156,11 +156,16 @@ class JMCFunction:
                     self.datapack.functions_called[arg.token.string] = (
                         arg.token,
                         self.tokenizer,
+                        prefix,
                     )
                     self.args[key] = f"function {arg.token.string}"
                 else:
                     func = convention_jmc_to_mc(arg.token, self.tokenizer, self.prefix)
-                    self.datapack.functions_called[func] = arg.token, self.tokenizer
+                    self.datapack.functions_called[func] = (
+                        arg.token,
+                        self.tokenizer,
+                        prefix,
+                    )
                     self.args[key] = f"function {datapack.format_func_path(func)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
                 self.args[key] = "\n".join(

@@ -1,6 +1,7 @@
 """Module responsible for handling all Function Content parsing in Lexer"""
 
 from enum import Enum, auto
+from sys import prefix
 from typing import TYPE_CHECKING
 from json import dumps
 
@@ -664,7 +665,11 @@ class FuncContent:
                     suggestion="You might have misspelled the built-in function name. (It is case-sensitive.)",
                 )
             func = convention_jmc_to_mc(token, self.tokenizer, self.prefix)
-            self.lexer.datapack.functions_called[func] = token, self.tokenizer
+            self.lexer.datapack.functions_called[func] = (
+                token,
+                self.tokenizer,
+                self.prefix,
+            )
             append_commands(
                 self.__commands,
                 f"function {self.lexer.datapack.format_func_path(func)}",
@@ -693,7 +698,11 @@ class FuncContent:
                 append_commands(self.__commands, __command)
                 return SKIP_TO_NEXT_LINE
 
-            self.lexer.datapack.functions_called[func] = token, self.tokenizer
+            self.lexer.datapack.functions_called[func] = (
+                token,
+                self.tokenizer,
+                self.prefix,
+            )
             if args:
                 if len(args) > 1:
                     self.lexer.datapack.delayed_error = JMCSyntaxException(
@@ -790,7 +799,7 @@ class FuncContent:
                 )
             append_commands(self.__commands, __command)
             return SKIP_TO_NEXT_LINE
-        self.lexer.datapack.functions_called[func] = token, self.tokenizer
+        self.lexer.datapack.functions_called[func] = token, self.tokenizer, self.prefix
         append_commands(
             self.__commands,
             f"function {

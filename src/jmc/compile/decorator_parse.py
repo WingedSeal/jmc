@@ -129,6 +129,12 @@ class If(JMCDecorator):
         )
 
 
+@dec_property("private")
+class Private(JMCDecorator):
+    def modify(self, pre_func: PreFunction, func: Function | None) -> None:
+        self.datapack.user_private_functions[pre_func.func_path] = self.prefix
+
+
 @dec_property("add", arg_type={"from": ArgType._FUNC_CALL})
 class Add(JMCDecorator):
     def modify(self, pre_func: PreFunction, func: Function | None) -> None:
