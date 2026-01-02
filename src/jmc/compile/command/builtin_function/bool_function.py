@@ -55,8 +55,8 @@ class StringIsEqual(JMCFunction):
     func_type=FuncType.BOOL_FUNCTION,
     call_string="Object.isEqual",
     arg_type={
-        "nbt1": ArgType.STRING,
-        "nbt2": ArgType.STRING,
+        "nbt1": ArgType.NBT,
+        "nbt2": ArgType.NBT,
     },
     name="object_is_equal",
 )
