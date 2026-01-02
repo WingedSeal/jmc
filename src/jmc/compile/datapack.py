@@ -668,7 +668,7 @@ class DataPack:
         for _func_path, _commands in self.after_func.items():
             if _func_path not in self.functions:
                 raise JMCValueError(
-                    f"Function '{_func_path}' was not defined",
+                    f"Function '{_func_path}' was never defined",
                     self.after_func_token[_func_path][0],
                     self.after_func_token[_func_path][1],
                 )
@@ -677,6 +677,7 @@ class DataPack:
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
 
+        header = Header()
         for function_called, (
             token,
             tokenizer,
@@ -699,11 +700,20 @@ class DataPack:
                     tokenizer,
                     suggestion=f"Remove the @private decorator from function '{function_called}' at {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
                 )
-            if (
-                function_called not in self.functions
-                and function_called.split("/")[0].strip()
-                not in Header().namespace_overrides
-            ):
+            if header.copy is None:
+                is_function_called_in_copy = False
+            else:
+                function_called_first_class = function_called.split("/", 1)[0].strip()
+                if function_called_first_class in header.namespace_overrides:
+                    function_called_namespace = function_called_first_class
+                    __function_called = function_called.split("/", 1)[1].strip()
+                else:
+                    function_called_namespace = self.namespace
+                    __function_called = function_called
+                function_called_relative_path = f"data/{function_called_namespace}/function/{'s' if self.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}/{__function_called}.mcfunction"
+                function_called_path = header.copy / function_called_relative_path
+                is_function_called_in_copy = function_called_path.is_file()
+            if not is_function_called_in_copy and function_called not in self.functions:
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
                         f"Lazy function '{function_called}' used before definition.",
@@ -712,7 +722,7 @@ class DataPack:
                         suggestion="Lazy function has to be defined BEFORE using.",
                     )
                 raise JMCValueError(
-                    f"Function '{function_called}' was not defined", token, tokenizer
+                    f"Function '{function_called}' was never defined", token, tokenizer
                 )
 
         envs = Header().envs
