@@ -668,7 +668,7 @@ class DataPack:
         for _func_path, _commands in self.after_func.items():
             if _func_path not in self.functions:
                 raise JMCValueError(
-                    f"Function '{_func_path}' was not defined",
+                    f"Function '{_func_path}' was never defined",
                     self.after_func_token[_func_path][0],
                     self.after_func_token[_func_path][1],
                 )
@@ -676,6 +676,13 @@ class DataPack:
         for name, functions in self.private_functions.items():
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
+
+        if Header().copy is not None:
+            for _func_path, _ in self.functions.items():
+                if self.is_function_in_copy(_func_path):
+                    raise JMCBuildError(
+                        f"Cannot create function '{_func_path}' because it also exists in #copy"
+                    )
 
         for function_called, (
             token,
@@ -699,11 +706,8 @@ class DataPack:
                     tokenizer,
                     suggestion=f"Remove the @private decorator from function '{function_called}' at {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
                 )
-            if (
-                function_called not in self.functions
-                and function_called.split("/")[0].strip()
-                not in Header().namespace_overrides
-            ):
+            is_function_called_in_copy = self.is_function_in_copy(function_called)
+            if not is_function_called_in_copy and function_called not in self.functions:
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
                         f"Lazy function '{function_called}' used before definition.",
@@ -712,7 +716,7 @@ class DataPack:
                         suggestion="Lazy function has to be defined BEFORE using.",
                     )
                 raise JMCValueError(
-                    f"Function '{function_called}' was not defined", token, tokenizer
+                    f"Function '{function_called}' was never defined", token, tokenizer
                 )
 
         envs = Header().envs
@@ -736,6 +740,23 @@ class DataPack:
                     continue
                 tellraw = f'tellraw @a ["",{{"text":"[JMC] ","color":"gold","bold":true}},{{"text":"{prefix}","color":"{color}"}},{{"text":"{name}","color":"{function_color}"}},{{"text":"{suffix}","color":"{color}"}}]'
                 function.insert(tellraw, 0)
+
+    def is_function_in_copy(self, function: str) -> bool:
+        header = Header()
+        if header.copy is None:
+            is_function_called_in_copy = False
+        else:
+            function_called_first_class = function.split("/", 1)[0].strip()
+            if function_called_first_class in header.namespace_overrides:
+                function_called_namespace = function_called_first_class
+                __function_called = function.split("/", 1)[1].strip()
+            else:
+                function_called_namespace = self.namespace
+                __function_called = function
+            function_called_relative_path = f"data/{function_called_namespace}/function/{'s' if self.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}/{__function_called}.mcfunction"
+            function_called_path = header.copy / function_called_relative_path
+            is_function_called_in_copy = function_called_path.is_file()
+        return is_function_called_in_copy
 
     def parse_func_map(
         self, token: Token, tokenizer: Tokenizer, prefix: str

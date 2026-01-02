@@ -822,7 +822,7 @@ def __parse_header(
                     line,
                     line_str,
                 )
-            copy_folder = (namespace_path / arg_tokens[0].string).resolve()
+            copy_folder = (parent_target / arg_tokens[0].string).resolve()
             if header.copy is not None:
                 raise HeaderDuplicatedDirective(
                     f"'#copy' can only be used once.", file_name, line, line_str
@@ -834,6 +834,7 @@ def __parse_header(
                     line,
                     line_str,
                 )
+            header.copy = copy_folder
 
         else:
             raise HeaderSyntaxException(
