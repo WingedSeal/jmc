@@ -834,6 +834,7 @@ def __parse_header(
                     line,
                     line_str,
                 )
+            header.copy = copy_folder
 
         else:
             raise HeaderSyntaxException(
