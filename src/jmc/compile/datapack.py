@@ -678,7 +678,6 @@ class DataPack:
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
 
         if Header().copy is not None:
-
             for _func_path, _ in self.functions.items():
                 if self.is_function_in_copy(_func_path):
                     raise JMCBuildError(
