@@ -677,7 +677,6 @@ class DataPack:
             for path, func in functions.items():
                 self.functions[f"{self.private_name}/{name}/{path}"] = func
 
-        header = Header()
         for function_called, (
             token,
             tokenizer,
@@ -700,19 +699,9 @@ class DataPack:
                     tokenizer,
                     suggestion=f"Remove the @private decorator from function '{function_called}' at {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
                 )
-            if header.copy is None:
-                is_function_called_in_copy = False
-            else:
-                function_called_first_class = function_called.split("/", 1)[0].strip()
-                if function_called_first_class in header.namespace_overrides:
-                    function_called_namespace = function_called_first_class
-                    __function_called = function_called.split("/", 1)[1].strip()
-                else:
-                    function_called_namespace = self.namespace
-                    __function_called = function_called
-                function_called_relative_path = f"data/{function_called_namespace}/function/{'s' if self.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}/{__function_called}.mcfunction"
-                function_called_path = header.copy / function_called_relative_path
-                is_function_called_in_copy = function_called_path.is_file()
+            is_function_called_in_copy = self.is_function_called_in_copy(
+                function_called
+            )
             if not is_function_called_in_copy and function_called not in self.functions:
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
@@ -746,6 +735,23 @@ class DataPack:
                     continue
                 tellraw = f'tellraw @a ["",{{"text":"[JMC] ","color":"gold","bold":true}},{{"text":"{prefix}","color":"{color}"}},{{"text":"{name}","color":"{function_color}"}},{{"text":"{suffix}","color":"{color}"}}]'
                 function.insert(tellraw, 0)
+
+    def is_function_called_in_copy(self, function_called: str) -> bool:
+        header = Header()
+        if header.copy is None:
+            is_function_called_in_copy = False
+        else:
+            function_called_first_class = function_called.split("/", 1)[0].strip()
+            if function_called_first_class in header.namespace_overrides:
+                function_called_namespace = function_called_first_class
+                __function_called = function_called.split("/", 1)[1].strip()
+            else:
+                function_called_namespace = self.namespace
+                __function_called = function_called
+            function_called_relative_path = f"data/{function_called_namespace}/function/{'s' if self.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}/{__function_called}.mcfunction"
+            function_called_path = header.copy / function_called_relative_path
+            is_function_called_in_copy = function_called_path.is_file()
+        return is_function_called_in_copy
 
     def parse_func_map(
         self, token: Token, tokenizer: Tokenizer, prefix: str
