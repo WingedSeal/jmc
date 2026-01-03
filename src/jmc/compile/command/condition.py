@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from sys import prefix
 from typing import TYPE_CHECKING, Union
 
-
+from ...compile.command.nbt_operation import extract_nbt, get_nbt_type
 from ...compile.utils import is_number
 from ..tokenizer import TokenType, Tokenizer, Token
 from ..exception import JMCSyntaxException, JMCValueError
@@ -90,7 +90,6 @@ def custom_condition(
     :return: Condition object parsed from list of tokens
     """
     if tokens[0].string.startswith(DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
-
         objective = DataPack.var_name
         if is_obj_selector(tokens):
             objective = tokens[0].string
@@ -295,6 +294,11 @@ def custom_condition(
             tokenizer, [tokens], is_load=False, lexer=datapack.lexer, prefix=prefix
         ).parse()
         return Condition(func_content[0], IF)
+
+    nbt_type = get_nbt_type(tokens)
+    if nbt_type is not None:
+        nbt_type_str, target, path = extract_nbt(tokens, tokenizer, datapack, nbt_type)
+        return Condition(f"data {nbt_type_str} {target}{path}", IF)
 
     valid_condition_kinds = Header().conditions
     if tokens[0].string not in valid_condition_kinds:
