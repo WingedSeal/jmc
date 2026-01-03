@@ -612,13 +612,9 @@ class FuncContent:
                 token.string not in VANILLA_COMMANDS
                 and token.string not in Header().commands
             ):
-                if not self.command_strings:
-                    raise JMCSyntaxException(
-                        f"Unrecognized command ({
-                            token.string})",
-                        token,
-                        self.tokenizer,
-                    )
+                if token.string.endswith("$") and "$(" in self.command[key_pos].string:
+                    append_commands(self.__commands, self.command[key_pos].string)
+                    return SKIP_TO_NEXT_LINE
                 raise JMCSyntaxException(
                     f"Unrecognized command ({
                         token.string})",
