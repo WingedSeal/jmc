@@ -6,6 +6,8 @@ from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
+from jmc.compile.utils import merge_dicts
+
 from .pack_version import PackVersionFeature
 from .header import Header
 from .header_parse import parse_header
@@ -396,12 +398,15 @@ def build(
     if not header.nometa:
         with (output_folder / "pack.mcmeta").open("w+", encoding="utf-8") as file:
             dump(
-                {
-                    "pack": {
-                        "pack_format": int(config.pack_format),
-                        "description": config.description,
-                    }
-                },
+                merge_dicts(
+                    {
+                        "pack": {
+                            "pack_format": int(config.pack_format),
+                            "description": config.description,
+                        }
+                    },
+                    datapack.custom_pack_meta,
+                ),
                 file,
                 indent=4,
             )

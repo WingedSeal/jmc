@@ -295,6 +295,7 @@ class DataPack:
         "version",
         "after_func",
         "delayed_error",
+        "custom_pack_meta",
     )
     private_name = "__private__"
     load_name = "__load__"
@@ -364,6 +365,9 @@ class DataPack:
 
         self.user_private_functions: dict[str, str] = {}
         """Dictionary of @private function path and its prefix"""
+
+        self.custom_pack_meta: dict[Any, Any] = {}
+        """Overriding pack.mcmeta"""
 
     def add_objective(self, objective: str, criteria: str = "dummy") -> None:
         """
@@ -710,7 +714,8 @@ class DataPack:
             if (
                 not is_function_called_in_copy
                 and function_called not in self.functions
-                and function_called.split("/", 1)[0].strip() not in Header().datapack_link
+                and function_called.split("/", 1)[0].strip()
+                not in Header().datapack_link
             ):
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(

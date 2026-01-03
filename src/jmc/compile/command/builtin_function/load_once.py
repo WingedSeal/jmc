@@ -1,5 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function that can only be used on load function and used once"""
 
+import json
 from ..jmc_function_mixin import EventMixin
 from ...exception import JMCMissingValueError
 from ...datapack import DataPack
@@ -110,4 +111,16 @@ class PlayerDie(JMCFunction):
             ],
             "on_respawn",
         )
+        return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONCE,
+    call_string="JMC.packMeta",
+    arg_type={"packMeta": ArgType.JSON},
+    name="jmc_pack_meta",
+)
+class JMCPackMeta(JMCFunction):
+    def call(self) -> str:
+        self.datapack.custom_pack_meta = json.loads(self.args["packMeta"])
         return ""
