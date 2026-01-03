@@ -89,7 +89,9 @@ def custom_condition(
     :param prefix: Prefix of function(for Class feature)
     :return: Condition object parsed from list of tokens
     """
-    if tokens[0].string.startswith(DataPack.VARIABLE_SIGN) or is_obj_selector(tokens):
+    if tokens[0].string.startswith(DataPack.VARIABLE_SIGN) or (
+        is_obj_selector(tokens) and (len(tokens) < 4 or tokens[3].string != "::")
+    ):
         objective = DataPack.var_name
         if is_obj_selector(tokens):
             objective = tokens[0].string
