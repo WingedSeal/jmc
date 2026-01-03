@@ -508,6 +508,16 @@ class Lexer:
                     del command[index]
                     del command[index + 1]
 
+        for i in range(len(command)):
+            if i >= len(command):
+                break
+            if (
+                command[i].string.endswith("$")
+                and len(command) > i + 1
+                and command[i + 1].token_type == TokenType.PAREN_ROUND
+            ):
+                self.load_tokenizer.merge_vanilla_macro(command, i)
+
         if len(command) == 4:
             return True
         if len(command) == 5 and command[4].token_type == TokenType.PAREN_CURLY:
