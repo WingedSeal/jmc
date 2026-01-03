@@ -32,25 +32,6 @@ class Header(SingleTon):
     A SingleTon class containing all information from header
     """
 
-    __slots__ = (
-        "file_read",
-        "macros",
-        "number_macros",
-        "credits",
-        "is_enable_macro",
-        "commands",
-        "statics",
-        "dels",
-        "resources",
-        "post_process",
-        "finished_compiled_time",
-        "nometa",
-        "using_envs",
-        "force_bst",
-        "show_private_command",
-        "copy",
-    )
-
     file_read: set[str]
     """Set of files that was already read (to prevent reading the same file multiple times"""
     macros: dict[str, tuple[MacroFactory, int]]
@@ -63,6 +44,8 @@ class Header(SingleTon):
     """Whether to enable macro at the time of creating a token"""
     namespace_overrides: set[str]
     """Whether to allow jmc to take control over minecraft namespace"""
+    datapack_link: set[str]
+    """Assume another datapack is already installed and allow unknown function call"""
     commands: set[str]
     """List of extra command(first arguments) to allow"""
     conditions: set[str]
@@ -107,6 +90,7 @@ class Header(SingleTon):
         obj.credits = []
         obj.is_enable_macro = True
         obj.namespace_overrides = set()
+        obj.datapack_link = set()
         obj.commands = set()
         obj.conditions = VANILLA_CONDITIONS.copy()
         obj.statics = set()

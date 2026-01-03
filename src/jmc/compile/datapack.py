@@ -707,7 +707,11 @@ class DataPack:
                     suggestion=f"Remove the @private decorator from function '{function_called}' at {old_function_token.line} col {old_function_token.col} in {relative_file_name(old_function_tokenizer.file_path, old_function_token.line, old_function_token.col)}",
                 )
             is_function_called_in_copy = self.is_function_in_copy(function_called)
-            if not is_function_called_in_copy and function_called not in self.functions:
+            if (
+                not is_function_called_in_copy
+                and function_called not in self.functions
+                and function_called.split("/", 1)[0].strip() not in Header().datapack_link
+            ):
                 if function_called in self.lexer.datapack.lazy_func:
                     raise JMCSyntaxException(
                         f"Lazy function '{function_called}' used before definition.",

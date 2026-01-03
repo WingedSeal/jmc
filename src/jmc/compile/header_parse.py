@@ -652,12 +652,38 @@ def __parse_header(
         elif directive_token.string == "override":
             if not arg_tokens or len(arg_tokens) != 1:
                 raise HeaderSyntaxException(
-                    f"Expected 1 arguments after '#namespace' (got {len(arg_tokens)})",
+                    f"Expected 1 arguments after '#override' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            if arg_tokens[0].string in header.namespace_overrides:
+                raise HeaderSyntaxException(
+                    f"Namespace '{arg_tokens[0].string}' is already overriden.",
                     file_name,
                     line,
                     line_str,
                 )
             header.namespace_overrides.add(arg_tokens[0].string)
+
+        # #override
+        elif directive_token.string == "link":
+            if not arg_tokens or len(arg_tokens) != 1:
+                raise HeaderSyntaxException(
+                    f"Expected 1 arguments after '#link' (got {len(arg_tokens)})",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            if arg_tokens[0].string in header.namespace_overrides:
+                raise HeaderSyntaxException(
+                    f"Namespace '{arg_tokens[0].string}' is already overriden.",
+                    file_name,
+                    line,
+                    line_str,
+                )
+            header.namespace_overrides.add(arg_tokens[0].string)
+            header.datapack_link.add(arg_tokens[0].string)
 
         # #command
         elif directive_token.string == "command":
