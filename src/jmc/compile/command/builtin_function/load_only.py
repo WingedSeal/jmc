@@ -2254,3 +2254,27 @@ class DebugTrackFunction(JMCFunction):
             )
         )
         return ""
+
+
+@func_property(
+    func_type=FuncType.LOAD_ONLY,
+    call_string="JMC.require",
+    arg_type={
+        "namespace": ArgType.KEYWORD,
+        "functionPath": ArgType.STRING,
+        "errorMessage": ArgType.STRING,
+        "allowMissing": ArgType.KEYWORD
+    },
+    defaults={
+        "errorMessage": "default",
+        "allowMissing": "false"
+    },
+    name="jmc_require",
+)
+class JMCRequire(JMCFunction):
+    def call(self) -> str:
+        is_allow_missing = self.check_bool("allowMissing")
+        namespace = self.args["namespace"]
+        self.datapack.add_private_function("require", "return 1", count="return_1", force_create_func=True)
+        self.datapack.add_json(f"tags/function{'s' if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}", "test", {"Abc": "def"})
+        return ""
