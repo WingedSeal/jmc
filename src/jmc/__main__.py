@@ -144,7 +144,6 @@ def update(args: argparse.Namespace):
 
     if args.is_git or git_version_detected:
         package = [
-            "--force-reinstall",
             "--no-deps",
             "git+https://github.com/WingedSeal/jmc.git#subdirectory=src",
         ]
