@@ -2263,18 +2263,54 @@ class DebugTrackFunction(JMCFunction):
         "namespace": ArgType.KEYWORD,
         "functionPath": ArgType.STRING,
         "errorMessage": ArgType.STRING,
-        "allowMissing": ArgType.KEYWORD
+        "allowMissing": ArgType.KEYWORD,
     },
-    defaults={
-        "errorMessage": "default",
-        "allowMissing": "false"
-    },
+    defaults={"errorMessage": "default", "allowMissing": "false"},
     name="jmc_require",
 )
 class JMCRequire(JMCFunction):
     def call(self) -> str:
         is_allow_missing = self.check_bool("allowMissing")
         namespace = self.args["namespace"]
-        self.datapack.add_private_function("require", "return 1", count="return_1", force_create_func=True)
-        self.datapack.add_json(f"tags/function{'s' if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}", "test", {"Abc": "def"})
-        return ""
+        if namespace not in Header().datapack_link:
+            raise JMCValueError(
+                f"Namespace '{namespace}' was never linked",
+                self.raw_args["namespace"].token,
+                self.tokenizer,
+                suggestion=f"Add '#link {namespace}' to your header file.",
+            )
+        return_1 = self.datapack.add_private_function(
+            "require", "return 1", count="__return_1__", force_create_func=True
+        )[len("function ") :]
+        self.datapack.add_private_json(
+            f"tags/function{'s' if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}",
+            f"require/{namespace}",
+            {"values": [return_1, self.args["functionPath"]]},
+        )
+        check = self.datapack.add_private_function(
+            "require",
+            f"return run function #{self.datapack.namespace}:{self.datapack.private_name}/require/{namespace}",
+            count=namespace,
+            force_create_func=True,
+        )
+        if self.args["errorMessage"] == "default":
+            if is_allow_missing:
+                run = f'tellraw @a "[WARNING] Missing dependency: {namespace}'
+            else:
+                run = f'return run tellraw @a "[ERROR] Missing dependency: {namespace}. Failed to initialize"'
+        elif self.args["errorMessage"] == "":
+            if is_allow_missing:
+                raise JMCValueError(
+                    f"'{self.call_string}' is allowing missing dependency while omitting error message",
+                    self.raw_args["allowMissing"].token,
+                    self.tokenizer,
+                    suggestion="There's no point when you are not going to do anything at all if it's missing.",
+                )
+            run = "return 0"
+        else:
+            if is_allow_missing:
+                run = f"tellraw @a {self.format_text('errorMessage')}"
+            else:
+                run = f"return run tellraw @a {self.format_text('errorMessage')}"
+        return f"""execute store result success __temp__ {self.datapack.var_name} run {check}
+execute unless score __temp__ {self.datapack.var_name} matches 1.. run {run}"""
