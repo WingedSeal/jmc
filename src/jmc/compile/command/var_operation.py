@@ -94,22 +94,23 @@ def variable_operation(
         tokens[2] = tokenizer.merge_tokens(tokens[2:4])
         del tokens[3]
 
-    if (
-        (len(tokens) == 2 and tokens[0].string.endswith(".get"))
-        or (
-            len(tokens) == 3
-            and tokens[1].string.endswith(".get")
-            and is_token_obj_selector
-        )
-    ) and tokens[-1].token_type == TokenType.PAREN_ROUND:
-        if tokens[-1].string != "()":
-            raise JMCSyntaxException(
-                "'get' method takes no arguments, expected empty bracket, `.get()`",
-                tokens[1],
-                tokenizer,
+    for var_method in ("get", "reset"):
+        if (
+            (len(tokens) == 2 and tokens[0].string.endswith("." + var_method))
+            or (
+                len(tokens) == 3
+                and tokens[1].string.endswith("." + var_method)
+                and is_token_obj_selector
             )
+        ) and tokens[-1].token_type == TokenType.PAREN_ROUND:
+            if tokens[-1].string != "()":
+                raise JMCSyntaxException(
+                    f"'{var_method}' method takes no arguments, expected empty bracket, `.{var_method}()`",
+                    tokens[1],
+                    tokenizer,
+                )
 
-        return f"scoreboard players get {tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
+            return f"scoreboard players {var_method} {tokens[0].string[:-4] if tokens[0].string.endswith('.' + var_method) else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
         if tokens[0].string.startswith("$(") and tokens[0].string.endswith(")"):
