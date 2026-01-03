@@ -112,6 +112,8 @@ def variable_operation(
         return f"scoreboard players get {tokens[0].string[:-4] if tokens[0].string.endswith('.get') else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
+        if tokens[0].string.startswith("$(") and tokens[0].string.endswith(")"):
+            return tokens[0].string
         return f"scoreboard players get {tokens[0].string} {objective_name}"
         # raise JMCSyntaxException(
         #     "Expected operator after variable", tokens[0], tokenizer, col_length=True)
