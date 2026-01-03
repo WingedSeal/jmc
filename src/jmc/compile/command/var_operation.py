@@ -110,7 +110,7 @@ def variable_operation(
                     tokenizer,
                 )
 
-            return f"scoreboard players {var_method} {tokens[0].string[:-4] if tokens[0].string.endswith('.' + var_method) else tokens[0].string} {objective_name}"
+            return f"scoreboard players {var_method} {tokens[0].string[:-len(f'.{var_method}')] if tokens[0].string.endswith('.' + var_method) else tokens[0].string} {objective_name}"
 
     if len(tokens) == 1:
         if tokens[0].string.startswith("$(") and tokens[0].string.endswith(")"):
