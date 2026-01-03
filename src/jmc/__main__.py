@@ -144,7 +144,6 @@ def update(args: argparse.Namespace):
 
     if args.is_git or git_version_detected:
         package = [
-            "--no-deps",
             "--ignore-installed",
             "git+https://github.com/WingedSeal/jmc.git#subdirectory=src",
         ]
