@@ -1,6 +1,7 @@
 """Main module"""
 
 import atexit
+from enum import Enum, auto
 import shutil
 import subprocess
 import argparse
@@ -23,6 +24,7 @@ from . import terminal_commands  # noqa
 logger = Logger(__name__)
 
 PACKAGE_NAME = "jmcfunction"
+PACKAGE_SOURCE = "git+https://github.com/WingedSeal/jmc.git#subdirectory=src"
 
 
 def main():
@@ -132,6 +134,11 @@ def init(args: argparse.Namespace):
     configuration.save_config()
 
 
+class Updater(Enum):
+    PIP = auto()
+    UV = auto()
+
+
 def update(args: argparse.Namespace):
     """Update the CLI package to the latest version via pip"""
     git_version_detected = VERSION.endswith("-git")
@@ -141,36 +148,46 @@ def update(args: argparse.Namespace):
             print("Ignoring '--git' flag")
     elif args.is_git:
         print("Forcing git version")
-
-    if args.is_git or git_version_detected:
-        package = [
-            "--ignore-installed",
-            "git+https://github.com/WingedSeal/jmc.git#subdirectory=src",
-        ]
-    else:
-        package = [PACKAGE_NAME]
-
+    is_git = args.is_git or git_version_detected
     updater = _get_updater()
-    if updater is None:
-        sys.exit(1)
-    try:
-        subprocess.check_call(
-            [*updater, "install", "--upgrade"]
+    if updater == Updater.PIP:
+        if is_git:
+            package = [
+                "--force-reinstall",
+                "--user",
+                PACKAGE_SOURCE,
+            ]
+        else:
+            package = [PACKAGE_NAME]
+        command = (
+            [sys.executable, "-m", "pip", "install", "--upgrade"]
             + (
-                [] if args.is_verbose else ["--quiet", "--quiet"]
-            )  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
+                []
+                if args.is_verbose
+                else [
+                    "--quiet",
+                    "--quiet",
+                ]  # It can be used up to 3 times (https://pip.pypa.io/en/stable/cli/pip/#cmdoption-q)
+            )
             + package
         )
+    elif updater == Updater.UV:
+        command = ["uv", "tool", "upgrade", PACKAGE_SOURCE if is_git else PACKAGE_NAME]
+    else:
+        raise Exception("Unreachable")
+
+    try:
+        subprocess.check_call(command)
         print("Update installed")
     except subprocess.CalledProcessError as e:
         print(f"Update failed: {e}")
         sys.exit(1)
 
 
-def _get_updater() -> list[str] | None:
+def _get_updater() -> Updater:
     if importlib.util.find_spec("pip") is not None:
         print("Module 'pip' found, updating...")
-        return [sys.executable, "-m", "pip"]
+        return Updater.PIP
     print("Module 'pip' not found, falling back to 'uv' command")
     if shutil.which("uv") is not None:
         print("command 'uv' found")
@@ -180,12 +197,12 @@ def _get_updater() -> list[str] | None:
             )
             if PACKAGE_NAME in result.stdout:
                 print(f"'{PACKAGE_NAME}' package found in 'uv', updating...")
-                return ["uv", "tool"]
+                return Updater.UV
         except subprocess.CalledProcessError:
             pass
         print(f"'{PACKAGE_NAME}' package not found in 'uv'")
     print("Update failed")
-    return None
+    sys.exit(1)
 
 
 def config(args: argparse.Namespace):
