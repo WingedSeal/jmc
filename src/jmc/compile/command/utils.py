@@ -779,6 +779,31 @@ class FormattedText:
                     )
                 continue
 
+            if prop.count("::") == 1:
+                if "score" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used with score in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                if "selector" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used with selector in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                if "nbt" in self.current_json:
+                    raise JMCValueError(
+                        "nbt used twice in formatted text",
+                        self.token,
+                        self.tokenizer,
+                    )
+                source, path = prop.split("::", 1)
+                nbt_type = guess_nbt_type(source)
+                self.current_json["nbt"] = path
+                self.current_json[nbt_type] = source
+                continue
+
             if prop.startswith("@"):
                 if "score" in self.current_json:
                     raise JMCValueError(
@@ -843,31 +868,6 @@ class FormattedText:
                     self.current_json[key] = json_body(arg)
                 if is_local:
                     del self.datapack.data.formatted_text_prop[prop_]
-                continue
-
-            if prop.count("::") == 1:
-                if "score" in self.current_json:
-                    raise JMCValueError(
-                        "nbt used with score in formatted text",
-                        self.token,
-                        self.tokenizer,
-                    )
-                if "selector" in self.current_json:
-                    raise JMCValueError(
-                        "nbt used with selector in formatted text",
-                        self.token,
-                        self.tokenizer,
-                    )
-                if "nbt" in self.current_json:
-                    raise JMCValueError(
-                        "nbt used twice in formatted text",
-                        self.token,
-                        self.tokenizer,
-                    )
-                source, path = prop.split("::", 1)
-                nbt_type = guess_nbt_type(source)
-                self.current_json["nbt"] = path
-                self.current_json[nbt_type] = source
                 continue
 
             if prop not in self.datapack.data.formatted_text_prop:
