@@ -549,13 +549,9 @@ class FuncContent:
             if self.__handle_schedule(key_pos):
                 return SKIP_TO_NEXT_LINE
 
-        if (
-            token.string == "$"
-            and len(self.command) > key_pos + 1
-            and self.command[key_pos + 1].token_type == TokenType.PAREN_ROUND
-        ):
+        if token.string.startswith("$(") and token.string.endswith(")"):
             append_commands(self.__commands, token.string)
-            return CONTINUE_LINE
+            return SKIP_TO_NEXT_LINE
 
         if token.string == "return":
             self.__handle_return(key_pos)
