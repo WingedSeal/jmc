@@ -1,9 +1,8 @@
 from copy import deepcopy
 from pathlib import Path
 from json import loads, JSONDecodeError, dumps
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
-from .pack_version import PackVersionFeature
 from .decorator_parse import DECORATORS
 from .header import Header
 from .exception import (
@@ -490,6 +489,16 @@ class Lexer:
         """
         Whether command is in vanilla function syntax
         """
+        command = command.copy()
+        for i in range(len(command)):
+            if i >= len(command):
+                break
+            if (
+                command[i].string.endswith("$")
+                and len(command) > i + 1
+                and command[i + 1].token_type == TokenType.PAREN_ROUND
+            ):
+                self.load_tokenizer.merge_vanilla_macro(command, i)
         if len(command) == 2 and command[1].token_type == TokenType.STRING:
             return True
         if not (
@@ -507,16 +516,6 @@ class Lexer:
                 if token.string == "/" and len(command) > index + 1:
                     del command[index]
                     del command[index + 1]
-
-        for i in range(len(command)):
-            if i >= len(command):
-                break
-            if (
-                command[i].string.endswith("$")
-                and len(command) > i + 1
-                and command[i + 1].token_type == TokenType.PAREN_ROUND
-            ):
-                self.load_tokenizer.merge_vanilla_macro(command, i)
 
         if len(command) == 4:
             return True
