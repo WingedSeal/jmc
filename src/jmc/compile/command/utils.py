@@ -6,7 +6,7 @@ import operator as op
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from ...compile.pack_version import PackVersionFeature
 from ...compile.datapack_data import SIMPLE_JSON_BODY
@@ -222,10 +222,11 @@ class Arg:
                 )
         elif verifier == ArgType.FUNC:
             if self.arg_type == ArgType.ARROW_FUNC:
-                if self.raw_tokens[1].string != "()":
+                param_token = cast(Token, self.raw_tokens[0]._embeded_data)
+                if param_token.string != "()":
                     raise JMCValueError(
                         "'Function' type parameters do not accept 'ArrowFunction' with parameters",
-                        self.raw_tokens[1],
+                        param_token,
                         tokenizer,
                     )
                 return self
@@ -319,13 +320,12 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
             if re.match(r'^{\s*"', tokens[0].string) is not None:
                 return ArgType.JSON
             return ArgType.JS_OBJECT
+        if tokens[0].token_type == TokenType.FUNC:
+            return ArgType.ARROW_FUNC
         if tokens[0].token_type == TokenType.PAREN_SQUARE:
             return ArgType.LIST
         if tokens[0].token_type == TokenType.STRING:
             return ArgType.STRING
-
-    if len(tokens) == 2 and tokens[0].token_type == TokenType.FUNC:
-        return ArgType.ARROW_FUNC
 
     for token in tokens:
         if token.string == "::":

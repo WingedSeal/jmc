@@ -1,7 +1,7 @@
 from collections import defaultdict
 from enum import Enum, auto
 from json import JSONDecodeError, loads
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from ..command.nbt_operation import extract_nbt, get_nbt_type
 from ..utils import convention_jmc_to_mc, is_float
@@ -174,8 +174,9 @@ class JMCFunction:
                     )
                     self.args[key] = f"function {datapack.format_func_path(func)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
+                param_token = cast(Token, arg.raw_tokens[0]._embeded_data)
                 self.arrow_func_args_params[key] = self.__parse_arrow_func_args_param(
-                    arg.raw_tokens[1], key
+                    param_token, key
                 )
                 self.args[key] = "\n".join(
                     datapack.parse_function_token(arg.token, tokenizer, prefix)

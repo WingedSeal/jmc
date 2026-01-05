@@ -1,9 +1,9 @@
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from ast import literal_eval
 from enum import Enum
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 
 from .utils import clean_up_paren_token, is_connected, is_decorator
@@ -65,6 +65,7 @@ class Token:
     """The string representation (including parentheses, excluding quotation mark)"""
     _macro_length: int = 0
     quote: str = ""
+    _embeded_data: Any = field(default=None, repr=False)
 
     # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
     #     return super().__new__(cls)
@@ -875,8 +876,8 @@ class Tokenizer:
                         line=token_.line,
                         col=token_.col + 1,
                         token_type=TokenType.FUNC,
+                        _embeded_data=tokens[0],
                     ),
-                    tokens[0],
                 ]
 
             if tokens[0].token_type == TokenType.PAREN_ROUND and (
