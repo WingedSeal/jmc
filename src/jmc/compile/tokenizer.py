@@ -323,7 +323,7 @@ class Tokenizer:
         elif self.macro_factory:
             if new_token.token_type != TokenType.PAREN_ROUND:
                 raise JMCSyntaxWarning(
-                    f"Expect round bracket after macro factory({self.macro_factory[0]})",
+                    f"Expected round bracket after macro factory({self.macro_factory[0]})",
                     new_token,
                     self,
                     display_col_length=False,
@@ -385,7 +385,7 @@ class Tokenizer:
         elif char == Re.SEMICOLON:
             if self.macro_factory:
                 raise JMCSyntaxWarning(
-                    f"Expect round bracket after macro factory({self.macro_factory[0]})",
+                    f"Expected round bracket after macro factory({self.macro_factory[0]})",
                     None,
                     self,
                 )
@@ -846,7 +846,10 @@ class Tokenizer:
             return tokens
 
         if len(tokens) > 1:
-            if tokens[0].string == "()" and tokens[1].string == "=>":
+            if (
+                tokens[0].token_type == TokenType.PAREN_ROUND
+                and tokens[1].string == "=>"
+            ):
                 if len(tokens) < 3:
                     raise JMCSyntaxException(
                         "Expected curly bracket after '()=>' (got nothing)",
@@ -872,7 +875,8 @@ class Tokenizer:
                         line=token_.line,
                         col=token_.col + 1,
                         token_type=TokenType.FUNC,
-                    )
+                    ),
+                    tokens[0],
                 ]
 
             if tokens[0].token_type == TokenType.PAREN_ROUND and (
@@ -1006,7 +1010,7 @@ class Tokenizer:
                 continue
 
             if is_expect_comma:
-                raise JMCSyntaxException("Expect comma(,)", token_, self)
+                raise JMCSyntaxException("Expected comma(,)", token_, self)
 
             if token_.token_type != TokenType.KEYWORD:
                 raise JMCSyntaxException(
@@ -1058,7 +1062,7 @@ class Tokenizer:
                 continue
 
             if is_expect_comma:
-                raise JMCSyntaxException("Expect comma(,)", token_, self)
+                raise JMCSyntaxException("Expected comma(,)", token_, self)
             tokens.append(token_)
             is_expect_comma = True
 

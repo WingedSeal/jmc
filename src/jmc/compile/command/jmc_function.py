@@ -69,6 +69,7 @@ class JMCFunction:
         "var",
         "args",
         "raw_args",
+        "arrow_func_args_params",
         "self_token",
         "prefix",
     )
@@ -86,6 +87,8 @@ class JMCFunction:
     """Defaults value of each parameter as string (Set by decorator)"""
     number_type: dict[str, NumberType]
     """Dictionary containing some number parameter that need to be specific (Set by decorator)"""
+    param_count: dict[str, tuple[int, int]]
+    """Dictionary containing some arrow function parameter that need to have minimum and maximum parameter count (Set by decorator)"""
     _ignore: set[str]
     """Private set of parameter for parser to ignore and leave as is (Set by decorator)"""
 
@@ -106,6 +109,8 @@ class JMCFunction:
     """Dictionary containing parameter and parsed argument in form of string"""
     raw_args: dict[str, Arg]
     """Dictionary containing parameter and given argument as Arg object"""
+    arrow_func_args_params: dict[str, list[str]]
+    """Dictionary containing parameter and parsed parameters (only valid for ARROW_FUNC type)"""
 
     _subcls: dict[FuncType, dict[str, type["JMCFunction"]]] = defaultdict(dict)
     """:cvar: Dictionary of (Function type and according dictionary of funtion name and a subclass)"""
@@ -139,6 +144,7 @@ class JMCFunction:
 
         args_Args = verify_args(self.arg_type, self.call_string, token, tokenizer)
         self.args = {}
+        self.arrow_func_args_params = {}
         self.raw_args = {}
 
         for key, arg in args_Args.items():
@@ -168,6 +174,9 @@ class JMCFunction:
                     )
                     self.args[key] = f"function {datapack.format_func_path(func)}"
             elif arg.arg_type == ArgType.ARROW_FUNC:
+                self.arrow_func_args_params[key] = self.__parse_arrow_func_args_param(
+                    arg.raw_tokens[1], key
+                )
                 self.args[key] = "\n".join(
                     datapack.parse_function_token(arg.token, tokenizer, prefix)
                 )
@@ -317,6 +326,20 @@ class JMCFunction:
             )
         )
 
+    def __parse_arrow_func_args_param(self, token: Token, key: str) -> list[str]:
+        params, _ = self.datapack.parse_list(
+            token, self.tokenizer, TokenType.KEYWORD, (TokenType.PAREN_ROUND, "()")
+        )
+        if key not in self.param_count:
+            return params
+        if len(params) not in range(*self.param_count[key]):
+            raise JMCValueError(
+                f"Expected {self.param_count[key][0]-self.param_count[key][1]} parameters (got {len(params)})",
+                token,
+                self.tokenizer,
+            )
+        return params
+
     def make_empty_private_function(self, function_name: str) -> Function:
         """
         Make private function with no content
@@ -410,6 +433,7 @@ def func_property(
     defaults: dict[str, str] = {},
     ignore: set[str] = set(),
     number_type: dict[str, NumberType] = {},
+    param_count: dict[str, int | tuple[int, int]] = {},
 ) -> Callable[[type[T]], type[T]]:
     """
     Decorator factory for setting property of custom JMC function
@@ -436,6 +460,9 @@ def func_property(
         cls.arg_type = arg_type
         cls.defaults = defaults
         cls.number_type = number_type
+        cls.param_count = {}
+        for param, count in param_count.items():
+            cls.param_count[param] = (count, count) if isinstance(count, int) else count
         # for default in defaults:
         #     if default not in arg_type:
         #         raise BaseException()

@@ -276,7 +276,7 @@ def nbt_operation(
             del tokens[1]
         if not is_number(index):
             raise JMCSyntaxException(
-                f"Expect a number after `^` for NBT insert, got {tokens[1].string}",
+                f"Expected a number after `^` for NBT insert, got {tokens[1].string}",
                 tokens[0],
                 tokenizer,
             )

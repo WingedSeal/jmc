@@ -199,8 +199,35 @@ class Arg:
                 self.token,
                 tokenizer,
             )
+        elif verifier == ArgType.ARROW_FUNC:
+            if self.arg_type == ArgType.ARROW_FUNC:
+                self.token = self.raw_tokens[0]
+                return self
+            elif self.arg_type == ArgType.FUNC:
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        self.arg_type.value}",
+                    self.token,
+                    tokenizer,
+                    suggestion="'ArrowFunction' type parameters do not accept 'Function' in name format",
+                )
+            else:
+                raise JMCValueError(
+                    f"For '{key_string}' key, expected {
+                        verifier.value}, got {
+                        self.arg_type.value}",
+                    self.token,
+                    tokenizer,
+                )
         elif verifier == ArgType.FUNC:
             if self.arg_type == ArgType.ARROW_FUNC:
+                if self.raw_tokens[1].string != "()":
+                    raise JMCValueError(
+                        "'Function' type parameters do not accept 'ArrowFunction' with parameters",
+                        self.raw_tokens[1],
+                        tokenizer,
+                    )
                 return self
             if self.arg_type in {ArgType.KEYWORD, ArgType.SCOREBOARD}:
                 self.arg_type = ArgType._FUNC_CALL
@@ -294,10 +321,11 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
             return ArgType.JS_OBJECT
         if tokens[0].token_type == TokenType.PAREN_SQUARE:
             return ArgType.LIST
-        if tokens[0].token_type == TokenType.FUNC:
-            return ArgType.ARROW_FUNC
         if tokens[0].token_type == TokenType.STRING:
             return ArgType.STRING
+
+    if len(tokens) == 2 and tokens[0].token_type == TokenType.FUNC:
+        return ArgType.ARROW_FUNC
 
     for token in tokens:
         if token.string == "::":
