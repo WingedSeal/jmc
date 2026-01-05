@@ -1,5 +1,6 @@
 """Module containing JMCFunction subclasses for custom JMC function that cannot be used with `/execute`"""
 
+from typing import cast
 from ...pack_version import PackVersionFeature
 from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCValueError
@@ -108,11 +109,11 @@ class HardcodeRepeat(JMCFunction):
     func_type=FuncType.EXECUTE_EXCLUDED,
     call_string="Hardcode.repeatList",
     arg_type={
-        "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "strings": ArgType.LIST,
     },
     name="hardcode_repeat_list",
+    param_count={"function": 2},
     ignore={"function"},
 )
 class HardcodeRepeatList(JMCFunction):
@@ -121,7 +122,7 @@ class HardcodeRepeatList(JMCFunction):
             self.raw_args["strings"].token, self.tokenizer, TokenType.STRING
         )
         commands: list[str] = []
-        for i in strings:
+        for i, index in enumerate(strings):
             try:
                 commands.extend(
                     self.datapack.parse_function_token(
@@ -130,9 +131,15 @@ class HardcodeRepeatList(JMCFunction):
                             self.raw_args["function"].token.line,
                             self.raw_args["function"].token.col,
                             _hardcode_process(
-                                self.raw_args["function"].token.string,
-                                self.args["indexString"],
-                                i,
+                                _hardcode_process(
+                                    self.raw_args["function"].token.string,
+                                    "$" + self.arrow_func_args_params["function"][0],
+                                    str(i),
+                                    self.token,
+                                    self.tokenizer,
+                                ),
+                                "$" + self.arrow_func_args_params["function"][1],
+                                index,
                                 self.token,
                                 self.tokenizer,
                             ),
@@ -144,8 +151,18 @@ class HardcodeRepeatList(JMCFunction):
             except JMCSyntaxException as error:
                 error.reinit(
                     lambda string: _hardcode_process(
-                        string, self.args["indexString"], i, self.token, self.tokenizer
-                    )
+                        _hardcode_process(
+                            string,
+                            "$" + self.arrow_func_args_params["function"][0],
+                            str(i),
+                            self.token,
+                            self.tokenizer,
+                        ),
+                        "$" + self.arrow_func_args_params["function"][1],
+                        index,
+                        self.token,
+                        self.tokenizer,
+                    ),
                 )
                 error.msg = (
                     f"WARNING: This error happens inside {self.call_string}, error position might not be accurate\n\n"
@@ -160,7 +177,6 @@ class HardcodeRepeatList(JMCFunction):
     func_type=FuncType.EXECUTE_EXCLUDED,
     call_string="Hardcode.repeatLists",
     arg_type={
-        "indexStrings": ArgType.LIST,
         "function": ArgType.ARROW_FUNC,
         "stringLists": ArgType.LIST,
     },
@@ -169,17 +185,18 @@ class HardcodeRepeatList(JMCFunction):
 )
 class HardcodeRepeatLists(JMCFunction):
     def call(self) -> str:
-        index_strings, _ = self.datapack.parse_list(
-            self.raw_args["indexStrings"].token, self.tokenizer, TokenType.STRING
-        )
+        index_strings = [
+            "$" + param for param in self.arrow_func_args_params["function"]
+        ]
         string_lists, _ = self.datapack.parse_lists(
             self.raw_args["stringLists"].token, self.tokenizer, TokenType.STRING
         )
-        if len(index_strings) != len(string_lists):
+        if len(index_strings) != len(string_lists) + 1:
             raise JMCValueError(
-                f"Size of indexStrings({len(index_strings)}) doesn't match the size of stringLists({len(string_lists)})",
-                self.raw_args["indexStrings"].token,
+                f"Size of parameters of arrow function in 'function' ({len(index_strings)}) + 1 doesn't match the size of stringLists({len(string_lists)})",
+                cast(Token, self.raw_args["function"].raw_tokens[0]._embeded_data),
                 self.tokenizer,
+                suggestion="+1 is for number index. If you don't need it, use '_'",
             )
         string_lists_count = [len(string_list) for string_list in string_lists]
         if string_lists_count.count(string_lists_count[0]) != len(string_lists_count):
@@ -188,6 +205,7 @@ class HardcodeRepeatLists(JMCFunction):
                 self.raw_args["stringLists"].token,
                 self.tokenizer,
             )
+        string_lists.insert(0, [str(i) for i in range(string_lists_count[0])])
         commands: list[str] = []
         for index in range(len(string_lists[0])):
             try:
