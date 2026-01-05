@@ -44,13 +44,13 @@ def _hardcode_processes(
     func_type=FuncType.EXECUTE_EXCLUDED,
     call_string="Hardcode.repeat",
     arg_type={
-        "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "start": ArgType.INTEGER,
         "stop": ArgType.INTEGER,
         "step": ArgType.INTEGER,
     },
     name="hardcode_repeat",
+    param_count={"function": 1},
     ignore={"function"},
     defaults={"step": "1"},
 )
@@ -75,7 +75,7 @@ class HardcodeRepeat(JMCFunction):
                             self.raw_args["function"].token.col,
                             _hardcode_process(
                                 self.raw_args["function"].token.string,
-                                self.args["indexString"],
+                                "$" + self.arrow_func_args_params["function"][0],
                                 str(i),
                                 self.token,
                                 self.tokenizer,
@@ -89,7 +89,7 @@ class HardcodeRepeat(JMCFunction):
                 error.reinit(
                     lambda string: _hardcode_process(
                         string,
-                        self.args["indexString"],
+                        "$" + self.arrow_func_args_params["function"][0],
                         str(i),
                         self.token,
                         self.tokenizer,
@@ -182,8 +182,7 @@ class HardcodeRepeatLists(JMCFunction):
                 self.tokenizer,
             )
         string_lists_count = [len(string_list) for string_list in string_lists]
-        if string_lists_count.count(
-                string_lists_count[0]) != len(string_lists_count):
+        if string_lists_count.count(string_lists_count[0]) != len(string_lists_count):
             raise JMCValueError(
                 "Not all of list in stringLists have equal size",
                 self.raw_args["stringLists"].token,
@@ -201,8 +200,7 @@ class HardcodeRepeatLists(JMCFunction):
                             _hardcode_processes(
                                 self.raw_args["function"].token.string,
                                 index_strings,
-                                [string_list[index]
-                                    for string_list in string_lists],
+                                [string_list[index] for string_list in string_lists],
                                 self.token,
                                 self.tokenizer,
                             ),
@@ -385,10 +383,17 @@ class RaycastSimple(JMCFunction):
                         "minecraft:cave_air",
                         "minecraft:water",
                         "minecraft:lava",
-                        "minecraft:grass" if self.datapack.version < PackVersionFeature.SHORT_GRASS else "minecraft:short_grass",
+                        (
+                            "minecraft:grass"
+                            if self.datapack.version < PackVersionFeature.SHORT_GRASS
+                            else "minecraft:short_grass"
+                        ),
                         "#minecraft:small_flowers",
-                        *(["#minecraft:tall_flowers"]
-                          if self.datapack.version < PackVersionFeature.TALL_FLOWER else []),
+                        *(
+                            ["#minecraft:tall_flowers"]
+                            if self.datapack.version < PackVersionFeature.TALL_FLOWER
+                            else []
+                        ),
                         "#minecraft:small_dripleaf_placeable",
                         "minecraft:fern",
                         "minecraft:fire",
@@ -543,5 +548,4 @@ class TagUpdate(JMCFunction):
         selector = self.args["selector"]
         tag = self.args["tag"]
         remove_from = self.args["removeFrom"]
-        return f"tag {remove_from} remove {tag}\n" + \
-            f"tag {selector} add {tag}"
+        return f"tag {remove_from} remove {tag}\n" + f"tag {selector} add {tag}"

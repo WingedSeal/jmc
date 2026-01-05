@@ -156,7 +156,11 @@ class JMCFunction:
 
             self.raw_args[key] = arg
             if key in self._ignore:
-                pass
+                if arg.arg_type == ArgType.ARROW_FUNC:
+                    param_token = cast(Token, arg.raw_tokens[0]._embeded_data)
+                    self.arrow_func_args_params[key] = (
+                        self.__parse_arrow_func_args_param(param_token, key)
+                    )
             elif arg.arg_type == ArgType._FUNC_CALL:
                 if ":" in arg.token.string:
                     self.datapack.functions_called[arg.token.string] = (
@@ -333,9 +337,15 @@ class JMCFunction:
         )
         if key not in self.param_count:
             return params
-        if len(params) not in range(*self.param_count[key]):
+        min_ = self.param_count[key][0]
+        max_ = self.param_count[key][1]
+        if len(params) not in range(min_, max_ + 1):
+            if min_ == max_:
+                text = f"{min_}"
+            else:
+                text = f"{min_}-{max_}"
             raise JMCValueError(
-                f"Expected {self.param_count[key][0]-self.param_count[key][1]} parameters (got {len(params)})",
+                f"Expected {text} parameters (got {len(params)})",
                 token,
                 self.tokenizer,
             )
@@ -463,7 +473,12 @@ def func_property(
         cls.number_type = number_type
         cls.param_count = {}
         for param, count in param_count.items():
-            cls.param_count[param] = (count, count) if isinstance(count, int) else count
+            if isinstance(count, int):
+                cls.param_count[param] = (count, count)
+            else:
+                if count[0] > count[1]:
+                    raise ValueError("Invalid parameter count range")
+                cls.param_count[param] = count
         # for default in defaults:
         #     if default not in arg_type:
         #         raise BaseException()
