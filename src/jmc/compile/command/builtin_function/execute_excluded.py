@@ -251,7 +251,6 @@ class HardcodeRepeatLists(JMCFunction):
     call_string="Hardcode.switch",
     arg_type={
         "switch": ArgType.SCOREBOARD,
-        "indexString": ArgType.STRING,
         "function": ArgType.ARROW_FUNC,
         "count": ArgType.INTEGER,
         "begin_at": ArgType.INTEGER,
@@ -279,7 +278,7 @@ class HardcodeSwitch(JMCFunction):
                             self.raw_args["function"].token.col,
                             _hardcode_process(
                                 self.raw_args["function"].token.string,
-                                self.args["indexString"],
+                                "$" + self.arrow_func_args_params["function"][0],
                                 str(i),
                                 self.token,
                                 self.tokenizer,
@@ -293,7 +292,7 @@ class HardcodeSwitch(JMCFunction):
                 error.reinit(
                     lambda string: _hardcode_process(
                         string,
-                        self.args["indexString"],
+                        "$" + self.arrow_func_args_params["function"][0],
                         str(i),
                         self.token,
                         self.tokenizer,

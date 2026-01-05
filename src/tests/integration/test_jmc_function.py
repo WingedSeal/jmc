@@ -262,9 +262,9 @@ tellraw @a "5^2=25"
             JMCTestPack()
             .set_jmc_file(
                 """
-Hardcode.switch($var, "index", ()=>{
-    tellraw @s "index";
-    tellraw @s "Hardcode.calc(index**2)";
+Hardcode.switch($var, (index)=>{
+    tellraw @s "$index";
+    tellraw @s "Hardcode.calc($index**2)";
 }, count=5);
         """
             )
