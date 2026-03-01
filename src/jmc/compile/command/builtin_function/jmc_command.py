@@ -399,6 +399,7 @@ def points_to_commands(
     speed: str,
     count: str,
     mode: str,
+    viewers: str,
     notation: str = "^",
 ) -> list[str]:
     """
@@ -414,9 +415,10 @@ def points_to_commands(
     """
     commands = []
     for x_pos, y_pos, z_pos in points:
-        commands.append(
-            f"particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}"
-        )
+        command = f"particle {particle} {notation}{__normalize_decimal(x_pos)} {notation}{__normalize_decimal(y_pos)} {notation}{__normalize_decimal(z_pos)} 0 0 0 {speed} {count} {mode}"
+        if viewers != "@a":
+            command += " " + viewers
+        commands.append(command)
     return commands
 
 
@@ -430,13 +432,10 @@ def points_to_commands(
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_circle",
-    defaults={
-        "speed": "1",
-        "count": "1",
-        "mode": "normal",
-    },
+    defaults={"speed": "1", "count": "1", "mode": "normal", "viewers": "@a"},
     number_type={
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
@@ -475,6 +474,7 @@ class ParticleCircle(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -489,12 +489,14 @@ class ParticleCircle(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_sphere",
     defaults={
         "speed": "1",
         "count": "1",
         "mode": "normal",
+        "viewers": "@a",
     },
     number_type={
         "spread": NumberType.POSITIVE,
@@ -541,6 +543,7 @@ class ParticleSphere(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -556,9 +559,16 @@ class ParticleSphere(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_square",
-    defaults={"speed": "1", "count": "1", "align": "corner", "mode": "normal"},
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "align": "corner",
+        "mode": "normal",
+        "viewers": "@a",
+    },
     number_type={
         "spread": NumberType.POSITIVE,
         "length": NumberType.POSITIVE,
@@ -622,6 +632,7 @@ class ParticleSquare(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -637,9 +648,16 @@ class ParticleSquare(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_cube",
-    defaults={"speed": "1", "count": "1", "align": "corner", "mode": "normal"},
+    defaults={
+        "speed": "1",
+        "count": "1",
+        "align": "corner",
+        "mode": "normal",
+        "viewers": "@a",
+    },
     number_type={
         "spread": NumberType.POSITIVE,
         "length": NumberType.POSITIVE,
@@ -713,6 +731,7 @@ class ParticleCube(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -728,13 +747,10 @@ class ParticleCube(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_spiral",
-    defaults={
-        "speed": "1",
-        "count": "1",
-        "mode": "normal",
-    },
+    defaults={"speed": "1", "count": "1", "mode": "normal", "viewers": "@a"},
     number_type={
         "spread": NumberType.POSITIVE,
         "radius": NumberType.POSITIVE,
@@ -783,6 +799,7 @@ class ParticleSpiral(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -798,12 +815,14 @@ class ParticleSpiral(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_spiral",
     defaults={
         "speed": "1",
         "count": "1",
         "mode": "normal",
+        "viewers": "@a",
     },
     number_type={
         "spread": NumberType.POSITIVE,
@@ -828,12 +847,14 @@ class ParticleHelix(ParticleSpiral):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_cylinder",
     defaults={
         "speed": "1",
         "count": "1",
         "mode": "normal",
+        "viewers": "@a",
     },
     number_type={
         "spreadXZ": NumberType.POSITIVE,
@@ -886,6 +907,7 @@ class ParticleCylinder(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
@@ -900,13 +922,10 @@ class ParticleCylinder(JMCFunction):
         "speed": ArgType.INTEGER,
         "count": ArgType.INTEGER,
         "mode": ArgType.KEYWORD,
+        "viewers": ArgType.SELECTOR,
     },
     name="particle_line",
-    defaults={
-        "speed": "1",
-        "count": "1",
-        "mode": "normal",
-    },
+    defaults={"speed": "1", "count": "1", "mode": "normal", "viewers": "@a"},
     number_type={
         "spread": NumberType.POSITIVE,
         "distance": NumberType.POSITIVE,
@@ -941,6 +960,7 @@ class ParticleLine(JMCFunction):
                 self.args["speed"],
                 self.args["count"],
                 self.args["mode"],
+                self.args["viewers"],
             ),
         )
 
