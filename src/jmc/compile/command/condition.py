@@ -487,7 +487,19 @@ def ast_to_commands(
             if ast["body"]["operator"] == OR_OPERATOR:
                 ast["body"]["operator"] = AND_OPERATOR
             elif ast["body"]["operator"] == AND_OPERATOR:
-                ast["body"]["operator"] = OR_OPERATOR
+                # No De Morgan's law for !(A && B) condition; directly use negated AND result
+                and_conditions, and_precommand = ast_to_commands(ast["body"], datapack)
+                _count = datapack.data.condition_count
+                datapack.data.condition_count += 1
+                precommand_not: list[tuple[list[Condition], int]] = []
+                if and_precommand is not None:
+                    precommand_not.extend(and_precommand)
+                precommand_not.append((and_conditions, _count))
+
+                return [
+                    Condition(f"score {VAR}{_count} {DataPack.var_name} matches 1", UNLESS)
+                ], precommand_not
+
             conditions, precommand = ast_to_commands(ast["body"], datapack)
         else:
             raise ValueError('ast["body"] is a list or str')

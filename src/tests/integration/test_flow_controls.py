@@ -222,6 +222,53 @@ execute if score __logic__0 __variable__ matches 1 run say Hello World
         )
 
 
+    def test_negated_ands(self):
+        pack = JMCTestPack().set_jmc_file("""
+if (!(entity @e[type=skeleton] && entity @e[type=zombie] && entity @e[type=creeper])) {
+    say "Hello World";
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+scoreboard players set __logic__0 __variable__ 0
+execute if entity @e[type=skeleton] if entity @e[type=zombie] if entity @e[type=creeper] run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 run say Hello World
+            """)
+        )
+
+    def test_negated_ors(self):
+        pack = JMCTestPack().set_jmc_file("""
+if (!(entity @e[type=skeleton] || entity @e[type=zombie] || entity @e[type=creeper])) {
+    say "Hello World";
+}
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute unless entity @e[type=skeleton] unless entity @e[type=zombie] unless entity @e[type=creeper] run say Hello World
+            """)
+        )
+
+
 class TestFor(unittest.TestCase):
     def test_for(self):
         pack = JMCTestPack().set_jmc_file("""
