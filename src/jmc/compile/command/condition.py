@@ -233,9 +233,17 @@ def custom_condition(
 
             header = Header()
             first = match_tokens[0][0].string
+            first_prefix = ""
+            if first.startswith("-"):
+                first = first[1:]
+                first_prefix = "-"
             second = match_tokens[1][0].string
-            first = header.number_macros.get(first, first)
-            second = header.number_macros.get(second, second)
+            second_prefix = ""
+            if second.startswith("-"):
+                second = second[1:]
+                second_prefix = "-"
+            first = first_prefix + header.number_macros.get(first, first)
+            second = second_prefix + header.number_macros.get(second, second)
             if not is_number(first):
                 raise JMCSyntaxException(
                     f"Expected integer after 'matches' (got '{first}')",
