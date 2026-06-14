@@ -401,7 +401,7 @@ def build(
                 merge_dicts(
                     {
                         "pack": {
-                            "pack_format": int(config.pack_format),
+                            "pack_format": config.parsed_pack_format,
                             "description": config.description,
                         }
                     },

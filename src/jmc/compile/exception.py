@@ -297,7 +297,7 @@ class MinecraftVersionTooHigh(Exception):
 
     def __init__(
         self,
-        pack_format: int,
+        pack_format: float,
         token: "Token|None",
         tokenizer: "Tokenizer",
         *,
@@ -321,7 +321,7 @@ class MinecraftVersionTooLow(Exception):
 
     def __init__(
         self,
-        pack_format: int,
+        pack_format: float,
         token: "Token|None",
         tokenizer: "Tokenizer",
         *,

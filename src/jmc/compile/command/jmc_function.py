@@ -421,7 +421,7 @@ class JMCFunction:
             is_local,
         )
 
-    def require(self, pack_format: int, suggestion: str | None = None):
+    def require(self, pack_format: float, suggestion: str | None = None):
         """
         Raise MinecraftVersionTooLow when pack_format is too low, a shortcut for `self.datapack.version.require`
 

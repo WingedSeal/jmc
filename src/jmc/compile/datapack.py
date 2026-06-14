@@ -306,7 +306,7 @@ class DataPack:
     VARIABLE_SIGN = "$"
     """Data read from header file(s)"""
 
-    def __init__(self, namespace: str, pack_format: int, lexer: "Lexer") -> None:
+    def __init__(self, namespace: str, pack_format: float, lexer: "Lexer") -> None:
         logger.debug("Initializing Datapack")
         self.version: PackVersion = PackVersion(pack_format)
         """Datapack's version details"""

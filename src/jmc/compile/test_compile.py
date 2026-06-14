@@ -1,4 +1,5 @@
 """Module for testing compilation"""
+
 from json import dumps
 from pathlib import Path
 
@@ -7,7 +8,6 @@ from .log import Logger
 from .header import Header
 from .compiling import read_cert, read_header, build
 from .lexer import Lexer
-
 
 logger = Logger(__name__)
 
@@ -21,8 +21,8 @@ class JMCTestPack:
     :param namespace: Namespace of the virtual datapack, defaults to "TEST"
     :param output: virtual directory for output, defaults to "VIRTUAL"
     """
-    __slots__ = ("cert", "jmc_file", "header_file",
-                 "__built", "config", "envs")
+
+    __slots__ = ("cert", "jmc_file", "header_file", "__built", "config", "envs")
     cert: str
     jmc_file: str
     header_file: str | None
@@ -30,8 +30,7 @@ class JMCTestPack:
     __built: dict[str, str] | None
     """Dictionary of file name and file content"""
 
-    def __init__(self, namespace: str = "TEST",
-                 output: str = "VIRTUAL") -> None:
+    def __init__(self, namespace: str = "TEST", output: str = "VIRTUAL") -> None:
         self.__built = None
         self.cert = """LOAD=__load__
 TICK=__tick__
@@ -46,11 +45,11 @@ INT=__int__"""
             description="__THIS_IS_FOR_TESTING__",
             pack_format="-1",
             target=Path("main.jmc"),
-            output=Path(output)
+            output=Path(output),
         )
         self.envs = []
 
-    def set_pack_format(self, pack_format: int) -> "JMCTestPack":
+    def set_pack_format(self, pack_format: float) -> "JMCTestPack":
         self.config.pack_format = str(pack_format)
         return self
 
@@ -102,20 +101,20 @@ INT=__int__"""
         logger.info("Building from JMCPack")
         Header.clear()
         Header().envs = self.envs.copy()
-        is_delete, cert_config, cert_file = read_cert(
-            self.config, _test_file=self.cert)
+        is_delete, cert_config, cert_file = read_cert(self.config, _test_file=self.cert)
         read_header(self.config, _test_file=self.header_file)
         lexer = Lexer(self.config, _test_file=self.jmc_file)
         built = build(
             lexer.datapack,
             self.config,
-            is_delete, cert_config, cert_file,
-            _is_virtual=True)
+            is_delete,
+            cert_config,
+            cert_file,
+            _is_virtual=True,
+        )
         if built is None:
             raise ValueError
-        self.__built = {
-            path.as_posix(): content for path,
-            content in built.items()}
+        self.__built = {path.as_posix(): content for path, content in built.items()}
         return self
 
     @property
@@ -139,7 +138,11 @@ INT=__int__"""
     def to_string(self) -> str:
         """Get human-readable string"""
         return "\n".join(
-            [f"> {file_name}\n{file_content}" for file_name, file_content in self.built.items()])
+            [
+                f"> {file_name}\n{file_content}"
+                for file_name, file_content in self.built.items()
+            ]
+        )
 
     def __str__(self) -> str:
         ouput_str = ""

@@ -72,7 +72,7 @@ def get_args() -> argparse.Namespace:
         "--description", "--desc", "-d", default="", required=False, type=str
     )
     init_parser.add_argument(
-        "--packformat", "--pack_format", "-p", required=True, type=int
+        "--packformat", "--pack_format", "-p", required=True, type=float
     )
     init_parser.add_argument(
         "--target", "--target_path", "-t", required=False, type=Path

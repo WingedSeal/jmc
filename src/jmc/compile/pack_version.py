@@ -20,13 +20,13 @@ class PackVersion:
 
     __slot__ = ("_pack_format",)
 
-    def __init__(self, pack_format: int) -> None:
+    def __init__(self, pack_format: float) -> None:
         self._pack_format = pack_format
         """Datapack's pack_format"""
 
     def require(
         self,
-        pack_format: "int | PackVersion",
+        pack_format: "float | PackVersion",
         token: Token,
         tokenizer: Tokenizer,
         suggestion: str | None = None,

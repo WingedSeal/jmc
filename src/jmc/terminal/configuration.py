@@ -4,7 +4,7 @@ from pathlib import Path
 import threading
 from typing import Any, Callable, TypeVar
 from .utils import Colors, get_input, pprint
-from ..compile.utils import SingleTon
+from ..compile.utils import SingleTon, is_float
 from ..compile import Logger
 from dataclasses import dataclass
 
@@ -31,6 +31,12 @@ class MinecraftVersion:
 
 
 PACK_VERSION = {
+    MinecraftVersion(26, 2): "107.1",
+    MinecraftVersion(26, 1): "101.1",
+    MinecraftVersion(1, 21, 11): "94.1",
+    MinecraftVersion(1, 21, 9): "88.0",
+    MinecraftVersion(1, 21, 7): "81",
+    MinecraftVersion(1, 21, 6): "80",
     MinecraftVersion(1, 21, 5): "71",
     MinecraftVersion(1, 21, 4): "61",
     MinecraftVersion(1, 21, 2): "57",
@@ -50,6 +56,9 @@ PACK_VERSION = {
 }
 """Dictionary of MinecraftVersion and it's coresponding pack_format"""
 
+MINECRAFT_VERSION_OR_PACK_FORMAT = 88.0
+"""Any number less than this is a minecraft version. Otherwise, it's a pack format"""
+
 
 def get_pack_format(string: str) -> str:
     """
@@ -61,9 +70,16 @@ def get_pack_format(string: str) -> str:
     """
     if "." not in string:
         if not string.isdigit():
-            pprint("Invalid Pack Format: Non integer detected.", Colors.FAIL)
+            pprint("Invalid Pack Format: Non float detected.", Colors.FAIL)
             return ""
         return string
+
+    if is_float(string):
+        float_pack_format = float(string)
+        if float_pack_format >= MINECRAFT_VERSION_OR_PACK_FORMAT:
+            return string
+        if int(string) == float_pack_format:
+            return string
 
     string_split = string.split(".")
     if not 2 <= len(string_split) <= 3:
@@ -103,6 +119,15 @@ class Configuration:
     target: Path = Path()
     output: Path = Path()
     is_configed: bool = False
+
+    @property
+    def parsed_pack_format(self) -> float | int:
+        pack_format = float(self.pack_format)
+        if int(pack_format) != pack_format:
+            return pack_format
+        if pack_format < MINECRAFT_VERSION_OR_PACK_FORMAT:
+            return int(pack_format)
+        return pack_format
 
     @property
     def target_str(self) -> str:
@@ -231,8 +256,7 @@ class Configuration:
 
         # Target
         while True:
-            target_str = get_input(
-                "Main JMC file(Leave blank for default[main.jmc]): ")
+            target_str = get_input("Main JMC file(Leave blank for default[main.jmc]): ")
             if target_str == "":
                 target = self._default_target()
                 break
