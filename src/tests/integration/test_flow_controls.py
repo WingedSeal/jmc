@@ -243,7 +243,7 @@ if (!(($A || $B) && ($C || $D))) { say "11"; }
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
-        "namespace:__load__"
+        "TEST:__load__"
     ]
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction

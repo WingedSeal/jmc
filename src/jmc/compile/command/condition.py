@@ -510,8 +510,8 @@ def negate_ast(ast: AST_TYPE) -> AST_TYPE:
             "body": [negate_ast(inner_ast) for inner_ast in body],
         }
     if ast["operator"] == NOT_OPERATOR:
-        body = cast(AST_TYPE, ast["body"])
-        return body
+        not_body = cast(AST_TYPE, ast["body"])
+        return not_body
     raise ValueError("Invalid AST")
 
 
