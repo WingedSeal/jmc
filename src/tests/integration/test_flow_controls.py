@@ -1,4 +1,5 @@
 import sys  # noqa
+
 sys.path.append("./src")  # noqa
 
 import unittest
@@ -27,7 +28,7 @@ if (entity condition) {
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute if entity condition run say Hello World
-            """)
+            """),
         )
 
     def test_if_else(self):
@@ -57,7 +58,7 @@ execute if score __if_else__ __variable__ matches 0 run say FALSE
 > VIRTUAL/data/TEST/functions/__private__/if_else/0.mcfunction
 say TRUE
 scoreboard players set __if_else__ __variable__ 1
-            """)
+            """),
         )
 
     def test_if_elif(self):
@@ -86,7 +87,7 @@ execute if score __if_else__ __variable__ matches 0 if entity condition2 run say
 > VIRTUAL/data/TEST/functions/__private__/if_else/0.mcfunction
 say CONDITION1
 scoreboard players set __if_else__ __variable__ 1
-            """)
+            """),
         )
 
 
@@ -114,7 +115,7 @@ execute if entity condition run function TEST:__private__/while_loop/0
 > VIRTUAL/data/TEST/functions/__private__/while_loop/0.mcfunction
 say Hello World
 execute if entity condition run function TEST:__private__/while_loop/0
-            """)
+            """),
         )
 
     def test_do_while(self):
@@ -139,7 +140,7 @@ function TEST:__private__/while_loop/0
 > VIRTUAL/data/TEST/functions/__private__/while_loop/0.mcfunction
 say Hello World
 execute if entity condition run function TEST:__private__/while_loop/0
-            """)
+            """),
         )
 
 
@@ -163,7 +164,7 @@ if ($i==1) {
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute if score $i __variable__ matches 1 run say Hello World
-            """)
+            """),
         )
 
     def test_range(self):
@@ -193,7 +194,7 @@ scoreboard objectives add __variable__ dummy
 execute if score $i __variable__ matches -1..1 run say Hello World
 execute if score $i __variable__ matches -2..-1 run say Hello World
 execute if score $i __variable__ matches 1..2 run say Hello World
-            """)
+            """),
         )
 
     def test_logic_gate(self):
@@ -218,7 +219,69 @@ scoreboard players set __logic__0 __variable__ 0
 execute unless entity @s[type=skeleton] run scoreboard players set __logic__0 __variable__ 1
 execute unless score __logic__0 __variable__ matches 1 if entity @s[type=zombie] if score $deathCount __variable__ matches 6.. run scoreboard players set __logic__0 __variable__ 1
 execute if score __logic__0 __variable__ matches 1 run say Hello World
-            """)
+            """),
+        )
+
+    def test_advance_logic(self):
+        pack = JMCTestPack().set_jmc_file("""
+if (!$A) { say "1"; }
+if (!($A && $B)) { say "2"; }
+if (!($A && $B && $C)) { say "3"; }
+if (!($A || $B)) { say "4"; }
+if (!($A || $B || $C)) { say "5"; }
+if (! !$A) { say "6"; }
+if (!(!$A && !$B)) { say "7"; }
+if (!(!$A || !$B)) { say "8"; }
+if (!($A && ($B || $C))) { say "9"; }
+if (!($A || ($B && $C))) { say "10"; }
+if (!(($A || $B) && ($C || $D))) { say "11"; }
+        """).build()
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "namespace:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute unless score $A __variable__ matches 1.. run say 1
+scoreboard players set __logic__0 __variable__ 0
+execute if score $A __variable__ matches 1.. if score $B __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 run say 2
+scoreboard players set __logic__0 __variable__ 0
+execute if score $A __variable__ matches 1.. if score $B __variable__ matches 1.. if score $C __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 run say 3
+execute unless score $A __variable__ matches 1.. unless score $B __variable__ matches 1.. run say 4
+execute unless score $A __variable__ matches 1.. unless score $B __variable__ matches 1.. unless score $C __variable__ matches 1.. run say 5
+execute if score $A __variable__ matches 1.. run say 6
+scoreboard players set __logic__0 __variable__ 0
+execute unless score $A __variable__ matches 1.. unless score $B __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 run say 7
+execute if score $A __variable__ matches 1.. if score $B __variable__ matches 1.. run say 8
+scoreboard players set __logic__0 __variable__ 0
+execute if score $B __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 if score $C __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+scoreboard players set __logic__1 __variable__ 0
+execute if score $A __variable__ matches 1.. if score __logic__0 __variable__ matches 1 run scoreboard players set __logic__1 __variable__ 1
+execute unless score __logic__1 __variable__ matches 1 run say 9
+scoreboard players set __logic__0 __variable__ 0
+execute unless score $B __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 unless score $C __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score $A __variable__ matches 1.. if score __logic__0 __variable__ matches 1 run say 10
+scoreboard players set __logic__0 __variable__ 0
+execute if score $A __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+execute unless score __logic__0 __variable__ matches 1 if score $B __variable__ matches 1.. run scoreboard players set __logic__0 __variable__ 1
+scoreboard players set __logic__1 __variable__ 0
+execute if score $C __variable__ matches 1.. run scoreboard players set __logic__1 __variable__ 1
+execute unless score __logic__1 __variable__ matches 1 if score $D __variable__ matches 1.. run scoreboard players set __logic__1 __variable__ 1
+scoreboard players set __logic__2 __variable__ 0
+execute if score __logic__0 __variable__ matches 1 if score __logic__1 __variable__ matches 1 run scoreboard players set __logic__2 __variable__ 1
+execute unless score __logic__2 __variable__ matches 1 run say 11
+            """),
         )
 
 
@@ -247,7 +310,7 @@ execute if score $i __variable__ matches ..9 run function TEST:__private__/for_l
 say Hello World
 scoreboard players add $i __variable__ 1
 execute if score $i __variable__ matches ..9 run function TEST:__private__/for_loop/0
-            """)
+            """),
         )
 
     def test_async_for(self):
@@ -276,7 +339,7 @@ execute if score $i __variable__ matches ..9 run function TEST:__private__/for_l
 tellraw @a {"score":{"name":"$i","objective":"__variable__"},"type":"score"}
 scoreboard players add $i __variable__ 1
 schedule function TEST:__private__/async/0 1s
-            """)
+            """),
         )
 
 
@@ -344,7 +407,7 @@ execute if score __switch__0 __variable__ matches 6 run function TEST:__private_
 tellraw @s "You are a pilot."
 > VIRTUAL/data/TEST/functions/__private__/switch_case/10.mcfunction
 tellraw @s "You are a god?"
-            """)
+            """),
         )
 
 

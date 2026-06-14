@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from sys import prefix
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, cast
 
 from ...compile.command.nbt_operation import extract_nbt, get_nbt_type
 from ...compile.utils import is_number
@@ -434,20 +434,18 @@ def ast_to_commands(
 ) -> tuple[list[Condition], list[tuple[list[Condition], int]] | None]:
     """
     Parse abstract syntax tree into list of conditions and list of commands that need to come before for it to works
-
     :param ast: Abstract syntax tree
     :raises ValueError: Invalid AST
     :return: A tuple of (
         A chain of conditions(List of Condition)
         and
         Commands(
-            List of Condition and n (`__logic__n` for minecraft function name)
+            List of Condition and n (__logic__n for minecraft function name)
         ) that need to come before (can be None)
     )
     """
     if isinstance(ast, Condition):
         return [ast], None
-
     if ast["operator"] == AND_OPERATOR:
         conditions: list[Condition] = []
         precommand_and: list[tuple[list[Condition], int]] = []
@@ -456,12 +454,11 @@ def ast_to_commands(
         for and_body in ast["body"]:
             if isinstance(and_body, str):
                 raise ValueError('ast["body"] is string')
-            _conditions, precommand = ast_to_commands(and_body, datapack)  # noqa
+            _conditions, precommand = ast_to_commands(and_body, datapack)
             conditions.extend(_conditions)
             if precommand is not None:
                 precommand_and.extend(precommand)
         return conditions, (precommand_and if precommand_and else None)
-
     elif ast["operator"] == OR_OPERATOR:
         _count = datapack.data.condition_count
         datapack.data.condition_count += 1
@@ -475,26 +472,46 @@ def ast_to_commands(
             if precommand is not None:
                 precommand_or.extend(precommand)
             precommand_or.append((conditions, _count))
-
         return [
             Condition(f"score {VAR}{_count} {DataPack.var_name} matches 1", IF)
         ], precommand_or
-
     elif ast["operator"] == NOT_OPERATOR:
-        if isinstance(ast["body"], Condition):
-            conditions, precommand = ast_to_commands(ast["body"], datapack)
-        elif isinstance(ast["body"], dict):
-            if ast["body"]["operator"] == OR_OPERATOR:
-                ast["body"]["operator"] = AND_OPERATOR
-            elif ast["body"]["operator"] == AND_OPERATOR:
-                ast["body"]["operator"] = OR_OPERATOR
-            conditions, precommand = ast_to_commands(ast["body"], datapack)
-        else:
+        body = ast["body"]
+        if not (isinstance(body, Condition) or isinstance(body, dict)):
             raise ValueError('ast["body"] is a list or str')
-        for condition in conditions:
-            condition.reverse()
-        return conditions, precommand
+        if isinstance(body, Condition) or body["operator"] != AND_OPERATOR:
+            return ast_to_commands(negate_ast(body), datapack)
+        conditions, precommand = ast_to_commands(body, datapack)
+        _count = datapack.data.condition_count
+        datapack.data.condition_count += 1
+        precommand_not: list[tuple[list[Condition], int]] = precommand or []
+        precommand_not.append((conditions, _count))
+        return [
+            Condition(f"score {VAR}{_count} {DataPack.var_name} matches 1", UNLESS)
+        ], precommand_not
+    raise ValueError("Invalid AST")
 
+
+def negate_ast(ast: AST_TYPE) -> AST_TYPE:
+    """Push NOT down through the entire AST (De Morgan's)."""
+    if isinstance(ast, Condition):
+        ast.reverse()
+        return ast
+    if ast["operator"] == AND_OPERATOR:
+        body = cast(list[AST_TYPE], ast["body"])
+        return {
+            "operator": OR_OPERATOR,
+            "body": [negate_ast(inner_ast) for inner_ast in body],
+        }
+    if ast["operator"] == OR_OPERATOR:
+        body = cast(list[AST_TYPE], ast["body"])
+        return {
+            "operator": AND_OPERATOR,
+            "body": [negate_ast(inner_ast) for inner_ast in body],
+        }
+    if ast["operator"] == NOT_OPERATOR:
+        body = cast(AST_TYPE, ast["body"])
+        return body
     raise ValueError("Invalid AST")
 
 
