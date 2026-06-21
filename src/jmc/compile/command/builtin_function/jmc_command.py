@@ -13,6 +13,7 @@ from ...exception import (
     JMCValueError,
     relative_file_name,
 )
+from ...hooks import emit_message
 from ..utils import ArgType, NumberType, find_scoreboard_player_type
 from ..jmc_function import JMCFunction, FuncType, func_property
 from .utils.isolated import IsolatedEnvironment
@@ -231,13 +232,10 @@ class JMCLog(JMCFunction):
     def call(self) -> str:
         text = self.args["text"]
         if "\n" not in text:
-            print(f"JMC.log: {text}")
+            emit_message(f"JMC.log: {text}")
         else:
-            print(
-                "\n".join(
-                    f"JMC.log[{i}]: {text}" for i, text in enumerate(text.split("\n"))
-                )
-            )
+            for i, line in enumerate(text.split("\n")):
+                emit_message(f"JMC.log[{i}]: {line}")
         return ""
 
 
@@ -252,14 +250,10 @@ class JMCLogAny(JMCFunction):
     def call(self) -> str:
         text = self.args["prefix"] + self.args["any"]
         if "\n" not in text:
-            print(f"JMC.logAny: {text}")
+            emit_message(f"JMC.logAny: {text}")
         else:
-            print(
-                "\n".join(
-                    f"JMC.logAny[{i}]: {text}"
-                    for i, text in enumerate(text.split("\n"))
-                )
-            )
+            for i, line in enumerate(text.split("\n")):
+                emit_message(f"JMC.logAny[{i}]: {line}")
         return ""
 
 
@@ -273,9 +267,7 @@ class JMCLogAny(JMCFunction):
 class JMCTodo(JMCFunction):
     def call(self) -> str:
         self.self_token
-        print(
-            f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}"
-        )
+        emit_message(f"JMC.todo({relative_file_name(self.tokenizer.file_path, self.self_token.line, self.self_token.col)}): {self.args['text']}")
         return ""
 
 

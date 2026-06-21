@@ -9,9 +9,8 @@ from time import perf_counter
 from traceback import format_exc
 
 from .compile.header import Header
-
-from .terminal.utils import RestartException, error_report, get_input, handle_exception, press_enter
-from .terminal import pprint, Colors, GlobalData, add_command
+from .compile.hooks import register_message
+from .terminal import GlobalData, add_command, Colors, eprint, error_report, get_input, handle_exception, press_enter, pprint, RestartException
 from .compile import compile_jmc, Logger, EXCEPTIONS, get_debug_log, get_info_log
 
 global_data: GlobalData = GlobalData()
@@ -47,7 +46,7 @@ def exit_() -> None:
 @add_command("compile [env ...]", "compile")
 def compile_(*envs: str) -> None:
     """Compile main JMC file"""
-
+    register_message(lambda msg: pprint(msg, Colors.YELLOW))
     pprint("Compiling...", Colors.INFO)
     if not global_data.config:
         global_data.config.ask_and_save()
@@ -129,7 +128,7 @@ def version() -> None:
 def __config_reset() -> None:
     (global_data.cwd / global_data.CONFIG_FILE_NAME).unlink(missing_ok=True)
     pprint("Resetting configurations", Colors.PURPLE)
-    print("\n" * 5)
+    pprint("\n" * 5)
     raise RestartException()
 
 
@@ -142,7 +141,7 @@ Type `cancel` to cancel
     if key not in config_json:
         if key.lower() == "cancel":
             return
-        pprint("Invalid Key", Colors.FAIL)
+        eprint("Invalid Key")
         __config_edit()
     else:
         pprint(f"Current {key}: {config_json[key]}", Colors.YELLOW)
@@ -162,9 +161,7 @@ def config(mode: str = "") -> None:
         if not global_data.config:
             global_data.config.ask_and_save()
             return
-        pprint(
-            "Configuration file is already generated. To reset, use `cofig reset`",
-            Colors.FAIL)
+        eprint("Configuration file is already generated. To reset, use `cofig reset`")
     if mode == "reset":
         __config_reset()
     elif mode == "edit":
@@ -188,7 +185,7 @@ def autocompile(interval: str) -> None:
     except ValueError as error:
         raise TypeError("Invalid integer for interval") from error
     if global_data.interval == 0:
-        pprint("Interaval cannot be 0 seconds", Colors.FAIL)
+        eprint("Interval cannot be 0 seconds")
         return
 
     if not global_data.config:
@@ -214,7 +211,7 @@ def chdir(path: str) -> None:
     try:
         os.chdir(path)
     except (ValueError, FileNotFoundError):
-        pprint("Invalid path", Colors.FAIL)
+        eprint("Invalid path")
         return
     global_data.cwd = Path(os.getcwd())
     global_data.LOG_PATH = global_data.cwd / "log"

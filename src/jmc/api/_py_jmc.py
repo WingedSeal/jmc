@@ -4,7 +4,7 @@ from pathlib import Path
 from ..compile.datapack import DataPack
 from ..compile.lexer import Lexer
 
-from ..terminal.configuration import Configuration, GlobalData
+from ..terminal import Configuration, GlobalData
 from ..compile.header import Header
 from ..compile.compiling import cert_config_to_string, read_cert, read_header, build
 

@@ -17,7 +17,7 @@ from .exception import (
 from .log import Logger
 
 if TYPE_CHECKING:
-    from ..terminal.configuration import Configuration
+    from ..terminal import Configuration
     from ..compile.datapack import DataPack
 
 logger = Logger(__name__)
