@@ -1193,5 +1193,84 @@ scoreboard players set @a[tag=test] test 1
 #             """).build()
 
 
+class TestJMCPython(unittest.TestCase):
+    def test_basic_emit(self):
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
+JMC.python(`
+    for i in range(3):
+        emit(f'say {i}')
+`);
+            """
+            )
+            .build()
+        )
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict(
+                """
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+say 0
+say 1
+say 2
+            """
+            ),
+        )
+
+    def test_jmc_true_compiles_generated_output(self):
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
+JMC.python(`
+    emit('$result = 5;')
+`, jmc=true);
+            """
+            )
+            .build()
+        )
+        load = pack.built["VIRTUAL/data/TEST/functions/__load__.mcfunction"]
+        self.assertIn("scoreboard players set $result __variable__ 5", load)
+
+    def test_jmc_true_output_longer_than_source(self):
+        # Ensures generated content can have more lines than the source file. 
+        # parse_function_token must use generated content as file_string.
+        pack = (
+            JMCTestPack()
+            .set_jmc_file(
+                """
+JMC.python(`
+    for i in range(100):
+        emit(f'$x = {i};')
+`, jmc=true);
+            """
+            )
+            .build()
+        )
+        load = pack.built["VIRTUAL/data/TEST/functions/__load__.mcfunction"]
+        self.assertIn("scoreboard players set $x __variable__ 0", load)
+        self.assertIn("scoreboard players set $x __variable__ 99", load)
+
+    def test_jmc_true_bad_generated_jmc_raises_JMCValueError(self):
+        # Error in generated content must indicate it is python_generated_content in the filepath
+        with self.assertRaisesRegex(JMCValueError, "#python_generated_content"):
+            JMCTestPack().set_jmc_file(
+                """
+JMC.python(`
+    emit('not_a_valid_command blah blah')
+`, jmc=true);
+            """
+            ).build()
+
+
 if __name__ == "__main__":
     unittest.main()

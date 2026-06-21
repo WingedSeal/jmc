@@ -571,13 +571,20 @@ class DataPack:
         return self.call_func(name, count)
 
     def parse_function_token(
-        self, token: Token | list[Token], tokenizer: Tokenizer, prefix: str
+        self,
+        token: Token | list[Token],
+        tokenizer: Tokenizer,
+        prefix: str,
+        file_string: str | None = None,
+        file_path: str | None = None,
     ) -> list[str]:
         """
         "Parse a paren_curly token into a list of commands(string)
 
         :param token: paren_curly token
         :param tokenizer: token's tokenizer
+        :param file_string: Override file_string for the inner tokenizer (use when token content is generated, not from the original source)
+        :param file_path: Override file_path for the inner tokenizer (use when token content is generated, not from the original source)
         :return: List of minecraft commands(string)
         """
         if isinstance(token, list):
@@ -586,10 +593,10 @@ class DataPack:
             )
         return self.lexer.parse_func_content(
             token.string[1:-1],
-            tokenizer.file_path,
+            file_path if file_path is not None else tokenizer.file_path,
             token.line,
             token.col,
-            tokenizer.file_string,
+            file_string if file_string is not None else tokenizer.file_string,
             prefix,
         )
 
