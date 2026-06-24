@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import threading
 from typing import Any, Callable, TypeVar
-from .utils import Colors, get_input, pprint
+from .utils import Colors, eprint, get_input, pprint
 from ..compile.utils import SingleTon, is_float
 from ..compile import Logger
 from dataclasses import dataclass
@@ -70,7 +70,7 @@ def get_pack_format(string: str) -> str:
     """
     if "." not in string:
         if not string.isdigit():
-            pprint("Invalid Pack Format: Non float detected.", Colors.FAIL)
+            eprint("Invalid Pack Format: Non float detected.")
             return ""
         return string
 
@@ -83,26 +83,20 @@ def get_pack_format(string: str) -> str:
 
     string_split = string.split(".")
     if not 2 <= len(string_split) <= 3:
-        pprint(
-            f"Invalid Minecraft version: Expect 1 or 2 dot (got {len(string_split) - 1}).",
-            Colors.FAIL,
-        )
+        eprint(f"Invalid Minecraft version: Expect 1 or 2 dot (got {len(string_split) - 1}).")
         return ""
 
     try:
         current_version = MinecraftVersion(*(int(x) for x in string_split))
     except ValueError:
-        pprint("Invalid Minecraft version: Non integer detected.", Colors.FAIL)
+        eprint("Invalid Minecraft version: Non integer detected.")
         return ""
 
     for minecraft_version, pack_format in PACK_VERSION.items():
         if current_version > minecraft_version:
             return pack_format
 
-    pprint(
-        f"Invalid Minecraft version: Version {current_version} does not support datapack.",
-        Colors.FAIL,
-    )
+    eprint(f"Invalid Minecraft version: Version {current_version} does not support datapack.")
     return ""
 
 
@@ -181,16 +175,10 @@ class Configuration:
             self.output = self.global_data.cwd / json["output"]
             self.is_configed = True
         except JSONDecodeError as error:
-            pprint(
-                f"Invalid JSON syntax in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.",
-                Colors.FAIL,
-            )
+            eprint(f"Invalid JSON syntax in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.")
             raise error from error
         except KeyError as error:
-            pprint(
-                f"Invalid JSON data in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.",
-                Colors.FAIL,
-            )
+            eprint(f"Invalid JSON data in {self.global_data.CONFIG_FILE_NAME}. Delete the file to reset the configuration.")
             raise error from error
 
     def save_config(self):
@@ -226,16 +214,13 @@ class Configuration:
         while True:
             namespace = get_input("Namespace(Leave blank to cancel): ")
             if " " in namespace or "\t" in namespace:
-                pprint("Invalid Namespace: Space detected.", Colors.FAIL)
+                eprint("Invalid Namespace: Space detected.")
                 continue
             if namespace == "":
-                pprint(
-                    f"Configuration canceled.{' Using backup configuration.' if self.is_configed else ''}",
-                    Colors.FAIL,
-                )
+                eprint(f"Configuration canceled.{' Using backup configuration.' if self.is_configed else ''}")
                 return
             if not namespace.islower():
-                pprint("Invalid Namespace: Uppercase character detected.", Colors.FAIL)
+                eprint("Invalid Namespace: Uppercase character detected.")
                 continue
             break
         self.namespace = namespace
@@ -261,12 +246,12 @@ class Configuration:
                 target = self._default_target()
                 break
             if not target_str.endswith(".jmc"):
-                pprint("Invalid path: Target file needs to end with .jmc", Colors.FAIL)
+                eprint("Invalid path: Target file needs to end with .jmc")
                 continue
             try:
                 target = Path(target_str).resolve()
             except BaseException:
-                pprint("Invalid path", Colors.FAIL)
+                eprint("Invalid path")
                 continue
             break
         target.touch(exist_ok=True)
@@ -283,10 +268,10 @@ class Configuration:
             try:
                 output = Path(output_str).resolve()
                 if output.is_file():
-                    pprint("Path is not a directory.", Colors.FAIL)
+                    eprint("Path is not a directory.")
                     continue
             except BaseException:
-                pprint("Invalid path", Colors.FAIL)
+                eprint("Invalid path")
                 continue
             break
         self.output = output

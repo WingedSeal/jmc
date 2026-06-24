@@ -6,14 +6,13 @@ import shutil
 import subprocess
 import argparse
 import importlib.util
+import os
 from pathlib import Path
 import sys
 
 
-from .terminal.configuration import Configuration
 from .compile import Logger
-from .terminal.utils import RestartException, handle_exception
-from .terminal import GlobalData, Colors, start
+from .terminal import Colors, Configuration, eprint, handle_exception, pprint, RestartException, GlobalData, start
 from .config import VERSION, CONFIG_FILE_NAME
 
 GlobalData().init(VERSION, CONFIG_FILE_NAME)
@@ -29,6 +28,7 @@ PACKAGE_SOURCE = "git+https://github.com/WingedSeal/jmc.git#subdirectory=src"
 
 def main():
     """Main function"""
+    os.system("")  # required for ANSI escape codes on Windows terminal
     logger.info(f"Argv: {sys.argv}")
     args = get_args()
     logger.info(f"Args: {args}")
@@ -39,7 +39,7 @@ def main():
     elif args.command == "config":
         config(args)
     elif args.command == "run" or args.command is None:
-        atexit.register(lambda: print(Colors.EXIT.value + "\n"))
+        atexit.register(lambda: sys.stdout.isatty() and print(Colors.EXIT.value + "\n"))
         run()
     elif args.command == "update":
         update(args)
@@ -127,7 +127,7 @@ def init(args: argparse.Namespace):
     if args.output is None:
         configuration.output = configuration._default_output()
     if not args.is_force and configuration.is_file_exist():
-        print(
+        eprint(
             "Initialization failed: Configuration file already exists. Run with `--force` to override the old file."
         )
         return
@@ -143,11 +143,11 @@ def update(args: argparse.Namespace):
     """Update the CLI package to the latest version via pip"""
     git_version_detected = VERSION.endswith("-git")
     if git_version_detected:
-        print("Git version detected")
+        pprint("Git version detected")
         if args.is_git:
-            print("Ignoring '--git' flag")
+            pprint("Ignoring '--git' flag")
     elif args.is_git:
-        print("Forcing git version")
+        pprint("Forcing git version")
     is_git = args.is_git or git_version_detected
     updater = _get_updater()
     if updater == Updater.PIP:
@@ -178,30 +178,30 @@ def update(args: argparse.Namespace):
 
     try:
         subprocess.check_call(command)
-        print("Update installed")
+        pprint("Update installed")
     except subprocess.CalledProcessError as e:
-        print(f"Update failed: {e}")
+        eprint(f"Update failed: {e}")
         sys.exit(1)
 
 
 def _get_updater() -> Updater:
     if importlib.util.find_spec("pip") is not None:
-        print("Module 'pip' found, updating...")
+        pprint("Module 'pip' found, updating...")
         return Updater.PIP
-    print("Module 'pip' not found, falling back to 'uv' command")
+    pprint("Module 'pip' not found, falling back to 'uv' command")
     if shutil.which("uv") is not None:
-        print("command 'uv' found")
+        pprint("command 'uv' found")
         try:
             result = subprocess.run(
                 ["uv", "tool", "list"], capture_output=True, text=True, check=True
             )
             if PACKAGE_NAME in result.stdout:
-                print(f"'{PACKAGE_NAME}' package found in 'uv', updating...")
+                pprint(f"'{PACKAGE_NAME}' package found in 'uv', updating...")
                 return Updater.UV
         except subprocess.CalledProcessError:
             pass
-        print(f"'{PACKAGE_NAME}' package not found in 'uv'")
-    print("Update failed")
+        eprint(f"'{PACKAGE_NAME}' package not found in 'uv'")
+    eprint("Update failed")
     sys.exit(1)
 
 
@@ -209,7 +209,7 @@ def config(args: argparse.Namespace):
     configuration = global_data.config
     configuration.load_config()
     if not configuration.is_file_exist():
-        print("Configuration editing failed: Configuration file does not exists.")
+        eprint("Configuration editing failed: Configuration file does not exist.")
         return
     setattr(configuration, args.config, args.value)
     configuration.save_config()
@@ -217,7 +217,7 @@ def config(args: argparse.Namespace):
 
 def compile(args: argparse.Namespace):
     if not global_data.config.is_file_exist():
-        print("Compilation failed: Configuration file does not exists.")
+        eprint("Compilation failed: Configuration file does not exist.")
         return
     global_data.config.load_config()
     terminal_commands.compile_(*args.environment)

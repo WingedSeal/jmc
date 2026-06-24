@@ -3,7 +3,7 @@
 from json import dumps
 from pathlib import Path
 
-from ..terminal.configuration import Configuration, GlobalData
+from ..terminal import Configuration, GlobalData
 from .log import Logger
 from .header import Header
 from .compiling import read_cert, read_header, build
