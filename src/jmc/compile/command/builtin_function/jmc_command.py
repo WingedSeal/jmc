@@ -1353,6 +1353,7 @@ class EntityLaunch(JMCFunction):
 
 
 ISOLATED_ENVIRONMENT = IsolatedEnvironment("emit")
+JMC_PY_FILE_PATH_SUFFIX = "#python_generated_content"
 
 
 @func_property(
@@ -1406,6 +1407,8 @@ class JMCPythonFile(JMCFunction):
                         Token(TokenType.PAREN_CURLY, 0, 0, f"{{\n{output}\n}}"),
                         self.tokenizer,
                         self.prefix,
+                        file_string=output,
+                        file_path=self.tokenizer.file_path + JMC_PY_FILE_PATH_SUFFIX,
                     )
                 )
             except EXCEPTIONS as error:
@@ -1480,6 +1483,8 @@ class JMCPython(JMCFunction):
                         Token(TokenType.PAREN_CURLY, 0, 0, f"{{\n{output}\n}}"),
                         self.tokenizer,
                         self.prefix,
+                        file_string=output,
+                        file_path=self.tokenizer.file_path + JMC_PY_FILE_PATH_SUFFIX,
                     )
                 )
             except EXCEPTIONS as error:
