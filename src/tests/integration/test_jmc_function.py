@@ -1242,7 +1242,7 @@ JMC.python(`
         self.assertIn("scoreboard players set $result __variable__ 5", load)
 
     def test_jmc_true_output_longer_than_source(self):
-        # Ensures generated content can have more lines than the source file. 
+        # Ensures generated content can have more lines than the source file.
         # parse_function_token must use generated content as file_string.
         pack = (
             JMCTestPack()

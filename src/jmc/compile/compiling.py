@@ -361,7 +361,7 @@ def build(
                 / "data"
                 / namespace
                 / function_folder
-                / (func_path[len(namespace) + 1 :] + ".mcfunction")
+                / (func_path[len(namespace) + 1:] + ".mcfunction")
             )
         else:
             path = namespace_folder / function_folder / (func_path + ".mcfunction")
@@ -381,7 +381,7 @@ def build(
                 output_folder
                 / "data"
                 / namespace
-                / (json_path[len(namespace) + 1 :] + ".json")
+                / (json_path[len(namespace) + 1:] + ".json")
             )
         else:
             path = namespace_folder / (json_path + ".json")

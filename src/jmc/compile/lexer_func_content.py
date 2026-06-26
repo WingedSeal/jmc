@@ -1,7 +1,6 @@
 """Module responsible for handling all Function Content parsing in Lexer"""
 
 from enum import Enum, auto
-from sys import prefix
 from typing import TYPE_CHECKING
 from json import dumps
 
@@ -56,7 +55,6 @@ FIRST_ARGUMENTS = {
     *LOAD_ONCE_COMMANDS,
     *LOAD_ONLY_COMMANDS,
     *JMC_COMMANDS,
-    *FLOW_CONTROL_COMMANDS,
     *EXECUTE_EXCLUDED_COMMANDS,
     *VANILLA_COMMANDS,
     "class",
@@ -185,9 +183,6 @@ class FuncContent:
             raise JMCSyntaxException(
                 "'class' keyword found in function", self.command[0], self.tokenizer
             )
-        # if is_decorator(self.command[0].string):
-        #     raise JMCSyntaxException(
-        #         "Decorated function declaration found in function", self.command[0], self.tokenizer)
         if self.command[0].string == "import":
             raise JMCSyntaxException(
                 "Importing found in function", self.command[0], self.tokenizer
@@ -277,7 +272,7 @@ class FuncContent:
             if self.expanded_commands is not None:
                 for expanded_command in self.expanded_commands:
                     if expanded_command.startswith("execute"):
-                        expanded_command = expanded_command[len("execute") + 1 :]
+                        expanded_command = expanded_command[len("execute") + 1:]
                         self.command_strings.append(
                             " ".join(self.__commands[:-1])
                             + " "
@@ -422,15 +417,7 @@ class FuncContent:
         if self.__optimize(token):
             return
 
-        if token.token_type == TokenType.PAREN_ROUND:
-            if is_connected(token, self.command[key_pos - 1]):
-                self.__commands[-1] += clean_up_paren_token(token, self.tokenizer)
-            else:
-                append_commands(
-                    self.__commands,
-                    clean_up_paren_token(token, self.tokenizer),
-                )
-        elif token.token_type in {TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
+        if token.token_type in {TokenType.PAREN_ROUND, TokenType.PAREN_CURLY, TokenType.PAREN_SQUARE}:
             if is_connected(token, self.command[key_pos - 1]):
                 self.__commands[-1] += clean_up_paren_token(token, self.tokenizer)
             else:
@@ -519,9 +506,7 @@ class FuncContent:
         if token.string == "with":
             self.__handle_with_anon(key_pos, token)
             if len(self.command) <= key_pos + 1:
-                raise JMCSyntaxException(
-                    f"Expected a token after 'with'", token, self.tokenizer
-                )
+                raise JMCSyntaxException("Expected a token after 'with'", token, self.tokenizer)
             if self.__handle_with(key_pos, token):
                 return SKIP_TO_NEXT_LINE
 
@@ -595,10 +580,9 @@ class FuncContent:
         ):
             if self.is_execute:
                 raise JMCSyntaxException(
-                    f"This feature({
-                        token.string}) can only be used in load function",
+                    f"This feature({token.string}) can only be used in load function",
                     token,
-                    self.tokenizer,
+                    self.tokenizer
                 )
 
         if (
@@ -608,23 +592,8 @@ class FuncContent:
             return self.__handle_function_call(key_pos, token)
 
         if not self._bypass_checks:
-            if (
-                token.string not in VANILLA_COMMANDS
-                and token.string not in Header().commands
-            ):
-                if not self.command_strings:
-                    raise JMCSyntaxException(
-                        f"Unrecognized command ({
-                            token.string})",
-                        token,
-                        self.tokenizer,
-                    )
-                raise JMCSyntaxException(
-                    f"Unrecognized command ({
-                        token.string})",
-                    token,
-                    self.tokenizer,
-                )
+            if (token.string not in VANILLA_COMMANDS and token.string not in Header().commands):
+                raise JMCSyntaxException(f"Unrecognized command ({token.string})", token, self.tokenizer)
 
         if self.__optimize(token):
             return CONTINUE_LINE
@@ -902,7 +871,7 @@ class FuncContent:
             )
             return SKIP_TO_NEXT_LINE
 
-        __with_nbt_type = get_nbt_type(self.command[key_pos + 1 :])
+        __with_nbt_type = get_nbt_type(self.command[key_pos + 1:])
         if __with_nbt_type is None:
             token_ = self.command[key_pos + 1]
             if token_.token_type != TokenType.PAREN_CURLY:
@@ -1168,7 +1137,7 @@ class FuncContent:
                     raise var_error
                 raise normal_error
             if not self.__commands:
-                return SKIP_TO_NEXT_LINE  # TODO: Will this break anything?
+                return SKIP_TO_NEXT_LINE  # nothing generated, no $ prefix to apply
             self.__commands[0] = "$" + self.__commands[0]
         return SKIP_TO_NEXT_LINE
 
