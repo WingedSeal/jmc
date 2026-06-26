@@ -115,10 +115,10 @@ def merge_path(
         elif string.endswith(")") and token.token_type == TokenType.KEYWORD:
             string += token.string
         else:
-            del tokens[start_index : start_index + index]
+            del tokens[start_index: start_index + index]
             return string
     assert index is not None
-    del tokens[start_index : start_index + index + 1]
+    del tokens[start_index: start_index + index + 1]
     return string
 
 
@@ -142,7 +142,7 @@ def extract_nbt(
     if nbt_type == NBTType.AUTO_STORAGE:
         if tokens[start_index].string == "::":
             path = merge_path(tokens, start_index + 1, tokenizer, datapack)
-            del tokens[start_index : start_index + 1]
+            del tokens[start_index: start_index + 1]
             return (
                 get_nbt_string(nbt_type),
                 datapack.namespace + ":" + datapack.namespace,
@@ -151,7 +151,7 @@ def extract_nbt(
         else:
             target = tokens[start_index].string
             path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-            del tokens[start_index : start_index + 2]
+            del tokens[start_index: start_index + 2]
             return (
                 get_nbt_string(nbt_type),
                 datapack.namespace + ":" + target,
@@ -164,14 +164,14 @@ def extract_nbt(
             + tokens[start_index + 2].string
         )
         path = merge_path(tokens, start_index + 4, tokenizer, datapack)
-        del tokens[start_index : start_index + 4]
+        del tokens[start_index: start_index + 4]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.BLOCK:
         target = " ".join(
             _token.string for _token in tokenizer.parse_list(tokens[start_index])
         )
         path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-        del tokens[start_index : start_index + 2]
+        del tokens[start_index: start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     elif nbt_type == NBTType.ENTITY:
         if tokens[start_index + 1].token_type == TokenType.PAREN_SQUARE:
@@ -179,11 +179,11 @@ def extract_nbt(
                 tokens[start_index + 1], tokenizer
             )
             path = merge_path(tokens, start_index + 3, tokenizer, datapack)
-            del tokens[start_index : start_index + 3]
+            del tokens[start_index: start_index + 3]
         else:
             target = tokens[start_index].string
             path = merge_path(tokens, start_index + 2, tokenizer, datapack)
-            del tokens[start_index : start_index + 2]
+            del tokens[start_index: start_index + 2]
         return get_nbt_string(nbt_type), target, " " + path if path else ""
     raise NotImplementedError("Invalid nbt_type")
 

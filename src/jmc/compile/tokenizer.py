@@ -16,8 +16,6 @@ if TYPE_CHECKING:
 
 logger = Logger(__name__)
 
-NEW_LINE = "\n"
-
 TERMINATE_LINE = {
     "function",
     "class",
@@ -67,9 +65,6 @@ class Token:
     quote: str = ""
     _embeded_data: Any = field(default=None, repr=False)
 
-    # def __new__(cls: type["Token"], token_type: TokenType, line: int, col: int, string: str) -> "Token":
-    #     return super().__new__(cls)
-
     def __post_init__(self) -> None:
         """
         Edit string and _length according to macros(`#define something`) defined
@@ -87,14 +82,11 @@ class Token:
 
         :return: Length of the string
         """
-        # if not self._macro_length:
         return (
             len(repr(self.string))
             if self.token_type == TokenType.STRING
             else len(self.string)
         )
-        # else:
-        #     return self._macro_length
 
     def add_quotation(self) -> str:
         """Get self.string including quotation mark (Raise error when the token_type is not TokenType.STRING)"""
@@ -334,10 +326,6 @@ class Tokenizer:
             args: list[Token] = []
             args_, kwargs = deepcopy(self).parse_func_args(new_token)
             for arg_ in args_:
-                # if arg_[0].token_type != TokenType.KEYWORD:
-                #     raise JMCSyntaxException(
-                # f"Macro factory arguments can only have a keyword token (got
-                # {arg_[0].token_type})", arg_[0], self)
                 if len(arg_) > 1:
                     arg_ = [self.merge_tokens(arg_)]
 
@@ -487,7 +475,7 @@ class Tokenizer:
         self.col = 0
 
     def __parse_multiline_string(self):
-        lines = self.token_str.split(NEW_LINE)
+        lines = self.token_str.split(Re.NEW_LINE)
         if len(lines) <= 2:
             if len(lines) == 1:
                 raise JMCSyntaxException(
@@ -1069,8 +1057,46 @@ class Tokenizer:
 
         return tokens
 
-    # def parse_nbt(self, token: Token) -> dict[str, str]:
-    #     return {}
+    def _parse_kv_token(self, token: Token, separator: str, context: str) -> dict[str, Token]:
+        statements = self.parse(
+            token.string[1:-1],
+            line=token.line,
+            col=token.col + 1,
+            expect_semicolon=False,
+        )
+        if not statements:
+            return {}
+        keywords: list[Token] = statements[0]
+
+        result: dict[str, Token] = {}
+        comma_separated_tokens = self.find_token(keywords, ",")
+        if not comma_separated_tokens[-1]:
+            raise JMCSyntaxException(f"Unexpected comma at the end of {context}", keywords[-1], self)
+        comma_token_index = 0
+        for comma_separated_token in comma_separated_tokens:
+            if not comma_separated_token:
+                raise JMCSyntaxException(f"Unexpected comma in {context}", keywords[comma_token_index], self)
+            comma_token_index += len(comma_separated_token) + 1
+
+            if (len(comma_separated_token) == 1 or comma_separated_token[1].string != separator):
+                raise JMCSyntaxException(
+                    f"Expected 'key{separator}value' in {context}",
+                    comma_separated_token[0],
+                    self,
+                )
+
+            if len(comma_separated_token) == 2:
+                raise JMCSyntaxException(
+                    f"Expected value after '{separator}' in {context}",
+                    comma_separated_token[1],
+                    self,
+                )
+            key = comma_separated_token[0].string
+            value = self.__parse_func_arg(comma_separated_token[2:], False, is_nbt=True)
+            if key in result:
+                raise JMCSyntaxException(f"Duplicated key({key})", comma_separated_token[0], self)
+            result[key] = self.merge_tokens(value)
+        return result
 
     def parse_component(self, token: Token) -> dict[str, Token]:
         """
@@ -1081,60 +1107,9 @@ class Tokenizer:
         """
         if token.token_type != TokenType.PAREN_SQUARE:
             raise JMCSyntaxException(
-                "Expected JavaScript Object", token, self, suggestion="Expected {"
+                "Expected JavaScript Object", token, self, suggestion="Expected ["
             )
-        _keywords = self.parse(
-            token.string[1:-1],
-            line=token.line,
-            col=token.col + 1,
-            expect_semicolon=False,
-        )
-        if not _keywords:
-            return {}
-        keywords = _keywords[0]
-        component: dict[str, Token] = {}
-        comma_separated_tokens = self.find_token(keywords, ",")
-        if not comma_separated_tokens[-1]:
-            raise JMCSyntaxException(
-                "Unexpected comma at the end of component", keywords[-1], self
-            )
-        comma_token_index = 0
-        for comma_separated_token in comma_separated_tokens:
-            # List of tokens between commas
-            if not comma_separated_token:
-                raise JMCSyntaxException(
-                    "Unexpected comma in component",
-                    keywords[comma_token_index],
-                    self,
-                )
-            comma_token_index += len(comma_separated_token) + 1
-
-            if (
-                len(comma_separated_token) == 1
-                or comma_separated_token[1].string != "="
-            ):
-                raise JMCSyntaxException(
-                    "Expected 'key=value' in component",
-                    comma_separated_token[0],
-                    self,
-                )
-
-            if len(comma_separated_token) == 2:
-                raise JMCSyntaxException(
-                    "Expected value after '=' in component",
-                    comma_separated_token[1],
-                    self,
-                )
-            key = comma_separated_token[0].string
-            value = self.__parse_func_arg(comma_separated_token[2:], False, is_nbt=True)
-            if key in component:
-                raise JMCSyntaxException(
-                    f"Duplicated key({key})", comma_separated_token[0], self
-                )
-            component[key] = self.merge_tokens(value)
-            continue
-
-        return component
+        return self._parse_kv_token(token, "=", "component")
 
     def parse_js_obj(self, token: Token) -> dict[str, Token]:
         """
@@ -1147,58 +1122,7 @@ class Tokenizer:
             raise JMCSyntaxException(
                 "Expected JavaScript Object", token, self, suggestion="Expected {"
             )
-        _keywords = self.parse(
-            token.string[1:-1],
-            line=token.line,
-            col=token.col + 1,
-            expect_semicolon=False,
-        )
-        if not _keywords:
-            return {}
-        keywords = _keywords[0]
-        js_obj: dict[str, Token] = {}
-        comma_separated_tokens = self.find_token(keywords, ",")
-        if not comma_separated_tokens[-1]:
-            raise JMCSyntaxException(
-                "Unexpected comma at the end of JSObject/NBT", keywords[-1], self
-            )
-        comma_token_index = 0
-        for comma_separated_token in comma_separated_tokens:
-            # List of tokens between commas
-            if not comma_separated_token:
-                raise JMCSyntaxException(
-                    "Unexpected comma in JSObject/NBT",
-                    keywords[comma_token_index],
-                    self,
-                )
-            comma_token_index += len(comma_separated_token) + 1
-
-            if (
-                len(comma_separated_token) == 1
-                or comma_separated_token[1].string != ":"
-            ):
-                raise JMCSyntaxException(
-                    "Expected 'key:value' in JSObject/NBT",
-                    comma_separated_token[0],
-                    self,
-                )
-
-            if len(comma_separated_token) == 2:
-                raise JMCSyntaxException(
-                    "Expected value after ':' in JSObject/NBT",
-                    comma_separated_token[1],
-                    self,
-                )
-            key = comma_separated_token[0].string
-            value = self.__parse_func_arg(comma_separated_token[2:], False, is_nbt=True)
-            if key in js_obj:
-                raise JMCSyntaxException(
-                    f"Duplicated key({key})", comma_separated_token[0], self
-                )
-            js_obj[key] = self.merge_tokens(value)
-            continue
-
-        return js_obj
+        return self._parse_kv_token(token, ":", "JSObject/NBT")
 
     def merge_vanilla_macro(self, tokens: list[Token], key_pos: int):
         if (
@@ -1211,8 +1135,8 @@ class Tokenizer:
                 and tokens[key_pos + 2].token_type == TokenType.KEYWORD
                 and is_connected(tokens[key_pos + 2], tokens[key_pos + 1])
             ):
-                tokens[key_pos] = self.merge_tokens(tokens[key_pos : key_pos + 3])
-                del tokens[key_pos + 1 : key_pos + 3]
+                tokens[key_pos] = self.merge_tokens(tokens[key_pos: key_pos + 3])
+                del tokens[key_pos + 1: key_pos + 3]
             else:
-                tokens[key_pos] = self.merge_tokens(tokens[key_pos : key_pos + 2])
+                tokens[key_pos] = self.merge_tokens(tokens[key_pos: key_pos + 2])
                 del tokens[key_pos + 1]

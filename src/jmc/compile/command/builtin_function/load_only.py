@@ -7,7 +7,7 @@ from ...header import Header
 from ...pack_version import PackVersionFeature
 from ...utils import convention_jmc_to_mc
 from ..jmc_function_mixin import EventMixin, ItemMixin
-from ...tokenizer import Token, TokenType
+from ...tokenizer import Token, Tokenizer, TokenType
 from ...exception import JMCSyntaxException, JMCMissingValueError, JMCValueError
 from ...datapack_data import GUI, SIMPLE_JSON_BODY, GUIMode, Item
 from ...datapack import DataPack
@@ -71,7 +71,6 @@ class RightClickSetup(EventMixin):
     tag_id_var = "__item_id__"
 
     def call(self) -> str:
-        # self.rc_obj = "__rc__" + self.args["idName"][:10]
         func_map = self.datapack.parse_func_map(
             self.raw_args["functionMap"].token, self.tokenizer, self.prefix
         )
@@ -709,9 +708,6 @@ class RecipeTable(JMCFunction):
 
         json = self.load_arg_json("recipe")
 
-        # raise JMCSyntaxException("'result' key not found in recipe",
-        # self.raw_args["recipe"].token, self.tokenizer,
-        # display_col_length=True, suggestion="recipe json maybe invalid")
         if "result" in json:
             if "item" not in json["result"]:
                 raise JMCSyntaxException(
@@ -1152,8 +1148,6 @@ class GUICreate(JMCFunction):
             self.datapack.private_name}/gui/{name}"
 
         reset_commands = gui.get_reset_commands()
-        # reset_commands.append("kill @e[type=minecraft:item,nbt={Item:{tag:{__gui__:{name:%s}}}}]" % repr(
-        #     name),)
         reset = self.datapack.add_raw_private_function(
             f"gui/{name}", reset_commands, "reset"
         )
@@ -1255,6 +1249,26 @@ class TeamAdd(JMCFunction):
         return command
 
 
+def _validate_single_command(
+    command: list[str], call_string: str, token: Token, tokenizer: Tokenizer
+) -> None:
+    if not command:
+        raise JMCValueError("Unexpected empty arrow function", token, tokenizer)
+    if len(command) > 1:
+        raise JMCValueError(
+            f"'{call_string}' only allows 1 command (got {len(command)})",
+            token,
+            tokenizer,
+        )
+    if command[0].startswith("say"):
+        raise JMCValueError(
+            f"'{call_string}' doesn't allow 'say' command",
+            token,
+            tokenizer,
+            suggestion="This is due to minecraft's limitation",
+        )
+
+
 @func_property(
     func_type=FuncType.LOAD_ONLY,
     call_string="TextProp.clickCommand",
@@ -1274,27 +1288,9 @@ class TextPropClickCommand(JMCFunction):
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token, self.tokenizer, self.prefix
         )
-        if not command:
-            raise JMCValueError(
-                "Unexpected empty arrow function",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if len(command) > 1:
-            raise JMCValueError(
-                f"'{
-                    self.call_string}' only allows 1 command (got {
-                    len(command)})",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if command[0].startswith("say"):
-            raise JMCValueError(
-                f"'{self.call_string}' doesn't allow 'say' command",
-                self.raw_args["function"].token,
-                self.tokenizer,
-                suggestion="This is due to minecraft's limitation",
-            )
+        _validate_single_command(
+            command, self.call_string, self.raw_args["function"].token, self.tokenizer
+        )
 
         if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
@@ -1328,27 +1324,9 @@ class TextPropsClickCommand(JMCFunction):
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token, self.tokenizer, self.prefix
         )
-        if not command:
-            raise JMCValueError(
-                "Unexpected empty arrow function",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if len(command) > 1:
-            raise JMCValueError(
-                f"'{
-                    self.call_string}' only allows 1 command (got {
-                    len(command)})",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if command[0].startswith("say"):
-            raise JMCValueError(
-                f"'{self.call_string}' doesn't allow 'say' command",
-                self.raw_args["function"].token,
-                self.tokenizer,
-                suggestion="This is due to minecraft's limitation",
-            )
+        _validate_single_command(
+            command, self.call_string, self.raw_args["function"].token, self.tokenizer
+        )
 
         if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
@@ -1385,27 +1363,9 @@ class TextPropSuggestCommand(JMCFunction):
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token, self.tokenizer, self.prefix
         )
-        if not command:
-            raise JMCValueError(
-                "Unexpected empty arrow function",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if len(command) > 1:
-            raise JMCValueError(
-                f"'{
-                    self.call_string}' only allows 1 command (got {
-                    len(command)})",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if command[0].startswith("say"):
-            raise JMCValueError(
-                f"'{self.call_string}' doesn't allow 'say' command",
-                self.raw_args["function"].token,
-                self.tokenizer,
-                suggestion="This is due to minecraft's limitation",
-            )
+        _validate_single_command(
+            command, self.call_string, self.raw_args["function"].token, self.tokenizer
+        )
 
         if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
@@ -1440,27 +1400,9 @@ class TextPropsSuggestCommand(JMCFunction):
         command = self.datapack.parse_function_token(
             self.raw_args["function"].token, self.tokenizer, self.prefix
         )
-        if not command:
-            raise JMCValueError(
-                "Unexpected empty arrow function",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if len(command) > 1:
-            raise JMCValueError(
-                f"'{
-                    self.call_string}' only allows 1 command (got {
-                    len(command)})",
-                self.raw_args["function"].token,
-                self.tokenizer,
-            )
-        if command[0].startswith("say"):
-            raise JMCValueError(
-                f"'{self.call_string}' doesn't allow 'say' command",
-                self.raw_args["function"].token,
-                self.tokenizer,
-                suggestion="This is due to minecraft's limitation",
-            )
+        _validate_single_command(
+            command, self.call_string, self.raw_args["function"].token, self.tokenizer
+        )
 
         if self.datapack.version < PackVersionFeature.TEXT_COMPONENT:
             outer_key, inner_key = "clickEvent", "value"
@@ -2281,7 +2223,7 @@ class JMCRequire(JMCFunction):
             )
         return_1 = self.datapack.add_private_function(
             "require", "return 1", count="__return_1__", force_create_func=True
-        )[len("function ") :]
+        )[len("function "):]
         self.datapack.add_private_json(
             f"tags/function{'s' if self.datapack.version < PackVersionFeature.LEGACY_FOLDER_RENAME else ''}",
             f"require/{namespace}",

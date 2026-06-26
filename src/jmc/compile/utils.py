@@ -218,7 +218,7 @@ def convention_jmc_to_mc(
     else:
         string = custom_string
     if substr is not None:
-        string = string[substr[0] : substr[1]]
+        string = string[substr[0]: substr[1]]
     if string.startswith("."):
         raise JMCSyntaxException("Name started with '.'", token, tokenizer)
     if string.endswith("."):

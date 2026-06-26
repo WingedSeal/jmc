@@ -18,6 +18,31 @@ from ..exception import JMCSyntaxException, JMCValueError
 from ..utils import clean_up_paren_token, is_number, is_float
 
 
+MINECRAFT_POSITION_REGEX = (
+    r"^[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?[~\^]?$"
+)
+
+_COLOR_NAMES: frozenset[str] = frozenset({
+    "dark_red",
+    "red",
+    "gold",
+    "yellow",
+    "dark_green",
+    "green",
+    "aqua",
+    "dark_aqua",
+    "blue",
+    "dark_blue",
+    "light_purple",
+    "dark_purple",
+    "white",
+    "gray",
+    "dark_gray",
+    "black",
+    "reset",
+})
+
+
 class PlayerType(Enum):
     VARIABLE = auto()
     INTEGER = auto()
@@ -64,12 +89,12 @@ def merge_obj_selector(
             tokens[start_index + 3].col,
             clean_up_paren_token(tokens[start_index + 3], tokenizer),
         )
-        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 4])
-        del tokens[start_index + 1 : start_index + 4]
+        return_value = tokenizer.merge_tokens(tokens[start_index: start_index + 4])
+        del tokens[start_index + 1: start_index + 4]
         return return_value
     elif len(tokens) >= start_index + 3:
-        return_value = tokenizer.merge_tokens(tokens[start_index : start_index + 3])
-        del tokens[start_index + 1 : start_index + 3]
+        return_value = tokenizer.merge_tokens(tokens[start_index: start_index + 3])
+        del tokens[start_index + 1: start_index + 3]
         return return_value
     raise ValueError(
         "Impossible tokens array length (merge_obj_selector used without is_obj_selector)"
@@ -361,7 +386,7 @@ def find_arg_type(tokens: list[Token], tokenizer: Tokenizer) -> ArgType:
                 )
             return ArgType.INTEGER
         if is_float(tokens[1].string):
-            if len(tokens) > 1:
+            if len(tokens) > 2:
                 raise JMCSyntaxException(
                     f"Unexpected {
                         tokens[2].token_type.value} after float/decimal in function argument",
@@ -516,11 +541,7 @@ def eval_expr(expr: str) -> str:
     if isinstance(number, float):
         if int(number) == number:
             return f"{int(number):d}"
-        if abs(number) >= 100:
-            return f"{number:.2f}"
-        elif abs(number) >= 10:
-            return f"{number:.3f}"
-        elif abs(number) >= 1:
+        if abs(number) >= 1:
             return f"{number:.3f}"
         string = f"{number:.12f}"
         whole, decimal = string.split(".")
@@ -702,25 +723,7 @@ class FormattedText:
             if prop.startswith("!"):
                 value = False
                 prop = prop[1:]
-            if prop in {
-                "dark_red",
-                "red",
-                "gold",
-                "yellow",
-                "dark_green",
-                "green",
-                "aqua",
-                "dark_aqua",
-                "blue",
-                "dark_blue",
-                "light_purple",
-                "dark_purple",
-                "white",
-                "gray",
-                "dark_gray",
-                "black",
-                "reset",
-            }:
+            if prop in _COLOR_NAMES:
                 if "color" in self.current_json:
                     raise JMCValueError(
                         f"color({prop}) used twice in formatted text",
@@ -860,7 +863,7 @@ class FormattedText:
 
             if prop.endswith(")"):
                 open_paren_index = prop.find("(")
-                arg = prop[open_paren_index + 1 : -1].strip()
+                arg = prop[open_paren_index + 1: -1].strip()
                 prop_ = prop[:open_paren_index]
                 if prop_ not in self.datapack.data.formatted_text_prop:
                     raise JMCValueError(
@@ -1005,27 +1008,9 @@ class FormattedText:
         """
         prop = self.PROPS.get(char, None)
         if prop is None:
-            JMCValueError(f"Unknown code format '{char}'", self.token, self.tokenizer)
+            raise JMCValueError(f"Unknown code format '{char}'", self.token, self.tokenizer)
 
-        if prop in {
-            "dark_red",
-            "red",
-            "gold",
-            "yellow",
-            "dark_green",
-            "green",
-            "aqua",
-            "dark_aqua",
-            "blue",
-            "dark_blue",
-            "light_purple",
-            "dark_purple",
-            "white",
-            "gray",
-            "dark_gray",
-            "black",
-            "reset",
-        }:
+        if prop in _COLOR_NAMES:
             self.current_json["color"] = prop
             self.current_color = prop
 
@@ -1176,7 +1161,7 @@ def hardcode_parse_calc(
         raise JMCSyntaxException(
             "Expected ( after Hardcode.calc", token, tokenizer, display_col_length=False
         )
-    for char in string[calc_pos + 13 :]:  # len('Hardcode.calc') = 13
+    for char in string[calc_pos + 13:]:  # len('Hardcode.calc') = 13
         index += 1
         if char == "(":
             count += 1
@@ -1231,7 +1216,7 @@ def hardcode_parse_calc(
                 display_col_length=False,
             )
 
-    return string[:calc_pos] + eval_expr(expression) + string[index + 13 :]
+    return string[:calc_pos] + eval_expr(expression) + string[index + 13:]
 
 
 def is_uuid(source: str) -> bool:
@@ -1256,8 +1241,3 @@ def guess_nbt_type(source: str) -> str:
         return "block"
 
     return "storage"
-
-
-MINECRAFT_POSITION_REGEX = (
-    r"^[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?\s+[~\^]?-?\d*(\.\d+)?[~\^]?$"
-)

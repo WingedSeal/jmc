@@ -1432,7 +1432,7 @@ class JMCPython(JMCFunction):
         if not string:
             return string
         if string.startswith(indent):
-            return string[len(indent) :]
+            return string[len(indent):]
         raise JMCSyntaxException(
             "Invalid indentation when trimming indentation",
             self.raw_args["pythonCode"].token,
