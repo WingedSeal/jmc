@@ -252,11 +252,11 @@ execute if score @s test matches ..-A run say "7";
 scoreboard objectives add __variable__ dummy
 execute if score @s test matches 1..2 run say 1
 execute if score @s test matches -2..1 run say 2
-execute if score @s test matches -2..-1 run say 4
-execute if score @s test matches 1.. run say 5
-execute if score @s test matches -1.. run say 6
-execute if score @s test matches ..1 run say 7
-execute if score @s test matches ..-1 run say 8
+execute if score @s test matches -2..-1 run say 3
+execute if score @s test matches 1.. run say 4
+execute if score @s test matches -1.. run say 5
+execute if score @s test matches ..1 run say 6
+execute if score @s test matches ..-1 run say 7
             """),
         )
 
