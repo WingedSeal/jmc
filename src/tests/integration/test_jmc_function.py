@@ -15,20 +15,13 @@ from jmc.compile.exception import (
 
 class TestVarOperation(unittest.TestCase):
     def test_MathSqrt(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 $i = Math.sqrt($x);
 $i = Math.sqrt($i);//COMMENT_TEST
-        """
-            )
-            .build()
-        )
+        """).build()
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -60,41 +53,29 @@ function TEST:__private__/math_sqrt/newton_raphson
 scoreboard players operation __main__.x_n_sq __variable__ = __math__.x_n __variable__
 scoreboard players operation __main__.x_n_sq __variable__ *= __math__.x_n __variable__
 execute if score __main__.x_n_sq __variable__ > __math__.N __variable__ run scoreboard players remove __math__.x_n __variable__ 1
-            """
-            ),
+            """),
         )
 
         with self.assertRaises(JMCMissingValueError):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 $x = Math.sqrt();//COMMENT_TEST
-        """
-            ).build()
+        """).build()
 
         with self.assertRaises(JMCValueError):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 $x = Math.sqrt(10);
-        """
-            ).build()
+        """).build()
 
     def test_MathRandom(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 $x = Math.random();
 $y = Math.random(min=5, max=10);
 $z = Math.random(max=10);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -131,36 +112,26 @@ scoreboard players operation __math__.rng.result __variable__ %= __math__.rng.bo
 scoreboard players operation __math__.tmp __variable__ -= __math__.rng.result __variable__
 scoreboard players operation __math__.tmp __variable__ += __math__.rng.bound __variable__
 execute if score __math__.tmp __variable__ matches ..0 run function TEST:__private__/math_random/main
-            """
-            ),
+            """),
         )
 
         with self.assertRaises(JMCValueError):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 $x = Math.random(min=100,max=1);
-        """
-            ).build()
+        """).build()
 
 
 class TestBoolFunction(unittest.TestCase):
     def test_TimerIsOver(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 if (Timer.isOver(my_objective)) {
     say "Timer is over";
 }
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -170,8 +141,7 @@ if (Timer.isOver(my_objective)) {
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 execute unless score @s my_objective matches 1.. run say Timer is over
-            """
-            ),
+            """),
         )
 
 
@@ -183,29 +153,20 @@ class TestExecuteExcluded(unittest.TestCase):
         #             """).build()
 
         with self.assertRaises(JMCMissingValueError):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 Hardcode.repeat();
-            """
-            ).build()
+            """).build()
 
     def test_HardcodeRepeat(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.repeat((index)=>{
     tellraw @a "Hello World: $index";
 }, start=1, stop=6, step=1);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -219,27 +180,19 @@ tellraw @a "Hello World: 2"
 tellraw @a "Hello World: 3"
 tellraw @a "Hello World: 4"
 tellraw @a "Hello World: 5"
-            """
-            ),
+            """),
         )
 
     def test_HardcodeCalc(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.repeat((index)=>{
     tellraw @a "$index^2=Hardcode.calc($index**2)";
 }, start=1, stop=6, step=1);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -253,28 +206,20 @@ tellraw @a "2^2=4"
 tellraw @a "3^2=9"
 tellraw @a "4^2=16"
 tellraw @a "5^2=25"
-            """
-            ),
+            """),
         )
 
     def test_HardcodeSwitch(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Hardcode.switch($var, (index)=>{
     tellraw @s "$index";
     tellraw @s "Hardcode.calc($index**2)";
 }, count=5);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -312,25 +257,17 @@ tellraw @s "16"
 > VIRTUAL/data/TEST/functions/__private__/hardcode_switch/8.mcfunction
 tellraw @s "5"
 tellraw @s "25"
-            """
-            ),
+            """),
         )
 
     def test_TagUpdate(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Tag.update(@e[nbt={OnGround:1b}], onGround);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -341,28 +278,20 @@ Tag.update(@e[nbt={OnGround:1b}], onGround);
 scoreboard objectives add __variable__ dummy
 tag @e remove onGround
 tag @e[nbt={OnGround:1b}] add onGround
-            """
-            ),
+            """),
         )
 
 
 class TestJMCCommand(unittest.TestCase):
     def test_TimerSet(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Timer.set(my_objective, @a, $i);
 Timer.set(my_objective, @s, 5);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -373,25 +302,17 @@ Timer.set(my_objective, @s, 5);
 scoreboard objectives add __variable__ dummy
 scoreboard players operation @a my_objective = $i __variable__
 scoreboard players set @s my_objective 5
-            """
-            ),
+            """),
         )
 
     def test_ParticleCircle(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Particle.circle("dust 1.0 1.0 1.0 0.7", radius=2.0, spread=10);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -418,25 +339,17 @@ particle dust 1.0 1.0 1.0 0.7 ^0.6180339887 ^ ^1.9021130326 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^-0.6180339887 ^ ^1.9021130326 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^-1.6180339887 ^ ^1.1755705046 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^-2.0000000000 ^ ^0.0000000000 0 0 0 1 1 normal
-            """
-            ),
+            """),
         )
 
     def test_ParticleSpiral(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1.0, spread=10);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -457,25 +370,17 @@ particle dust 1.0 1.0 1.0 0.7 ^-0.8090169944 ^0.6000000000 ^-0.5877852523 0 0 0 
 particle dust 1.0 1.0 1.0 0.7 ^-0.3090169944 ^0.7000000000 ^-0.9510565163 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^0.3090169944 ^0.8000000000 ^-0.9510565163 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^0.8090169944 ^0.9000000000 ^-0.5877852523 0 0 0 1 1 normal
-            """
-            ),
+            """),
         )
 
     def test_ParticleCylinder(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Particle.spiral("dust 1.0 1.0 1.0 0.7", radius=1, height=1, spread=10);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -496,25 +401,17 @@ particle dust 1.0 1.0 1.0 0.7 ^-0.8090169944 ^0.6000000000 ^-0.5877852523 0 0 0 
 particle dust 1.0 1.0 1.0 0.7 ^-0.3090169944 ^0.7000000000 ^-0.9510565163 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^0.3090169944 ^0.8000000000 ^-0.9510565163 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^0.8090169944 ^0.9000000000 ^-0.5877852523 0 0 0 1 1 normal
-            """
-            ),
+            """),
         )
 
     def test_ParticleLine(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Particle.line("dust 1.0 1.0 1.0 0.7", distance=10.5, spread=10);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -535,55 +432,43 @@ particle dust 1.0 1.0 1.0 0.7 ^ ^ ^7.3000000000 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^ ^ ^8.3500000000 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^ ^ ^9.4000000000 0 0 0 1 1 normal
 particle dust 1.0 1.0 1.0 0.7 ^ ^ ^10.4500000000 0 0 0 1 1 normal
-            """
-            ),
+            """),
         )
 
 
 class TestLoadOnce(unittest.TestCase):
     def test_error_load_twice(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
 });
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
 });
-            """
-            ).build()
+            """).build()
 
     def test_error_no_load(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 function test() {
     Player.firstJoin(()=>{
         tellraw @s "Welcome!";
     });
 }
 
-            """
-            ).build()
+            """).build()
 
     def test_PlayerFirstJoin(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Player.firstJoin(()=>{
     tellraw @s "Welcome!";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -605,27 +490,19 @@ tellraw @s "Welcome!"
         "function": "TEST:__private__/player_first_join/main"
     }
 }
-            """
-            ),
+            """),
         )
 
     def test_PlayerRejoin(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Player.rejoin(()=>{
     tellraw @s "Welcome!";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -646,30 +523,22 @@ execute as @a[scores={on_event_md16oge=1..}] at @s run function TEST:__private__
 > VIRTUAL/data/TEST/functions/__private__/on_event/custom_leave_game.mcfunction
 scoreboard players set @s on_event_md16oge 0
 tellraw @s "Welcome!"
-            """
-            ),
+            """),
         )
 
     def test_PlayerDie(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Player.die(onDeath=()=>{
     tellraw @s "You died";
 },onRespawn=()=>{
     tellraw @s "Welcome back to live";
     say "I'm back";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -695,29 +564,23 @@ tellraw @s "You died"
 scoreboard players set @s __die__ 0
 tellraw @s "Welcome back to live"
 say I'm back
-            """
-            ),
+            """),
         )
 
 
 class TestLoadOnly(unittest.TestCase):
     def test_error_no_load(self):
         with self.assertRaises(JMCSyntaxException):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 function notLoad() {
     Timer.add(help_cd, runOnce, @a, ()=>{
         tellraw @s "Your help command is ready!";
     });
 }
-            """
-            ).build()
+            """).build()
 
     def test_RightClickSetup(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 RightClick.setup(
     custom_id,
     {
@@ -729,15 +592,11 @@ RightClick.setup(
         }
     }
 );
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -769,30 +628,22 @@ execute if score __switch__0 __variable__ matches 2 run function TEST:__private_
 say 1
 > VIRTUAL/data/TEST/functions/__private__/right_click_setup/3.mcfunction
 say 2
-            """
-            ),
+            """),
         )
 
     def test_PlayerOnEvent(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Player.onEvent(used:carrot_on_a_stick, ()=>{
     say "Hello World";
 });
 Player.onEvent(used:carrot_on_a_stick, ()=>{
     say "Hello World 2";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -814,29 +665,21 @@ execute as @a[scores={on_event_4gjev5i=1..}] at @s run function TEST:__private__
 scoreboard players set @s on_event_4gjev5i 0
 say Hello World
 say Hello World 2
-            """
-            ),
+            """),
         )
 
     def test_TriggerSetup(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Trigger.setup(help, {
     1: ()=>{
         tellraw @s {"text":"Cool help commands", "color":"gold"};
     }
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -877,27 +720,19 @@ scoreboard players enable @s help
         "function": "TEST:__private__/trigger_setup/enable"
     }
 }
-            """
-            ),
+            """),
         )
 
     def test_TimerAdd(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Timer.add(help_cd, runOnce, @a, ()=>{
     tellraw @s "Your help command is ready!";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -918,15 +753,11 @@ function TEST:__private__/timer_add/main
 > VIRTUAL/data/TEST/functions/__private__/timer_add/main.mcfunction
 execute as @a if score @s help_cd matches 0.. run scoreboard players remove @s help_cd 1
 execute as @a if score @s help_cd matches 0 at @s run tellraw @s "Your help command is ready!"
-            """
-            ),
+            """),
         )
 
     def test_RecipeTable(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Recipe.table({
     "type": "minecraft:crafting_shapeless",
     "ingredients": [
@@ -941,15 +772,11 @@ Recipe.table({
 }, baseItem=barrier, onCraft=()=>{
     tellraw @s "Wow! You crafted a special diamond";
 });
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -991,15 +818,11 @@ tellraw @s "Wow! You crafted a special diamond"
         "count": 1
     }
 }
-            """
-            ),
+            """),
         )
 
     def test_empty_list(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                r"""
+        pack = JMCTestPack().set_jmc_file(r"""
 Item.create(
     block,
     polar_bear_spawn_egg,
@@ -1008,15 +831,11 @@ Item.create(
     nbt={EntityTag:{id:"minecraft:pig"}}
 );
 Item.give(block, @a);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -1026,15 +845,11 @@ Item.give(block, @a);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}',Lore:[]}} 1
-                            """
-            ),
+                            """),
         )
 
     def test_no_lore(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                r"""
+        pack = JMCTestPack().set_jmc_file(r"""
 Item.create(
     block,
     polar_bear_spawn_egg,
@@ -1042,15 +857,11 @@ Item.create(
     nbt={EntityTag:{id:"minecraft:pig"}}
 );
 Item.give(block, @a);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -1060,15 +871,11 @@ Item.give(block, @a);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 give @a polar_bear_spawn_egg{EntityTag:{id:"minecraft:pig"},display:{Name:'{"text":"Block","color":"gold","italic":false}'}} 1
-                            """
-            ),
+                            """),
         )
 
     def test_ItemCreate(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 Item.createUse(
     veryCoolSword,
     carrot_on_a_stick,
@@ -1082,15 +889,9 @@ Item.createUse(
     }
 );
 execute as @a run Item.give(veryCoolSword);
-        """
-            )
-            .build()
-        )
+        """).build()
 
-        pack2 = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack2 = JMCTestPack().set_jmc_file("""
 Item.createUse(
     veryCoolSword,
     carrot_on_a_stick,
@@ -1104,17 +905,13 @@ Item.createUse(
     }
 );
 execute as @a run Item.give(veryCoolSword);
-        """
-            )
-            .build()
-        )
+        """).build()
 
         self.assertDictEqual(pack.built, pack2.built)
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -1142,36 +939,26 @@ execute if score __item_id__ __variable__ matches 1 at @s run function TEST:__pr
 > VIRTUAL/data/TEST/functions/__private__/item_create_use/0.mcfunction
 say I'm very cool
 effect give @s speed 1 255 True
-            """
-            ),
+            """),
         )
 
     def test_ItemGive(self):
         with self.assertRaises(JMCValueError):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 execute as @a run Item.give(veryCoolSword);
-        """
-            ).build()
+        """).build()
 
 
 class TestParenthesis(unittest.TestCase):
 
     def test_selector(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                r"""
+        pack = JMCTestPack().set_jmc_file(r"""
 Timer.set(test, @a[tag=test], 1);
-    """
-            )
-            .build()
-        )
+    """).build()
 
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -1181,8 +968,7 @@ Timer.set(test, @a[tag=test], 1);
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
 scoreboard players set @a[tag=test] test 1
-            """
-            ),
+            """),
         )
 
 
@@ -1195,22 +981,15 @@ scoreboard players set @a[tag=test] test 1
 
 class TestJMCPython(unittest.TestCase):
     def test_basic_emit(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 JMC.python(`
     for i in range(3):
         emit(f'say {i}')
 `);
-            """
-            )
-            .build()
-        )
+            """).build()
         self.assertDictEqual(
             pack.built,
-            string_to_tree_dict(
-                """
+            string_to_tree_dict("""
 > VIRTUAL/data/minecraft/tags/functions/load.json
 {
     "values": [
@@ -1222,40 +1001,27 @@ scoreboard objectives add __variable__ dummy
 say 0
 say 1
 say 2
-            """
-            ),
+            """),
         )
 
     def test_jmc_true_compiles_generated_output(self):
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 JMC.python(`
     emit('$result = 5;')
 `, jmc=true);
-            """
-            )
-            .build()
-        )
+            """).build()
         load = pack.built["VIRTUAL/data/TEST/functions/__load__.mcfunction"]
         self.assertIn("scoreboard players set $result __variable__ 5", load)
 
     def test_jmc_true_output_longer_than_source(self):
-        # Ensures generated content can have more lines than the source file. 
+        # Ensures generated content can have more lines than the source file.
         # parse_function_token must use generated content as file_string.
-        pack = (
-            JMCTestPack()
-            .set_jmc_file(
-                """
+        pack = JMCTestPack().set_jmc_file("""
 JMC.python(`
     for i in range(100):
         emit(f'$x = {i};')
 `, jmc=true);
-            """
-            )
-            .build()
-        )
+            """).build()
         load = pack.built["VIRTUAL/data/TEST/functions/__load__.mcfunction"]
         self.assertIn("scoreboard players set $x __variable__ 0", load)
         self.assertIn("scoreboard players set $x __variable__ 99", load)
@@ -1263,13 +1029,11 @@ JMC.python(`
     def test_jmc_true_bad_generated_jmc_raises_JMCValueError(self):
         # Error in generated content must indicate it is python_generated_content in the filepath
         with self.assertRaisesRegex(JMCValueError, "#python_generated_content"):
-            JMCTestPack().set_jmc_file(
-                """
+            JMCTestPack().set_jmc_file("""
 JMC.python(`
     emit('not_a_valid_command blah blah')
 `, jmc=true);
-            """
-            ).build()
+            """).build()
 
 
 if __name__ == "__main__":

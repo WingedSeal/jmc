@@ -829,6 +829,8 @@ class FormattedText:
                 source, path = prop.split("::", 1)
                 nbt_type = guess_nbt_type(source)
                 self.current_json["nbt"] = path
+                if ":" not in source:
+                    source = self.datapack.namespace + ":" + source
                 self.current_json[nbt_type] = source
                 continue
 
