@@ -964,10 +964,10 @@ class FuncContent:
                 )
                 assert isinstance(scoreboard_player.value, tuple)
                 self.command_strings.append(f"execute store result storage {
-                        self.lexer.datapack.namespace}:{
-                        self.lexer.datapack.private_name} global.{i} int 1 run scoreboard players get {
-                        scoreboard_player.value[1]} {
-                        scoreboard_player.value[0]}")
+                    self.lexer.datapack.namespace}:{
+                    self.lexer.datapack.private_name} global.{i} int 1 run scoreboard players get {
+                    scoreboard_player.value[1]} {
+                    scoreboard_player.value[0]}")
             append_commands(
                 self.__commands,
                 f"storage {
