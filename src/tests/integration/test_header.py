@@ -225,13 +225,12 @@ scoreboard objectives add __variable__ dummy
             JMCTestPack()
             .set_jmc_file("""
 execute if score @s test matches A..B run say "1";
-execute if score @s test matches -A..B run say "2";
-execute if score @s test matches A..-B run say "3";
-execute if score @s test matches -A..-B run say "4";
-execute if score @s test matches A.. run say "5";
-execute if score @s test matches -A.. run say "6";
-execute if score @s test matches ..A run say "7";
-execute if score @s test matches ..-A run say "8";
+execute if score @s test matches -B..A run say "2";
+execute if score @s test matches -B..-A run say "3";
+execute if score @s test matches A.. run say "4";
+execute if score @s test matches -A.. run say "5";
+execute if score @s test matches ..A run say "6";
+execute if score @s test matches ..-A run say "7";
         """)
             .set_header_file("""
 #define A 1
@@ -251,14 +250,45 @@ execute if score @s test matches ..-A run say "8";
 }
 > VIRTUAL/data/TEST/functions/__load__.mcfunction
 scoreboard objectives add __variable__ dummy
-execute if score @s test 1..2 run say 1
-execute if score @s test -1..2 run say 2
-execute if score @s test 1..-2 run say 3
-execute if score @s test -1..-2 run say 4
-execute if score @s test 1.. run say 5
-execute if score @s test -1.. run say 6
-execute if score @s test ..1 run say 7
-execute if score @s test ..-1 run say 8
+execute if score @s test matches 1..2 run say 1
+execute if score @s test matches -2..1 run say 2
+execute if score @s test matches -2..-1 run say 4
+execute if score @s test matches 1.. run say 5
+execute if score @s test matches -1.. run say 6
+execute if score @s test matches ..1 run say 7
+execute if score @s test matches ..-1 run say 8
+            """),
+        )
+
+    def test_flow_control_matches(self):
+        pack = (
+            JMCTestPack()
+            .set_jmc_file("""
+if (test:@s matches A..B) say "1";
+if (test:@s matches -A..B) say "2";
+if (test:@s matches -B..-A) say "3";
+        """)
+            .set_header_file("""
+#define A 1
+#define B 2
+        """)
+            .build()
+        )
+
+        self.assertDictEqual(
+            pack.built,
+            string_to_tree_dict("""
+> VIRTUAL/data/minecraft/tags/functions/load.json
+{
+    "values": [
+        "TEST:__load__"
+    ]
+}
+> VIRTUAL/data/TEST/functions/__load__.mcfunction
+scoreboard objectives add __variable__ dummy
+execute if score @s test matches 1..2 run say 1
+execute if score @s test matches -1..2 run say 2
+execute if score @s test matches -2..-1 run say 3
             """),
         )
 

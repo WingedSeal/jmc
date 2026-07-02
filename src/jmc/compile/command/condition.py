@@ -600,14 +600,17 @@ def extract_matches(
     first_int = int(first) if has_first else None
     second_int = int(second) if has_second else None
 
-    if first_token:
-        assert first_int is not None and second_int is not None
+    if first_int is not None and second_int is not None:
         if first_int == second_int:
             raise JMCSyntaxException(
                 "First integer must not equal second integer after 'matches'",
                 token,
                 tokenizer,
-                suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead",
+                suggestion=(
+                    f"Use {first_token.string}=={match_tokens[0][0].string} instead"
+                    if first_token is not None
+                    else f"Use =={match_tokens[0][0].string} instead"
+                ),
             )
         if first_int > second_int:
             raise JMCSyntaxException(

@@ -898,6 +898,7 @@ class FuncContent:
                 self.tokenizer,
                 suggestion="I'm not sure when this case can happen. So please report if you encounter this.",
             )
+        append_commands(self.__commands, "matches")
         append_commands(self.__commands, extract_matches(self.tokenizer, token, None))
 
     def __handle_return(self, key_pos: int) -> None:
