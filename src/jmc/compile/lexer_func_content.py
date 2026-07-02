@@ -24,7 +24,7 @@ from .utils import (
     is_connected,
 )
 from .datapack import DataPack
-from .command.condition import BOOL_FUNCTIONS, FUNC_CONTENT
+from .command.condition import BOOL_FUNCTIONS, FUNC_CONTENT, extract_matches
 from .command.nbt_operation import extract_nbt, get_nbt_type, NBTType, nbt_operation
 from .header import Header
 from .command import (
@@ -127,6 +127,7 @@ class FuncContent:
         "prefix",
         "_bypass_checks",
         "switch_tokens",
+        "_skip_token_count",
     )
 
     command: list[Token]
@@ -157,6 +158,7 @@ class FuncContent:
         self.prefix = prefix
         self.switch_tokens: list[Token] | None = None
         self._bypass_checks = _bypass_checks
+        self._skip_token_count = 0
 
     def parse_self_command(self, current_line: int, _is_switch: bool = False):
         """
@@ -314,6 +316,9 @@ class FuncContent:
         command_pos = None
 
         for key_pos, token in enumerate(self.command):
+            if self._skip_token_count > 0:
+                self._skip_token_count -= 1
+                continue
             if not self.is_expect_command:
                 if command_pos is None:
                     raise ValueError("Unknown command_pos")
@@ -385,6 +390,10 @@ class FuncContent:
             if self.is_execute:
                 self.is_expect_command = True
                 self.expanded_commands = []
+
+        if token.string == "matches":
+            self.__handle_matches(key_pos)
+            return
 
         __token_string = token.string
         if __token_string.startswith("$"):
@@ -824,6 +833,73 @@ class FuncContent:
             "Unexpected number", token, self.tokenizer, display_col_length=False
         )
 
+    def __handle_matches(self, key_pos: int) -> None:
+        def _get_token(key_pos: int) -> Token | None:
+            if len(self.command) <= key_pos:
+                return None
+            return self.command[key_pos]
+
+        token_1 = _get_token(key_pos + 1)
+        if token_1 is None:
+            raise MinecraftSyntaxWarning(
+                "Expected <integer>..<integer> after 'matches'",
+                self.command[key_pos],
+                self.tokenizer,
+            )
+
+        token_2 = _get_token(key_pos + 2)
+        token_3 = _get_token(key_pos + 3)
+        token_4 = _get_token(key_pos + 4)
+
+        # A..B
+        if token_1.string != "-" and (token_2 is None or token_2.string != "-"):
+            token = token_1
+            self._skip_token_count = 1
+        # -A..B
+        elif token_1.string == "-" and (token_3 is None or token_3.string != "-"):
+            if token_2 is None:
+                raise MinecraftSyntaxWarning(
+                    "Expected <integer>..<integer> after 'matches'",
+                    token_1,
+                    self.tokenizer,
+                )
+
+            token = self.tokenizer.merge_tokens([token_1, token_2])
+            self._skip_token_count = 2
+        # A..-B
+        elif token_1.string != "-" and token_2 is not None and token_2.string == "-":
+            if token_3 is None:
+                raise MinecraftSyntaxWarning(
+                    "Expected <integer>..<integer> after 'matches'",
+                    self.tokenizer.merge_tokens([token_1, token_2]),
+                    self.tokenizer,
+                )
+            token = self.tokenizer.merge_tokens([token_1, token_2, token_3])
+            self._skip_token_count = 3
+        # -A..-B
+        elif (
+            token_1.string == "-"
+            and token_2 is not None
+            and token_3 is not None
+            and token_3.string == "-"
+        ):
+            if token_4 is None:
+                raise MinecraftSyntaxWarning(
+                    "Expected <integer>..<integer> after 'matches'",
+                    self.tokenizer.merge_tokens([token_1, token_2, token_3]),
+                    self.tokenizer,
+                )
+            token = self.tokenizer.merge_tokens([token_1, token_2, token_3, token_4])
+            self._skip_token_count = 4
+        else:
+            raise MinecraftSyntaxWarning(
+                "Expected <integer>..<integer> after 'matches'",
+                token_1,
+                self.tokenizer,
+                suggestion="I'm not sure when this case can happen. So please report if you encounter this.",
+            )
+        append_commands(self.__commands, extract_matches(self.tokenizer, token, None))
+
     def __handle_return(self, key_pos: int) -> None:
         if len(self.command) <= key_pos + 1:
             append_commands(self.__commands, "return 0")
@@ -887,13 +963,11 @@ class FuncContent:
                     arg.token, self.tokenizer, allow_integer=False
                 )
                 assert isinstance(scoreboard_player.value, tuple)
-                self.command_strings.append(
-                    f"execute store result storage {
+                self.command_strings.append(f"execute store result storage {
                         self.lexer.datapack.namespace}:{
                         self.lexer.datapack.private_name} global.{i} int 1 run scoreboard players get {
                         scoreboard_player.value[1]} {
-                        scoreboard_player.value[0]}"
-                )
+                        scoreboard_player.value[0]}")
             append_commands(
                 self.__commands,
                 f"storage {

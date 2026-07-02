@@ -204,77 +204,11 @@ def custom_condition(
             operator_token.token_type == TokenType.KEYWORD
             and operator_token.string == "matches"
         ):
-            match_tokens_ = tokenizer.split_keyword_token(tokens[2], "..")
-            match_tokens = tokenizer.find_token(match_tokens_, "..")
-            if (
-                len(match_tokens) != 2
-                or len(match_tokens[0]) > 1
-                or len(match_tokens[1]) > 1
-            ):
-                raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'",
-                    tokens[2],
-                    tokenizer,
-                )
-            if not match_tokens[0]:
-                raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'",
-                    tokens[2],
-                    tokenizer,
-                    suggestion=f"Use {first_token.string}<={match_tokens[1][0].string} instead",
-                )
-            if not match_tokens[1]:
-                raise JMCSyntaxException(
-                    "Expected <integer>..<integer> after 'matches'",
-                    tokens[2],
-                    tokenizer,
-                    suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead",
-                )
-
-            header = Header()
-            first = match_tokens[0][0].string
-            first_prefix = ""
-            if first.startswith("-"):
-                first = first[1:]
-                first_prefix = "-"
-            second = match_tokens[1][0].string
-            second_prefix = ""
-            if second.startswith("-"):
-                second = second[1:]
-                second_prefix = "-"
-            first = first_prefix + header.number_macros.get(first, first)
-            second = second_prefix + header.number_macros.get(second, second)
-            if not is_number(first):
-                raise JMCSyntaxException(
-                    f"Expected integer after 'matches' (got '{first}')",
-                    match_tokens[0][0],
-                    tokenizer,
-                )
-            if not is_number(second):
-                raise JMCSyntaxException(
-                    f"Expected integer after '..' (got '{second}')",
-                    match_tokens[1][0],
-                    tokenizer,
-                )
-            first_int = int(first)
-            second_int = int(second)
-            if first_int == second_int:
-                raise JMCSyntaxException(
-                    "First integer must not equal second integer after 'matches'",
-                    tokens[2],
-                    tokenizer,
-                    suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead",
-                )
-            if first_int > second_int:
-                raise JMCSyntaxException(
-                    "First integer must be less than second integer after 'matches'",
-                    tokens[2],
-                    tokenizer,
-                    suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?",
-                )
-
+            first_int_dot_dot_second_int = extract_matches(
+                tokenizer, tokens[2], first_token
+            )
             return Condition(
-                f"score {first_token.string} {objective} matches {first_int}..{second_int}",
+                f"score {first_token.string} {objective} matches {first_int_dot_dot_second_int}",
                 IF,
             )
 
@@ -598,3 +532,88 @@ def parse_condition(
     condition, precommand = ast_to_strings(ast, datapack)
     precommand = precommand + "\n" if precommand else ""
     return condition, precommand
+
+
+def extract_matches(
+    tokenizer: Tokenizer, token: Token, first_token: Token | None
+) -> str:
+    match_tokens_ = tokenizer.split_keyword_token(token, "..")
+    match_tokens = tokenizer.find_token(match_tokens_, "..")
+    has_first = True
+    has_second = True
+    if len(match_tokens) != 2 or len(match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
+        raise JMCSyntaxException(
+            "Expected <integer>..<integer> after 'matches'",
+            token,
+            tokenizer,
+        )
+    if not match_tokens[0]:
+        if first_token is not None:
+            raise JMCSyntaxException(
+                "Expected <integer>..<integer> after 'matches'",
+                token,
+                tokenizer,
+                suggestion=f"Use {first_token.string}<={match_tokens[1][0].string} instead",
+            )
+        has_first = False
+    if not match_tokens[1]:
+        if first_token is not None:
+            raise JMCSyntaxException(
+                "Expected <integer>..<integer> after 'matches'",
+                token,
+                tokenizer,
+                suggestion=f"Use {first_token.string}>={match_tokens[0][0].string} instead",
+            )
+        has_second = False
+    if not match_tokens[0] and not match_tokens[1]:
+        raise JMCSyntaxException(
+            "Expected <integer>..<integer> after 'matches'",
+            token,
+            tokenizer,
+            suggestion="There must be at least 1 integer. '..' doesn't mean anything.",
+        )
+    header = Header()
+    first = match_tokens[0][0].string if has_first else ""
+    first_prefix = ""
+    if first.startswith("-"):
+        first = first[1:]
+        first_prefix = "-"
+    second = match_tokens[1][0].string if has_second else ""
+    second_prefix = ""
+    if second.startswith("-"):
+        second = second[1:]
+        second_prefix = "-"
+    first = first_prefix + header.number_macros.get(first, first)
+    second = second_prefix + header.number_macros.get(second, second)
+    if first and not is_number(first):
+        raise JMCSyntaxException(
+            f"Expected integer after 'matches' (got '{first}')",
+            match_tokens[0][0],
+            tokenizer,
+        )
+    if second and not is_number(second):
+        raise JMCSyntaxException(
+            f"Expected integer after '..' (got '{second}')",
+            match_tokens[1][0],
+            tokenizer,
+        )
+    first_int = int(first) if has_first else None
+    second_int = int(second) if has_second else None
+
+    if first_token:
+        assert first_int is not None and second_int is not None
+        if first_int == second_int:
+            raise JMCSyntaxException(
+                "First integer must not equal second integer after 'matches'",
+                token,
+                tokenizer,
+                suggestion=f"Use {first_token.string}=={match_tokens[0][0].string} instead",
+            )
+        if first_int > second_int:
+            raise JMCSyntaxException(
+                "First integer must be less than second integer after 'matches'",
+                token,
+                tokenizer,
+                suggestion=f"Did you mean {match_tokens[1][0].string}..{match_tokens[0][0].string} ?",
+            )
+    return f"{'' if first_int is None else first_int}..{'' if second_int is None else second_int}"
