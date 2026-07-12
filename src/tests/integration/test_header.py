@@ -231,6 +231,8 @@ execute if score @s test matches A.. run say "4";
 execute if score @s test matches -A.. run say "5";
 execute if score @s test matches ..A run say "6";
 execute if score @s test matches ..-A run say "7";
+execute if score @s test matches A run say "8";
+execute if score @s test matches -A run say "9";
         """)
             .set_header_file("""
 #define A 1
@@ -257,6 +259,8 @@ execute if score @s test matches 1.. run say 4
 execute if score @s test matches -1.. run say 5
 execute if score @s test matches ..1 run say 6
 execute if score @s test matches ..-1 run say 7
+execute if score @s test matches 1 run say 8
+execute if score @s test matches -1 run say 9
             """),
         )
 
@@ -291,6 +295,36 @@ execute if score @s test matches -1..2 run say 2
 execute if score @s test matches -2..-1 run say 3
             """),
         )
+
+    def test_flow_control_bare_integer_rejected(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCTestPack().set_jmc_file("""
+if (test:@s matches A) {
+    say "hi";
+}
+        """).set_header_file("""
+#define A 1
+        """).build()
+
+    def test_flow_control_less_than_or_equal_to_rejected(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCTestPack().set_jmc_file("""
+if (test:@s matches ..A) {
+    say "hi";
+}
+        """).set_header_file("""
+#define A 1
+        """).build()
+
+    def test_flow_control_greater_than_or_equal_to_rejected(self):
+        with self.assertRaises(JMCSyntaxException):
+            JMCTestPack().set_jmc_file("""
+if (test:@s matches A..) {
+    say "hi";
+}
+        """).set_header_file("""
+#define A 1
+        """).build()
 
 
 if __name__ == "__main__":

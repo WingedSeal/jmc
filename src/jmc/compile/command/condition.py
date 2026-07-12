@@ -522,7 +522,7 @@ def parse_condition(
         :param condition_token: Token or List of tokens
         :param tokenizer: Tokenizer
         :param datapack: Datapack object
-      :param prefix: Prefix of function(for Class feature)
+        :param prefix: Prefix of function(for Class feature)
         :return: tuple of `execute if` command(excluding `execute`) a multiple line string representing precommands
     """
     datapack.data.condition_count = 0
@@ -534,11 +534,44 @@ def parse_condition(
     return condition, precommand
 
 
-def extract_matches(
-    tokenizer: Tokenizer, token: Token, first_token: Token | None
-) -> str:
+def _resolve_number_macro(raw: str, header: Header) -> str:
+    """
+    Resolve a header number macro, preserving the sign
+    
+    :param raw: The token string to resolve, e.g. '5', '-5', or a macro name like 'A'
+    :param header: Header containing the number_macros mapping
+    :returns: The resolved integer as a string, with the original sign reattached
+    """
+    sign, digits = ("-", raw[1:]) if raw.startswith("-") else ("", raw)
+    return sign + header.number_macros.get(digits, digits)
+
+
+def extract_matches(tokenizer: Tokenizer, token: Token, first_token: Token | None) -> str:
+    """
+    Parse the value after a 'matches' keyword into vanilla's scoreboard-matches
+    format, resolving header number macros and validating the result
+
+    :param tokenizer: Tokenizer
+    :param token: Token containing the value after 'matches' (e.g. '0..5', '5..', '0')
+    :param first_token: The JMC variable/selector token to the left of 'matches' in
+        JMC's own `if (var matches ...)` syntax, or None when parsing a bare vanilla
+        command.
+    :return: The resolved matches value, e.g. '0..5', '5..', '..5', or (vanilla-only) '5'
+    """
     match_tokens_ = tokenizer.split_keyword_token(token, "..")
     match_tokens = tokenizer.find_token(match_tokens_, "..")
+    header = Header()
+
+    if len(match_tokens) == 1 and first_token is None:
+        value = _resolve_number_macro(match_tokens[0][0].string, header)
+        if not is_number(value):
+            raise JMCSyntaxException(
+                f"Expected integer after 'matches' (got '{value}')",
+                match_tokens[0][0],
+                tokenizer,
+            )
+        return value
+
     has_first = True
     has_second = True
     if len(match_tokens) != 2 or len(match_tokens[0]) > 1 or len(match_tokens[1]) > 1:
@@ -572,19 +605,12 @@ def extract_matches(
             tokenizer,
             suggestion="There must be at least 1 integer. '..' doesn't mean anything.",
         )
-    header = Header()
-    first = match_tokens[0][0].string if has_first else ""
-    first_prefix = ""
-    if first.startswith("-"):
-        first = first[1:]
-        first_prefix = "-"
-    second = match_tokens[1][0].string if has_second else ""
-    second_prefix = ""
-    if second.startswith("-"):
-        second = second[1:]
-        second_prefix = "-"
-    first = first_prefix + header.number_macros.get(first, first)
-    second = second_prefix + header.number_macros.get(second, second)
+    first = (
+        _resolve_number_macro(match_tokens[0][0].string, header) if has_first else ""
+    )
+    second = (
+        _resolve_number_macro(match_tokens[1][0].string, header) if has_second else ""
+    )
     if first and not is_number(first):
         raise JMCSyntaxException(
             f"Expected integer after 'matches' (got '{first}')",
